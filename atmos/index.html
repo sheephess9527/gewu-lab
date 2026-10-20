@@ -1,17 +1,16 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="x-light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>格物实验室 · 大气环流 AtmosLab</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap" />
     <link rel="stylesheet" href="hark.css" />
     <link rel="stylesheet" href="hark-hero.css" />
     <style>
-      :root{--x-bg1:#0E1420;--x-bg2:#121A2A;--x-panel:rgba(21,30,48,.82);--x-line:rgba(255,255,255,.08);--x-acc:#2EC4B6;--x-gold:#F2B544;--x-red:#EF6461;--x-tx:#E6ECF5;--x-tx2:#8A97AD;--x-soft:rgba(46,196,182,.12);--x-serif:"Noto Serif SC","Songti SC",serif;--x-mono:"Geist Mono",ui-monospace,Menlo,monospace;--x-r:10px;--x-t:200ms;--x-onbg:#183A44;--x-onacc:#2EC4B6}
-      html.x-light{--x-bg1:#F6F3EC;--x-bg2:#EFEADF;--x-panel:rgba(255,255,255,.9);--x-line:rgba(29,36,51,.1);--x-acc:#139A8E;--x-gold:#C98A12;--x-tx:#1D2433;--x-tx2:#5E6878;--x-soft:rgba(19,154,142,.1);--x-onbg:#DDF0EC;--x-onacc:#0B6159}
+      /* 深色（切换后）：#000 / #1d1d1f 底、#f5f5f7 字、强调 #2997ff；--x-acc 仅作语义青（曲线、低压、正确） */
+      :root{--x-bg1:#000000;--x-bg2:#000000;--x-panel:#1d1d1f;--x-card:#1d1d1f;--x-fill:#2c2c2e;--x-fill2:#3a3a3c;--x-line:rgba(255,255,255,.12);--x-acc:#2fb5a9;--x-acc-tx:#4fd1c5;--x-gold:#e0a43a;--x-gold-tx:#f0b952;--x-red:#ff6369;--x-red-tx:#ff7b80;--x-tx:#f5f5f7;--x-tx2:#a1a1a6;--x-soft:rgba(41,151,255,.16);--x-blue:#2997ff;--x-blue-tx:#2997ff;--x-onbg:#0f2a47;--x-onacc:#2997ff;--x-exam:#2a2313;--x-okbg:rgba(47,181,169,.16);--x-nobg:rgba(255,99,105,.14);--x-topbg:rgba(0,0,0,.72);--x-shadow:0 4px 24px rgba(0,0,0,.4);--x-sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;--x-serif:var(--x-sans);--x-mono:ui-monospace,Menlo,Consolas,monospace;--x-r:18px;--x-t:.3s;--x-ease:cubic-bezier(.2,.8,.2,1)}
+      /* 浅色（默认）：Apple 式极简 */
+      html.x-light{--x-bg1:#fbfbfd;--x-bg2:#fbfbfd;--x-panel:#ffffff;--x-card:#ffffff;--x-fill:#f5f5f7;--x-fill2:#e8e8ed;--x-line:rgba(0,0,0,.08);--x-acc:#0a9396;--x-acc-tx:#077376;--x-gold:#c98a12;--x-gold-tx:#8a5c00;--x-red:#e5484d;--x-red-tx:#c9353a;--x-tx:#1d1d1f;--x-tx2:#6e6e73;--x-soft:#e8f1fc;--x-blue:#0071e3;--x-blue-tx:#0062c4;--x-onbg:#e8f1fc;--x-onacc:#0062c4;--x-exam:#fdf7ea;--x-okbg:#e6f4f4;--x-nobg:#fdecec;--x-topbg:rgba(251,251,253,.72);--x-shadow:0 4px 24px rgba(0,0,0,.04)}
       html,body{height:100%;overflow:hidden}
       body{background:linear-gradient(160deg,var(--x-bg1),var(--x-bg2));color:var(--x-tx);font:15px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
       button{font:inherit;color:inherit;cursor:pointer}
@@ -113,13 +112,162 @@
         .x-soon{padding:16px 12px 70px}
       }
     </style>
+    <style>
+      /* ===== 视觉改版：Apple 官网式极简（只改样式） ===== */
+      html,body{background:var(--x-bg1)}
+      body{background:var(--x-bg1);color:var(--x-tx);font:16px/1.6 var(--x-sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;letter-spacing:0}
+      :focus-visible{outline:2px solid var(--x-blue);outline-offset:2px}
+      button,input,a{-webkit-tap-highlight-color:transparent}
+      .x-app button,.x-app a,.x-app input{transition:background-color var(--x-t) var(--x-ease),color var(--x-t) var(--x-ease),box-shadow var(--x-t) var(--x-ease),opacity var(--x-t) var(--x-ease),transform var(--x-t) var(--x-ease)}
+
+      /* 顶栏 */
+      .x-top{gap:14px;padding:0 16px;background:var(--x-topbg);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--x-line);box-shadow:none}
+      .x-brand{flex-direction:row;align-items:center;gap:4px;line-height:1.2;min-width:0;flex:0 1 auto}
+      .x-back{display:inline-flex;align-items:center;min-height:44px;padding:0 8px 0 2px;color:var(--x-blue-tx);text-decoration:none;font-size:14px;font-weight:400;white-space:nowrap;flex:none;border-radius:980px}
+      .x-back:hover{text-decoration:underline}
+      .x-back b{font-size:20px;font-weight:300;margin-right:4px;line-height:1;transform:translateY(-1px)}
+      .x-name{display:inline-flex;align-items:center;gap:6px;min-height:44px;min-width:0;padding:0 10px;margin:0;border:0;border-radius:980px;background:transparent;color:var(--x-tx);font-family:var(--x-sans);white-space:nowrap}
+      .x-name:hover{background:var(--x-fill)}
+      .x-name b{min-width:0;font-family:var(--x-sans);font-size:15px;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis}
+      .x-name .x-en{font-size:15px;font-weight:400;color:var(--x-tx2)}
+      .x-name i{font-style:normal;font-size:12px;color:var(--x-tx2);transition:transform var(--x-t) var(--x-ease)}
+      .x-app.x-toc-off .x-name i{transform:rotate(-90deg)}
+      .x-segs{gap:4px}
+      .x-segs button{height:24px;border-radius:980px;background:transparent;position:relative}
+      .x-segs button::before{content:"";position:absolute;left:0;right:0;top:10px;height:4px;border-radius:980px;background:var(--x-fill2);transition:background-color var(--x-t) var(--x-ease)}
+      .x-segs button.done{background:transparent}.x-segs button.done::before{background:color-mix(in srgb,var(--x-blue) 32%,transparent)}
+      .x-segs button.on{background:transparent}.x-segs button.on::before{background:var(--x-blue)}
+      .x-segs button:hover::before{background:color-mix(in srgb,var(--x-blue) 55%,transparent)}
+      .x-count{font-family:var(--x-mono);font-size:12px;color:var(--x-tx2);letter-spacing:.02em}
+      .x-tools{gap:2px}
+      .x-ib{width:44px;height:44px;border:0;border-radius:980px;background:transparent;color:var(--x-tx);font-family:var(--x-sans);font-size:17px}
+      .x-ib:hover{background:var(--x-fill);border-color:transparent}
+
+      /* 左侧目录 */
+      .x-side{background:var(--x-bg1);border-right:.5px solid var(--x-line);padding:12px 10px}
+      .x-side button{border-left:0;border-radius:12px;padding:9px 14px;margin:1px 0;min-height:44px;color:var(--x-tx)}
+      .x-side button span{font-family:var(--x-mono);font-size:12px;color:var(--x-tx2);letter-spacing:.02em}
+      .x-side button b{font-size:14px;font-weight:500;letter-spacing:-.005em}
+      .x-side button:hover{background:var(--x-fill)}
+      .x-side button.on{background:var(--x-onbg);color:var(--x-blue-tx);border-left:0}
+      .x-side button.on span{color:var(--x-blue-tx)}
+      .x-side button.on b{font-weight:600}
+      .x-app.x-toc-off{grid-template-columns:0 1fr 340px}
+      .x-app.x-toc-off .x-side{display:none}
+
+      /* 舞台：浅色背景 */
+      .x-stage{background:var(--x-bg1)}
+      .x-ov{border:0;border-radius:22px;background:var(--x-card);box-shadow:0 0 0 .5px var(--x-line),var(--x-shadow);padding:16px 20px;backdrop-filter:none;-webkit-backdrop-filter:none}
+      .x-ov .x-book{font-size:12px;color:var(--x-tx2);letter-spacing:0}
+      .x-ov h1{font-family:var(--x-sans);font-size:21px;font-weight:600;letter-spacing:-.02em;line-height:1.3}
+      .x-ov h1 button{color:var(--x-blue-tx);font-size:14px;font-weight:400;border-radius:980px;padding:0 12px;margin:-12px -10px -12px 0}
+      .x-ov h1 button:hover{background:var(--x-fill)}
+      .x-ov p{font-size:15px;line-height:1.6}
+      #ovP #cap,#ovP #cap3,#ovP #cap4,#ovP #cap6,#ovP #cap7,#ovP #cap8,#ovP #cap5,#ovP #cap9{color:var(--x-blue-tx);font-weight:500}
+      #ovP #cap10{color:var(--x-blue-tx)!important}
+      #ovP #cap3.x-bad,#ovP #cap6.x-bad{color:var(--x-red-tx)}
+      .x-msg{color:var(--x-red-tx)}
+      .x-soon>div{border:0;border-radius:28px;background:var(--x-card);box-shadow:0 0 0 .5px var(--x-line),var(--x-shadow);padding:28px 32px}
+      .x-soon h2{font-family:var(--x-sans);font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.25}
+      .x-soon .x-book,.x-soon .x-count{font-size:12px;color:var(--x-tx2)}
+      .x-tag{border:0;border-radius:980px;background:var(--x-exam);color:var(--x-gold-tx);padding:6px 14px}
+      .x-pop{border:0;border-radius:20px;background:var(--x-card);box-shadow:0 0 0 .5px var(--x-line),0 12px 40px rgba(0,0,0,.12);backdrop-filter:none;-webkit-backdrop-filter:none;padding:16px 18px}
+      .x-pop h3{font-family:var(--x-sans);font-size:17px;font-weight:600;letter-spacing:-.02em}
+      .x-pop h3 button{border-radius:980px;color:var(--x-tx2)}
+      .x-pop h3 button:hover{background:var(--x-fill)}
+      .x-pop dt{color:var(--x-tx2)}
+
+      /* 右侧面板与卡片 */
+      .x-panel{background:var(--x-bg1);border-left:.5px solid var(--x-line);padding:16px;gap:14px}
+      .x-card{border:0;border-radius:20px;background:var(--x-card);box-shadow:0 0 0 .5px var(--x-line),var(--x-shadow);padding:16px 18px}
+      .x-card h4{font-family:var(--x-sans);font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--x-tx2);margin:0 0 10px}
+      .x-card ul{font-size:15px;line-height:1.6}
+      .x-row{font-size:15px;gap:10px;min-height:32px}
+      .x-row output{font-family:var(--x-mono);font-size:14px;color:var(--x-blue-tx);text-align:right}
+      .x-muted{color:var(--x-tx2);font-size:14px;line-height:1.6}
+      .x-gl{font-family:var(--x-mono)}
+      .x-grad{height:6px;border-radius:980px}
+      html .x-card.x-exam{background:var(--x-exam);border:0;box-shadow:none;font-size:14px;line-height:1.65}
+      html .x-card.x-exam b{color:var(--x-gold-tx)}
+      html .x-card.x-exam em{color:var(--x-red-tx)}
+
+      /* 滑块：iOS 风格 */
+      .x-card input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;height:44px;cursor:pointer}
+      .x-card input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:980px;background:var(--x-fill2)}
+      .x-card input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-10px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 0 .5px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.18);transition:transform var(--x-t) var(--x-ease)}
+      .x-card input[type=range]:active::-webkit-slider-thumb{transform:scale(1.1)}
+      .x-card input[type=range]::-moz-range-track{height:4px;border-radius:980px;background:var(--x-fill2)}
+      .x-card input[type=range]::-moz-range-progress{height:4px;border-radius:980px;background:var(--x-blue)}
+      .x-card input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 0 .5px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.18)}
+      .x-card input[type=range]:disabled{opacity:.4;cursor:default}
+
+      /* 按钮：胶囊形；次按钮浅灰，主按钮蓝底白字 */
+      .x-btn{border:0;border-radius:980px;background:var(--x-fill);color:var(--x-tx);font-family:var(--x-sans);font-size:15px;font-weight:500;letter-spacing:-.01em;padding:0 18px}
+      .x-btn:not(:disabled):hover{background:var(--x-fill2)}
+      .x-btn:not(:disabled):active{transform:scale(.98)}
+      .x-btn.on,#oNext,#qNx,#uFac{background:var(--x-blue);color:#fff}
+      .x-btn.on:not(:disabled):hover,#oNext:hover,#qNx:hover,#uFac:not(:disabled):hover{background:var(--x-blue);opacity:.88}
+      .x-btn:disabled{opacity:.35}
+      .x-pn{gap:8px}
+      .x-card .x-btn+.x-btn,.x-card .x-pn+.x-btn{margin-top:8px}
+      .x-pn .x-btn+.x-btn{margin-top:0}
+
+      /* 分段按钮 */
+      .x-st{gap:6px}
+      .x-st button{border:0;border-radius:980px;background:var(--x-fill);color:var(--x-tx);font-family:var(--x-sans);padding:0 10px;line-height:1.3}
+      .x-st button:hover{background:var(--x-fill2)}
+      .x-st button.on{background:var(--x-blue);color:#fff;border-color:transparent}
+
+      /* 开关：iOS 风格 */
+      .x-sw{gap:12px;font-size:15px}
+      .x-sw input{-webkit-appearance:none;appearance:none;flex:none;position:relative;width:51px;height:31px;margin:0;border-radius:980px;background:var(--x-fill2);cursor:pointer;transition:background-color var(--x-t) var(--x-ease)}
+      .x-sw input::before{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.04),0 3px 8px rgba(0,0,0,.15),0 3px 1px rgba(0,0,0,.06);transition:transform var(--x-t) var(--x-ease)}
+      .x-sw input:checked{background:var(--x-blue)}
+      .x-sw input:checked::before{transform:translateX(20px)}
+
+      /* 随堂检测选项 */
+      .x-qo{gap:8px}
+      .x-qo button{border:0;border-radius:16px;background:var(--x-fill);color:var(--x-tx);font-family:var(--x-sans);font-size:15px;line-height:1.5;padding:10px 16px}
+      .x-qo button:not(:disabled):hover{background:var(--x-onbg);color:var(--x-blue-tx);border-color:transparent}
+      .x-qo button.ok{background:var(--x-okbg);color:var(--x-acc-tx);box-shadow:inset 0 0 0 1.5px var(--x-acc)}
+      .x-qo button.no{background:var(--x-nobg);color:var(--x-red-tx);box-shadow:inset 0 0 0 1.5px var(--x-red)}
+      #qFb b.ok{color:var(--x-acc-tx)}#qFb b.no{color:var(--x-red-tx)}
+
+      @media (max-width:1023px){.x-app.x-toc-off{grid-template-columns:0 1fr 300px}}
+      @media (max-width:767px){
+        .x-app.x-toc-off{grid-template-columns:1fr}
+        .x-top{gap:4px;padding:0 4px 0 6px}
+        .x-prog,#bFull{display:none}
+        .x-tools{gap:0;margin-left:auto}
+        .x-ib{width:44px}
+        .x-back{font-size:14px;padding:0 2px}
+        .x-name{padding:0 6px;gap:4px;flex:0 1 auto}
+        .x-name b{font-size:15px}
+        .x-name .x-en{display:none}
+        .x-side{padding:4px 8px;gap:2px;border-right:0;border-bottom:.5px solid var(--x-line);background:var(--x-bg1)}
+        .x-side button{border-bottom:0;border-radius:980px;padding:0 14px;margin:0;min-height:44px;display:flex;align-items:center;gap:6px}
+        .x-side button span{display:inline}
+        .x-side button.on{border-bottom:0}
+        .x-ov{left:10px;right:10px;top:10px;padding:12px 16px;border-radius:20px}
+        .x-ov h1{font-size:18px}
+        .x-ov p{font-size:15px}
+        .x-panel{background:var(--x-bg1);border-top:0;border-radius:28px 28px 0 0;box-shadow:0 0 0 .5px var(--x-line),0 -8px 32px rgba(0,0,0,.08);padding:0 14px calc(20px + env(safe-area-inset-bottom));transition:transform var(--x-t) var(--x-ease)}
+        .x-handle{min-height:52px;font-family:var(--x-sans);font-size:13px;font-weight:500;color:var(--x-tx2);background:var(--x-bg1)}
+        .x-handle::before{width:36px;height:5px;border-radius:980px;background:var(--x-fill2);opacity:1}
+        .x-soon>div{padding:22px 20px;border-radius:24px}
+        .x-soon h2{font-size:24px}
+      }
+      @media (prefers-reduced-motion:reduce){
+        *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;scroll-behavior:auto!important}
+      }
+    </style>
     <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
   </head>
   <body>
     <div class="x-app" id="top">
       <header class="x-top">
-        <div class="x-brand"><small>格物实验室</small><b>大气环流 · AtmosLab</b></div>
+        <div class="x-brand"><a class="x-back" href="../" aria-label="返回格物实验室"><b aria-hidden="true">‹</b>格物实验室</a><button class="x-name" id="bToc" aria-expanded="true" aria-controls="side" title="收起 / 展开目录"><b>大气环流</b><span class="x-en">· AtmosLab</span><i aria-hidden="true">▾</i></button></div>
         <div class="x-prog"><div class="x-segs" id="segs"></div><span class="x-count" id="count">01 / 11</span></div>
         <div class="x-tools">
           <button class="x-ib" id="bPrev" title="上一章 (←)" aria-label="上一章">←</button>
@@ -528,13 +676,13 @@
         G.err.textContent = "3D 引擎未能加载，请检查网络后刷新";
         $("stage").appendChild(G.err);
       }
-      function label(text, col, w) {
+      function label(text, col, w, halo) {
         const c = document.createElement("canvas");
         c.width = 512; c.height = 96;
         const x = c.getContext("2d");
-        x.font = '500 44px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+        x.font = '500 44px -apple-system,"SF Pro Display","PingFang SC","Noto Sans SC",sans-serif';
         x.textAlign = "center"; x.textBaseline = "middle";
-        x.lineWidth = 8; x.strokeStyle = "rgba(10,16,28,.85)"; x.strokeText(text, 256, 48);
+        x.lineWidth = 8; x.strokeStyle = halo || "rgba(10,16,28,.85)"; x.strokeText(text, 256, 48);
         x.fillStyle = col; x.fillText(text, 256, 48);
         const m = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false });
         const s = new THREE.Sprite(m);
@@ -605,14 +753,15 @@
           const R0 = 1.03, R1 = 1.37;
           ring.add(new THREE.Mesh(new THREE.RingGeometry(R0, R1, 160), new THREE.MeshBasicMaterial({ color: 0x2ec4b6, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false })));
           const circ = (r) => { const p = []; for (let i = 0; i <= 200; i++) { const a = (i / 200) * Math.PI * 2; p.push(new THREE.Vector3(r * Math.cos(a), r * Math.sin(a), 0)); } return p; };
-          const rl = new THREE.Line(new THREE.BufferGeometry().setFromPoints(circ(R1)), new THREE.LineBasicMaterial({ color: 0x2ec4b6, transparent: true, opacity: 0.35 }));
+          const rl = new THREE.Line(new THREE.BufferGeometry().setFromPoints(circ(R1)), new THREE.LineBasicMaterial({ color: 0x0a9396, transparent: true, opacity: 0.55 }));
           ring.add(rl); G.guides.push(rl);
           const div = [];
           [30, 60, -30, -60].forEach((d) => [1, -1].forEach((sx) => { const a = (d * Math.PI) / 180; div.push(new THREE.Vector3(sx * R0 * Math.cos(a), R0 * Math.sin(a), 0), new THREE.Vector3(sx * R1 * Math.cos(a), R1 * Math.sin(a), 0)); }));
-          const dl = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(div), new THREE.LineBasicMaterial({ color: 0x8a97ad, transparent: true, opacity: 0.4 }));
+          const dl = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(div), new THREE.LineBasicMaterial({ color: 0x6e6e73, transparent: true, opacity: 0.5 }));
           ring.add(dl); G.guides.push(dl);
           [[90, "90°N 极地下沉"], [60, "60° 上升"], [30, "30° 下沉"], [0, "0° 赤道上升"], [-30, "30°S"], [-60, "60°S"], [-90, "90°S"]].forEach(([d, t]) => {
-            const s = label(t, d === 0 ? "#F2B544" : "#C9D3E3", 0.62), a = (d * Math.PI) / 180, rr = 1.5;
+            const lt = document.documentElement.classList.contains("x-light");
+            const s = lt ? label(t, d === 0 ? "#8a5c00" : "#3a3a3c", 0.62, "rgba(255,255,255,.92)") : label(t, d === 0 ? "#F2B544" : "#C9D3E3", 0.62), a = (d * Math.PI) / 180, rr = 1.5;
             const off = d === 90 || d === -90 ? 0 : 0.26;
             s.position.set(rr * Math.cos(a) + off, rr * Math.sin(a) * (Math.abs(d) === 90 ? 0.97 : 1), 0.01);
             ring.add(s); G.labels.push(s);
@@ -706,7 +855,7 @@
         "④ 水平方向上，空气由高压流向低压：近地面 %C → %H，高空 %H → %C，形成闭合的热力环流。",
       ];
       const T = { step: 0, auto: false, at: 0, k: 0.6, swap: false, bend: 0, lab: 0, run: false, P: [] };
-      const WARM = [226, 88, 70], COLD = [74, 144, 226], Q = Math.PI / 5;
+      const WARM = [214, 64, 69], COLD = [42, 118, 204], Q = Math.PI / 5;
       const tc = document.createElement("canvas");
       tc.style.cursor = "default";
       tc.style.visibility = "hidden";
@@ -838,7 +987,7 @@
             const y = lineY(y0, s, x) - 22;
             tx.fillStyle = V(t === "高" ? "--x-gold" : "--x-acc");
             tx.beginPath(); tx.arc(x, y, 14, 0, 7); tx.fill();
-            tx.fillStyle = V("--x-bg1");
+            tx.fillStyle = "#1d1d1f";
             tx.fillText(t, x, y + 1);
           });
           tx.globalAlpha = 1;
@@ -971,7 +1120,7 @@
             ux.fillText(s > 0 ? "高空：市区 → 郊区" : "高空：郊区 ← 市区", cx + s * C, g.cy - g.ry - 10);
             ux.fillText("郊区下沉 ↓", cx + s * (C + A + W * 0.05), g.cy);
             ux.fillText(s > 0 ? "近地面：市区 ← 郊区" : "近地面：郊区 → 市区", cx + s * (C + W * 0.04), yG - 26);
-            if (U.belt) { ux.fillStyle = "#3FAE6B"; ux.fillText("绿化带", cx + s * 0.31 * W, yG - 30); ux.fillStyle = V("--x-tx2"); }
+            if (U.belt) { ux.fillStyle = "#2b8a50"; ux.fillText("绿化带", cx + s * 0.31 * W, yG - 30); ux.fillStyle = V("--x-tx2"); }
           });
         }
 
@@ -2141,7 +2290,7 @@
       $("ovBtn").onclick = (e) => { const m = $("ov").classList.toggle("x-min"); e.target.textContent = m ? "展开" : "收起"; e.target.setAttribute("aria-expanded", !m); };
       $("handle").onclick = () => { const o = $("panel").classList.toggle("open"); $("handle").setAttribute("aria-expanded", o); };
       const theme = () => { const l = document.documentElement.classList.toggle("x-light"); try { localStorage.setItem("gewu-theme", l ? "light" : "dark"); } catch (e) {} $("bTheme").title = (l ? "宣纸" : "青黛夜") + " · 主题切换 (T)"; };
-      try { if (localStorage.getItem("gewu-theme") === "light") document.documentElement.classList.add("x-light"); } catch (e) {}
+      try { if (localStorage.getItem("gewu-theme") === "dark") document.documentElement.classList.remove("x-light"); } catch (e) {}
       const full = () => { const d = document; if (d.fullscreenElement) d.exitFullscreen && d.exitFullscreen(); else { const el = d.documentElement; const f = el.requestFullscreen || el.webkitRequestFullscreen; if (f) Promise.resolve(f.call(el)).catch(() => {}); } };
       $("bPrev").onclick = () => go(cur - 1);
       $("bNext").onclick = () => go(cur + 1);
@@ -2162,6 +2311,13 @@
       document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
       addEventListener("hashchange", () => { const n = parseInt(location.hash.slice(1), 10); if (n && n !== cur) go(n); });
       go(parseInt(location.hash.slice(1), 10) || 1);
+    </script>
+    <script>
+      /* 目录收起 / 展开（仅外观） */
+      (function () {
+        var b = document.getElementById("bToc"), app = document.querySelector(".x-app");
+        b.addEventListener("click", function () { var off = app.classList.toggle("x-toc-off"); b.setAttribute("aria-expanded", String(!off)); });
+      })();
     </script>
   </body>
 </html>
