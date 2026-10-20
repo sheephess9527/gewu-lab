@@ -1,0 +1,2167 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>格物实验室 · 大气环流 AtmosLab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap" />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-hero.css" />
+    <style>
+      :root{--x-bg1:#0E1420;--x-bg2:#121A2A;--x-panel:rgba(21,30,48,.82);--x-line:rgba(255,255,255,.08);--x-acc:#2EC4B6;--x-gold:#F2B544;--x-red:#EF6461;--x-tx:#E6ECF5;--x-tx2:#8A97AD;--x-soft:rgba(46,196,182,.12);--x-serif:"Noto Serif SC","Songti SC",serif;--x-mono:"Geist Mono",ui-monospace,Menlo,monospace;--x-r:10px;--x-t:200ms;--x-onbg:#183A44;--x-onacc:#2EC4B6}
+      html.x-light{--x-bg1:#F6F3EC;--x-bg2:#EFEADF;--x-panel:rgba(255,255,255,.9);--x-line:rgba(29,36,51,.1);--x-acc:#139A8E;--x-gold:#C98A12;--x-tx:#1D2433;--x-tx2:#5E6878;--x-soft:rgba(19,154,142,.1);--x-onbg:#DDF0EC;--x-onacc:#0B6159}
+      html,body{height:100%;overflow:hidden}
+      body{background:linear-gradient(160deg,var(--x-bg1),var(--x-bg2));color:var(--x-tx);font:15px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+      button{font:inherit;color:inherit;cursor:pointer}
+      .x-app{position:fixed;inset:0;display:grid;grid-template:56px 1fr/220px 1fr 340px;grid-template-areas:"top top top" "side stage panel"}
+      .x-top{grid-area:top;display:flex;align-items:center;gap:16px;padding:0 14px;border-bottom:1px solid var(--x-line);background:var(--x-panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:5}
+      .x-brand{display:flex;flex-direction:column;line-height:1.25;min-width:0;white-space:nowrap}
+      .x-brand small{font-size:12px;color:var(--x-tx2)}
+      .x-brand b{font-family:var(--x-serif);font-size:16px;font-weight:600}
+      .x-prog{flex:1;display:flex;align-items:center;gap:10px;justify-content:center;min-width:0}
+      .x-segs{display:flex;gap:4px;flex:1;max-width:420px}
+      .x-segs button{flex:1;height:6px;border:0;padding:0;border-radius:3px;background:var(--x-line);transition:background var(--x-t)}
+      .x-segs button.on{background:var(--x-acc)}
+      .x-segs button.done{background:var(--x-soft)}
+      .x-count{font-family:var(--x-mono);font-size:13px;color:var(--x-tx2);white-space:nowrap}
+      .x-tools{display:flex;gap:6px}
+      .x-ib{width:44px;height:44px;border-radius:var(--x-r);border:1px solid var(--x-line);background:transparent;display:grid;place-items:center;font-family:var(--x-mono);font-size:14px;transition:background var(--x-t),border-color var(--x-t)}
+      .x-ib:hover{background:var(--x-soft);border-color:var(--x-acc)}
+      .x-side{grid-area:side;overflow-y:auto;border-right:1px solid var(--x-line);padding:10px 0;background:var(--x-panel)}
+      .x-side button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:9px 16px 9px 18px;border-left:3px solid transparent;transition:background var(--x-t)}
+      .x-side button span{display:block;font-family:var(--x-mono);font-size:12px;color:var(--x-tx2)}
+      .x-side button b{font-weight:500;font-size:14px}
+      .x-side button:hover{background:var(--x-soft)}
+      .x-side button.on{border-left-color:var(--x-acc);background:var(--x-onbg);color:var(--x-tx);transition:none}
+      .x-side button.on span{color:var(--x-onacc)}
+      .x-stage{grid-area:stage;position:relative;overflow:hidden;min-height:0}
+      .x-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+      .x-ov{position:absolute;left:14px;top:14px;max-width:min(440px,calc(100% - 28px));padding:14px 16px;border-radius:var(--x-r);background:var(--x-panel);border:1px solid var(--x-line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:2}
+      .x-ov .x-book{font-size:12px;color:var(--x-tx2);margin-bottom:6px}
+      .x-ov h1{font-family:var(--x-serif);font-size:20px;font-weight:600;display:flex;justify-content:space-between;gap:12px;align-items:center}
+      .x-ov h1 button{border:0;background:transparent;color:var(--x-acc);font-size:13px;min-height:44px;min-width:44px;margin:-12px -8px -12px 0;padding:0 8px}
+      .x-ov p{font-size:14px;margin-top:8px}
+      .x-ov.x-min p:not(.x-book){display:none}
+      .x-msg{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--x-red);font-size:15px}
+      .x-soon{position:absolute;inset:0;overflow-y:auto;padding:28px 20px;display:none}
+      .x-soon>div{max-width:640px;margin:0 auto;padding:22px 24px;border-radius:var(--x-r);background:var(--x-panel);border:1px solid var(--x-line)}
+      .x-soon h2{font-family:var(--x-serif);font-size:24px;font-weight:600;margin:4px 0 12px}
+      .x-soon p{margin-top:10px}
+      .x-soon .x-book{font-size:12px;color:var(--x-tx2)}
+      .x-tag{display:inline-flex;align-items:center;gap:6px;margin-top:18px;padding:4px 12px;border-radius:999px;border:1px dashed var(--x-gold);color:var(--x-gold);font-size:13px}
+      .x-panel{grid-area:panel;overflow-y:auto;border-left:1px solid var(--x-line);background:var(--x-panel);padding:16px;display:flex;flex-direction:column;gap:14px}
+      .x-handle{display:none}
+      .x-card{border:1px solid var(--x-line);border-radius:var(--x-r);padding:14px}
+      .x-card h4{margin:0 0 10px;font-size:12px;letter-spacing:.08em;color:var(--x-tx2);font-weight:500}
+      .x-card ul{margin:0;padding-left:18px;font-size:14px}
+      .x-card li+li{margin-top:6px}
+      .x-row{display:flex;justify-content:space-between;align-items:center;font-size:14px}
+      .x-row output{font-family:var(--x-mono);color:var(--x-acc)}
+      .x-card input[type=range]{width:100%;accent-color:var(--x-acc);height:44px;margin:0}
+      .x-btn{width:100%;min-height:44px;border-radius:var(--x-r);border:1px solid var(--x-acc);background:var(--x-onbg);color:var(--x-onacc);font-weight:500;transition:background var(--x-t)}
+      .x-btn.on{background:var(--x-acc);color:#0E1420}
+      .x-grad{height:8px;border-radius:4px;background:linear-gradient(90deg,#FF7340,#F2B544,#2EC4B6,#8CBFFF);margin:6px 0 4px}
+      .x-gl{display:flex;justify-content:space-between;font-size:12px;color:var(--x-tx2);font-family:var(--x-mono)}
+      .x-exam{border-color:var(--x-gold);background:var(--x-bg1);font-size:14px}
+      html.x-light .x-exam b{color:#8A5A00}
+      html.x-light .x-exam em{color:#B3302C}
+      .x-exam b{color:var(--x-gold)}
+      .x-exam em{font-style:normal;color:var(--x-red)}
+      .x-sw{display:flex;justify-content:space-between;align-items:center;min-height:44px;font-size:14px}
+      .x-sw input{width:40px;height:22px;accent-color:var(--x-acc)}
+      .x-muted{color:var(--x-tx2);font-size:14px}
+      .x-st{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+      .x-st button{min-height:44px;border-radius:var(--x-r);border:1px solid var(--x-line);background:transparent;font-size:16px;transition:background var(--x-t)}
+      .x-st button.on{background:var(--x-soft);border-color:var(--x-acc);color:var(--x-acc)}
+      .x-pn{display:flex;gap:8px}
+      .x-btn:disabled{opacity:.4}
+      .x-pop{position:absolute;z-index:3;width:min(300px,calc(100% - 16px));padding:14px 16px;border-radius:var(--x-r);background:var(--x-panel);border:1px solid var(--x-line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:14px}
+      .x-pop h3{font-family:var(--x-serif);font-size:17px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 6px}
+      .x-pop h3 button{border:0;background:transparent;color:var(--x-tx2);min-width:44px;min-height:44px;margin:-12px -12px -12px 0;font-size:18px}
+      .x-pop dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 10px}
+      .x-pop dt{color:var(--x-tx2);font-size:12px;padding-top:2px}
+      .x-pop dd{margin:0}
+      #ovP #cap,#ovP #cap3,#ovP #cap4,#ovP #cap6,#ovP #cap7,#ovP #cap8{color:var(--x-acc);font-weight:500}
+      #ovP #cap3.x-bad,#ovP #cap6.x-bad{color:var(--x-red)}
+      #ov.x-quiz{max-height:calc(100% - 28px);overflow-y:auto}
+      .x-qo{display:grid;gap:6px;margin-top:10px}
+      .x-qo button{min-height:44px;text-align:left;padding:8px 12px;border-radius:var(--x-r);border:1px solid var(--x-line);background:transparent;font-size:14px;transition:background var(--x-t),border-color var(--x-t)}
+      .x-qo button:not(:disabled):hover{background:var(--x-soft);border-color:var(--x-acc)}
+      .x-qo button:disabled{cursor:default}
+      .x-qo button.ok{border-color:var(--x-acc);background:var(--x-soft);color:var(--x-acc)}
+      .x-qo button.no{border-color:var(--x-red);color:var(--x-red)}
+      #qFb b.ok{color:var(--x-acc)}#qFb b.no{color:var(--x-red)}
+      #ov #qNx{margin-top:10px}
+      .x-ov.x-min .x-qo,.x-ov.x-min #qNx{display:none}
+      .x-soon ol{margin:12px 0 16px;padding-left:20px}.x-soon li+li{margin-top:6px}
+      @media (max-width:1023px){.x-app{grid-template-columns:180px 1fr 300px}}
+      @media (max-width:767px){
+        .x-app{grid-template:56px auto 1fr/1fr;grid-template-areas:"top" "side" "stage"}
+        .x-top{gap:8px;padding:0 8px}
+        .x-brand small,.x-segs{display:none}
+        .x-tools{gap:0}.x-ib{width:44px;border:0}.x-brand b{font-size:14px;overflow:hidden;text-overflow:ellipsis}
+        .x-side{display:flex;overflow-x:auto;padding:0;border-right:0;border-bottom:1px solid var(--x-line);scrollbar-width:none}
+        .x-side button{flex:0 0 auto;width:auto;border-left:0;border-bottom:3px solid transparent;padding:6px 14px;white-space:nowrap}
+        .x-side button.on{border-bottom-color:var(--x-acc)}
+        .x-ov{left:8px;top:8px;right:8px;padding:10px 12px}
+        .x-panel{position:fixed;left:0;right:0;bottom:0;max-height:70vh;border-left:0;border-top:1px solid var(--x-line);border-radius:16px 16px 0 0;padding:0 14px 20px;transform:translateY(calc(100% - 52px));transition:transform 260ms;z-index:6;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+        .x-panel.open{transform:none}
+        .x-handle{display:flex;flex-direction:column;align-items:center;gap:4px;position:sticky;top:0;min-height:52px;justify-content:center;border:0;background:inherit;width:100%;font-size:13px;color:var(--x-tx2);z-index:1}
+        .x-handle::before{content:"";width:40px;height:4px;border-radius:2px;background:var(--x-tx2);opacity:.5}
+        .x-soon{padding:16px 12px 70px}
+      }
+    </style>
+    <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+  </head>
+  <body>
+    <div class="x-app" id="top">
+      <header class="x-top">
+        <div class="x-brand"><small>格物实验室</small><b>大气环流 · AtmosLab</b></div>
+        <div class="x-prog"><div class="x-segs" id="segs"></div><span class="x-count" id="count">01 / 11</span></div>
+        <div class="x-tools">
+          <button class="x-ib" id="bPrev" title="上一章 (←)" aria-label="上一章">←</button>
+          <button class="x-ib" id="bNext" title="下一章 (→)" aria-label="下一章">→</button>
+          <button class="x-ib" id="bTheme" title="主题切换 (T)" aria-label="切换主题">◐</button>
+          <button class="x-ib" id="bReset" title="重置视角 (R)" aria-label="重置视角">⟲</button>
+          <button class="x-ib" id="bFull" title="全屏 (F)" aria-label="全屏">⛶</button>
+        </div>
+      </header>
+      <nav class="x-side" id="side" aria-label="章节"></nav>
+      <main class="x-stage" id="stage">
+        <div class="x-ov" id="ov">
+          <p class="x-book" id="ovB">教材：湘教版 必修第一册·第三章 地球上的大气；选择性必修1·第三章 大气变化</p>
+          <h1><span id="ovT">大气运动总览</span><button id="ovBtn" aria-expanded="true">收起</button></h1>
+          <div id="ovP"></div>
+        </div>
+        <div class="x-soon" id="soon"></div>
+        <div class="x-pop" id="ePop" role="dialog" aria-live="polite" hidden></div>
+      </main>
+      <aside class="x-panel" id="panel">
+        <button class="x-handle" id="handle" aria-expanded="false">控件与要点</button>
+        <div id="pc1">
+          <div class="x-card">
+            <h4>粒子环流</h4>
+            <div class="x-row"><label for="spd">粒子速度</label><output id="spdO">1.0×</output></div>
+            <input type="range" id="spd" min="0.2" max="3" step="0.1" value="1" />
+            <button class="x-btn" id="pause">暂停</button>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>颜色 = 纬度</h4>
+            <div class="x-grad"></div>
+            <div class="x-gl"><span>0° 暖</span><span>30°</span><span>60°</span><span>90° 冷</span></div>
+            <p class="x-muted" style="margin-top:8px">赤道上升、30° 下沉、60° 上升、极地下沉：南北半球各三个环流圈。</p>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>要点</h4>
+            <ul>
+              <li>太阳辐射 → 地表冷热不均 → 空气垂直运动与水平气压差 → 热力环流</li>
+              <li>全球尺度再叠加地球自转 → 三圈环流 → 七个气压带、六个风带</li>
+              <li>键盘 ← → 切换章节，F 全屏，适合投屏讲解。</li>
+            </ul>
+          </div>
+          <div class="x-card x-exam" style="margin-top:14px">
+            <b>高考链接：</b>热力环流是一切大气运动的基础，浙江选考常结合等压面图、风向判读考查；<em>易错：</em>近地面受热形成低压，高空对应为高压。
+          </div>
+        </div>
+        <div id="pc2" hidden>
+          <div class="x-card">
+            <h4>四步拆解</h4>
+            <button class="x-btn" id="tPlay">▶ 四步拆解</button>
+            <div class="x-st" id="tSteps"><button aria-label="第 1 步">①</button><button aria-label="第 2 步">②</button><button aria-label="第 3 步">③</button><button aria-label="第 4 步">④</button></div>
+            <div class="x-pn"><button class="x-btn" id="tPrev">上一步</button><button class="x-btn" id="tNext">下一步</button></div>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>沙盒</h4>
+            <div class="x-row"><label for="tK">加热强度</label><output id="tKO">60%</output></div>
+            <input type="range" id="tK" min="20" max="100" step="10" value="60" />
+            <button class="x-btn" id="tSwap">互换 A/B 冷热</button>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>要点</h4>
+            <ul id="tPts"></ul>
+          </div>
+          <div class="x-card x-exam" style="margin-top:14px">
+            <b>高考链接：</b>等压面图判读是浙江选考高频：先判高低压，再判冷热、天气与风向；<em>易错：</em>等压面上凸为高压，同一地点近地面与高空气压性质相反。
+          </div>
+        </div>
+        <div id="pc3" hidden>
+          <div class="x-card">
+            <h4>污染工厂</h4>
+            <button class="x-btn" id="uFac">放置污染工厂</button>
+            <div class="x-row" style="margin-top:8px"><label for="uFx">工厂位置</label><output id="uFxO">未放置</output></div>
+            <input type="range" id="uFx" min="-48" max="48" step="1" value="25" disabled />
+            <p class="x-muted" id="uHint">放置后可在地面横向拖动工厂图标，或用滑块移动。</p>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>城市规划</h4>
+            <label class="x-sw">增加绿地<input type="checkbox" id="uGreen" /></label>
+            <label class="x-sw">浅色屋顶<input type="checkbox" id="uRoof" /></label>
+            <label class="x-sw">布置绿化带<input type="checkbox" id="uBelt" /></label>
+            <div class="x-row"><span>市区比郊区高</span><output id="uDT">4.0°C</output></div>
+            <p class="x-muted" id="uBeltN" hidden style="margin-top:8px">绿化带布置在环流内部、郊区下沉区附近：近地面风从这里吹向市区，树木吸烟滞尘、吸收有害气体，净化流向市区的空气。</p>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>要点</h4>
+            <ul id="uPts"></ul>
+          </div>
+          <div class="x-card x-exam" style="margin-top:14px">
+            <b>高考链接：</b>城市热岛环流常考工业区与绿化带布局；<em>易错：</em>污染工业应布局在热岛环流下沉距离之外，而不是简单地“放在郊区”。
+          </div>
+        </div>
+        <div id="pc4" hidden>
+          <div class="x-card">
+            <h4>时刻</h4>
+            <div class="x-row"><label for="sT">一天中的时刻</label><output id="sTO">14:00 下午</output></div>
+            <input type="range" id="sT" min="0" max="24" step="0.1" value="14" />
+            <div class="x-pn"><button class="x-btn" id="sDay">☀ 白天</button><button class="x-btn" id="sNight">☾ 夜晚</button></div>
+            <button class="x-btn" id="sPlay" style="margin-top:8px">▶ 播放一天</button>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>当前读数</h4>
+            <div class="x-row"><span>陆地气温</span><output id="sL">–</output></div>
+            <div class="x-row"><span>海洋气温</span><output id="sS">–</output></div>
+            <div class="x-row"><span>近地面风</span><output id="sW">–</output></div>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>要点</h4>
+            <ul id="sPts"></ul>
+          </div>
+          <div class="x-card x-exam" style="margin-top:14px">
+            <b>高考链接：</b>海陆风常结合海陆比热差异、滨海城市气温与湿度考查；<em>易错：</em>白天吹海风（海→陆），夜晚吹陆风，近地面风从高压（冷）吹向低压（热）。
+          </div>
+        </div>
+        <div id="pc5" hidden>
+          <div class="x-card">
+            <h4>时刻</h4>
+            <div class="x-row"><label for="vT">一天中的时刻</label><output id="vTO">14:00 下午</output></div>
+            <input type="range" id="vT" min="0" max="24" step="0.1" value="14" />
+            <div class="x-pn"><button class="x-btn" id="vDay">☀ 白天</button><button class="x-btn" id="vNight">☾ 夜晚</button></div>
+            <button class="x-btn" id="vPlay" style="margin-top:8px">▶ 播放一天</button>
+            <label class="x-sw" style="margin-top:8px">显示夜雨/逆温<input type="checkbox" id="vFog" checked /></label>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>同一高度比较</h4>
+            <div class="x-row"><span>山坡上方气温</span><output id="vL">–</output></div>
+            <div class="x-row"><span>谷地上空气温</span><output id="vS">–</output></div>
+            <div class="x-row"><span>近地面风</span><output id="vW">–</output></div>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>要点</h4>
+            <ul id="vPts"></ul>
+          </div>
+          <div class="x-card x-exam" style="margin-top:14px">
+            <b>高考链接：</b>山谷风常结合谷地夜雨、逆温与大气污染、城镇选址考查；<em>易错：</em>比较的是同一高度的山坡与谷地上空，白天谷风、夜晚山风。
+          </div>
+        </div>
+        <div id="pc6" hidden>
+          <div class="x-card">
+            <h4>假设：地表均匀 · 地球不自转</h4>
+            <div class="x-row"><label for="oSpd">粒子速度</label><output id="oSpdO">1.0×</output></div>
+            <input type="range" id="oSpd" min="0.2" max="3" step="0.1" value="1" />
+            <label class="x-sw">南北半球对称显示<input type="checkbox" id="oSym" /></label>
+            <label class="x-sw">加入地转偏向力<input type="checkbox" id="oCor" /></label>
+            <div id="oNote" hidden>
+              <p class="x-muted" style="margin:4px 0 10px">地球一自转，气流就偏转（北半球向右、南半球向左），单圈环流无法维持，被分割成三个环流圈。</p>
+              <button class="x-btn" id="oNext">下一章：三圈环流 →</button>
+            </div>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>要点</h4>
+            <ul id="oPts"></ul>
+          </div>
+          <div class="x-card x-exam" style="margin-top:14px">
+            <b>高考链接：</b>单圈环流是理解三圈环流的理想模型；<em>易错：</em>单圈环流成立的前提是地球不自转、地表均匀。
+          </div>
+        </div>
+        <div id="pc7" hidden>
+          <div class="x-card">
+            <h4>逐步搭建三圈环流</h4>
+            <div class="x-st" id="rSt" style="grid-template-columns:1fr 1fr;margin-top:0"><button style="font-size:14px">①赤道上升</button><button style="font-size:14px">②30°下沉</button><button style="font-size:14px">③极地下沉</button><button style="font-size:14px">④60°上升</button></div>
+            <label class="x-sw">只看北半球<input type="checkbox" id="rNH" /></label>
+            <label class="x-sw">显示近地面风向<input type="checkbox" id="rWind" /></label>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>要点</h4>
+            <ul id="rPts"></ul>
+          </div>
+          <div class="x-card x-exam" style="margin-top:14px">
+            <b>高考链接：</b>三圈环流是全球气压带风带分布的成因，常结合气候类型考查；<em>易错：</em>副热带高压是动力原因（下沉）形成的，赤道低压是热力原因形成的。
+          </div>
+        </div>
+        <div id="pc8" hidden>
+          <div class="x-card">
+            <h4>七个气压带 · 六个风带</h4>
+            <p class="x-muted">点击地球上任一条带，查看位置、成因、性质与对应气候。红 = 低压，蓝 = 高压。</p>
+            <label class="x-sw">显示地转偏向力分解<input type="checkbox" id="eCor" /></label>
+            <label class="x-sw">风带粒子流<input type="checkbox" id="ePt" checked /></label>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>要点</h4>
+            <ul id="ePts"></ul>
+          </div>
+          <div class="x-card x-exam" style="margin-top:14px">
+            <b>高考链接：</b>气压带风带是判断气候类型成因的核心，常与洋流、降水分布结合；<em>易错：</em>北半球西风带吹西南风，南半球西风带吹西北风。
+          </div>
+        </div>
+        <div id="pc9" hidden>
+          <div class="x-card">
+            <h4>随太阳直射点移动</h4>
+            <div class="x-row"><label for="nM">月份</label><output id="nMO">7 月</output></div>
+            <input type="range" id="nM" min="1" max="12" step="1" value="7" />
+            <div class="x-row"><span>直射点</span><output id="nSun">—</output></div>
+            <div class="x-row"><span>气压带风带平移</span><output id="nSh">—</output></div>
+            <div class="x-st" id="nQ" style="grid-template-columns:1fr 1fr"><button style="font-size:14px">北半球夏季（7 月）</button><button style="font-size:14px">北半球冬季（1 月）</button></div>
+            <button class="x-btn" id="nPlay">▶ 播放一年</button>
+            <label class="x-sw">南亚风向<input type="checkbox" id="nSA" /></label>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>典型区域（实时）</h4>
+            <div class="x-row"><span>地中海气候 38°N</span><output id="nMed">—</output></div>
+            <div class="x-row"><span>热带草原 10°N</span><output id="nSav">—</output></div>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>要点</h4>
+            <ul id="nPts"></ul>
+          </div>
+          <div class="x-card x-exam" style="margin-top:14px">
+            <b>高考链接：</b>气压带风带季节移动是地中海气候、热带草原气候和南亚西南季风的成因；<em>易错：</em>就北半球而言，夏季北移、冬季南移，移动幅度小于直射点移动幅度。
+          </div>
+        </div>
+        <div id="pc10" hidden>
+          <div class="x-card">
+            <h4>季节切换</h4>
+            <div class="x-st" id="mQ" style="grid-template-columns:1fr 1fr;margin-top:0"><button style="font-size:14px">1 月（冬季）</button><button style="font-size:14px">7 月（夏季）</button></div>
+            <div class="x-row"><label for="mM">月份</label><output id="mMO">1 月</output></div>
+            <input type="range" id="mM" min="1" max="12" step="1" value="1" />
+            <div class="x-row"><span>东亚风向</span><output id="mEA">—</output></div>
+            <div class="x-row"><span>南亚风向</span><output id="mSA">—</output></div>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>东亚季风 vs 南亚季风</h4>
+            <ul>
+              <li><b>东亚季风</b> · 成因：海陆热力性质差异。冬季西北季风（寒冷干燥），夏季东南季风（高温多雨）。气候：温带季风气候、亚热带季风气候。</li>
+              <li><b>南亚季风</b> · 成因：海陆热力性质差异 + 气压带、风带的季节移动。冬季东北季风，夏季西南季风。气候：热带季风气候。</li>
+            </ul>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h4>要点</h4>
+            <ul id="mPts"></ul>
+          </div>
+          <div class="x-card x-exam" style="margin-top:14px">
+            <b>高考链接：</b>季风成因与东亚、南亚季风风向是浙江选考高频考点，常结合我国降水、雨带推移考查；<em>易错：</em>南亚西南季风的成因主要是气压带风带季节移动，不只是海陆热力差异。
+          </div>
+        </div>
+        <div id="pc11" hidden>
+          <div class="x-card">
+            <h4>随堂检测</h4>
+            <div class="x-row"><span>得分 / 已答</span><output id="qSc">0 / 0</output></div>
+            <p class="x-muted" style="margin:8px 0 10px">6 道单选，浙江选考风格。带图题先在舞台摆好场景，作答后演示答案。</p>
+            <button class="x-btn" id="qRe">重新作答</button>
+          </div>
+        </div>
+        <div id="pcX" class="x-card" hidden>
+          <h4>本章控件</h4>
+          <p class="x-muted">交互即将上线。讲解文字见舞台。</p>
+        </div>
+        <div class="x-card">
+          <h4>显示</h4>
+          <label class="x-sw">标签<input type="checkbox" id="optLbl" checked /></label>
+          <label class="x-sw">辅助线<input type="checkbox" id="optGuide" checked /></label>
+        </div>
+      </aside>
+    </div>
+    <script>
+      const CH = [
+        { t: "大气运动总览", p: ["大气运动的根本能量来自太阳辐射。地表冷热不均引起空气的垂直运动和同一水平面上的气压差，形成热力环流；在全球尺度上，再叠加地球自转的影响，就形成了三圈环流和七个气压带、六个风带。", "三维地球可拖动旋转、滚轮缩放；地球边缘的光环是经向环流剖面，始终朝向你。"] },
+        { t: "热力环流原理", p: ["热力环流是由地面冷热不均而形成的空气环流，是大气运动最简单的形式。按步骤看它是怎样形成的：", "热 → 上升 → 近地面低压、高空高压", "冷 → 下沉 → 近地面高压、高空低压", "等压面高压处上凸、低压处下凹。", "同一地点，近地面与高空的气压性质相反。", "水平方向上，空气总是由高压流向低压。", "垂直方向上，近地面气压总是高于高空——“高压”“低压”是与同一水平面比较而言。"] },
+        { t: "城市热岛环流", p: ["城市人口、工业集中，生产生活释放大量废热，水泥、沥青路面吸热多、绿地少，市区气温高于郊区，形成城市热岛。市区空气上升、郊区空气下沉，近地面风从郊区吹向市区。", "近地面：郊区 → 市区；高空：市区 → 郊区；市区上升，郊区下沉。", "大气污染较重的工业应布局在热岛环流之外。", "城市绿地宜布置在环流内部、下沉区附近，净化流向市区的空气。", "增加绿地、水面，使用浅色屋顶，可以减弱热岛效应。"] },
+        { t: "海陆风", p: ["陆地比热容小，升温、降温都比海洋快。白天陆地气温高、近地面形成低压，风从海洋吹向陆地——海风；夜晚陆地降温快，气压比海洋高，风从陆地吹向海洋——陆风。", "白天海风 · 夜晚陆风", "近地面风总是从较冷（高压）的一侧吹向较热（低压）的一侧。", "海风使滨海地区夏季白天较为凉爽、空气湿润。", "传统渔民“借陆风清晨出海、借海风傍晚归航”。"] },
+        { t: "山谷风", p: ["白天山坡增温快，坡面上方空气比同高度谷地上空暖，空气沿山坡上升，谷底空气补充——谷风；夜晚山坡降温快，冷空气沿坡下滑流入谷底——山风。", "白天谷风 · 夜晚山风", "夜晚谷底暖湿空气被冷空气抬升，易成云致雨，山区多夜雨。", "冷空气在谷底堆积易形成逆温，污染物不易扩散——谷地不宜布局大气污染严重的工业。"] },
+        { t: "单圈环流", p: ["先做两个假设：地表均匀、地球不自转。赤道受热最多，空气膨胀上升，高空流向两极；两极冷却，空气收缩下沉，近地面由两极流回赤道。南北半球各形成一个闭合的热力环流。", "赤道：受热 → 上升 → 近地面低压", "极地：冷却 → 下沉 → 近地面高压", "观察地球边缘的剖面：粒子在赤道上升、在两极下沉。", "近地面气流沿经线由极地直接吹向赤道，没有东西向的偏转。", "实际上地球在自转，这种单圈环流并不存在——见下一节。"] },
+        { t: "三圈环流", p: ["地球自转产生地转偏向力（北半球向右、南半球向左）。赤道上空流向极地的气流，在约 30° 附近已偏转成西风，空气堆积下沉，单圈环流被分割成三个环流圈。", "低纬环流：赤道上升 → 高空流向 30° → 下沉 → 近地面流回赤道。", "中纬环流：30° 下沉的气流一部分流向高纬，在 60° 附近与极地冷空气相遇、被抬升。", "高纬环流：极地冷却下沉 → 近地面流向 60° → 上升 → 高空流回极地。"] },
+        { t: "气压带与风带", p: ["三圈环流在近地面形成七个气压带、六个风带，高低压相间分布，风带夹在气压带之间。", "赤低 · 副高 · 副低 · 极高", "风从高压吹向低压，再按“北右南左”偏转。"] },
+        { t: "季节移动", p: ["气压带和风带随太阳直射点的移动而移动：就北半球而言，大致夏季北移、冬季南移，移动幅度约 5～10 个纬度。", "地中海气候（约 30°–40° 大陆西岸）：夏季受副热带高气压带控制，炎热干燥；冬季受西风带控制，温和多雨。看左下角 38°N 的实时判断。", "热带草原气候：赤道低气压带与信风带交替控制，干湿季分明。"] },
+        { t: "海陆分布与季风", p: ["真实的地球表面海陆相间。陆地冬冷夏热、海洋冬暖夏凉，气压带被切断成一个个高、低压中心，季风也由此产生。地球上显示的是 NCEP 再分析资料 1991–2020 年的月平均近地面风和海平面气压。", "冬季：亚欧大陆冷却，形成强大的亚洲高压（蒙古—西伯利亚高压），把副极地低气压带切断，只在海洋上保留阿留申低压和冰岛低压。", "我国东部吹西北季风，寒冷干燥；南亚吹东北季风。", "夏季：亚欧大陆受热，形成亚洲低压（印度低压），把副热带高气压带切断，只在海洋上保留夏威夷高压和亚速尔高压。", "我国东部吹东南季风，高温多雨；南亚吹西南季风——南半球的东南信风越过赤道后向右偏转而成。", "东亚季风：海陆热力性质差异", "南亚季风：海陆热力性质差异 + 气压带、风带的季节移动"] },
+        { t: "随堂检测", p: ["6 道单选：热力环流、城市热岛、海陆风、山谷风、三圈环流、季风。作答后立即显示对错与解析，最后显示得分。"] },
+      ];
+      const $ = (id) => document.getElementById(id);
+      const pad = (n) => String(n).padStart(2, "0");
+      const BOOK = "教材：湘教版 必修第一册·第三章 地球上的大气；选择性必修1·第三章 大气变化";
+      let cur = 1, QZ = 0; // QZ：随堂检测正在复用的章节示意图
+      const at = (k) => cur === k || (cur === 11 && QZ === k);
+      CH.forEach((c, i) => {
+        const b = document.createElement("button");
+        b.innerHTML = `<span>${pad(i + 1)}</span><b>${c.t}</b>`;
+        b.onclick = () => go(i + 1);
+        $("side").appendChild(b);
+        const s = document.createElement("button");
+        s.setAttribute("aria-label", `第 ${i + 1} 章 ${c.t}`);
+        s.title = c.t;
+        s.onclick = () => go(i + 1);
+        $("segs").appendChild(s);
+      });
+
+      function go(n) {
+        n = Math.max(1, Math.min(CH.length, n | 0 || 1));
+        cur = n;
+        const c = CH[n - 1];
+        [...$("side").children].forEach((b, i) => b.classList.toggle("on", i === n - 1));
+        [...$("segs").children].forEach((b, i) => { b.classList.toggle("on", i === n - 1); b.classList.toggle("done", i < n - 1); });
+        $("side").children[n - 1].scrollIntoView({ block: "nearest", inline: "nearest" });
+        $("count").textContent = `${pad(n)} / ${pad(CH.length)}`;
+        if (location.hash !== "#" + n) history.replaceState(null, "", "#" + n);
+        const one = n === 1, two = n === 2, three = n === 3, four = n === 4, five = n === 5, six = n === 6, seven = n === 7, eight = n === 8, nine = n === 9, ten = n === 10, live = one || two || three || four || five || six || seven || eight || nine || ten;
+        $("pc10").hidden = !ten;
+        $("pc11").hidden = n !== 11;
+        $("ov").classList.toggle("x-quiz", n === 11);
+        mc.style.visibility = ten ? "visible" : "hidden";
+        $("pc8").hidden = !eight;
+        $("pc9").hidden = !nine;
+        ec.style.visibility = eight || nine ? "visible" : "hidden";
+        E8.s = nine ? N9.s : 0;
+        if (!nine) nPlay(false);
+        if (!eight) $("ePop").hidden = true;
+        $("pc7").hidden = !seven;
+        rc.style.visibility = seven ? "visible" : "hidden";
+        $("pc5").hidden = !five;
+        vc.style.visibility = five ? "visible" : "hidden";
+        $("pc6").hidden = !six;
+        oc.style.visibility = six ? "visible" : "hidden";
+        $("ov").hidden = !live;
+        $("pc1").hidden = !one;
+        $("pc2").hidden = !two;
+        $("pc3").hidden = !three;
+        $("pc4").hidden = !four;
+        $("pcX").hidden = live;
+        $("soon").style.display = live ? "none" : "block";
+        if (G.cv) G.cv.style.visibility = one ? "visible" : "hidden";
+        if (G.err) G.err.style.display = one ? "grid" : "none";
+        tc.style.visibility = two ? "visible" : "hidden";
+        uc.style.visibility = three ? "visible" : "hidden";
+        sc.style.visibility = four ? "visible" : "hidden";
+        if (ten) {
+          stop();
+          $("ovB").textContent = "教材：湘教版 选择性必修1·第三章 第二节 气压带和风带（海陆分布对大气环流的影响）";
+          $("ovT").textContent = c.t;
+          $("ovP").innerHTML = `<p>${c.p[0].split("地球上显示")[0]}</p><p id="cap10" style="color:var(--x-acc);font-weight:500"></p>`;
+          mSet(M10.m);
+          mStart();
+        } else if (nine) {
+          stop();
+          $("ovB").textContent = BOOK6;
+          $("ovT").textContent = c.t;
+          $("ovP").innerHTML = `<p>${c.p[0]}</p><p id="cap9"></p>`;
+          nSet(N9.m);
+          eStart();
+        } else if (eight) {
+          stop();
+          $("ovB").textContent = BOOK6;
+          $("ovT").textContent = c.t;
+          $("ovP").innerHTML = `<p>${c.p[0]}</p><p id="cap8"></p>`;
+          eUI();
+          eStart();
+        } else if (seven) {
+          stop();
+          $("ovB").textContent = BOOK6;
+          $("ovT").textContent = c.t;
+          $("ovP").innerHTML = `<p>${c.p[0]}</p><p id="cap7"></p>`;
+          rUI();
+          rStart();
+        } else if (six) {
+          stop();
+          $("ovB").textContent = BOOK6;
+          $("ovT").textContent = c.t;
+          $("ovP").innerHTML = `<p>${c.p[0]}</p><p id="cap6"></p>`;
+          oUI();
+          oStart();
+        } else if (five) {
+          stop();
+          $("ovB").textContent = BOOK2;
+          $("ovT").textContent = c.t;
+          $("ovP").innerHTML = `<p>${c.p[0]}</p><p id="cap5"></p>`;
+          vStart();
+        } else if (four) {
+          stop();
+          $("ovB").textContent = BOOK2;
+          $("ovT").textContent = c.t;
+          $("ovP").innerHTML = `<p>${c.p[0]}</p><p id="cap4"></p>`;
+          sStart();
+        } else if (three) {
+          stop();
+          $("ovB").textContent = BOOK2;
+          $("ovT").textContent = c.t;
+          $("ovP").innerHTML = `<p>${c.p[0]}</p><p id="cap3"></p>`;
+          uMsg();
+          uStart();
+        } else if (two) {
+          stop();
+          $("ovB").textContent = BOOK2;
+          $("ovT").textContent = c.t;
+          $("ovP").innerHTML = `<p>${c.p[0]}</p><p id="cap"></p>`;
+          tUI();
+          tStart();
+        } else if (one) {
+          $("ovB").textContent = BOOK;
+          $("ovT").textContent = c.t;
+          $("ovP").innerHTML = c.p.map((x) => `<p>${x}</p>`).join("");
+          init3D();
+          start();
+        } else if (n === 11) {
+          stop();
+          $("pcX").hidden = true;
+          Q11.i < QS.length ? qShow() : qEnd();
+        } else {
+          stop();
+          $("soon").innerHTML = `<div><p class="x-book">${BOOK}</p><p class="x-count">${pad(n)} / ${pad(CH.length)}</p><h2>${c.t}</h2>${c.p.map((x) => `<p>${x}</p>`).join("")}<span class="x-tag">⏳ 交互即将上线</span></div>`;
+          $("soon").scrollTop = 0;
+        }
+      }
+
+      /* ---------- 3D：地球 + 经向剖面光环 + 三圈环流粒子 ---------- */
+      const G = { ok: false, tried: false, running: false, paused: false, speed: 1 };
+      function fail() {
+        G.err = document.createElement("div");
+        G.err.className = "x-msg";
+        G.err.textContent = "3D 引擎未能加载，请检查网络后刷新";
+        $("stage").appendChild(G.err);
+      }
+      function label(text, col, w) {
+        const c = document.createElement("canvas");
+        c.width = 512; c.height = 96;
+        const x = c.getContext("2d");
+        x.font = '500 44px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+        x.textAlign = "center"; x.textBaseline = "middle";
+        x.lineWidth = 8; x.strokeStyle = "rgba(10,16,28,.85)"; x.strokeText(text, 256, 48);
+        x.fillStyle = col; x.fillText(text, 256, 48);
+        const m = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false });
+        const s = new THREE.Sprite(m);
+        s.scale.set(w || 0.6, (w || 0.6) * 96 / 512, 1);
+        return s;
+      }
+      function init3D() {
+        if (G.tried) return;
+        G.tried = true;
+        try {
+          if (!window.THREE || !THREE.OrbitControls) throw new Error("three.js missing");
+          const stage = $("stage");
+          const R = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+          R.setPixelRatio(Math.min(devicePixelRatio, 2));
+          R.setClearColor(0x000000, 0);
+          G.cv = R.domElement;
+          G.cv.setAttribute("aria-label", "可拖动旋转、滚轮缩放的三维地球，边缘光环显示三圈环流粒子");
+          stage.prepend(G.cv);
+          const scene = new THREE.Scene();
+          const cam = new THREE.PerspectiveCamera(42, 1, 0.1, 50);
+          const ctl = new THREE.OrbitControls(cam, G.cv);
+          Object.assign(ctl, { enableDamping: true, dampingFactor: 0.08, enablePan: false, minDistance: 1.8, maxDistance: 8, rotateSpeed: 0.7 });
+          Object.assign(G, { R, scene, cam, ctl, ok: true });
+
+          // 地球：程序化着色（蓝色海洋 + 噪声陆块）
+          const earthMat = new THREE.ShaderMaterial({
+            vertexShader: `varying vec3 vP;varying vec3 vN;void main(){vP=position;vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+            fragmentShader: `varying vec3 vP;varying vec3 vN;
+              float h(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+              float n(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);
+                return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),
+                           mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}
+              float fbm(vec3 p){float s=0.,a=.5;for(int i=0;i<5;i++){s+=a*n(p);p*=2.03;a*=.5;}return s;}
+              void main(){vec3 p=normalize(vP);float e=fbm(p*2.2+vec3(3.1,1.7,.4));float lat=abs(p.y);
+                vec3 oc=mix(vec3(.03,.14,.36),vec3(.08,.34,.62),smoothstep(.3,.55,e));
+                vec3 ld=mix(vec3(.18,.42,.2),vec3(.5,.44,.27),smoothstep(.6,.78,e));
+                ld=mix(ld,vec3(.72,.6,.38),.6*exp(-pow((lat-.42)/.12,2.)));
+                vec3 c=mix(oc,ld,smoothstep(.555,.575,e));
+                c=mix(c,vec3(.9,.94,1.),smoothstep(.87,.93,lat));
+                float d=max(dot(vN,normalize(vec3(-.35,.45,1.))),0.);
+                c*=.32+.78*d;c+=vec3(.2,.5,.85)*pow(1.-max(vN.z,0.),3.)*.55;
+                gl_FragColor=vec4(c,1.);}`,
+          });
+          scene.add(new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), earthMat));
+
+          // 纬线：赤道、南北回归线、60°
+          G.guides = []; G.labels = [];
+          const lat = (deg, col, op) => {
+            const pts = [], la = (deg * Math.PI) / 180;
+            for (let i = 0; i <= 160; i++) { const lo = (i / 160) * Math.PI * 2; pts.push(new THREE.Vector3(1.004 * Math.cos(la) * Math.cos(lo), 1.004 * Math.sin(la), 1.004 * Math.cos(la) * Math.sin(lo))); }
+            const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: op }));
+            scene.add(l); G.guides.push(l);
+          };
+          const tag = (t, deg, col) => {
+            const s = label(t, col, 0.62), la = (deg * Math.PI) / 180, lo = Math.PI / 2 - 0.45;
+            s.position.set(1.03 * Math.cos(la) * Math.cos(lo), 1.03 * Math.sin(la) + 0.045, 1.03 * Math.cos(la) * Math.sin(lo));
+            scene.add(s); G.labels.push(s);
+          };
+          lat(0, 0xf2b544, 0.9); tag("赤道", 0, "#F2B544");
+          lat(23.44, 0x2ec4b6, 0.7); tag("北回归线 23.5°N", 23.44, "#7FE3D8");
+          lat(-23.44, 0x2ec4b6, 0.7); tag("南回归线 23.5°S", -23.44, "#7FE3D8");
+          lat(60, 0xdbe4f2, 0.55); tag("60°N", 60, "#DBE4F2");
+          lat(-60, 0xdbe4f2, 0.55); tag("60°S", -60, "#DBE4F2");
+
+          // 经向剖面光环：始终朝向观众（lookAt 相机，保持地轴向上）
+          const ring = new THREE.Group();
+          scene.add(ring); G.ring = ring;
+          const R0 = 1.03, R1 = 1.37;
+          ring.add(new THREE.Mesh(new THREE.RingGeometry(R0, R1, 160), new THREE.MeshBasicMaterial({ color: 0x2ec4b6, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false })));
+          const circ = (r) => { const p = []; for (let i = 0; i <= 200; i++) { const a = (i / 200) * Math.PI * 2; p.push(new THREE.Vector3(r * Math.cos(a), r * Math.sin(a), 0)); } return p; };
+          const rl = new THREE.Line(new THREE.BufferGeometry().setFromPoints(circ(R1)), new THREE.LineBasicMaterial({ color: 0x2ec4b6, transparent: true, opacity: 0.35 }));
+          ring.add(rl); G.guides.push(rl);
+          const div = [];
+          [30, 60, -30, -60].forEach((d) => [1, -1].forEach((sx) => { const a = (d * Math.PI) / 180; div.push(new THREE.Vector3(sx * R0 * Math.cos(a), R0 * Math.sin(a), 0), new THREE.Vector3(sx * R1 * Math.cos(a), R1 * Math.sin(a), 0)); }));
+          const dl = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(div), new THREE.LineBasicMaterial({ color: 0x8a97ad, transparent: true, opacity: 0.4 }));
+          ring.add(dl); G.guides.push(dl);
+          [[90, "90°N 极地下沉"], [60, "60° 上升"], [30, "30° 下沉"], [0, "0° 赤道上升"], [-30, "30°S"], [-60, "60°S"], [-90, "90°S"]].forEach(([d, t]) => {
+            const s = label(t, d === 0 ? "#F2B544" : "#C9D3E3", 0.62), a = (d * Math.PI) / 180, rr = 1.5;
+            const off = d === 90 || d === -90 ? 0 : 0.26;
+            s.position.set(rr * Math.cos(a) + off, rr * Math.sin(a) * (Math.abs(d) === 90 ? 0.97 : 1), 0.01);
+            ring.add(s); G.labels.push(s);
+          });
+
+          // 粒子：12 个环流圈（南北半球 × 剖面两侧 × 低/中/高纬）
+          const N = 2000, CELLS = [[0, 30], [60, 30], [60, 90]];
+          const pos = new Float32Array(N * 3), col = new Float32Array(N * 3), P = [];
+          for (let i = 0; i < N; i++) {
+            const k = i % 12;
+            P.push({ c: CELLS[k % 3], hem: k % 6 < 3 ? 1 : -1, side: k < 6 ? 1 : -1, s: 0.18 + 0.82 * Math.sqrt(Math.random()), th: Math.random() * Math.PI * 2 });
+          }
+          const dotC = document.createElement("canvas");
+          dotC.width = dotC.height = 32;
+          const dx = dotC.getContext("2d"), gr = dx.createRadialGradient(16, 16, 0, 16, 16, 16);
+          gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.5, "rgba(255,255,255,.8)"); gr.addColorStop(1, "rgba(255,255,255,0)");
+          dx.fillStyle = gr; dx.fillRect(0, 0, 32, 32);
+          const geo = new THREE.BufferGeometry();
+          geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+          geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+          ring.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.032, map: new THREE.CanvasTexture(dotC), vertexColors: true, transparent: true, depthWrite: false })));
+          const STOPS = [[1, 0.45, 0.25], [0.95, 0.71, 0.27], [0.18, 0.77, 0.71], [0.55, 0.75, 1]];
+          const sp = (v, e) => Math.sign(v) * Math.pow(Math.abs(v), e);
+          G.step = (dt) => {
+            for (let i = 0; i < N; i++) {
+              const p = P[i], [up, dn] = p.c, c = (up + dn) / 2, u = Math.sign(up - c);
+              if (dt) p.th += (G.speed * dt * 0.9) / (0.35 + p.s);
+              const w = 14 * p.s, la = c + u * w * sp(Math.cos(p.th), 0.5);
+              const r = R0 + 0.17 + 0.135 * p.s * sp(Math.sin(p.th), 0.5);
+              const a = (p.hem * la * Math.PI) / 180;
+              pos[i * 3] = p.side * r * Math.cos(a); pos[i * 3 + 1] = r * Math.sin(a); pos[i * 3 + 2] = 0;
+              const t = Math.min(0.999, la / 90) * 3, j = Math.floor(t), f = t - j;
+              for (let q = 0; q < 3; q++) col[i * 3 + q] = STOPS[j][q] + (STOPS[j + 1][q] - STOPS[j][q]) * f;
+            }
+            geo.attributes.position.needsUpdate = true;
+            geo.attributes.color.needsUpdate = true;
+          };
+          G.step(0);
+
+          const size = () => {
+            const r = stage.getBoundingClientRect();
+            if (!r.width || !r.height) return;
+            R.setSize(r.width, r.height, false);
+            cam.aspect = r.width / r.height;
+            cam.updateProjectionMatrix();
+          };
+          new ResizeObserver(size).observe(stage);
+          size();
+          resetView();
+          applyOpts();
+        } catch (e) {
+          G.ok = false;
+          if (G.cv) G.cv.remove();
+          G.cv = null;
+          fail();
+        }
+      }
+      function resetView() {
+        if (!G.ok) return;
+        const v = (G.cam.fov * Math.PI) / 360, hf = Math.atan(Math.tan(v) * G.cam.aspect);
+        const d = Math.min(7.5, 1.75 / Math.tan(Math.min(v, hf)));
+        G.cam.position.set(0, 0.28, 1).normalize().multiplyScalar(d);
+        G.ctl.target.set(0, 0, 0);
+        G.ctl.update();
+      }
+      function frame(t) {
+        if (!G.running) return;
+        requestAnimationFrame(frame);
+        const dt = Math.min(0.05, (t - G.last) / 1000 || 0);
+        G.last = t;
+        if (!G.paused) G.step(dt);
+        G.ctl.update();
+        G.ring.lookAt(G.cam.position);
+        G.R.render(G.scene, G.cam);
+      }
+      function start() { if (!G.ok || G.running || cur !== 1) return; G.running = true; G.last = performance.now(); requestAnimationFrame(frame); }
+      function stop() { G.running = false; }
+      function applyOpts() {
+        if (!G.ok) return;
+        G.labels.forEach((s) => (s.visible = $("optLbl").checked));
+        G.guides.forEach((l) => (l.visible = $("optGuide").checked));
+      }
+
+      /* ---------- 第 2 章：热力环流竖直剖面（2D Canvas） ---------- */
+      const BOOK2 = "教材：湘教版 必修第一册·第三章 第三节 大气热力环流";
+      const CAP = [
+        "点「四步拆解」自动演示，或用「下一步」逐步查看。",
+        "① %H 处空气受热膨胀上升，%C 处冷却收缩下沉。",
+        "② %H 近地面形成低压、高空形成高压；%C 相反：近地面高压、高空低压。",
+        "③ 等压面弯曲：高压处上凸，低压处下凹。",
+        "④ 水平方向上，空气由高压流向低压：近地面 %C → %H，高空 %H → %C，形成闭合的热力环流。",
+      ];
+      const T = { step: 0, auto: false, at: 0, k: 0.6, swap: false, bend: 0, lab: 0, run: false, P: [] };
+      const WARM = [226, 88, 70], COLD = [74, 144, 226], Q = Math.PI / 5;
+      const tc = document.createElement("canvas");
+      tc.style.cursor = "default";
+      tc.style.visibility = "hidden";
+      tc.setAttribute("role", "img");
+      tc.setAttribute("aria-label", "热力环流竖直剖面：A、B 两地冷热不同，形成上升、下沉气流、等压面弯曲和闭合环流");
+      $("stage").prepend(tc);
+      const tx = tc.getContext("2d");
+      for (let i = 0; i < 400; i++) T.P.push({ s: Math.random(), side: i % 2, th: 0 });
+      const tSeed = () => T.P.forEach((p) => (p.th = (p.side ? Math.PI : 0) + (Math.random() * 2 - 1) * Q));
+      tSeed();
+      $("tPts").innerHTML = CH[1].p.slice(1).map((x) => `<li>${x}</li>`).join("");
+      function tSize() {
+        const r = $("stage").getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+        tc.width = Math.round(r.width * d); tc.height = Math.round(r.height * d);
+        Object.assign(T, { w: r.width, h: r.height, d });
+      }
+      new ResizeObserver(tSize).observe($("stage"));
+      tSize();
+      function tSet(n) {
+        n = Math.max(0, Math.min(4, n));
+        if (n < 4 && T.step === 4) tSeed();
+        T.step = n; T.at = 0;
+        if (n === 4) T.auto = false;
+        tUI();
+      }
+      function tUI() {
+        const h = T.swap ? "B" : "A", c = T.swap ? "A" : "B", cap = $("cap");
+        if (cap) cap.textContent = CAP[T.step].replace(/%H/g, h).replace(/%C/g, c);
+        [...$("tSteps").children].forEach((b, i) => { b.classList.toggle("on", i < T.step); b.setAttribute("aria-pressed", i === T.step - 1); });
+        $("tPrev").disabled = T.step === 0;
+        $("tNext").disabled = T.step === 4;
+        $("tPlay").classList.toggle("on", T.auto);
+        $("tPlay").textContent = T.auto ? "演示中…" : "▶ 四步拆解";
+      }
+      const sp = (v, e) => Math.sign(v) * Math.pow(Math.abs(v), e);
+      const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+      function tFrame(t) {
+        if (!T.run || !at(2)) { T.run = false; return; }
+        requestAnimationFrame(tFrame);
+        const dt = Math.min(0.05, (t - T.last) / 1000 || 0);
+        T.last = t;
+        if (T.auto && (T.at += dt) > 3.8) tSet(T.step + 1);
+        T.bend += ((T.step >= 3 ? 1 : 0) - T.bend) * Math.min(1, dt * 2.2);
+        T.lab += ((T.step >= 2 ? 1 : 0) - T.lab) * Math.min(1, dt * 4);
+        const cs = getComputedStyle(document.documentElement), V = (n) => cs.getPropertyValue(n).trim();
+        const W = T.w, H = T.h, ov = $("ov");
+        tx.setTransform(T.d, 0, 0, T.d, 0, 0);
+        tx.clearRect(0, 0, W, H);
+        const top = Math.min(H * 0.45, Math.max(40, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 36));
+        const yG = H - (innerWidth < 768 ? 100 : 60), h = Math.max(140, yG - top);
+        const yU = yG - h * 0.78, yL = yG - h * 0.24;
+        const xA = W * 0.28, xB = W * 0.72, xh = T.swap ? xB : xA, xc = T.swap ? xA : xB, cx = W / 2, hx = xh - cx;
+        const cy = yG - h * 0.5, ry = h * 0.47;
+        const font = (w, s) => `${w} ${s}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`;
+        const lbl = $("optLbl").checked, gd = $("optGuide").checked;
+
+        // 地面与冷热源
+        tx.fillStyle = V("--x-line");
+        tx.fillRect(0, yG, W, H - yG);
+        const R = Math.min(W * 0.16, h * 0.5);
+        [[xh, WARM], [xc, COLD]].forEach(([x, c]) => {
+          const g = tx.createRadialGradient(x, yG, 0, x, yG, R);
+          g.addColorStop(0, `rgba(${c},${0.2 + 0.45 * T.k})`);
+          g.addColorStop(1, `rgba(${c},0)`);
+          tx.fillStyle = g;
+          tx.fillRect(x - R, yG - R, 2 * R, 2 * R);
+        });
+        tx.strokeStyle = V("--x-tx2"); tx.lineWidth = 1.5;
+        tx.beginPath(); tx.moveTo(0, yG); tx.lineTo(W, yG); tx.stroke();
+        tx.textAlign = "center"; tx.textBaseline = "middle"; tx.font = font(600, 15);
+        [[xA, "A"], [xB, "B"]].forEach(([x, n]) => {
+          const hot = x === xh;
+          tx.fillStyle = `rgb(${hot ? WARM : COLD})`;
+          tx.fillText(`${n} · ${hot ? "受热" : "冷却"}`, x, yG + 24);
+        });
+
+        // 等压面：高压处上凸、低压处下凹
+        const sg = Math.max(60, W * 0.13), amp = T.bend * T.k * h * 0.12;
+        const g = (x) => Math.exp(-(((x - xh) / sg) ** 2)) - Math.exp(-(((x - xc) / sg) ** 2));
+        const lineY = (y0, s, x) => y0 + s * amp * g(x);
+        tx.strokeStyle = V("--x-acc"); tx.lineWidth = 2;
+        [[yL, 1], [yU, -1]].forEach(([y0, s]) => {
+          tx.beginPath();
+          for (let x = 0; x <= W + 4; x += 4) { const y = lineY(y0, s, x); x ? tx.lineTo(x, y) : tx.moveTo(x, y); }
+          tx.stroke();
+        });
+        if (gd) {
+          tx.fillStyle = V("--x-tx2"); tx.font = font(400, 12); tx.textAlign = "right";
+          tx.fillText("高空等压面", W - 12, lineY(yU, -1, W - 12) - 12);
+          tx.fillText("近地面等压面", W - 12, lineY(yL, 1, W - 12) - 12);
+        }
+
+        // 粒子：①–③ 只有竖直气流，④ 完整闭合环流
+        if (T.step >= 1) {
+          const full = T.step === 4, v = (0.25 + 0.9 * T.k) * dt;
+          T.P.forEach((p) => {
+            p.th += v / (0.5 + 0.6 * p.s);
+            let a = 0.9;
+            if (!full) {
+              const c0 = p.side ? Math.PI : 0;
+              if (p.th - c0 > Q) p.th -= 2 * Q;
+              a = Math.min(0.9, (Q - Math.abs(p.th - c0)) * 4);
+            }
+            const x = cx + hx * (0.45 + 0.55 * p.s) * sp(Math.cos(p.th), 0.5);
+            const y = cy - ry * (0.72 + 0.28 * p.s) * sp(Math.sin(p.th), 0.5);
+            const tt = Math.max(0, Math.min(1, (x - xh) / (xc - xh)));
+            tx.fillStyle = `rgba(${mix(WARM, COLD, tt)},${Math.max(0, a)})`;
+            tx.beginPath(); tx.arc(x, y, 2.2, 0, 7); tx.fill();
+          });
+          if (gd) {
+            tx.strokeStyle = V("--x-tx"); tx.lineWidth = 2;
+            (full ? [0, Math.PI / 2, Math.PI, 1.5 * Math.PI] : [0, Math.PI]).forEach((th) => {
+              const P = (q) => [cx + hx * 1.08 * sp(Math.cos(q), 0.5), cy - ry * 1.03 * sp(Math.sin(q), 0.5)];
+              const [x, y] = P(th), [x2, y2] = P(th + 0.02), an = Math.atan2(y2 - y, x2 - x);
+              tx.beginPath();
+              tx.moveTo(x - 9 * Math.cos(an - 0.6), y - 9 * Math.sin(an - 0.6));
+              tx.lineTo(x, y);
+              tx.lineTo(x - 9 * Math.cos(an + 0.6), y - 9 * Math.sin(an + 0.6));
+              tx.stroke();
+            });
+          }
+        }
+
+        // 高、低压标注（与同一水平面比较）
+        if (lbl && T.lab > 0.01) {
+          const ox = hx * 0.34;
+          tx.globalAlpha = T.lab; tx.font = font(600, 14); tx.textAlign = "center";
+          [[xh + ox, yL, 1, "低"], [xc - ox, yL, 1, "高"], [xh + ox, yU, -1, "高"], [xc - ox, yU, -1, "低"]].forEach(([x, y0, s, t]) => {
+            const y = lineY(y0, s, x) - 22;
+            tx.fillStyle = V(t === "高" ? "--x-gold" : "--x-acc");
+            tx.beginPath(); tx.arc(x, y, 14, 0, 7); tx.fill();
+            tx.fillStyle = V("--x-bg1");
+            tx.fillText(t, x, y + 1);
+          });
+          tx.globalAlpha = 1;
+        }
+      }
+      function tStart() {
+        if (T.run || !at(2) || document.hidden) return;
+        T.run = true; T.last = performance.now();
+        requestAnimationFrame(tFrame);
+      }
+      $("tPlay").onclick = () => { T.auto = true; tSet(1); };
+      $("tPrev").onclick = () => { T.auto = false; tSet(T.step - 1); };
+      $("tNext").onclick = () => { T.auto = false; tSet(T.step + 1); };
+      [...$("tSteps").children].forEach((b, i) => (b.onclick = () => { T.auto = false; tSet(i + 1); }));
+      $("tK").oninput = (e) => { T.k = e.target.value / 100; $("tKO").textContent = e.target.value + "%"; };
+      $("tSwap").onclick = () => { T.swap = !T.swap; T.bend = 0; T.lab = 0; tUI(); };
+      document.addEventListener("visibilitychange", () => (document.hidden ? (T.run = false) : tStart()));
+
+      /* ---------- 第 3 章：城市热岛环流（2D Canvas，复用第 2 章的粒子环流） ---------- */
+      const U = { run: false, P: [], S: [], fac: false, f: 0.25, drag: false, dT: 4, green: 0, roof: 0, belt: false };
+      const BLD = [0.45, 0.7, 0.55, 0.95, 0.62, 0.85, 1, 0.78, 0.9, 0.58, 0.8, 0.66, 0.5, 0.4];
+      const uc = document.createElement("canvas");
+      uc.style.cursor = "default";
+      uc.style.visibility = "hidden";
+      uc.setAttribute("role", "img");
+      uc.setAttribute("aria-label", "城市热岛环流剖面：市区高楼气温高、空气上升，高空流向郊区，郊区下沉，近地面风从郊区吹向市区；可放置污染工厂、增加绿地、浅色屋顶和绿化带");
+      $("stage").prepend(uc);
+      const ux = uc.getContext("2d");
+      for (let i = 0; i < 500; i++) U.P.push({ s: i % 2 ? 1 : -1, r: 0.3 + 0.7 * Math.sqrt(Math.random()), th: Math.random() * 7 });
+      $("uPts").innerHTML = CH[2].p.slice(1).map((x) => `<li>${x}</li>`).join("");
+      function uSize() {
+        const r = $("stage").getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+        uc.width = Math.round(r.width * d); uc.height = Math.round(r.height * d);
+        Object.assign(U, { w: r.width, h: r.height, d });
+      }
+      new ResizeObserver(uSize).observe($("stage"));
+      uSize();
+      function uGeo() {
+        const W = U.w, H = U.h, ov = $("ov");
+        const top = Math.min(H * 0.4, Math.max(30, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 12));
+        const yG = H - (innerWidth < 768 ? 100 : 60), yT = top + 50, h = Math.max(130, yG - yT - 16);
+        return { W, H, cx: W / 2, yG, yT, h, cy: yG - h / 2, ry: h * 0.47, C: W * 0.19, A: W * 0.17 };
+      }
+      // 内侧（市区）th=0 上升，th=π/2 高空流向郊区，th=π 郊区下沉，th=3π/2 近地面流回市区
+      const uPos = (g, s, r, th) => [g.cx + s * (g.C - g.A * r * sp(Math.cos(th), 0.5)), g.cy - g.ry * (0.55 + 0.45 * r) * sp(Math.sin(th), 0.5)];
+      const uIn = () => Math.abs(U.f) < 0.37;
+      function uMsg() {
+        const inn = uIn(), cap = $("cap3");
+        let m = "点「放置污染工厂」，看污染如何随热岛环流扩散。";
+        if (U.fac) m = inn ? "⚠ 污染随近地面风流向市区" : "✓ 布局合理：工厂在热岛环流下沉距离之外";
+        if (U.belt) m += "；绿化带净化流向市区的空气";
+        if (cap) { cap.textContent = m; cap.classList.toggle("x-bad", U.fac && inn); }
+        $("uFxO").textContent = U.fac ? (inn ? "环流内" : "环流外") : "未放置";
+        $("uHint").textContent = U.fac ? m : "放置后可在地面横向拖动工厂图标，或用滑块移动。";
+      }
+      function uSetF(f) { U.f = Math.max(-0.48, Math.min(0.48, f)); $("uFx").value = Math.round(U.f * 100); uMsg(); }
+      function uFrame(t) {
+        if (!U.run || !at(3)) { U.run = false; return; }
+        requestAnimationFrame(uFrame);
+        const dt = Math.min(0.05, (t - U.last) / 1000 || 0);
+        U.last = t;
+        const cs = getComputedStyle(document.documentElement), V = (n) => cs.getPropertyValue(n).trim();
+        const g = uGeo(), { W, cx, yG, h, C, A } = g, lbl = $("optLbl").checked, gd = $("optGuide").checked;
+        const font = (w, s) => `${w} ${s}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`;
+        U.dT += (4 - 1.4 * U.green - 1.4 * U.roof - U.dT) * Math.min(1, dt * 1.5);
+        const k = U.dT / 4, v = (0.25 + 0.75 * k) * 0.9 * dt, dTs = U.dT.toFixed(1) + "°C";
+        if ($("uDT").textContent !== dTs) $("uDT").textContent = dTs;
+        ux.setTransform(U.d, 0, 0, U.d, 0, 0);
+        ux.clearRect(0, 0, W, g.H);
+
+        // 顶部温度曲线：市区高、郊区低
+        const tmp = (x) => U.dT * Math.exp(-(((x - cx) / (W * 0.2)) ** 2)), ty = (x) => g.yT - 9 * tmp(x);
+        if (gd) { ux.strokeStyle = V("--x-line"); ux.lineWidth = 1; ux.setLineDash([4, 4]); ux.beginPath(); ux.moveTo(0, g.yT); ux.lineTo(W, g.yT); ux.stroke(); ux.setLineDash([]); }
+        const lg = ux.createLinearGradient(0, 0, W, 0);
+        lg.addColorStop(0, `rgb(${COLD})`); lg.addColorStop(0.5, `rgb(${mix(COLD, WARM, 0.3 + 0.7 * k)})`); lg.addColorStop(1, `rgb(${COLD})`);
+        ux.strokeStyle = lg; ux.lineWidth = 2.5; ux.beginPath();
+        for (let x = 0; x <= W + 4; x += 4) x ? ux.lineTo(x, ty(x)) : ux.moveTo(x, ty(x));
+        ux.stroke();
+        if (lbl) {
+          ux.font = font(600, 13); ux.textBaseline = "middle"; ux.textAlign = "center";
+          ux.fillStyle = `rgb(${WARM})`; ux.fillText(`市区 比郊区高 ${dTs}`, cx, ty(cx) - 13);
+          ux.textAlign = "left"; ux.fillStyle = `rgb(${COLD})`; ux.fillText("郊区 气温低", 12, g.yT - 12);
+          ux.textAlign = "right"; ux.fillStyle = V("--x-tx2"); ux.font = font(400, 12); ux.fillText("气温曲线", W - 12, g.yT - 12);
+        }
+
+        // 地面、田野、树、城市热岛
+        ux.fillStyle = V("--x-line"); ux.fillRect(0, yG, W, g.H - yG);
+        ux.fillStyle = "rgba(120,170,80,.3)"; ux.fillRect(0, yG, cx - W * 0.16, 10); ux.fillRect(cx + W * 0.16, yG, W, 10);
+        const R = W * 0.26, gr = ux.createRadialGradient(cx, yG, 0, cx, yG, R);
+        gr.addColorStop(0, `rgba(${WARM},${0.08 * U.dT})`); gr.addColorStop(1, `rgba(${WARM},0)`);
+        ux.fillStyle = gr; ux.fillRect(cx - R, yG - R, 2 * R, R);
+        const tree = (x, r, c) => {
+          ux.strokeStyle = "#7A5A3A"; ux.lineWidth = 2; ux.beginPath(); ux.moveTo(x, yG); ux.lineTo(x, yG - r - 4); ux.stroke();
+          ux.fillStyle = c; ux.beginPath(); ux.arc(x, yG - r - 6, r, 0, 7); ux.fill();
+        };
+        [0.2, 0.235, 0.41, 0.44, 0.475].forEach((f) => [1, -1].forEach((s) => tree(cx + s * f * W, 7, "#3E9B5A")));
+        const bw = (W * 0.3) / BLD.length, hb = Math.min(h * 0.38, 170);
+        BLD.forEach((b, i) => {
+          const x = cx - W * 0.15 + i * bw, bh = hb * b;
+          ux.fillStyle = `rgba(${mix(COLD, WARM, 0.35 + 0.65 * k)},${0.55 + 0.3 * k})`;
+          ux.fillRect(x + bw * 0.08, yG - bh, bw * 0.84, bh);
+          if (U.roof) { ux.fillStyle = "#EEF2F7"; ux.fillRect(x + bw * 0.08, yG - bh - 3, bw * 0.84, 4); }
+          if (U.green && i % 2) tree(x + bw, 6, "#4CAF6A");
+        });
+        if (U.belt) [1, -1].forEach((s) => { for (let f = 0.27; f <= 0.351; f += 0.012) tree(cx + s * f * W, 6, "#2F9E5B"); });
+        ux.textAlign = "center"; ux.textBaseline = "middle"; ux.font = font(600, 14);
+        ux.fillStyle = `rgb(${WARM})`; ux.fillText("市区", cx, yG + 22);
+        ux.fillStyle = `rgb(${COLD})`; [1, -1].forEach((s) => ux.fillText("郊区 · 田野", cx + s * W * 0.33, yG + 22));
+
+        // 两个对称闭合环流
+        U.P.forEach((p) => {
+          p.th += v / (0.5 + 0.6 * p.r);
+          const [x, y] = uPos(g, p.s, p.r, p.th), tt = 1 - (1 - Math.min(1, Math.abs(x - cx) / (C + A))) * (0.35 + 0.65 * k);
+          ux.fillStyle = `rgba(${mix(WARM, COLD, tt)},.85)`;
+          ux.beginPath(); ux.arc(x, y, 2, 0, 7); ux.fill();
+        });
+        if (gd) {
+          ux.strokeStyle = V("--x-tx"); ux.lineWidth = 2;
+          [1, -1].forEach((s) => [0, Math.PI / 2, Math.PI, 1.5 * Math.PI].forEach((th) => {
+            const [x, y] = uPos(g, s, 1.08, th), [x2, y2] = uPos(g, s, 1.08, th + 0.02), an = Math.atan2(y2 - y, x2 - x);
+            ux.beginPath();
+            ux.moveTo(x - 9 * Math.cos(an - 0.6), y - 9 * Math.sin(an - 0.6)); ux.lineTo(x, y); ux.lineTo(x - 9 * Math.cos(an + 0.6), y - 9 * Math.sin(an + 0.6));
+            ux.stroke();
+          }));
+        }
+        if (lbl) {
+          ux.font = font(500, 12); ux.fillStyle = V("--x-tx2");
+          ux.fillText("市区上升 ↑", cx, g.cy - g.ry * 0.6);
+          [1, -1].forEach((s) => {
+            ux.fillText(s > 0 ? "高空：市区 → 郊区" : "高空：郊区 ← 市区", cx + s * C, g.cy - g.ry - 10);
+            ux.fillText("郊区下沉 ↓", cx + s * (C + A + W * 0.05), g.cy);
+            ux.fillText(s > 0 ? "近地面：市区 ← 郊区" : "近地面：郊区 → 市区", cx + s * (C + W * 0.04), yG - 26);
+            if (U.belt) { ux.fillStyle = "#3FAE6B"; ux.fillText("绿化带", cx + s * 0.31 * W, yG - 30); ux.fillStyle = V("--x-tx2"); }
+          });
+        }
+
+        // 污染工厂与污染粒子
+        const fx = cx + U.f * W, inn = uIn(), life = (p) => (p.inn ? 16 : 9);
+        if (U.fac && U.S.length < 260 && Math.random() < dt * 50) {
+          const s = Math.sign(U.f) || 1, r = 0.8 + 0.2 * Math.random(), q = Math.max(-1, Math.min(1, (C - Math.abs(U.f) * W) / (A * r)));
+          U.S.push({ x0: fx + 11, y0: yG - 46, x: fx + 11, y: yG - 46, inn, s, r, th: -Math.acos(Math.sign(q) * q * q) - 0.1 - Math.random() * 0.2, age: 0, a: 1, j: (Math.random() - 0.5) * 14, vx: s * (8 + Math.random() * 22), vy: -(14 + Math.random() * 16) });
+        }
+        U.S = U.S.filter((p) => (p.age += dt) < life(p) && p.a > 0.02);
+        ux.fillStyle = "rgb(140,140,140)";
+        U.S.forEach((p) => {
+          if (p.inn) {
+            p.th += v / (0.5 + 0.6 * p.r);
+            const [ox, oy] = uPos(g, p.s, p.r, p.th), b = Math.min(1, p.age / 1.6), e = b * b * (3 - 2 * b);
+            p.x = p.x0 + (ox + p.j - p.x0) * e; p.y = p.y0 + (oy + p.j * 0.5 - p.y0) * e;
+          } else { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 1 + dt * 0.3; }
+          const d = Math.abs(p.x - cx) / W;
+          if (U.belt && d > 0.26 && d < 0.36 && p.y > yG - h * 0.4) p.a -= dt * 0.9;
+          ux.globalAlpha = Math.max(0, p.a * Math.min(1, p.age * 3, (life(p) - p.age) / 2) * 0.7);
+          ux.beginPath(); ux.arc(p.x, p.y, 3 + Math.min(3, p.age * 0.6), 0, 7); ux.fill();
+        });
+        ux.globalAlpha = 1;
+        if (U.fac) {
+          const c = V(inn ? "--x-red" : "--x-acc");
+          ux.fillStyle = V("--x-tx2");
+          ux.fillRect(fx + 7, yG - 46, 8, 28);
+          ux.beginPath(); ux.moveTo(fx - 20, yG);
+          [[-20, -14], [-10, -22], [-10, -14], [0, -22], [0, -14], [20, -14], [20, 0]].forEach(([a, b]) => ux.lineTo(fx + a, yG + b));
+          ux.closePath(); ux.fill();
+          ux.strokeStyle = c; ux.lineWidth = 3; ux.beginPath(); ux.moveTo(fx - 26, yG + 3); ux.lineTo(fx + 26, yG + 3); ux.stroke();
+          ux.font = font(500, 12); ux.fillStyle = c; ux.fillText("⇆ 工厂", fx, yG + 40);
+        }
+      }
+      function uStart() {
+        if (U.run || !at(3) || document.hidden) return;
+        U.run = true; U.last = performance.now();
+        requestAnimationFrame(uFrame);
+      }
+      const uHit = (e) => {
+        const g = uGeo(), r = uc.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+        return { x, g, on: U.fac && Math.abs(x - (g.cx + U.f * g.W)) < 34 && y > g.yG - 56 && y < g.yG + 50 };
+      };
+      uc.addEventListener("pointerdown", (e) => { if (!uHit(e).on) return; U.drag = true; uc.setPointerCapture(e.pointerId); uc.style.cursor = "grabbing"; });
+      uc.addEventListener("pointermove", (e) => { const q = uHit(e); if (U.drag) uSetF((q.x - q.g.cx) / q.g.W); else uc.style.cursor = q.on ? "grab" : "default"; });
+      ["pointerup", "pointercancel"].forEach((n) => uc.addEventListener(n, () => { U.drag = false; uc.style.cursor = "default"; }));
+      $("uFac").onclick = (e) => {
+        U.fac = !U.fac; U.S = [];
+        e.target.textContent = U.fac ? "移除污染工厂" : "放置污染工厂";
+        e.target.classList.toggle("on", U.fac);
+        $("uFx").disabled = !U.fac;
+        uMsg();
+      };
+      $("uFx").oninput = (e) => uSetF(e.target.value / 100);
+      $("uGreen").onchange = (e) => (U.green = +e.target.checked);
+      $("uRoof").onchange = (e) => (U.roof = +e.target.checked);
+      $("uBelt").onchange = (e) => { U.belt = e.target.checked; $("uBeltN").hidden = !U.belt; uMsg(); };
+      document.addEventListener("visibilitychange", () => (document.hidden ? (U.run = false) : uStart()));
+
+      /* ---------- 第 4 章：海陆风（2D Canvas，复用第 2 章的粒子环流） ---------- */
+      const S = { run: false, t: 14, play: false, P: [], clock: 0 };
+      const sc = document.createElement("canvas");
+      sc.style.cursor = "default";
+      sc.style.visibility = "hidden";
+      sc.setAttribute("role", "img");
+      sc.setAttribute("aria-label", "海陆风剖面：左侧陆地、右侧海洋；白天陆地升温快，近地面吹海风，夜晚陆地降温快，近地面吹陆风；渔船清晨出海、傍晚归航");
+      $("stage").prepend(sc);
+      const sx = sc.getContext("2d");
+      for (let i = 0; i < 400; i++) S.P.push({ s: Math.random(), th: Math.random() * 7 });
+      $("sPts").innerHTML = CH[3].p.slice(1).map((x) => `<li>${x}</li>`).join("");
+      function sSize() {
+        const r = $("stage").getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+        sc.width = Math.round(r.width * d); sc.height = Math.round(r.height * d);
+        Object.assign(S, { w: r.width, h: r.height, d });
+      }
+      new ResizeObserver(sSize).observe($("stage"));
+      sSize();
+      // 陆地日较差大（16–32°C，15 时最高），海洋日较差小（22.5–25.5°C，约 16:30 最高）
+      const tL = (t) => 24 + 8 * Math.sin((2 * Math.PI * (t - 9)) / 24);
+      const tS = (t) => 24 + 1.5 * Math.sin((2 * Math.PI * (t - 10.5)) / 24);
+      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+      const hm = (t) => { const m = Math.round(t * 60) % 1440; return `${pad((m / 60) | 0)}:${pad(m % 60)}`; };
+      const nm = (t) => (t < 5 ? "深夜" : t < 7 ? "清晨" : t < 11 ? "上午" : t < 13 ? "正午" : t < 17 ? "下午" : t < 19 ? "傍晚" : "夜晚");
+      const put = (id, s) => { const e = $(id); if (e && e.textContent !== s) e.textContent = s; };
+      function sUI() {
+        const L = tL(S.t), M = tS(S.t), dT = L - M, tm = `${hm(S.t)} ${nm(S.t)}`;
+        if (+$("sT").value !== Math.round(S.t * 10) / 10) $("sT").value = S.t;
+        put("sTO", tm); put("sL", L.toFixed(1) + "°C"); put("sS", M.toFixed(1) + "°C");
+        put("sW", Math.abs(dT) < 0.6 ? "微弱 · 转向中" : dT > 0 ? "海风 海→陆" : "陆风 陆→海");
+        put("sPlay", S.play ? "⏸ 暂停" : "▶ 播放一天");
+        $("sPlay").classList.toggle("on", S.play);
+        put("cap4", Math.abs(dT) < 0.6 ? `${tm}：海陆温差很小，风力微弱，海陆风正在转向。`
+          : dT > 0 ? `${tm}：陆地升温快（${L.toFixed(1)}°C > 海洋 ${M.toFixed(1)}°C）→ 陆地空气上升、近地面低压 → 近地面吹海风（海→陆），高空由陆地流向海洋。`
+          : `${tm}：陆地降温快（${L.toFixed(1)}°C < 海洋 ${M.toFixed(1)}°C）→ 陆地空气下沉、近地面高压 → 近地面吹陆风（陆→海），高空由海洋流向陆地。`);
+      }
+      function sFrame(t) {
+        if (!S.run || !at(4)) { S.run = false; return; }
+        requestAnimationFrame(sFrame);
+        const dt = Math.min(0.05, (t - S.last) / 1000 || 0);
+        S.last = t; S.clock += dt;
+        if (S.play && (S.t += dt * 1.2) >= 24) { S.t = 24; S.play = false; }
+        sUI();
+        const cs = getComputedStyle(document.documentElement), V = (n) => cs.getPropertyValue(n).trim();
+        const font = (w, s) => `${w} ${s}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`;
+        const lbl = $("optLbl").checked, gd = $("optGuide").checked, W = S.w, H = S.h, ov = $("ov");
+        const gy = Math.min(H * 0.4, Math.max(12, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 12)), gh = 96;
+        const yG = H - (innerWidth < 768 ? 100 : 60), yT = gy + gh + 14, h = Math.max(120, yG - yT - 6);
+        const cx = W / 2, cy = yG - h / 2, ry = h * 0.47, A = W * 0.27;
+        const L = tL(S.t), M = tS(S.t), k = clamp((L - M) / 5, -1, 1), dir = Math.sign(k), al = Math.min(1, Math.abs(k) * 2);
+        const txt = (s, x, y, z, c) => { sx.font = font(600, z); sx.lineWidth = 4; sx.strokeStyle = "rgba(10,16,28,.8)"; sx.strokeText(s, x, y); sx.fillStyle = c; sx.fillText(s, x, y); };
+        sx.setTransform(S.d, 0, 0, S.d, 0, 0);
+        sx.clearRect(0, 0, W, H);
+        sx.textAlign = "center"; sx.textBaseline = "middle"; sx.lineJoin = "round";
+
+        // 天空随时刻变色，太阳 / 月亮
+        const a = Math.sin((2 * Math.PI * (S.t - 6)) / 24), day = clamp((a + 0.2) / 0.5, 0, 1), dusk = Math.max(0, 1 - Math.abs(a) / 0.25) * 0.7;
+        const sky = sx.createLinearGradient(0, 0, 0, yG);
+        sky.addColorStop(0, `rgb(${mix([10, 16, 34], [70, 140, 215], day)})`);
+        sky.addColorStop(1, `rgb(${mix(mix([24, 34, 62], [170, 210, 240], day), [244, 150, 92], dusk)})`);
+        sx.fillStyle = sky; sx.fillRect(0, 0, W, yG);
+        const orb = (u, c, r) => { const q = Math.PI * u; sx.fillStyle = c; sx.beginPath(); sx.arc(W * 0.06 + u * W * 0.88, yG - Math.sin(q) * (yG - yT) * 0.85, r, 0, 7); sx.fill(); };
+        if (S.t > 5.5 && S.t < 18.5) orb((S.t - 6) / 12, "#FFD45C", 16);
+        else orb((((S.t + 12) % 24) - 6) / 12, "#E8EDF5", 11);
+
+        // 陆地、沙滩、房屋、海洋波浪
+        sx.fillStyle = `rgb(${mix([46, 58, 42], [104, 140, 78], day)})`; sx.fillRect(0, yG, cx, H - yG);
+        sx.fillStyle = `rgb(${mix([110, 98, 70], [226, 200, 140], day)})`;
+        sx.beginPath(); sx.moveTo(W * 0.36, yG); sx.lineTo(cx + 14, yG + 16); sx.lineTo(cx + 14, H); sx.lineTo(W * 0.36, H); sx.fill();
+        [0.07, 0.16, 0.26].forEach((f, i) => {
+          const x = W * f, bw = Math.max(22, W * 0.045), bh = bw * (0.75 + 0.15 * i);
+          sx.fillStyle = `rgb(${mix([120, 110, 100], [236, 228, 214], day)})`; sx.fillRect(x - bw / 2, yG - bh, bw, bh);
+          sx.fillStyle = `rgb(${mix([90, 40, 36], [196, 82, 60], day)})`;
+          sx.beginPath(); sx.moveTo(x - bw * 0.65, yG - bh); sx.lineTo(x, yG - bh - bw * 0.55); sx.lineTo(x + bw * 0.65, yG - bh); sx.fill();
+          sx.fillStyle = day < 0.5 ? "#FFD27A" : "rgba(60,80,110,.6)"; sx.fillRect(x - bw * 0.18, yG - bh * 0.65, bw * 0.36, bh * 0.3);
+        });
+        const wave = (x) => yG + 2 + 3 * Math.sin(x / 18 + S.clock * 2);
+        sx.fillStyle = `rgb(${mix([16, 40, 72], [40, 120, 190], day)})`;
+        sx.beginPath(); sx.moveTo(cx, H);
+        for (let x = cx; x <= W + 4; x += 4) sx.lineTo(x, wave(x));
+        sx.lineTo(W, H); sx.fill();
+        sx.strokeStyle = "rgba(255,255,255,.45)"; sx.lineWidth = 1.5; sx.beginPath();
+        for (let x = cx; x <= W + 4; x += 4) x > cx ? sx.lineTo(x, wave(x)) : sx.moveTo(x, wave(x));
+        sx.stroke();
+        if (lbl) { txt("陆地 · 沙滩", W * 0.2, yG + 24, 14, `rgb(${WARM})`); txt("海洋", W * 0.78, yG + 28, 14, "#9CC8FF"); }
+
+        // 粒子闭合环流：陆地一侧 th=0；k>0 陆地上升（海风），k<0 陆地下沉（陆风）
+        S.P.forEach((p) => {
+          p.th += (k * 0.9 * dt) / (0.5 + 0.6 * p.s);
+          const x = cx - A * (0.45 + 0.55 * p.s) * sp(Math.cos(p.th), 0.5), y = cy - ry * (0.72 + 0.28 * p.s) * sp(Math.sin(p.th), 0.5);
+          const tt = clamp((x - cx + A) / (2 * A), 0, 1), q = 0.5 + (tt - 0.5) * Math.min(1, Math.abs(k) * 1.5) * (k >= 0 ? 1 : -1);
+          sx.fillStyle = `rgba(${mix(WARM, COLD, q)},.85)`;
+          sx.beginPath(); sx.arc(x, y, 2, 0, 7); sx.fill();
+        });
+
+        // 近地面大箭头（海风 / 陆风）、高空反向箭头、高低压
+        const arw = (x0, x1, y, w) => {
+          const d = Math.sign(x1 - x0), hx = x1 - d * w * 2.2;
+          const path = () => { sx.beginPath(); sx.moveTo(x0, y - w / 2); sx.lineTo(hx, y - w / 2); sx.lineTo(hx, y - w * 1.3); sx.lineTo(x1, y); sx.lineTo(hx, y + w * 1.3); sx.lineTo(hx, y + w / 2); sx.lineTo(x0, y + w / 2); sx.closePath(); };
+          path(); sx.lineWidth = 3; sx.strokeStyle = `rgba(10,16,28,${0.7 * al})`; sx.stroke();
+          sx.fillStyle = `rgba(255,255,255,${al})`; sx.fill();
+        };
+        const yU = cy - ry * 0.95;
+        if (al > 0.05) {
+          sx.globalAlpha = 1;
+          arw(cx + dir * W * 0.14, cx - dir * W * 0.14, yG - 30, 12);
+          arw(cx - dir * W * 0.09, cx + dir * W * 0.09, yU, 5);
+          if (lbl) {
+            sx.globalAlpha = al;
+            txt(k > 0 ? "海风  海 → 陆" : "陆风  陆 → 海", cx, yG - 60, 17, "#FFFFFF");
+            txt(k > 0 ? "高空：陆 → 海" : "高空：海 → 陆", cx, yU - 20, 13, "#E6ECF5");
+            const lo = k > 0;
+            [[cx - A * 0.8, yG - 30, lo ? "低" : "高"], [cx + A * 0.8, yG - 30, lo ? "高" : "低"], [cx - A * 0.8, yU, lo ? "高" : "低"], [cx + A * 0.8, yU, lo ? "低" : "高"]].forEach(([x, y, s]) => {
+              sx.fillStyle = V(s === "高" ? "--x-gold" : "--x-acc");
+              sx.beginPath(); sx.arc(x, y, 14, 0, 7); sx.fill();
+              sx.fillStyle = "#0E1420"; sx.font = font(600, 14); sx.fillText(s, x, y + 1);
+            });
+            sx.globalAlpha = 1;
+          }
+        }
+
+        // 渔船：5–7 时借陆风出海，17–19 时借海风归航
+        const e = (u) => u * u * (3 - 2 * u);
+        const bp = S.t < 5 || S.t >= 19 ? 0 : S.t < 7 ? e((S.t - 5) / 2) : S.t < 17 ? 1 : 1 - e((S.t - 17) / 2);
+        const bx = cx + W * 0.05 + bp * W * 0.38, by = wave(bx) - 2;
+        sx.fillStyle = "#8B5A2B";
+        sx.beginPath(); sx.moveTo(bx - 17, by - 4); sx.lineTo(bx + 17, by - 4); sx.lineTo(bx + 11, by + 5); sx.lineTo(bx - 11, by + 5); sx.fill();
+        sx.strokeStyle = "#5A3A1C"; sx.lineWidth = 2; sx.beginPath(); sx.moveTo(bx, by - 4); sx.lineTo(bx, by - 32); sx.stroke();
+        sx.fillStyle = "#F4EFE4"; sx.beginPath(); sx.moveTo(bx, by - 31); sx.lineTo(bx, by - 8); sx.lineTo(bx - dir * 15 * al + (dir ? 0 : 8), by - 16); sx.fill();
+        if (lbl && bp > 0 && bp < 1) txt(S.t < 12 ? "借陆风出海 →" : "← 借海风归航", bx, by - 46, 13, "#FFE08A");
+
+        // 顶部温度曲线：陆地日变化大，海洋日变化小
+        const bx0 = 12, bw0 = W - 24, px0 = bx0 + 40, px1 = bx0 + bw0 - Math.min(150, W * 0.3);
+        const X = (h) => px0 + (h / 24) * (px1 - px0), Y = (T) => gy + 10 + ((34 - T) / 20) * (gh - 32);
+        sx.fillStyle = V("--x-panel"); sx.strokeStyle = V("--x-line"); sx.lineWidth = 1;
+        sx.beginPath(); sx.roundRect ? sx.roundRect(bx0, gy, bw0, gh, 10) : sx.rect(bx0, gy, bw0, gh); sx.fill(); sx.stroke();
+        sx.font = font(400, 12); sx.fillStyle = V("--x-tx2");
+        [0, 6, 12, 18, 24].forEach((h) => sx.fillText(h + "时", X(h), gy + gh - 10));
+        sx.fillText("气温", bx0 + 20, gy + 18);
+        [[tL, `rgb(${WARM})`], [tS, `rgb(${COLD})`]].forEach(([f, c]) => {
+          sx.strokeStyle = c; sx.lineWidth = 2.5; sx.beginPath();
+          for (let h = 0; h <= 24.01; h += 0.25) h ? sx.lineTo(X(h), Y(f(h))) : sx.moveTo(X(h), Y(f(h)));
+          sx.stroke();
+          sx.fillStyle = c; sx.beginPath(); sx.arc(X(S.t), Y(f(S.t)), 4.5, 0, 7); sx.fill();
+        });
+        sx.strokeStyle = V("--x-tx2"); sx.setLineDash([3, 4]); sx.lineWidth = 1;
+        sx.beginPath(); sx.moveTo(X(S.t), gy + 8); sx.lineTo(X(S.t), gy + gh - 20); sx.stroke(); sx.setLineDash([]);
+        sx.textAlign = "left"; sx.font = font(600, 14);
+        sx.fillStyle = `rgb(${WARM})`; sx.fillText(`陆地 ${L.toFixed(1)}°C`, px1 + 18, gy + 30);
+        sx.fillStyle = `rgb(${COLD})`; sx.fillText(`海洋 ${M.toFixed(1)}°C`, px1 + 18, gy + 54);
+        sx.fillStyle = V("--x-tx2"); sx.font = font(400, 12); sx.fillText(hm(S.t), px1 + 18, gy + 76);
+        sx.textAlign = "center";
+      }
+      function sStart() {
+        sUI();
+        if (S.run || !at(4) || document.hidden) return;
+        S.run = true; S.last = performance.now();
+        requestAnimationFrame(sFrame);
+      }
+      const sGo = (t) => { S.t = t; S.play = false; sUI(); };
+      $("sT").oninput = (e) => sGo(+e.target.value);
+      $("sDay").onclick = () => sGo(14);
+      $("sNight").onclick = () => sGo(2);
+      $("sPlay").onclick = () => { if (!S.play && S.t >= 23.9) S.t = 0; S.play = !S.play; sUI(); };
+      document.addEventListener("visibilitychange", () => (document.hidden ? (S.run = false) : sStart()));
+
+      /* ---------- 第 5 章：山谷风（2D Canvas，复用海陆风的粒子环流与时刻控件） ---------- */
+      const Vv = { run: false, t: 14, play: false, P: [], clock: 0 };
+      const vc = document.createElement("canvas");
+      vc.style.visibility = "hidden";
+      vc.setAttribute("role", "img");
+      vc.setAttribute("aria-label", "山谷风剖面：V 形山谷，两侧山坡，谷底村庄与河流；白天近地面风由谷底吹向山坡（谷风），夜晚冷空气沿坡下滑（山风），夜间谷底易成云、多夜雨并形成逆温");
+      $("stage").prepend(vc);
+      const vx = vc.getContext("2d");
+      for (let i = 0; i < 420; i++) Vv.P.push({ s: Math.random(), th: Math.random() * 7, side: i % 2 ? 1 : -1 });
+      $("vPts").innerHTML = CH[4].p.slice(1).map((x) => `<li>${x}</li>`).join("");
+      function vSize() {
+        const r = $("stage").getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+        vc.width = Math.round(r.width * d); vc.height = Math.round(r.height * d);
+        Object.assign(Vv, { w: r.width, h: r.height, d });
+      }
+      new ResizeObserver(vSize).observe($("stage"));
+      vSize();
+      // 同一高度：山坡上方日较差大（14–30°C），谷地上空日较差小（19.5–24.5°C）
+      const vSl = (t) => 22 + 8 * Math.sin((2 * Math.PI * (t - 9)) / 24);
+      const vVa = (t) => 22 + 2.5 * Math.sin((2 * Math.PI * (t - 10)) / 24);
+      function vUI() {
+        const L = vSl(Vv.t), M = vVa(Vv.t), dT = L - M, tm = `${hm(Vv.t)} ${nm(Vv.t)}`;
+        if (+$("vT").value !== Math.round(Vv.t * 10) / 10) $("vT").value = Vv.t;
+        put("vTO", tm); put("vL", L.toFixed(1) + "°C"); put("vS", M.toFixed(1) + "°C");
+        put("vW", Math.abs(dT) < 0.6 ? "微弱 · 转向中" : dT > 0 ? "谷风 谷底→山坡" : "山风 山坡→谷底");
+        put("vPlay", Vv.play ? "⏸ 暂停" : "▶ 播放一天");
+        $("vPlay").classList.toggle("on", Vv.play);
+        put("cap5", Math.abs(dT) < 0.6 ? `${tm}：山坡与同高度谷地上空温差很小，风力微弱，山谷风正在转向。`
+          : dT > 0 ? `${tm}：山坡增温快（${L.toFixed(1)}°C > 同高度谷地上空 ${M.toFixed(1)}°C）→ 坡面暖空气上升 → 近地面风由谷底吹向山坡（谷风），谷地上空下沉。`
+          : `${tm}：山坡降温快（${L.toFixed(1)}°C < 同高度谷地上空 ${M.toFixed(1)}°C）→ 冷空气沿坡下滑（山风）→ 谷底暖湿空气被抬升，易成云致雨。`);
+      }
+      function vFrame(t) {
+        if (!Vv.run || !at(5)) { Vv.run = false; return; }
+        requestAnimationFrame(vFrame);
+        const dt = Math.min(0.05, (t - Vv.last) / 1000 || 0);
+        Vv.last = t; Vv.clock += dt;
+        if (Vv.play && (Vv.t += dt * 1.2) >= 24) { Vv.t = 24; Vv.play = false; }
+        vUI();
+        const font = (w, s) => `${w} ${s}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`;
+        const lbl = $("optLbl").checked, gd = $("optGuide").checked, fog = $("vFog").checked, W = Vv.w, H = Vv.h, ov = $("ov");
+        const top = Math.min(H * 0.4, Math.max(12, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 12));
+        const yG = H - (innerWidth < 768 ? 100 : 60), yR = top + (yG - top) * 0.38, yTop = top + (yR - top) * 0.3 + 10;
+        const cx = W / 2, fw = W * 0.07, RX = W * 0.44, Ax = (RX - fw * 0.4) / 2, cc = fw * 0.4 + Ax;
+        const gnd = (x) => { const d = Math.abs(x - cx); return d < fw ? yG : d > RX ? yR : yG - ((yG - yR) * (d - fw)) / (RX - fw); };
+        const k = clamp((vSl(Vv.t) - vVa(Vv.t)) / 5, -1, 1), al = Math.min(1, Math.abs(k) * 2), nf = clamp(-k * 1.6, 0, 1);
+        const txt = (s, x, y, z, c) => { vx.font = font(600, z); vx.lineWidth = 4; vx.strokeStyle = "rgba(10,16,28,.8)"; vx.strokeText(s, x, y); vx.fillStyle = c; vx.fillText(s, x, y); };
+        vx.setTransform(Vv.d, 0, 0, Vv.d, 0, 0);
+        vx.clearRect(0, 0, W, H);
+        vx.textAlign = "center"; vx.textBaseline = "middle"; vx.lineJoin = "round";
+
+        // 天空随时刻变色，太阳 / 月亮
+        const a = Math.sin((2 * Math.PI * (Vv.t - 6)) / 24), day = clamp((a + 0.2) / 0.5, 0, 1), dusk = Math.max(0, 1 - Math.abs(a) / 0.25) * 0.7;
+        const sky = vx.createLinearGradient(0, 0, 0, yG);
+        sky.addColorStop(0, `rgb(${mix([10, 16, 34], [70, 140, 215], day)})`);
+        sky.addColorStop(1, `rgb(${mix(mix([24, 34, 62], [170, 210, 240], day), [244, 150, 92], dusk)})`);
+        vx.fillStyle = sky; vx.fillRect(0, 0, W, yG);
+        const orb = (u, c, r) => { vx.fillStyle = c; vx.beginPath(); vx.arc(W * 0.06 + u * W * 0.88, yR - Math.sin(Math.PI * u) * (yR - top) * 0.8, r, 0, 7); vx.fill(); };
+        if (Vv.t > 5.5 && Vv.t < 18.5) orb((Vv.t - 6) / 12, "#FFD45C", 16);
+        else orb((((Vv.t + 12) % 24) - 6) / 12, "#E8EDF5", 11);
+
+        // V 形山谷：两侧山坡（白天坡面受热泛暖、夜晚泛冷）、树木、谷底河流与村庄
+        vx.fillStyle = `rgb(${mix([40, 52, 44], [96, 128, 76], day)})`;
+        vx.beginPath(); vx.moveTo(0, H); vx.lineTo(0, yR); vx.lineTo(cx - RX, yR); vx.lineTo(cx - fw, yG); vx.lineTo(cx + fw, yG); vx.lineTo(cx + RX, yR); vx.lineTo(W, yR); vx.lineTo(W, H); vx.fill();
+        [-1, 1].forEach((sd) => {
+          vx.strokeStyle = `rgba(${k > 0 ? WARM : COLD},${0.85 * al})`; vx.lineWidth = 5;
+          vx.beginPath(); vx.moveTo(cx + sd * fw, yG); vx.lineTo(cx + sd * RX, yR); vx.stroke();
+          for (let f = 0.25; f < 0.95; f += 0.17) {
+            const x = cx + sd * (fw + (RX - fw) * f), y = gnd(x) + 2;
+            vx.fillStyle = `rgb(${mix([28, 50, 36], [46, 104, 58], day)})`;
+            vx.beginPath(); vx.moveTo(x - 7, y); vx.lineTo(x, y - 20); vx.lineTo(x + 7, y); vx.fill();
+          }
+        });
+        vx.fillStyle = `rgb(${mix([20, 44, 76], [52, 132, 200], day)})`;
+        vx.beginPath(); vx.ellipse(cx, yG + 3, fw * 0.32, 6, 0, 0, 7); vx.fill();
+        [-0.68, 0.62].forEach((f, i) => {
+          const x = cx + fw * f, bw = Math.max(16, fw * 0.36), bh = bw * (0.8 + 0.15 * i);
+          vx.fillStyle = `rgb(${mix([120, 110, 100], [236, 228, 214], day)})`; vx.fillRect(x - bw / 2, yG - bh, bw, bh);
+          vx.fillStyle = `rgb(${mix([90, 40, 36], [196, 82, 60], day)})`;
+          vx.beginPath(); vx.moveTo(x - bw * 0.65, yG - bh); vx.lineTo(x, yG - bh - bw * 0.5); vx.lineTo(x + bw * 0.65, yG - bh); vx.fill();
+          vx.fillStyle = day < 0.5 ? "#FFD27A" : "rgba(60,80,110,.6)"; vx.fillRect(x - bw * 0.18, yG - bh * 0.62, bw * 0.36, bh * 0.3);
+        });
+        if (lbl) { txt("谷底村庄 · 河流", cx, yG + 26, 13, "#E6ECF5"); txt("山坡", cx - RX * 0.62, gnd(cx - RX * 0.62) + 30, 14, `rgb(${k > 0 ? WARM : COLD})`); txt("山坡", cx + RX * 0.62, gnd(cx + RX * 0.62) + 30, 14, `rgb(${k > 0 ? WARM : COLD})`); }
+
+        // 同一高度比较线
+        if (gd) {
+          const yh = (yG + yR) / 2;
+          vx.strokeStyle = "rgba(255,255,255,.4)"; vx.setLineDash([4, 5]); vx.lineWidth = 1;
+          vx.beginPath(); vx.moveTo(cx - RX * 0.62, yh); vx.lineTo(cx + RX * 0.62, yh); vx.stroke(); vx.setLineDash([]);
+          if (lbl) txt("同一高度：山坡上方 vs 谷地上空", cx, yh - 12, 12, "#E6ECF5");
+        }
+
+        // 粒子：每侧一个闭合环流，下缘贴着坡面；k>0 白天沿坡上升、谷地上空下沉，k<0 夜晚沿坡下滑、谷底抬升
+        Vv.P.forEach((p) => {
+          p.th -= (k * 0.9 * dt) / (0.5 + 0.6 * p.s);
+          const r = 0.45 + 0.55 * p.s, u = r * sp(Math.cos(p.th), 0.5), v = r * sp(Math.sin(p.th), 0.5);
+          const x = cx + p.side * (cc - u * Ax), g = gnd(x) - 12, y = g + (yTop - g) * (0.5 + 0.5 * v);
+          const q = clamp((1 - u) / 2, 0, 1), m = 0.5 + (q - 0.5) * Math.min(1, Math.abs(k) * 1.5) * (k >= 0 ? 1 : -1);
+          vx.fillStyle = `rgba(${mix(COLD, WARM, m)},.85)`;
+          vx.beginPath(); vx.arc(x, y, 2, 0, 7); vx.fill();
+        });
+
+        // 大箭头：沿坡的谷风 / 山风，谷地中央下沉 / 抬升
+        const arw = (x0, y0, x1, y1, w, c) => {
+          const L = Math.hypot(x1 - x0, y1 - y0), hx = L - w * 2.2;
+          vx.save(); vx.translate(x0, y0); vx.rotate(Math.atan2(y1 - y0, x1 - x0));
+          vx.beginPath(); vx.moveTo(0, -w / 2); vx.lineTo(hx, -w / 2); vx.lineTo(hx, -w * 1.3); vx.lineTo(L, 0); vx.lineTo(hx, w * 1.3); vx.lineTo(hx, w / 2); vx.lineTo(0, w / 2); vx.closePath();
+          vx.lineWidth = 3; vx.strokeStyle = `rgba(10,16,28,${0.7 * al})`; vx.stroke(); vx.fillStyle = c; vx.fill(); vx.restore();
+        };
+        if (al > 0.05) {
+          const pt = (sd, f) => { const x = cx + sd * (fw + (RX - fw) * f); return [x, gnd(x) - 26]; };
+          [-1, 1].forEach((sd) => {
+            const [a0, a1] = k > 0 ? [pt(sd, 0.12), pt(sd, 0.72)] : [pt(sd, 0.72), pt(sd, 0.12)];
+            arw(a0[0], a0[1], a1[0], a1[1], 12, `rgba(255,255,255,${al})`);
+            if (lbl) { vx.globalAlpha = al; const mp = pt(sd, 0.42); txt(k > 0 ? "谷风 ↗ 沿坡上升" : "山风 ↘ 冷空气下滑", mp[0] - sd * 6, mp[1] - 34, 16, "#FFFFFF"); vx.globalAlpha = 1; }
+          });
+          const y0 = yTop + 24, y1 = yR + (yG - yR) * 0.35;
+          k > 0 ? arw(cx, y0, cx, y1, 6, `rgba(160,200,255,${al})`) : arw(cx, y1, cx, y0, 6, `rgba(255,190,160,${al})`);
+          if (lbl) { vx.globalAlpha = al; txt(k > 0 ? "谷地上空下沉" : "谷底空气被抬升", cx, y0 - 14, 13, "#E6ECF5"); vx.globalAlpha = 1; }
+        }
+
+        // 夜雨 / 逆温：谷底冷空气堆积成雾，抬升的暖湿空气成云致雨
+        if (fog && nf > 0.02) {
+          const yI = yG - (yG - yR) * 0.22, fg = vx.createLinearGradient(0, yI, 0, yG);
+          fg.addColorStop(0, "rgba(220,228,240,0)"); fg.addColorStop(1, `rgba(220,228,240,${0.55 * nf})`);
+          vx.fillStyle = fg; vx.beginPath(); vx.moveTo(cx - fw - (yG - yI) * (RX - fw) / (yG - yR), yI); vx.lineTo(cx + fw + (yG - yI) * (RX - fw) / (yG - yR), yI); vx.lineTo(cx + fw, yG); vx.lineTo(cx - fw, yG); vx.fill();
+          const yc = yR + (yG - yR) * 0.3, dr = Math.sin(Vv.clock * 0.5) * 6;
+          vx.fillStyle = `rgba(200,208,222,${0.85 * nf})`;
+          [[-1.1, 0, 22], [-0.4, -10, 28], [0.4, -6, 26], [1.1, 2, 20], [0, 6, 24]].forEach(([fx, fy, r]) => { vx.beginPath(); vx.arc(cx + fx * fw + dr, yc + fy, r, 0, 7); vx.fill(); });
+          if (nf > 0.5) {
+            vx.strokeStyle = `rgba(170,200,240,${(nf - 0.5) * 1.6})`; vx.lineWidth = 1.5; vx.beginPath();
+            for (let i = 0; i < 18; i++) { const x = cx + (((i * 37) % 100) / 50 - 1) * fw * 1.1 + dr, y = yc + 22 + ((Vv.clock * 120 + i * 23) % Math.max(20, yI - yc - 30)); vx.moveTo(x, y); vx.lineTo(x - 2, y + 8); }
+            vx.stroke();
+          }
+          vx.strokeStyle = `rgba(255,214,120,${0.8 * nf})`; vx.setLineDash([6, 5]); vx.lineWidth = 1.5;
+          vx.beginPath(); vx.moveTo(cx - fw * 2.2, yI); vx.lineTo(cx + fw * 2.2, yI); vx.stroke(); vx.setLineDash([]);
+          if (lbl) { vx.globalAlpha = nf; txt("谷底成云 · 山区多夜雨", cx + fw * 2.6, yc - 18, 13, "#E6ECF5"); txt("逆温层：冷空气堆积，污染物不易扩散", cx, yI - 12, 12, "#FFD678"); vx.globalAlpha = 1; }
+        }
+      }
+      function vStart() {
+        vUI();
+        if (Vv.run || !at(5) || document.hidden) return;
+        Vv.run = true; Vv.last = performance.now();
+        requestAnimationFrame(vFrame);
+      }
+      const vGo = (t) => { Vv.t = t; Vv.play = false; vUI(); };
+      $("vT").oninput = (e) => vGo(+e.target.value);
+      $("vDay").onclick = () => vGo(14);
+      $("vNight").onclick = () => vGo(2);
+      $("vPlay").onclick = () => { if (!Vv.play && Vv.t >= 23.9) Vv.t = 0; Vv.play = !Vv.play; vUI(); };
+      document.addEventListener("visibilitychange", () => (document.hidden ? (Vv.run = false) : vStart()));
+
+      /* ---------- 第 6 章：单圈环流（2D Canvas 经线剖面，地表均匀、地球不自转） ---------- */
+      const BOOK6 = "教材：湘教版 选择性必修1·第三章 第二节 气压带和风带";
+      const O = { run: false, sym: false, cor: false, cf: 0, spd: 1, P: [], w: 0, h: 0, d: 1 };
+      const oc = document.createElement("canvas");
+      oc.style.visibility = "hidden";
+      oc.setAttribute("role", "img");
+      oc.setAttribute("aria-label", "单圈环流经线剖面：赤道受热空气上升、近地面低压，极地冷却下沉、近地面高压；近地面风由极地吹向赤道，高空由赤道流向极地，形成一个闭合环流");
+      $("stage").prepend(oc);
+      const ox = oc.getContext("2d");
+      for (let i = 0; i < 380; i++) O.P.push({ th: Math.random() * Math.PI * 2, r: 0.35 + Math.sqrt(Math.random()) * 0.65, side: i % 2 ? 1 : -1 });
+      $("oPts").innerHTML = CH[5].p.slice(1).map((x) => `<li>${x}</li>`).join("");
+      function oSize() {
+        const r = $("stage").getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+        oc.width = Math.round(r.width * d); oc.height = Math.round(r.height * d);
+        Object.assign(O, { w: r.width, h: r.height, d });
+      }
+      new ResizeObserver(oSize).observe($("stage"));
+      oSize();
+      const oCl = (v, a, b) => Math.max(a, Math.min(b, v));
+      const oMix = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(",");
+      const oSc = (t) => Math.sign(t) * Math.pow(Math.abs(t), 0.55);
+      // 环流路径：θ=0 赤道中层，逆时针 → 赤道上升 → 高空流向极地 → 极地下沉 → 近地面流回赤道
+      const oLoop = (th, r, L) => [L / 2 - (L / 2) * 0.88 * r * oSc(Math.cos(th)), 0.5 + 0.4 * r * oSc(Math.sin(th))];
+      function oUI() {
+        $("oNote").hidden = !O.cor;
+        const e = $("cap6");
+        if (!e) return;
+        e.classList.toggle("x-bad", O.cor);
+        e.textContent = O.cor
+          ? "加入地转偏向力：高空流向极地的气流" + (O.sym ? "北半球向右偏、南半球向左偏" : "向右偏") + "，到约 30° 附近已偏成西风、无法继续流向极地，空气堆积下沉——单圈环流无法维持。下一章：三圈环流。"
+          : "赤道受热 → 上升 → 近地面低压；极地冷却 → 下沉 → 近地面高压。近地面风由极地吹向赤道，高空由赤道流向极地：" + (O.sym ? "南北半球各一个闭合环流，关于赤道对称。" : "一个闭合的大环流。");
+      }
+      function oFrame(t) {
+        if (!O.run || cur !== 6) { O.run = false; return; }
+        requestAnimationFrame(oFrame);
+        const dt = Math.min(0.05, (t - O.last) / 1000 || 0);
+        O.last = t;
+        O.cf += ((O.cor ? 1 : 0) - O.cf) * Math.min(1, dt * 2.5);
+        const lbl = $("optLbl").checked, gd = $("optGuide").checked, W = O.w, H = O.h, ov = $("ov"), mob = innerWidth < 768;
+        const light = document.documentElement.classList.contains("x-light");
+        const top = Math.min(H * 0.45, Math.max(16, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 40));
+        const yG = H - (mob ? 110 : 70), yT = top, hgt = yG - yT;
+        const sym = O.sym, hw = W * 0.44, x0 = W * 0.07, span = W * 0.86;
+        const X = (lat, s) => (sym ? W / 2 + s * (lat / 90) * hw : x0 + (lat / 90) * span);
+        const Y = (v) => yG - v * hgt;
+        const L = 90 - 60 * O.cf, f = (w, z) => `${w} ${z}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`;
+        const txt = (s, x, y, z, c) => { ox.font = f(600, z); ox.lineWidth = 4; ox.strokeStyle = light ? "rgba(255,255,255,.85)" : "rgba(10,16,28,.8)"; ox.strokeText(s, x, y); ox.fillStyle = c; ox.fillText(s, x, y); };
+        const ink = light ? "#1D2433" : "#E6ECF5", warm = [255, 115, 64], cold = [110, 170, 255];
+        const sides = sym ? [1, -1] : [1];
+        ox.setTransform(O.d, 0, 0, O.d, 0, 0);
+        ox.clearRect(0, 0, W, H);
+        ox.textAlign = "center"; ox.textBaseline = "middle"; ox.lineJoin = "round"; ox.lineCap = "round";
+
+        // 大气层：赤道暖、极地冷
+        const xa = sym ? W / 2 - hw : x0, xb = sym ? W / 2 + hw : x0 + span;
+        const air = ox.createLinearGradient(xa, 0, xb, 0), ga = light ? 0.16 : 0.22;
+        if (sym) { air.addColorStop(0, `rgba(${cold},${ga})`); air.addColorStop(0.5, `rgba(${warm},${ga})`); air.addColorStop(1, `rgba(${cold},${ga})`); }
+        else { air.addColorStop(0, `rgba(${warm},${ga})`); air.addColorStop(1, `rgba(${cold},${ga})`); }
+        ox.fillStyle = air; ox.fillRect(xa, yT, xb - xa, hgt);
+        // 地表（均匀）
+        const gr = ox.createLinearGradient(xa, 0, xb, 0);
+        if (sym) { gr.addColorStop(0, "#9CC4F0"); gr.addColorStop(0.5, "#E8955A"); gr.addColorStop(1, "#9CC4F0"); }
+        else { gr.addColorStop(0, "#E8955A"); gr.addColorStop(1, "#9CC4F0"); }
+        ox.fillStyle = gr; ox.fillRect(xa, yG, xb - xa, 16);
+        ox.strokeStyle = light ? "rgba(29,36,51,.35)" : "rgba(255,255,255,.35)"; ox.lineWidth = 1; ox.setLineDash([5, 5]);
+        ox.beginPath(); ox.moveTo(xa, yT); ox.lineTo(xb, yT); ox.stroke(); ox.setLineDash([]);
+
+        // 纬线刻度
+        ox.font = f(500, 12);
+        for (const s of sides) for (const la of [0, 30, 60, 90]) {
+          if (s < 0 && la === 0) continue;
+          const x = X(la, s);
+          if (gd && la > 0 && la < 90) { ox.strokeStyle = light ? "rgba(29,36,51,.12)" : "rgba(255,255,255,.1)"; ox.setLineDash([3, 5]); ox.beginPath(); ox.moveTo(x, yT); ox.lineTo(x, yG); ox.stroke(); ox.setLineDash([]); }
+          ox.fillStyle = light ? "#5E6878" : "#8A97AD";
+          ox.fillText(la === 0 ? "赤道 0°" : la === 90 ? (s > 0 ? "北极 90°N" : "南极 90°S") : `${la}°${s > 0 ? "N" : "S"}`, x, yG + 30);
+        }
+        if (lbl) { ox.fillStyle = light ? "#5E6878" : "#8A97AD"; ox.fillText("高空 ↑", sym ? W / 2 - hw + 26 : x0 + 26, yT - 12); }
+
+        // 太阳辐射：赤道多、极地少
+        for (const s of sides) for (const la of [0, 10, 20, 35, 50, 70]) {
+          if (s < 0 && la === 0) continue;
+          const k = Math.cos((la * Math.PI) / 180), x = X(la, s), y1 = yG - 4, y0 = y1 - 10 - 22 * k;
+          ox.strokeStyle = `rgba(242,181,68,${0.25 + 0.7 * k})`; ox.lineWidth = 1 + 1.6 * k;
+          ox.beginPath(); ox.moveTo(x, y0); ox.lineTo(x, y1); ox.moveTo(x - 4, y1 - 5); ox.lineTo(x, y1); ox.lineTo(x + 4, y1 - 5); ox.stroke();
+        }
+
+        // 主环流线 + 方向箭头
+        for (const s of sides) {
+          if (O.cf > 0.02) {
+            ox.strokeStyle = `rgba(239,100,97,${0.5 * O.cf})`; ox.setLineDash([4, 6]); ox.lineWidth = 1.5; ox.beginPath();
+            for (let i = 0; i <= 80; i++) { const [la, v] = oLoop((i / 80) * Math.PI * 2, 1, 90); i ? ox.lineTo(X(la, s), Y(v)) : ox.moveTo(X(la, s), Y(v)); }
+            ox.stroke(); ox.setLineDash([]);
+          }
+          ox.strokeStyle = O.cf > 0.5 ? "rgba(239,100,97,.7)" : light ? "rgba(19,154,142,.55)" : "rgba(46,196,182,.55)"; ox.lineWidth = 2; ox.beginPath();
+          for (let i = 0; i <= 80; i++) { const [la, v] = oLoop((i / 80) * Math.PI * 2, 1, L); i ? ox.lineTo(X(la, s), Y(v)) : ox.moveTo(X(la, s), Y(v)); }
+          ox.stroke();
+          for (const th of [0.15, Math.PI / 2, Math.PI + 0.15, (3 * Math.PI) / 2]) {
+            const [a1, b1] = oLoop(th, 1, L), [a2, b2] = oLoop(th + 0.06, 1, L), px = X(a2, s), py = Y(b2), an = Math.atan2(py - Y(b1), px - X(a1, s));
+            ox.fillStyle = ox.strokeStyle; ox.beginPath(); ox.moveTo(px + 9 * Math.cos(an), py + 9 * Math.sin(an));
+            ox.lineTo(px + 7 * Math.cos(an + 2.5), py + 7 * Math.sin(an + 2.5)); ox.lineTo(px + 7 * Math.cos(an - 2.5), py + 7 * Math.sin(an - 2.5)); ox.fill();
+          }
+        }
+
+        // 粒子沿环流流动
+        for (const p of O.P) {
+          if (!sym && p.side < 0) continue;
+          p.th = (p.th + dt * 0.55 * O.spd * (1.15 - p.r * 0.4)) % (Math.PI * 2);
+          const [la, v] = oLoop(p.th, p.r, L), k = oCl(la / 90, 0, 1);
+          ox.fillStyle = `rgba(${oMix(warm, cold, k)},.9)`;
+          ox.beginPath(); ox.arc(X(la, p.side), Y(v), 2.2, 0, Math.PI * 2); ox.fill();
+        }
+
+        // 地转偏向力：高空气流向右（南半球向左）偏，约 30° 偏成西风
+        if (O.cf > 0.02) {
+          ox.globalAlpha = O.cf;
+          for (const s of sides) {
+            const xs = X(8, s), ys = Y(0.88), xe = X(30, s), ye = Y(0.66);
+            ox.strokeStyle = "#F2B544"; ox.lineWidth = 2.5; ox.beginPath(); ox.moveTo(xs, ys);
+            ox.quadraticCurveTo(X(26, s), Y(0.94), xe, ye); ox.stroke();
+            const an = Math.atan2(ye - Y(0.94), xe - X(26, s));
+            ox.fillStyle = "#F2B544"; ox.beginPath(); ox.moveTo(xe + 10 * Math.cos(an), ye + 10 * Math.sin(an));
+            ox.lineTo(xe + 8 * Math.cos(an + 2.5), ye + 8 * Math.sin(an + 2.5)); ox.lineTo(xe + 8 * Math.cos(an - 2.5), ye + 8 * Math.sin(an - 2.5)); ox.fill();
+            if (lbl) txt(s > 0 ? "向右偏 → 约 30° 成西风" : "向左偏 → 约 30° 成西风", X(28, s), Y(0.97) - 4, 12, light ? "#8A5A00" : "#F2B544");
+            const xm = X(60, s), ym = Y(0.9);
+            ox.strokeStyle = "#EF6461"; ox.lineWidth = 3; ox.beginPath();
+            ox.moveTo(xm - 9, ym - 9); ox.lineTo(xm + 9, ym + 9); ox.moveTo(xm + 9, ym - 9); ox.lineTo(xm - 9, ym + 9); ox.stroke();
+          }
+          if (lbl) txt("单圈环流无法维持 → 下一章：三圈环流", sym ? W / 2 : X(60, 1), Y(0.5), mob ? 13 : 15, light ? "#B3302C" : "#EF6461");
+          ox.globalAlpha = 1;
+        }
+
+        // 标签
+        if (lbl) {
+          const z = mob ? 12 : 13, red = light ? "#C0442A" : "#FF8A5C", blue = light ? "#2F6FC0" : "#8CBFFF";
+          txt("赤道受热多 · 上升", X(0, 1), Y(0.5), z, red);
+          txt("近地面 低压 L", X(0, 1), yG - 46, z, red);
+          txt("高空 高压", X(0, 1), Y(0.97) + 16, z, red);
+          for (const s of sides) {
+            const xp = X(sym ? 84 : 86, s);
+            txt("极地冷 · 下沉", xp, Y(0.5), z, blue);
+            txt("近地面 高压 H", xp, yG - 46, z, blue);
+            txt("高空 低压", xp, Y(0.97) + 16, z, blue);
+            if (O.cf < 0.5) {
+              txt("高空：赤道 → 极地", X(45, s), Y(0.97) - 2, z, ink);
+              txt("近地面：极地 → 赤道", X(45, s), yG - 14, z, ink);
+            }
+          }
+        }
+      }
+      function oStart() {
+        if (O.run || cur !== 6 || document.hidden) return;
+        O.run = true; O.last = performance.now();
+        requestAnimationFrame(oFrame);
+      }
+      $("oSpd").oninput = (e) => { O.spd = +e.target.value; $("oSpdO").textContent = O.spd.toFixed(1) + "×"; };
+      $("oSym").onchange = (e) => { O.sym = e.target.checked; oUI(); };
+      $("oCor").onchange = (e) => { O.cor = e.target.checked; oUI(); };
+      $("oNext").onclick = () => go(7);
+      document.addEventListener("visibilitychange", () => (document.hidden ? (O.run = false) : oStart()));
+
+      /* ---------- 第 7 章：三圈环流（2D Canvas 经线剖面，考虑地球自转） ---------- */
+      const R7 = { run: false, step: 4, nh: false, wind: false, P: [], w: 0, h: 0, d: 1 };
+      const rc = document.createElement("canvas");
+      rc.style.visibility = "hidden";
+      rc.setAttribute("role", "img");
+      rc.setAttribute("aria-label", "三圈环流经线剖面：每个半球有低纬、中纬、高纬三个环流圈；赤道上升、30° 下沉、60° 上升、极地下沉，近地面形成赤道低气压带、副热带高气压带、副极地低气压带和极地高气压带");
+      $("stage").prepend(rc);
+      const rx = rc.getContext("2d");
+      // 三个环流圈：dir=1 在低纬一侧上升（低纬、高纬），dir=-1 在高纬一侧上升（中纬，间接环流）；pr = 未建成时可见的局部段
+      const RC = [
+        { a: 0, b: 30, dir: 1, n: "低纬环流", s: "低纬", c: ["#FF7A45", "#D2551F"], need: 2, ps: 1, pr: [5.5, 2.7] },
+        { a: 30, b: 60, dir: -1, n: "中纬环流（间接）", s: "中纬", c: ["#F2B544", "#A87200"], need: 4, ps: 9, pr: [0, 0] },
+        { a: 60, b: 90, dir: 1, n: "高纬环流", s: "高纬", c: ["#6EA8FF", "#2F6FC0"], need: 4, ps: 3, pr: [2.3, 2.9] },
+      ];
+      for (let i = 0; i < 540; i++) R7.P.push({ k: i % 3, s: (i >> 1) % 2 ? 1 : -1, th: Math.random() * Math.PI * 2, r: 0.3 + Math.sqrt(Math.random()) * 0.7 });
+      $("rPts").innerHTML = CH[6].p.slice(1).map((x) => `<li>${x}</li>`).join("") + "<li>近地面：赤道低气压带、副热带高气压带（30°）、副极地低气压带（60°）、极地高气压带。</li>";
+      function rSize() {
+        const r = $("stage").getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+        rc.width = Math.round(r.width * d); rc.height = Math.round(r.height * d);
+        Object.assign(R7, { w: r.width, h: r.height, d });
+      }
+      new ResizeObserver(rSize).observe($("stage"));
+      rSize();
+      const rLoop = (C, th, r) => { const c = (C.a + C.b) / 2, hw = (C.b - C.a) / 2; return [c - C.dir * hw * 0.84 * r * oSc(Math.cos(th)), 0.5 + 0.4 * r * oSc(Math.sin(th))]; };
+      const rVis = (C, th) => R7.step >= C.need || (R7.step >= C.ps && (th - C.pr[0] + Math.PI * 4) % (Math.PI * 2) < C.pr[1]);
+      function rUI() {
+        [...$("rSt").children].forEach((b, i) => { b.classList.toggle("on", i < R7.step); b.setAttribute("aria-pressed", i < R7.step); });
+        const e = $("cap7");
+        if (!e) return;
+        const T = [
+          "① 赤道受热，空气上升，高空流向极地；地转偏向力使气流偏转（北半球向右、南半球向左）。",
+          "② 约 30° 附近气流已偏转成西风，空气堆积下沉。低纬环流：赤道上升 → 高空流向 30° → 下沉 → 近地面流回赤道。",
+          "③ 极地冷却下沉，近地面流向 60°。",
+          "④ 60° 附近被抬升上升。中纬环流：30° 下沉的气流一部分流向高纬，在 60° 附近与极地冷空气相遇、被抬升。高纬环流：极地冷却下沉 → 近地面流向 60° → 上升 → 高空流回极地。",
+        ];
+        e.textContent = T[R7.step - 1] + (R7.wind ? " 近地面风向：信风（北半球东北信风、南半球东南信风）、盛行西风、极地东风。" : "");
+      }
+      function rFrame(t) {
+        if (!R7.run || !at(7)) { R7.run = false; return; }
+        requestAnimationFrame(rFrame);
+        const dt = Math.min(0.05, (t - R7.last) / 1000 || 0);
+        R7.last = t;
+        const lbl = $("optLbl").checked, gd = $("optGuide").checked, W = R7.w, H = R7.h, ov = $("ov"), mob = innerWidth < 768;
+        const light = document.documentElement.classList.contains("x-light"), L = light ? 1 : 0, st = R7.step;
+        const top = Math.min(H * 0.42, Math.max(16, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 36));
+        const yG = H - (mob ? 150 : 108), yT = top, hgt = yG - yT, nh = R7.nh, x0 = W * 0.05, span = W * 0.9;
+        const X = (la) => (nh ? x0 + (la / 90) * span : x0 + ((la + 90) / 180) * span);
+        const Y = (v) => yG - v * hgt;
+        const f = (w, z) => `${w} ${z}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`;
+        const ink = light ? "#1D2433" : "#E6ECF5", grey = light ? "#5E6878" : "#8A97AD", red = light ? "#C0442A" : "#FF8A5C", blue = light ? "#2F6FC0" : "#8CBFFF";
+        const txt = (s, x, y, z, c) => { rx.font = f(600, z); rx.lineWidth = 4; rx.strokeStyle = light ? "rgba(255,255,255,.85)" : "rgba(10,16,28,.8)"; rx.strokeText(s, x, y); rx.fillStyle = c; rx.fillText(s, x, y); };
+        const head = (x, y, an, z, c) => { rx.fillStyle = c; rx.beginPath(); rx.moveTo(x + z * Math.cos(an), y + z * Math.sin(an)); rx.lineTo(x + 0.8 * z * Math.cos(an + 2.5), y + 0.8 * z * Math.sin(an + 2.5)); rx.lineTo(x + 0.8 * z * Math.cos(an - 2.5), y + 0.8 * z * Math.sin(an - 2.5)); rx.fill(); };
+        const sides = nh ? [1] : [1, -1], short = span / (nh ? 3 : 6) < 110, xa = X(nh ? 0 : -90), xb = X(90);
+        rx.setTransform(R7.d, 0, 0, R7.d, 0, 0);
+        rx.clearRect(0, 0, W, H);
+        rx.textAlign = "center"; rx.textBaseline = "middle"; rx.lineJoin = "round"; rx.lineCap = "round";
+
+        // 大气层（赤道暖、极地冷）与地表
+        const air = rx.createLinearGradient(xa, 0, xb, 0), ga = light ? 0.14 : 0.2;
+        if (!nh) air.addColorStop(0, `rgba(110,170,255,${ga})`);
+        air.addColorStop(nh ? 0 : 0.5, `rgba(255,115,64,${ga})`); air.addColorStop(1, `rgba(110,170,255,${ga})`);
+        rx.fillStyle = air; rx.fillRect(xa, yT, xb - xa, hgt);
+        const gr = rx.createLinearGradient(xa, 0, xb, 0);
+        if (!nh) gr.addColorStop(0, "#9CC4F0");
+        gr.addColorStop(nh ? 0 : 0.5, "#E8955A"); gr.addColorStop(1, "#9CC4F0");
+        rx.fillStyle = gr; rx.fillRect(xa, yG, xb - xa, 12);
+        rx.strokeStyle = light ? "rgba(29,36,51,.35)" : "rgba(255,255,255,.35)"; rx.lineWidth = 1; rx.setLineDash([5, 5]);
+        rx.beginPath(); rx.moveTo(xa, yT); rx.lineTo(xb, yT); rx.stroke(); rx.setLineDash([]);
+
+        // 纬线刻度
+        rx.font = f(500, 12);
+        for (const la of nh ? [0, 30, 60, 90] : [-90, -60, -30, 0, 30, 60, 90]) {
+          const x = X(la), a = Math.abs(la);
+          if (gd && a > 0 && a < 90) { rx.strokeStyle = light ? "rgba(29,36,51,.12)" : "rgba(255,255,255,.1)"; rx.setLineDash([3, 5]); rx.beginPath(); rx.moveTo(x, yT); rx.lineTo(x, yG); rx.stroke(); rx.setLineDash([]); }
+          rx.fillStyle = grey;
+          rx.textAlign = a === 90 ? (la > 0 ? "right" : "left") : "center";
+          rx.fillText(a === 0 ? "赤道 0°" : a === 90 ? (la > 0 ? "北极 90°N" : "90°S 南极") : `${a}°${la > 0 ? "N" : "S"}`, x, yG + 24);
+        }
+        rx.textAlign = "center";
+
+        // 环流圈：轮廓、方向箭头
+        for (const s of sides) RC.forEach((C) => {
+          if (st < C.need) return;
+          const col = C.c[L]; rx.strokeStyle = col; rx.globalAlpha = 0.55; rx.lineWidth = 2; rx.beginPath();
+          for (let i = 0; i <= 80; i++) { const [la, v] = rLoop(C, (i / 80) * Math.PI * 2, 1); i ? rx.lineTo(X(s * la), Y(v)) : rx.moveTo(X(s * la), Y(v)); }
+          rx.stroke();
+          for (const th of [0.1, Math.PI / 2, Math.PI + 0.1, (3 * Math.PI) / 2]) {
+            const [a1, b1] = rLoop(C, th, 1), [a2, b2] = rLoop(C, th + 0.06, 1), px = X(s * a2), py = Y(b2);
+            head(px, py, Math.atan2(py - Y(b1), px - X(s * a1)), 9, col);
+          }
+          rx.globalAlpha = 1;
+        });
+
+        // 分步搭建的上升/下沉大箭头
+        const V = [[0, 1, 1], [30, -1, 2], [86, -1, 3], [60, 1, 4]];
+        for (const s of sides) for (const [la, up, k] of V) {
+          if (st < k || (la === 0 && s < 0)) continue;
+          const x = X(s * la), y1 = Y(up > 0 ? 0.28 : 0.72), y2 = Y(up > 0 ? 0.72 : 0.28);
+          rx.strokeStyle = light ? "rgba(29,36,51,.28)" : "rgba(255,255,255,.3)"; rx.lineWidth = 7; rx.beginPath(); rx.moveTo(x, y1); rx.lineTo(x, y2); rx.stroke();
+          head(x, y2, up > 0 ? -Math.PI / 2 : Math.PI / 2, 14, light ? "rgba(29,36,51,.4)" : "rgba(255,255,255,.45)");
+        }
+
+        // 粒子：三圈三种颜色
+        for (const p of R7.P) {
+          if (nh && p.s < 0) continue;
+          const C = RC[p.k];
+          p.th = (p.th + dt * 0.75 * (1.15 - p.r * 0.4)) % (Math.PI * 2);
+          if (!rVis(C, p.th)) continue;
+          const [la, v] = rLoop(C, p.th, p.r);
+          rx.fillStyle = C.c[L]; rx.beginPath(); rx.arc(X(p.s * la), Y(v), 2.2, 0, Math.PI * 2); rx.fill();
+        }
+
+        // 近地面气压带
+        const B = [[0, "赤道低气压带", "赤低", 0, 1], [30, "副热带高气压带", "副高", 1, 2], [90, "极地高气压带", "极高", 1, 3], [60, "副极地低气压带", "副低", 0, 4]];
+        for (const s of sides) for (const [la, nm, sn, hi, k] of B) {
+          if (st < k || (la === 0 && s < 0)) continue;
+          const x = X(s * (la === 90 ? 84 : la)), c = hi ? blue : red;
+          txt(hi ? "H" : "L", x, yG - 34, 18, c);
+          if (lbl) txt(short ? sn : nm, x, yG - 14, short ? 12 : 13, c);
+        }
+
+        // 环流圈名称
+        if (lbl) for (const s of sides) RC.forEach((C) => { if (st >= C.need) txt(short ? C.s : C.n, X((s * (C.a + C.b)) / 2), Y(0.5), mob ? 12 : 13, C.c[L]); });
+        if (lbl) txt("高空 ↑", xa + 26, yT - 12, 12, grey);
+
+        // 近地面风向（俯视示意：右 = 北、下 = 东），按“北右南左”偏转
+        if (R7.wind) {
+          const yc = yG + 62, Wd = [[28, 4, -1, "东北信风", 2], [33, 57, 1, "盛行西风", 4], [86, 64, -1, "极地东风", 4], [-28, -4, -1, "东南信风", 2], [-33, -57, 1, "盛行西风", 4], [-86, -64, -1, "极地东风", 4]];
+          rx.fillStyle = light ? "rgba(29,36,51,.05)" : "rgba(255,255,255,.05)"; rx.fillRect(xa, yG + 40, xb - xa, 44);
+          rx.textAlign = "left"; txt(mob ? "俯视 →北 ↓东" : "俯视示意：→ 北 · ↓ 东", xa + 4, yG + 46, 12, grey); rx.textAlign = "center";
+          for (const [a, b, e, nm, k] of Wd) {
+            if (st < k || (nh && a < 0)) continue;
+            const x1 = X(a), x2 = X(b), y1 = yc - 8 * e, y2 = yc + 8 * e, c = light ? "#0B6159" : "#2EC4B6";
+            rx.strokeStyle = c; rx.lineWidth = 2.5; rx.beginPath(); rx.moveTo(x1, y1); rx.quadraticCurveTo(x1 + (x2 - x1) * 0.6, y1, x2, y2); rx.stroke();
+            head(x2, y2, Math.atan2(y2 - y1, x2 - (x1 + (x2 - x1) * 0.6)), 9, c);
+            txt(nm, (x1 + x2) / 2, yc + 17, 12, ink);
+          }
+        }
+        if (st < 4 && lbl) txt(["按 ② 继续：30° 下沉", "按 ③ 继续：极地下沉", "按 ④ 继续：60° 上升"][st - 1], W / 2, yT + 18, mob ? 13 : 14, light ? "#8A5A00" : "#F2B544");
+      }
+      function rStart() {
+        if (R7.run || !at(7) || document.hidden) return;
+        R7.run = true; R7.last = performance.now();
+        requestAnimationFrame(rFrame);
+      }
+      [...$("rSt").children].forEach((b, i) => (b.onclick = () => { R7.step = i + 1; rUI(); }));
+      $("rNH").onchange = (e) => { R7.nh = e.target.checked; };
+      $("rWind").onchange = (e) => { R7.wind = e.target.checked; rUI(); };
+      document.addEventListener("visibilitychange", () => (document.hidden ? (R7.run = false) : rStart()));
+
+      /* ---------- 第 8 章：气压带与风带（2D Canvas 地球正面示意） ---------- */
+      const E8 = { run: false, cor: false, pt: true, sel: -1, P: [], w: 0, h: 0, d: 1, cx: 0, cy: 0, R: 1 };
+      const ec = document.createElement("canvas");
+      ec.style.visibility = "hidden";
+      ec.style.cursor = "pointer";
+      ec.setAttribute("role", "img");
+      ec.setAttribute("aria-label", "地球正面示意图：七个气压带（赤道低气压带，南北副热带高气压带、副极地低气压带、极地高气压带）与六个风带（东北信风、东南信风、北半球西南风、南半球西北风、东北和东南极地东风）。点击条带查看详情");
+      $("stage").prepend(ec);
+      const ex = ec.getContext("2d");
+      const RAIN = "热带雨林气候";
+      // 气压带：[纬度下限, 上限, 名称, 高压?, 位置, 成因, 性质, 对应气候]
+      const EB = [
+        [-5, 5, "赤道低气压带", 0, "赤道附近（约 5°S–5°N）", "热力原因：终年受热多，空气膨胀上升，近地面形成低压", "暖湿：上升气流多对流雨", RAIN + "（终年高温多雨）"],
+        [25, 35, "北半球副热带高气压带", 1, "约 30°N 附近", "动力原因：高空气流在 30° 附近堆积下沉", "干燥：下沉增温，少云少雨", "热带沙漠气候（受副高控制）；地中海气候夏季受其控制，炎热干燥"],
+        [-35, -25, "南半球副热带高气压带", 1, "约 30°S 附近", "动力原因：高空气流在 30° 附近堆积下沉", "干燥：下沉增温，少云少雨", "热带沙漠气候（如澳大利亚中西部）；地中海气候（南半球）夏季干热"],
+        [55, 65, "北半球副极地低气压带", 0, "约 60°N 附近", "动力原因：来自副高的暖气流与极地冷气流相遇，暖空气被抬升", "湿润：锋面活动频繁，多锋面雨", "与西风带共同影响，温带海洋性气候降水丰富"],
+        [-65, -55, "南半球副极地低气压带", 0, "约 60°S 附近", "动力原因：暖气流与极地冷气流相遇，暖空气被抬升", "湿润：多锋面雨（洋面上）", "南半球该纬度几乎全为海洋，终年多雨多大风"],
+        [80, 90, "北极地高气压带", 1, "北极附近（约 90°N）", "热力原因：终年寒冷，空气收缩下沉，近地面形成高压", "寒冷干燥", "极地气候（苔原、冰原）"],
+        [-90, -80, "南极地高气压带", 1, "南极附近（约 90°S）", "热力原因：终年寒冷，空气收缩下沉", "寒冷干燥", "极地气候（南极冰原）"],
+      ];
+      // 风带：[起纬, 止纬, 东西向(−1 西 / +1 东), 名称, 位置, 成因, 性质, 对应气候]
+      const EW = [
+        [27, 5, -1, "东北信风带", "0°–30°N", "副高吹向赤低的气流，北半球向右偏 → 东北风", "由较高纬吹向低纬，气温升高，较干燥", "热带沙漠气候（与副高共同作用）；热带草原气候的干季"],
+        [-27, -5, -1, "东南信风带", "0°–30°S", "副高吹向赤低的气流，南半球向左偏 → 东南风", "较干燥；大陆东岸迎风坡可形成多雨", "热带沙漠气候；大陆东岸迎风坡（如马达加斯加东部）可形成" + RAIN],
+        [33, 55, 1, "北半球盛行西风带", "30°N–60°N", "副高吹向副低的气流，北半球向右偏 → 西南风", "由低纬吹向高纬、多来自海洋，暖湿", "温带海洋性气候（大陆西岸）；地中海气候冬季温和多雨"],
+        [-33, -55, 1, "南半球盛行西风带", "30°S–60°S", "副高吹向副低的气流，南半球向左偏 → 西北风", "暖湿；南半球洋面广阔，风力强劲（“咆哮西风带”）", "温带海洋性气候（如新西兰、智利南部）"],
+        [87, 65, -1, "北半球极地东风带", "60°N–90°N", "极地高压吹向副极地低压的气流，向右偏 → 东北风", "寒冷干燥", "极地气候；与西风交汇于副极地低压带"],
+        [-87, -65, -1, "南半球极地东风带", "60°S–90°S", "极地高压吹向副极地低压的气流，向左偏 → 东南风", "寒冷干燥", "极地气候（南极大陆）"],
+      ];
+      const ALL = [...EB.map((b) => ({ n: b[2], k: b[3] ? "高压" : "低压", r: b.slice(4) })), ...EW.map((w) => ({ n: w[3], k: "风带", r: w.slice(4) }))];
+      for (let i = 0; i < 360; i++) E8.P.push({ k: i % 6, u: Math.random() * 1.7 - 0.85, t: Math.random() });
+      $("ePts").innerHTML = CH[7].p.slice(1).map((x) => `<li>${x}</li>`).join("") + "<li>北半球：东北信风、西南风（盛行西风）、东北风（极地东风）；南半球：东南信风、西北风、东南风。</li>";
+      function eSize() {
+        const r = $("stage").getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+        ec.width = Math.round(r.width * d); ec.height = Math.round(r.height * d);
+        Object.assign(E8, { w: r.width, h: r.height, d });
+      }
+      new ResizeObserver(eSize).observe($("stage"));
+      eSize();
+      const D2R = Math.PI / 180;
+      const eXY = (la, lo) => [E8.cx + E8.R * Math.cos(la * D2R) * Math.sin(lo * D2R), E8.cy - E8.R * Math.sin(la * D2R)];
+      // 风带弯曲路径：纬向偏转随路程加大（t²）
+      const ePath = (W, lo0, t) => eXY(Math.max(-89, Math.min(89, W[0] + (W[1] - W[0]) * t + (E8.s || 0))), lo0 + W[2] * 28 * t * t);
+      function eUI() {
+        const e = $("cap8");
+        if (e) e.textContent = E8.cor ? "西风带（45°N）受力分解：水平气压梯度力由副高指向副低（垂直于等压线）；地转偏向力垂直于风向、北半球向右；摩擦力与风向相反。三力合成，近地面实际风向与等压线斜交——吹西南风。" : "风从高压吹向低压，再按“北右南左”偏转。点击任一条带查看详情。";
+      }
+      function eHit(px, py) {
+        const v = (E8.cy - py) / E8.R;
+        if (Math.abs(v) > 1 || Math.abs(px - E8.cx) > E8.R * 1.6) return -1;
+        const la = Math.asin(v) / D2R, a = Math.abs(la), N = la >= 0;
+        if (a <= 5) return 0;
+        if (a >= 25 && a <= 35) return N ? 1 : 2;
+        if (a >= 55 && a <= 65) return N ? 3 : 4;
+        if (a >= 80) return N ? 5 : 6;
+        return 7 + (a < 25 ? 0 : a < 55 ? 2 : 4) + (N ? 0 : 1);
+      }
+      ec.addEventListener("pointerdown", (ev) => {
+        if (cur !== 8) return;
+        const r = ec.getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top, i = eHit(x, y), p = $("ePop");
+        E8.sel = i;
+        if (i < 0) { p.hidden = true; return; }
+        const A = ALL[i], L = ["位置", "成因", "性质", "对应气候"];
+        p.innerHTML = `<h3><span>${A.n} <small class="x-muted">${A.k}</small></span><button aria-label="关闭">×</button></h3><dl>${A.r.map((s, j) => `<dt>${L[j]}</dt><dd>${s}</dd>`).join("")}</dl>`;
+        p.querySelector("button").onclick = () => { p.hidden = true; E8.sel = -1; };
+        p.hidden = false;
+        const pw = p.offsetWidth, ph = p.offsetHeight;
+        p.style.left = Math.max(8, Math.min(E8.w - pw - 8, x + 14)) + "px";
+        p.style.top = Math.max(8, Math.min(E8.h - ph - 8, y - ph / 2)) + "px";
+      });
+      function eFrame(t) {
+        if (!E8.run || (cur !== 8 && cur !== 9)) { E8.run = false; return; }
+        requestAnimationFrame(eFrame);
+        const dt = Math.min(0.05, (t - E8.last) / 1000 || 0);
+        E8.last = t;
+        const lbl = $("optLbl").checked, gd = $("optGuide").checked, W = E8.w, H = E8.h, ov = $("ov"), mob = innerWidth < 768;
+        const light = document.documentElement.classList.contains("x-light");
+        const top = Math.min(H * 0.4, Math.max(16, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 20));
+        const bot = mob ? 70 : 24, R = Math.max(60, Math.min((H - top - bot) / 2, W / 2 - (mob ? 16 : 150)));
+        Object.assign(E8, { R, cx: W / 2, cy: top + (H - top - bot) / 2 });
+        const { cx, cy } = E8;
+        const f = (w, z) => `${w} ${z}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`;
+        const ink = light ? "#1D2433" : "#E6ECF5", grey = light ? "#5E6878" : "#8A97AD", red = light ? "#C0442A" : "#FF8A5C", blue = light ? "#2F6FC0" : "#8CBFFF", teal = light ? "#0B6159" : "#2EC4B6", gold = light ? "#8A5A00" : "#F2B544";
+        const txt = (s, x, y, z, c) => { ex.font = f(600, z); ex.lineWidth = 4; ex.strokeStyle = light ? "rgba(255,255,255,.85)" : "rgba(10,16,28,.8)"; ex.strokeText(s, x, y); ex.fillStyle = c; ex.fillText(s, x, y); };
+        const head = (x, y, an, z, c) => { ex.fillStyle = c; ex.beginPath(); ex.moveTo(x + z * Math.cos(an), y + z * Math.sin(an)); ex.lineTo(x + 0.8 * z * Math.cos(an + 2.5), y + 0.8 * z * Math.sin(an + 2.5)); ex.lineTo(x + 0.8 * z * Math.cos(an - 2.5), y + 0.8 * z * Math.sin(an - 2.5)); ex.fill(); };
+        const arrow = (x, y, vx, vy, c, s) => { ex.strokeStyle = c; ex.lineWidth = 3; ex.beginPath(); ex.moveTo(x, y); ex.lineTo(x + vx, y + vy); ex.stroke(); head(x + vx, y + vy, Math.atan2(vy, vx), 10, c); if (lbl) { ex.textAlign = vx < -1 ? "right" : "left"; txt(s, x + vx * 1.15 + (vx < -1 ? -4 : 4), y + vy * 1.15, 12, c); } };
+        ex.setTransform(E8.d, 0, 0, E8.d, 0, 0);
+        ex.clearRect(0, 0, W, H);
+        ex.lineJoin = "round"; ex.lineCap = "round"; ex.textBaseline = "middle";
+        // 地球圆面
+        const g = ex.createRadialGradient(cx - R * 0.3, cy - R * 0.3, R * 0.1, cx, cy, R);
+        g.addColorStop(0, light ? "#D6E6F5" : "#24406A"); g.addColorStop(1, light ? "#A9C4E0" : "#132440");
+        ex.fillStyle = g; ex.beginPath(); ex.arc(cx, cy, R, 0, Math.PI * 2); ex.fill();
+        ex.save(); ex.beginPath(); ex.arc(cx, cy, R, 0, Math.PI * 2); ex.clip();
+        // 气压带条带
+        EB.forEach((b, i) => {
+          const S = E8.s || 0, y1 = cy - R * Math.sin((b[1] === 90 ? 90 : Math.min(90, b[1] + S)) * D2R), y2 = cy - R * Math.sin((b[0] === -90 ? -90 : Math.max(-90, b[0] + S)) * D2R);
+          ex.fillStyle = b[3] ? (light ? "rgba(47,111,192,.45)" : "rgba(110,160,255,.42)") : (light ? "rgba(214,72,48,.42)" : "rgba(255,110,80,.42)");
+          ex.fillRect(cx - R, y1, 2 * R, y2 - y1);
+          if (E8.sel === i) { ex.strokeStyle = gold; ex.lineWidth = 2; ex.strokeRect(cx - R, y1, 2 * R, y2 - y1); }
+        });
+        if (E8.sel >= 7) { const w = EW[E8.sel - 7], s = Math.sign(w[0]), a = Math.abs(w[1]) === 5 ? 5 : Math.abs(w[1]) === 55 ? 35 : 65, b = a === 5 ? 25 : a === 35 ? 55 : 80, y1 = cy - R * Math.sin((s > 0 ? b : -a) * D2R), y2 = cy - R * Math.sin((s > 0 ? a : -b) * D2R); ex.fillStyle = light ? "rgba(201,138,18,.18)" : "rgba(242,181,68,.16)"; ex.fillRect(cx - R, y1, 2 * R, y2 - y1); }
+        // 经纬网
+        if (gd) {
+          ex.strokeStyle = light ? "rgba(29,36,51,.22)" : "rgba(255,255,255,.18)"; ex.lineWidth = 1;
+          for (let la = -60; la <= 60; la += 30) { const y = cy - R * Math.sin(la * D2R), hw = R * Math.cos(la * D2R); ex.setLineDash(la ? [3, 5] : []); ex.beginPath(); ex.moveTo(cx - hw, y); ex.lineTo(cx + hw, y); ex.stroke(); }
+          ex.setLineDash([3, 5]);
+          for (let lo = -60; lo <= 60; lo += 30) { ex.beginPath(); ex.ellipse(cx, cy, Math.abs(R * Math.sin(lo * D2R)) || 0.5, R, 0, 0, Math.PI * 2); ex.stroke(); }
+          ex.setLineDash([]);
+        }
+        // 弯箭头：先沿经线（高压→低压），再按“北右南左”偏转
+        EW.forEach((w) => {
+          for (const lo0 of [-50, -8, 34]) {
+            ex.strokeStyle = teal; ex.lineWidth = 2.5; ex.beginPath();
+            for (let i = 0; i <= 20; i++) { const [x, y] = ePath(w, lo0, i / 20); i ? ex.lineTo(x, y) : ex.moveTo(x, y); }
+            ex.stroke();
+            const [x1, y1] = ePath(w, lo0, 0.95), [x2, y2] = ePath(w, lo0, 1);
+            head(x2, y2, Math.atan2(y2 - y1, x2 - x1), 10, teal);
+          }
+        });
+        // 粒子流
+        if (E8.pt) {
+          ex.fillStyle = light ? "rgba(29,36,51,.75)" : "rgba(255,255,255,.85)";
+          for (const p of E8.P) {
+            p.t += dt * 0.28;
+            if (p.t > 1) { p.t = 0; p.u = Math.random() * 1.7 - 0.85; }
+            const [x, y] = ePath(EW[p.k], p.u * 75, p.t);
+            ex.globalAlpha = Math.min(1, p.t * 6, (1 - p.t) * 6); ex.beginPath(); ex.arc(x, y, 1.8, 0, Math.PI * 2); ex.fill();
+          }
+          ex.globalAlpha = 1;
+        }
+        ex.restore();
+        ex.strokeStyle = light ? "rgba(29,36,51,.4)" : "rgba(255,255,255,.35)"; ex.lineWidth = 1.5; ex.beginPath(); ex.arc(cx, cy, R, 0, Math.PI * 2); ex.stroke();
+        // 标签：右侧气压带，左侧风带与纬度
+        if (lbl) {
+          const sh = mob || W / 2 - R < 140;
+          EB.forEach((b) => {
+            const la = b[0] === 80 ? 84 : b[0] === -90 ? -84 : (b[0] + b[1]) / 2 + (E8.s || 0), [x, y] = eXY(la, 90), c = b[3] ? blue : red;
+            ex.textAlign = sh ? "center" : "left";
+            const nm = sh ? b[2].replace("北半球", "").replace("南半球", "").replace("北", "").replace("南", "").replace("气压带", "") : b[2];
+            txt((b[3] ? "H " : "L ") + nm, sh ? cx + (x - cx) * 0.55 : x + 8, y, 12, c);
+          });
+          EW.forEach((w) => {
+            const la = (w[0] + w[1]) / 2 + (E8.s || 0), [x, y] = eXY(la, -90), nm = { 1: "东北信风", 2: "东南信风", 3: "西南风", 4: "西北风", 5: "东北风", 6: "东南风" }[EW.indexOf(w) + 1];
+            ex.textAlign = sh ? "center" : "right";
+            txt(sh ? nm : `${w[3].replace("北半球", "").replace("南半球", "")}（${nm}）`, sh ? cx - R * Math.cos(la * D2R) * 0.5 : x - 8, y, 12, ink);
+          });
+          ex.textAlign = "center";
+          if (gd) for (const la of [-60, -30, 0, 30, 60]) { const [x, y] = eXY(la, 0); txt(la ? `${Math.abs(la)}°${la > 0 ? "N" : "S"}` : "0°", x, y - 7, 12, grey); }
+          txt("90°N", cx, cy - R - 10, 12, grey); txt("90°S", cx, cy + R + 10, 12, grey);
+        }
+        if (cur === 9) nDraw({ txt, head, light, ink, grey, red, blue, teal, gold, lbl, mob });
+        // 地转偏向力分解（北半球西风带 45°N）
+        if (E8.cor && cur === 8) {
+          const [px, py] = eXY(45, 0), s = R * 0.22, k = Math.SQRT1_2;
+          ex.fillStyle = light ? "rgba(255,255,255,.75)" : "rgba(10,16,28,.6)"; ex.beginPath(); ex.arc(px, py, s * 1.25, 0, Math.PI * 2); ex.fill();
+          arrow(px, py, 0, -s, red, "水平气压梯度力");
+          arrow(px, py, s * k * k * 1.0, s * k * k, blue, "地转偏向力");
+          arrow(px, py, -s * k * k, s * k * k, grey, "摩擦力");
+          arrow(px, py, s * k * 0.95, -s * k * 0.95, gold, "实际风向：西南风");
+          ex.fillStyle = ink; ex.beginPath(); ex.arc(px, py, 3, 0, Math.PI * 2); ex.fill();
+        }
+      }
+      function eStart() {
+        if (E8.run || (cur !== 8 && cur !== 9) || document.hidden) return;
+        E8.run = true; E8.last = performance.now();
+        requestAnimationFrame(eFrame);
+      }
+      $("eCor").onchange = (e) => { E8.cor = e.target.checked; eUI(); };
+      $("ePt").onchange = (e) => { E8.pt = e.target.checked; };
+      document.addEventListener("visibilitychange", () => (document.hidden ? (E8.run = false) : eStart()));
+
+      /* ---------- 第 9 章：季节移动（复用第 8 章示意图，整体平移） ---------- */
+      const N9 = { m: 7, s: 0, sun: 0, id: 0, left: 0 };
+      $("nPts").innerHTML = CH[8].p.map((x) => `<li>${x}</li>`).join("") + "<li>南亚西南季风：7 月前后，南半球东南信风随气压带风带北移越过赤道，向右偏转成西南季风（海陆热力性质差异 + 气压带、风带的季节移动）。</li>";
+      const nLat = (v) => (Math.abs(v) < 0.05 ? "0°" : `${Math.abs(v).toFixed(1)}°${v > 0 ? "N" : "S"}`);
+      const nMed = () => (38 >= 25 + N9.s && 38 <= 35 + N9.s ? 1 : 0); // 1 = 副高控制
+      const nSav = () => (10 <= 5 + N9.s ? 1 : 0); // 1 = 赤道低压控制
+      function nSet(m) {
+        N9.m = m;
+        const day = (m - 1) * 30.4 + 15;
+        N9.sun = 23.44 * Math.sin((2 * Math.PI * (day - 80)) / 365);
+        N9.s = N9.sun * 0.35;
+        if (cur === 9) E8.s = N9.s;
+        const mi = ((Math.round(m) - 1) % 12) + 1;
+        $("nM").value = mi;
+        $("nMO").textContent = mi + " 月";
+        $("nSun").textContent = nLat(N9.sun);
+        $("nSh").textContent = (N9.s >= 0 ? "北移 " : "南移 ") + Math.abs(N9.s).toFixed(1) + "°";
+        [...$("nQ").children].forEach((b, i) => b.classList.toggle("on", mi === (i ? 1 : 7)));
+        $("nMed").textContent = nMed() ? "副高 · 炎热干燥" : "西风带 · 温和多雨";
+        $("nSav").textContent = nSav() ? "赤道低压 · 湿季" : "信风带 · 干季";
+        const c = $("cap9");
+        if (!c) return;
+        const sa = $("nSA").checked ? (N9.s > 3 ? "南亚：东南信风越过赤道后向右偏转，成为西南季风。" : "南亚风向：拖到 7 月前后，可见东南信风越过赤道右偏成西南季风。") : "";
+        c.textContent = `${mi} 月：直射点 ${nLat(N9.sun)}，气压带风带${N9.s >= 0 ? "北" : "南"}移约 ${Math.abs(N9.s).toFixed(1)}°，幅度小于直射点。地中海气候区${nMed() ? "受副热带高气压带控制，炎热干燥" : "受西风带控制，温和多雨"}；热带草原${nSav() ? "受赤道低气压带控制，为湿季" : "受信风带控制，为干季"}。${sa}`;
+      }
+      function nPlay(on) {
+        clearInterval(N9.id);
+        N9.id = 0;
+        $("nPlay").textContent = on ? "❚❚ 暂停" : "▶ 播放一年";
+        $("nPlay").classList.toggle("on", !!on);
+        if (!on) return;
+        N9.left = 12;
+        N9.id = setInterval(() => {
+          let m = N9.m + 0.05;
+          if (m >= 13) m -= 12;
+          N9.left -= 0.05;
+          nSet(m);
+          if (N9.left <= 0) { nSet(Math.round(m) || 12); nPlay(false); }
+        }, 50);
+      }
+      $("nM").oninput = (e) => { nPlay(false); nSet(+e.target.value); };
+      [...$("nQ").children].forEach((b, i) => (b.onclick = () => { nPlay(false); nSet(i ? 1 : 7); }));
+      $("nPlay").onclick = () => nPlay(!N9.id);
+      $("nSA").onchange = () => nSet(N9.m);
+      nSet(7);
+      function nDraw(o) {
+        const { cx, cy, R, w: W, h: H } = E8, S = N9.s, D = D2R;
+        const poly = (a1, a2, l1, l2) => { ex.beginPath(); for (let l = l1; l <= l2; l += 2) { const [x, y] = eXY(a2, l); l === l1 ? ex.moveTo(x, y) : ex.lineTo(x, y); } for (let l = l2; l >= l1; l -= 2) { const [x, y] = eXY(a1, l); ex.lineTo(x, y); } ex.closePath(); };
+        const dry = o.light ? "rgba(201,138,18,.55)" : "rgba(242,181,68,.5)", wet = o.light ? "rgba(19,154,142,.55)" : "rgba(46,196,182,.5)";
+        // 太阳直射纬线
+        const ys = cy - R * Math.sin(N9.sun * D), hw = R * Math.cos(N9.sun * D);
+        ex.strokeStyle = o.gold; ex.lineWidth = 1.5; ex.setLineDash([6, 4]);
+        ex.beginPath(); ex.moveTo(cx - hw, ys); ex.lineTo(cx + hw, ys); ex.stroke(); ex.setLineDash([]);
+        ex.textAlign = "center";
+        if (o.lbl) o.txt("☀ 直射点 " + nLat(N9.sun), cx + hw * 0.35, ys - 9, 12, o.gold);
+        // 两类典型区域（固定在地表，不随气压带移动）
+        [[30, 40, -75, -55, nMed() ? dry : wet, "地中海气候区", nMed() ? "夏·副高·干热" : "冬·西风·多雨"], [5, 15, -40, -16, nSav() ? wet : dry, "热带草原", nSav() ? "赤低·湿季" : "信风·干季"]].forEach((r) => {
+          poly(r[0], r[1], r[2], r[3]);
+          ex.fillStyle = r[4]; ex.fill();
+          ex.strokeStyle = o.gold; ex.lineWidth = 2; ex.stroke();
+          if (o.lbl) { const [x, y] = eXY((r[0] + r[1]) / 2, r[3]); ex.textAlign = "left"; o.txt(`${r[5]}：${r[6]}`, x + 6, y, 12, o.ink); }
+        });
+        // 南亚风向：东南信风越过赤道右偏成西南季风
+        if ($("nSA").checked && S > 3) {
+          const pt = (t) => { const la = -14 + 30 * t; return eXY(la, 52 + (la > 0 ? 26 * (la / 16) ** 2 : -6 * (la / 14))); };
+          ex.strokeStyle = o.gold; ex.lineWidth = 3.5; ex.beginPath();
+          for (let i = 0; i <= 30; i++) { const [x, y] = pt(i / 30); i ? ex.lineTo(x, y) : ex.moveTo(x, y); }
+          ex.stroke();
+          const [x1, y1] = pt(0.96), [x2, y2] = pt(1);
+          o.head(x2, y2, Math.atan2(y2 - y1, x2 - x1), 13, o.gold);
+          if (o.lbl) { const [a, b] = pt(0), [c, d] = pt(1); ex.textAlign = "center"; o.txt("东南信风", a, b + 12, 12, o.gold); o.txt("西南季风（南亚）", c - 10, d - 14, 12, o.gold); }
+        }
+        // 左下角：直射点小标尺 + 38°N 实时判断
+        const bw = 236, bh = 100, bx = 12, by = H - (o.mob ? 70 : 24) - bh;
+        ex.fillStyle = o.light ? "rgba(255,255,255,.88)" : "rgba(21,30,48,.85)";
+        ex.strokeStyle = o.light ? "rgba(29,36,51,.15)" : "rgba(255,255,255,.08)"; ex.lineWidth = 1;
+        ex.beginPath(); ex.roundRect ? ex.roundRect(bx, by, bw, bh, 10) : ex.rect(bx, by, bw, bh); ex.fill(); ex.stroke();
+        const rx = bx + 16, r1 = by + 14, r2 = by + bh - 14, ry = (v) => r1 + ((23.44 - v) / 46.88) * (r2 - r1);
+        ex.strokeStyle = o.grey; ex.beginPath(); ex.moveTo(rx, r1); ex.lineTo(rx, r2); ex.stroke();
+        ex.font = '400 12px ui-monospace,Menlo,monospace'; ex.textAlign = "left"; ex.fillStyle = o.grey;
+        [[23.44, "23.5°N"], [0, "0°"], [-23.44, "23.5°S"]].forEach(([v, s]) => { ex.beginPath(); ex.moveTo(rx - 4, ry(v)); ex.lineTo(rx + 4, ry(v)); ex.stroke(); ex.fillText(s, rx + 8, ry(v)); });
+        ex.fillStyle = o.gold; ex.beginPath(); ex.arc(rx, ry(N9.sun), 5, 0, Math.PI * 2); ex.fill();
+        const tx = bx + 82;
+        ex.font = '600 12px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif'; ex.fillStyle = o.ink;
+        ex.fillText(`${((Math.round(N9.m) - 1) % 12) + 1} 月 · 直射 ${nLat(N9.sun)}`, tx, by + 22);
+        ex.fillText("38°N 大陆西岸：", tx, by + 46);
+        ex.fillStyle = nMed() ? o.gold : o.teal;
+        ex.fillText(nMed() ? "副高控制 → 炎热干燥" : "西风带控制 → 温和多雨", tx, by + 66);
+        ex.fillStyle = o.grey;
+        ex.fillText(`带移 ${nLat(S)}（< 直射点）`, tx, by + 86);
+      }
+
+      /* ---------- 第 10 章：海陆分布与季风（2D Canvas 亚洲—太平洋—印度洋示意图） ---------- */
+      const M10 = { m: 1, run: false, w: 0, h: 0, d: 1, P: [], last: 0 };
+      const mc = document.createElement("canvas");
+      mc.style.visibility = "hidden";
+      mc.setAttribute("role", "img");
+      mc.setAttribute("aria-label", "亚洲—太平洋—印度洋示意图：1 月亚洲高压与阿留申低压，东亚西北季风、南亚东北季风；7 月亚洲低压与夏威夷高压，东亚东南季风、南亚西南季风");
+      $("stage").prepend(mc);
+      const mx = mc.getContext("2d");
+      // 简化轮廓 [经度, 纬度]
+      const LAND = [
+        [[40, 70], [100, 76], [140, 72], [180, 69], [178, 62], [160, 60], [156, 51], [142, 47], [135, 43], [129, 37], [126, 34], [121, 31], [120, 26], [116, 22], [110, 20], [108, 15], [109, 11], [105, 9], [103, 2], [100, 8], [98, 15], [94, 17], [91, 22], [87, 21], [80, 15], [78, 8], [73, 17], [72, 22], [66, 25], [57, 25], [58, 22], [52, 16], [45, 13], [43, 13], [38, 22], [34, 30], [30, 40], [30, 70]],
+        [[30, 31], [34, 30], [38, 22], [43, 12], [51, 12], [49, 6], [44, 0], [40, -5], [40, -15], [36, -24], [33, -30], [30, -33], [20, -33], [20, 31]],
+        [[114, -22], [122, -18], [129, -15], [133, -12], [137, -12], [141, -11], [143, -14], [146, -19], [150, -23], [153, -28], [150, -37], [144, -38], [138, -35], [131, -31], [124, -33], [115, -34], [114, -26]],
+        [[109, 1], [113, -3], [117, -4], [119, 1], [117, 7], [113, 3]],
+        [[95, 5], [98, 4], [106, -6], [104, -5]],
+        [[130, 31], [135, 34], [140, 36], [142, 40], [141, 45], [139, 42], [135, 35], [131, 34]],
+        [[192, 66], [200, 59], [210, 60], [210, 72], [195, 71]],
+      ];
+      // 季风路径（二次贝塞尔：起点、控制点、终点）
+      const MW = {
+        w: [{ n: "西北季风", P: [[112, 47], [118, 36], [127, 23]] }, { n: "东北季风", P: [[96, 27], [86, 18], [72, 6]] }],
+        s: [{ n: "东南季风", P: [[142, 17], [126, 24], [112, 38]] }, { n: "西南季风", P: [[80, -20], [50, 3], [84, 22]] }],
+      };
+      for (let i = 0; i < 260; i++) M10.P.push({ k: i % 2, t: Math.random(), u: Math.random() * 2 - 1 });
+      $("mPts").innerHTML = CH[9].p.slice(1, 5).map((x) => `<li>${x}</li>`).join("");
+      function mSize() {
+        const r = $("stage").getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+        mc.width = Math.round(r.width * d); mc.height = Math.round(r.height * d);
+        Object.assign(M10, { w: r.width, h: r.height, d });
+      }
+      new ResizeObserver(mSize).observe($("stage"));
+      mSize();
+      const mW = () => Math.cos((2 * Math.PI * (M10.m - 1)) / 12); // >0 冬季型，<0 夏季型
+      function mSet(m) {
+        M10.m = m;
+        $("mM").value = m; $("mMO").textContent = m + " 月";
+        const w = mW(), win = w > 0.2, sum = w < -0.2;
+        [...$("mQ").children].forEach((b, i) => b.classList.toggle("on", (i === 0 && m === 1) || (i === 1 && m === 7)));
+        $("mEA").textContent = win ? "西北季风" : sum ? "东南季风" : "转换中";
+        $("mSA").textContent = win ? "东北季风" : sum ? "西南季风" : "转换中";
+        const c = $("cap10");
+        if (c) c.textContent = win ? `${m} 月（冬季型）：${CH[9].p[1]}${CH[9].p[2]}` : sum ? `${m} 月（夏季型）：${CH[9].p[3]}${CH[9].p[4]}` : `${m} 月：过渡季节，海陆温差小，高低压中心减弱，季风正在转换。`;
+      }
+      [...$("mQ").children].forEach((b, i) => (b.onclick = () => mSet(i ? 7 : 1)));
+      $("mM").oninput = (e) => mSet(+e.target.value);
+      function mStart() {
+        if (M10.run || !at(10) || document.hidden) return;
+        M10.run = true; M10.last = performance.now();
+        requestAnimationFrame(mFrame);
+      }
+      document.addEventListener("visibilitychange", () => (document.hidden ? (M10.run = false) : mStart()));
+      function mFrame(t) {
+        if (!M10.run || !at(10)) { M10.run = false; return; }
+        requestAnimationFrame(mFrame);
+        const dt = Math.min(0.05, (t - M10.last) / 1000 || 0);
+        M10.last = t;
+        const W = M10.w, H = M10.h, ov = $("ov"), mob = innerWidth < 768, lbl = $("optLbl").checked, gd = $("optGuide").checked;
+        const light = document.documentElement.classList.contains("x-light");
+        const top = Math.min(H * 0.42, Math.max(12, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 12)), bot = mob ? 64 : 16;
+        const s = Math.max(1, Math.min((W - 24) / 170, (H - top - bot) / 112)), ox = (W - 170 * s) / 2, oy = top + (H - top - bot - 112 * s) / 2;
+        const X = (lo) => ox + (lo - 35) * s, Y = (la) => oy + (72 - la) * s, XY = (p) => [X(p[0]), Y(p[1])];
+        const ink = light ? "#1D2433" : "#E6ECF5", grey = light ? "#5E6878" : "#8A97AD", red = light ? "#C0442A" : "#FF8A5C", blue = light ? "#2F6FC0" : "#8CBFFF", teal = light ? "#0B6159" : "#2EC4B6", gold = light ? "#8A5A00" : "#F2B544";
+        const txt = (str, x, y, z, c, wt = 600) => { mx.font = `${wt} ${z}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`; mx.lineWidth = 4; mx.strokeStyle = light ? "rgba(255,255,255,.85)" : "rgba(10,16,28,.8)"; mx.strokeText(str, x, y); mx.fillStyle = c; mx.fillText(str, x, y); };
+        const w = mW(), a = Math.abs(w), set = w >= 0 ? MW.w : MW.s, win = w >= 0;
+        mx.setTransform(M10.d, 0, 0, M10.d, 0, 0);
+        mx.clearRect(0, 0, W, H);
+        mx.lineJoin = "round"; mx.lineCap = "round"; mx.textBaseline = "middle"; mx.textAlign = "center";
+        mx.save(); mx.beginPath(); mx.rect(X(35), Y(72), 170 * s, 112 * s); mx.clip();
+        // 海洋：冬暖夏凉
+        mx.fillStyle = light ? "#C9DDEF" : "#16304F"; mx.fillRect(X(35), Y(72), 170 * s, 112 * s);
+        // 陆地：冬冷（偏蓝）夏热（偏橙），强度随月份
+        const lc = win ? [140, 170, 205] : [214, 140, 80], base = light ? [226, 214, 186] : [70, 78, 70];
+        const mixc = base.map((v, i) => Math.round(v + (lc[i] - v) * a * 0.75));
+        mx.fillStyle = `rgb(${mixc.join(",")})`; mx.strokeStyle = light ? "rgba(29,36,51,.35)" : "rgba(230,236,245,.3)"; mx.lineWidth = 1;
+        LAND.forEach((poly) => { mx.beginPath(); poly.forEach((p, i) => (i ? mx.lineTo(...XY(p)) : mx.moveTo(...XY(p)))); mx.closePath(); mx.fill(); mx.stroke(); });
+        // 经纬辅助线与赤道
+        if (gd) {
+          mx.setLineDash([3, 5]); mx.strokeStyle = grey; mx.lineWidth = 1;
+          [0, 30, 60].forEach((la) => { mx.globalAlpha = la ? 0.35 : 0.8; mx.beginPath(); mx.moveTo(X(35), Y(la)); mx.lineTo(X(205), Y(la)); mx.stroke(); });
+          mx.globalAlpha = 1; mx.setLineDash([]);
+          if (lbl) { mx.textAlign = "left"; txt("赤道 0°", X(36), Y(0) - 9, 12, grey, 500); txt("30°N", X(36), Y(30) - 9, 12, grey, 500); txt("60°N", X(36), Y(60) - 9, 12, grey, 500); mx.textAlign = "center"; }
+        }
+        // 高低压中心与等压线
+        const C = win
+          ? [{ p: [100, 49], H: 1, n: "亚洲高压", sub: "蒙古—西伯利亚高压", r: 1.25 }, { p: [184, 52], H: 0, n: "阿留申低压", r: 0.9 }]
+          : [{ p: [74, 29], H: 0, n: "亚洲低压", sub: "印度低压", r: 1.15 }, { p: [196, 32], H: 1, n: "夏威夷高压", r: 0.95 }];
+        C.forEach((c) => {
+          const [cx, cy] = XY(c.p), col = c.H ? blue : red;
+          if (gd) {
+            mx.strokeStyle = col; mx.lineWidth = 1.2;
+            for (let k = 1; k <= 3; k++) { mx.globalAlpha = (0.25 + 0.6 * a) * (1 - k * 0.2); mx.beginPath(); mx.ellipse(cx, cy, k * 10 * s * c.r, k * 6 * s * c.r, 0, 0, Math.PI * 2); mx.stroke(); }
+            mx.globalAlpha = 1;
+          }
+          mx.globalAlpha = 0.35 + 0.65 * a;
+          mx.fillStyle = col; mx.beginPath(); mx.arc(cx, cy, 15, 0, Math.PI * 2); mx.fill();
+          mx.fillStyle = light ? "#fff" : "#0E1420"; mx.font = "700 16px -apple-system,sans-serif"; mx.fillText(c.H ? "H" : "L", cx, cy + 1);
+          mx.globalAlpha = 1;
+          if (lbl) { txt(c.n, cx, cy + 26, 13, col); if (c.sub) txt(c.sub, cx, cy + 42, 12, grey, 500); }
+        });
+        // 地名
+        if (lbl) {
+          txt("亚欧大陆", X(80), Y(62), 14, ink); txt("中国", X(106), Y(34), 14, ink); txt("南亚", X(79), Y(20), 13, ink);
+          txt("澳大利亚", X(134), Y(-25), 13, ink); txt("太平洋", X(168), Y(10), 15, teal); txt("印度洋", X(80), Y(-30), 15, teal);
+        }
+        // 季风大箭头 + 粒子流
+        const bz = (P, t) => { const [p0, p1, p2] = P.map(XY), u = 1 - t; return [u * u * p0[0] + 2 * u * t * p1[0] + t * t * p2[0], u * u * p0[1] + 2 * u * t * p1[1] + t * t * p2[1]]; };
+        set.forEach((m, i) => {
+          const col = i ? gold : teal, [p0, p1, p2] = m.P.map(XY);
+          mx.globalAlpha = 0.25 + 0.75 * a; mx.strokeStyle = col; mx.lineWidth = Math.max(5, s * 1.4);
+          mx.beginPath(); mx.moveTo(...p0); mx.quadraticCurveTo(...p1, ...p2); mx.stroke();
+          const an = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]), z = Math.max(16, s * 4);
+          mx.fillStyle = col; mx.beginPath(); mx.moveTo(p2[0] + z * Math.cos(an), p2[1] + z * Math.sin(an));
+          mx.lineTo(p2[0] + z * 0.8 * Math.cos(an + 2.4), p2[1] + z * 0.8 * Math.sin(an + 2.4)); mx.lineTo(p2[0] + z * 0.8 * Math.cos(an - 2.4), p2[1] + z * 0.8 * Math.sin(an - 2.4)); mx.fill();
+          mx.globalAlpha = 1;
+          if (lbl) { const [lx, ly] = bz(m.P, 0.5); txt(m.n, lx + (i ? -36 : 40), ly, 14, col); }
+        });
+        if (lbl && !win) {
+          const [ax, ay] = bz(MW.s[1].P, 0.08), [bx, by] = bz(MW.s[1].P, 0.45);
+          txt("南半球东南信风", ax + 14, ay + 16, 12, gold, 500); txt("越赤道右偏", bx - 44, by + 2, 12, gold, 500);
+          txt("气压带风带季节移动成因", X(66), Y(-8), 12, gold);
+        }
+        mx.fillStyle = ink;
+        M10.P.forEach((q) => {
+          q.t += dt * 0.22 * (0.3 + a);
+          if (q.t > 1) { q.t = 0; q.u = Math.random() * 2 - 1; }
+          const P = set[q.k].P, [x, y] = bz(P, q.t), [x2, y2] = bz(P, Math.min(1, q.t + 0.01)), L = Math.hypot(x2 - x, y2 - y) || 1;
+          mx.globalAlpha = a * Math.sin(Math.PI * q.t) * 0.9;
+          mx.beginPath(); mx.arc(x - ((y2 - y) / L) * q.u * 4 * s, y + ((x2 - x) / L) * q.u * 4 * s, 1.8, 0, Math.PI * 2); mx.fill();
+        });
+        mx.globalAlpha = 1; mx.restore();
+      }
+
+      /* ---------- 第 11 章：随堂检测（复用各章示意图：作答前摆好场景，作答后演示答案） ---------- */
+      const BOOK11 = "教材：湘教版 必修第一册·第三章 与 选择性必修1·第三章 综合";
+      const QC = { 2: tc, 3: uc, 4: sc, 5: vc, 7: rc, 10: mc }, QST = { 2: tStart, 3: uStart, 4: sStart, 5: vStart, 7: rStart, 10: mStart };
+      const uFacSync = (on, f) => { U.fac = on; U.S = []; const b = $("uFac"); b.textContent = on ? "移除污染工厂" : "放置污染工厂"; b.classList.toggle("on", on); $("uFx").disabled = !on; uSetF(f); };
+      const QS = [
+        { k: 2, n: "热力环流", s: "读热力环流示意图（A 地近地面受热，B 地冷却）。下列说法正确的是",
+          o: ["A 地近地面形成高压", "A 地高空形成高压", "近地面空气由 A 地流向 B 地", "B 地盛行上升气流"], a: 1,
+          e: "A 地受热，空气膨胀上升，近地面形成低压、高空形成高压；B 地冷却下沉，近地面为高压，近地面风由 B 吹向 A。舞台已演示完整四步。",
+          pre: () => { T.auto = false; T.swap = false; tSet(1); }, post: () => tSet(4) },
+        { k: 3, n: "城市热岛", s: "某城市拟新建一座大气污染较重的工厂，图为该城市热岛环流。工厂最合理的布局是",
+          o: ["紧邻市区边缘，便于招工", "郊区热岛环流下沉区附近", "城市热岛环流下沉距离之外", "市区上升气流处，利于污染物扩散"], a: 2,
+          e: "近地面风由郊区吹向市区，工厂若在环流之内（含下沉区），污染物会随近地面风流回市区，应布局在热岛环流下沉距离之外；下沉区附近宜布置绿化带。舞台已把工厂放到环流之外。",
+          pre: () => uFacSync(false, 0.25), post: () => uFacSync(true, 0.45) },
+        { k: 4, n: "海陆风", s: "图为某海滨地区午后的海陆风。下列叙述正确的是",
+          o: ["午后近地面风由陆地吹向海洋", "夜晚陆地气压低于海洋", "渔民清晨出海，可借助陆风", "海风使滨海地区白天气温升高"], a: 2,
+          e: "陆地比热容小，夜晚降温快、气压高于海洋，吹陆风，清晨陆风仍盛，渔民借陆风出海；白天吹海风，滨海地区白天较凉爽。舞台已切到清晨 6:00。",
+          pre: () => sGo(14), post: () => sGo(6) },
+        { k: 5, n: "山谷风", s: "图为某山谷白天的山谷风。该山谷“多夜雨”的主要原因是",
+          o: ["夜晚吹谷风，谷底空气沿坡上升", "夜晚山坡冷空气下滑，谷底暖湿空气被抬升成云致雨", "白天谷底增温快，对流旺盛", "夜晚谷底形成逆温，对流加强"], a: 1,
+          e: "夜晚山坡降温快，冷空气沿坡下滑（山风）流入谷底，迫使谷底暖湿空气上升、冷却凝结成云致雨；冷空气堆积还形成逆温，对流反而减弱。舞台已切到夜晚 2:00。",
+          pre: () => { $("vFog").checked = true; vGo(14); }, post: () => vGo(2) },
+        { k: 7, n: "三圈环流", s: "图为三圈环流的形成过程。近地面副热带高气压带的成因是",
+          o: ["热力原因：近地面冷却，空气收缩下沉", "动力原因：高空气流偏转成西风，在 30° 附近堆积下沉", "热力原因：近地面受热，空气膨胀上升", "动力原因：冷暖气流相遇，暖空气被抬升"], a: 1,
+          e: "赤道上空流向极地的气流受地转偏向力影响，在约 30° 附近偏转成西风，空气堆积下沉，形成副热带高压，属动力成因；赤道低压、极地高压为热力成因。舞台已演示 30° 下沉。",
+          pre: () => { R7.step = 1; rUI(); }, post: () => { R7.step = 2; rUI(); } },
+        { k: 10, n: "季风", s: "图为亚洲 1 月季风示意。南亚 7 月盛行西南季风，其主要成因是",
+          o: ["海陆热力性质差异，亚洲高压增强", "气压带、风带季节移动，南半球东南信风北移越过赤道后右偏", "副热带高气压带南移，西风带控制南亚", "青藏高原阻挡冷空气南下"], a: 1,
+          e: "7 月气压带风带北移，南半球东南信风越过赤道，受地转偏向力向右偏成西南季风；东亚季风则主要由海陆热力性质差异形成。舞台已切到 7 月。",
+          pre: () => mSet(1), post: () => mSet(7) },
+      ];
+      const Q11 = { i: 0, pick: [] };
+      const qScore = () => Q11.pick.filter((p, i) => p === QS[i].a).length;
+      function qShow() {
+        const q = QS[Q11.i], done = Q11.pick[Q11.i] != null;
+        QZ = q.k;
+        Object.entries(QC).forEach(([k, c]) => (c.style.visibility = +k === q.k ? "visible" : "hidden"));
+        $("soon").style.display = "none";
+        $("ov").hidden = false;
+        $("ovB").textContent = BOOK11;
+        $("ovT").textContent = `随堂检测 · ${Q11.i + 1} / ${QS.length}`;
+        $("ovP").innerHTML = `<p>${q.s}（ ）</p><div class="x-qo">${q.o.map((t, j) => `<button data-j="${j}">${"ABCD"[j]}. ${t}</button>`).join("")}</div><p id="qFb" aria-live="polite"></p><button class="x-btn" id="qNx">${Q11.i < QS.length - 1 ? "下一题 →" : "查看得分"}</button>`;
+        $("ovP").querySelectorAll(".x-qo button").forEach((b) => (b.onclick = () => qPick(+b.dataset.j)));
+        $("qNx").onclick = () => { Q11.i++; Q11.i < QS.length ? qShow() : qEnd(); };
+        done ? q.post() : q.pre();
+        QST[q.k]();
+        qUI();
+        $("ov").scrollTop = 0;
+      }
+      function qPick(j) {
+        if (Q11.pick[Q11.i] != null) return;
+        Q11.pick[Q11.i] = j;
+        QS[Q11.i].post();
+        qUI();
+      }
+      function qUI() {
+        const q = QS[Q11.i], p = Q11.pick[Q11.i], done = p != null, ok = p === q.a;
+        $("ovP").querySelectorAll(".x-qo button").forEach((b, j) => {
+          b.disabled = done;
+          b.classList.toggle("ok", done && j === q.a);
+          b.classList.toggle("no", done && j === p && !ok);
+        });
+        $("qFb").hidden = !done;
+        $("qFb").innerHTML = done ? `<b class="${ok ? "ok" : "no"}">${ok ? "✓ 回答正确。" : `✗ 回答错误，正确答案是 ${"ABCD"[q.a]}。`}</b>${q.e}` : "";
+        $("qNx").hidden = !done;
+        $("qSc").textContent = `${qScore()} / ${Q11.pick.filter((x) => x != null).length}`;
+      }
+      function qEnd() {
+        QZ = 0;
+        Object.values(QC).forEach((c) => (c.style.visibility = "hidden"));
+        $("ov").hidden = true;
+        const sc = qScore();
+        $("soon").style.display = "block";
+        $("soon").innerHTML = `<div><p class="x-book">${BOOK11}</p><p class="x-count">11 / ${pad(CH.length)}</p><h2>得分 ${sc} / ${QS.length}</h2><p>${sc === QS.length ? "全部正确，大气环流掌握扎实。" : sc >= 4 ? "基本掌握，回看答错题对应章节。" : "建议回看对应章节的示意图后重新作答。"}</p><ol>${QS.map((q, i) => `<li>${Q11.pick[i] === q.a ? "✓" : "✗"} ${q.n}：正确答案 ${"ABCD"[q.a]}${Q11.pick[i] === q.a ? "" : `，你选 ${"ABCD"[Q11.pick[i]]}`}</li>`).join("")}</ol><button class="x-btn" id="qRe2">重新作答</button></div>`;
+        $("soon").scrollTop = 0;
+        $("qRe2").onclick = qRestart;
+        $("qSc").textContent = `${sc} / ${QS.length}`;
+      }
+      function qRestart() { Q11.i = 0; Q11.pick = []; if (cur === 11) qShow(); else go(11); }
+      $("qRe").onclick = qRestart;
+
+      /* ---------- 控件与外壳交互 ---------- */
+      $("spd").oninput = (e) => { G.speed = +e.target.value; $("spdO").textContent = G.speed.toFixed(1) + "×"; };
+      $("pause").onclick = (e) => { G.paused = !G.paused; e.target.textContent = G.paused ? "继续" : "暂停"; e.target.classList.toggle("on", G.paused); };
+      $("optLbl").onchange = $("optGuide").onchange = applyOpts;
+      $("ovBtn").onclick = (e) => { const m = $("ov").classList.toggle("x-min"); e.target.textContent = m ? "展开" : "收起"; e.target.setAttribute("aria-expanded", !m); };
+      $("handle").onclick = () => { const o = $("panel").classList.toggle("open"); $("handle").setAttribute("aria-expanded", o); };
+      const theme = () => { const l = document.documentElement.classList.toggle("x-light"); try { localStorage.setItem("gewu-theme", l ? "light" : "dark"); } catch (e) {} $("bTheme").title = (l ? "宣纸" : "青黛夜") + " · 主题切换 (T)"; };
+      try { if (localStorage.getItem("gewu-theme") === "light") document.documentElement.classList.add("x-light"); } catch (e) {}
+      const full = () => { const d = document; if (d.fullscreenElement) d.exitFullscreen && d.exitFullscreen(); else { const el = d.documentElement; const f = el.requestFullscreen || el.webkitRequestFullscreen; if (f) Promise.resolve(f.call(el)).catch(() => {}); } };
+      $("bPrev").onclick = () => go(cur - 1);
+      $("bNext").onclick = () => go(cur + 1);
+      $("bTheme").onclick = theme;
+      $("bReset").onclick = resetView;
+      $("bFull").onclick = full;
+      document.addEventListener("keydown", (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+        const k = e.key.toLowerCase();
+        if (k === "arrowleft") go(cur - 1);
+        else if (k === "arrowright") go(cur + 1);
+        else if (k === "t") theme();
+        else if (k === "r") resetView();
+        else if (k === "f") full();
+        else return;
+        e.preventDefault();
+      });
+      document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
+      addEventListener("hashchange", () => { const n = parseInt(location.hash.slice(1), 10); if (n && n !== cur) go(n); });
+      go(parseInt(location.hash.slice(1), 10) || 1);
+    </script>
+  </body>
+</html>
