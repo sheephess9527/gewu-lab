@@ -1,0 +1,1629 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>格物实验室 · 地球运动</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
+    />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-hero.css" />
+    <style>
+      :root[data-theme="dark"] { --x-bg1:#0E1420; --x-bg2:#121A2A; --x-panel:#151E30; --x-line:rgba(255,255,255,.08); --x-tx:#E6ECF5; --x-tx2:#8A97AD; --x-ac:#2EC4B6; --x-ac2:#F2B544; --x-red:#EF6461; --x-soft:#163437; --x-card:#1B2436; }
+      :root[data-theme="light"] { --x-bg1:#F6F3EC; --x-bg2:#F6F3EC; --x-panel:#FFFFFF; --x-line:rgba(29,36,51,.1); --x-tx:#1D2433; --x-tx2:#5B6577; --x-ac:#139A8E; --x-ac2:#C98A12; --x-red:#D2453F; --x-soft:#E2F1EE; --x-card:#F4F2EC; }
+      html:has(body.x-app) { background:var(--x-bg1); }
+      body.x-app { margin:0; max-width:100vw; height:100vh; height:100dvh; overflow:hidden; color:var(--x-tx); background:linear-gradient(160deg,var(--x-bg1),var(--x-bg2)); font:15px/1.6 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+      .x-app * { transition:background-color 200ms, border-color 200ms, color 200ms; }
+      .x-mono { font-family:"Geist Mono",ui-monospace,Menlo,monospace; }
+      .x-serif { font-family:"Noto Serif SC","Songti SC",serif; }
+      .x-shell { display:grid; height:100%; max-width:none; margin:0; padding:0; gap:0; grid-template-columns:220px 1fr 340px; grid-template-rows:56px 1fr; }
+      .x-top { grid-column:1/-1; display:flex; align-items:center; gap:16px; padding:0 14px; border-bottom:1px solid var(--x-line); background:var(--x-panel); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+      .x-brand { display:flex; flex-direction:column; line-height:1.2; min-width:0; }
+      .x-brand small { font-size:12px; color:var(--x-tx2); }
+      .x-brand b { font-size:15px; white-space:nowrap; }
+      .x-prog { flex:1; display:flex; align-items:center; gap:10px; justify-content:center; }
+      .x-segs { display:flex; gap:4px; width:min(360px,100%); }
+      .x-segs i { flex:1; height:4px; border-radius:2px; background:var(--x-line); }
+      .x-segs i.on { background:var(--x-ac); }
+      .x-count { font-size:12px; color:var(--x-tx2); white-space:nowrap; }
+      .x-tools { display:flex; gap:6px; }
+      .x-ib { width:44px; height:44px; border-radius:10px; border:1px solid var(--x-line); background:transparent; color:var(--x-tx); font-size:18px; cursor:pointer; display:grid; place-items:center; }
+      .x-ib:hover { background:var(--x-soft); border-color:var(--x-ac); }
+      .x-chap { list-style:none; margin:0; padding:10px 0; overflow-y:auto; border-right:1px solid var(--x-line); background:var(--x-bg1); min-width:0; }
+      .x-stage, .x-panel, .x-top { min-width:0; }
+      .x-chap button { display:block; width:100%; text-align:left; padding:10px 16px 10px 18px; min-height:44px; border:0; border-left:3px solid transparent; background:transparent; color:var(--x-tx2); cursor:pointer; font:inherit; }
+      .x-chap button span { display:block; font-size:12px; }
+      .x-chap button b { font-weight:500; color:var(--x-tx); }
+      .x-chap button[aria-current="true"] { border-left-color:var(--x-ac); background:var(--x-soft); }
+      .x-chap button[aria-current="true"] span { color:var(--x-ac); }
+      .x-stage { position:relative; overflow:hidden; background:radial-gradient(ellipse at 50% 40%,#16203a,#070b14 75%); min-height:0; }
+      .x-stage canvas { display:block; width:100%; height:100%; touch-action:none; }
+      .x-ov { position:absolute; left:14px; top:14px; max-width:min(440px,calc(100% - 28px)); padding:14px 16px; border-radius:10px; border:1px solid var(--x-line); background:var(--x-panel); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+      .x-ov .x-book { margin:0 0 4px; font-size:12px; color:var(--x-tx2); }
+      .x-ov h1 { margin:0; font-size:20px; font-weight:600; display:flex; align-items:baseline; gap:10px; }
+      .x-ov h1 .x-mono { font-size:13px; color:var(--x-ac); }
+      .x-ov p.x-lead { margin:8px 0 0; font-size:14px; }
+      .x-ov.min .x-lead { display:none; }
+      .x-fold { position:absolute; right:6px; top:6px; width:44px; height:44px; border:0; background:none; color:var(--x-tx2); cursor:pointer; font-size:16px; }
+      .x-ov h1 { padding-right:36px; }
+      .x-soon, .x-err { position:absolute; inset:0; display:none; place-items:center; padding:24px; text-align:center; background:rgba(7,11,20,.55); color:#E6ECF5; }
+      .x-soon.show, .x-err.show { display:grid; }
+      .x-soon div, .x-err div { padding:20px 24px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:rgba(21,30,48,.9); max-width:360px; }
+      .x-soon b { font-size:18px; }
+      .x-err div { border-color:#EF6461; }
+      .x-panel { overflow-y:auto; border-left:1px solid var(--x-line); background:var(--x-panel); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); padding:16px; display:flex; flex-direction:column; gap:14px; }
+      .x-handle { display:none; }
+      .x-grp h2, .x-card h2 { margin:0 0 8px; font-size:13px; font-weight:600; color:var(--x-tx2); letter-spacing:.04em; }
+      .x-read { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+      .x-read div { padding:10px 12px; border-radius:10px; background:var(--x-card); border:1px solid var(--x-line); }
+      .x-read div.x-wide { grid-column:1/-1; }
+      .x-read small { display:block; font-size:12px; color:var(--x-tx2); }
+      .x-read b { font-size:16px; font-weight:600; }
+      .x-read .x-big { font-size:20px; color:var(--x-ac2); }
+      .x-slider label { display:flex; justify-content:space-between; font-size:13px; color:var(--x-tx2); }
+      .x-slider label output { color:var(--x-ac); }
+      .x-slider input { width:100%; accent-color:var(--x-ac); height:44px; margin:0; }
+      .x-ticks { display:flex; justify-content:space-between; font-size:12px; color:var(--x-tx2); margin-top:-6px; }
+      .x-btn { min-height:44px; padding:0 16px; border-radius:10px; border:1px solid var(--x-ac); background:var(--x-soft); color:var(--x-tx); font:inherit; font-weight:500; cursor:pointer; }
+      .x-btn:hover { background:var(--x-ac); color:#0E1420; }
+      .x-btn[aria-pressed="true"] { background:var(--x-ac); color:#0E1420; }
+      .x-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+      .x-hint { margin:8px 0 0; font-size:12px; color:var(--x-tx2); }
+      .x-card { padding:14px; border-radius:10px; border:1px solid var(--x-line); background:var(--x-card); }
+      .x-card ul { margin:0; padding-left:18px; font-size:14px; }
+      .x-card li + li { margin-top:6px; }
+      .x-card li b { color:var(--x-ac); font-weight:600; }
+      .x-gk { margin:10px 0 0; padding:10px 12px; border-left:3px solid var(--x-ac2); border-radius:0 10px 10px 0; background:var(--x-soft); font-size:13px; }
+      .x-gk em { font-style:normal; color:var(--x-red); font-weight:600; }
+      .x-chip { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; border:1px solid var(--x-ac2); color:var(--x-ac2); font-size:12px; }
+      .x-chip::before { content:""; width:6px; height:6px; border-radius:50%; border:1.5px solid currentColor; }
+      .x-tg { display:flex; gap:16px; flex-wrap:wrap; }
+      .x-tg label { display:flex; align-items:center; gap:8px; min-height:44px; font-size:14px; cursor:pointer; }
+      .x-tg input { width:18px; height:18px; accent-color:var(--x-ac); }
+      .x-fine { margin:0; font-size:12px; color:var(--x-tx2); }
+      .x-mini { position:absolute; right:14px; bottom:14px; width:min(360px,calc(100% - 28px)); height:190px; border-radius:10px; border:1px solid var(--x-line); background:var(--x-panel); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); overflow:hidden; }
+      .x-mini { z-index:2; }
+      .x-q5 .x-btn { padding:0 12px; flex:1 1 40%; }
+      .x-q9t { margin:0 0 10px; font-size:15px; line-height:1.6; color:var(--x-tx); }
+      .x-q9o { display:grid; gap:8px; }
+      .x-q9o .x-btn { text-align:left; padding:10px 14px; line-height:1.45; }
+      .x-q9o .x-btn:disabled { cursor:default; opacity:.6; }
+      .x-q9o .x-btn:disabled:hover { background:var(--x-soft); color:var(--x-tx); }
+      .x-q9o .x-btn.x-ok, .x-q9o .x-btn.x-ok:hover { opacity:1; background:var(--x-ac); border-color:var(--x-ac); color:#0E1420; }
+      .x-q9o .x-btn.x-no, .x-q9o .x-btn.x-no:hover { opacity:1; background:transparent; border-color:var(--x-red); color:var(--x-red); }
+      .x-q9g { color:var(--x-ac); } .x-q9b { color:var(--x-red); }
+      @media (max-width:767px) { .x-mini { bottom:76px; height:150px; } }
+      .x-mini.x-up { bottom:218px; height:170px; }
+      @media (max-width:767px) { .x-mini.x-up { bottom:236px; height:130px; } }
+      [hidden] { display:none !important; }
+      @media (max-width:1023px) { .x-shell { grid-template-columns:180px 1fr 300px; } .x-prog .x-segs { display:none; } }
+      @media (max-width:767px) {
+        .x-shell { grid-template-columns:1fr; grid-template-rows:56px 52px 1fr; }
+        .x-brand small { display:none; }
+        .x-prog { visibility:hidden; } .x-brand .x-en { display:none; } .x-tools { gap:4px; } .x-tools #x-full { display:none; } .x-top { gap:8px; padding:0 10px; } .x-prog { flex:0 1 0; } .x-brand { flex:1; }
+        .x-chap { display:flex; padding:4px 8px; border-right:0; border-bottom:1px solid var(--x-line); overflow-x:auto; overflow-y:hidden; white-space:nowrap; }
+        .x-chap button { display:flex; align-items:center; gap:6px; width:auto; border-left:0; border-bottom:2px solid transparent; padding:6px 10px; border-radius:8px 8px 0 0; }
+        .x-chap button[aria-current="true"] { border-bottom-color:var(--x-ac); }
+        .x-stage { padding-bottom:64px; }
+        .x-ov { padding:10px 12px; } .x-ov h1 { font-size:17px; } .x-ov p.x-lead { font-size:13px; }
+        .x-panel { position:fixed; left:0; right:0; bottom:0; max-height:72vh; border-left:0; border-top:1px solid var(--x-line); border-radius:16px 16px 0 0; padding:0 16px 20px; transform:translateY(calc(100% - 64px)); transition:transform 260ms ease; z-index:5; background:var(--x-bg2); }
+        .x-panel.open { transform:none; }
+        .x-handle { display:flex; position:sticky; top:0; align-items:center; justify-content:space-between; gap:8px; min-height:64px; margin:0 -16px; padding:0 16px; border:0; background:var(--x-bg2); color:var(--x-tx); font:inherit; cursor:pointer; z-index:1; }
+        .x-handle::before { content:""; position:absolute; left:50%; top:8px; width:36px; height:4px; margin-left:-18px; border-radius:2px; background:var(--x-tx2); opacity:.5; }
+        .x-handle span:last-child { color:var(--x-tx2); font-size:12px; }
+      }
+    </style>
+  </head>
+  <body class="x-app">
+    <div class="page x-shell" id="top">
+      <header class="x-top">
+        <div class="x-brand"><small>格物实验室</small><b class="x-serif">地球运动<span class="x-en"> · EarthLab</span></b></div>
+        <div class="x-prog"><div class="x-segs" id="x-segs"></div><span class="x-count x-mono" id="x-count">01 / 09</span></div>
+        <div class="x-tools">
+          <button class="x-ib" id="x-prev" aria-label="上一章（←）" title="上一章 ←">‹</button>
+          <button class="x-ib" id="x-next" aria-label="下一章（→）" title="下一章 →">›</button>
+          <button class="x-ib x-hide-m" id="x-theme" aria-label="切换主题（T）" title="主题：青黛夜 / 宣纸（T）">◐</button>
+          <button class="x-ib x-hide-m" id="x-reset" aria-label="重置视角（R）" title="重置视角 R">⟲</button>
+          <button class="x-ib" id="x-full" aria-label="全屏（F）" title="全屏 F">⛶</button>
+        </div>
+      </header>
+      <nav class="x-chap" id="x-chap" aria-label="章节目录"></nav>
+      <main class="x-stage" id="x-stage">
+        <canvas id="x-gl" aria-label="地球绕太阳公转的三维演示"></canvas>
+        <div class="x-ov" id="x-ov">
+          <p class="x-book" id="x-book">教材：湘教版 选择性必修1·第一章 地球的运动</p>
+          <h1 class="x-serif"><span class="x-mono" id="x-num">01</span><span id="x-title">地球运动总览</span></h1>
+          <p class="x-lead" id="x-lead"></p>
+          <button class="x-fold" id="x-fold" aria-label="折叠讲解" aria-expanded="true">▾</button>
+        </div>
+        <div class="x-soon" id="x-soon"><div><b class="x-serif">交互即将上线</b><p class="x-fine" style="color:#8A97AD;margin-top:6px">本章讲解已就绪，三维模拟正在制作中。</p></div></div>
+        <div class="x-mini" id="x-mini5" hidden><canvas id="x-cv5" role="img" aria-label="太阳直射点纬度一年变化曲线：3月21日 0°，6月22日 23°26′N，9月23日 0°，12月22日 23°26′S"></canvas></div>
+        <div class="x-mini" id="x-mini6" hidden><canvas id="x-cv6" style="display:block;width:100%;height:100%" role="img" aria-label="当前日期昼长随纬度分布曲线：横轴纬度 90°S–90°N，纵轴昼长 0–24 小时"></canvas></div>
+        <div class="x-mini x-up" id="x-mini7" hidden><canvas id="x-cv7" style="display:block;width:100%;height:100%" role="img" aria-label="正午竖杆剖面：太阳光以正午太阳高度角 H 入射，地面杆影长度为杆高除以 tanH"></canvas></div>
+        <div class="x-mini" id="x-mini7b" hidden><canvas id="x-cv7b" style="display:block;width:100%;height:100%" role="img" aria-label="当天各纬度正午太阳高度分布：直射点处 90°，向南北两侧递减"></canvas></div>
+        <div class="x-mini" id="x-mini8" style="height:220px" hidden><canvas id="x-cv8" style="display:block;width:100%;height:100%" role="img" aria-label="所选纬度全年昼长与正午太阳高度曲线：北半球中纬度两者都在夏至前后最大、冬至前后最小"></canvas></div>
+        <div class="x-err" id="x-err" role="alert"><div>3D 引擎未能加载，请检查网络后刷新</div></div>
+      </main>
+      <aside class="x-panel" id="x-panel" aria-label="讲解与控件">
+        <button class="x-handle" id="x-handle" aria-expanded="false"><span id="x-hd-main">6月21日 · 夏至日</span><span>控件 ▴</span></button>
+        <div id="x-p1">
+          <div class="x-grp">
+            <h2>当前</h2>
+            <div class="x-read">
+              <div><small>日期</small><b class="x-big x-mono" id="x-date">1月1日</b></div>
+              <div><small>北半球</small><b id="x-half">冬半年</b></div>
+              <div class="x-wide"><small>地球所处位置</small><b id="x-pos">冬至 → 春分 之间</b></div>
+              <div class="x-wide"><small>日地距离（约）</small><b class="x-mono" id="x-dist">1.47 亿 km</b></div>
+            </div>
+          </div>
+          <div class="x-grp x-slider" style="margin-top:14px">
+            <label for="x-day">全年日期 <output class="x-mono" id="x-dayout">1月1日</output></label>
+            <input type="range" id="x-day" min="0" max="364" step="1" value="0" />
+            <div class="x-ticks x-mono"><span>1月1日</span><span>7月</span><span>12月31日</span></div>
+            <div class="x-row" style="margin-top:10px">
+              <button class="x-btn" id="x-play">▶ 播放一年</button>
+            </div>
+            <p class="x-hint">拖动旋转视角、滚轮缩放；拖动日期或点击“播放一年”，看地球沿轨道运行。</p>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h2>要点</h2>
+            <ul>
+              <li><b>自转</b>：绕地轴，周期约 1 天 → 昼夜交替与时差。</li>
+              <li><b>公转</b>：绕太阳，周期约 1 年；公转 + 地轴倾斜 → 直射点移动、昼夜长短与正午太阳高度变化 → 四季。</li>
+              <li>地轴倾斜 23.5°，始终指向同一方向（北极星附近），所以一年中北半球有时朝向太阳、有时背向太阳。</li>
+            </ul>
+            <p class="x-gk"><b>高考链接：</b>浙江选考常以光照图、二分二至日为背景综合考查昼夜长短、正午太阳高度与地方时；<em>易错</em>：地轴空间指向不变，北半球冬半年地球离太阳更近。</p>
+          </div>
+          <div class="x-grp" style="margin-top:14px">
+            <h2>显示</h2>
+            <div class="x-tg">
+              <label><input type="checkbox" id="x-lab" checked /> 标签</label>
+              <label><input type="checkbox" id="x-aux" checked /> 辅助线</label>
+            </div>
+            <p class="x-fine">辅助线：日地连线、赤道、二分二至处的地轴（彼此平行）。天体大小、偏心率已夸大，自转已放慢示意。键盘 ← → 切换章节，R 重置视角，F 全屏。</p>
+          </div>
+        </div>
+        <div id="x-p2" hidden>
+          <div class="x-grp">
+            <h2>视角</h2>
+            <div class="x-row">
+              <button class="x-btn" data-v="side" aria-pressed="true">侧视</button>
+              <button class="x-btn" data-v="n" aria-pressed="false">北极上空俯视</button>
+              <button class="x-btn" data-v="s" aria-pressed="false">南极上空俯视</button>
+            </div>
+          </div>
+          <div class="x-grp x-slider" style="margin-top:14px">
+            <label for="x-lat">纬度 φ <output class="x-mono" id="x-latout">0°</output></label>
+            <input type="range" id="x-lat" min="0" max="90" step="1" value="0" />
+            <div class="x-ticks x-mono"><span>0°</span><span>45°</span><span>90°</span></div>
+            <div class="x-read" style="margin-top:10px">
+              <div><small>线速度 1670×cosφ</small><b class="x-big x-mono" id="x-v">1670 km/h</b></div>
+              <div><small>角速度</small><b class="x-big x-mono" id="x-w">15°/h</b></div>
+              <div class="x-wide" id="x-pole" hidden><b>极点：角速度、线速度均为 0</b></div>
+            </div>
+          </div>
+          <div class="x-grp x-slider" style="margin-top:14px">
+            <label for="x-spd">自转速度 <output class="x-mono" id="x-spdout">×1</output></label>
+            <input type="range" id="x-spd" min="0.25" max="4" step="0.25" value="1" />
+            <div class="x-row" style="margin-top:10px"><button class="x-btn" id="x-pause">❚❚ 暂停</button></div>
+            <p class="x-hint">金色箭头随地球自西向东转动，长度与该纬度线速度成正比；青色圈为所选纬线。</p>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h2>要点</h2>
+            <ul>
+              <li>地球绕地轴自西向东旋转：从北极上空看呈逆时针，从南极上空看呈顺时针。</li>
+              <li><b>角速度</b>：除南北两极点外，各地约 15°/小时。</li>
+              <li><b>线速度</b>：赤道最大约 1670 km/h，向两极递减，60° 约为赤道的一半，极点为 0。图中金色箭头长短即线速度大小。</li>
+            </ul>
+            <p class="x-gk"><b>高考链接：</b>线速度随纬度和海拔变化，常考同步卫星、火箭发射场选址（低纬线速度大）；<em>易错</em>：除极点外各地角速度都相等，线速度 60° 约为赤道一半。</p>
+          </div>
+        </div>
+        <div id="x-p3" hidden>
+          <div class="x-grp">
+            <h2>视角</h2>
+            <div class="x-row">
+              <button class="x-btn" data-v3="side" aria-pressed="true">侧视</button>
+              <button class="x-btn" data-v3="n" aria-pressed="false">北极上空俯视</button>
+            </div>
+          </div>
+          <div class="x-grp x-slider" style="margin-top:14px">
+            <label for="x-d3">日期 <output class="x-mono" id="x-d3out">6月21日</output></label>
+            <input type="range" id="x-d3" min="0" max="364" step="1" value="171" />
+            <div class="x-ticks x-mono"><span>1月1日</span><span>7月</span><span>12月31日</span></div>
+            <label for="x-t3" style="margin-top:8px">北京时间 <output class="x-mono" id="x-t3out">12:00</output></label>
+            <input type="range" id="x-t3" min="0" max="24" step="0.25" value="12" />
+            <div class="x-ticks x-mono"><span>0 时</span><span>12 时</span><span>24 时</span></div>
+            <div class="x-row" style="margin-top:10px"><button class="x-btn" id="x-play3">▶ 播放一天</button></div>
+          </div>
+          <div class="x-grp" style="margin-top:14px">
+            <h2>当前</h2>
+            <div class="x-read">
+              <div class="x-wide"><small>直射点纬度 δ = 23.44°·sin(2π(d−80)/365)</small><b class="x-big x-mono" id="x-dec">23.4°N</b></div>
+              <div class="x-wide"><small>北京 116°E · 地方时</small><b class="x-mono" id="x-c0">—</b></div>
+              <div class="x-wide"><small>伦敦 0° · 地方时</small><b class="x-mono" id="x-c1">—</b></div>
+              <div class="x-wide"><small>纽约 74°W · 地方时</small><b class="x-mono" id="x-c2">—</b></div>
+            </div>
+            <p class="x-hint">地方时 = 北京时间 −(120−经度)/15。太阳光从右侧平行照射（金色箭头）；青绿为晨线、暖橙为昏线。拖动旋转视角、滚轮缩放。</p>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h2>要点</h2>
+            <ul>
+              <li><b>晨昏线 ⟂ 太阳光线</b>，晨昏线上太阳高度为 0°；晨昏线平分赤道，所以赤道上全年昼夜等长。</li>
+              <li>看城市标签：北京、伦敦、纽约随自转依次进入白天，经度每差 15°，地方时相差 1 小时，东早西晚。</li>
+              <li>切换“北极上空俯视”，这是考试中最常见的光照图视角：逆时针自转，晨线在逆时针方向的前方。</li>
+            </ul>
+            <p class="x-gk"><b>高考链接：</b>光照图判读——顺着自转方向，由夜入昼为晨线；晨昏线与经线重合只在二分日；<em>易错</em>：地方时东早西晚，经度每差 15° 相差 1 小时。</p>
+          </div>
+        </div>
+        <div id="x-p4" hidden>
+          <div class="x-grp">
+            <h2>当前</h2>
+            <div class="x-read">
+              <div><small>日期</small><b class="x-big x-mono" id="x-date4">1月1日</b></div>
+              <div><small>北半球</small><b id="x-half4">冬半年</b></div>
+              <div class="x-wide"><small>日地距离（约 1.471–1.521 亿 km）</small><b class="x-mono" id="x-dist4">—</b></div>
+              <div class="x-wide"><small>公转角速度（约 0.95–1.02°/日）</small><b class="x-mono" id="x-w4">—</b></div>
+            </div>
+            <p class="x-fine">北半球冬半年（秋分→春分）约 179 天，夏半年（春分→秋分）约 186 天。</p>
+          </div>
+          <div class="x-grp x-slider" style="margin-top:14px">
+            <label for="x-d4">日期 <output class="x-mono" id="x-d4out">1月1日</output></label>
+            <input type="range" id="x-d4" min="0" max="364" step="1" value="0" />
+            <div class="x-ticks x-mono"><span>1月1日</span><span>7月</span><span>12月31日</span></div>
+            <div class="x-row" style="margin-top:10px"><button class="x-btn" id="x-play4">▶ 播放一年</button></div>
+            <div class="x-tg" style="margin-top:10px"><label><input type="checkbox" id="x-sw4" /> 扫过面积（每 30 天一扇，面积相等）</label></div>
+            <p class="x-hint">按开普勒第二定律：日地连线在相等时间内扫过相等面积，所以近日点附近走得快、远日点附近走得慢。</p>
+          </div>
+          <div class="x-grp x-slider" style="margin-top:14px">
+            <label for="x-ob">黄赤交角 <output class="x-mono" id="x-obout">23°26′</output></label>
+            <input type="range" id="x-ob" min="0" max="40" step="0.01" value="23.44" />
+            <div class="x-ticks x-mono"><span>0°</span><span>20°</span><span>40°</span></div>
+            <div class="x-read" style="margin-top:10px">
+              <div><small>回归线 = 交角</small><b class="x-mono" id="x-trop">23°26′</b></div>
+              <div><small>极圈 = 90° − 交角</small><b class="x-mono" id="x-circ">66°34′</b></div>
+            </div>
+            <p class="x-hint" id="x-obtip" aria-live="polite"></p>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h2>要点</h2>
+            <ul>
+              <li><b>黄赤交角 23°26′</b>：赤道面（蓝环）与黄道面（金环）的夹角。地轴在公转中始终指向北极星附近，倾斜方向保持不变。</li>
+              <li>黄赤交角的存在，使太阳直射点在南北回归线之间往返移动——下一节。</li>
+              <li>北半球冬半年地球离太阳较近、公转较快，所以冬半年（约 179 天）比夏半年（约 186 天）短。</li>
+            </ul>
+            <p class="x-gk"><b>高考链接：</b>黄赤交角变化引起五带范围变化，是选考常见情境题；<em>易错</em>：1 月初近日点公转最快，7 月初远日点最慢。</p>
+          </div>
+          <p class="x-fine" style="margin-top:14px">偏心率已夸大（图中 e = 0.12，实际约 0.0167），天体大小、二分二至位置为示意；读数按真实轨道计算。拖动旋转视角、滚轮缩放。</p>
+        </div>
+        <div id="x-p5" hidden>
+          <div class="x-grp">
+            <h2>当前</h2>
+            <div class="x-read">
+              <div><small>日期</small><b class="x-big x-mono" id="x-date5">6月22日</b></div>
+              <div><small>直射点纬度</small><b class="x-big x-mono" id="x-lat5">23°26′N</b></div>
+              <div><small>移动方向</small><b id="x-dir5">—</b></div>
+              <div><small>所在半球</small><b id="x-hem5">—</b></div>
+            </div>
+          </div>
+          <div class="x-grp x-slider" style="margin-top:14px">
+            <label for="x-d5">日期 <output class="x-mono" id="x-d5out">6月22日</output></label>
+            <input type="range" id="x-d5" min="0" max="364" step="1" value="172" />
+            <div class="x-ticks x-mono"><span>1月1日</span><span>7月</span><span>12月31日</span></div>
+            <div class="x-row" style="margin-top:10px"><button class="x-btn" id="x-play5">▶ 播放一年</button></div>
+            <div class="x-row x-q5" style="margin-top:8px">
+              <button class="x-btn" data-q5="79" aria-pressed="false">春分 3/21</button>
+              <button class="x-btn" data-q5="172" aria-pressed="false">夏至 6/22</button>
+              <button class="x-btn" data-q5="265" aria-pressed="false">秋分 9/23</button>
+              <button class="x-btn" data-q5="355" aria-pressed="false">冬至 12/22</button>
+            </div>
+            <p class="x-hint">太阳光从右侧平行射入，红点为直射点；右下小窗的游标随日期移动。</p>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h2>要点</h2>
+            <ul>
+              <li><b>往返路线</b>：春分（3月21日）直射赤道 → 夏至（6月22日）到北回归线 23°26′N → 秋分（9月23日）回到赤道 → 冬至（12月22日）到南回归线 23°26′S → 再北返。</li>
+              <li><b>直射点向北移</b>：北半球昼渐长、正午太阳高度渐大；向南移则相反。</li>
+              <li><b>直射次数</b>：南北回归线之间一年两次直射，回归线上一年一次。</li>
+            </ul>
+            <p class="x-gk"><b>高考链接：</b>直射点位置与移动方向是判断昼夜长短、正午太阳高度变化的起点；<em>易错</em>：6 月 22 日到 9 月 23 日直射点在北半球但向南移。</p>
+          </div>
+          <p class="x-fine" style="margin-top:14px">侧视示意：为保持光线水平，地轴随日期向太阳倾斜或背离。曲线按 δ = 23.44°·sin(2π(d−80)/365) 的正弦形状，在二分二至日分段校准。拖动旋转视角、滚轮缩放。</p>
+        </div>
+        <div id="x-p6" hidden>
+          <div class="x-grp">
+            <h2>当前</h2>
+            <div class="x-read">
+              <div><small>日期</small><b class="x-big x-mono" id="x-date6">6月22日</b></div>
+              <div><small>直射点纬度 δ</small><b class="x-big x-mono" id="x-dec6">23°26′N</b></div>
+              <div><small>昼长</small><b class="x-big x-mono" id="x-dl6">—</b></div>
+              <div><small>夜长</small><b class="x-big x-mono" id="x-nl6">—</b></div>
+              <div><small>日出（地方时）</small><b class="x-mono" id="x-sr6">—</b></div>
+              <div><small>日落（地方时）</small><b class="x-mono" id="x-ss6">—</b></div>
+              <div class="x-wide"><small>状态</small><b id="x-st6" aria-live="polite">—</b></div>
+            </div>
+          </div>
+          <div class="x-grp x-slider" style="margin-top:14px">
+            <label for="x-d6">日期 <output class="x-mono" id="x-d6out">6月22日</output></label>
+            <input type="range" id="x-d6" min="0" max="364" step="1" value="172" />
+            <div class="x-ticks x-mono"><span>1月1日</span><span>7月</span><span>12月31日</span></div>
+            <div class="x-row x-q5" style="margin-top:8px">
+              <button class="x-btn" data-q6="79" aria-pressed="false">春分 3/21</button>
+              <button class="x-btn" data-q6="172" aria-pressed="false">夏至 6/22</button>
+              <button class="x-btn" data-q6="265" aria-pressed="false">秋分 9/23</button>
+              <button class="x-btn" data-q6="355" aria-pressed="false">冬至 12/22</button>
+            </div>
+            <label for="x-la6" style="margin-top:12px">纬度 φ <output class="x-mono" id="x-la6out">30°N</output></label>
+            <input type="range" id="x-la6" min="-90" max="90" step="1" value="30" />
+            <div class="x-ticks x-mono"><span>90°S</span><span>0°</span><span>90°N</span></div>
+            <div class="x-row" style="margin-top:8px"><button class="x-btn" id="x-hz6">杭州 30°N</button></div>
+            <p class="x-hint">昼长 = 2×arccos(−tanφ·tanδ)/15 小时；日出 = 12 − 昼长/2，日落 = 12 + 昼长/2（地方时）。金色为昼弧、蓝色为夜弧；右下小图为当天昼长随纬度的分布。</p>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h2>要点</h2>
+            <ul>
+              <li>太阳直射哪个半球，哪个半球昼长夜短，且纬度越高昼越长；北极圈内可出现极昼。</li>
+              <li>赤道全年昼夜等长；春分、秋分全球昼夜等长。</li>
+              <li>夏至日北半球各地昼长达一年最大值；冬至日达最小值。</li>
+              <li>直射点向北移动，北半球昼渐长；向南移动，北半球昼渐短。</li>
+            </ul>
+            <p class="x-gk"><b>高考链接：</b>昼夜长短由直射点所在半球决定，纬度越高差值越大，赤道终年昼夜平分；<em>易错</em>：日出时间=12−昼长/2，是地方时不是北京时间。</p>
+          </div>
+          <p class="x-fine" style="margin-top:14px">侧视示意：太阳光从右侧平行射入，地轴随日期向太阳倾斜或背离；直射点纬度按第 5 章同一公式计算，不计大气折射。拖动旋转视角、滚轮缩放。</p>
+        </div>
+        <div id="x-p7" hidden>
+          <div class="x-grp">
+            <h2>当前</h2>
+            <div class="x-read">
+              <div><small>日期</small><b class="x-big x-mono" id="x-date7">6月22日</b></div>
+              <div><small>直射点纬度 δ</small><b class="x-big x-mono" id="x-dec7">23°26′N</b></div>
+              <div class="x-wide"><small>正午太阳高度 H = 90° − |φ − δ|</small><b class="x-big x-mono" id="x-h7">—</b></div>
+              <div><small>影长（杆高倍数）</small><b class="x-big x-mono" id="x-sh7">—</b></div>
+              <div><small>正午影子朝向</small><b id="x-dir7">—</b></div>
+              <div><small>太阳能板倾角 90° − H</small><b class="x-mono" id="x-pv7">—</b></div>
+              <div><small>当地冬至楼间距 ≥ 楼高 ×</small><b class="x-mono" id="x-gap7">—</b></div>
+              <div class="x-wide"><small>计算</small><b class="x-mono" id="x-calc7" aria-live="polite">—</b></div>
+            </div>
+          </div>
+          <div class="x-grp x-slider" style="margin-top:14px">
+            <label for="x-d7">日期 <output class="x-mono" id="x-d7out">6月22日</output></label>
+            <input type="range" id="x-d7" min="0" max="364" step="1" value="172" />
+            <div class="x-ticks x-mono"><span>1月1日</span><span>7月</span><span>12月31日</span></div>
+            <div class="x-row x-q5" style="margin-top:8px">
+              <button class="x-btn" data-q7="79" aria-pressed="false">春分 3/21</button>
+              <button class="x-btn" data-q7="172" aria-pressed="false">夏至 6/22</button>
+              <button class="x-btn" data-q7="265" aria-pressed="false">秋分 9/23</button>
+              <button class="x-btn" data-q7="355" aria-pressed="false">冬至 12/22</button>
+            </div>
+            <label for="x-la7" style="margin-top:12px">纬度 φ <output class="x-mono" id="x-la7out">30°N</output></label>
+            <input type="range" id="x-la7" min="-90" max="90" step="1" value="30" />
+            <div class="x-ticks x-mono"><span>90°S</span><span>0°</span><span>90°N</span></div>
+            <div class="x-row" style="margin-top:8px"><button class="x-btn" id="x-hz7">杭州 30°N</button></div>
+            <p class="x-hint">影长 = 杆高 / tanH；所在纬度在直射点以北，正午太阳在南、影子朝北，反之朝南。右侧上图为竖杆剖面，下图为当天各纬度的正午太阳高度。</p>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h2>要点</h2>
+            <ul>
+              <li>北回归线以北：夏至日最大、冬至日最小。</li>
+              <li>南回归线以南：冬至日最大、夏至日最小。</li>
+              <li>南北回归线之间：一年有两次直射（回归线上一次）。</li>
+              <li>楼间距：保证冬至日正午底楼有阳光，楼间距 ≥ 楼高 × cot H冬至（右下角已按所选纬度算出）。</li>
+              <li>太阳能热水器：集热板与地面夹角 = 90° − H，使阳光直射板面。</li>
+            </ul>
+            <p class="x-gk"><b>高考链接：</b>正午太阳高度常结合楼间距、太阳能板倾角、影长变化考查；<em>易错</em>：公式里 φ 与 δ 同半球取差、异半球取和；太阳能板倾角 = 90° − H。</p>
+          </div>
+          <p class="x-fine" style="margin-top:14px">侧视示意：太阳光从右侧平行射入，红点为直射点，金环为所选纬线；直射点纬度按第 5 章同一公式计算，不计大气折射。拖动旋转视角、滚轮缩放。</p>
+        </div>
+        <div id="x-p8" hidden>
+          <div class="x-grp">
+            <h2>当前</h2>
+            <div class="x-read">
+              <div><small>日期</small><b class="x-big x-mono" id="x-date8">6月21日</b></div>
+              <div><small>纬度 φ</small><b class="x-big x-mono" id="x-lat8">30°N</b></div>
+              <div><small>昼长</small><b class="x-big x-mono" id="x-dl8">—</b></div>
+              <div><small>正午太阳高度 H</small><b class="x-big x-mono" id="x-h8">—</b></div>
+              <div class="x-wide"><small>天文四季（以二分二至为中点）</small><b id="x-as8" aria-live="polite">—</b></div>
+              <div class="x-wide"><small>我国气候四季（3–5 月春、6–8 月夏、9–11 月秋、12–2 月冬）</small><b id="x-cs8">—</b></div>
+              <div class="x-wide"><small>所选纬度所在半球</small><b id="x-hm8">—</b></div>
+            </div>
+          </div>
+          <div class="x-grp x-slider" style="margin-top:14px">
+            <label for="x-d8">全年日期 <output class="x-mono" id="x-d8out">6月21日</output></label>
+            <input type="range" id="x-d8" min="0" max="364" step="1" value="171" />
+            <div class="x-ticks x-mono"><span>1月1日</span><span>7月</span><span>12月31日</span></div>
+            <div class="x-row" style="margin-top:10px"><button class="x-btn" id="x-play8">▶ 播放一年</button></div>
+            <label for="x-la8" style="margin-top:12px">纬度 φ <output class="x-mono" id="x-la8out">30°N（杭州）</output></label>
+            <input type="range" id="x-la8" min="-90" max="90" step="1" value="30" />
+            <div class="x-ticks x-mono"><span>90°S</span><span>0°</span><span>90°N</span></div>
+            <div class="x-row" style="margin-top:8px"><button class="x-btn" id="x-hz8">杭州 30°N</button></div>
+            <p class="x-hint">右下图：所选纬度全年昼长（青，左轴 0–24 h）与正午太阳高度（金，右轴 0–90°），红线为当前日期。</p>
+          </div>
+          <div class="x-card" style="margin-top:14px">
+            <h2>要点</h2>
+            <ul>
+              <li>昼夜长短与正午太阳高度随季节变化，使各地获得的太阳热量不同，形成四季。</li>
+              <li>天文意义：夏季是一年中白昼最长、太阳最高的季节，冬季相反，春秋是过渡。</li>
+              <li>天文四季以二分二至为中点：北半球夏季约 5 月初（立夏）至 8 月初（立秋），夏至居中。</li>
+              <li>我国气候四季：3–5 月春、6–8 月夏、9–11 月秋、12–2 月冬。</li>
+              <li>南北半球季节相反：北半球夏季时，南半球为冬季。</li>
+            </ul>
+            <p class="x-gk"><b>高考链接：</b>四季的实质是昼长与正午太阳高度共同引起的太阳辐射季节变化；<em>易错</em>：近日点在 1 月初，北半球却是冬季，四季与日地距离无关。</p>
+          </div>
+          <p class="x-fine" style="margin-top:14px">公转轨道俯视示意：太阳居中，地轴倾斜 23°26′、指向北极星不变；轨道偏心率已夸大。昼长与正午太阳高度按第 5–7 章同一公式计算，不计大气折射。</p>
+        </div>
+        <div id="x-p9" hidden>
+          <div id="x-q9box">
+            <div class="x-grp">
+              <h2 id="x-q9n">第 1 / 6 题</h2>
+              <p class="x-q9t" id="x-q9t"></p>
+              <div class="x-q9o" id="x-q9o"></div>
+            </div>
+            <div class="x-card" id="x-q9f" style="margin-top:14px" hidden aria-live="polite">
+              <h2 id="x-q9r"></h2>
+              <p class="x-gk" id="x-q9e" style="margin-top:0"></p>
+              <div class="x-row" style="margin-top:10px"><button class="x-btn" id="x-q9next">下一题 ›</button></div>
+            </div>
+            <p class="x-hint">选择后立即判分；舞台与右下小图会演示对应情境。</p>
+          </div>
+          <div id="x-q9end" hidden>
+            <div class="x-grp">
+              <h2>检测结果</h2>
+              <div class="x-read">
+                <div class="x-wide"><small>得分</small><b class="x-big x-mono" id="x-q9s">0 / 6</b></div>
+                <div class="x-wide"><small>评价</small><b id="x-q9c">—</b></div>
+              </div>
+            </div>
+            <div class="x-card" style="margin-top:14px"><h2>逐题</h2><ul id="x-q9l"></ul></div>
+            <div class="x-row" style="margin-top:14px"><button class="x-btn" id="x-q9again">↺ 重新作答</button></div>
+          </div>
+        </div>
+        <div id="x-pg" hidden>
+          <p><span class="x-chip">交互即将上线</span></p>
+          <div class="x-card" id="x-pgcard"><h2>要点</h2><ul id="x-pglist"></ul></div>
+        </div>
+      </aside>
+    </div>
+    <script src="hark.js"></script>
+    <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+      /* ---------- 章节内容（取自 earth.txt） ---------- */
+      var CH = [
+        { t: "地球运动总览", p: ["地球同时进行着两种运动：绕地轴的自转（周期约 1 天）和绕太阳的公转（周期约 1 年）。自转带来昼夜交替与时差；公转加上地轴倾斜，带来太阳直射点的移动、昼夜长短与正午太阳高度的变化，最终形成四季。"] },
+        { t: "地球自转", p: ["地球绕地轴自西向东旋转：从北极上空看呈逆时针，从南极上空看呈顺时针。", "角速度：除南北两极点外，各地约 15°/小时。", "线速度：赤道最大约 1670 km/h，向两极递减，60° 约为赤道的一半，极点为 0。图中金色箭头长短即线速度大小。"] },
+        { t: "昼夜交替与晨昏线", p: ["地球不透明、不发光，被太阳照亮的一半是昼半球，另一半是夜半球，二者的分界线叫晨昏线。随着自转，由夜进入昼的一侧是晨线，由昼进入夜的一侧是昏线。", "晨昏线 ⟂ 太阳光线，晨昏线上太阳高度为 0°；晨昏线平分赤道，所以赤道上全年昼夜等长。", "看城市标签：北京、伦敦、纽约随自转依次进入白天，经度每差 15°，地方时相差 1 小时，东早西晚。", "切换“北极上空俯视”，这是考试中最常见的光照图视角：逆时针自转，晨线在逆时针方向的前方。"] },
+        { t: "地球公转", p: ["地球绕太阳自西向东公转，周期 1 恒星年（365日6时9分10秒）。公转轨道是近似正圆的椭圆，太阳位于一个焦点上：1 月初过近日点，公转速度较快；7 月初过远日点，速度较慢。", "黄赤交角 23°26′：赤道面（蓝环）与黄道面（金环）的夹角。地轴在公转中始终指向北极星附近，倾斜方向保持不变。", "黄赤交角的存在，使太阳直射点在南北回归线之间往返移动——下一节。", "北半球冬半年地球离太阳较近、公转较快，所以冬半年（约 179 天）比夏半年（约 186 天）短。"] },
+        { t: "太阳直射点的移动", p: ["由于黄赤交角的存在，太阳直射点在南北回归线之间往返移动，周期为一个回归年（365日5时48分46秒）。"] },
+        { t: "昼夜长短", p: ["晨昏线把纬线圈分成昼弧（金色）与夜弧（蓝色）。昼弧越长，白昼越长：昼长 = 昼弧度数 ÷ 15°。", "太阳直射哪个半球，哪个半球昼长夜短，且纬度越高昼越长；北极圈内可出现极昼。", "赤道全年昼夜等长；春分、秋分全球昼夜等长。", "夏至日北半球各地昼长达一年最大值；冬至日达最小值。", "直射点向北移动，北半球昼渐长；向南移动，北半球昼渐短。"] },
+        { t: "正午太阳高度", p: ["正午太阳高度是一天中最大的太阳高度角。它由太阳直射点向南北两侧递减，与纬度差有关：", "北回归线以北：夏至日最大、冬至日最小。", "南回归线以南：冬至日最大、夏至日最小。", "南北回归线之间：一年有两次直射（回归线上一次）。", "楼间距：保证冬至日正午底楼有阳光，楼间距 ≥ 楼高 × cot H冬至（右下角已按所选纬度算出）。", "太阳能热水器：集热板与地面夹角 = 90° − H，使阳光直射板面。"] },
+        { t: "四季更替", p: ["昼夜长短与正午太阳高度随季节变化，使各地获得的太阳热量不同，形成四季。从天文意义看，夏季是一年中白昼最长、太阳最高的季节，冬季相反，春秋是过渡。"] },
+        { t: "随堂检测", p: ["浙江选考风格单选 6 题，覆盖地方时、晨昏线、直射点、昼夜长短、正午太阳高度与四季。作答后即时显示对错与解析，舞台同步演示。"] }
+      ];
+      var $ = function (id) { return document.getElementById(id); };
+      var cur = -1, pad = function (n) { return (n < 10 ? "0" : "") + n; };
+
+      /* ---------- 外壳 ---------- */
+      CH.forEach(function (c, i) {
+        var b = document.createElement("button");
+        b.innerHTML = '<span class="x-mono">' + pad(i + 1) + "</span><b>" + c.t + "</b>";
+        b.onclick = function () { go(i); };
+        $("x-chap").appendChild(b);
+        $("x-segs").appendChild(document.createElement("i"));
+      });
+      function go(i) {
+        i = Math.max(0, Math.min(CH.length - 1, i));
+        if (i === cur) return;
+        var prev = cur;
+        cur = i;
+        var c = CH[i];
+        if (location.hash !== "#" + (i + 1)) history.replaceState(null, "", "#" + (i + 1));
+        [].forEach.call($("x-chap").children, function (b, k) { b.setAttribute("aria-current", k === i ? "true" : "false"); if (k === i) b.scrollIntoView({ block: "nearest", inline: "nearest" }); });
+        [].forEach.call($("x-segs").children, function (s, k) { s.className = k <= i ? "on" : ""; });
+        $("x-count").textContent = pad(i + 1) + " / " + pad(CH.length);
+        $("x-num").textContent = pad(i + 1);
+        $("x-title").textContent = c.t;
+        $("x-lead").textContent = c.p[0];
+        $("x-p1").hidden = i !== 0;
+        $("x-p2").hidden = i !== 1;
+        $("x-p3").hidden = i !== 2;
+        $("x-p4").hidden = i !== 3;
+        $("x-p5").hidden = $("x-mini5").hidden = i !== 4;
+        $("x-p6").hidden = $("x-mini6").hidden = i !== 5;
+        $("x-p7").hidden = $("x-mini7").hidden = $("x-mini7b").hidden = i !== 6;
+        $("x-p8").hidden = $("x-mini8").hidden = i !== 7;
+        $("x-p9").hidden = i !== 8;
+        $("x-pg").hidden = i <= 8;
+        $("x-soon").classList.toggle("show", i > 8 && !failed);
+        $("x-book").textContent = i === 8 ? "教材：湘教版 选择性必修1·第一章 地球的运动 综合" : i === 1 || i === 3 ? "教材：湘教版 选择性必修1·第一章 第一节 地球的自转与公转" : i === 2 || i === 4 || i === 5 || i === 6 || i === 7 ? "教材：湘教版 选择性必修1·第一章 第二节 地球运动的地理意义" : "教材：湘教版 选择性必修1·第一章 地球的运动";
+        if (i !== 6) mode7(false);
+        if (i !== 5) mode6(false);
+        if (i !== 4) mode5(false);
+        if (i !== 3) mode4(false);
+        if (i !== 1) mode2(false);
+        if (i !== 2) mode3(false);
+        mode2(i === 1);
+        mode3(i === 2);
+        mode4(i === 3);
+        mode5(i === 4);
+        mode6(i === 5);
+        mode7(i === 6);
+        if (i === 7 || prev === 7) resetView();
+        if (i === 7) { setPlay(false); upd8(); }
+        else if (i === 1) { setPlay(false); upd2(); }
+        else if (i === 2) { setPlay(false); upd3(); }
+        else if (i === 3) { setPlay(false); upd4(); }
+        else if (i === 4) { setPlay(false); upd5(); }
+        else if (i === 5) { setPlay(false); upd6(); }
+        else if (i === 6) { setPlay(false); upd7(); }
+        else if (i === 8) { setPlay(false); show9(); }
+        else if (i !== 0) {
+          var rest = c.p.slice(1);
+          $("x-pgcard").hidden = !rest.length;
+          $("x-pglist").innerHTML = rest.map(function (s) { return "<li>" + s + "</li>"; }).join("");
+          $("x-hd-main").textContent = c.t + " · 交互即将上线";
+          setPlay(false);
+        } else updateHud();
+        loop();
+      }
+      $("x-prev").onclick = function () { go(cur === 0 ? CH.length - 1 : cur - 1); };
+      $("x-next").onclick = function () { go(cur === CH.length - 1 ? 0 : cur + 1); };
+      function toggleTheme() {
+        var r = document.documentElement, n = r.getAttribute("data-theme") === "light" ? "dark" : "light";
+        r.setAttribute("data-theme", n);
+        try { localStorage.setItem("hark-theme", n); } catch (e) {}
+      }
+      $("x-theme").onclick = toggleTheme;
+      function toggleFull() {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {});
+      }
+      $("x-full").onclick = toggleFull;
+      $("x-fold").onclick = function () {
+        var m = $("x-ov").classList.toggle("min");
+        this.textContent = m ? "▸" : "▾";
+        this.setAttribute("aria-expanded", m ? "false" : "true");
+      };
+      $("x-handle").onclick = function () {
+        var o = $("x-panel").classList.toggle("open");
+        this.setAttribute("aria-expanded", o ? "true" : "false");
+        this.lastChild.textContent = o ? "收起 ▾" : "控件 ▴";
+      };
+      document.addEventListener("keydown", function (e) {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        var t = e.target, inRange = t && t.type === "range";
+        if (e.key === "ArrowLeft" && !inRange) go(cur - 1);
+        else if (e.key === "ArrowRight" && !inRange) go(cur + 1);
+        else if (e.key === "t" || e.key === "T") toggleTheme();
+        else if (e.key === "r" || e.key === "R") resetView();
+        else if (e.key === "f" || e.key === "F") toggleFull();
+      });
+      window.addEventListener("hashchange", function () { go(parseInt(location.hash.slice(1), 10) - 1 || 0); });
+
+      /* ---------- 天文：日期 → 太阳黄经（2025 年） ---------- */
+      var ML = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      function fmt(d) { d = Math.floor(d); var m = 0; while (d >= ML[m]) { d -= ML[m]; m++; } return m + 1 + "月" + (d + 1) + "日"; }
+      var RAD = Math.PI / 180, md = function (a) { return ((a % 360) + 360) % 360; };
+      function sun(d) {
+        var n = 9132 + d, L = 280.46 + 0.9856474 * n, g = md(357.528 + 0.9856003 * n);
+        return { lam: md(L + 1.915 * Math.sin(g * RAD) + 0.02 * Math.sin(2 * g * RAD)), g: g };
+      }
+      var EV = [[0, "春分"], [90, "夏至"], [180, "秋分"], [270, "冬至"]];
+      function evDay(target) {
+        var best = 0, bd = 999;
+        for (var d = 0; d < 365; d += 0.25) { var df = Math.abs(((sun(d).lam - target + 540) % 360) - 180); if (df < bd) { bd = df; best = d; } }
+        return best;
+      }
+      function posName(d) {
+        var s = sun(d), name = "";
+        for (var k = 0; k < 4; k++) {
+          var df = ((s.lam - EV[k][0] + 540) % 360) - 180;
+          if (Math.abs(df) < 1) { name = EV[k][1] + "日"; break; }
+          if (df > 0 && df < 90) { name = EV[k][1] + " → " + EV[(k + 1) % 4][1] + " 之间"; }
+        }
+        if (s.g < 5 || s.g > 355) name += " · 近日点附近";
+        else if (Math.abs(s.g - 180) < 5) name += " · 远日点附近";
+        return name;
+      }
+      var day = 171, playing = false;
+      function updateHud() {
+        var s = sun(day), r = (1 - 0.0167 * 0.0167) / (1 + 0.0167 * Math.cos(s.g * RAD));
+        $("x-date").textContent = $("x-dayout").textContent = fmt(day);
+        $("x-pos").textContent = posName(day);
+        $("x-half").textContent = s.lam < 180 ? "夏半年" : "冬半年";
+        $("x-dist").textContent = (1.496 * r).toFixed(3) + " 亿 km";
+        if (cur === 0) $("x-hd-main").textContent = fmt(day) + " · " + posName(day).split(" · ")[0];
+      }
+      function setPlay(on) {
+        playing = on;
+        $("x-play").textContent = $("x-play8").textContent = on ? "❚❚ 暂停" : "▶ 播放一年";
+        if (on && day >= 364) day = 0;
+        lastT = 0;
+        loop();
+      }
+      $("x-play").onclick = function () { setPlay(!playing); };
+      $("x-day").addEventListener("input", function () { day = +this.value; setPlay(false); updateHud(); place(); });
+      $("x-day").value = day;
+
+      /* ---------- three.js 场景（只初始化一次） ---------- */
+      var failed = false, renderer, scene, camera, controls, earth, tiltG, line, labels = [], aux = [], raf = 0, lastT = 0;
+      var A = 20, EVIS = 0.08, PSI_P = md(280.46 - 357.528 + 180), TILT = 23.5 * RAD, ER = 1.4;
+      var AXIS = null;
+      function fail() {
+        failed = true; cancelAnimationFrame(raf); raf = 0;
+        $("x-err").classList.add("show"); $("x-soon").classList.remove("show"); $("x-gl").style.display = "none";
+      }
+      function orbitPos(psiDeg) {
+        var r = (A * (1 - EVIS * EVIS)) / (1 + EVIS * Math.cos((psiDeg - PSI_P) * RAD));
+        return new THREE.Vector3(r * Math.cos(psiDeg * RAD), 0, -r * Math.sin(psiDeg * RAD));
+      }
+      function label(text, color, scale) {
+        var c = document.createElement("canvas"), x = c.getContext("2d");
+        c.width = 512; c.height = 96;
+        x.font = '500 46px "PingFang SC","Microsoft YaHei",sans-serif';
+        x.textAlign = "center"; x.textBaseline = "middle";
+        x.lineWidth = 8; x.strokeStyle = "rgba(7,11,20,.85)"; x.strokeText(text, 256, 48);
+        x.fillStyle = color; x.fillText(text, 256, 48);
+        var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
+        sp.scale.set(5.33 * scale, scale, 1); sp.renderOrder = 10; labels.push(sp);
+        return sp;
+      }
+      function earthTexture() {
+        var c = document.createElement("canvas"), W = 512, H = 256, x = c.getContext("2d"), img = x.createImageData(W, H);
+        var G = [], S = 17;
+        for (var i = 0; i < S * S; i++) G.push(Math.random());
+        function vn(u, v, f) {
+          var gx = u * f, gy = v * f, x0 = Math.floor(gx), y0 = Math.floor(gy), fx = gx - x0, fy = gy - y0;
+          var at = function (a, b) { return G[(b % S) * S + (a % f)]; };
+          fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
+          return (at(x0, y0) * (1 - fx) + at(x0 + 1, y0) * fx) * (1 - fy) + (at(x0, y0 + 1) * (1 - fx) + at(x0 + 1, y0 + 1) * fx) * fy;
+        }
+        for (var y = 0; y < H; y++) for (var X = 0; X < W; X++) {
+          var u = X / W, v = y / H, n = vn(u, v, 4) * 0.6 + vn(u, v, 8) * 0.3 + vn(u, v, 16) * 0.1, lat = Math.abs(v - 0.5) * 2, p = (y * W + X) * 4, col;
+          if (lat > 0.86) col = [235, 242, 248];
+          else if (n > 0.56) col = n > 0.68 ? [120, 140, 80] : [62, 140, 72];
+          else col = [20 + n * 30, 70 + n * 60, 150 + n * 70];
+          img.data[p] = col[0]; img.data[p + 1] = col[1]; img.data[p + 2] = col[2]; img.data[p + 3] = 255;
+        }
+        x.putImageData(img, 0, 0);
+        return new THREE.CanvasTexture(c);
+      }
+      function init() {
+        if (typeof THREE === "undefined") return fail();
+        try {
+          renderer = new THREE.WebGLRenderer({ canvas: $("x-gl"), antialias: true, alpha: true });
+        } catch (e) { return fail(); }
+        $("x-gl").addEventListener("webglcontextlost", function (e) { e.preventDefault(); fail(); });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(45, 1, 0.1, 2000);
+        AXIS = new THREE.Vector3(0, Math.cos(TILT), -Math.sin(TILT));
+        if (THREE.OrbitControls) {
+          controls = new THREE.OrbitControls(camera, renderer.domElement);
+          controls.enableDamping = true; controls.minDistance = 8; controls.maxDistance = 140;
+          controls.addEventListener("change", function () { if (!raf) loop(); });
+        }
+        resetView();
+        // 星空
+        var sv = [];
+        for (var i = 0; i < 1800; i++) { var v = new THREE.Vector3().randomDirection ? new THREE.Vector3().randomDirection() : new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(); v.multiplyScalar(400 + Math.random() * 300); sv.push(v.x, v.y, v.z); }
+        var sg = new THREE.BufferGeometry(); sg.setAttribute("position", new THREE.Float32BufferAttribute(sv, 3));
+        scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xcfd8ea, size: 1.6, sizeAttenuation: false })));
+        // 太阳
+        scene.add(new THREE.Mesh(new THREE.SphereGeometry(3, 48, 32), new THREE.MeshBasicMaterial({ color: 0xffd36b })));
+        var gc = document.createElement("canvas"); gc.width = gc.height = 128;
+        var gx = gc.getContext("2d"), gr = gx.createRadialGradient(64, 64, 0, 64, 64, 64);
+        gr.addColorStop(0, "rgba(255,220,120,1)"); gr.addColorStop(0.3, "rgba(255,180,60,.55)"); gr.addColorStop(1, "rgba(255,150,40,0)");
+        gx.fillStyle = gr; gx.fillRect(0, 0, 128, 128);
+        var glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(gc), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+        glow.scale.set(16, 16, 1); scene.add(glow);
+        scene.add(new THREE.PointLight(0xffffff, 1.5, 0));
+        scene.add(new THREE.AmbientLight(0xffffff, 0.12));
+        var sl = label("太阳", "#F2B544", 1.1); sl.position.set(0, 4.6, 0); scene.add(sl);
+        // 轨道
+        var op = [];
+        for (var a = 0; a <= 360; a += 1) op.push(orbitPos(a));
+        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(op), new THREE.LineBasicMaterial({ color: 0x2ec4b6, transparent: true, opacity: 0.6 })));
+        // 二分二至、近日点、远日点
+        var marks = EV.map(function (e) { return [e[0] + 180, e[1] + " " + fmt(evDay(e[0]) + 20 / 24), "#E6ECF5", true]; });
+        marks.push([PSI_P, "近日点 1月初", "#F2B544"], [PSI_P + 180, "远日点 7月初", "#F2B544"]);
+        marks.forEach(function (m) {
+          var p = orbitPos(m[0]), dot = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 8), new THREE.MeshBasicMaterial({ color: m[2] === "#F2B544" ? 0xf2b544 : 0x2ec4b6 }));
+          dot.position.copy(p); scene.add(dot);
+          var l = label(m[1], m[2], 1.0), out = p.clone().setLength(p.length() + 3.4); l.position.set(out.x, m[3] ? -1.6 : 1.4, out.z); scene.add(l);
+          if (m[3]) {
+            var g = new THREE.Line(new THREE.BufferGeometry().setFromPoints([p.clone().addScaledVector(AXIS, -2.2), p.clone().addScaledVector(AXIS, 2.6)]), new THREE.LineBasicMaterial({ color: 0x8a97ad, transparent: true, opacity: 0.55 }));
+            scene.add(g); aux.push(g);
+          }
+        });
+        // 地球：倾斜组（地轴方向不变）+ 自转网格
+        tiltG = new THREE.Group(); tiltG.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), AXIS); scene.add(tiltG);
+        earth = new THREE.Mesh(new THREE.SphereGeometry(ER, 64, 40), new THREE.MeshLambertMaterial({ map: earthTexture() }));
+        tiltG.add(earth);
+        tiltG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -ER * 1.6, 0), new THREE.Vector3(0, ER * 3.2, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
+        var eq = new THREE.Mesh(new THREE.TorusGeometry(ER * 1.01, 0.025, 6, 96), new THREE.MeshBasicMaterial({ color: 0x5aa9ff }));
+        eq.rotation.x = Math.PI / 2; tiltG.add(eq); aux.push(eq);
+        var ns = label("北极星方向 ↑", "#F2B544", 0.9); ns.position.set(0, ER * 3.2 + 0.7, 0); tiltG.add(ns);
+        line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineDashedMaterial({ color: 0xf2b544, dashSize: 0.6, gapSize: 0.5, transparent: true, opacity: 0.5 }));
+        scene.add(line); aux.push(line);
+        $("x-lab").onchange = function () { var on = this.checked; labels.forEach(function (l) { l.visible = on; }); loop(); };
+        $("x-aux").onchange = function () { var on = this.checked; aux.forEach(function (l) { l.visible = on; }); loop(); };
+        if (window.ResizeObserver) new ResizeObserver(resize).observe($("x-stage")); else window.addEventListener("resize", resize);
+        resize(); place(); build2(); build3(); build4(); build5(); build6(); build7();
+      }
+      function place() {
+        if (!tiltG) return;
+        var p = orbitPos(sun(day).lam + 180);
+        tiltG.position.copy(p);
+        earth.rotation.y = day * Math.PI * 2 * 0.25;
+        line.geometry.setFromPoints([new THREE.Vector3(), p]); line.computeLineDistances();
+      }
+      function resize() {
+        if (!renderer) return;
+        var s = $("x-stage"), w = s.clientWidth, h = $("x-gl").clientHeight || s.clientHeight;
+        renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+        loop();
+      }
+      function resetView() {
+        if (!camera) return;
+        if (cur === 1 && g2) return view2("side");
+        if (cur === 2 && g3) return view3(v3);
+        if (cur === 3 && g4) return view4();
+        if (cur === 4 && g5) return view5();
+        if (cur === 5 && g6) return view6();
+        if (cur === 6 && g7) return view6();
+        var narrow = window.innerWidth < 768;
+        if (cur === 7) { // 第 8 章：公转轨道俯视
+          camera.position.set(0, narrow ? 82 : 58, 0.01); camera.lookAt(0, 0, 0);
+          if (controls) { controls.target.set(0, 0, 0); controls.update(); }
+          return loop();
+        }
+        camera.position.set(0, narrow ? 46 : 30, narrow ? 64 : 42);
+        camera.lookAt(0, 0, 0);
+        if (controls) { controls.target.set(0, 0, 0); controls.update(); }
+        loop();
+      }
+      function frame(t) {
+        raf = 0;
+        if (failed || cur > 7 || document.hidden) return; // 其它章暂停渲染
+        if (cur === 1) tick2(t);
+        else if (cur === 2) tick3(t);
+        else if (cur === 3) tick4(t);
+        else if (cur === 4) tick5(t);
+        else if (playing) {
+          if (lastT) day = Math.min(364, day + ((t - lastT) / 1000) * 18);
+          lastT = t;
+          $("x-day").value = Math.floor(day);
+          updateHud(); place();
+          if (cur === 7) upd8();
+          if (day >= 364) setPlay(false);
+        }
+        if (controls) controls.update();
+        renderer.render(scene, camera);
+        if (!raf && (((cur === 0 || cur === 7) && playing) || (cur === 1 && !pause2) || (cur === 2 && play3) || (cur === 3 && play4) || (cur === 4 && play5) || dampFrames-- > 0)) raf = requestAnimationFrame(frame);
+      }
+      var dampFrames = 0;
+      function loop() {
+        dampFrames = 40;
+        if (!raf && !failed && renderer && cur <= 7) raf = requestAnimationFrame(frame);
+      }
+      document.addEventListener("visibilitychange", loop);
+
+      /* ---------- 第 2 章：地球自转（复用同一场景与渲染器） ---------- */
+      var g2, spin2, arcN, arcS, latRing, main1 = [], in2 = false, view = "side", pause2 = false, spd2 = 1, lt2 = 0, R2 = 5;
+      var Y2 = null;
+      function circle(r, y, col, op) {
+        var p = [];
+        for (var k = 0; k <= 96; k++) { var t = (k / 96) * Math.PI * 2; p.push(new THREE.Vector3(r * Math.cos(t), y, r * Math.sin(t))); }
+        return new THREE.Line(new THREE.BufferGeometry().setFromPoints(p), new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: op }));
+      }
+      function arc(h, txt) {
+        var g = new THREE.Group(), r = R2 * 1.3, p = [], teal = new THREE.MeshBasicMaterial({ color: 0x2ec4b6 }), e = Math.PI * 1.5;
+        for (var k = 0; k <= 60; k++) { var t = (k / 60) * e; p.push(new THREE.Vector3(r * Math.cos(t), h, -r * Math.sin(t))); }
+        g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(p), 80, 0.09, 8), teal));
+        var cn = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1, 16), teal);
+        cn.position.set(r * Math.cos(e), h, -r * Math.sin(e));
+        cn.quaternion.setFromUnitVectors(Y2, new THREE.Vector3(-Math.sin(e), 0, -Math.cos(e)));
+        g.add(cn);
+        var l = label(txt, "#2EC4B6", 1.5); l.position.set(r * 0.95, h, r * 0.95); g.add(l);
+        g.visible = false; g2.add(g);
+        return g;
+      }
+      function build2() {
+        Y2 = new THREE.Vector3(0, 1, 0);
+        var gold = new THREE.MeshBasicMaterial({ color: 0xf2b544 });
+        main1 = scene.children.filter(function (c) { return !(c instanceof THREE.Points); });
+        g2 = new THREE.Group(); g2.visible = false; scene.add(g2);
+        var dl = new THREE.DirectionalLight(0xffffff, 1.1); dl.position.set(10, 6, 12);
+        g2.add(dl, new THREE.AmbientLight(0xffffff, 0.35));
+        spin2 = new THREE.Group(); g2.add(spin2);
+        spin2.add(new THREE.Mesh(new THREE.SphereGeometry(R2, 64, 40), earth.material));
+        g2.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R2 * 1.5, 0), new THREE.Vector3(0, R2 * 1.5, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
+        [["北极 N", 1], ["南极 S", -1]].forEach(function (a) { var l = label(a[0], "#E6ECF5", 1.1); l.position.set(1.8, a[1] * R2 * 1.5, 0); g2.add(l); });
+        var al = label("地轴", "#F2B544", 0.9); al.position.set(-1.6, R2 * 1.3, 0); g2.add(al);
+        [0, 30, 60, 90].forEach(function (d) {
+          var f = d * RAD, c = Math.cos(f), s = Math.sin(f), v = Math.round(1670 * c), L = 4 * c;
+          if (d < 90) { var ring = circle(R2 * c * 1.003, R2 * s * 1.003, 0xf2b544, 0.35); g2.add(ring); aux.push(ring); }
+          var p = new THREE.Vector3(R2 * c, R2 * s, 0).multiplyScalar(1.03);
+          if (d === 90) { var dot = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 12), gold); dot.position.copy(p); spin2.add(dot); }
+          else {
+            var ar = new THREE.Group(), h = Math.min(0.8, L * 0.4);
+            var sh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, L - h, 10), gold); sh.position.y = (L - h) / 2;
+            var cn = new THREE.Mesh(new THREE.ConeGeometry(0.26, h, 16), gold); cn.position.y = L - h / 2;
+            ar.add(sh, cn); ar.position.copy(p); ar.quaternion.setFromUnitVectors(Y2, new THREE.Vector3(0, 0, -1)); spin2.add(ar);
+          }
+          var l = label(d + "° · " + v + " km/h", "#F2B544", 0.75);
+          l.material.depthTest = true;
+          l.position.copy(p).multiplyScalar(1.1).add(new THREE.Vector3(0, 0.3, d === 90 ? 0 : 1.6)); spin2.add(l);
+        });
+        latRing = circle(1, 0, 0x2ec4b6, 1); g2.add(latRing);
+        arcN = arc(R2 + 0.3, "逆时针"); arcS = arc(-R2 - 0.3, "顺时针");
+      }
+      function view2(v) {
+        view = v;
+        var k = window.innerWidth < 768 ? 1.45 : 1;
+        camera.position.set(0, v === "side" ? 4 * k : v === "n" ? 24 * k : -24 * k, v === "side" ? 22 * k : 0.01);
+        camera.lookAt(0, 0, 0);
+        if (controls) { controls.target.set(0, 0, 0); controls.update(); }
+        arcN.visible = v === "n"; arcS.visible = v === "s";
+        [].forEach.call(document.querySelectorAll("[data-v]"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-v") === v ? "true" : "false"); });
+        loop();
+      }
+      function mode2(on) {
+        if (!g2 || on === in2) return;
+        in2 = on;
+        if (!in3) main1.forEach(function (o) { if (on) { o.userData.v = o.visible; o.visible = false; } else o.visible = o.userData.v !== false; });
+        g2.visible = on; lt2 = 0;
+        $("x-gl").setAttribute("aria-label", on ? "地球自转三维演示" : "地球绕太阳公转的三维演示");
+        if (on) view2(view); else resetView();
+      }
+      function tick2(t) {
+        if (!pause2 && lt2) spin2.rotation.y += ((t - lt2) / 1000) * 0.5 * spd2;
+        lt2 = pause2 ? 0 : t;
+      }
+      function upd2() {
+        var d = +$("x-lat").value, f = d * RAD, v = Math.round(1670 * Math.cos(f)), pole = d === 90;
+        $("x-latout").textContent = d + "°";
+        $("x-v").textContent = pole ? "0" : v + " km/h";
+        $("x-w").textContent = pole ? "0" : "15°/h";
+        $("x-pole").hidden = !pole;
+        $("x-hd-main").textContent = "纬度 " + d + "° · " + (pole ? "角速度、线速度均为 0" : v + " km/h");
+        if (latRing) {
+          var r = R2 * Math.cos(f) * 1.01;
+          latRing.visible = !pole; latRing.scale.set(r, 1, r); latRing.position.y = R2 * Math.sin(f) * 1.01;
+        }
+        loop();
+      }
+      $("x-lat").addEventListener("input", upd2);
+      $("x-spd").addEventListener("input", function () { spd2 = +this.value; $("x-spdout").textContent = "×" + spd2; });
+      $("x-pause").onclick = function () {
+        pause2 = !pause2; lt2 = 0;
+        this.textContent = pause2 ? "▶ 继续" : "❚❚ 暂停";
+        loop();
+      };
+      [].forEach.call(document.querySelectorAll("[data-v]"), function (b) { b.onclick = function () { if (g2) view2(b.getAttribute("data-v")); }; });
+
+      /* ---------- 第 3 章：昼夜交替与晨昏线（复用同一场景、渲染器与地球纹理） ---------- */
+      var g3, spin3, term3, arc3, cities3 = [], in3 = false, v3 = "side", play3 = false, lt3 = 0, d3 = 171, t3 = 12, R3 = 5, SUN3 = null, TMP3 = null;
+      var CITY3 = [["北京", 116, 39.9], ["伦敦", 0, 51.5], ["纽约", -74, 40.7]];
+      function hm(t) { var m = Math.round(t * 60); return pad(Math.floor(m / 60)) + ":" + pad(m % 60); }
+      function draw3(sp, text, color) {
+        var c = sp.material.map.image, x = c.getContext("2d");
+        x.clearRect(0, 0, c.width, c.height);
+        x.font = '500 46px "PingFang SC","Microsoft YaHei",sans-serif'; x.textAlign = "center"; x.textBaseline = "middle";
+        x.lineWidth = 8; x.strokeStyle = "rgba(7,11,20,.85)"; x.strokeText(text, 256, 48);
+        x.fillStyle = color; x.fillText(text, 256, 48);
+        sp.material.map.needsUpdate = true;
+      }
+      function half3(col, sgn) {
+        var p = [];
+        for (var k = 0; k <= 48; k++) { var t = (k / 48 - 0.5) * Math.PI; p.push(new THREE.Vector3(0, R3 * 1.01 * Math.sin(t), sgn * R3 * 1.01 * Math.cos(t))); }
+        return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(p), 64, 0.07, 8), new THREE.MeshBasicMaterial({ color: col }));
+      }
+      function build3() {
+        SUN3 = new THREE.Vector3(1, 0, 0); TMP3 = new THREE.Vector3();
+        g3 = new THREE.Group(); g3.visible = false; scene.add(g3);
+        var mat = new THREE.ShaderMaterial({
+          uniforms: { map: { value: earth.material.map }, sunDir: { value: SUN3 } },
+          vertexShader: "varying vec2 vUv; varying vec3 vN; void main(){ vUv = uv; vN = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
+          fragmentShader: "uniform sampler2D map; uniform vec3 sunDir; varying vec2 vUv; varying vec3 vN; void main(){ float d = dot(normalize(vN), sunDir); vec3 c = texture2D(map, vUv).rgb; vec3 day = c * (0.55 + 0.6 * max(d, 0.0)); vec3 night = c * 0.13 + vec3(0.01, 0.02, 0.07); gl_FragColor = vec4(mix(night, day, smoothstep(-0.04, 0.04, d)), 1.0); }"
+        });
+        spin3 = new THREE.Group(); g3.add(spin3);
+        spin3.add(new THREE.Mesh(new THREE.SphereGeometry(R3, 64, 40), mat));
+        g3.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R3 * 1.4, 0), new THREE.Vector3(0, R3 * 1.4, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
+        var eq = circle(R3 * 1.004, 0, 0x5aa9ff, 0.7); g3.add(eq); aux.push(eq);
+        var nl = label("北极 N", "#E6ECF5", 1); nl.position.set(1.6, R3 * 1.4, 0); g3.add(nl);
+        CITY3.forEach(function (c) {
+          var f = c[2] * RAD, l = c[1] * RAD, p = new THREE.Vector3(Math.cos(f) * Math.cos(l), Math.sin(f), -Math.cos(f) * Math.sin(l)).multiplyScalar(R3 * 1.005);
+          var dot = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+          dot.position.copy(p); spin3.add(dot);
+          var lb = label(c[0], "#E6ECF5", 0.8); lb.position.copy(p).multiplyScalar(1.13); spin3.add(lb); cities3.push(lb);
+        });
+        // 晨昏线：垂直于太阳光的大圆；z>0 一侧随自转由夜入昼 = 晨线
+        term3 = new THREE.Group(); g3.add(term3);
+        term3.add(half3(0x2ec4b6, 1), half3(0xff8a3d, -1));
+        var a = label("晨线", "#2EC4B6", 1.2); a.position.set(0, R3 * 0.6, R3 * 1.05); term3.add(a);
+        var b = label("昏线", "#FF8A3D", 1.2); b.position.set(0, R3 * 0.6, -R3 * 1.05); term3.add(b);
+        [[0, 0], [0, 3], [0, -3], [3, 0], [-3, 0]].forEach(function (o) {
+          term3.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R3 + 5.5, o[0], o[1]), 4, 0xffd36b, 0.8, 0.45));
+        });
+        var sl = label("太阳光（平行光）", "#F2B544", 1); sl.position.set(R3 + 4, 4.4, 0); term3.add(sl);
+        arc3 = arc(R3 + 0.3, "逆时针自转"); g3.add(arc3);
+      }
+      function view3(v) {
+        v3 = v;
+        var k = window.innerWidth < 768 ? 1.45 : 1;
+        if (v === "n") camera.position.set(0, 30 * k, 0.01); else camera.position.set(-6 * k, 7 * k, 26 * k);
+        camera.lookAt(0, 0, 0);
+        if (controls) { controls.target.set(0, 0, 0); controls.update(); }
+        if (arc3) arc3.visible = v === "n";
+        [].forEach.call(document.querySelectorAll("[data-v3]"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-v3") === v ? "true" : "false"); });
+        loop();
+      }
+      function mode3(on) {
+        if (!g3 || on === in3) return;
+        in3 = on;
+        if (!in2) main1.forEach(function (o) { if (on) { o.userData.v = o.visible; o.visible = false; } else o.visible = o.userData.v !== false; });
+        g3.visible = on; setPlay3(false);
+        $("x-gl").setAttribute("aria-label", on ? "昼夜交替与晨昏线三维演示" : "地球绕太阳公转的三维演示");
+        if (on) view3(v3); else resetView();
+      }
+      function upd3() {
+        var dec = 23.44 * Math.sin((2 * Math.PI * (d3 + 1 - 80)) / 365), dr = dec * RAD, th = ((t3 - 12) * 15 - 120) * RAD;
+        $("x-d3out").textContent = fmt(d3);
+        $("x-t3out").textContent = hm(t3);
+        $("x-dec").textContent = Math.abs(dec).toFixed(1) + "°" + (Math.abs(dec) < 0.05 ? "" : dec > 0 ? "N" : "S");
+        $("x-hd-main").textContent = fmt(d3) + " · 北京时间 " + hm(t3);
+        CITY3.forEach(function (c, i) {
+          var lt = (((t3 - (120 - c[1]) / 15) % 24) + 24) % 24, a = c[1] * RAD + th, f = c[2] * RAD;
+          var isDay = Math.cos(f) * Math.cos(a) * Math.cos(dr) + Math.sin(f) * Math.sin(dr) > 0, dn = isDay ? "昼" : "夜";
+          $("x-c" + i).textContent = hm(lt) + " · " + dn;
+          if (g3) draw3(cities3[i], c[0] + " " + hm(lt) + " " + dn, isDay ? "#F2B544" : "#B8C4DA");
+        });
+        if (g3) { SUN3.set(Math.cos(dr), Math.sin(dr), 0); term3.rotation.z = dr; spin3.rotation.y = th; }
+        loop();
+      }
+      function tick3(t) {
+        if (play3 && lt3) {
+          t3 = Math.min(24, t3 + ((t - lt3) / 1000) * 2);
+          $("x-t3").value = t3; upd3();
+          if (t3 >= 24) setPlay3(false);
+        }
+        lt3 = play3 ? t : 0;
+        var on = $("x-lab").checked;
+        cities3.forEach(function (l) { l.getWorldPosition(TMP3); l.visible = on && TMP3.dot(camera.position) > 0; });
+      }
+      function setPlay3(on) {
+        play3 = on; lt3 = 0;
+        if (on && t3 >= 24) t3 = 0;
+        $("x-play3").textContent = on ? "❚❚ 暂停" : "▶ 播放一天";
+        loop();
+      }
+      $("x-d3").addEventListener("input", function () { d3 = +this.value; upd3(); });
+      $("x-t3").addEventListener("input", function () { t3 = +this.value; setPlay3(false); upd3(); });
+      $("x-play3").onclick = function () { setPlay3(!play3); };
+      [].forEach.call(document.querySelectorAll("[data-v3]"), function (b) { b.onclick = function () { if (g3) view3(b.getAttribute("data-v3")); }; });
+
+      /* ---------- 第 4 章：地球公转（复用同一场景、太阳与地球纹理） ---------- */
+      var g4, hub4, tilt4, earth4, arc4, arcL4, sw4, line4, DJ4, Y4, in4 = false, play4 = false, lt4 = 0, day4 = 0, ob4 = 23.44;
+      var E4 = 0.12, A4 = 20, ER4 = 1.4, PH4 = 2, RQ4 = ER4 * 2.6; // 图中偏心率夸大为 0.12；1月3日过近日点
+      function kep4(d) { // 图中轨道按开普勒方程运行：相等时间扫过相等面积
+        var M = (2 * Math.PI * (d - PH4)) / 365.25, E = M;
+        for (var k = 0; k < 6; k++) E -= (E - E4 * Math.sin(E) - M) / (1 - E4 * Math.cos(E));
+        var x = A4 * (Math.cos(E) - E4), y = A4 * Math.sqrt(1 - E4 * E4) * Math.sin(E), f = PSI_P * RAD;
+        return new THREE.Vector3(x * Math.cos(f) - y * Math.sin(f), 0, -(x * Math.sin(f) + y * Math.cos(f)));
+      }
+      function real4(d) { // 真实轨道读数（e = 0.0167）
+        var e = 0.0167, M = (2 * Math.PI * (d - PH4)) / 365.25, nu = M + 2 * e * Math.sin(M) + 1.25 * e * e * Math.sin(2 * M), c = 1 + e * Math.cos(nu);
+        return { r: (1.496 * (1 - e * e)) / c, w: (0.98561 * c * c) / Math.pow(1 - e * e, 1.5) };
+      }
+      function dm(x) { var D = Math.floor(x + 1e-9), m = Math.round((x - D) * 60); if (m === 60) { D++; m = 0; } return D + "°" + pad(m) + "′"; }
+      function geo4(p) { return new THREE.BufferGeometry().setFromPoints(p); }
+      function build4() {
+        Y4 = new THREE.Vector3(0, 1, 0);
+        g4 = new THREE.Group(); g4.visible = false; scene.add(g4);
+        var op = [];
+        for (var d = 0; d <= 366; d += 0.5) op.push(kep4(d));
+        g4.add(new THREE.Line(geo4(op), new THREE.LineBasicMaterial({ color: 0x2ec4b6, transparent: true, opacity: 0.75 })));
+        // 黄道面：金色半透明圆盘 + 环
+        var disc = new THREE.Mesh(new THREE.CircleGeometry(27, 96), new THREE.MeshBasicMaterial({ color: 0xf2b544, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false }));
+        disc.rotation.x = -Math.PI / 2; g4.add(disc, circle(27, 0, 0xf2b544, 0.55));
+        var el = label("黄道面", "#F2B544", 1.1), ep = kep4(PH4 + 91).setLength(29); el.position.set(ep.x, 0.8, ep.z); g4.add(el);
+        // 长轴：近日点—太阳—远日点
+        var pp = kep4(PH4), ap = kep4(PH4 + 182.6);
+        g4.add(new THREE.Line(geo4([pp, ap]), new THREE.LineBasicMaterial({ color: 0x8a97ad, transparent: true, opacity: 0.4 })));
+        // 近日点、远日点、二分二至
+        var mk = EV.map(function (e) { var dd = evDay(e[0]); return [dd, e[1] + " " + fmt(dd + 20 / 24), "#E6ECF5"]; });
+        mk.push([PH4, "近日点 1月初", "#F2B544"], [184, "远日点 7月初", "#F2B544"]);
+        mk.forEach(function (m) {
+          var p = kep4(m[0]), gold = m[2] === "#F2B544", dot = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 8), new THREE.MeshBasicMaterial({ color: gold ? 0xf2b544 : 0x2ec4b6 }));
+          dot.position.copy(p);
+          var l = label(m[1], m[2], 1), o = p.clone().setLength(p.length() + 3.6);
+          l.position.set(o.x, gold ? 1.5 : -1.6, o.z); g4.add(dot, l);
+        });
+        // 每 30 天扫过的扇形（交替颜色）
+        sw4 = new THREE.Group(); sw4.visible = false; g4.add(sw4);
+        for (var k = 0; k < 12; k++) {
+          var v = [];
+          for (var s = 0; s < 30; s++) { var a = kep4(PH4 + k * 30 + s), b = kep4(PH4 + k * 30 + s + 1); v.push(0, 0.03, 0, a.x, 0.03, a.z, b.x, 0.03, b.z); }
+          var sg = new THREE.BufferGeometry(); sg.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+          sw4.add(new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ color: k % 2 ? 0xf2b544 : 0x2ec4b6, transparent: true, opacity: 0.32, side: THREE.DoubleSide, depthWrite: false })));
+        }
+        // 日地连线
+        line4 = new THREE.Line(geo4([new THREE.Vector3(), new THREE.Vector3(1, 0, 0)]), new THREE.LineDashedMaterial({ color: 0xf2b544, dashSize: 0.6, gapSize: 0.5, transparent: true, opacity: 0.55 }));
+        g4.add(line4);
+        // 地球：地轴倾斜方向不变（夏至时北极倾向太阳）
+        DJ4 = kep4(evDay(90)).negate().normalize();
+        hub4 = new THREE.Group(); g4.add(hub4);
+        hub4.add(circle(RQ4, 0, 0xf2b544, 0.95));
+        tilt4 = new THREE.Group(); hub4.add(tilt4);
+        earth4 = new THREE.Mesh(new THREE.SphereGeometry(ER4, 48, 32), earth.material); tilt4.add(earth4);
+        tilt4.add(new THREE.Line(geo4([new THREE.Vector3(0, -ER4 * 1.8, 0), new THREE.Vector3(0, ER4 * 3, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
+        var ql = label("地轴 → 北极星附近", "#F2B544", 0.85); ql.position.set(0, ER4 * 3 + 0.6, 0); tilt4.add(ql);
+        var eqd = new THREE.Mesh(new THREE.CircleGeometry(RQ4, 64), new THREE.MeshBasicMaterial({ color: 0x5aa9ff, transparent: true, opacity: 0.2, side: THREE.DoubleSide, depthWrite: false }));
+        eqd.rotation.x = -Math.PI / 2; tilt4.add(eqd, circle(RQ4, 0, 0x5aa9ff, 0.95));
+        var eql = label("赤道面", "#5AA9FF", 0.85); eql.position.set(0, 0.5, -RQ4 - 1.2); tilt4.add(eql);
+        arc4 = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0xf2b544 })); hub4.add(arc4);
+        arcL4 = label("黄赤交角 23°26′", "#F2B544", 1); hub4.add(arcL4);
+        setOb4();
+      }
+      function setOb4() {
+        var e = ob4 * RAD, r = RQ4 * 1.02, p = [];
+        tilt4.quaternion.setFromUnitVectors(Y4, Y4.clone().multiplyScalar(Math.cos(e)).addScaledVector(DJ4, Math.sin(e)));
+        for (var k = 0; k <= 24; k++) { var t = (e * k) / 24; p.push(DJ4.clone().multiplyScalar(r * Math.cos(t)).addScaledVector(Y4, -r * Math.sin(t))); }
+        arc4.geometry.dispose();
+        arc4.geometry = ob4 > 0.5 ? new THREE.TubeGeometry(new THREE.CatmullRomCurve3(p), 32, 0.07, 6) : new THREE.BufferGeometry();
+        arcL4.position.copy(p[12]).multiplyScalar(1 + 2.6 / r).addScaledVector(Y4, -0.4);
+        draw3(arcL4, "黄赤交角 " + dm(ob4), "#F2B544");
+      }
+      function view4() {
+        var k = window.innerWidth < 768 ? 1.45 : 1;
+        camera.position.set(0, 30 * k, 42 * k); camera.lookAt(0, 0, 0);
+        if (controls) { controls.target.set(0, 0, 0); controls.update(); }
+        loop();
+      }
+      function mode4(on) {
+        if (!g4 || on === in4) return;
+        in4 = on;
+        main1.slice(5).forEach(function (o) { if (on) { o.userData.v4 = o.visible; o.visible = false; } else o.visible = o.userData.v4 !== false; }); // 保留太阳、光源
+        g4.visible = on; setPlay4(false);
+        $("x-gl").setAttribute("aria-label", on ? "地球公转与黄赤交角三维演示" : "地球绕太阳公转的三维演示");
+        if (on) view4(); else resetView();
+      }
+      function upd4() {
+        var r = real4(day4);
+        $("x-d4out").textContent = $("x-date4").textContent = fmt(day4);
+        $("x-dist4").textContent = r.r.toFixed(3) + " 亿 km";
+        $("x-w4").textContent = r.w.toFixed(3) + "°/日";
+        $("x-half4").textContent = sun(day4).lam < 180 ? "夏半年" : "冬半年";
+        $("x-hd-main").textContent = fmt(day4) + " · " + r.r.toFixed(3) + " 亿 km";
+        if (hub4) {
+          var p = kep4(day4);
+          hub4.position.copy(p); earth4.rotation.y = day4 * Math.PI * 0.5;
+          line4.geometry.setFromPoints([new THREE.Vector3(), p]); line4.computeLineDistances();
+        }
+        loop();
+      }
+      function updOb4() {
+        var t = dm(ob4), c = dm(90 - ob4), d = ob4 - 23.44;
+        $("x-obout").textContent = $("x-trop").textContent = t; $("x-circ").textContent = c;
+        $("x-obtip").textContent = Math.abs(d) < 0.01 ? "实际值 23°26′：回归线 23°26′，极圈 66°34′。拖动滑块看五带范围如何变化。"
+          : "交角" + (d > 0 ? "增大" : "减小") + "到 " + t + "：回归线移到 " + t + "，极圈移到 " + c + "；热带、寒带范围" + (d > 0 ? "扩大" : "缩小") + "，温带范围" + (d > 0 ? "缩小" : "扩大") + "。";
+        if (g4) setOb4();
+        loop();
+      }
+      function tick4(t) {
+        if (play4 && lt4) {
+          day4 = Math.min(364, day4 + ((t - lt4) / 1000) * 18);
+          $("x-d4").value = Math.floor(day4); upd4();
+          if (day4 >= 364) setPlay4(false);
+        }
+        lt4 = play4 ? t : 0;
+      }
+      function setPlay4(on) {
+        play4 = on; lt4 = 0;
+        if (on && day4 >= 364) day4 = 0;
+        $("x-play4").textContent = on ? "❚❚ 暂停" : "▶ 播放一年";
+        loop();
+      }
+      $("x-d4").addEventListener("input", function () { day4 = +this.value; setPlay4(false); upd4(); });
+      $("x-play4").onclick = function () { setPlay4(!play4); };
+      $("x-ob").addEventListener("input", function () { ob4 = +this.value; updOb4(); });
+      $("x-sw4").onchange = function () { if (sw4) sw4.visible = this.checked; loop(); };
+
+      /* ---------- 第 5 章：太阳直射点的移动（复用同一场景、渲染器与地球纹理） ---------- */
+      var g5, tilt5, dot5, dotL5, in5 = false, play5 = false, lt5 = 0, d5 = 172, R5 = 4.5, EV5 = [80, 173, 266, 356, 445];
+      function dec5(n) { // 正弦形状，按二分二至日（第 80、173、266、356 天）分段校准
+        if (n < 80) n += 365;
+        var k = 0; while (n >= EV5[k + 1]) k++;
+        return 23.44 * Math.sin((Math.PI / 2) * (k + (n - EV5[k]) / (EV5[k + 1] - EV5[k])));
+      }
+      function latStr5(v) { var a = Math.abs(v); return a < 0.05 ? "0°" : (a > 23.43 ? "23°26′" : a.toFixed(1) + "°") + (v > 0 ? "N" : "S"); }
+      function build5() {
+        g5 = new THREE.Group(); g5.visible = false; scene.add(g5);
+        var mat = spin3.children[0].material.clone();
+        mat.uniforms.map.value = earth.material.map; mat.uniforms.sunDir.value = new THREE.Vector3(1, 0, 0);
+        tilt5 = new THREE.Group(); g5.add(tilt5);
+        tilt5.add(new THREE.Mesh(new THREE.SphereGeometry(R5, 64, 40), mat));
+        tilt5.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R5 * 1.35, 0), new THREE.Vector3(0, R5 * 1.35, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
+        var nl = label("北极 N", "#E6ECF5", 0.9); nl.position.set(0, R5 * 1.35 + 0.6, 0); tilt5.add(nl);
+        [[66.56, "北极圈 66°34′N", 0xb8c4da, "#B8C4DA"], [23.44, "北回归线 23°26′N", 0xf2b544, "#F2B544"], [0, "赤道 0°", 0x5aa9ff, "#5AA9FF"], [-23.44, "南回归线 23°26′S", 0xf2b544, "#F2B544"], [-66.56, "南极圈 66°34′S", 0xb8c4da, "#B8C4DA"]].forEach(function (z) {
+          var f = z[0] * RAD, c = Math.cos(f) * R5 * 1.006, s = Math.sin(f) * R5 * 1.006;
+          tilt5.add(circle(c, s, z[2], 0.95));
+          var l = label(z[1], z[3], 0.75); l.position.set(-c - 2.3, s, 0); tilt5.add(l);
+        });
+        dot5 = new THREE.Group(); tilt5.add(dot5);
+        dot5.add(new THREE.Mesh(new THREE.SphereGeometry(0.26, 16, 12), new THREE.MeshBasicMaterial({ color: 0xff4d4d })));
+        var gc = document.createElement("canvas"); gc.width = gc.height = 64;
+        var gx = gc.getContext("2d"), gr = gx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        gr.addColorStop(0, "rgba(255,90,80,1)"); gr.addColorStop(0.35, "rgba(255,60,60,.5)"); gr.addColorStop(1, "rgba(255,40,40,0)");
+        gx.fillStyle = gr; gx.fillRect(0, 0, 64, 64);
+        var glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(gc), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+        glow.scale.set(2.2, 2.2, 1); dot5.add(glow);
+        dotL5 = label("直射点", "#FF6B66", 0.85); dotL5.position.set(1.2, 0.9, 0); dot5.add(dotL5);
+        [-3.4, -1.7, 0, 1.7, 3.4].forEach(function (y) {
+          g5.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R5 + 7, y, 0), 5, 0xffd36b, 0.7, 0.4));
+        });
+        var sl = label("太阳光（平行光）", "#F2B544", 0.9); sl.position.set(R5 + 4.5, 4.4, 0); g5.add(sl);
+      }
+      function view5() {
+        var k = window.innerWidth < 768 ? 1.5 : 1;
+        camera.position.set(1.5, 1.5 * k, 27 * k); camera.lookAt(1.5, 0, 0);
+        if (controls) { controls.target.set(1.5, 0, 0); controls.update(); }
+        loop();
+      }
+      function mode5(on) {
+        if (!g5 || on === in5) return;
+        in5 = on;
+        main1.forEach(function (o) { if (on) { o.userData.v5 = o.visible; o.visible = false; } else o.visible = o.userData.v5 !== false; });
+        g5.visible = on; setPlay5(false);
+        $("x-gl").setAttribute("aria-label", on ? "太阳直射点移动三维演示" : "地球绕太阳公转的三维演示");
+        if (on) view5(); else resetView();
+      }
+      function draw5(n, v) {
+        var cv = $("x-cv5"), w = cv.clientWidth, h = cv.clientHeight, r = Math.min(window.devicePixelRatio || 1, 2);
+        if (!w || !h) return;
+        cv.width = w * r; cv.height = h * r;
+        var x = cv.getContext("2d"), cs = getComputedStyle(document.documentElement), C = function (k) { return cs.getPropertyValue(k).trim(); };
+        var L = 56, Rm = 12, T = 26, B = 22, X = function (d) { return L + ((d - 1) / 364) * (w - L - Rm); }, Y = function (a) { return T + ((23.44 - a) / 46.88) * (h - T - B); };
+        x.setTransform(r, 0, 0, r, 0, 0);
+        x.font = '12px system-ui,"PingFang SC","Microsoft YaHei",sans-serif'; x.textBaseline = "middle";
+        x.fillStyle = C("--x-tx2"); x.fillText("直射点纬度 δ ≈ 23.44°·sin(2π(d−80)/365)", 8, 13);
+        x.strokeStyle = C("--x-tx2"); x.globalAlpha = 0.5; x.setLineDash([3, 4]); x.lineWidth = 1;
+        [23.44, 0, -23.44].forEach(function (a) { x.beginPath(); x.moveTo(L, Y(a)); x.lineTo(w - Rm, Y(a)); x.stroke(); });
+        x.setLineDash([]); x.globalAlpha = 1; x.textAlign = "right";
+        [[23.44, "23°26′N"], [0, "0°"], [-23.44, "23°26′S"]].forEach(function (a) { x.fillText(a[1], L - 6, Y(a[0])); });
+        x.textAlign = "center";
+        for (var m = 0, s = 0; m < 12; s += ML[m], m++) x.fillText(m === 11 ? "12月" : m + 1, X(s + 1 + ML[m] / 2), h - 10);
+        x.strokeStyle = C("--x-ac"); x.lineWidth = 2; x.beginPath();
+        for (var d = 1; d <= 365; d++) x[d === 1 ? "moveTo" : "lineTo"](X(d), Y(dec5(d)));
+        x.stroke();
+        x.strokeStyle = C("--x-red"); x.globalAlpha = 0.45; x.beginPath(); x.moveTo(X(n), T - 4); x.lineTo(X(n), h - B); x.stroke(); x.globalAlpha = 1;
+        x.fillStyle = C("--x-red"); x.shadowColor = C("--x-red"); x.shadowBlur = 10;
+        x.beginPath(); x.arc(X(n), Y(v), 5, 0, Math.PI * 2); x.fill(); x.shadowBlur = 0;
+      }
+      function upd5() {
+        var n = Math.floor(d5) + 1, v = dec5(n), ls = latStr5(v), dir, hem;
+        dir = n === 173 ? "到达最北，转向南" : n === 356 ? "到达最南，转向北" : n > 173 && n < 356 ? "向南" : "向北";
+        hem = Math.abs(v) < 0.05 ? "赤道上（二分日）" : v > 0 ? "北半球" : "南半球";
+        $("x-d5out").textContent = $("x-date5").textContent = fmt(d5);
+        $("x-lat5").textContent = ls; $("x-dir5").textContent = dir; $("x-hem5").textContent = hem;
+        $("x-hd-main").textContent = fmt(d5) + " · 直射点 " + ls + " · " + dir;
+        [].forEach.call(document.querySelectorAll("[data-q5]"), function (b) { b.setAttribute("aria-pressed", +b.getAttribute("data-q5") === n - 1 ? "true" : "false"); });
+        draw5(n, v);
+        if (g5) {
+          var dr = v * RAD;
+          tilt5.rotation.z = -dr;
+          dot5.position.set(R5 * 1.01 * Math.cos(dr), R5 * 1.01 * Math.sin(dr), 0);
+          draw3(dotL5, "直射点 " + ls, "#FF6B66");
+        }
+        loop();
+      }
+      function tick5(t) {
+        if (play5 && lt5) {
+          d5 = Math.min(364, d5 + ((t - lt5) / 1000) * 24);
+          $("x-d5").value = Math.floor(d5); upd5();
+          if (d5 >= 364) setPlay5(false);
+        }
+        lt5 = play5 ? t : 0;
+      }
+      function setPlay5(on) {
+        play5 = on; lt5 = 0;
+        if (on && d5 >= 364) d5 = 0;
+        $("x-play5").textContent = on ? "❚❚ 暂停" : "▶ 播放一年";
+        loop();
+        if (on && failed) { setPlay5(false); }
+      }
+      $("x-d5").addEventListener("input", function () { d5 = +this.value; setPlay5(false); upd5(); });
+      $("x-play5").onclick = function () { setPlay5(!play5); };
+      [].forEach.call(document.querySelectorAll("[data-q5]"), function (b) { b.onclick = function () { d5 = +b.getAttribute("data-q5"); $("x-d5").value = d5; setPlay5(false); upd5(); }; });
+      window.addEventListener("resize", function () { if (cur === 4) upd5(); });
+      if (window.MutationObserver) new MutationObserver(function () { if (cur === 4) upd5(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+      /* ---------- 第 6 章：昼夜长短（复用同一场景、光照半球与晨昏线） ---------- */
+      var g6, tilt6, day6m, night6m, latL6, in6 = false, d6 = 172, la6 = 30, R6 = 4.5;
+      function dayLen(phi, dec) { // 昼长 = 2×arccos(−tanφ·tanδ)/15，含极昼/极夜
+        phi = Math.max(-89.9, Math.min(89.9, phi));
+        var x = -Math.tan(phi * RAD) * Math.tan(dec * RAD);
+        return x <= -1 ? 24 : x >= 1 ? 0 : (2 * Math.acos(x)) / RAD / 15;
+      }
+      function dur6(h) { var m = Math.round(h * 60); return Math.floor(m / 60) + "小时" + pad(m % 60) + "分"; }
+      function laStr6(v) { return v === 0 ? "0°" : Math.abs(v) + "°" + (v > 0 ? "N" : "S"); }
+      function build6() {
+        g6 = new THREE.Group(); g6.visible = false; scene.add(g6);
+        var mat = spin3.children[0].material.clone();
+        mat.uniforms.map.value = earth.material.map; mat.uniforms.sunDir.value = new THREE.Vector3(1, 0, 0);
+        tilt6 = new THREE.Group(); g6.add(tilt6);
+        tilt6.add(new THREE.Mesh(new THREE.SphereGeometry(R6, 64, 40), mat));
+        tilt6.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R6 * 1.35, 0), new THREE.Vector3(0, R6 * 1.35, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
+        var nl = label("北极 N", "#E6ECF5", 0.9); nl.position.set(0, R6 * 1.35 + 0.6, 0); tilt6.add(nl);
+        tilt6.add(circle(R6 * 1.004, 0, 0xb8c4da, 0.45));
+        var term = circle(R6 * 1.008, 0, 0xe6ecf5, 0.9); term.rotation.z = Math.PI / 2; g6.add(term); // 晨昏线 ⟂ 太阳光
+        var tl = label("晨昏线", "#E6ECF5", 0.85); tl.position.set(0.3, -R6 - 0.8, 0); g6.add(tl);
+        day6m = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0xf2b544 }));
+        night6m = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0x3d7bff }));
+        tilt6.add(day6m, night6m);
+        latL6 = label("30°N", "#F2B544", 0.85); tilt6.add(latL6);
+        [-3.4, -1.7, 0, 1.7, 3.4].forEach(function (y) {
+          g6.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R6 + 7, y, 0), 5, 0xffd36b, 0.7, 0.4));
+        });
+        var sl = label("太阳光（平行光）", "#F2B544", 0.9); sl.position.set(R6 + 4.5, 4.4, 0); g6.add(sl);
+      }
+      function arc6(m, t0, t1, rc, y) {
+        m.geometry.dispose();
+        if (rc < 0.02 || t1 - t0 < 0.01) { m.geometry = new THREE.BufferGeometry(); return; }
+        var p = [], n = Math.max(4, Math.ceil((t1 - t0) * 16));
+        for (var k = 0; k <= n; k++) { var t = t0 + ((t1 - t0) * k) / n; p.push(new THREE.Vector3(rc * Math.cos(t), y, rc * Math.sin(t))); }
+        m.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(p), n * 2, 0.09, 8);
+      }
+      function view6() {
+        var k = window.innerWidth < 768 ? 1.5 : 1;
+        camera.position.set(-3 * k, 7 * k, 24 * k); camera.lookAt(1.5, 0, 0);
+        if (controls) { controls.target.set(1.5, 0, 0); controls.update(); }
+        loop();
+      }
+      function mode6(on) {
+        if (!g6 || on === in6) return;
+        in6 = on;
+        main1.forEach(function (o) { if (on) { o.userData.v6 = o.visible; o.visible = false; } else o.visible = o.userData.v6 !== false; });
+        g6.visible = on;
+        $("x-gl").setAttribute("aria-label", on ? "昼夜长短三维演示：所选纬线的昼弧与夜弧" : "地球绕太阳公转的三维演示");
+        if (on) view6(); else resetView();
+      }
+      function draw6(dec) {
+        var cv = $("x-cv6"), w = cv.clientWidth, h = cv.clientHeight, r = Math.min(window.devicePixelRatio || 1, 2);
+        if (!w || !h) return;
+        cv.width = w * r; cv.height = h * r;
+        var x = cv.getContext("2d"), cs = getComputedStyle(document.documentElement), C = function (k) { return cs.getPropertyValue(k).trim(); };
+        var L = 40, Rm = 14, T = 26, B = 22, X = function (a) { return L + ((a + 90) / 180) * (w - L - Rm); }, Y = function (v) { return T + ((24 - v) / 24) * (h - T - B); };
+        x.setTransform(r, 0, 0, r, 0, 0);
+        x.font = '12px system-ui,"PingFang SC","Microsoft YaHei",sans-serif'; x.textBaseline = "middle";
+        x.fillStyle = C("--x-tx2"); x.fillText("昼长随纬度分布（小时）· " + fmt(d6), 8, 13);
+        x.strokeStyle = C("--x-tx2"); x.globalAlpha = 0.5; x.setLineDash([3, 4]); x.lineWidth = 1;
+        [0, 12, 24].forEach(function (v) { x.beginPath(); x.moveTo(L, Y(v)); x.lineTo(w - Rm, Y(v)); x.stroke(); });
+        x.setLineDash([]); x.globalAlpha = 1; x.textAlign = "right";
+        [0, 12, 24].forEach(function (v) { x.fillText(v + "h", L - 6, Y(v)); });
+        x.textAlign = "center";
+        [-90, -60, -30, 0, 30, 60, 90].forEach(function (a) { x.fillText(a === 0 ? "0°" : Math.abs(a) + (a > 0 ? "N" : "S"), X(a), h - 10); });
+        x.strokeStyle = C("--x-ac"); x.lineWidth = 2; x.beginPath();
+        for (var a = -90; a <= 90; a += 0.5) x[a === -90 ? "moveTo" : "lineTo"](X(a), Y(dayLen(a, dec)));
+        x.stroke();
+        var v = dayLen(la6, dec);
+        x.strokeStyle = C("--x-red"); x.globalAlpha = 0.45; x.beginPath(); x.moveTo(X(la6), T - 4); x.lineTo(X(la6), h - B); x.stroke(); x.globalAlpha = 1;
+        x.fillStyle = C("--x-red"); x.shadowColor = C("--x-red"); x.shadowBlur = 10;
+        x.beginPath(); x.arc(X(la6), Y(v), 5, 0, Math.PI * 2); x.fill(); x.shadowBlur = 0;
+      }
+      function upd6() {
+        var n = Math.floor(d6) + 1, dec = dec5(n), D = dayLen(la6, dec), ls = laStr6(la6), st;
+        st = D >= 24 ? "极昼：太阳终日不落" : D <= 0 ? "极夜：太阳终日不出" : Math.abs(D - 12) < 0.02 ? "昼夜平分" : D > 12 ? "昼长夜短" : "昼短夜长";
+        $("x-d6out").textContent = $("x-date6").textContent = fmt(d6);
+        $("x-la6out").textContent = ls + (la6 === 30 ? "（杭州）" : "");
+        $("x-dec6").textContent = latStr5(dec);
+        $("x-dl6").textContent = dur6(D); $("x-nl6").textContent = dur6(24 - D);
+        $("x-sr6").textContent = D >= 24 ? "不落" : D <= 0 ? "不出" : hm(12 - D / 2);
+        $("x-ss6").textContent = D >= 24 ? "不落" : D <= 0 ? "不出" : hm(12 + D / 2);
+        $("x-st6").textContent = ls + " · " + st;
+        $("x-hd-main").textContent = fmt(d6) + " · " + ls + " · 昼长 " + dur6(D);
+        [].forEach.call(document.querySelectorAll("[data-q6]"), function (b) { b.setAttribute("aria-pressed", +b.getAttribute("data-q6") === n - 1 ? "true" : "false"); });
+        draw6(dec);
+        if (g6) {
+          var f = la6 * RAD, rc = R6 * Math.cos(f) * 1.012, y = R6 * Math.sin(f) * 1.012, H = (D / 24) * Math.PI;
+          tilt6.rotation.z = -dec * RAD; // 本地太阳方向 (cosδ, sinδ, 0)，昼弧以 t = 0 为中心
+          arc6(day6m, -H, H, rc, y); arc6(night6m, H, 2 * Math.PI - H, rc, y);
+          latL6.position.set(-rc - 2.4, y, 0);
+          draw3(latL6, ls + " 昼长 " + D.toFixed(1) + "h", "#F2B544");
+        }
+        loop();
+      }
+      $("x-d6").addEventListener("input", function () { d6 = +this.value; upd6(); });
+      $("x-la6").addEventListener("input", function () { la6 = +this.value; upd6(); });
+      $("x-hz6").onclick = function () { la6 = 30; $("x-la6").value = 30; upd6(); };
+      [].forEach.call(document.querySelectorAll("[data-q6]"), function (b) { b.onclick = function () { d6 = +b.getAttribute("data-q6"); $("x-d6").value = d6; upd6(); }; });
+      window.addEventListener("resize", function () { if (cur === 5) upd6(); });
+      if (window.MutationObserver) new MutationObserver(function () { if (cur === 5) upd6(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+      /* ---------- 第 7 章：正午太阳高度（与第 6 章共用日期、纬度状态） ---------- */
+      var g7, tilt7, lat7m, dot7, noon7, latL7, dotL7, in7 = false;
+      function noonH(phi, dec) { return 90 - Math.abs(phi - dec); }
+      function build7() {
+        g7 = new THREE.Group(); g7.visible = false; scene.add(g7);
+        var mat = tilt6.children[0].material.clone();
+        mat.uniforms.map.value = earth.material.map; mat.uniforms.sunDir.value = new THREE.Vector3(1, 0, 0);
+        tilt7 = new THREE.Group(); g7.add(tilt7);
+        tilt7.add(new THREE.Mesh(new THREE.SphereGeometry(R6, 64, 40), mat));
+        tilt7.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R6 * 1.35, 0), new THREE.Vector3(0, R6 * 1.35, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
+        var nl = label("北极 N", "#E6ECF5", 0.9); nl.position.set(0, R6 * 1.35 + 0.6, 0); tilt7.add(nl);
+        tilt7.add(circle(R6 * 1.004, 0, 0xb8c4da, 0.5));
+        [23.44, -23.44].forEach(function (a) { var f = a * RAD; tilt7.add(circle(R6 * Math.cos(f) * 1.004, R6 * Math.sin(f) * 1.004, 0xb8c4da, 0.25)); });
+        lat7m = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0xf2b544 })); tilt7.add(lat7m);
+        dot7 = new THREE.Mesh(new THREE.SphereGeometry(0.26, 16, 12), new THREE.MeshBasicMaterial({ color: 0xff6b66 })); tilt7.add(dot7);
+        noon7 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffffff })); tilt7.add(noon7);
+        dotL7 = label("直射点", "#FF6B66", 0.85); g7.add(dotL7);
+        latL7 = label("30°N", "#F2B544", 0.85); tilt7.add(latL7);
+        [-3.4, -1.7, 0, 1.7, 3.4].forEach(function (y) {
+          g7.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R6 + 7, y, 0), 5, 0xffd36b, 0.7, 0.4));
+        });
+        var sl = label("太阳光（平行光）", "#F2B544", 0.9); sl.position.set(R6 + 4.5, 4.4, 0); g7.add(sl);
+      }
+      function mode7(on) {
+        if (!g7 || on === in7) return;
+        in7 = on;
+        main1.forEach(function (o) { if (on) { o.userData.v7 = o.visible; o.visible = false; } else o.visible = o.userData.v7 !== false; });
+        g7.visible = on;
+        $("x-gl").setAttribute("aria-label", on ? "正午太阳高度三维演示：直射点与所选纬线" : "地球绕太阳公转的三维演示");
+        if (on) view6(); else resetView();
+      }
+      function cv7(id) {
+        var cv = $(id), w = cv.clientWidth, h = cv.clientHeight, r = Math.min(window.devicePixelRatio || 1, 2);
+        if (!w || !h) return null;
+        cv.width = w * r; cv.height = h * r;
+        var x = cv.getContext("2d"), cs = getComputedStyle(document.documentElement);
+        x.setTransform(r, 0, 0, r, 0, 0);
+        x.font = '12px system-ui,"PingFang SC","Microsoft YaHei",sans-serif'; x.textBaseline = "middle";
+        return { x: x, w: w, h: h, C: function (k) { return cs.getPropertyValue(k).trim(); } };
+      }
+      function drawPole7(H, dec) {
+        var o = cv7("x-cv7"); if (!o) return;
+        var x = o.x, w = o.w, h = o.h, C = o.C, gy = h - 28, ph = Math.min(56, h * 0.36);
+        var north = la6 > dec + 1e-6, south = la6 < dec - 1e-6; // 影子朝北 / 朝南
+        x.fillStyle = C("--x-tx2"); x.textAlign = "left"; x.fillText("正午竖杆剖面 · " + laStr6(la6), 8, 13);
+        x.textAlign = "center"; x.fillText("南 S", 22, gy + 14); x.fillText("北 N", w - 22, gy + 14);
+        x.strokeStyle = C("--x-tx2"); x.lineWidth = 1.5; x.beginPath(); x.moveTo(8, gy); x.lineTo(w - 8, gy); x.stroke();
+        var px = north ? w * 0.3 : south ? w * 0.7 : w / 2;
+        if (H <= 0) {
+          x.strokeStyle = C("--x-tx"); x.lineWidth = 3; x.beginPath(); x.moveTo(px, gy); x.lineTo(px, gy - ph); x.stroke();
+          x.fillStyle = C("--x-tx2"); x.fillText("正午太阳在地平线下（极夜），无影", w / 2, 32); return;
+        }
+        var t = Math.tan(H * RAD), s = H >= 89.99 ? 0 : ph / t, sg = north ? 1 : -1, room = north ? w - 14 - px : px - 14, clip = s > room;
+        var sl = Math.min(s, room), tip = px + sg * sl;
+        x.strokeStyle = C("--x-tx2"); x.globalAlpha = 0.85; x.lineWidth = 5; x.lineCap = "round";
+        if (sl > 0) { x.beginPath(); x.moveTo(px, gy); x.lineTo(tip, gy); x.stroke(); }
+        x.globalAlpha = 1; x.lineCap = "butt";
+        x.strokeStyle = C("--x-tx"); x.lineWidth = 3; x.beginPath(); x.moveTo(px, gy); x.lineTo(px, gy - ph); x.stroke();
+        // 光线：经杆顶射到影端，向太阳一侧延长
+        var dx = -sg * Math.cos(H * RAD), dy = -Math.sin(H * RAD), L = 400, ax = clip ? px : px + sg * s, ay = clip ? gy - ph : gy;
+        if (!north && !south) { dx = 0; dy = -1; }
+        x.strokeStyle = C("--x-ac2"); x.lineWidth = 1.5; x.setLineDash([5, 4]);
+        x.beginPath(); x.moveTo(ax, ay); x.lineTo(ax + dx * L, ay + dy * L); x.stroke(); x.setLineDash([]);
+        if (clip) { x.globalAlpha = 0.5; x.strokeStyle = C("--x-tx2"); x.setLineDash([2, 3]); x.beginPath(); x.moveTo(px, ay); x.lineTo(px - sg * 40, ay); x.stroke(); x.setLineDash([]); x.globalAlpha = 1; }
+        // H 角：影端处地面与光线的夹角（影子超出画面时画在杆顶）
+        var a1 = Math.atan2(dy, dx);
+        x.strokeStyle = C("--x-ac2"); x.lineWidth = 1.5; x.beginPath();
+        if (north) x.arc(ax, ay, 22, -Math.PI, a1); else if (south) x.arc(ax, ay, 22, a1, 0);
+        x.stroke();
+        x.fillStyle = C("--x-ac2"); x.textAlign = north ? "right" : "left";
+        x.fillText("H = " + H.toFixed(1) + "°", ax + (north ? -28 : 28), ay - 12);
+        x.fillStyle = C("--x-tx2"); x.textAlign = "center";
+        x.fillText(s === 0 ? "太阳直射 · 无影" : "影长 " + (1 / t).toFixed(2) + " × 杆高" + (clip ? "（超出画面）" : ""), sl > 0 ? (px + tip) / 2 : px, gy + 14);
+      }
+      function drawCurve7(dec, gap) {
+        var o = cv7("x-cv7b"); if (!o) return;
+        var x = o.x, w = o.w, h = o.h, C = o.C, Lm = 40, Rm = 14, T = 26, B = 22;
+        var X = function (a) { return Lm + ((a + 90) / 180) * (w - Lm - Rm); }, Y = function (v) { return T + ((90 - v) / 90) * (h - T - B); };
+        x.fillStyle = C("--x-tx2"); x.textAlign = "left"; x.fillText("正午太阳高度随纬度 · " + fmt(d6), 8, 13);
+        x.textAlign = "right"; x.fillText("冬至楼距 ≥ " + gap, w - 8, 13);
+        x.strokeStyle = C("--x-tx2"); x.globalAlpha = 0.5; x.setLineDash([3, 4]); x.lineWidth = 1;
+        [0, 45, 90].forEach(function (v) { x.beginPath(); x.moveTo(Lm, Y(v)); x.lineTo(w - Rm, Y(v)); x.stroke(); });
+        x.beginPath(); x.moveTo(X(dec), T - 4); x.lineTo(X(dec), h - B); x.stroke();
+        x.setLineDash([]); x.globalAlpha = 1;
+        [0, 45, 90].forEach(function (v) { x.fillText(v + "°", Lm - 6, Y(v)); });
+        x.textAlign = "center";
+        [-90, -60, -30, 0, 30, 60, 90].forEach(function (a) { x.fillText(a === 0 ? "0°" : Math.abs(a) + (a > 0 ? "N" : "S"), X(a), h - 10); });
+        x.fillStyle = C("--x-red"); x.fillText("直射点", X(dec), T + 2);
+        x.strokeStyle = C("--x-ac"); x.lineWidth = 2; x.beginPath();
+        for (var a = -90; a <= 90; a += 0.5) x[a === -90 ? "moveTo" : "lineTo"](X(a), Y(Math.max(0, noonH(a, dec))));
+        x.stroke();
+        var v = Math.max(0, noonH(la6, dec));
+        x.fillStyle = C("--x-red"); x.shadowColor = C("--x-red"); x.shadowBlur = 10;
+        x.beginPath(); x.arc(X(la6), Y(v), 5, 0, Math.PI * 2); x.fill(); x.shadowBlur = 0;
+      }
+      function upd7() {
+        var n = Math.floor(d6) + 1, dec = dec5(n), H = noonH(la6, dec), ls = laStr6(la6), up = H > 0;
+        var dw = la6 >= 0 ? -23.44 : 23.44, Hw = noonH(la6, dw), gap = Hw <= 0 ? "冬至正午无日照" : (1 / Math.tan(Hw * RAD)).toFixed(2) + " × 楼高";
+        var a = Math.abs(la6), b = Math.abs(dec), diff = Math.abs(la6 - dec), same = la6 * dec > 0;
+        var dir = !up ? "无影（极夜）" : diff < 0.05 ? "无影（太阳直射）" : la6 > dec ? "朝北（太阳在南）" : "朝南（太阳在北）";
+        $("x-d7").value = $("x-d6").value = Math.floor(d6); $("x-la7").value = $("x-la6").value = la6;
+        $("x-d7out").textContent = $("x-date7").textContent = fmt(d6);
+        $("x-la7out").textContent = ls + (la6 === 30 ? "（杭州）" : "");
+        $("x-dec7").textContent = latStr5(dec);
+        $("x-h7").textContent = up ? H.toFixed(1) + "°" : "0°（太阳不出）";
+        $("x-sh7").textContent = !up ? "—" : diff < 0.05 ? "0" : (1 / Math.tan(H * RAD)).toFixed(2) + " 倍";
+        $("x-dir7").textContent = dir;
+        $("x-pv7").textContent = up ? (90 - H).toFixed(1) + "°" : "—";
+        $("x-gap7").textContent = gap.replace(" × 楼高", " 倍");
+        $("x-calc7").textContent = (a < 0.05 || b < 0.05 ? "纬度差 |φ − δ| = " + diff.toFixed(1) + "°" : same ? "同半球取差 " + a + " − " + b.toFixed(1) + " → " + diff.toFixed(1) + "°" : "异半球取和 " + a + " + " + b.toFixed(1) + " = " + diff.toFixed(1) + "°") + "，H = 90° − " + diff.toFixed(1) + "° = " + H.toFixed(1) + "°";
+        $("x-hd-main").textContent = fmt(d6) + " · " + ls + " · H " + Math.max(0, H).toFixed(1) + "°";
+        [].forEach.call(document.querySelectorAll("[data-q7]"), function (b) { b.setAttribute("aria-pressed", +b.getAttribute("data-q7") === n - 1 ? "true" : "false"); });
+        drawPole7(H, dec); drawCurve7(dec, gap);
+        if (g7) {
+          var f = la6 * RAD, rc = R6 * Math.cos(f) * 1.012, y = R6 * Math.sin(f) * 1.012, dr = dec * RAD;
+          tilt7.rotation.z = -dr;
+          arc6(lat7m, 0, Math.PI * 2, rc, y);
+          noon7.position.set(rc, y, 0);
+          dot7.position.set(R6 * 1.01 * Math.cos(dr), R6 * 1.01 * Math.sin(dr), 0);
+          dotL7.position.set(R6 + 2.2, 0.8, 0);
+          draw3(dotL7, "直射点 " + latStr5(dec), "#FF6B66");
+          latL7.position.set(-rc - 2.4, y, 0);
+          draw3(latL7, ls + " H " + Math.max(0, H).toFixed(1) + "°", "#F2B544");
+        }
+        loop();
+      }
+      $("x-d7").addEventListener("input", function () { d6 = +this.value; upd7(); });
+      $("x-la7").addEventListener("input", function () { la6 = +this.value; upd7(); });
+      $("x-hz7").onclick = function () { la6 = 30; upd7(); };
+      [].forEach.call(document.querySelectorAll("[data-q7]"), function (b) { b.onclick = function () { d6 = +b.getAttribute("data-q7"); upd7(); }; });
+      window.addEventListener("resize", function () { if (cur === 6) upd7(); });
+      if (window.MutationObserver) new MutationObserver(function () { if (cur === 6) upd7(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+      /* ---------- 第 8 章：四季更替（复用第 1 章公转场景、日期与播放；纬度与第 6、7 章共用） ---------- */
+      var SN = ["春", "夏", "秋", "冬"], B8 = [45, 135, 225, 315].map(evDay).sort(function (a, b) { return a - b; }); // 立夏、立秋、立冬、立春
+      function astro8(d, north) { var k = Math.floor(md(sun(d).lam + 45) / 90); return SN[north ? k : (k + 2) % 4]; } // 春分 ±45° 为春
+      function clim8(d, north) { var m = 0, x = Math.floor(d); while (x >= ML[m]) { x -= ML[m]; m++; } var k = Math.floor(((m + 10) % 12) / 3); return SN[north ? k : (k + 2) % 4]; }
+      function draw8() {
+        var o = cv7("x-cv8"); if (!o) return;
+        var x = o.x, w = o.w, h = o.h, C = o.C, Lm = 34, Rm = 34, T = 28, B = 22;
+        var X = function (d) { return Lm + (d / 364) * (w - Lm - Rm); }, Yd = function (v) { return T + ((24 - v) / 24) * (h - T - B); }, Yh = function (v) { return T + ((90 - v) / 90) * (h - T - B); };
+        x.fillStyle = C("--x-tx2"); x.textAlign = "left"; x.fillText("全年变化 · " + laStr6(la6), 8, 13);
+        x.textAlign = "right"; x.fillStyle = C("--x-ac"); x.fillText("昼长", w - 90, 13); x.fillStyle = C("--x-ac2"); x.fillText("正午太阳高度", w - 8, 13);
+        x.strokeStyle = C("--x-tx2"); x.globalAlpha = 0.4; x.setLineDash([3, 4]); x.lineWidth = 1;
+        [0, 12, 24].forEach(function (v) { x.beginPath(); x.moveTo(Lm, Yd(v)); x.lineTo(w - Rm, Yd(v)); x.stroke(); });
+        B8.forEach(function (d) { x.beginPath(); x.moveTo(X(d), T); x.lineTo(X(d), h - B); x.stroke(); });
+        x.setLineDash([]); x.globalAlpha = 1;
+        x.fillStyle = C("--x-ac"); x.textAlign = "right"; [0, 12, 24].forEach(function (v) { x.fillText(v + "h", Lm - 5, Yd(v)); });
+        x.fillStyle = C("--x-ac2"); x.textAlign = "left"; [0, 45, 90].forEach(function (v) { x.fillText(v + "°", w - Rm + 5, Yh(v)); });
+        x.fillStyle = C("--x-tx2"); x.textAlign = "center";
+        [0, 90, 181, 273].forEach(function (d, k) { x.fillText(k * 3 + 1 + "月", X(d), h - 10); });
+        var nh = la6 >= 0, ed = [0].concat(B8, [364]);
+        for (var k = 0; k < 5; k++) x.fillText(astro8((ed[k] + ed[k + 1]) / 2, nh), X((ed[k] + ed[k + 1]) / 2), T + 6);
+        x.lineWidth = 2;
+        [["--x-ac", function (n) { return Yd(dayLen(la6, dec5(n))); }], ["--x-ac2", function (n) { return Yh(Math.max(0, noonH(la6, dec5(n)))); }]].forEach(function (s) {
+          x.strokeStyle = C(s[0]); x.beginPath();
+          for (var d = 0; d <= 364; d++) x[d ? "lineTo" : "moveTo"](X(d), s[1](d + 1));
+          x.stroke();
+        });
+        var cd = Math.floor(day), n = cd + 1;
+        x.strokeStyle = C("--x-red"); x.globalAlpha = 0.6; x.beginPath(); x.moveTo(X(cd), T - 4); x.lineTo(X(cd), h - B); x.stroke(); x.globalAlpha = 1;
+        x.fillStyle = C("--x-red");
+        [Yd(dayLen(la6, dec5(n))), Yh(Math.max(0, noonH(la6, dec5(n))))].forEach(function (y) { x.beginPath(); x.arc(X(cd), y, 4.5, 0, Math.PI * 2); x.fill(); });
+      }
+      function upd8() {
+        var n = Math.floor(day) + 1, dec = dec5(n), D = dayLen(la6, dec), H = noonH(la6, dec), ls = laStr6(la6), nh = la6 >= 0;
+        var aN = astro8(day, true), aS = astro8(day, false), cN = clim8(day, true), cS = clim8(day, false), mine = nh ? aN : aS;
+        $("x-d8").value = Math.floor(day);
+        $("x-la8").value = $("x-la6").value = $("x-la7").value = la6;
+        $("x-d8out").textContent = $("x-date8").textContent = fmt(day);
+        $("x-la8out").textContent = ls + (la6 === 30 ? "（杭州）" : "");
+        $("x-lat8").textContent = ls;
+        $("x-dl8").textContent = dur6(D);
+        $("x-h8").textContent = H > 0 ? H.toFixed(1) + "°" : "0°（太阳不出）";
+        $("x-as8").textContent = "北半球 " + aN + "季 · 南半球 " + aS + "季";
+        $("x-cs8").textContent = "北半球（我国）" + cN + "季 · 南半球 " + cS + "季";
+        $("x-hm8").textContent = la6 === 0 ? "赤道：昼长终年 12 小时，正午太阳高度变化小，四季不明显" : (nh ? "北半球" : "南半球") + "：天文" + mine + "季，与另一半球季节相反";
+        $("x-hd-main").textContent = fmt(day) + " · " + ls + " · 天文" + mine + "季";
+        draw8();
+        loop();
+      }
+      $("x-d8").addEventListener("input", function () { day = +this.value; setPlay(false); updateHud(); place(); upd8(); });
+      $("x-play8").onclick = function () { setPlay(!playing); };
+      $("x-la8").addEventListener("input", function () { la6 = +this.value; upd8(); });
+      $("x-hz8").onclick = function () { la6 = 30; upd8(); };
+      window.addEventListener("resize", function () { if (cur === 7) upd8(); });
+      if (window.MutationObserver) new MutationObserver(function () { if (cur === 7) upd8(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+      /* ---------- 第 9 章：随堂检测 ---------- */
+      function sv9(id, v) { $(id).value = v; }
+      var Q9 = [
+        { m: 3, q: "已知 120°E 的地方时为 10:00（舞台为此刻的地球，标签显示各城市地方时），此时 90°E 的地方时是",
+          o: ["12:00", "9:00", "8:00", "7:00"], a: 2,
+          e: "两地经度差 120° − 90° = 30°，时差 30 ÷ 15 = 2 小时；90°E 在西，东早西晚，10:00 − 2 小时 = 8:00。",
+          p: function () { d3 = 171; t3 = 10; v3 = "side"; sv9("x-d3", 171); sv9("x-t3", 10); },
+          r: function () { v3 = "n"; } },
+        { m: 3, q: "舞台为某日北极上空俯视的光照图。读图可知北极圈及其以内终日位于昼半球，该日最接近",
+          o: ["春分", "秋分", "冬至", "夏至"], a: 3,
+          e: "北极圈内出现极昼，说明太阳直射北回归线，为夏至日（6月22日前后）；此时晨昏线与北极圈相切。舞台正转动一天：北极圈内始终是白昼。",
+          p: function () { d3 = 171; t3 = 12; v3 = "n"; sv9("x-d3", 171); sv9("x-t3", 12); },
+          r: function () { t3 = 0; setPlay3(true); } },
+        { m: 5, q: "某日太阳直射 10°N，且直射点正向北移动。该日最可能在",
+          o: ["4月", "6月", "8月", "10月"], a: 0,
+          e: "直射点在北半球且向北移，应处于春分（3月21日）→ 夏至（6月22日）之间，10°N 约在 4 月中旬。8 月下旬也直射 10°N，但向南移；10 月直射点已在南半球。",
+          p: function () { d5 = 79; sv9("x-d5", 79); },
+          r: function () { d5 = 105; sv9("x-d5", 105); } },
+        { m: 6, q: "5 月中旬至 7 月中旬，杭州（30°N）的昼长变化是",
+          o: ["一直变短", "先变长后变短", "一直变长", "先变短后变长"], a: 1,
+          e: "夏至前直射点北移，北半球昼渐长；夏至日（6月22日）杭州昼长达全年最大，约 14 小时；之后直射点南移，昼渐短。舞台已切到夏至日。",
+          p: function () { d6 = 130; la6 = 30; sv9("x-d6", 130); sv9("x-la6", 30); },
+          r: function () { d6 = 172; sv9("x-d6", 172); } },
+        { m: 7, q: "杭州（30°N）某小区规划住宅楼。为保证全年正午底层都有阳光，计算楼间距应依据",
+          o: ["冬至日正午影长", "春分日正午影长", "夏至日正午影长", "秋分日正午影长"], a: 0,
+          e: "冬至日直射南回归线，杭州正午太阳高度全年最小：H = 90° − (30° + 23°26′) ≈ 36.6°，影子最长；楼间距 ≥ 楼高 × cot H ≈ 1.35 倍楼高。舞台已切到冬至日。",
+          p: function () { d6 = 172; la6 = 30; },
+          r: function () { d6 = 355; } },
+        { m: 4, q: "1 月初地球公转速度较快。此时",
+          o: ["地球位于远日点附近，北半球为夏季", "地球位于近日点附近，北半球为夏季", "地球位于近日点附近，北半球为冬季", "地球位于远日点附近，北半球为冬季"], a: 2,
+          e: "1 月初过近日点，日地距离约 1.471 亿 km，公转最快约 1.02°/日；但此时直射点在南半球，北半球昼短、正午太阳高度小，为冬季。四季由昼长与太阳高度决定，与日地距离无关。",
+          p: function () { day4 = 184; sv9("x-d4", 184); },
+          r: function () { day4 = 3; sv9("x-d4", 3); } }
+      ];
+      var q9 = 0, ans9 = [];
+      function stage9(m, set) {
+        if (m !== 3) mode3(false); if (m !== 4) mode4(false); if (m !== 5) mode5(false); if (m !== 6) mode6(false); if (m !== 7) mode7(false);
+        set();
+        $("x-mini5").hidden = m !== 5; $("x-mini6").hidden = m !== 6; $("x-mini7").hidden = $("x-mini7b").hidden = m !== 7;
+        if (m === 3) { mode3(true); if (g3) view3(v3); upd3(); }
+        else if (m === 4) { mode4(true); upd4(); }
+        else if (m === 5) { mode5(true); upd5(); }
+        else if (m === 6) { mode6(true); upd6(); }
+        else { mode7(true); upd7(); }
+        $("x-hd-main").textContent = "随堂检测 · " + (q9 < Q9.length ? "第 " + (q9 + 1) + " / 6 题" : "得分 " + score9() + " / 6");
+      }
+      function score9() { return ans9.filter(function (k, i) { return k === Q9[i].a; }).length; }
+      function show9() {
+        if (q9 >= Q9.length) return end9();
+        var Q = Q9[q9], done = ans9[q9] != null;
+        $("x-q9box").hidden = false; $("x-q9end").hidden = true;
+        $("x-q9n").textContent = "第 " + (q9 + 1) + " / 6 题 · 单选";
+        $("x-q9t").textContent = Q.q;
+        $("x-q9o").innerHTML = Q.o.map(function (s, k) { return '<button class="x-btn" data-k="' + k + '">' + "ABCD"[k] + ". " + s + "</button>"; }).join("");
+        [].forEach.call($("x-q9o").children, function (b) { b.onclick = function () { pick9(+b.getAttribute("data-k")); }; });
+        $("x-q9f").hidden = true;
+        stage9(Q.m, Q.p);
+        if (done) pick9(ans9[q9], true);
+      }
+      function pick9(k, again) {
+        var Q = Q9[q9], ok = k === Q.a;
+        ans9[q9] = k;
+        [].forEach.call($("x-q9o").children, function (b, j) {
+          b.disabled = true;
+          if (j === Q.a) b.classList.add("x-ok"); else if (j === k) b.classList.add("x-no");
+        });
+        $("x-q9r").innerHTML = ok ? '<span class="x-q9g">✓ 回答正确</span>' : '<span class="x-q9b">✗ 回答错误</span>，正确答案 ' + "ABCD"[Q.a];
+        $("x-q9e").innerHTML = "<b>解析：</b>" + Q.e;
+        $("x-q9next").textContent = q9 < Q9.length - 1 ? "下一题 ›" : "查看得分";
+        $("x-q9f").hidden = false;
+        if (!again) stage9(Q.m, Q.r);
+        $("x-q9next").focus({ preventScroll: true });
+      }
+      function end9() {
+        var s = score9();
+        $("x-q9box").hidden = true; $("x-q9end").hidden = false;
+        $("x-q9s").textContent = s + " / 6";
+        $("x-q9c").textContent = s === 6 ? "全部正确，地球运动掌握扎实！" : s >= 4 ? "基本掌握，回看错题对应章节再巩固。" : "建议回看第 3–8 章演示后重新作答。";
+        $("x-q9l").innerHTML = Q9.map(function (Q, i) {
+          var ok = ans9[i] === Q.a;
+          return "<li><b>" + (i + 1) + ".</b> " + (ok ? '<span class="x-q9g">✓</span>' : '<span class="x-q9b">✗</span>') + " 正确答案 " + "ABCD"[Q.a] + "：" + Q.o[Q.a] + "</li>";
+        }).join("");
+        $("x-hd-main").textContent = "随堂检测 · 得分 " + s + " / 6";
+      }
+      $("x-q9next").onclick = function () { q9++; show9(); };
+      $("x-q9again").onclick = function () { q9 = 0; ans9 = []; show9(); };
+      window.addEventListener("resize", function () { if (cur !== 8) return; if (!$("x-mini5").hidden) upd5(); if (!$("x-mini6").hidden) upd6(); if (!$("x-mini7").hidden) upd7(); });
+
+      init();
+      updOb4();
+      go(parseInt(location.hash.slice(1), 10) - 1 || 0);
+      updateHud();
+    </script>
+  </body>
+</html>
