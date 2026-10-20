@@ -1,0 +1,1744 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>立体几何 · GeoSpace｜格物实验室</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
+    />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-hero.css" />
+    <style>
+      :root {
+        --x-bg: linear-gradient(160deg, #0e1420, #121a2a);
+        --x-panel: rgba(21, 30, 48, 0.82);
+        --x-line: rgba(255, 255, 255, 0.08);
+        --x-text: #e6ecf5;
+        --x-sub: #8a97ad;
+        --x-acc: #2ec4b6;
+        --x-gold: #f2b544;
+        --x-red: #ef6461;
+        --x-vio: #b9a2f2;
+        --x-tint: rgba(46, 196, 182, 0.12);
+        --x-tint-solid: #17303d;
+        --x-serif: "Noto Serif SC", "Songti SC", "STSong", serif;
+        --x-ui: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+        --x-mono: "Geist Mono", ui-monospace, Menlo, monospace;
+        --x-r: 10px;
+      }
+      [data-theme="light"] {
+        --x-bg: #f6f3ec;
+        --x-panel: rgba(255, 255, 255, 0.9);
+        --x-line: rgba(29, 36, 51, 0.1);
+        --x-text: #1d2433;
+        --x-sub: #5d6878;
+        --x-acc: #139a8e;
+        --x-gold: #c98a12;
+        --x-tint: rgba(19, 154, 142, 0.1);
+        --x-tint-solid: #e2f1ee;
+        --x-vio: #7b5fc9;
+      }
+      .x-tb8 { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .x-tb8 th, .x-tb8 td { padding: 6px 4px; border-bottom: 1px solid var(--x-line); text-align: left; vertical-align: top; font-weight: 400; }
+      .x-tb8 thead th { color: var(--x-sub); font-size: 12px; }
+      .x-tb8 td:last-child { font-family: var(--x-mono); text-align: right; white-space: nowrap; }
+      .x-tb8 small { display: block; color: var(--x-sub); font-family: var(--x-ui); font-size: 12px; }
+      html, body { height: 100%; }
+      body.x-app {
+        margin: 0; overflow: hidden; background: var(--x-bg); color: var(--x-text);
+        font: 14px/1.6 var(--x-ui); transition: background 200ms, color 200ms;
+      }
+      .x-shell { display: grid; grid-template-rows: 56px 1fr; grid-template-columns: 220px 1fr 340px; height: 100vh; height: 100dvh; }
+      .page.x-shell { max-width: none; margin: 0; padding: 0; gap: 0; }
+      .x-top {
+        grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding: 0 16px;
+        border-bottom: 1px solid var(--x-line); background: var(--x-panel); backdrop-filter: blur(14px);
+      }
+      .x-brand { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+      .x-brand small { color: var(--x-sub); font-size: 12px; letter-spacing: 0.1em; }
+      .x-brand b { font-family: var(--x-serif); font-size: 17px; font-weight: 600; white-space: nowrap; }
+      .x-prog { flex: 1; display: flex; align-items: center; gap: 10px; justify-content: center; min-width: 0; }
+      .x-segs { display: flex; gap: 4px; width: min(360px, 100%); }
+      .x-segs i { flex: 1; height: 4px; border-radius: 2px; background: var(--x-line); transition: background 200ms; }
+      .x-segs i.on { background: var(--x-acc); }
+      .x-count { font-family: var(--x-mono); font-size: 13px; color: var(--x-sub); white-space: nowrap; }
+      .x-tools { display: flex; gap: 6px; }
+      .x-ib {
+        width: 40px; height: 40px; border-radius: var(--x-r); border: 1px solid var(--x-line); background: transparent;
+        color: var(--x-text); font: 15px var(--x-mono); cursor: pointer; transition: background 200ms, border-color 200ms;
+      }
+      .x-ib:hover { background: var(--x-tint); border-color: var(--x-acc); }
+      .x-side { border-right: 1px solid var(--x-line); overflow-y: auto; padding: 10px 0; background: var(--x-panel); }
+      .x-side button {
+        display: block; width: 100%; text-align: left; border: 0; border-left: 3px solid transparent; background: transparent;
+        color: var(--x-sub); padding: 9px 18px; cursor: pointer; font: inherit; transition: background 200ms, color 200ms;
+      }
+      .x-side button span { display: block; font: 12px var(--x-mono); opacity: 0.8; }
+      .x-side button b { font-weight: 500; font-size: 14px; }
+      .x-side button:hover { color: var(--x-text); }
+      .x-side button.on { border-left-color: var(--x-acc); background: var(--x-tint-solid); color: var(--x-text); }
+      [data-theme="light"] .x-side button.on span { color: #0f7a70; }
+      .x-side button.on span { color: var(--x-acc); }
+      .x-stage { position: relative; overflow: hidden; touch-action: none; }
+      .x-stage canvas { display: block; width: 100%; height: 100%; }
+      .x-note {
+        position: absolute; left: 16px; top: 16px; max-width: min(420px, calc(100% - 32px)); padding: 14px 16px;
+        background: var(--x-panel); border: 1px solid var(--x-line); border-radius: var(--x-r); backdrop-filter: blur(14px);
+      }
+      .x-note h1 { font: 600 19px/1.3 var(--x-serif); margin: 0; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+      .x-note h1 button { border: 0; background: none; color: var(--x-sub); cursor: pointer; font: 13px var(--x-ui); min-height: 44px; min-width: 44px; }
+      .x-note p { margin: 8px 0 0; color: var(--x-sub); font-size: 13.5px; }
+      .x-note.closed p { display: none; }
+      .x-soon {
+        position: absolute; inset: 0; display: none; place-items: center; text-align: center; color: var(--x-sub);
+      }
+      .x-soon b { display: block; font: 600 28px var(--x-serif); color: var(--x-text); margin-bottom: 6px; }
+      .x-panel { border-left: 1px solid var(--x-line); background: var(--x-panel); backdrop-filter: blur(14px); overflow-y: auto; padding: 16px; }
+      .x-handle { display: none; }
+      .x-h { font: 12px var(--x-mono); color: var(--x-sub); letter-spacing: 0.08em; margin: 18px 0 8px; }
+      .x-h:first-child { margin-top: 0; }
+      .x-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .x-grid button, .x-btn {
+        min-height: 44px; border-radius: var(--x-r); border: 1px solid var(--x-line); background: transparent; color: var(--x-text);
+        font: inherit; font-size: 13.5px; cursor: pointer; transition: all 200ms;
+      }
+      .x-grid button.on { background: var(--x-acc); border-color: var(--x-acc); color: #0e1420; font-weight: 600; }
+      .x-grid button:hover:not(.on), .x-btn:hover { border-color: var(--x-acc); }
+      .x-tag { font: 12px var(--x-mono); color: var(--x-sub); margin-top: 8px; }
+      .x-card { border: 1px solid var(--x-line); border-radius: var(--x-r); padding: 12px 14px; margin-top: 8px; }
+      .x-vef { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
+      .x-vef b { display: block; font: 600 26px var(--x-mono); color: var(--x-acc); }
+      .x-vef span { font-size: 12px; color: var(--x-sub); }
+      .x-euler { margin-top: 10px; text-align: center; font: 15px var(--x-mono); }
+      .x-euler em { font-style: normal; color: var(--x-gold); font-weight: 600; }
+      .x-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; }
+      .x-row label { flex: 1; cursor: pointer; }
+      .x-row output { font: 13px var(--x-mono); color: var(--x-gold); min-width: 44px; text-align: right; }
+      .x-row input[type="range"] { flex: 1.4; accent-color: var(--x-acc); }
+      .x-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--x-acc); }
+      .x-card ul { margin: 0; padding-left: 18px; color: var(--x-sub); font-size: 13px; }
+      .x-card li + li { margin-top: 6px; }
+      .x-card li b { color: var(--x-text); font-weight: 500; }
+      .x-g3 { position: absolute; left: 16px; bottom: 16px; padding: 12px 14px; background: var(--x-panel); border: 1px solid var(--x-line); border-radius: var(--x-r); backdrop-filter: blur(14px); }
+      .x-g3 .x-h { margin: 0 0 8px; }
+      .x-g3grid { display: grid; grid-template-columns: repeat(4, 44px); gap: 4px; }
+      .x-g3grid button { height: 44px; border: 1px solid var(--x-line); border-radius: 6px; color: var(--x-text); font: 600 14px var(--x-mono); cursor: pointer; }
+      .x-g3grid button:hover { border-color: var(--x-acc); }
+      .x-g3 .x-btn { width: 100%; margin-top: 8px; }
+      .x-g3 .x-btn[aria-pressed="true"] { border-color: var(--x-red); color: var(--x-red); }
+      .x-views { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .x-views figure { margin: 0; }
+      .x-ob { position: absolute; inset: 0; width: 100%; height: 100%; display: none; }
+      .x-views canvas { display: block; width: 100%; aspect-ratio: 1; border: 1px solid var(--x-line); border-radius: 6px; }
+      .x-views figcaption { font: 12px var(--x-mono); color: var(--x-sub); text-align: center; margin-top: 4px; }
+      .x-lbls { position: absolute; inset: 0; pointer-events: none; display: none; }
+      .x-lbls span { position: absolute; transform: translate(-50%, -130%); font: 12px var(--x-mono); color: var(--x-sub); white-space: nowrap; }
+      .x-lbls span.s { color: var(--x-text); font-weight: 600; font-size: 13px; }
+      .x-lbls span.p { color: var(--x-acc); font-weight: 600; font-size: 14px; }
+      .x-row select { flex: 1.4; min-height: 40px; border-radius: var(--x-r); border: 1px solid var(--x-line); background: transparent; color: var(--x-text); font: 13px var(--x-mono); padding: 0 8px; }
+      .x-row select option { background: var(--x-tint-solid); color: var(--x-text); }
+      .x-q9n { grid-template-columns: repeat(6, 1fr); }
+      .x-q9n button.ok:not(.on) { border-color: var(--x-acc); color: var(--x-acc); }
+      .x-q9n button.no:not(.on) { border-color: var(--x-red); color: var(--x-red); }
+      .x-stem { margin: 8px 0 4px; font-size: 14px; line-height: 1.6; }
+      .x-opt { display: block; width: 100%; margin-top: 6px; padding: 8px 12px; text-align: left; line-height: 1.5; }
+      .x-opt[aria-pressed="true"] { border-color: var(--x-acc); background: var(--x-tint); }
+      .x-opt:disabled { cursor: default; }
+      .x-opt.ok { border-color: var(--x-acc); color: var(--x-acc); }
+      .x-opt.no { border-color: var(--x-red); color: var(--x-red); }
+      .x-in { flex: 1; min-height: 44px; padding: 0 10px; border: 1px solid var(--x-line); border-radius: var(--x-r); background: transparent; color: var(--x-text); font: 15px var(--x-mono); }
+      .x-in:focus { outline: none; border-color: var(--x-acc); }
+      .x-res { margin: 12px 0 4px; font: 600 13px var(--x-mono); }
+      .x-ok { color: var(--x-acc); }
+      .x-no { color: var(--x-red); }
+      .x-exp { margin: 0; font-size: 13px; line-height: 1.65; color: var(--x-sub); }
+      .x-exp b { color: var(--x-gold); font-weight: 600; }
+      @media (max-width: 767px) { .x-g3 { left: 10px; bottom: 74px; padding: 8px 10px; } }
+      @media (max-width: 1023px) { .x-shell { grid-template-columns: 180px 1fr 300px; } }
+      @media (max-width: 767px) {
+        .x-shell { grid-template-columns: 1fr; grid-template-rows: 52px auto 1fr; }
+        .x-top { padding: 0 10px; gap: 8px; }
+        .x-prog .x-segs, .x-brand small { display: none; }
+        .x-ib { width: 44px; height: 44px; }
+        .x-tools { gap: 4px; }
+        .x-count { display: none; }
+        .x-ib[data-k="r"], .x-ib[data-k="f"] { display: none; }
+        .x-side { display: flex; overflow-x: auto; padding: 0; border-right: 0; border-bottom: 1px solid var(--x-line); }
+        .x-side button { flex: none; width: auto; border-left: 0; border-bottom: 3px solid transparent; padding: 6px 14px; white-space: nowrap; }
+        .x-side button.on { border-bottom-color: var(--x-acc); }
+        .x-panel {
+          position: fixed; left: 0; right: 0; bottom: 0; max-height: 72vh; border-left: 0; border-top: 1px solid var(--x-line);
+          border-radius: 16px 16px 0 0; transform: translateY(calc(100% - 64px)); transition: transform 200ms; z-index: 5;
+          padding-top: 0; padding-bottom: calc(16px + env(safe-area-inset-bottom));
+        }
+        .x-panel.open { transform: none; }
+        .x-handle {
+          display: block; position: sticky; top: 0; width: calc(100% + 32px); margin: 0 -16px 8px; height: 56px; border: 0;
+          background: var(--x-panel); color: var(--x-sub); font: inherit; font-size: 13px; cursor: pointer; z-index: 1;
+        }
+        .x-handle::before { content: ""; display: block; width: 40px; height: 4px; border-radius: 2px; background: var(--x-sub); margin: 0 auto 6px; opacity: 0.5; }
+        .x-note { left: 10px; top: 10px; padding: 10px 12px; }
+        .x-note h1 { font-size: 16px; }
+        .x-stage { padding-bottom: 64px; }
+      }
+    </style>
+  </head>
+  <body class="x-app">
+    <div class="page x-shell" id="top">
+      <header class="x-top">
+        <div class="x-brand"><small>格物实验室</small><b>立体几何 · GeoSpace</b></div>
+        <div class="x-prog"><div class="x-segs" id="segs"></div><span class="x-count" id="count">01 / 09</span></div>
+        <div class="x-tools">
+          <button class="x-ib" data-k="prev" aria-label="上一章" title="上一章 (←)">←</button>
+          <button class="x-ib" data-k="next" aria-label="下一章" title="下一章 (→)">→</button>
+          <button class="x-ib" id="theme-btn" data-k="t" title="切换主题：青黛夜 / 宣纸 (T)">T</button>
+          <button class="x-ib" data-k="r" aria-label="重置视角" title="重置视角 (R)">R</button>
+          <button class="x-ib" data-k="f" aria-label="全屏" title="全屏 (F)">F</button>
+        </div>
+      </header>
+      <nav class="x-side" id="side" aria-label="章节"></nav>
+      <main class="x-stage" id="stage">
+        <div class="x-soon" id="soon"><div><b>即将上线</b>本章正在制作中，先去第 1 章「几何体认识」看看吧。</div></div>
+        <div class="x-note" id="note">
+          <h1><span id="noteTitle">几何体认识</span><button id="noteBtn" aria-expanded="true">收起</button></h1>
+          <div id="noteBody"></div>
+        </div>
+        <div class="x-lbls" id="lbl4" aria-hidden="true"></div>
+        <div class="x-lbls" id="lbl5" aria-hidden="true"></div>
+        <div class="x-lbls" id="lbl6" aria-hidden="true"></div>
+        <div class="x-lbls" id="lbl7" aria-hidden="true"></div>
+        <div class="x-lbls" id="lbl8" aria-hidden="true"></div>
+        <div class="x-lbls" id="lbl9" aria-hidden="true"></div>
+        <canvas class="x-ob" id="ob" role="img" aria-label="斜二测画法：左为原图，右为直观图"></canvas>
+        <div class="x-g3" id="g3" style="display:none">
+          <p class="x-h">俯视 · 点击格子叠放（最多 4 层）</p>
+          <div class="x-g3grid" id="g3grid" role="group" aria-label="4×4 俯视网格，上方为后、下方为前"></div>
+          <p class="x-tag" style="text-align:center;margin-top:4px">↓ 正前方</p>
+          <button class="x-btn" id="g3mode" aria-pressed="false">移除模式：关</button>
+        </div>
+      </main>
+      <aside class="x-panel" id="panel">
+        <button class="x-handle" id="handle" aria-expanded="false">控制面板</button>
+        <div id="ctl"></div>
+      </aside>
+    </div>
+    <script src="hark.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+      const CH = ["几何体认识", "展开与折叠", "三视图与直观图", "截面", "空间角", "空间向量与坐标", "外接球与内切球", "正四面体", "随堂检测"];
+      const NOTE1 = [
+        "由若干个平面多边形围成的几何体叫<b>多面体</b>；由平面图形绕一条直线旋转形成的几何体叫<b>旋转体</b>。",
+        "拖动舞台旋转几何体：看不见的棱画成<b>虚线</b>，这是立体图形的画法约定。",
+        "数一数多面体的顶点数 V、棱数 E、面数 F，它们总满足欧拉公式 V − E + F = 2。",
+      ];
+      // 多面体：V E F；旋转体：母线轮廓（半径 r, 高 y）
+      const SHAPES = {
+        cube: { n: "正方体", poly: true, v: 8, e: 12, f: 6, g: () => new THREE.BoxGeometry(2, 2, 2) },
+        cuboid: { n: "长方体", poly: true, v: 8, e: 12, f: 6, g: () => new THREE.BoxGeometry(3, 1.8, 1.6) },
+        prism: { n: "三棱柱", poly: true, v: 6, e: 9, f: 5, g: () => new THREE.CylinderGeometry(1.3, 1.3, 2.2, 3) },
+        pyramid: { n: "四棱锥", poly: true, v: 5, e: 8, f: 5, g: () => new THREE.ConeGeometry(1.5, 2.2, 4) },
+        tetra: { n: "正四面体", poly: true, v: 4, e: 6, f: 4, g: () => new THREE.TetrahedronGeometry(1.7) },
+        octa: { n: "正八面体", poly: true, v: 6, e: 12, f: 8, g: () => new THREE.OctahedronGeometry(1.7) },
+        cyl: { n: "圆柱", poly: false, from: "矩形", prof: [[0, -1.1], [1.1, -1.1], [1.1, 1.1], [0, 1.1]] },
+        cone: { n: "圆锥", poly: false, from: "直角三角形", prof: [[0, -1.1], [1.3, -1.1], [0, 1.2]] },
+        sphere: { n: "球", poly: false, from: "半圆", prof: Array.from({ length: 33 }, (_, i) => { const a = -Math.PI / 2 + (Math.PI * i) / 32; return [1.5 * Math.cos(a), 1.5 * Math.sin(a)]; }) },
+      };
+      const st = { ch: 0, shape: "cube", faces: true, dashed: true, spin: false, axes: false, ang: 360, playing: false };
+      /* ---------- 第 2 章：展开与折叠 ---------- */
+      const NOTE2 = [
+        "沿棱把几何体剪开、摊平，得到的平面图形叫<b>展开图</b>；表面积就是展开图的面积。",
+        "圆柱的侧面展开是<b>矩形</b>，圆锥的侧面展开是<b>扇形</b>；正方体共有 <b>11</b> 种不同的展开图。",
+        "求表面上两点间的最短路径：先展开到同一平面，再连直线。",
+      ];
+      const MODELS2 = {
+        cube: { n: "正方体", f: "6a²", parts: ["6 个边长为 a 的全等正方形，每个面积 a²。"] },
+        cyl: { n: "圆柱", f: "2πr² + 2πrh", parts: ["两个底面圆：2 × πr²。", "侧面矩形：长 2πr（底面周长）× 宽 h。"] },
+        cone: { n: "圆锥", f: "πr² + πrl", parts: ["底面圆：πr²。", "侧面扇形：半径为母线 l，弧长 2πr，面积 ½ · 2πr · l = πrl。"] },
+      };
+      // 11 种正方体展开图（格点 [列, 行]）
+      const NETS = [
+        [[0, 0], [0, 1], [1, 1], [2, 1], [3, 1], [0, 2]],
+        [[0, 0], [0, 1], [1, 1], [2, 1], [3, 1], [1, 2]],
+        [[0, 0], [0, 1], [1, 1], [2, 1], [3, 1], [2, 2]],
+        [[0, 0], [0, 1], [1, 1], [2, 1], [3, 1], [3, 2]],
+        [[1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [1, 2]],
+        [[1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [2, 2]],
+        [[0, 0], [1, 0], [1, 1], [2, 1], [3, 1], [1, 2]],
+        [[0, 0], [1, 0], [1, 1], [2, 1], [3, 1], [2, 2]],
+        [[0, 0], [1, 0], [1, 1], [2, 1], [3, 1], [3, 2]],
+        [[0, 0], [1, 0], [1, 1], [2, 1], [2, 2], [3, 2]],
+        [[0, 0], [1, 0], [2, 0], [2, 1], [3, 1], [4, 1]],
+      ];
+      const NET_TYPE = (i) => (i < 6 ? "1-4-1 型" : i < 9 ? "2-3-1 型" : i === 9 ? "2-2-2 型" : "3-3 型");
+      const st2 = { model: "cube", net: 0, fold: 0, playing: false, dir: 1 };
+      const $ = (id) => document.getElementById(id);
+      const root = document.documentElement;
+
+      /* ---------- 外壳 ---------- */
+      $("segs").innerHTML = CH.map(() => "<i></i>").join("");
+      $("side").innerHTML = CH.map((c, i) => `<button data-i="${i}"><span>${String(i + 1).padStart(2, "0")}</span><b>${c}</b></button>`).join("");
+      $("side").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) go(+b.dataset.i); });
+      document.querySelectorAll(".x-ib").forEach((b) => b.addEventListener("click", () => act(b.dataset.k)));
+      $("noteBtn").onclick = () => { const c = $("note").classList.toggle("closed"); $("noteBtn").textContent = c ? "展开" : "收起"; $("noteBtn").setAttribute("aria-expanded", !c); };
+      $("handle").onclick = () => { const o = $("panel").classList.toggle("open"); $("handle").setAttribute("aria-expanded", o); };
+      function act(k) {
+        if (k === "prev") go(st.ch - 1);
+        else if (k === "next") go(st.ch + 1);
+        else if (k === "r") resetView();
+        else if (k === "f") { if (document.fullscreenElement) document.exitFullscreen(); else if (root.requestFullscreen) root.requestFullscreen().catch(() => {}); }
+      }
+      addEventListener("keydown", (e) => {
+        if (e.target.matches("input, textarea, select") || e.metaKey || e.ctrlKey || e.altKey) return;
+        const k = e.key.toLowerCase();
+        if (e.key === "ArrowLeft") act("prev");
+        else if (e.key === "ArrowRight") act("next");
+        else if (k === "t") $("theme-btn").click();
+        else if (k === "r" || k === "f") act(k);
+      });
+      function go(i, fromHash) {
+        st.ch = Math.max(0, Math.min(CH.length - 1, i));
+        if (!fromHash) history.replaceState(null, "", "#" + (st.ch + 1));
+        document.querySelectorAll("#segs i").forEach((s, j) => s.classList.toggle("on", j <= st.ch));
+        document.querySelectorAll("#side button").forEach((b, j) => { b.classList.toggle("on", j === st.ch); if (j === st.ch) b.scrollIntoView({ block: "nearest", inline: "nearest" }); });
+        $("count").textContent = String(st.ch + 1).padStart(2, "0") + " / " + String(CH.length).padStart(2, "0");
+        $("noteTitle").textContent = CH[st.ch];
+        const live = st.ch <= 8;
+        $("lbl9").style.display = st.ch === 8 ? "block" : "none";
+        if (group9) group9.visible = st.ch === 8;
+        $("lbl8").style.display = st.ch === 7 ? "block" : "none";
+        if (group8) group8.visible = st.ch === 7;
+        $("lbl4").style.display = st.ch === 3 ? "block" : "none";
+        $("lbl5").style.display = st.ch === 4 ? "block" : "none";
+        $("lbl6").style.display = st.ch === 5 ? "block" : "none";
+        $("lbl7").style.display = st.ch === 6 ? "block" : "none";
+        if (group4) group4.visible = st.ch === 3;
+        if (group5) group5.visible = st.ch === 4;
+        if (group6) group6.visible = st.ch === 5;
+        if (group7) group7.visible = st.ch === 6;
+        $("noteBody").innerHTML = live ? [NOTE1, NOTE2, NOTE3, NOTE4, NOTE5, NOTE6, NOTE7, NOTE8, NOTE9][st.ch].map((t) => `<p>${t}</p>`).join("") : "<p>本章即将上线。</p>";
+        $("soon").style.display = live ? "none" : "grid";
+        $("g3").style.display = st.ch === 2 ? "block" : "none";
+        $("ob").style.display = "none";
+        if (renderer) renderer.domElement.style.visibility = live ? "visible" : "hidden";
+        if (group) { group.visible = st.ch === 0; group2.visible = st.ch === 1; axes.visible = st.axes && st.ch === 0; controls.autoRotate = st.spin && st.ch === 0; }
+        if (group3) group3.visible = st.ch === 2;
+        renderPanel();
+      }
+      addEventListener("hashchange", () => go((parseInt(location.hash.slice(1)) || 1) - 1, true));
+
+      /* ---------- 控制面板 ---------- */
+      function renderPanel() {
+        if (st.ch === 1) return renderPanel2();
+        if (st.ch === 2) return renderPanel3();
+        if (st.ch === 3) return renderPanel4();
+        if (st.ch === 4) return renderPanel5();
+        if (st.ch === 5) return renderPanel6();
+        if (st.ch === 6) return renderPanel7();
+        if (st.ch === 7) return renderPanel8();
+        if (st.ch === 8) return renderPanel9();
+        if (st.ch !== 0) {
+          $("ctl").innerHTML = `<p class="x-h">${CH[st.ch]}</p><div class="x-card"><ul><li>本章的交互演示即将上线。</li><li>已开放：第 1 章「几何体认识」、第 2 章「展开与折叠」、第 3 章「三视图与直观图」、第 4 章「截面」。</li></ul></div>
+            <p style="margin-top:12px"><button class="x-btn" style="width:100%" onclick="go(0)">去第 1 章</button></p>`;
+          return;
+        }
+        const s = SHAPES[st.shape];
+        const keys = Object.keys(SHAPES);
+        let h = `<p class="x-h">多面体</p><div class="x-grid">${keys.filter((k) => SHAPES[k].poly).map(btn).join("")}</div>
+          <p class="x-h">旋转体</p><div class="x-grid">${keys.filter((k) => !SHAPES[k].poly).map(btn).join("")}</div>`;
+        if (s.poly) {
+          h += `<p class="x-h">欧拉公式 · ${s.n}</p><div class="x-card"><div class="x-vef">
+            <div><b>${s.v}</b><span>顶点 V</span></div><div><b>${s.e}</b><span>棱 E</span></div><div><b>${s.f}</b><span>面 F</span></div></div>
+            <p class="x-euler">${s.v} − ${s.e} + ${s.f} = <em>${s.v - s.e + s.f}</em> ✓</p></div>`;
+        } else {
+          h += `<p class="x-h">旋转生成 · ${s.from}绕轴旋转</p><div class="x-card">
+            <div class="x-row"><label for="ang">旋转角</label><input type="range" id="ang" min="0" max="360" step="1" value="${st.ang}"><output id="angOut">${st.ang}°</output></div>
+            <button class="x-btn" id="play" style="width:100%;margin-top:6px">${st.playing ? "⏸ 暂停" : "▶ 播放旋转"}</button>
+            <p class="x-tag">${s.from}绕它的一边（直径）所在直线旋转一周，形成${s.n}。</p></div>`;
+        }
+        h += `<p class="x-h">要点</p><div class="x-card"><ul>
+            <li><b>多面体</b>：由若干个平面多边形围成。</li>
+            <li><b>旋转体</b>：平面图形绕一条直线旋转形成。</li>
+            <li><b>画法约定</b>：看不见的棱画成虚线。</li>
+            <li><b>欧拉公式</b>：V − E + F = 2。</li></ul></div>
+          <p class="x-h">显示</p><div class="x-card">
+            ${tog("faces", "半透明面")}${tog("dashed", "隐藏的棱画虚线")}${tog("spin", "自动旋转")}${tog("axes", "坐标轴")}</div>`;
+        $("ctl").innerHTML = h;
+        $("ctl").querySelectorAll("[data-s]").forEach((b) => (b.onclick = () => { st.shape = b.dataset.s; st.ang = SHAPES[st.shape].poly ? 360 : 0; st.playing = !SHAPES[st.shape].poly; build(); renderPanel(); }));
+        $("ctl").querySelectorAll("[data-t]").forEach((c) => (c.onchange = () => { st[c.dataset.t] = c.checked; applyToggles(); }));
+        if ($("ang")) {
+          $("ang").oninput = (e) => { st.ang = +e.target.value; $("angOut").textContent = st.ang + "°"; st.playing = false; $("play").textContent = "▶ 播放旋转"; build(); };
+          $("play").onclick = () => { st.playing = !st.playing; if (st.playing && st.ang >= 360) st.ang = 0; $("play").textContent = st.playing ? "⏸ 暂停" : "▶ 播放旋转"; };
+        }
+      }
+      const btn = (k) => `<button data-s="${k}" class="${k === st.shape ? "on" : ""}">${SHAPES[k].n}</button>`;
+      const tog = (k, l) => `<div class="x-row"><label for="t-${k}">${l}</label><input type="checkbox" id="t-${k}" data-t="${k}" ${st[k] ? "checked" : ""}></div>`;
+
+      const playLabel = () => (st2.playing ? "⏸ 暂停" : st2.fold >= 1 ? "▶ 播放展开" : "▶ 播放折叠");
+      function renderPanel2() {
+        const m = MODELS2[st2.model];
+        const end = st2.model === "cube" ? "正方体" : m.n;
+        let h = `<p class="x-h">模型</p><div class="x-grid">${Object.keys(MODELS2).map((k) => `<button data-m="${k}" class="${k === st2.model ? "on" : ""}">${MODELS2[k].n}</button>`).join("")}</div>`;
+        if (st2.model === "cube") {
+          h += `<p class="x-h">展开图 · 共 11 种</p><div class="x-grid" style="grid-template-columns:repeat(4,1fr)">${NETS.map((_, i) => `<button data-n="${i}" class="${i === st2.net ? "on" : ""}" aria-label="第 ${i + 1} 种展开图">${i + 1}</button>`).join("")}</div>
+            <p class="x-tag">第 ${st2.net + 1} 种 · ${NET_TYPE(st2.net)}</p>`;
+        }
+        h += `<p class="x-h">折叠</p><div class="x-card">
+            <div class="x-row"><label for="fold">折叠程度</label><input type="range" id="fold" min="0" max="1" step="0.01" value="${st2.fold}"><output id="foldOut">${st2.fold.toFixed(2)}</output></div>
+            <button class="x-btn" id="play2" style="width:100%;margin-top:6px">${playLabel()}</button>
+            <p class="x-tag">0 = 展开平铺，1 = 折成${end}</p></div>
+          <p class="x-h">表面积 · ${m.n}</p><div class="x-card"><p class="x-euler" style="margin-top:0">S = <em>${m.f}</em></p><ul>${m.parts.map((p) => `<li>${p}</li>`).join("")}</ul></div>
+          <p class="x-h">要点</p><div class="x-card"><ul>
+            <li><b>展开图</b>：沿棱剪开摊平，表面积 = 展开图面积。</li>
+            <li><b>圆柱</b>侧面展开是矩形，<b>圆锥</b>侧面展开是扇形。</li>
+            <li><b>正方体</b>共有 11 种不同展开图。</li>
+            <li><b>最短路径</b>：先展开到同一平面，再连直线。</li></ul></div>`;
+        $("ctl").innerHTML = h;
+        $("ctl").querySelectorAll("[data-m]").forEach((b) => (b.onclick = () => { st2.model = b.dataset.m; st2.fold = 0; st2.playing = false; build2(); renderPanel2(); }));
+        $("ctl").querySelectorAll("[data-n]").forEach((b) => (b.onclick = () => { st2.net = +b.dataset.n; st2.fold = 0; st2.playing = false; build2(); renderPanel2(); }));
+        $("fold").oninput = (e) => { st2.fold = +e.target.value; st2.playing = false; $("foldOut").textContent = st2.fold.toFixed(2); $("play2").textContent = playLabel(); update2(); };
+        $("play2").onclick = () => {
+          if (st2.playing) st2.playing = false;
+          else { st2.dir = st2.fold >= 1 ? -1 : 1; st2.playing = true; }
+          $("play2").textContent = playLabel();
+        };
+      }
+      function syncFold() {
+        if (!$("fold")) return;
+        $("fold").value = st2.fold;
+        $("foldOut").textContent = st2.fold.toFixed(2);
+        $("play2").textContent = playLabel();
+      }
+
+      /* ---------- three.js 舞台 ---------- */
+      let renderer, scene, camera, controls, group, group2, axes;
+      const stage = $("stage");
+      const css = (v) => getComputedStyle(root).getPropertyValue(v).trim();
+      const mats = {};
+      function initThree() {
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        stage.prepend(renderer.domElement);
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.minDistance = 3;
+        controls.maxDistance = 20;
+        mats.face = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.16, side: THREE.DoubleSide, depthWrite: true, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+        mats.solid = new THREE.LineBasicMaterial();
+        mats.dash = new THREE.LineDashedMaterial({ dashSize: 0.1, gapSize: 0.08, depthTest: false, transparent: true, opacity: 0.75 });
+        mats.gen = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false });
+        mats.genLine = new THREE.LineBasicMaterial();
+        mats.axis = new THREE.LineDashedMaterial({ dashSize: 0.14, gapSize: 0.1 });
+        axes = new THREE.AxesHelper(2.6);
+        axes.material.depthTest = false;
+        scene.add(axes);
+        group = new THREE.Group();
+        scene.add(group);
+        mats.net = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.28, side: THREE.DoubleSide, depthWrite: false });
+        mats.base = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.32, side: THREE.DoubleSide, depthWrite: false });
+        group2 = new THREE.Group();
+        scene.add(group2);
+        new ResizeObserver(resize).observe(stage);
+        new MutationObserver(colors).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+        colors();
+        resize();
+        resetView();
+        build();
+        build2();
+        loop();
+      }
+      function colors() {
+        const acc = new THREE.Color(css("--x-acc")), gold = new THREE.Color(css("--x-gold"));
+        const light = root.getAttribute("data-theme") === "light";
+        mats.face.color.copy(acc);
+        mats.face.opacity = light ? 0.12 : 0.16;
+        mats.solid.color.set(light ? "#1d2433" : "#e6ecf5");
+        mats.dash.color.set(light ? "#5d6878" : "#8a97ad");
+        mats.gen.color.copy(gold);
+        mats.genLine.color.copy(gold);
+        mats.axis.color.copy(gold);
+        mats.net.color.copy(acc);
+        mats.net.opacity = light ? 0.22 : 0.28;
+        mats.base.color.copy(gold);
+      }
+      function resize() {
+        const w = stage.clientWidth, h = stage.clientHeight;
+        if (!w || !h) return;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      function resetView() {
+        if (!camera) return;
+        const far = camera.aspect < 0.8 ? 10 : 7.5;
+        camera.position.set(far * 0.62, far * 0.42, far * 0.66);
+        controls.target.set(0, 0, 0);
+        controls.update();
+      }
+      function edges(geo, thresh) {
+        const eg = new THREE.EdgesGeometry(geo, thresh);
+        const solid = new THREE.LineSegments(eg, mats.solid);
+        const dash = new THREE.LineSegments(eg, mats.dash);
+        dash.computeLineDistances();
+        dash.renderOrder = -1;
+        dash.userData.dash = true;
+        solid.renderOrder = 2;
+        return [dash, solid];
+      }
+      function clear() {
+        group.children.slice().forEach((o) => {
+          group.remove(o);
+          o.traverse((c) => c.geometry && c.geometry.dispose());
+        });
+      }
+      function build() {
+        if (!group) return;
+        clear();
+        const s = SHAPES[st.shape];
+        if (s.poly) {
+          const geo = s.g();
+          const face = new THREE.Mesh(geo, mats.face);
+          face.userData.face = true;
+          group.add(face, ...edges(geo, 1));
+        } else {
+          const phi = (Math.max(st.ang, 0.001) * Math.PI) / 180;
+          const pts = s.prof.map(([r, y]) => new THREE.Vector2(r, y));
+          if (st.ang > 0) {
+            const geo = new THREE.LatheGeometry(pts, Math.max(3, Math.round((64 * st.ang) / 360)), 0, phi);
+            const face = new THREE.Mesh(geo, mats.face);
+            face.userData.face = true;
+            group.add(face);
+            if (st.shape !== "sphere") group.add(...edges(geo, 30));
+          }
+          if (st.shape === "sphere" && st.ang > 0) {
+            const ring = [];
+            for (let i = 0; i <= 64; i++) { const a = (phi * i) / 64; ring.push(new THREE.Vector3(1.5 * Math.sin(a), 0, 1.5 * Math.cos(a))); }
+            const rg = new THREE.BufferGeometry().setFromPoints(ring);
+            const d = new THREE.Line(rg, mats.dash), l = new THREE.Line(rg, mats.solid);
+            d.computeLineDistances(); d.renderOrder = -1; d.userData.dash = true; l.renderOrder = 2;
+            group.add(d, l);
+          }
+          // 母线所在平面图形（金色）与旋转轴
+          const shape = new THREE.Shape(pts);
+          const gen = new THREE.Group();
+          gen.add(new THREE.Mesh(new THREE.ShapeGeometry(shape), mats.gen));
+          const outline = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts.map((p) => new THREE.Vector3(p.x, p.y, 0))), mats.genLine);
+          outline.renderOrder = 3;
+          gen.add(outline);
+          gen.rotation.y = phi - Math.PI / 2;
+          group.add(gen);
+          const ax = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -2, 0), new THREE.Vector3(0, 2, 0)]), mats.axis);
+          ax.computeLineDistances();
+          group.add(ax);
+        }
+        applyToggles();
+      }
+      function applyToggles() {
+        group.traverse((o) => {
+          if (o.userData.face) o.visible = st.faces;
+          if (o.userData.dash) o.visible = st.dashed;
+        });
+        axes.visible = st.axes;
+        controls.autoRotate = st.spin;
+      }
+      /* ---------- 第 2 章：展开图与折叠 ---------- */
+      const A = 1.2;
+      let cube2 = null; // { holder, hinges, flat }
+      const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+      function clear2() {
+        group2.children.slice().forEach((o) => { group2.remove(o); o.traverse((c) => c.geometry && c.geometry.dispose()); });
+      }
+      function outline(pts, closed) {
+        const g = new THREE.BufferGeometry().setFromPoints(pts);
+        const l = closed ? new THREE.LineLoop(g, mats.solid) : new THREE.Line(g, mats.solid);
+        l.renderOrder = 2;
+        return l;
+      }
+      function disk(r, mat) {
+        const g = new THREE.Group();
+        g.add(new THREE.Mesh(new THREE.CircleGeometry(r, 64).rotateX(-Math.PI / 2), mat));
+        g.add(outline(Array.from({ length: 64 }, (_, i) => { const a = (2 * Math.PI * i) / 64; return V3(r * Math.cos(a), 0, r * Math.sin(a)); }), true));
+        return g;
+      }
+      function gridMesh(cols, rows, f, mat) {
+        const pos = [], ind = [];
+        for (let i = 0; i <= cols; i++) for (let j = 0; j <= rows; j++) pos.push(...f(i / cols, j / rows).toArray());
+        for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+          const a = i * (rows + 1) + j, b = a + rows + 1;
+          ind.push(a, b, a + 1, a + 1, b, b + 1);
+        }
+        const g = new THREE.BufferGeometry();
+        g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+        g.setIndex(ind);
+        return new THREE.Mesh(g, mat);
+      }
+      function build2() {
+        if (!group2) return;
+        clear2();
+        cube2 = null;
+        if (st2.model === "cube") {
+          const cells = NETS[st2.net];
+          const idx = new Map(cells.map((c, i) => [c[0] + "," + c[1], i]));
+          const nb = (c) => [[1, 0], [-1, 0], [0, 1], [0, -1]].filter((d) => idx.has(c[0] + d[0] + "," + (c[1] + d[1]))).map((d) => [idx.get(c[0] + d[0] + "," + (c[1] + d[1])), d]);
+          let root = 0;
+          cells.forEach((c, i) => { if (nb(c).length > nb(cells[root]).length) root = i; });
+          const face = (base) => {
+            const g = new THREE.Group();
+            const geo = new THREE.PlaneGeometry(A, A).rotateX(-Math.PI / 2);
+            g.add(new THREE.Mesh(geo, base ? mats.base : mats.net));
+            const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), mats.solid);
+            e.renderOrder = 2;
+            g.add(e);
+            return g;
+          };
+          const holder = new THREE.Group();
+          const rootG = face(true);
+          holder.add(rootG);
+          const hinges = [], seen = new Set([root]), q = [[root, rootG]];
+          while (q.length) {
+            const [i, g] = q.shift();
+            nb(cells[i]).forEach(([j, d]) => {
+              if (seen.has(j)) return;
+              seen.add(j);
+              const piv = new THREE.Group();
+              piv.position.set((d[0] * A) / 2, 0, (d[1] * A) / 2);
+              const cg = face(false);
+              cg.position.set((d[0] * A) / 2, 0, (d[1] * A) / 2);
+              piv.add(cg);
+              g.add(piv);
+              // 绕与父面共享的棱旋转，向上折起
+              hinges.push({ piv, ax: d[0] ? "z" : "x", sg: d[0] ? d[0] : -d[1] });
+              q.push([j, cg]);
+            });
+          }
+          const xs = cells.map((c) => c[0]), zs = cells.map((c) => c[1]);
+          const flat = V3(((Math.min(...xs) + Math.max(...xs)) / 2 - cells[root][0]) * A, 0, ((Math.min(...zs) + Math.max(...zs)) / 2 - cells[root][1]) * A);
+          group2.add(holder);
+          cube2 = { holder, hinges, flat };
+        }
+        update2();
+      }
+      function update2() {
+        if (!group2) return;
+        const t = st2.fold;
+        if (cube2) {
+          const th = (t * Math.PI) / 2;
+          cube2.hinges.forEach((h) => { h.piv.rotation.set(0, 0, 0); h.piv.rotation[h.ax] = h.sg * th; });
+          cube2.holder.position.set(-cube2.flat.x * (1 - t), (-A / 2) * t, -cube2.flat.z * (1 - t));
+          return;
+        }
+        clear2();
+        const holder = new THREE.Group();
+        if (st2.model === "cyl") {
+          const r = 0.85, h = 2.1, L = 2 * Math.PI * r;
+          const map = (s, z) => { if (t < 1e-3) return V3(s, 0, z); const R = L / (2 * Math.PI * t); return V3(R * Math.sin(s / R), R * (1 - Math.cos(s / R)), z); };
+          holder.add(gridMesh(64, 1, (u, v) => map(-L / 2 + L * u, -h / 2 + h * v), mats.net));
+          const edge = [];
+          for (let i = 0; i <= 64; i++) edge.push(map(-L / 2 + (L * i) / 64, -h / 2));
+          for (let i = 64; i >= 0; i--) edge.push(map(-L / 2 + (L * i) / 64, h / 2));
+          holder.add(outline(edge, true));
+          [1, -1].forEach((sg) => {
+            const piv = new THREE.Group();
+            piv.position.set(0, 0, (sg * h) / 2);
+            const d = disk(r, mats.base);
+            d.position.set(0, 0, sg * r);
+            piv.add(d);
+            piv.rotation.x = (-sg * t * Math.PI) / 2;
+            holder.add(piv);
+          });
+          holder.position.set(0, -r * t, 0);
+        } else {
+          const r = 1, l = 3, h = Math.sqrt(l * l - r * r), al = (2 * Math.PI * r) / l;
+          const psi = al + t * (2 * Math.PI - al), rho = (al * l) / psi;
+          const sb = Math.min(1, rho / l), cb = Math.sqrt(Math.max(0, 1 - sb * sb));
+          const map = (u, ph) => { const th = (ph * psi) / al; return V3(u * sb * Math.cos(th), -u * cb, u * sb * Math.sin(th)); };
+          holder.add(gridMesh(48, 12, (a, b) => map(l * b, -al / 2 + al * a), mats.net));
+          const edge = [V3(0, 0, 0), map(l, -al / 2)];
+          for (let i = 1; i <= 48; i++) edge.push(map(l, -al / 2 + (al * i) / 48));
+          holder.add(outline(edge, true));
+          const piv = new THREE.Group();
+          piv.position.copy(map(l, 0));
+          const d = disk(r, mats.base);
+          d.position.set(r, 0, 0);
+          piv.add(d);
+          piv.rotation.z = -Math.PI * t;
+          holder.add(piv);
+          holder.position.set(-((l + 2 * r) / 2) * (1 - t), l * cb - (h / 2) * t, 0);
+        }
+        group2.add(holder);
+      }
+
+      /* ---------- 第 3 章：三视图 ---------- */
+      const NOTE3 = [
+        "<b>教材：人教A版 必修第二册·第八章 立体几何初步</b>",
+        "在左下网格点击格子叠放小方块，右侧实时画出三视图：<b>主视图</b>从正前方、<b>左视图</b>从正左方、<b>俯视图</b>从正上方观察。",
+        "三视图满足“<b>长对正、高平齐、宽相等</b>”。",
+        "<b>斜二测画法</b>用来画水平放置的平面图形的直观图：平行于 x 轴的线段长度不变，平行于 y 轴的线段长度减半。",
+      ];
+      const OB = {
+        sq: { n: "正方形", p: [[-1, 0], [1, 0], [1, 2], [-1, 2]], S: "4", S2: "√2 ≈ 1.41" },
+        tri: { n: "正三角形", p: [[-1, 0], [1, 0], [0, Math.sqrt(3)]], S: "√3 ≈ 1.73", S2: "√6/4 ≈ 0.61" },
+        rect: { n: "矩形", p: [[-1.5, 0], [1.5, 0], [1.5, 2], [-1.5, 2]], S: "6", S2: "3√2/2 ≈ 2.12" },
+      };
+      const sto = { shape: "sq", t: 0, playing: false };
+      const C45 = Math.SQRT1_2;
+      const obPt = ([x, y], t) => [x + t * (y / 2) * C45, y * (1 - t) + t * (y / 2) * C45];
+      function drawOb() {
+        const cv = $("ob");
+        if (!cv || cv.style.display === "none") return;
+        const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(devicePixelRatio, 2);
+        if (!W || !H) return;
+        cv.width = W * dpr; cv.height = H * dpr;
+        const g = cv.getContext("2d");
+        g.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const narrow = W < H, u = narrow ? Math.min(W, H / 2) / 5.5 : Math.min(W / 2, H) / 5.5;
+        const mono = css("--x-mono"), acc = css("--x-acc"), txt = css("--x-text"), sub = css("--x-sub");
+        const pts = OB[sto.shape].p;
+        [[0, "原图"], [sto.t, sto.t >= 1 ? "直观图" : "直观图 · 变换中"]].forEach(([t, title], k) => {
+          const ox = narrow ? W / 2 - 0.4 * u : (W / 4) * (1 + 2 * k) - 0.4 * u, oy = narrow ? (H / 4) * (1 + 2 * k) + 1.2 * u : H / 2 + 1.2 * u;
+          const P = (q) => [ox + q[0] * u, oy - q[1] * u];
+          g.strokeStyle = sub; g.fillStyle = sub; g.lineWidth = 1; g.font = `12px ${mono}`;
+          g.beginPath(); g.moveTo(...P([-2.2, 0])); g.lineTo(...P([2.4, 0]));
+          const ya = obPt([0, 2.8], t);
+          g.moveTo(...P([0, 0])); g.lineTo(...P(ya)); g.stroke();
+          const p = k ? "′" : "";
+          g.fillText("x" + p, ...P([2.5, -0.1])); g.fillText("y" + p, ...P([ya[0] + 0.1, ya[1] + 0.1])); g.fillText("O" + p, ...P([-0.35, -0.35]));
+          g.fillStyle = txt; g.font = `600 13px ${mono}`;
+          g.fillText(title, ox - 2 * u, oy - 3.4 * u);
+          g.beginPath();
+          pts.forEach((q, i) => g[i ? "lineTo" : "moveTo"](...P(obPt(q, t))));
+          g.closePath();
+          g.globalAlpha = 0.3; g.fillStyle = acc; g.fill(); g.globalAlpha = 1;
+          g.strokeStyle = txt; g.lineWidth = 1.8; g.stroke();
+        });
+      }
+      new ResizeObserver(drawOb).observe($("ob"));
+      new MutationObserver(drawOb).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+      const obLabel = () => (sto.playing ? "⏸ 暂停" : sto.t >= 1 ? "↺ 重新播放" : "▶ 播放");
+      function syncOb() {
+        if (!$("obT")) return;
+        $("obT").value = sto.t; $("obOut").textContent = sto.t.toFixed(2); $("playOb").textContent = obLabel();
+        drawOb();
+      }
+      const Z4 = () => Array.from({ length: 4 }, () => [0, 0, 0, 0]);
+      const PRE3 = {
+        L: [[0, 0, 0, 0], [3, 1, 1, 0], [3, 1, 1, 0], [0, 0, 0, 0]],
+        stair: [[0, 0, 0, 0], [4, 3, 2, 1], [4, 3, 2, 1], [0, 0, 0, 0]],
+      };
+      const st3 = { h: Z4(), rm: false, mode: "views" }; // h[行 r：0 后 → 3 前][列 c：0 左 → 3 右]
+      const S3 = 0.7;
+      let group3;
+      function grid3() {
+        $("g3grid").innerHTML = st3.h.flatMap((row, r) => row.map((v, c) =>
+          `<button data-r="${r}" data-c="${c}" aria-label="第 ${r + 1} 行第 ${c + 1} 列，${v} 层" style="background:color-mix(in srgb, var(--x-acc) ${v * 20}%, transparent)">${v || ""}</button>`)).join("");
+      }
+      $("g3grid").addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        const row = st3.h[+b.dataset.r], c = +b.dataset.c;
+        row[c] = Math.max(0, Math.min(4, row[c] + (st3.rm ? -1 : 1)));
+        update3();
+      });
+      $("g3mode").onclick = () => {
+        st3.rm = !st3.rm;
+        $("g3mode").setAttribute("aria-pressed", st3.rm);
+        $("g3mode").textContent = st3.rm ? "移除模式：开（点击拿走一层）" : "移除模式：关";
+      };
+      function update3() { grid3(); build3(); draw3(); const t = $("cnt3"); if (t) t.textContent = st3.h.flat().reduce((a, b) => a + b, 0); }
+      function init3() {
+        group3 = new THREE.Group();
+        const gh = new THREE.GridHelper(4 * S3, 4, 0x8a97ad, 0x8a97ad);
+        gh.material.transparent = true;
+        gh.material.opacity = 0.4;
+        gh.position.y = -1.4;
+        group3.add(gh);
+        group3.userData.floor = gh;
+        scene.add(group3);
+        build3();
+        go(st.ch, true);
+      }
+      function build3() {
+        if (!group3) return;
+        group3.children.slice().forEach((o) => { if (o === group3.userData.floor) return; group3.remove(o); o.traverse((c) => c.geometry && c.geometry.dispose()); });
+        st3.h.forEach((row, r) => row.forEach((v, c) => {
+          for (let k = 0; k < v; k++) {
+            const geo = new THREE.BoxGeometry(S3, S3, S3).translate((c - 1.5) * S3, -1.4 + (k + 0.5) * S3, (r - 1.5) * S3);
+            const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), mats.solid);
+            e.renderOrder = 2;
+            group3.add(new THREE.Mesh(geo, mats.net), e);
+          }
+        }));
+      }
+      function view3(id, filled) {
+        const cv = $(id);
+        if (!cv) return;
+        const w = cv.clientWidth || 120, dpr = Math.min(devicePixelRatio, 2);
+        cv.width = cv.height = w * dpr;
+        const g = cv.getContext("2d");
+        g.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const p = 8, u = (w - 2 * p) / 4;
+        g.lineWidth = 1;
+        g.strokeStyle = css("--x-line");
+        for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) g.strokeRect(p + i * u, p + j * u, u, u);
+        for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+          if (!filled(i, j)) continue;
+          g.globalAlpha = 0.35;
+          g.fillStyle = css("--x-acc");
+          g.fillRect(p + i * u, p + j * u, u, u);
+          g.globalAlpha = 1;
+          g.lineWidth = 1.5;
+          g.strokeStyle = css("--x-text");
+          g.strokeRect(p + i * u, p + j * u, u, u);
+        }
+      }
+      function draw3() {
+        const h = st3.h;
+        const front = [0, 1, 2, 3].map((c) => Math.max(...h.map((row) => row[c]))); // 每列取最高
+        const left = h.map((row) => Math.max(...row)); // 左视图：左后 → 右前
+        view3("v-front", (i, j) => front[i] >= 4 - j);
+        view3("v-left", (i, j) => left[i] >= 4 - j);
+        view3("v-top", (i, j) => h[j][i] > 0);
+      }
+      new MutationObserver(() => st.ch === 2 && draw3()).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+      function renderPanel3() {
+        const ob = st3.mode === "ob";
+        $("g3").style.display = ob ? "none" : "block";
+        $("ob").style.display = ob ? "block" : "none";
+        if (group3) group3.visible = !ob;
+        if (renderer) renderer.domElement.style.visibility = ob ? "hidden" : "visible";
+        const modes = `<p class="x-h">模式</p><div class="x-grid" style="grid-template-columns:1fr 1fr">${[["views", "三视图"], ["ob", "斜二测"]].map(([k, l]) => `<button data-md="${k}" class="${k === st3.mode ? "on" : ""}" aria-pressed="${k === st3.mode}">${l}</button>`).join("")}</div>`;
+        const bindModes = () => $("ctl").querySelectorAll("[data-md]").forEach((b) => (b.onclick = () => { st3.mode = b.dataset.md; sto.playing = false; renderPanel3(); }));
+        if (ob) {
+          const s = OB[sto.shape];
+          $("ctl").innerHTML = `${modes}<p class="x-h">平面图形（水平放置）</p><div class="x-grid">${Object.keys(OB).map((k) => `<button data-ob="${k}" class="${k === sto.shape ? "on" : ""}">${OB[k].n}</button>`).join("")}</div>
+            <p class="x-h">原图 → 直观图</p><div class="x-card">
+              <div class="x-row"><label for="obT">变换程度</label><input type="range" id="obT" min="0" max="1" step="0.01" value="${sto.t}"><output id="obOut">${sto.t.toFixed(2)}</output></div>
+              <button class="x-btn" id="playOb" style="width:100%;margin-top:6px">${obLabel()}</button>
+              <p class="x-tag">x′ 轴长度不变；y′ 轴与 x′ 轴成 45°，平行于 y 轴的线段长度减半</p></div>
+            <p class="x-h">面积 · ${s.n}</p><div class="x-card"><ul>
+              <li>原图面积 S = <b>${s.S}</b></li><li>直观图面积 S′ = <b>${s.S2}</b></li></ul>
+              <p class="x-euler">S′ = <em>(√2/4)·S</em></p></div>
+            <p class="x-h">要点</p><div class="x-card"><ul>
+              <li><b>斜二测画法</b>：画水平放置的平面图形的直观图。</li>
+              <li><b>平行于 x 轴</b>的线段长度不变，<b>平行于 y 轴</b>的线段长度减半。</li>
+              <li><b>面积关系</b>：S′ = (√2/4)·S，反求原图面积 S = 2√2·S′。</li></ul></div>`;
+          bindModes();
+          $("ctl").querySelectorAll("[data-ob]").forEach((b) => (b.onclick = () => { sto.shape = b.dataset.ob; sto.t = 0; sto.playing = false; renderPanel3(); }));
+          $("obT").oninput = (e) => { sto.t = +e.target.value; sto.playing = false; syncOb(); };
+          $("playOb").onclick = () => { if (sto.playing) sto.playing = false; else { if (sto.t >= 1) sto.t = 0; sto.playing = true; } syncOb(); };
+          requestAnimationFrame(drawOb);
+          return;
+        }
+        $("ctl").innerHTML = `${modes}<p class="x-h">三视图 · 共 <span id="cnt3">${st3.h.flat().reduce((a, b) => a + b, 0)}</span> 个小方块</p>
+          <div class="x-card x-views">
+            <figure><canvas id="v-front" role="img" aria-label="主视图"></canvas><figcaption>主视图 · 正前方</figcaption></figure>
+            <figure><canvas id="v-left" role="img" aria-label="左视图"></canvas><figcaption>左视图 · 正左方</figcaption></figure>
+            <figure><canvas id="v-top" role="img" aria-label="俯视图"></canvas><figcaption>俯视图 · 正上方</figcaption></figure>
+          </div>
+          <p class="x-tag">主俯长对正 · 主左高平齐 · 俯左宽相等</p>
+          <p class="x-h">预设</p><div class="x-grid"><button data-p="L">L 形</button><button data-p="stair">阶梯</button><button data-p="clear">清空</button></div>
+          <p class="x-h">要点</p><div class="x-card"><ul>
+            <li><b>观察方向</b>：主视图从正前方、左视图从正左方、俯视图从正上方观察。</li>
+            <li><b>长对正、高平齐、宽相等</b>：主视图与俯视图长对正，主视图与左视图高平齐，左视图与俯视图宽相等。</li>
+            <li><b>搭法不唯一</b>：三视图相同的几何体，搭法不一定唯一。</li>
+            <li><b>高考链接</b>：由三视图还原几何体求体积、表面积；易错：三视图相同的几何体搭法不唯一，求方块个数要考虑最多与最少。</li></ul></div>`;
+        bindModes();
+        $("ctl").querySelectorAll("[data-p]").forEach((b) => (b.onclick = () => { st3.h = PRE3[b.dataset.p] ? PRE3[b.dataset.p].map((r) => r.slice()) : Z4(); update3(); }));
+        requestAnimationFrame(draw3);
+      }
+
+      /* ---------- 第 4 章：截面 ---------- */
+      const NOTE4 = [
+        "<b>教材：人教A版 必修第二册·第八章 8.4–8.5 空间点、直线、平面之间的位置关系</b>",
+        "用一个平面去截几何体，得到的平面图形叫<b>截面</b>；截面的每条边都是截平面与几何体某个面的交线。",
+        "在右侧选择 P、Q、R 所在的棱并拖动滑块，三点确定截平面，金色多边形就是截面。",
+        "正方体的截面可以是三角形、四边形、五边形、六边形，但截面三角形一定是<b>锐角三角形</b>，也截不出<b>正五边形</b>。",
+        "画截面常用“<b>延长线找交点</b>”：同一平面内的两点直接连线；平行平面上的交线互相平行。",
+      ];
+      const VN = ["A", "B", "C", "D", "A₁", "B₁", "C₁", "D₁"];
+      const VP = [[-1, -1, 1], [1, -1, 1], [1, -1, -1], [-1, -1, -1], [-1, 1, 1], [1, 1, 1], [1, 1, -1], [-1, 1, -1]]; // 棱长 2
+      const ED = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
+      const EN = ED.map(([a, b]) => VN[a] + VN[b]);
+      const PRE4 = {
+        tri: { n: "正三角形", p: [[0, 0.5], [3, 0.5], [8, 0.5]] },
+        sq: { n: "正方形", p: [[8, 0.5], [9, 0.5], [10, 0.5]] },
+        rect: { n: "矩形", p: [[0, 0], [2, 0], [6, 0]] },
+        trap: { n: "梯形", p: [[0, 0.5], [1, 0.5], [4, 0]] },
+        pent: { n: "五边形", p: [[0, 0.5], [1, 0.5], [6, 1]] },
+        hex: { n: "正六边形", p: [[0, 0.5], [1, 0.5], [10, 0.5]] },
+      };
+      const st4 = { pre: "hex", p: PRE4.hex.p.map((a) => a.slice()) };
+      const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+      const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+      const crs = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+      const lerp = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+      const onEdge = ([e, t]) => lerp(VP[ED[e][0]], VP[ED[e][1]], t);
+      function sect4() {
+        const [P, Q, R] = st4.p.map(onEdge);
+        const n = crs(sub(Q, P), sub(R, P)), L = Math.hypot(...n);
+        if (L < 1e-6) return { P, Q, R, poly: [], bad: true };
+        const nn = n.map((v) => v / L);
+        const d = VP.map((v) => { const x = dot(nn, sub(v, P)); return Math.abs(x) < 1e-9 ? 0 : x; });
+        const pts = [];
+        const add = (p) => { if (!pts.some((q) => Math.hypot(...sub(p, q)) < 1e-6)) pts.push(p); };
+        ED.forEach(([a, b]) => {
+          if (d[a] === 0) add(VP[a]);
+          if (d[b] === 0) add(VP[b]);
+          if (d[a] * d[b] < 0) add(lerp(VP[a], VP[b], d[a] / (d[a] - d[b])));
+        });
+        if (pts.length < 3) return { P, Q, R, poly: [] };
+        const c = pts.reduce((s, p) => s.map((v, i) => v + p[i] / pts.length), [0, 0, 0]);
+        const u = sub(pts[0], c), ul = Math.hypot(...u), U = u.map((x) => x / ul), W = crs(nn, U);
+        const ang = (p) => Math.atan2(dot(sub(p, c), W), dot(sub(p, c), U));
+        pts.sort((a, b) => ang(a) - ang(b)); // 凸包顺序
+        let area = 0, per = 0;
+        pts.forEach((p, i) => { const q = pts[(i + 1) % pts.length]; area += dot(crs(sub(p, c), sub(q, c)), nn) / 2; per += Math.hypot(...sub(q, p)); });
+        return { P, Q, R, poly: pts, c, area: Math.abs(area), per };
+      }
+      let group4, sec4;
+      function init4() {
+        group4 = new THREE.Group();
+        const geo = new THREE.BoxGeometry(2, 2, 2);
+        group4.add(new THREE.Mesh(geo, mats.face), ...edges(geo, 1));
+        mats.sec = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false, depthTest: false });
+        mats.secLine = new THREE.LineBasicMaterial({ transparent: true, depthTest: false });
+        mats.dotA = new THREE.MeshBasicMaterial({ transparent: true, depthTest: false });
+        mats.dotG = new THREE.MeshBasicMaterial({ transparent: true, depthTest: false });
+        sec4 = new THREE.Group();
+        group4.add(sec4);
+        group4.visible = false;
+        scene.add(group4);
+        col4();
+        new MutationObserver(col4).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+        build4(sect4());
+      }
+      function col4() {
+        const gold = css("--x-gold");
+        mats.sec.color.set(gold);
+        mats.secLine.color.set(gold);
+        mats.dotG.color.set(gold);
+        mats.dotA.color.set(css("--x-acc"));
+      }
+      function build4(r) {
+        const near = (a, b) => Math.hypot(...sub(a, b)) < 1e-6;
+        const lab = (p, t, cls, k = 1) => `<span class="${cls}" data-x="${p[0] * k}" data-y="${p[1] * k}" data-z="${p[2] * k}">${t}</span>`;
+        let html = VP.map((p, i) => lab(p, VN[i], "", 1.14)).join("");
+        let ci = 0;
+        r.poly.forEach((p) => { if (![r.P, r.Q, r.R].some((q) => near(p, q))) html += lab(p, "EFGHIJ"[ci++], "s"); });
+        html += [r.P, r.Q, r.R].map((p, i) => lab(p, "PQR"[i], "p")).join("");
+        $("lbl4").innerHTML = html;
+        if (!sec4) return;
+        sec4.children.slice().forEach((o) => { sec4.remove(o); o.geometry.dispose(); });
+        const V = (p) => new THREE.Vector3(...p);
+        const dotM = (p, rad, m) => { const s = new THREE.Mesh(new THREE.SphereGeometry(rad, 14, 10), m); s.position.copy(V(p)); s.renderOrder = 5; sec4.add(s); };
+        if (r.poly.length >= 3) {
+          const pos = [];
+          r.poly.forEach((p, i) => pos.push(...r.c, ...p, ...r.poly[(i + 1) % r.poly.length]));
+          const g = new THREE.BufferGeometry();
+          g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+          const m = new THREE.Mesh(g, mats.sec);
+          m.renderOrder = 3;
+          const l = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(r.poly.map(V)), mats.secLine);
+          l.renderOrder = 4;
+          sec4.add(m, l);
+          r.poly.forEach((p) => dotM(p, 0.045, mats.dotG));
+        }
+        [r.P, r.Q, r.R].forEach((p) => dotM(p, 0.07, mats.dotA));
+      }
+      function lbl4(id = "lbl4") {
+        const cv = renderer.domElement, w = cv.clientWidth, h = cv.clientHeight, v = new THREE.Vector3();
+        $(id).querySelectorAll("span").forEach((s) => {
+          v.set(+s.dataset.x, +s.dataset.y, +s.dataset.z).project(camera);
+          s.style.left = cv.offsetLeft + ((v.x + 1) / 2) * w + "px";
+          s.style.top = cv.offsetTop + ((1 - v.y) / 2) * h + "px";
+        });
+      }
+      function res4() {
+        const r = sect4(), n = r.poly.length, N = { 3: "三角形", 4: "四边形", 5: "五边形", 6: "六边形" };
+        $("res4").innerHTML = n >= 3
+          ? `<div class="x-vef"><div><b>${n}</b><span>边数</span></div><div><b>${r.area.toFixed(2)}</b><span>面积</span></div><div><b>${r.per.toFixed(2)}</b><span>周长</span></div></div>
+             <p class="x-euler">截面是<em>${N[n]}</em></p>`
+          : `<p class="x-tag" style="margin:0">${r.bad ? "P、Q、R 三点共线，不能确定平面，请调整位置。" : "截平面只经过正方体的棱或顶点，没有截面。"}</p>`;
+        build4(r);
+      }
+      function renderPanel4() {
+        const opts = (sel) => EN.map((n, i) => `<option value="${i}" ${i === sel ? "selected" : ""}>棱 ${n}</option>`).join("");
+        $("ctl").innerHTML = `<p class="x-h">预设</p><div class="x-grid">${Object.keys(PRE4).map((k) => `<button data-p4="${k}" class="${k === st4.pre ? "on" : ""}" aria-pressed="${k === st4.pre}">${PRE4[k].n}</button>`).join("")}</div>
+          <p class="x-h">截平面 · 三点确定</p><div class="x-card">${[0, 1, 2].map((i) => `
+            <div class="x-row"><label for="e4${i}"><b>${"PQR"[i]}</b> 所在棱</label><select id="e4${i}" data-i="${i}">${opts(st4.p[i][0])}</select></div>
+            <div class="x-row"><label for="t4${i}">位置</label><input type="range" id="t4${i}" data-i="${i}" min="0" max="1" step="0.01" value="${st4.p[i][1]}"><output id="o4${i}">${st4.p[i][1].toFixed(2)}</output></div>`).join("")}
+            <p class="x-tag">0 = 棱的起点，1 = 棱的终点（如棱 AB：0 为 A，1 为 B）</p></div>
+          <p class="x-h">截面 · 正方体棱长 2</p><div class="x-card" id="res4"></div>
+          <p class="x-h">要点</p><div class="x-card"><ul>
+            <li><b>截面</b>：用一个平面去截几何体得到的平面图形；每条边都是截平面与几何体某个面的交线。</li>
+            <li><b>正方体截面</b>可以是三角形、四边形、五边形、六边形；截面三角形一定是锐角三角形，截不出正五边形。</li>
+            <li><b>延长线找交点</b>：同一平面内两点连线，平行平面上的交线互相平行。</li>
+            <li><b>高考链接</b>：作截面、求截面周长与面积是选择填空常考题，正方体过三棱中点的截面要会画；易错：两平行平面被第三平面所截，交线平行。</li></ul></div>`;
+        const custom = () => { st4.pre = null; $("ctl").querySelectorAll("[data-p4]").forEach((b) => { b.classList.remove("on"); b.setAttribute("aria-pressed", "false"); }); res4(); };
+        $("ctl").querySelectorAll("[data-p4]").forEach((b) => (b.onclick = () => { st4.pre = b.dataset.p4; st4.p = PRE4[st4.pre].p.map((a) => a.slice()); renderPanel4(); }));
+        $("ctl").querySelectorAll("select[data-i]").forEach((s) => (s.onchange = () => { st4.p[+s.dataset.i][0] = +s.value; custom(); }));
+        $("ctl").querySelectorAll("input[type=range][data-i]").forEach((s) => (s.oninput = () => { const i = +s.dataset.i; st4.p[i][1] = +s.value; $("o4" + i).textContent = st4.p[i][1].toFixed(2); custom(); }));
+        res4();
+      }
+
+      /* ---------- 第 5 章：空间角 ---------- */
+      const NOTE5 = [
+        "<b>教材：人教A版 必修第二册·第八章 8.6 空间直线、平面的垂直</b>",
+        "空间角都要<b>转化为平面角</b>来求：异面直线靠<b>平移</b>，线面角靠<b>射影</b>，二面角靠在棱上<b>作垂线</b>。",
+        "在右侧切换模式、选择直线与平面，或直接点例题；拖动舞台旋转正方体。",
+      ];
+      const ad5 = (a, b) => a.map((v, i) => v + b[i]), mu5 = (a, k) => a.map((v) => v * k), ln5 = (a) => Math.hypot(...a), nm5 = (a) => mu5(a, 1 / ln5(a));
+      const angD = (u, v) => (Math.acos(Math.max(-1, Math.min(1, dot(u, v) / ln5(u) / ln5(v)))) * 180) / Math.PI;
+      const nameOf = (p, f) => { const k = VP.findIndex((q) => ln5(sub(p, q)) < 1e-6); return k >= 0 ? VN[k] : f; };
+      const LN5 = ED.map(([a, b], i) => ({ a, b, n: EN[i], k: "棱" }));
+      for (let i = 0; i < 8; i++) for (let j = i + 1; j < 8; j++) {
+        const d = ln5(sub(VP[i], VP[j]));
+        if (d < 2.1) continue;
+        const [p, q] = i % 4 <= j % 4 ? [i, j] : [j, i];
+        LN5.push({ a: p, b: q, n: VN[p] + VN[q], k: d < 3 ? "面对角线" : "体对角线" });
+      }
+      const PL5 = [["ABCD", [0, 1, 2, 3]], ["A₁B₁C₁D₁", [4, 5, 6, 7]], ["ABB₁A₁", [0, 1, 5, 4]], ["BCC₁B₁", [1, 2, 6, 5]], ["CDD₁C₁", [2, 3, 7, 6]], ["DAA₁D₁", [3, 0, 4, 7]], ["AA₁C₁C", [0, 4, 6, 2]], ["A₁BD", [4, 1, 3]]]
+        .map(([n, v]) => { const P = v.map((i) => VP[i]); return { n, P, N: nm5(crs(sub(P[1], P[0]), sub(P[2], P[0]))) }; });
+      const fl = (n) => LN5.findIndex((l) => l.n === n), fp = (n) => PL5.findIndex((p) => p.n === n);
+      const EX5 = [
+        { n: "① A₁B 与 AD₁", m: "skew", s: [fl("A₁B"), fl("AD₁")], txt: "AD₁∥BC₁，平移后 △A₁BC₁ 三边都是面对角线，是正三角形，θ = ∠A₁BC₁ = 60°。" },
+        { n: "② A₁C 与底面", m: "lp", s: [fl("A₁C"), fp("ABCD")], txt: "A₁A⊥底面，AC 是 A₁C 在底面内的射影，tan θ = A₁A / AC = 2 / 2√2 = √2/2，θ = arctan(√2/2)。" },
+        { n: "③ 二面角 A₁-BD-A", m: "di", s: [fp("A₁BD"), fp("ABCD")], txt: "取 BD 中点 O，AO⊥BD 且 A₁O⊥BD，∠A₁OA 为平面角，tan θ = AA₁ / AO = 2 / √2 = √2，θ = arctan√2。" },
+        { n: "④ AC 与 BD₁", m: "skew", s: [fl("AC"), fl("BD₁")], txt: "AC⊥BD、AC⊥DD₁，所以 AC⊥平面 BDD₁B₁，故 AC⊥BD₁，θ = 90°。" },
+      ];
+      const st5 = { mode: "skew", sel: { skew: EX5[0].s.slice(), lp: EX5[1].s.slice(), di: EX5[2].s.slice() }, ex: 0, t: 0, playing: true };
+      function calc5() {
+        const [i, j] = st5.sel[st5.mode], R = { segs: [], polys: [], pts: [], deg: null }, E = 1e-6;
+        const f4 = (x) => x.toFixed(4);
+        if (st5.mode === "skew") {
+          const L1 = LN5[i], L2 = LN5[j], P1 = VP[L1.a], P1b = VP[L1.b], P2 = VP[L2.a], P2b = VP[L2.b], u = sub(P1b, P1), v = sub(P2b, P2);
+          R.segs.push([P1, P1b, 0], [P2, P2b, 1]);
+          if (i === j) { R.txt = "两条直线重合，请选择两条不同的直线。"; return R; }
+          const w = sub(P1, P2), a = dot(u, u), b = dot(u, v), c = dot(v, v), d = dot(u, w), e = dot(v, w), D = a * c - b * b;
+          if (D < E) { R.deg = 0; R.txt = `${L1.n}∥${L2.n}，两直线平行，不是异面直线，所成角为 0°。`; return R; }
+          const Q1 = ad5(P1, mu5(u, (b * e - c * d) / D)), Q2 = ad5(P2, mu5(v, (a * e - b * d) / D)), meet = ln5(sub(Q1, Q2)) < E;
+          let sh = sub(Q1, Q2), O = Q1, hit = false;
+          if (!meet) for (const p of [P1, P1b]) for (const q of [P2, P2b]) {
+            const s = sub(p, q);
+            if (!hit && [P2, P2b].every((x) => ad5(x, s).every((k) => Math.abs(k) <= 1 + E))) { sh = s; O = p; hit = true; }
+          }
+          const T = mu5(sh, st5.t), A2 = ad5(P2, T), B2 = ad5(P2b, T);
+          if (!meet) R.segs.push([A2, B2, 1]);
+          const cs = Math.abs(b) / Math.sqrt(a * c);
+          R.deg = (Math.acos(Math.min(1, cs)) * 180) / Math.PI;
+          const on = nameOf(O, "O"), uu = ln5(sub(P1b, O)) >= ln5(sub(P1, O)) ? sub(P1b, O) : sub(P1, O), vv = dot(uu, v) >= 0 ? v : mu5(v, -1);
+          if (meet || st5.t >= 1) { R.arc = [O, uu, vv]; if (on === "O") R.pts.push([O, "O"]); }
+          const tn = nameOf(A2, "") && nameOf(B2, "") ? nameOf(A2, "") + nameOf(B2, "") : L2.n + "′";
+          R.txt = meet
+            ? `${L1.n} 与 ${L2.n} 相交于 ${on}，交角即所成角，cos θ = |u·v| / (|u||v|) = ${f4(cs)}。`
+            : `把 ${L2.n} 平移到 ${tn}，与 ${L1.n} 交于 ${on}，cos θ = |u·v| / (|u||v|) = ${f4(cs)}。`;
+        } else if (st5.mode === "lp") {
+          const L = LN5[i], pl = PL5[j], P = VP[L.a], Pb = VP[L.b], u = sub(Pb, P), n = pl.N, X = pl.P[0];
+          R.polys.push([pl.P, 0]);
+          R.segs.push([P, Pb, 1]);
+          const dP = dot(n, sub(P, X)), dQ = dot(n, sub(Pb, X)), un = dot(u, n), sn = Math.min(1, Math.abs(un) / ln5(u));
+          R.deg = (Math.asin(sn) * 180) / Math.PI;
+          if (Math.abs(un) < E) { R.txt = Math.abs(dP) < E ? `${L.n} 在平面 ${pl.n} 内，θ = 0°。` : `${L.n}∥平面 ${pl.n}，θ = 0°。`; return R; }
+          const O = ad5(P, mu5(u, -dP / un)), S = Math.abs(dP) >= Math.abs(dQ) ? P : Pb, H = sub(S, mu5(n, dot(n, sub(S, X))));
+          const on = nameOf(O, "O"), sn2 = S === P ? VN[L.a] : VN[L.b], hn = nameOf(H, "H");
+          R.segs.push([O, S, 1]);
+          if (on === "O") R.pts.push([O, "O"]);
+          if (ln5(sub(H, O)) < E) { R.txt = `${L.n}⊥平面 ${pl.n}，θ = 90°。`; return R; }
+          R.segs.push([S, H, 3], [O, H, 2]);
+          if (hn === "H") R.pts.push([H, "H"]);
+          R.arc = [O, sub(S, O), sub(H, O)];
+          R.txt = `作 ${sn2}${hn}⊥平面 ${pl.n}，${on}${hn} 是射影，θ = ∠${sn2}${on}${hn}，sin θ = ${f4(sn)}。`;
+        } else {
+          const p1 = PL5[i], p2 = PL5[j], d = crs(p1.N, p2.N), dd = dot(d, d);
+          R.polys.push([p1.P, 0], [p2.P, 1]);
+          if (i === j) { R.txt = "两个平面相同，请选择两个不同的平面。"; return R; }
+          if (dd < E) { R.txt = `平面 ${p1.n}∥平面 ${p2.n}，不构成二面角。`; return R; }
+          const h1 = dot(p1.N, p1.P[0]), h2 = dot(p2.N, p2.P[0]), O = mu5(ad5(mu5(crs(p2.N, d), h1), mu5(crs(d, p1.N), h2)), 1 / dd), dn = nm5(d);
+          let lo = -9, hi = 9;
+          [0, 1, 2].forEach((k) => { if (Math.abs(dn[k]) > E) { const s1 = (-1 - O[k]) / dn[k], s2 = (1 - O[k]) / dn[k]; lo = Math.max(lo, Math.min(s1, s2)); hi = Math.min(hi, Math.max(s1, s2)); } });
+          if (lo > hi) { lo = -1.5; hi = 1.5; }
+          const e0 = ad5(O, mu5(dn, lo)), e1 = ad5(O, mu5(dn, hi));
+          const ray = (pl) => { let r = [0, 0, 0]; pl.P.forEach((p) => { const w = sub(p, O), q = sub(w, mu5(dn, dot(w, dn))); if (ln5(q) > ln5(r) + E) r = q; }); return r; };
+          const r1 = ray(p1), r2 = ray(p2), M = ad5(O, r1), N = ad5(O, r2);
+          const on = nameOf(O, "O"), mn = nameOf(M, "M"), nn = nameOf(N, "N"), en = nameOf(e0, "") && nameOf(e1, "") ? nameOf(e0, "") + nameOf(e1, "") : "l";
+          R.segs.push([e0, e1, 3], [O, M, 0], [O, N, 1]);
+          [[O, on, "O"], [M, mn, "M"], [N, nn, "N"]].forEach(([p, a, b]) => a === b && R.pts.push([p, a]));
+          R.deg = angD(r1, r2);
+          R.arc = [O, r1, r2];
+          R.txt = `在棱 ${en} 上取点 ${on}，两面内分别作 ${on}${mn}⊥${en}、${on}${nn}⊥${en}，平面角 θ = ∠${mn}${on}${nn}，cos θ = ${f4(Math.cos((R.deg * Math.PI) / 180))}。`;
+        }
+        return R;
+      }
+      let group5, g5, M5, F5;
+      function init5() {
+        group5 = new THREE.Group();
+        const geo = new THREE.BoxGeometry(2, 2, 2);
+        group5.add(new THREE.Mesh(geo, mats.face), ...edges(geo, 1));
+        g5 = new THREE.Group();
+        group5.add(g5);
+        group5.visible = false;
+        scene.add(group5);
+        const mk = (D) => (D ? new THREE.LineDashedMaterial({ dashSize: 0.1, gapSize: 0.07, transparent: true, depthTest: false }) : new THREE.LineBasicMaterial({ transparent: true, depthTest: false }));
+        M5 = [mk(), mk(), mk(1), mk()];
+        F5 = [0, 1].map(() => new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
+        const col5 = () => { const a = css("--x-acc"), r = css("--x-red"), g = css("--x-gold"); [a, r, a, g].forEach((c, k) => M5[k].color.set(c)); F5[0].color.set(a); F5[1].color.set(r); };
+        col5();
+        new MutationObserver(col5).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+        build5();
+      }
+      function build5() {
+        const r = calc5(), V = (p) => new THREE.Vector3(...p);
+        const lab = (p, t, cls, k = 1) => `<span class="${cls}" data-x="${p[0] * k}" data-y="${p[1] * k}" data-z="${p[2] * k}">${t}</span>`;
+        let html = VP.map((p, i) => lab(p, VN[i], "", 1.14)).join("") + r.pts.map(([p, n]) => lab(p, n, "s")).join("");
+        if (g5) {
+          g5.children.slice().forEach((o) => { g5.remove(o); o.geometry.dispose(); });
+          r.polys.forEach(([P, m]) => {
+            const pos = [];
+            for (let k = 1; k < P.length - 1; k++) pos.push(...P[0], ...P[k], ...P[k + 1]);
+            const g = new THREE.BufferGeometry();
+            g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+            const ms = new THREE.Mesh(g, F5[m]);
+            ms.renderOrder = 3;
+            g5.add(ms);
+          });
+          r.segs.forEach(([a, b, m]) => {
+            const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(a), V(b)]), M5[m]);
+            if (m === 2) l.computeLineDistances();
+            l.renderOrder = 4;
+            g5.add(l);
+          });
+        }
+        if (r.arc) {
+          const [O, u, v] = r.arc, U = nm5(u), w = sub(v, mu5(U, dot(v, U))), th = (angD(u, v) * Math.PI) / 180;
+          if (ln5(w) > 1e-6 && g5) {
+            const W = nm5(w), at = (a, rad) => ad5(O, mu5(ad5(mu5(U, Math.cos(a)), mu5(W, Math.sin(a))), rad));
+            const pts = [], fan = [];
+            for (let k = 0; k <= 24; k++) { pts.push(at((th * k) / 24, 0.4)); if (k) fan.push(...O, ...pts[k - 1], ...pts[k]); }
+            const g = new THREE.BufferGeometry();
+            g.setAttribute("position", new THREE.Float32BufferAttribute(fan, 3));
+            const sec = new THREE.Mesh(g, mats.sec), arc = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map(V)), M5[3]);
+            sec.renderOrder = 3;
+            arc.renderOrder = 5;
+            g5.add(sec, arc);
+            html += lab(at(th / 2, 0.72), "θ", "p");
+          }
+        }
+        $("lbl5").innerHTML = html;
+        return r;
+      }
+      function res5() {
+        const r = build5(), txt = st5.ex !== null ? EX5[st5.ex].txt : r.txt;
+        $("res5").innerHTML = (r.deg !== null ? `<p class="x-euler" style="margin-top:0">θ = <em>${r.deg.toFixed(2)}°</em></p>` : "") + `<p class="x-tag">思路：${txt}</p>`;
+      }
+      function renderPanel5() {
+        const m = st5.mode, [i, j] = st5.sel[m];
+        const lo = (s) => ["棱", "面对角线", "体对角线"].map((k) => `<optgroup label="${k}">${LN5.map((l, x) => (l.k === k ? `<option value="${x}" ${x === s ? "selected" : ""}>${l.n}</option>` : "")).join("")}</optgroup>`).join("");
+        const po = (s) => PL5.map((p, x) => `<option value="${x}" ${x === s ? "selected" : ""}>平面 ${p.n}</option>`).join("");
+        const lab = { skew: ["直线 1", "直线 2"], lp: ["斜线", "平面"], di: ["半平面 1", "半平面 2"] }[m];
+        const opt = [m === "di" ? po(i) : lo(i), m === "skew" ? lo(j) : po(j)];
+        $("ctl").innerHTML = `<p class="x-h">模式</p><div class="x-grid">${[["skew", "异面直线角"], ["lp", "线面角"], ["di", "二面角"]].map(([k, l]) => `<button data-m5="${k}" class="${k === m ? "on" : ""}" aria-pressed="${k === m}">${l}</button>`).join("")}</div>
+          <p class="x-h">例题</p><div class="x-grid" style="grid-template-columns:1fr 1fr">${EX5.map((e, k) => `<button data-ex="${k}" class="${k === st5.ex ? "on" : ""}" aria-pressed="${k === st5.ex}">${e.n}</button>`).join("")}</div>
+          <p class="x-h">选择对象</p><div class="x-card">${[0, 1].map((k) => `<div class="x-row"><label for="s5${k}">${lab[k]}</label><select id="s5${k}" data-k="${k}">${opt[k]}</select></div>`).join("")}
+            ${m === "skew" ? `<button class="x-btn" id="play5" style="width:100%;margin-top:6px">▶ 平移演示</button>` : ""}</div>
+          <p class="x-h">结果 · 正方体棱长 2</p><div class="x-card" id="res5"></div>
+          <p class="x-h">要点</p><div class="x-card"><ul>
+            <li><b>转化思想</b>：空间角都要转化为平面角来求。</li>
+            <li><b>异面直线所成角</b>：平移到相交，范围 (0°, 90°]。</li>
+            <li><b>线面角</b>：斜线与它在平面内的射影所成的角，范围 [0°, 90°]。</li>
+            <li><b>二面角</b>：在棱上取点，两面内分别作垂直于棱的射线，平面角范围 [0°, 180°]。</li>
+            <li><b>高考链接</b>：立体几何大题第二问必考线面角或二面角，常用空间向量法；易错：异面直线所成角取锐角或直角，向量夹角为钝角时要取补角。</li></ul></div>`;
+        const restart = () => { st5.t = 0; st5.playing = st5.mode === "skew"; };
+        $("ctl").querySelectorAll("[data-m5]").forEach((b) => (b.onclick = () => { st5.mode = b.dataset.m5; st5.ex = null; restart(); renderPanel5(); }));
+        $("ctl").querySelectorAll("[data-ex]").forEach((b) => (b.onclick = () => { const e = EX5[+b.dataset.ex]; st5.mode = e.m; st5.sel[e.m] = e.s.slice(); st5.ex = +b.dataset.ex; restart(); renderPanel5(); }));
+        $("ctl").querySelectorAll("select[data-k]").forEach((s) => (s.onchange = () => { st5.sel[st5.mode][+s.dataset.k] = +s.value; st5.ex = null; restart(); renderPanel5(); }));
+        if ($("play5")) $("play5").onclick = () => { restart(); res5(); };
+        res5();
+      }
+
+      /* ---------- 第 6 章：空间向量与坐标 ---------- */
+      const NOTE6 = [
+        "<b>教材：人教A版 选择性必修第一册·第一章 空间向量与立体几何</b>",
+        "建立空间直角坐标系后，点有坐标，直线有<b>方向向量</b>，平面有<b>法向量</b>，空间角和距离都可以用向量运算求出，不必作辅助线。",
+        "异面直线：cos θ = |a·b| / (|a||b|)；线面角：sin θ = |a·n| / (|a||n|)；二面角：由法向量夹角得到，锐角还是钝角要看图形；点到平面的距离：d = |AP·n| / |n|。",
+        "右侧把向量法的结果与第 5 章的几何法放在一起对照。",
+      ];
+      // 以 D 为原点：x 轴 DA、y 轴 DC、z 轴 DD₁（场景坐标 → 数学坐标）
+      const M6 = (i) => [VP[i][2] + 1, VP[i][0] + 1, VP[i][1] + 1];
+      const S6 = (m) => [m[1] - 1, m[2] - 1, m[0] - 1], sv6 = (v) => [v[1], v[2], v[0]];
+      const D6 = (i, j) => sub(M6(j), M6(i));
+      const vs6 = (v) => `(${v.map((x) => String(+x.toFixed(3))).join(", ")})`;
+      const rt6 = (q) => { const r = Math.round(Math.sqrt(q)); return r * r === q ? String(r) : `√${q}`; };
+      const gcd6 = (a, b) => (b ? gcd6(b, a % b) : a);
+      const F6 = { ABCD: [0, 1, 2, 3], "A₁BD": [4, 1, 3] }, T6 = { ABCD: [3, 0, 2], "A₁BD": [3, 4, 1] };
+      const cen6 = (p) => mu5(F6[p].map(M6).reduce(ad5), 1 / F6[p].length);
+      function nrm6(p, nn) {
+        const [o, a, b] = T6[p], u = D6(o, a), v = D6(o, b), c = crs(u, v), g = c.reduce((s, x) => gcd6(s, Math.abs(x)), 0), s = c.find((x) => x) > 0 ? 1 : -1;
+        const n = c.map((x) => (x * s) / g || 0);
+        const eq = (w) => w.map((k, t) => (k ? `${k > 0 && w.slice(0, t).some((z) => z) ? " + " : ""}${k === 1 ? "" : k === -1 ? "−" : k}${"xyz"[t]}` : "")).join("") + " = 0";
+        return { n, txt: `平面 ${p}：设 ${nn} = (x, y, z)，由 ${nn}·${VN[o]}${VN[a]} = ${eq(u)}，${nn}·${VN[o]}${VN[b]} = ${eq(v)}，取一组非零解得 ${nn} = ${vs6(n)}` };
+      }
+      const EX6 = [
+        { n: EX5[0].n, k: "skew", a: [4, 1], b: [0, 7], geo: 60, ex: "60°", gx: "60°" },
+        { n: EX5[1].n, k: "lp", a: [4, 2], pl: ["ABCD"], geo: (Math.atan(Math.SQRT1_2) * 180) / Math.PI, ex: "arcsin(√3/3)", gx: "arctan(√2/2)" },
+        { n: EX5[2].n, k: "di", pl: ["A₁BD", "ABCD"], geo: (Math.atan(Math.SQRT2) * 180) / Math.PI, ex: "arccos(√3/3)", gx: "arctan√2" },
+        { n: EX5[3].n, k: "skew", a: [0, 2], b: [1, 7], geo: 90, ex: "90°", gx: "90°" },
+        { n: "⑤ 点 A 到平面 A₁BD", k: "dist", a: [0, 3], pl: ["A₁BD"], geo: 2 / Math.sqrt(3), ex: "2√3/3", gx: "2√3/3", gtxt: "等体积法：V(A₁-ABD) = ⅓ × 2 × 2 = 4/3，S△A₁BD = 2√3，d = 3V / S = 2√3/3。" },
+      ];
+      const st6 = { ex: 0 };
+      function calc6(e) {
+        const ids = [...new Set([...(e.a || []), ...(e.b || []), ...(e.pl || []).flatMap((p) => F6[p])])].sort((x, y) => x - y);
+        const vn = (p) => VN[p[0]] + VN[p[1]], a = e.a && D6(...e.a), b = e.b && D6(...e.b);
+        const N = (e.pl || []).map((p, t) => nrm6(p, e.k === "di" ? ["n₁", "n₂"][t] : "n"));
+        const S = [`① 写坐标：${ids.map((i) => `${VN[i]}${vs6(M6(i))}`).join("，")}`];
+        S.push("② 方向向量：" + (e.k === "dist" ? `在平面内取 P = D，AP = AD = ${vs6(a)}` : e.k === "di" ? "二面角不用直线的方向向量，只用两个平面的法向量" : `a = ${vn(e.a)} = ${vs6(a)}` + (b ? `，b = ${vn(e.b)} = ${vs6(b)}` : "")));
+        S.push("③ 法向量：" + (N.length ? N.map((q) => q.txt).join("；") : "异面直线所成角只用两条直线的方向向量，不需要法向量"));
+        let v, f;
+        if (e.k === "skew") {
+          const ab = dot(a, b), c = Math.abs(ab) / Math.sqrt(dot(a, a) * dot(b, b));
+          f = `cos θ = |a·b| / (|a||b|) = |${ab}| / (${rt6(dot(a, a))} × ${rt6(dot(b, b))}) = ${c.toFixed(4)}`;
+          v = (Math.acos(Math.min(1, c)) * 180) / Math.PI;
+        } else if (e.k === "lp") {
+          const n = N[0].n, an = dot(a, n), s = Math.abs(an) / Math.sqrt(dot(a, a) * dot(n, n));
+          f = `sin θ = |a·n| / (|a||n|) = |${an}| / (${rt6(dot(a, a))} × ${rt6(dot(n, n))}) = ${s.toFixed(4)}`;
+          v = (Math.asin(Math.min(1, s)) * 180) / Math.PI;
+        } else if (e.k === "di") {
+          const [n1, n2] = N.map((q) => q.n), d = dot(n1, n2), c = d / Math.sqrt(dot(n1, n1) * dot(n2, n2));
+          f = `cos〈n₁, n₂〉 = n₁·n₂ / (|n₁||n₂|) = ${d} / (${rt6(dot(n1, n1))} × ${rt6(dot(n2, n2))}) = ${c.toFixed(4)}；看图形，二面角 A₁-BD-A 是锐角，所以 cos θ = |cos〈n₁, n₂〉| = ${Math.abs(c).toFixed(4)}`;
+          v = (Math.acos(Math.abs(c)) * 180) / Math.PI;
+        } else {
+          const n = N[0].n, an = dot(a, n);
+          f = `d = |AP·n| / |n| = |${an}| / ${rt6(dot(n, n))}`;
+          v = Math.abs(an) / Math.sqrt(dot(n, n));
+        }
+        const fmt = (x) => (e.k === "dist" ? x.toFixed(3) : x.toFixed(2) + "°");
+        S.push(`④ 代入公式：${f}`, `⑤ 结果：${e.k === "dist" ? "d" : "θ"} = ${e.ex} ≈ ${fmt(v)}`);
+        return { S, v, a, b, N, ids, fmt };
+      }
+      let group6, g6;
+      function init6() {
+        group6 = new THREE.Group();
+        const geo = new THREE.BoxGeometry(2, 2, 2);
+        group6.add(new THREE.Mesh(geo, mats.face), ...edges(geo, 1));
+        g6 = new THREE.Group();
+        group6.add(g6);
+        group6.visible = st.ch === 5;
+        scene.add(group6);
+        new MutationObserver(build6).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+        build6();
+      }
+      function build6() {
+        const e = EX6[st6.ex], r = calc6(e), V = (p) => new THREE.Vector3(...p);
+        const lab = (p, t, cls, sty = "") => `<span class="${cls}" style="${sty}" data-x="${p[0]}" data-y="${p[1]}" data-z="${p[2]}">${t}</span>`;
+        let html = VP.map((p, i) => lab(mu5(p, 1.16), VN[i] + vs6(M6(i)), r.ids.includes(i) ? "s" : "")).join("");
+        if (!g6) return r;
+        g6.children.slice().forEach((o) => { g6.remove(o); o.traverse((c) => (o.type === "ArrowHelper" ? c.material && c.material.dispose() : c.geometry && c.geometry.dispose())); });
+        const ink = css("--x-text");
+        const arrow = (o, v, col, L, hl = 0.2) => {
+          const d = V(sv6(v)), h = new THREE.ArrowHelper(d.clone().normalize(), V(S6(o)), L || d.length(), new THREE.Color(col), hl, hl / 2);
+          h.traverse((c) => { if (c.material) { c.material.depthTest = false; c.material.transparent = true; } c.renderOrder = 6; });
+          g6.add(h);
+        };
+        const tl = new THREE.LineBasicMaterial({ color: ink, depthTest: false, transparent: true });
+        [[1, 0, 0], [0, 1, 0], [0, 0, 1]].forEach((u, k) => {
+          arrow([0, 0, 0], u, ink, 3.2, 0.16);
+          html += lab(S6(mu5(u, 3.42)), "xyz"[k], "s");
+          const td = nm5([[0, -1, 0], [-1, 0, 0], [-1, -1, 0]][k]);
+          [1, 2, 3].forEach((t) => {
+            const p = mu5(u, t), q = ad5(p, mu5(td, 0.12));
+            const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(S6(p)), V(S6(q))]), tl);
+            l.renderOrder = 6;
+            g6.add(l);
+            html += lab(S6(ad5(p, mu5(td, 0.34))), t, "");
+          });
+        });
+        (e.pl || []).forEach((p, t) => {
+          const P = F6[p].map((i) => VP[i]), pos = [];
+          for (let k = 1; k < P.length - 1; k++) pos.push(...P[0], ...P[k], ...P[k + 1]);
+          const g = new THREE.BufferGeometry();
+          g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+          const ms = new THREE.Mesh(g, F5[t]);
+          ms.renderOrder = 3;
+          g6.add(ms);
+        });
+        const gold = css("--x-gold"), tip = (o, v, t, c) => (html += lab(S6(ad5(ad5(o, v), mu5(nm5(v), 0.22))), t, "p", `color:${c}`));
+        if (r.a) { const o = M6(e.a[0]), c = css("--x-acc"); arrow(o, r.a, c); tip(o, r.a, e.k === "dist" ? "AP" : "a", c); }
+        if (r.b) { const o = M6(e.b[0]), c = css("--x-red"); arrow(o, r.b, c); tip(o, r.b, "b", c); }
+        r.N.forEach((q, t) => {
+          const o = cen6(e.pl[t]), v = mu5(nm5(q.n), 1.3);
+          arrow(o, v, gold);
+          tip(o, v, r.N.length > 1 ? ["n₁", "n₂"][t] : "n", gold);
+        });
+        if (e.k === "dist") {
+          const A = M6(0), n = nm5(r.N[0].n), H = sub(A, mu5(n, dot(sub(A, M6(3)), n)));
+          const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(S6(A)), V(S6(H))]), mats.dash);
+          l.computeLineDistances();
+          l.renderOrder = 6;
+          g6.add(l);
+          html += lab(S6(mu5(ad5(A, H), 0.5)), "d", "p", `color:${gold}`);
+        }
+        $("lbl6").innerHTML = html;
+        return r;
+      }
+      function renderPanel6() {
+        const e = EX6[st6.ex], r = build6(), ok = Math.abs(r.v - e.geo) < 1e-6;
+        $("ctl").innerHTML = `<p class="x-h">例题 · 棱长 2，D 为原点</p><div class="x-grid" style="grid-template-columns:1fr 1fr">${EX6.map((x, k) => `<button data-ex6="${k}" class="${k === st6.ex ? "on" : ""}" aria-pressed="${k === st6.ex}"${k === 4 ? ' style="grid-column:1/-1"' : ""}>${x.n}</button>`).join("")}</div>
+          <p class="x-h">向量法 · 分步</p><div class="x-card"><ul style="list-style:none;padding-left:0">${r.S.map((s) => `<li>${s}</li>`).join("")}</ul></div>
+          <p class="x-h">对照</p><div class="x-card"><div class="x-vef" style="grid-template-columns:1fr 1fr;gap:8px">
+            <div><b style="font-size:20px">${r.fmt(r.v)}</b><span>向量法</span></div>
+            <div style="border:1px solid var(--x-line);border-radius:6px;padding:6px 4px"><b style="font-size:20px;color:var(--x-gold)">${r.fmt(e.geo)}</b><span>几何法结果（第 5 章）</span></div></div>
+            <p class="x-euler">${ok ? `<em>✓</em> 两种方法一致：${e.gx}` : "两种方法结果不一致"}</p><p class="x-tag">几何法：${e.gtxt || EX5[st6.ex].txt}</p></div>
+          <p class="x-h">要点</p><div class="x-card"><ul>
+            <li><b>建系</b>：以 D 为原点，DA、DC、DD₁ 分别为 x、y、z 轴。</li>
+            <li><b>异面直线</b>：cos θ = |a·b| / (|a||b|)。</li>
+            <li><b>线面角</b>：sin θ = |a·n| / (|a||n|)。</li>
+            <li><b>二面角</b>：由法向量夹角得到，锐角还是钝角要看图形。</li>
+            <li><b>点到平面距离</b>：d = |AP·n| / |n|。</li>
+            <li><b>高考链接</b>：浙江卷立体几何大题首选建系，坐标写对是关键；易错：线面角用 sin 不是 cos，二面角要判断锐钝。</li></ul></div>`;
+        $("ctl").querySelectorAll("[data-ex6]").forEach((b) => (b.onclick = () => { st6.ex = +b.dataset.ex6; renderPanel6(); }));
+      }
+
+      /* ---------- 第 7 章：外接球与内切球 ---------- */
+      const NOTE7 = [
+        "<b>教材：人教A版 必修第二册·第八章 8.3 简单几何体的表面积与体积</b>",
+        "几何体的所有顶点都在球面上，这个球叫它的<b>外接球</b>；球与几何体的所有面都相切，叫<b>内切球</b>。",
+        "求外接球的关键是找球心：球心到各顶点的距离相等，常用办法是<b>补形</b>（补成长方体）和<b>过外心作垂线</b>。求内切球常用<b>等体积法</b>和截面法。",
+        "先看模型的特征，再套用对应的公式。每个模型都配了一道例题。",
+      ];
+      const sq7 = Math.sqrt, f27 = (x) => +x.toFixed(2);
+      const box7 = (x, y, z) => {
+        const V = [...Array(8)].map((_, i) => [i & 1 ? x : 0, i & 2 ? y : 0, i & 4 ? z : 0]), E = [];
+        for (let i = 0; i < 8; i++) for (let j = i + 1; j < 8; j++) if ([1, 2, 4].includes(i ^ j)) E.push([i, j]);
+        return { V, E };
+      };
+      const reg7 = (n, a, y) => { const p = a / (2 * Math.sin(Math.PI / n)); return [...Array(n)].map((_, k) => { const t = (2 * Math.PI * k) / n + Math.PI / n; return [p * Math.cos(t), y, p * Math.sin(t)]; }); };
+      const ring7 = (n, o = 0) => [...Array(n)].map((_, k) => [o + k, o + ((k + 1) % n)]);
+      const ALL7 = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
+      const pyr7 = (n) => [...ring7(n), ...[...Array(n)].map((_, k) => [k, n])];
+      const sb7 = (a, b) => a.map((v, i) => v - b[i]), cr7 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+      const dt7 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2], ln7 = (a) => sq7(dt7(a, a));
+      // 四面体内切球：等体积法 r = 3V / S表；球心 = 各顶点按对面面积加权
+      function inc7(P) {
+        const ar = (a, b, c) => ln7(cr7(sb7(b, a), sb7(c, a))) / 2;
+        const S = [ar(P[1], P[2], P[3]), ar(P[0], P[2], P[3]), ar(P[0], P[1], P[3]), ar(P[0], P[1], P[2])], St = S[0] + S[1] + S[2] + S[3];
+        const vol = Math.abs(dt7(cr7(sb7(P[1], P[0]), sb7(P[2], P[0])), sb7(P[3], P[0]))) / 6;
+        return { r: (3 * vol) / St, I: [0, 1, 2].map((k) => P.reduce((s, p, i) => s + S[i] * p[k], 0) / St) };
+      }
+      const L7 = (a, b, c) => [["a", a, 0.5, 4, 0.5], ["b", b, 0.5, 4, 0.5], ["c", c, 0.5, 4, 0.5]];
+      const MODELS7 = [
+        { n: "长方体", sl: L7("长 a", "宽 b", "高 c"), d: { a: 1, b: 2, c: 3 }, f: "R = √(a² + b² + c²) / 2", tip: "长方体一般没有内切球。",
+          g: ({ a, b, c }) => { const B = box7(a, c, b), O = [a / 2, c / 2, b / 2]; return { ...B, O, R: sq7(a * a + b * b + c * c) / 2, seg: [[O, B.V[7], "R", "R"]] }; },
+          ex: ["长方体的长、宽、高分别为 1、2、3，求外接球的表面积。", "① 体对角线是外接球的直径：2R = √(1² + 2² + 3²) = √14。", "② R² = 14 / 4 = 7/2。", "③ S = 4πR² = 14π。"] },
+        { n: "正方体", sl: [["a", "棱长 a", 1, 4, 0.5]], d: { a: 2 }, f: "R = √3a / 2，r = a / 2",
+          g: ({ a }) => { const B = box7(a, a, a), O = [a / 2, a / 2, a / 2]; return { ...B, O, R: (sq7(3) * a) / 2, r: a / 2, I: O, seg: [[O, B.V[7], "R", "R"], [O, [a / 2, a / 2, 0], "r", "r"]] }; },
+          ex: ["棱长为 2 的正方体，求外接球与内切球的体积。", "① 外接球直径 = 体对角线 2√3，R = √3。", "② 内切球直径 = 棱长 2，r = 1。", "③ V外 = 4/3·π·(√3)³ = 4√3π，V内 = 4π/3。"] },
+        { n: "墙角模型", sl: L7("PA", "PB", "PC"), d: { a: 1, b: 2, c: 2 }, f: "补成长方体：R = √(PA² + PB² + PC²) / 2", tip: "PA、PB、PC 两两垂直，虚线为补成的长方体。",
+          g: ({ a, b, c }) => { const V = [[0, 0, 0], [a, 0, 0], [0, 0, b], [0, c, 0]], O = [a / 2, c / 2, b / 2]; return { V, E: ALL7, box: [a, c, b], O, R: sq7(a * a + b * b + c * c) / 2, ...inc7(V), seg: [[O, V[0], "R", "R"]] }; },
+          ex: ["三棱锥 P-ABC 中 PA、PB、PC 两两垂直，PA = 1，PB = PC = 2，求外接球的表面积。", "① 以 PA、PB、PC 为棱补成长方体，二者外接球相同。", "② 2R = √(1 + 4 + 4) = 3，R = 3/2。", "③ S = 4πR² = 9π。"] },
+        { n: "对棱相等", sl: L7("长方体 x", "长方体 y", "长方体 z"), d: { a: 1, b: 2, c: 3 }, f: "R = √((a² + b² + c²) / 8)", tip: "三组对棱是长方体的面对角线，虚线为补成的长方体。",
+          g: ({ a: x, b: y, c: z }) => {
+            const B = box7(x, y, z), V = [0, 3, 5, 6].map((i) => B.V[i]), A2 = x * x + y * y, B2 = y * y + z * z, C2 = x * x + z * z, O = [x / 2, y / 2, z / 2];
+            return { V, E: ALL7, box: [x, y, z], O, R: sq7((A2 + B2 + C2) / 8), ...inc7(V), seg: [[O, V[0], "R", "R"]], val: `三组对棱 a = √${f27(A2)}，b = √${f27(B2)}，c = √${f27(C2)}` };
+          },
+          ex: ["四面体三组对棱长分别为 √5、√10、√13，求外接球的表面积。", "① 补成长方体，设棱长 x、y、z：x² + y² = 5，y² + z² = 13，x² + z² = 10。", "② R² = (5 + 10 + 13) / 8 = 7/2。", "③ S = 4πR² = 14π。"] },
+        { n: "直三棱柱", sl: [["a", "底边 a", 1, 5, 0.5], ["h", "高 h", 0.5, 5, 0.5]], d: { a: 3, h: 2 }, f: "R² = r底² + (h/2)²", tip: "底面取正三角形演示；一般没有内切球。",
+          g: ({ a, h }) => { const p = a / sq7(3), V = [...reg7(3, a, 0), ...reg7(3, a, h)], O = [0, h / 2, 0]; return { V, E: [...ring7(3), ...ring7(3, 3), [0, 3], [1, 4], [2, 5]], O, R: sq7(p * p + (h * h) / 4), circ: [[p, 0], [p, h]], seg: [[O, V[3], "R", "R"], [[0, 0, 0], [0, h, 0], "h", "h"], [[0, 0, 0], V[0], "r底", "b"]] }; },
+          ex: ["正三棱柱底面边长为 3，高为 2，求外接球的表面积。", "① 底面外接圆半径 r底 = 3/√3 = √3。", "② 球心在上下底面外心连线的中点：R² = 3 + 1 = 4。", "③ S = 4πR² = 16π。"] },
+        { n: "正三棱锥", sl: [["a", "底边 a", 1, 5, 0.5], ["h", "高 h", 0.5, 5, 0.5]], d: { a: 3, h: 3 }, f: "R = (h² + r底²) / (2h)", tip: "球心在高线上；内切球由 r = 3V / S表 求得。",
+          g: ({ a, h }) => { const p = a / sq7(3), R = (h * h + p * p) / (2 * h), V = [...reg7(3, a, 0), [0, h, 0]]; return { V, E: pyr7(3), O: [0, h - R, 0], R, ...inc7(V), circ: [[p, 0]], seg: [[[0, h - R, 0], V[0], "R", "R"], [[0, 0, 0], [0, h, 0], "h", "h"], [[0, 0, 0], V[0], "r底", "b"]] }; },
+          ex: ["正三棱锥底面边长为 3，高为 3，求外接球的表面积。", "① r底 = 3/√3 = √3，球心 O 在高线上。", "② (h − R)² + r底² = R²，R = (9 + 3) / 6 = 2。", "③ S = 4πR² = 16π。"] },
+        { n: "正四棱锥", sl: [["a", "底边 a", 1, 5, 0.5], ["h", "高 h", 0.5, 5, 0.5]], d: { a: 2, h: 2 }, f: "R = (h² + r底²) / (2h)", tip: "球心在高线上；内切球由 r = 3V / S表 求得。",
+          g: ({ a, h }) => { const p = a / sq7(2), R = (h * h + p * p) / (2 * h), s = sq7(h * h + (a * a) / 4), r = (a * a * h) / (a * a + 2 * a * s), V = [...reg7(4, a, 0), [0, h, 0]]; return { V, E: pyr7(4), O: [0, h - R, 0], R, r, I: [0, r, 0], circ: [[p, 0]], seg: [[[0, h - R, 0], V[0], "R", "R"], [[0, 0, 0], [0, h, 0], "h", "h"], [[0, 0, 0], V[0], "r底", "b"]] }; },
+          ex: ["正四棱锥底面边长为 2，高为 2，求外接球的表面积。", "① r底 = 底面对角线的一半 = √2。", "② R = (h² + r底²) / (2h) = (4 + 2) / 4 = 3/2。", "③ S = 4πR² = 9π。"] },
+        { n: "正四面体", sl: [["a", "棱长 a", 1, 4, 0.5]], d: { a: 2 }, f: "R = √6a / 4，r = √6a / 12", tip: "外接球、内切球球心重合，把高分成 3 : 1。",
+          g: ({ a }) => { const h = sq7(2 / 3) * a, R = (sq7(6) * a) / 4, O = [0, h - R, 0]; return { V: [...reg7(3, a, 0), [0, h, 0]], E: pyr7(3), O, R, r: (sq7(6) * a) / 12, I: O, circ: [[a / sq7(3), 0]], seg: [[O, reg7(3, a, 0)[0], "R", "R"], [[0, 0, 0], [0, h, 0], "h", "h"], [O, [0, 0, 0], "r", "r"]] }; },
+          ex: ["棱长为 2 的正四面体，求外接球与内切球的半径。", "① 补成棱长 √2 的正方体，2R = √6，R = √6/2。", "② r = √6a / 12 = √6/6。", "③ R : r = 3 : 1，球心把高分成 3 : 1。"] },
+      ];
+      const st7 = { m: 0, sp: "both", v: MODELS7.map((m) => ({ ...m.d })) };
+      let group7, mats7;
+      function init7() {
+        group7 = new THREE.Group();
+        group7.visible = st.ch === 6;
+        scene.add(group7);
+        const sg = new THREE.SphereGeometry(1, 48, 32), wg = new THREE.WireframeGeometry(new THREE.SphereGeometry(1, 18, 12));
+        mats7 = { s: [0, 1].map(() => new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide })), w: [0, 1].map(() => new THREE.LineBasicMaterial({ transparent: true, opacity: 0.16, depthWrite: false })) };
+        group7.userData.sph = [0, 1].map((k) => { const o = new THREE.Group(); o.add(new THREE.Mesh(sg, mats7.s[k]), new THREE.LineSegments(wg, mats7.w[k])); group7.add(o); return o; });
+        group7.userData.dyn = new THREE.Group();
+        group7.add(group7.userData.dyn);
+        new MutationObserver(build7).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+        build7();
+      }
+      function build7() {
+        const g = MODELS7[st7.m].g(st7.v[st7.m]);
+        if (!group7) return g;
+        const k = 1.7 / g.R, T = (p) => new THREE.Vector3(...p.map((v, i) => (v - g.O[i]) * k));
+        const C = { R: css("--x-acc"), r: css("--x-gold"), h: css("--x-sub"), b: css("--x-red") };
+        mats7.s[0].color.set(C.R); mats7.w[0].color.set(C.R); mats7.s[1].color.set(C.r); mats7.w[1].color.set(C.r);
+        const [so, si] = group7.userData.sph, dyn = group7.userData.dyn;
+        so.scale.setScalar(1.7);
+        so.visible = st7.sp !== "r";
+        si.visible = !!g.r && st7.sp !== "R";
+        if (g.r) { si.scale.setScalar(g.r * k); si.position.copy(T(g.I)); }
+        dyn.children.slice().forEach((o) => { dyn.remove(o); o.geometry.dispose(); if (o.userData.own) o.material.dispose(); });
+        const line = (pts, mat, own) => { const l = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), mat); l.userData.own = own; dyn.add(l); return l; };
+        const dot = (p, c) => { const d = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 8), new THREE.MeshBasicMaterial({ color: c, depthTest: false })); d.position.copy(p); d.renderOrder = 7; d.userData.own = true; dyn.add(d); };
+        const lab = (v, t, c) => `<span class="p" style="color:${c}" data-x="${v.x}" data-y="${v.y}" data-z="${v.z}">${t}</span>`;
+        line(g.E.flatMap(([i, j]) => [T(g.V[i]), T(g.V[j])]), mats.solid).renderOrder = 2;
+        if (g.box) { const B = box7(...g.box); line(B.E.flatMap(([i, j]) => [T(B.V[i]), T(B.V[j])]), mats.dash).computeLineDistances(); }
+        (g.circ || []).forEach(([p, y]) => {
+          const pts = [], P = (t) => T([p * Math.cos((t / 64) * 2 * Math.PI), y, p * Math.sin((t / 64) * 2 * Math.PI)]);
+          for (let t = 0; t < 64; t++) pts.push(P(t), P(t + 1));
+          line(pts, mats.dash).computeLineDistances();
+        });
+        dot(T(g.O), C.R);
+        let html = lab(T(g.O), "O", C.R);
+        if (si.visible && ln7(sb7(g.I, g.O)) > 1e-6) { dot(T(g.I), C.r); html += lab(T(g.I), "O′", C.r); }
+        g.seg.filter((s) => !(s[3] === "r" && !si.visible)).forEach(([p, q, t, c]) => {
+          const l = line([T(p), T(q)], new THREE.LineBasicMaterial({ color: C[c], depthTest: false, transparent: true }), true);
+          l.renderOrder = 6;
+          html += lab(T(p).add(T(q)).multiplyScalar(0.5), t, C[c]);
+        });
+        $("lbl7").innerHTML = html;
+        return g;
+      }
+      const res7 = (g) => `<p class="x-euler" style="margin-top:0">${MODELS7[st7.m].f}</p>
+        <div class="x-vef" style="margin-top:10px"><div><b>${f27(g.R)}</b><span>外接球 R</span></div><div><b style="color:var(--x-gold)">${g.r ? f27(g.r) : "—"}</b><span>内切球 r</span></div><div><b>${f27(4 * g.R * g.R)}π</b><span>外接球表面积</span></div></div>${g.val ? `<p class="x-tag">${g.val}</p>` : ""}`;
+      function renderPanel7() {
+        const m = MODELS7[st7.m], v = st7.v[st7.m], g = build7();
+        $("ctl").innerHTML = `<p class="x-h">模型 · 8 种</p><div class="x-grid" style="grid-template-columns:1fr 1fr">${MODELS7.map((x, i) => `<button data-m7="${i}" class="${i === st7.m ? "on" : ""}" aria-pressed="${i === st7.m}">${"①②③④⑤⑥⑦⑧"[i]} ${x.n}</button>`).join("")}</div>
+          <p class="x-h">显示</p><div class="x-grid">${[["R", "外接球"], ["r", "内切球"], ["both", "都显示"]].map(([k, l]) => `<button data-sp="${k}" class="${k === st7.sp ? "on" : ""}" aria-pressed="${k === st7.sp}">${l}</button>`).join("")}</div>
+          <p class="x-h">参数 · ${m.n}</p><div class="x-card">${m.sl.map(([k, l, a, b, s]) => `<div class="x-row"><label for="s7${k}">${l}</label><input type="range" id="s7${k}" data-k7="${k}" min="${a}" max="${b}" step="${s}" value="${v[k]}"><output id="o7${k}">${v[k]}</output></div>`).join("")}
+            <p class="x-tag">${m.tip || ""} 青色为外接球，暖金色为内切球。</p></div>
+          <p class="x-h">公式 · 当前数值</p><div class="x-card" id="res7">${res7(g)}</div>
+          <p class="x-h">例题</p><div class="x-card"><p style="margin:0">${m.ex[0]}</p><ul style="list-style:none;padding-left:0;margin-bottom:0">${m.ex.slice(1).map((s) => `<li>${s}</li>`).join("")}</ul></div>
+          <p class="x-h">要点</p><div class="x-card"><ul>
+            <li><b>外接球</b>：几何体的所有顶点都在球面上。</li>
+            <li><b>内切球</b>：球与几何体的所有面都相切。</li>
+            <li><b>找球心</b>：球心到各顶点距离相等，靠补形（补成长方体）或过底面外心作垂线。</li>
+            <li><b>等体积法</b>：r = 3V / S表。</li>
+            <li><b>高考链接</b>：外接球是选择填空压轴常客，先判断能否补成长方体；易错：直棱柱球心在上下底面外心连线中点，不在底面上。</li></ul></div>`;
+        $("ctl").querySelectorAll("[data-m7]").forEach((b) => (b.onclick = () => { st7.m = +b.dataset.m7; renderPanel7(); }));
+        $("ctl").querySelectorAll("[data-sp]").forEach((b) => (b.onclick = () => { st7.sp = b.dataset.sp; renderPanel7(); }));
+        $("ctl").querySelectorAll("[data-k7]").forEach((s) => (s.oninput = () => { v[s.dataset.k7] = +s.value; $("o7" + s.dataset.k7).textContent = s.value; $("res7").innerHTML = res7(build7()); }));
+      }
+
+      /* ---------- 第 8 章：正四面体 ---------- */
+      const NOTE8 = [
+        "<b>教材：人教A版 必修第二册·第八章 立体几何初步（专题：正四面体）</b>",
+        "4 个面都是正三角形的四面体叫<b>正四面体</b>。它是最对称的三棱锥，很多结论都可以直接记住。",
+        "两个关键：正四面体可以<b>补成正方体</b>（6 条棱是正方体的面对角线）；外接球、内切球、棱切球的球心都是它的<b>中心</b>，中心把高分成 <b>3 : 1</b>。",
+        "拖动“棱长 a”，各个量按比例变化，而角度保持不变。",
+      ];
+      const st8 = { a: 2, cube: false, t: 0, sp: { R: true, r: false, m: false } };
+      const K8 = 0.75, SP8 = ["R", "r", "m"];
+      const TV8 = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]]; // A B C D，单位 = 正方体半棱长
+      const f8 = (x) => String(+x.toFixed(3));
+      const rad8 = (a) => ({ R: (Math.sqrt(6) * a) / 4, r: (Math.sqrt(6) * a) / 12, m: (Math.SQRT2 * a) / 4 });
+      let group8, mats8;
+      function init8() {
+        group8 = new THREE.Group();
+        group8.visible = st.ch === 7;
+        scene.add(group8);
+        const sg = new THREE.SphereGeometry(1, 48, 32), wg = new THREE.WireframeGeometry(new THREE.SphereGeometry(1, 18, 12));
+        mats8 = {
+          s: SP8.map(() => new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.1, depthWrite: false, side: THREE.DoubleSide })),
+          w: SP8.map(() => new THREE.LineBasicMaterial({ transparent: true, opacity: 0.16, depthWrite: false })),
+          cube: new THREE.LineDashedMaterial({ dashSize: 0.1, gapSize: 0.08, transparent: true, depthTest: false }),
+        };
+        group8.userData.sph = SP8.map((_, k) => { const o = new THREE.Group(); o.add(new THREE.Mesh(sg, mats8.s[k]), new THREE.LineSegments(wg, mats8.w[k])); group8.add(o); return o; });
+        group8.userData.dyn = new THREE.Group();
+        group8.add(group8.userData.dyn);
+        new MutationObserver(build8).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+        build8();
+      }
+      function build8() {
+        if (!group8) return;
+        const a = st8.a, s = (a / (2 * Math.SQRT2)) * K8, T = (p) => new THREE.Vector3(p[0] * s, p[1] * s, p[2] * s);
+        const C = { R: css("--x-acc"), r: css("--x-gold"), m: css("--x-vio"), h: css("--x-red"), t: css("--x-text"), sub: css("--x-sub") };
+        const rd = rad8(a);
+        SP8.forEach((k, i) => { const o = group8.userData.sph[i]; o.visible = st8.sp[k]; o.scale.setScalar(rd[k] * K8); mats8.s[i].color.set(C[k]); mats8.w[i].color.set(C[k]); });
+        mats8.cube.color.set(C.sub);
+        mats8.cube.opacity = st8.t;
+        const dyn = group8.userData.dyn;
+        dyn.children.slice().forEach((o) => { dyn.remove(o); o.geometry.dispose(); if (o.userData.own) o.material.dispose(); });
+        const line = (pts, mat, own) => { const l = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), mat); l.userData.own = own; dyn.add(l); return l; };
+        const dot = (p, c) => { const d = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 8), new THREE.MeshBasicMaterial({ color: c, depthTest: false })); d.position.copy(p); d.renderOrder = 7; d.userData.own = true; dyn.add(d); };
+        const lab = (v, t, c) => `<span class="p" style="color:${c}" data-x="${v.x}" data-y="${v.y}" data-z="${v.z}">${t}</span>`;
+        const P = TV8.map(T);
+        line(ALL7.flatMap(([i, j]) => [P[i], P[j]]), mats.solid).renderOrder = 2;
+        // 补成正方体：每条正方体棱从正四面体顶点伸向另一端
+        if (st8.t > 0) {
+          const cv = [...Array(8)].map((_, i) => [i & 1 ? 1 : -1, i & 2 ? 1 : -1, i & 4 ? 1 : -1]), pts = [];
+          for (let i = 0; i < 8; i++) for (let j = i + 1; j < 8; j++) {
+            if (![1, 2, 4].includes(i ^ j)) continue;
+            const [u, w] = cv[i][0] * cv[i][1] * cv[i][2] > 0 ? [cv[i], cv[j]] : [cv[j], cv[i]];
+            pts.push(T(u), T(u).lerp(T(w), st8.t));
+          }
+          const l = line(pts, mats8.cube);
+          l.computeLineDistances();
+          l.renderOrder = 3;
+        }
+        // 高 AH 与中心 O：AO : OH = 3 : 1
+        const H = T([-1 / 3, -1 / 3, -1 / 3]), O = new THREE.Vector3();
+        line([P[0], H], new THREE.LineBasicMaterial({ color: C.h, depthTest: false, transparent: true }), true).renderOrder = 6;
+        dot(O, C.t);
+        dot(H, C.h);
+        const off = new THREE.Vector3(1, -1, 0).normalize().multiplyScalar(0.16);
+        let html = ["A", "B", "C", "D"].map((n, i) => lab(P[i].clone().multiplyScalar(1.12), n, C.t)).join("");
+        html += lab(O.clone().add(off), "O", C.t) + lab(H.clone().add(off), "H", C.h);
+        html += lab(P[0].clone().multiplyScalar(0.5).sub(off), "3", C.h) + lab(H.clone().multiplyScalar(0.5).sub(off), "1", C.h);
+        $("lbl8").innerHTML = html;
+      }
+      const tag8 = () => `正方体棱长 = a/√2 = ${f8(st8.a / Math.SQRT2)}；正四面体 6 条棱恰是正方体 6 条面对角线。`;
+      function res8() {
+        const a = st8.a, rd = rad8(a), inv = "<small>不随 a 变化</small>";
+        const rows = [
+          ["高 h", "√6a/3", f8((Math.sqrt(6) * a) / 3)],
+          ["体积 V", "√2a³/12", f8((Math.SQRT2 * a ** 3) / 12)],
+          ["表面积 S", "√3a²", f8(Math.sqrt(3) * a * a)],
+          ['<b style="color:var(--x-acc)">外接球半径 R</b>', "√6a/4", f8(rd.R)],
+          ['<b style="color:var(--x-gold)">内切球半径 r</b>', "√6a/12", f8(rd.r)],
+          ['<b style="color:var(--x-vio)">棱切球半径</b>', "√2a/4", f8(rd.m)],
+          ["对棱距离", "√2a/2", f8((Math.SQRT2 * a) / 2)],
+          ["相邻面二面角", "arccos(1/3)", "≈70.53°" + inv],
+          ["棱与面所成角", "arccos(√3/3)", "≈54.74°" + inv],
+          ["R : r", "3 : 1", "3 : 1" + inv],
+        ];
+        return `<table class="x-tb8"><caption class="x-tag" style="caption-side:bottom;text-align:left">a = ${f8(a)}；对棱距离等于正方体棱长。</caption>
+          <thead><tr><th scope="col">量</th><th scope="col">公式</th><th scope="col">当前值</th></tr></thead>
+          <tbody>${rows.map(([n, f, v]) => `<tr><th scope="row">${n}</th><td>${f}</td><td>${v}</td></tr>`).join("")}</tbody></table>`;
+      }
+      function renderPanel8() {
+        $("ctl").innerHTML = `<p class="x-h">参数</p><div class="x-card">
+            <div class="x-row"><label for="a8">棱长 a</label><input type="range" id="a8" min="1" max="4" step="0.1" value="${st8.a}"><output id="a8o">${st8.a.toFixed(1)}</output></div>
+            <button class="x-btn" id="cube8" style="width:100%;margin-top:6px" aria-pressed="${st8.cube}">${st8.cube ? "撤去正方体" : "补成正方体"}</button>
+            <p class="x-tag" id="tag8">${tag8()}</p></div>
+          <p class="x-h">三个球 · 球心都是中心 O</p><div class="x-card">
+            ${[["R", "外接球（青）"], ["r", "内切球（暖金）"], ["m", "棱切球（淡紫）"]].map(([k, l]) => `<div class="x-row"><label for="sp8${k}">${l}</label><input type="checkbox" id="sp8${k}" data-sp8="${k}" ${st8.sp[k] ? "checked" : ""}></div>`).join("")}
+            <p class="x-tag">红线为高 h = AH，中心 O 把高分成 AO : OH = 3 : 1。</p></div>
+          <p class="x-h">公式 · 当前数值</p><div class="x-card" id="res8">${res8()}</div>
+          <p class="x-h">要点</p><div class="x-card"><ul>
+            <li><b>正四面体</b>：4 个面都是正三角形，最对称的三棱锥。</li>
+            <li><b>补形</b>：补成棱长 a/√2 的正方体，6 条棱是正方体的面对角线；V = 正方体 − 4 个角 = 正方体体积的 1/3。</li>
+            <li><b>三球同心</b>：外接球、内切球、棱切球的球心都是中心 O。</li>
+            <li><b>中心分高</b>：AO : OH = 3 : 1，所以 R = 3r。</li>
+            <li><b>高考链接</b>：正四面体补成正方体是求外接球、对棱距离和体积的最快方法；易错：中心分高为 3:1，R=3r，不是 2:1。</li></ul></div>`;
+        $("a8").oninput = (e) => { st8.a = +e.target.value; $("a8o").textContent = st8.a.toFixed(1); $("tag8").textContent = tag8(); $("res8").innerHTML = res8(); build8(); };
+        $("cube8").onclick = () => { st8.cube = !st8.cube; $("cube8").textContent = st8.cube ? "撤去正方体" : "补成正方体"; $("cube8").setAttribute("aria-pressed", st8.cube); };
+        $("ctl").querySelectorAll("[data-sp8]").forEach((c) => (c.onchange = () => { st8.sp[c.dataset.sp8] = c.checked; build8(); }));
+      }
+
+      /* ---------- 第 9 章：随堂检测 ---------- */
+      const NOTE9 = ["教材：人教A版 必修第二册·第八章 与 选择性必修第一册·第一章 综合", "共 6 题：4 道单选、1 道多选、1 道填空。作答后立即判分，舞台演示答案，可拖动旋转。"];
+      const Q9 = [
+        { t: "单选", d: "pyr", s: "某几何体的三视图中，正视图与侧视图都是底边长 2、高 3 的等腰三角形，俯视图是边长 2 的正方形及其两条对角线，则该几何体的体积为", o: ["4", "8", "12", "4/3"], a: [0], e: "还原为正四棱锥：底面是边长 2 的正方形，高 3。V = ⅓·S·h = ⅓ × 4 × 3 = <b>4</b>。易错：忘乘 ⅓ 得 12。" },
+        { t: "单选", d: "hex", s: "正方体 ABCD-A₁B₁C₁D₁ 中，过棱上三点 P、Q、R 作截面，下列条件中能使截面为正六边形的是", o: ["P、Q、R 是从同一顶点出发的三条棱的中点", "P、Q、R 是三条互相平行的棱的中点", "P、Q、R 是正方体的三个顶点", "P、Q、R 分别是三条两两异面的棱的中点"], a: [3], e: "三条两两异面的棱的中点确定的平面过正方体中心，与 6 个面都相交，6 条交线都等于面对角线的一半，截面为<b>正六边形</b>。A、C 得正三角形，B 得矩形。" },
+        { t: "单选", d: "skew", s: "正方体 ABCD-A₁B₁C₁D₁ 中，异面直线 AB₁ 与 BC₁ 所成角为", o: ["30°", "45°", "60°", "90°"], a: [2], e: "BC₁ ∥ AD₁，把 BC₁ 平移到 AD₁，所成角即 ∠B₁AD₁。AB₁、AD₁、B₁D₁ 都是面对角线，△AB₁D₁ 为正三角形，所成角为 <b>60°</b>。" },
+        { t: "单选", d: "dih", s: "棱长为 2 的正方体 ABCD-A₁B₁C₁D₁ 中，以 A 为原点，AB、AD、AA₁ 分别为 x、y、z 轴建系，则二面角 A₁-BD-A 的余弦值为", o: ["√6/3", "√3/3", "√2/2", "1/3"], a: [1], e: "B(2,0,0)、D(0,2,0)、A₁(0,0,2)，平面 A₁BD 的法向量 n₁ = (1,1,1)，底面法向量 n₂ = (0,0,1)。cos θ = |n₁·n₂| / (|n₁||n₂|) = 1/√3 = <b>√3/3</b>（二面角为锐角）。几何验证：BD 中点 O，∠A₁OA 为平面角，tan θ = 2/√2 = √2。" },
+        { t: "多选", d: "tet", s: "棱长为 a 的正四面体 ABCD，下列说法正确的是", o: ["外接球半径 R 与内切球半径 r 满足 R = 3r", "相邻两个面所成二面角为 arccos(1/3)", "任意一组对棱互相垂直", "对棱之间的距离为 √2a/2", "中心 O 把高 AH 分成 AO : OH = 2 : 1"], a: [0, 1, 2, 3], e: "补成棱长 a/√2 的正方体：对棱是相对两面上互相垂直的面对角线，所以对棱垂直，距离等于正方体棱长 √2a/2。R = √6a/4，r = √6a/12，R = 3r，中心分高为 <b>3 : 1</b>，E 错。相邻面二面角余弦为 1/3。" },
+        { t: "填空", d: "box", s: "长、宽、高分别为 1、2、2 的长方体的 8 个顶点都在同一球面上，则该球的表面积为", e: "外接球直径 = 体对角线：2R = √(1² + 2² + 2²) = 3，R = 3/2，S = 4πR² = 4π · 9/4 = <b>9π</b>。" },
+      ];
+      const SC9 = [5, 5, 5, 5, 6, 5], L9 = "ABCDE";
+      const st9 = { q: 0, ans: Array(6).fill(null), sel: [] };
+      const esc9 = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      function num9(s) {
+        const m = String(s).replace(/\s|π|pi/gi, "").replace(/／/g, "/").match(/^(-?\d+(?:\.\d+)?)(?:\/(\d+(?:\.\d+)?))?$/);
+        if (!m) return null;
+        const v = m[2] ? +m[1] / +m[2] : +m[1];
+        return isFinite(v) ? v : null;
+      }
+      function grade9(i, pick) {
+        const q = Q9[i];
+        let ok, pts;
+        if (!q.o) { ok = Math.abs(num9(pick) - 9) <= 0.01; pts = ok ? SC9[i] : 0; }
+        else {
+          const wrong = pick.some((k) => !q.a.includes(k));
+          ok = !wrong && pick.length === q.a.length;
+          pts = ok ? SC9[i] : q.t === "多选" && !wrong ? 3 : 0;
+        }
+        st9.ans[i] = { pick, ok, pts };
+        st9.sel = [];
+        build9();
+        renderPanel9();
+      }
+      function renderPanel9() {
+        const i = st9.q, q = Q9[i], r = st9.ans[i], n = st9.ans.filter(Boolean).length;
+        let h = `<p class="x-h">题目 · ${i + 1} / 6</p><div class="x-grid x-q9n">${Q9.map((_, k) => { const a = st9.ans[k]; return `<button data-q="${k}" class="${k === i ? "on" : ""} ${a ? (a.ok ? "ok" : "no") : ""}" aria-label="第 ${k + 1} 题${a ? (a.ok ? "，正确" : "，错误") : ""}">${k + 1}</button>`; }).join("")}</div>
+          <div class="x-card"><p class="x-tag" style="margin:0">${q.t}题 · ${SC9[i]} 分${q.t === "多选" ? " · 全对 6 分，部分选对 3 分，有错选 0 分" : ""}</p>
+          <p class="x-stem">${i + 1}. ${q.s}${q.o ? "（　）" : " ____。"}</p>`;
+        if (q.o) h += q.o.map((o, k) => {
+          const c = r ? (q.a.includes(k) ? "ok" : r.pick.includes(k) ? "no" : "") : "";
+          return `<button class="x-btn x-opt ${c}" data-o="${k}" aria-pressed="${(r ? r.pick : st9.sel).includes(k)}" ${r ? "disabled" : ""}>${L9[k]}. ${o}</button>`;
+        }).join("");
+        else h += `<div class="x-row" style="margin-top:8px"><input class="x-in" id="in9" inputmode="decimal" autocomplete="off" placeholder="π 的系数，如 4 或 9/2" aria-label="答案，填 π 的系数" value="${r ? esc9(r.pick) : ""}" ${r ? "disabled" : ""}><span>π</span></div><p class="x-tag" id="hint9">填 π 前的系数，可写小数或分数（如 9/2），误差 0.01 内判对。</p>`;
+        if (!r && q.t !== "单选") h += `<button class="x-btn" id="sub9" style="width:100%;margin-top:10px">提交</button>`;
+        if (r) h += `<p class="x-res ${r.ok ? "x-ok" : "x-no"}">${r.ok ? "✓ 正确" : r.pts ? "◐ 部分正确" : "✗ 错误"} · 得 ${r.pts} 分 · 答案 ${q.o ? q.a.map((k) => L9[k]).join("") : "9π"}</p><p class="x-exp">${q.e}</p>`;
+        h += `</div><div class="x-grid" style="grid-template-columns:1fr 1fr;margin-top:8px"><button data-nv="-1" ${i ? "" : "disabled"}>上一题</button><button data-nv="1" ${i < 5 ? "" : "disabled"}>下一题</button></div>`;
+        if (n === 6) h += `<p class="x-h">得分</p><div class="x-card"><div class="x-vef" style="grid-template-columns:1fr 1fr"><div><b>${st9.ans.reduce((s, a) => s + a.pts, 0)}</b><span>总分 / 31</span></div><div><b>${st9.ans.filter((a) => a.ok).length}</b><span>全对 / 6 题</span></div></div>
+            <button class="x-btn" id="re9" style="width:100%;margin-top:10px">重新作答</button></div>`;
+        else h += `<p class="x-tag">已答 ${n} / 6，全部答完后显示得分。</p>`;
+        $("ctl").innerHTML = h;
+        const pick = (k) => { st9.q = k; st9.sel = []; build9(); renderPanel9(); };
+        $("ctl").querySelectorAll("[data-q]").forEach((b) => (b.onclick = () => pick(+b.dataset.q)));
+        $("ctl").querySelectorAll("[data-nv]").forEach((b) => (b.onclick = () => pick(i + +b.dataset.nv)));
+        $("ctl").querySelectorAll("[data-o]:not(:disabled)").forEach((b) => (b.onclick = () => {
+          const k = +b.dataset.o;
+          if (q.t === "单选") return grade9(i, [k]);
+          st9.sel = st9.sel.includes(k) ? st9.sel.filter((x) => x !== k) : [...st9.sel, k].sort();
+          b.setAttribute("aria-pressed", st9.sel.includes(k));
+        }));
+        if ($("sub9")) $("sub9").onclick = () => {
+          if (q.o) { if (st9.sel.length) grade9(i, st9.sel.slice()); return; }
+          const v = $("in9").value.trim();
+          if (num9(v) === null) { $("hint9").textContent = "请输入数字或分数，如 9 或 9/2。"; $("hint9").style.color = "var(--x-red)"; return; }
+          grade9(i, v);
+        };
+        if ($("in9")) $("in9").onkeydown = (e) => { if (e.key === "Enter" && $("sub9")) $("sub9").click(); };
+        if ($("re9")) $("re9").onclick = () => { st9.ans = Array(6).fill(null); pick(0); };
+      }
+      let group9;
+      function init9() {
+        group9 = new THREE.Group();
+        group9.visible = st.ch === 8;
+        scene.add(group9);
+        new MutationObserver(build9).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+        build9();
+      }
+      function build9() {
+        if (!group9) return;
+        group9.children.slice().forEach((o) => { group9.remove(o); o.traverse((c) => { if (c.geometry) c.geometry.dispose(); if (c.userData.own) c.material.dispose(); }); });
+        const q = Q9[st9.q], on = !!st9.ans[st9.q], labs = [];
+        const C = { a: css("--x-acc"), g: css("--x-gold"), v: css("--x-vio"), r: css("--x-red"), t: css("--x-text") };
+        const V = (p) => new THREE.Vector3(...p);
+        const own = (o, ord) => { o.userData.own = true; o.renderOrder = ord; group9.add(o); return o; };
+        const seg = (pts, c, dash) => {
+          const m = dash ? new THREE.LineDashedMaterial({ color: c, dashSize: 0.08, gapSize: 0.06 }) : new THREE.LineBasicMaterial({ color: c });
+          Object.assign(m, { depthTest: false, transparent: true });
+          const l = own(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts.map(V)), m), 6);
+          if (dash) l.computeLineDistances();
+        };
+        const poly = (pts, c, op = 0.45) => {
+          const pos = [];
+          for (let k = 1; k < pts.length - 1; k++) pos.push(...pts[0], ...pts[k], ...pts[k + 1]);
+          const g = new THREE.BufferGeometry();
+          g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+          own(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: op, side: THREE.DoubleSide, depthWrite: false, depthTest: false })), 4);
+          own(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts.map(V)), new THREE.LineBasicMaterial({ color: c, depthTest: false, transparent: true })), 5);
+        };
+        const ball = (rad, c, op) => own(new THREE.Mesh(new THREE.SphereGeometry(rad, 28, 18), new THREE.MeshBasicMaterial({ color: c, wireframe: true, transparent: true, opacity: op, depthWrite: false })), 1);
+        const arc = (O, P, Q, rad, c, t) => {
+          const u = V(P).sub(V(O)).normalize(), w = V(Q).sub(V(O)).normalize(), pts = [];
+          for (let k = 0; k <= 16; k++) { const d = u.clone().lerp(w, k / 16).normalize().multiplyScalar(rad).add(V(O)); pts.push(d.toArray(), d.toArray()); }
+          seg(pts.slice(1, -1), c);
+          lab(u.clone().add(w).normalize().multiplyScalar(rad * 1.7).add(V(O)).toArray(), t, "s");
+        };
+        const lab = (p, t, cls = "") => labs.push(`<span class="${cls}" data-x="${p[0]}" data-y="${p[1]}" data-z="${p[2]}">${t}</span>`);
+        const solid = (geo) => group9.add(new THREE.Mesh(geo, mats.face), ...edges(geo, 1));
+        const P = { A: [-1, -1, 1], B: [1, -1, 1], C: [1, -1, -1], D: [-1, -1, -1], A1: [-1, 1, 1], B1: [1, 1, 1], C1: [1, 1, -1], D1: [-1, 1, -1] };
+        const cube = () => { solid(new THREE.BoxGeometry(2, 2, 2)); Object.entries(P).forEach(([k, p]) => lab(p.map((x) => x * 1.14), k.replace("1", "₁"))); };
+        if (q.d === "pyr") {
+          solid(new THREE.ConeGeometry(Math.SQRT2, 3, 4).rotateY(Math.PI / 4));
+          lab([0, -1.5, 1.15], "2");
+          if (on) { poly([[-1, -1.5, -1], [1, -1.5, -1], [1, -1.5, 1], [-1, -1.5, 1]], C.g, 0.3); seg([[0, 1.5, 0], [0, -1.5, 0]], C.r, true); lab([0.12, 0.2, 0], "h = 3", "s"); lab([0, 1.75, 0], "V = ⅓ × 4 × 3 = 4", "p"); }
+        } else if (q.d === "hex") {
+          cube();
+          if (on) {
+            poly([[1, -1, 0], [1, 0, -1], [0, 1, -1], [-1, 1, 0], [-1, 0, 1], [0, -1, 1]], C.g);
+            seg([[1, -1, -1], [1, -1, 1], [-1, 1, -1], [1, 1, -1], [-1, -1, 1], [-1, 1, 1]], C.a);
+            [[1, -1, 0], [0, 1, -1], [-1, 0, 1]].forEach((p, k) => lab(p, "PQR"[k], "p"));
+          }
+        } else if (q.d === "skew") {
+          cube();
+          seg([P.A, P.B1], C.a);
+          seg([P.B, P.C1], C.v);
+          if (on) { seg([P.A, P.D1], C.v, true); seg([P.B1, P.D1], C.t, true); poly([P.A, P.B1, P.D1], C.g, 0.18); arc(P.A, P.B1, P.D1, 0.45, C.g, "60°"); }
+        } else if (q.d === "dih") {
+          cube();
+          poly([P.A1, P.B, P.D], C.g, 0.3);
+          if (on) {
+            const O = [0, -1, 0], G = [-1 / 3, -1 / 3, 1 / 3], n = V([1, 1, -1]).normalize().multiplyScalar(0.9).add(V(G)).toArray();
+            poly([P.A, P.B, P.C, P.D], C.a, 0.15);
+            seg([O, P.A1, O, P.A], C.r);
+            arc(O, P.A1, P.A, 0.4, C.r, "θ");
+            seg([G, n], C.a);
+            lab(n, "n₁ = (1,1,1)", "p");
+            lab([0, -1.25, 0], "O");
+          }
+        } else if (q.d === "tet") {
+          const T = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]];
+          seg([0, 1, 0, 2, 0, 3, 1, 2, 1, 3, 2, 3].map((k) => T[k]), C.t);
+          T.forEach((p, k) => lab(p.map((x) => x * 1.15), "ABCD"[k]));
+          if (on) {
+            ball(Math.sqrt(3), C.a, 0.18);
+            ball(Math.sqrt(3) / 3, C.g, 0.5);
+            seg([T[0], T[1]], C.a);
+            seg([T[2], T[3]], C.v);
+            seg([[1, 0, 0], [-1, 0, 0]], C.r, true);
+            seg([T[0], [-1 / 3, -1 / 3, -1 / 3]], C.g, true);
+            lab([0, 0.12, 0], "O · R = 3r", "s");
+            lab([0, -0.25, 0], "对棱距离 √2a/2", "p");
+          }
+        } else {
+          solid(new THREE.BoxGeometry(1, 2, 2));
+          lab([0, -1, 1.1], "1");
+          lab([0.6, -1, 0], "2");
+          lab([0.6, 0, 1.1], "2");
+          if (on) { ball(1.5, C.a, 0.22); seg([[-0.5, -1, -1], [0.5, 1, 1]], C.r); lab([0, 0.2, 0], "2R = 3 · S = 9π", "p"); }
+        }
+        $("lbl9").innerHTML = labs.join("");
+      }
+
+      let last = performance.now();
+      function loop(t = performance.now()) {
+        const dt = Math.min(0.05, (t - last) / 1000);
+        last = t;
+        if (st.ch === 1 && st2.playing) {
+          st2.fold = Math.max(0, Math.min(1, st2.fold + dt * 0.5 * st2.dir));
+          if (st2.fold <= 0 || st2.fold >= 1) st2.playing = false;
+          update2();
+          syncFold();
+        }
+        if (st.ch === 0 && st.playing && !SHAPES[st.shape].poly) {
+          st.ang = Math.min(360, st.ang + dt * 90);
+          if (st.ang >= 360) { st.playing = false; if ($("play")) $("play").textContent = "▶ 播放旋转"; }
+          if ($("ang")) { $("ang").value = Math.round(st.ang); $("angOut").textContent = Math.round(st.ang) + "°"; }
+          build();
+        }
+        if (st.ch === 2 && sto.playing) {
+          sto.t = Math.min(1, sto.t + dt * 0.5);
+          if (sto.t >= 1) sto.playing = false;
+          syncOb();
+        }
+        controls.update();
+        if (st.ch === 4 && st5.playing) {
+          st5.t = Math.min(1, st5.t + dt * 0.6);
+          if (st5.t >= 1) st5.playing = false;
+          build5();
+        }
+        if (st.ch === 3 && group4) lbl4();
+        if (st.ch === 4 && group5) lbl4("lbl5");
+        if (st.ch === 5 && group6) lbl4("lbl6");
+        if (st.ch === 6 && group7) lbl4("lbl7");
+        if (st.ch === 7 && group8) {
+          const goal = st8.cube ? 1 : 0;
+          if (st8.t !== goal) { st8.t = st8.cube ? Math.min(1, st8.t + dt * 0.8) : Math.max(0, st8.t - dt * 0.8); build8(); }
+          lbl4("lbl8");
+        }
+        if (st.ch === 8 && group9) lbl4("lbl9");
+        if (st.ch <= 8) renderer.render(scene, camera);
+        requestAnimationFrame(loop);
+      }
+
+      go((parseInt(location.hash.slice(1)) || 1) - 1, true);
+      grid3();
+      if (window.THREE && THREE.OrbitControls) { initThree(); init4(); init5(); init6(); init7(); init8(); init9(); init3(); }
+      else $("noteBody").insertAdjacentHTML("beforeend", "<p>三维引擎加载失败，请检查网络后刷新。</p>");
+      go(st.ch, true);
+    </script>
+  </body>
+</html>
