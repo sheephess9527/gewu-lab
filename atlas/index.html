@@ -1,39 +1,45 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#fbfbfd" />
     <title>格物实验室 · 疆域变迁</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&family=Noto+Serif+SC:wght@500;600&display=swap"
-    />
     <link rel="stylesheet" href="hark.css" />
     <link rel="stylesheet" href="hark-charts.css" />
     <style>
       /* 格物实验室外壳：青黛夜 / 宣纸 */
       :root {
-        --x-bg-1: #0e1420; --x-bg-2: #121a2a; --x-panel: rgba(21, 30, 48, .82);
-        --x-line: rgba(255, 255, 255, .08); --x-line-2: rgba(255, 255, 255, .16);
-        --x-ink: #e6ecf5; --x-ink-2: #8a97ad;
-        --x-acc: #2ec4b6; --x-gold: #f2b544; --x-red: #ef6461;
-        --x-sea: #0b1220; --x-land: #1b2538; --x-r: 10px;
-        --x-card: #172133; --x-sel: #133039; --x-hover: #15252f;
-        --x-acc-ink: #2ec4b6; --x-gold-ink: #f2b544;
-        --x-serif: "Noto Serif SC", "Songti SC", serif;
-        --x-mono: "Geist Mono", ui-monospace, monospace;
+        /* 浅色（默认）：Apple 式极简 */
+        --x-bg-1: #fbfbfd; --x-bg-2: #fbfbfd; --x-panel: #ffffff;
+        --x-line: rgba(0, 0, 0, .08); --x-line-2: rgba(0, 0, 0, .14);
+        --x-ink: #1d1d1f; --x-ink-2: #6e6e73;
+        --x-acc: #0a9396; --x-gold: #c98a12; --x-red: #e5484d;
+        --x-sea: #fbfbfd; --x-land: #ffffff; --x-r: 18px;
+        --x-card: #ffffff; --x-sel: #e8f1fc; --x-hover: #f5f5f7;
+        --x-acc-ink: #077275; --x-gold-ink: #8a5c00; --x-red-ink: #c4282d;
+        --x-blue: #0071e3; --x-blue-ink: #0062c4; --x-blue-soft: #e8f1fc;
+        --x-fill: #f5f5f7; --x-fill-2: #e8e8ed; --x-on-blue: #ffffff;
+        --x-glass: rgba(251, 251, 253, .72); --x-shadow: 0 4px 24px rgba(0, 0, 0, .04);
+        --x-thumb-shadow: 0 1px 4px rgba(0, 0, 0, .18), 0 0 0 .5px rgba(0, 0, 0, .06);
+        --x-ease: cubic-bezier(.2, .8, .2, 1); --x-dur: .3s;
+        --x-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        --x-serif: var(--x-sans);
+        --x-mono: ui-monospace, Menlo, "SF Mono", Consolas, monospace;
         --x-top: 56px; --x-side: 220px; --x-right: 340px; --x-bottom: 92px;
       }
-      :root[data-theme="light"] {
-        --x-bg-1: #f6f3ec; --x-bg-2: #efeade; --x-panel: rgba(255, 255, 255, .88);
-        --x-line: rgba(29, 36, 51, .12); --x-line-2: rgba(29, 36, 51, .22);
-        --x-ink: #1d2433; --x-ink-2: #6b7384;
-        --x-acc: #139a8e; --x-gold: #c98a12; --x-red: #cf4b48;
-        --x-sea: #e3e8ea; --x-land: #f0ece0;
-        --x-card: #fbfaf7; --x-sel: #dff0ed; --x-hover: #edf5f3;
-        --x-acc-ink: #0b6a62; --x-gold-ink: #8a5a00;
+      :root[data-theme="dark"] {
+        --x-bg-1: #000000; --x-bg-2: #000000; --x-panel: #1d1d1f;
+        --x-line: rgba(255, 255, 255, .1); --x-line-2: rgba(255, 255, 255, .18);
+        --x-ink: #f5f5f7; --x-ink-2: #a1a1a6;
+        --x-acc: #2ec4b6; --x-gold: #f2b544; --x-red: #ff6369;
+        --x-sea: #000000; --x-land: #1d1d1f;
+        --x-card: #1d1d1f; --x-sel: #0b2a4a; --x-hover: #2c2c2e;
+        --x-acc-ink: #3dd9c9; --x-gold-ink: #f2b544; --x-red-ink: #ff6369;
+        --x-blue: #2997ff; --x-blue-ink: #2997ff; --x-blue-soft: #0b2a4a;
+        --x-fill: #2c2c2e; --x-fill-2: #3a3a3c; --x-on-blue: #ffffff;
+        --x-glass: rgba(29, 29, 31, .72); --x-shadow: 0 4px 24px rgba(0, 0, 0, .4);
+        --x-thumb-shadow: 0 1px 4px rgba(0, 0, 0, .5);
       }
       * { box-sizing: border-box; }
       html, body { height: 100%; }
@@ -216,15 +222,205 @@
         .x-bar { padding-bottom: 58px; }
       }
     </style>
+    <style>
+      /* ===== 视觉改版：与门户首页一致的 Apple 式极简风格（只改样式） ===== */
+      :root { --sans: var(--x-sans); --chart-mono: var(--x-mono); color-scheme: light; }
+      :root[data-theme="dark"] { color-scheme: dark; }
+      body { background: var(--x-bg-1); color: var(--x-ink);
+        font: 15px/1.6 var(--x-sans); -webkit-font-smoothing: antialiased; letter-spacing: 0; }
+      h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; }
+      a { color: var(--x-blue-ink); }
+      :focus-visible { outline: 2px solid var(--x-blue); outline-offset: 2px; }
+      .x-btn, .x-ch, .x-pol button, .x-sw, .x-q__opts button, .x-qz__opts button, .x-tick i,
+      .x-prog__segs i, .x-fold, .x-back, .x-drawer__btn, .x-qwc li {
+        transition: background-color var(--x-dur) var(--x-ease), color var(--x-dur) var(--x-ease),
+          border-color var(--x-dur) var(--x-ease), box-shadow var(--x-dur) var(--x-ease),
+          opacity var(--x-dur) var(--x-ease), transform var(--x-dur) var(--x-ease);
+      }
+
+      /* 顶栏 */
+      .x-top { gap: 12px; padding: 0 16px; background: var(--x-glass);
+        -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+        border-bottom: 0; box-shadow: inset 0 -0.5px 0 var(--x-line-2); position: relative; z-index: 10; }
+      .x-back { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; min-width: 44px;
+        padding: 0 10px 0 4px; margin-left: -4px; border-radius: 980px; white-space: nowrap; flex: none;
+        color: var(--x-blue-ink); text-decoration: none; font: 400 15px/1 var(--x-sans); letter-spacing: -0.01em; }
+      .x-back b { font-size: 22px; font-weight: 400; line-height: 1; margin-top: -2px; }
+      .x-back:hover { background: var(--x-blue-soft); }
+      .x-brand { min-width: 0; padding-left: 12px; border-left: 0.5px solid var(--x-line-2); }
+      .x-brand b { font: 600 15px/1.25 var(--x-sans); letter-spacing: -0.02em; white-space: nowrap;
+        overflow: hidden; text-overflow: ellipsis; }
+      .x-brand span { font-size: 12px; color: var(--x-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .x-prog__segs { gap: 3px; }
+      .x-prog__segs i { height: 3px; border-radius: 980px; background: var(--x-fill-2); }
+      .x-prog__segs i.on { background: var(--x-blue); }
+      .x-count { font: 12px var(--x-mono); color: var(--x-ink-2); }
+      .x-tools { gap: 4px; }
+      .x-btn { border: 0; border-radius: 980px; background: var(--x-fill); color: var(--x-ink);
+        font: 500 14px/1 var(--x-mono); padding: 0 12px; }
+      .x-btn:hover { background: var(--x-fill-2); color: var(--x-ink); }
+      .x-btn:active { transform: scale(.96); }
+      .x-btn.on, .x-btn[aria-pressed="true"] { background: var(--x-blue); color: var(--x-on-blue); }
+      .x-btn[disabled] { opacity: .35; }
+      .x-btn[disabled]:hover { background: var(--x-fill); }
+      .x-toc { font: 500 13px/1 var(--x-sans); }
+
+      /* 章节栏 */
+      .x-chs { background: var(--x-bg-1); border-right: 0; box-shadow: inset -0.5px 0 0 var(--x-line-2); padding: 10px 8px; }
+      .x-ch { border-left: 0; border-radius: 12px; padding: 8px 12px; margin: 1px 0; }
+      .x-ch b { font: 12px var(--x-mono); color: var(--x-ink-2); letter-spacing: 0; }
+      .x-ch span { font: 500 15px/1.35 var(--x-sans); letter-spacing: -0.01em; }
+      .x-ch:hover { background: var(--x-hover); }
+      .x-ch.on { background: var(--x-blue-soft); }
+      .x-ch.on b, .x-ch.on span { color: var(--x-blue-ink); }
+      .x-ch.on span { font-weight: 600; }
+      .x-app.x-toc-off { grid-template-columns: 0 minmax(0, 1fr) var(--x-right); }
+      .x-app.x-toc-off .x-chs { visibility: hidden; padding: 0; overflow: hidden; }
+
+      /* 舞台浮层 */
+      .x-stage { background: var(--x-sea); }
+      .x-over { top: 16px; left: 16px; border: 0; border-radius: 22px; padding: 16px 56px 16px 18px;
+        background: var(--x-glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+        box-shadow: var(--x-shadow), 0 0 0 0.5px var(--x-line); max-width: min(400px, 62%); }
+      .x-over h2 { font: 600 20px/1.25 var(--x-sans); letter-spacing: -0.02em; margin: 0 0 6px; }
+      .x-over p { font-size: 15px; line-height: 1.6; color: var(--x-ink); }
+      .x-over__src { font-size: 12px !important; color: var(--x-ink-2) !important; }
+      .x-fold { border: 0; background: var(--x-fill); border-radius: 980px; width: 44px; height: 44px;
+        top: 6px; right: 6px; color: var(--x-ink-2); font-size: 16px; }
+      .x-fold:hover { background: var(--x-fill-2); color: var(--x-ink); }
+      .x-note { bottom: 14px; right: 14px; border: 0; border-radius: 980px; padding: 6px 12px;
+        background: var(--x-glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+        box-shadow: 0 0 0 0.5px var(--x-line); font: 12px var(--x-sans); color: var(--x-ink-2); }
+
+      /* 底部时间轴 */
+      .x-bar { background: var(--x-bg-1); border-top: 0; box-shadow: inset 0 0.5px 0 var(--x-line-2); padding: 8px 18px; }
+      .x-tick::before { background: var(--x-fill-2); height: 2px; top: 10px; border-radius: 2px; }
+      .x-tick i { width: 10px; height: 10px; background: var(--x-panel); border: 1.5px solid var(--x-line-2); }
+      .x-tick:not([disabled]) i { border-color: var(--x-blue); }
+      .x-tick:not([disabled]):hover i { transform: scale(1.25); }
+      .x-tick.live i { background: var(--x-blue); border-color: var(--x-blue);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--x-blue) 20%, transparent); }
+      .x-tick.live em { color: var(--x-blue-ink); }
+      .x-bar__meta { font: 12px var(--x-sans); color: var(--x-ink-2); }
+
+      /* 右侧面板与卡片 */
+      .x-panel { background: var(--x-bg-1); border-left: 0; box-shadow: inset 0.5px 0 0 var(--x-line-2); padding: 16px; }
+      .x-card { border: 0; border-radius: 20px; padding: 16px 18px; margin-bottom: 14px; background: var(--x-card);
+        box-shadow: var(--x-shadow), 0 0 0 0.5px var(--x-line); }
+      .x-card > h3 { font: 600 15px/1.3 var(--x-sans); letter-spacing: -0.02em; margin: 0 0 10px; }
+      .x-card--text { font-size: 15px; line-height: 1.6; color: var(--x-ink-2); }
+      .x-card--text summary { color: var(--x-blue-ink); font-weight: 500; }
+      .x-card p, .x-card li { line-height: 1.6; }
+      .x-tag { border: 0; border-radius: 980px; background: var(--x-blue-soft); color: var(--x-blue-ink);
+        font: 500 12px/1 var(--x-sans); padding: 7px 12px; margin-bottom: 12px; }
+      .x-fig b { font: 600 26px/1.1 var(--x-sans); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+      :root[data-theme="light"] .x-fig b[style*="color"] { filter: brightness(.6) saturate(1.15); }
+      .x-pol { gap: 6px; }
+      .x-pol button { border: 0; border-radius: 14px; background: var(--x-fill); padding: 8px 12px; color: var(--x-ink); }
+      .x-pol button:hover { background: var(--x-fill-2); }
+      .x-pol button.on { background: var(--x-blue-soft); box-shadow: inset 0 0 0 1.5px var(--x-blue); }
+      .x-pol i { border-radius: 4px; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, .18); }
+      .x-switches { gap: 8px; }
+      .x-sw { border: 0; border-radius: 980px; background: var(--x-fill); color: var(--x-ink); padding: 0 16px; font: 500 14px/1 var(--x-sans); }
+      .x-sw:hover { background: var(--x-fill-2); }
+      .x-sw:active { transform: scale(.97); }
+      .x-sw.on { background: var(--x-blue); color: var(--x-on-blue); }
+      .x-sw[disabled] { opacity: .4; }
+      .x-q, .x-qz__opts button, .x-q__opts button { font-size: 15px; }
+      .x-q__opts, .x-qz__opts { gap: 8px; }
+      .x-q__opts button, .x-qz__opts button { border: 0; border-radius: 14px; background: var(--x-fill);
+        color: var(--x-ink); padding: 10px 14px; line-height: 1.45; }
+      .x-q__opts button:not([disabled]):hover, .x-qz__opts button:not([disabled]):hover { background: var(--x-fill-2); }
+      .x-q__opts button.right, .x-qz__opts button.right { background: color-mix(in srgb, var(--x-acc) 12%, var(--x-card));
+        box-shadow: inset 0 0 0 1.5px var(--x-acc); color: var(--x-acc-ink); }
+      .x-q__opts button.wrong, .x-qz__opts button.wrong { background: color-mix(in srgb, var(--x-red) 10%, var(--x-card));
+        box-shadow: inset 0 0 0 1.5px var(--x-red); color: var(--x-red-ink); }
+      .x-qz__list li.no b { color: var(--x-red-ink); }
+      .x-qz__list li { border-top: 0.5px solid var(--x-line-2); }
+      .x-qz__go.x-sw, .x-qz__go { background: var(--x-blue); color: var(--x-on-blue); min-height: 44px; }
+      .x-qz__go:hover { background: var(--x-blue); filter: brightness(1.08); }
+      .x-ans { font-size: 14px; line-height: 1.6; border-left: 0; padding: 10px 14px; border-radius: 14px;
+        background: var(--x-fill); color: var(--x-ink-2); }
+      .x-gk { font-size: 13px; line-height: 1.6; border-left: 0; padding: 12px 14px; border-radius: 14px;
+        background: color-mix(in srgb, var(--x-gold) 9%, var(--x-card)); color: var(--x-ink); margin-top: 12px; }
+      .x-soon { border: 0; background: color-mix(in srgb, var(--x-gold) 14%, var(--x-card)); border-radius: 980px;
+        padding: 4px 10px; font: 500 12px/1.2 var(--x-sans); color: var(--x-gold-ink); }
+      .x-tl li { border-left: 1.5px solid var(--x-fill-2); }
+      .x-tl b { font: 12px var(--x-mono); color: var(--x-gold-ink); }
+      .x-chart .chart__canvas { height: 160px; }
+
+      /* 地图上的弹窗 */
+      .x-pop { border: 0; border-radius: 18px; padding: 12px 48px 12px 14px; background: var(--x-glass);
+        -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, .1), 0 0 0 0.5px var(--x-line-2); font-size: 14px; line-height: 1.55; }
+      .x-pop h3 { font: 600 15px/1.3 var(--x-sans); letter-spacing: -0.02em; }
+      .x-pop .x-fold { width: 44px; height: 44px; top: 2px; right: 2px; background: transparent; }
+      .x-pop .x-sw { margin-top: 10px; }
+
+      /* iOS 风格滑块（如有） */
+      input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; background: transparent; }
+      input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 980px; background: var(--x-fill-2); }
+      input[type="range"]::-moz-range-track { height: 4px; border-radius: 980px; background: var(--x-fill-2); }
+      input[type="range"]::-moz-range-progress { height: 4px; border-radius: 980px; background: var(--x-blue); }
+      input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -11px;
+        border-radius: 50%; background: #fff; border: 0; box-shadow: var(--x-thumb-shadow); }
+      input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 0; box-shadow: var(--x-thumb-shadow); }
+
+      /* 滚动条更轻 */
+      .x-chs, .x-panel, .x-ticks { scrollbar-width: thin; scrollbar-color: var(--x-fill-2) transparent; }
+
+      @media (max-width: 1023px) {
+        .x-brand span { display: none; }
+      }
+      @media (max-width: 767px) {
+        .x-app { grid-template-rows: auto 48px minmax(0, 1fr) auto; }
+        .x-app.x-toc-off { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 0 minmax(0, 1fr) auto; }
+        .x-top { flex-wrap: wrap; row-gap: 0; column-gap: 8px; padding: 2px 8px 4px 12px; align-content: center; }
+        .x-back { order: 1; }
+        .x-tools { order: 2; margin-left: auto; gap: 2px; }
+        .x-back { padding-right: 6px; }
+        .x-brand { order: 3; flex: 0 1 auto; border-left: 0; padding-left: 4px; justify-content: center; min-height: 44px; }
+        .x-prog { order: 4; flex: 1 1 auto; }
+        .x-toc { order: 5; }
+        .x-btn { min-width: 44px; padding: 0; }
+        .x-chs { box-shadow: inset 0 -0.5px 0 var(--x-line-2); padding: 2px 8px; gap: 4px; align-items: center; }
+        .x-ch { border-bottom: 0; border-radius: 980px; margin: 0; padding: 0 14px; min-height: 44px; }
+        .x-ch span { font-size: 14px; }
+        .x-ch.on { background: var(--x-blue-soft); }
+        .x-over { top: 10px; left: 10px; right: 10px; max-width: none; border-radius: 18px; padding: 12px 54px 12px 14px; }
+        .x-over h2 { font-size: 17px; }
+        .x-over p { font-size: 14px; }
+        .x-note { bottom: 10px; right: 10px; left: 10px; text-align: center; white-space: normal; }
+        .x-bar { padding: 6px 12px 60px; }
+        .x-panel { background: var(--x-panel); border-radius: 24px 24px 0 0; border-top: 0;
+          box-shadow: 0 -8px 32px rgba(0, 0, 0, .1), 0 0 0 0.5px var(--x-line-2);
+          transition: transform var(--x-dur) var(--x-ease); padding: 52px 14px 24px;
+          padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+        .x-panel .x-card { box-shadow: 0 0 0 0.5px var(--x-line-2); background: var(--x-card); }
+        :root[data-theme="light"] .x-panel .x-card { background: #fbfbfd; }
+        .x-drawer__btn { height: 50px; font: 500 14px/1 var(--x-sans); color: var(--x-blue-ink); padding-top: 8px; }
+        .x-drawer__btn::before { content: ""; position: absolute; top: 7px; left: 50%; width: 36px; height: 5px;
+          margin-left: -18px; border-radius: 980px; background: var(--x-fill-2); }
+        .x-pop { width: min(260px, calc(100vw - 32px)); }
+      }
+      @media (max-width: 374px) {
+        .x-back span { display: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; scroll-behavior: auto !important; }
+      }
+    </style>
   </head>
   <body>
     <div class="x-app" id="top">
       <header class="x-top">
-        <div class="x-brand"><b>格物实验室 · 疆域变迁</b><span>HistoryAtlas · 历史</span></div>
+        <a class="x-back" href="../" aria-label="返回格物实验室"><b aria-hidden="true">‹</b><span>格物实验室</span></a>
+        <div class="x-brand"><b>疆域变迁</b><span>HistoryAtlas · 历史</span></div>
         <div class="x-prog">
           <div class="x-prog__segs" id="segs"></div>
           <span class="x-count" id="count">01 / 17</span>
         </div>
+        <button class="x-btn x-toc" id="toc" aria-controls="chs" aria-expanded="true">目录</button>
         <div class="x-tools">
           <button class="x-btn" id="prev" aria-label="上一章">←</button>
           <button class="x-btn" id="next" aria-label="下一章">→</button>
@@ -840,9 +1036,9 @@
             { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
           ],
           ev: [
-            { t: "630 · 击败东突厥", y: 630, at: 0, dur: 2.5, c: "#ef6461", ll: [114.8, 40.2], pts: [[108.9,34.3],[109.6,37],[110.6,39.4],[111.4,41.6],[111,44]] },
+            { t: "630 · 击败东突厥", y: 630, at: 0, dur: 2.5, c: "#e5484d", ll: [114.8, 40.2], pts: [[108.9,34.3],[109.6,37],[110.6,39.4],[111.4,41.6],[111,44]] },
             { t: "641 · 文成公主入藏", y: 641, at: 3, dur: 3, dash: true, ll: [97.6, 30.9], pts: [[108.9,34.3],[105.7,34.6],[103.8,36.1],[101.7,36.6],[99.5,35],[97,33],[94,31.5],[91.1,29.65]] },
-            { t: "657 · 灭西突厥", y: 657, at: 6.5, dur: 2.5, c: "#ef6461", ll: [81.5, 45.2], pts: [[89.2,42.9],[86,44],[82,44.2],[78.5,43.4],[75.4,42.8]] }
+            { t: "657 · 灭西突厥", y: 657, at: 6.5, dur: 2.5, c: "#e5484d", ll: [81.5, 45.2], pts: [[89.2,42.9],[86,44],[82,44.2],[78.5,43.4],[75.4,42.8]] }
           ]
         };
       })();
@@ -876,7 +1072,7 @@
           ],
           tgl: "▶ 播放安史之乱 755–763", evn: "安史之乱箭头",
           ev: [
-            { t: "755–756 · 叛军南下，攻陷洛阳、长安", at: 0, dur: 3.5, c: "#ef6461", ll: [114.6, 36.2], pts: [[116.4,39.9],[115.4,38],[114.5,36.2],[113.2,35.2],[112.45,34.65],[110.5,34.5],[109.2,34.3]] },
+            { t: "755–756 · 叛军南下，攻陷洛阳、长安", at: 0, dur: 3.5, c: "#e5484d", ll: [114.6, 36.2], pts: [[116.4,39.9],[115.4,38],[114.5,36.2],[113.2,35.2],[112.45,34.65],[110.5,34.5],[109.2,34.3]] },
             { t: "调西北边兵东援平叛", at: 3.5, dur: 3, c: "#4A90D9", ll: [104.5, 38.6], pts: [[96.5,40.2],[100.5,38.9],[102.6,37.9],[104.6,37.6],[106.3,38.1],[107.8,36.2],[108.8,34.6]] },
             { t: "吐蕃东北进，占河西、陇右", at: 6.5, dur: 3, c: "#C07CCF", ll: [97.5, 37.2], pts: [[91.1,31.5],[95,33.6],[99,35.6],[101.7,36.6],[102.6,37.9],[99,39.8]] },
             { t: "763 · 吐蕃一度攻入长安", at: 9.5, dur: 1.5, dash: true, c: "#C07CCF", ll: [106, 33.4], pts: [[101.7,36.6],[104,35.4],[106.5,34.6],[108.9,34.3]] }
@@ -1002,12 +1198,12 @@
         }
         var pulse = RM.matches ? 0.5 : 0.5 + 0.5 * Math.sin((now || 0) / 260);
         path(L.yun, true); ctx.strokeStyle = c.halo; ctx.lineWidth = 7; ctx.stroke();
-        ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3 + pulse * 1.5; ctx.stroke();
+        ctx.strokeStyle = "#e5484d"; ctx.lineWidth = 3 + pulse * 1.5; ctx.stroke();
         path(L.bgh); ctx.strokeStyle = c.halo; ctx.lineWidth = 6; ctx.stroke();
         ctx.strokeStyle = c.river; ctx.lineWidth = 3; ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([]);
         if (state.show.note) label("白沟河（宋辽界）", [116.4, 38.4], { color: c.river, font: "600 12px system-ui, sans-serif" });
         label("燕云十六州", [115.4, 40.6], { color: c.ink, font: serif });
-        label("北宋始终未收复燕云十六州", unproj(W / 2, H - 56), { color: "#ef6461", font: serif });
+        label("北宋始终未收复燕云十六州", unproj(W / 2, H - 56), { color: "#e5484d", font: serif });
       }
       /* ---------- 第 13 章：南宋、金、西夏并立（约 1142）；sx＝绍兴和议界线（东淮水、西大散关） ---------- */
       (function () {
@@ -1064,8 +1260,8 @@
           if (k < 2) { star([126.95, 45.5], 9, c.star); label("会宁（阿城）", [126.95, 45.5], { dx: 11, align: "left", color: c.ink, font: "600 12px system-ui, sans-serif" }); }
           if (k >= 4 && k < 8.5) {
             var ap = [[116.4,39.9],[115.9,38.2],[115.2,36.6],[114.35,34.8]], pp = part(ap, Math.min(1, (k - 4) / 2));
-            line(pp, "#ef6461", 4); if (k >= 6) arrowHead(ap[2], ap[3], "#ef6461");
-            label("金军南下", [117.2, 37.4], { color: "#ef6461", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+            line(pp, "#e5484d", 4); if (k >= 6) arrowHead(ap[2], ap[3], "#e5484d");
+            label("金军南下", [117.2, 37.4], { color: "#e5484d", font: '600 14px "Noto Serif SC","Songti SC",serif' });
           }
           if (k >= 7) { var u = Math.min(1, (k - 7) / 3); line(part(NS_MV, u), c.star, 2, [6, 5]); star(along(NS_MV, Math.min(u, 0.999)), 10, c.star);
             label("宋高宗南渡", [118.6, 33.2], { color: c.star, font: '600 14px "Noto Serif SC","Songti SC",serif' }); }
@@ -1073,14 +1269,14 @@
           return label(k < 2 ? "1115 年 · 女真首领阿骨打建立金" : k < 4 ? "1125 年 · 金灭辽" : k < 7 ? "1127 年 · 靖康之变，金军攻破开封，北宋灭亡" : k < 10 ? "1127 年 · 宋高宗南渡建立南宋，后定都临安" : "1142 年 · 绍兴和议：东以淮水、西以大散关为界", bot, { color: c.ink, font: serif });
         }
         var pulse = RM.matches ? 0.5 : 0.5 + 0.5 * Math.sin((now || 0) / 260);
-        line(L.sx, "#ef6461", 3 + pulse * 1.5);
-        label("绍兴和议界线 1142", [116.6, 33.6], { dy: -12, color: "#ef6461", font: '600 15px "Noto Serif SC","Songti SC",serif' });
+        line(L.sx, "#e5484d", 3 + pulse * 1.5);
+        label("绍兴和议界线 1142", [116.6, 33.6], { dy: -12, color: "#e5484d", font: '600 15px "Noto Serif SC","Songti SC",serif' });
         if (state.show.note) { label("淮水", [118.2, 32.9], { dy: 12, color: c.river, font: "600 12px system-ui, sans-serif" });
-          var q = proj([106.9, 34.3]); ctx.beginPath(); ctx.arc(q[0], q[1], 4.5, 0, 7); ctx.fillStyle = "#ef6461"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = c.halo; ctx.stroke();
+          var q = proj([106.9, 34.3]); ctx.beginPath(); ctx.arc(q[0], q[1], 4.5, 0, 7); ctx.fillStyle = "#e5484d"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = c.halo; ctx.stroke();
           label("大散关", [106.9, 34.3], { dy: -13, color: c.ink, font: "600 12px system-ui, sans-serif" });
           label("★ 浙江考生重点：临安（今杭州）", [123.6, 28.4], { color: "#F2B544", font: '600 14px "Noto Serif SC","Songti SC",serif' }); }
         var h = proj([120.16, 30.25]); ctx.beginPath(); ctx.arc(h[0], h[1], 13 + pulse * 3, 0, 7); ctx.strokeStyle = "#F2B544"; ctx.lineWidth = 2; ctx.stroke();
-        label("以淮水—大散关为界，不是长江", bot, { color: "#ef6461", font: serif });
+        label("以淮水—大散关为界，不是长江", bot, { color: "#e5484d", font: serif });
       }
       /* ---------- 第 14 章：元朝疆域（约 1330）；xz＝宣政院辖地（交叉斜线），prov＝行省示意线 ---------- */
       (function () {
@@ -1134,7 +1330,7 @@
         var L = LAYERS[13], serif = '600 16px "Noto Serif SC","Songti SC",serif', sm = "600 12px system-ui, sans-serif", bot = unproj(W / 2, H - 56);
         if (state.un) {
           var k = unK(), t = Y_CAP.filter(function (x) { return x[0] <= k; }).pop();
-          if (k >= 10) { var y = proj([113.05, 22.2]); ctx.beginPath(); ctx.arc(y[0], y[1], 8, 0, 7); ctx.fillStyle = "#ef6461"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = c.halo; ctx.stroke();
+          if (k >= 10) { var y = proj([113.05, 22.2]); ctx.beginPath(); ctx.arc(y[0], y[1], 8, 0, 7); ctx.fillStyle = "#e5484d"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = c.halo; ctx.stroke();
             label("崖山", [113.05, 22.2], { dx: 12, align: "left", color: c.ink, font: sm }); }
           return label(t[1], bot, { color: c.ink, font: serif });
         }
@@ -1158,7 +1354,7 @@
           tos.forEach(function (to) { ctx.strokeStyle = c.halo; ctx.lineWidth = 4; path([from, to]); ctx.stroke(); ctx.strokeStyle = "#A68A64"; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([]); arrowHead(from, to, "#A68A64"); });
           label("四大汗国 · 不属元直接统治", [72, 57.6], { color: "#A68A64", font: '600 14px "Noto Serif SC","Songti SC",serif' });
         }
-        label("四大汗国不属元朝直接统治范围", bot, { color: "#ef6461", font: serif });
+        label("四大汗国不属元朝直接统治范围", bot, { color: "#e5484d", font: serif });
       }
       /* ---------- 第 15 章：明朝疆域（约 1433）；jm＝羁縻都司卫（同色浅色＋斜线），WL＝明长城 ---------- */
       (function () {
@@ -1300,8 +1496,8 @@
         var nu = state.un ? Math.max(0, Math.min(1, (k - 6) / 2)) : 1;
         if (nu > 0) {
           var np = part(L.nb, nu); ctx.strokeStyle = c.halo; ctx.lineWidth = 7; ctx.lineJoin = "round"; path(np); ctx.stroke();
-          ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3; ctx.setLineDash([9, 5]); ctx.stroke(); ctx.setLineDash([]);
-          if (nu >= 1) label("《尼布楚条约》1689 · 外兴安岭—额尔古纳河", [127, 56.6], { color: "#ef6461", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+          ctx.strokeStyle = "#e5484d"; ctx.lineWidth = 3; ctx.setLineDash([9, 5]); ctx.stroke(); ctx.setLineDash([]);
+          if (nu >= 1) label("《尼布楚条约》1689 · 外兴安岭—额尔古纳河", [127, 56.6], { color: "#e5484d", font: '600 14px "Noto Serif SC","Songti SC",serif' });
         }
         if (state.show.note) {
           var mk = function (t, ll, dx, col) { var q = proj(ll); ctx.fillStyle = col || QC; ctx.fillRect(q[0] - 4.5, q[1] - 4.5, 9, 9); ctx.lineWidth = 1.5; ctx.strokeStyle = c.halo; ctx.strokeRect(q[0] - 4.5, q[1] - 4.5, 9, 9);
@@ -1309,7 +1505,7 @@
           if (k >= 12) mk("惠远城（伊犁将军 1762）", [81.3, 43.9], 9);
           mk("拉萨（驻藏大臣 1727）", [91.1, 29.65], 9); mk("乌里雅苏台将军", [96.8, 47.75], 9);
           if (k >= 4.5) mk("台湾府（1684，属福建）", [120.2, 23], 9);
-          if (nu > 0) mk("尼布楚", [116.5, 51.95], -9, "#ef6461");
+          if (nu > 0) mk("尼布楚", [116.5, 51.95], -9, "#e5484d");
           label("库页岛", [142.6, 50.2], { dx: 10, align: "left", color: c.ink, font: sm });
           label("南海诸岛", [114.2, 12.4], { color: c.ink, font: sm });
           label("葱岭", [73.6, 38.2], { color: c.ink, font: sm }); label("巴尔喀什湖", [76.2, 47.4], { color: c.river, font: sm });
@@ -1325,10 +1521,10 @@
           QG_AR.forEach(function (v) {
             var u = Math.max(0, Math.min(1, (k - v.at) / 1.8)); if (!u) return; var p = part(v.pts, u);
             ctx.strokeStyle = c.halo; ctx.lineWidth = 6; ctx.lineJoin = "round"; ctx.lineCap = "round"; path(p); ctx.stroke();
-            ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3; ctx.setLineDash(v.t === "渡海" ? [7, 5] : []); ctx.stroke(); ctx.setLineDash([]);
-            if (u < 1) { var hq = proj(p[p.length - 1]); ctx.beginPath(); ctx.arc(hq[0], hq[1], 5, 0, 7); ctx.fillStyle = "#ef6461"; ctx.fill(); }
-            else arrowHead(v.pts[v.pts.length - 2], v.pts[v.pts.length - 1], "#ef6461");
-            label(v.t, v.pts[1], { dy: -14, color: "#ef6461", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+            ctx.strokeStyle = "#e5484d"; ctx.lineWidth = 3; ctx.setLineDash(v.t === "渡海" ? [7, 5] : []); ctx.stroke(); ctx.setLineDash([]);
+            if (u < 1) { var hq = proj(p[p.length - 1]); ctx.beginPath(); ctx.arc(hq[0], hq[1], 5, 0, 7); ctx.fillStyle = "#e5484d"; ctx.fill(); }
+            else arrowHead(v.pts[v.pts.length - 2], v.pts[v.pts.length - 1], "#e5484d");
+            label(v.t, v.pts[1], { dy: -14, color: "#e5484d", font: '600 14px "Noto Serif SC","Songti SC",serif' });
           });
           if (k >= 12) { var hy = proj([81.3, 43.9]); ctx.beginPath(); ctx.arc(hy[0], hy[1], 12 + pulse * 6, 0, 7); ctx.strokeStyle = QC; ctx.lineWidth = 2.5; ctx.stroke(); }
           return label(QG_CAP.filter(function (x) { return x[0] <= k; }).pop()[1], bot, { color: c.ink, font: serif });
@@ -1344,7 +1540,7 @@
         var k = RM.matches ? 1 : Math.max(0, Math.min(1, (performance.now() - state.yy) / 1000 - 0.5) / 2.5);
         var mix = function (a, b) { return "#" + [1, 3, 5].map(function (i) { var v = Math.round(parseInt(a.substr(i, 2), 16) * (1 - k) + parseInt(b.substr(i, 2), 16) * k); return (v < 16 ? "0" : "") + v.toString(16); }).join(""); };
         ctx.fillStyle = mix("#E5604A", "#5B9BEF") + "aa"; path(L.yy, true); ctx.fill();
-        ctx.strokeStyle = c.halo; ctx.lineWidth = 7; ctx.stroke(); ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3 + pulse * 1.5; ctx.stroke();
+        ctx.strokeStyle = c.halo; ctx.lineWidth = 7; ctx.stroke(); ctx.strokeStyle = "#e5484d"; ctx.lineWidth = 3 + pulse * 1.5; ctx.stroke();
         label("燕云十六州", [115.4, 40.4], { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
         label(k < 1 ? "936 年 · 石敬瑭割让燕云十六州给契丹" : "936 年割让后：中原失去北方天然屏障", unproj(W / 2, H - 56), { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
       }
@@ -1577,15 +1773,25 @@
         if (uk >= 2 && uk < 5) {
           var cr = [[117.6, 34], [118.3, 33], [118.78, 32.06]], cp = part(cr, Math.min(1, (uk - 2) / 2));
           ctx.strokeStyle = c.halo; ctx.lineWidth = 6; ctx.lineJoin = "round"; path(cp); ctx.stroke();
-          ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3; ctx.stroke(); if (uk >= 4) arrowHead(cr[1], cr[2], "#ef6461");
-          label("隋军渡江", [116.6, 33.2], { color: "#ef6461", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+          ctx.strokeStyle = "#e5484d"; ctx.lineWidth = 3; ctx.stroke(); if (uk >= 4) arrowHead(cr[1], cr[2], "#e5484d");
+          label("隋军渡江", [116.6, 33.2], { color: "#e5484d", font: '600 14px "Noto Serif SC","Songti SC",serif' });
         }
         label(uk < 2 ? "581 年 · 杨坚建立隋朝，与陈南北对峙" : uk < 5 ? "589 年 · 隋军渡江伐陈" : "589 年 · 灭陈，重新统一全国", unproj(W / 2, H - 56), { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
       }
       var PAL = {
-        dark: { sea: "#0a1120", sea2: "#0f1a2c", land: "#1a2437", high: "rgba(186,150,98,.30)", basin: "rgba(214,180,112,.13)", ridge: "rgba(236,214,170,.22)", river: "rgba(96,168,220,.8)", coast: "rgba(150,180,210,.35)", grat: "rgba(255,255,255,.05)", text: "#8a97ad", ink: "#e6ecf5", halo: "rgba(10,17,32,.85)", wall: "#e0a84a", star: "#f2b544", silk: "#f0d08a" },
-        light: { sea: "#dce6ea", sea2: "#e8eef0", land: "#f4f0e4", high: "rgba(150,108,58,.24)", basin: "rgba(206,164,92,.2)", ridge: "rgba(120,86,46,.3)", river: "rgba(50,118,170,.75)", coast: "rgba(60,80,100,.45)", grat: "rgba(0,0,0,.06)", text: "#6b7384", ink: "#1d2433", halo: "rgba(246,243,236,.9)", wall: "#a8641a", star: "#c98a12", silk: "#9a5b12" }
+        dark: { sea: "#000000", sea2: "#0b0b0d", land: "#1d1d1f", high: "rgba(186,150,98,.30)", basin: "rgba(214,180,112,.13)", ridge: "rgba(236,214,170,.22)", river: "rgba(96,168,220,.8)", coast: "rgba(255,255,255,.28)", grat: "rgba(255,255,255,.06)", text: "#a1a1a6", ink: "#f5f5f7", halo: "rgba(0,0,0,.85)", wall: "#e0a84a", star: "#f2b544", silk: "#f0d08a" },
+        light: { sea: "#fbfbfd", sea2: "#f1f3f6", land: "#ffffff", high: "rgba(150,108,58,.22)", basin: "rgba(206,164,92,.18)", ridge: "rgba(120,86,46,.3)", river: "rgba(40,110,170,.7)", coast: "rgba(0,0,0,.28)", grat: "rgba(0,0,0,.05)", text: "#6e6e73", ink: "#1d1d1f", halo: "rgba(255,255,255,.92)", wall: "#a8641a", star: "#c98a12", silk: "#9a5b12" }
       };
+      /* 改版：画布文字统一系统字体；浅色主题下把过浅的文字色压暗到 ≥4.5:1 */
+      var X_SANS = '-apple-system, "SF Pro Display", "PingFang SC", "Noto Sans SC", sans-serif';
+      function xFont(f) { return String(f).replace(/"Noto Serif SC".*$/, X_SANS).replace(/system-ui, sans-serif$/, X_SANS); }
+      function xInk(col) {
+        if (root.getAttribute("data-theme") !== "light" || !/^#[0-9a-f]{6}$/i.test(col || "")) return col;
+        var r = parseInt(col.slice(1, 3), 16), g = parseInt(col.slice(3, 5), 16), b = parseInt(col.slice(5, 7), 16);
+        function lum(v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+        for (var i = 0; i < 30 && 1.05 / (0.2126 * lum(r) + 0.7152 * lum(g) + 0.0722 * lum(b) + 0.05) < 4.6; i++) { r *= 0.93; g *= 0.93; b *= 0.93; }
+        return "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
+      }
       function pal() { return PAL[root.getAttribute("data-theme") === "light" ? "light" : "dark"]; }
       function proj(p) { return [(p[0] - view.cx) * view.s * K + W / 2, (view.cy - p[1]) * view.s + H / 2]; }
       function unproj(x, y) { return [(x - W / 2) / (view.s * K) + view.cx, view.cy - (y - H / 2) / view.s]; }
@@ -1645,10 +1851,10 @@
       }
       function label(t, p, o) {
         var q = proj(p), c = pal(); o = o || {};
-        ctx.font = o.font || "12px system-ui, sans-serif"; ctx.textAlign = o.align || "center"; ctx.textBaseline = "middle";
+        ctx.font = xFont(o.font || "12px system-ui, sans-serif"); ctx.textAlign = o.align || "center"; ctx.textBaseline = "middle";
         ctx.lineWidth = 3; ctx.strokeStyle = c.halo; ctx.lineJoin = "round";
         ctx.strokeText(t, q[0] + (o.dx || 0), q[1] + (o.dy || 0));
-        ctx.fillStyle = o.color || c.text; ctx.fillText(t, q[0] + (o.dx || 0), q[1] + (o.dy || 0));
+        ctx.fillStyle = xInk(o.color) || c.text; ctx.fillText(t, q[0] + (o.dx || 0), q[1] + (o.dy || 0));
       }
       function star(p, r, col) {
         var q = proj(p); ctx.beginPath();
@@ -1736,10 +1942,10 @@
             if (su > 0) {
               var sp = part(SH, su);
               ctx.strokeStyle = c.halo; ctx.lineWidth = 6; ctx.lineJoin = "round"; path(sp); ctx.stroke();
-              ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3; ctx.stroke();
-              if (su < 1) { var hq = proj(sp[sp.length - 1]); ctx.beginPath(); ctx.arc(hq[0], hq[1], 5, 0, 7); ctx.fillStyle = "#ef6461"; ctx.fill(); }
-              else arrowHead(SH[SH.length - 2], SH[SH.length - 1], "#ef6461");
-              label("王濬楼船下益州", [111.6, 29.2], { color: "#ef6461", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+              ctx.strokeStyle = "#e5484d"; ctx.lineWidth = 3; ctx.stroke();
+              if (su < 1) { var hq = proj(sp[sp.length - 1]); ctx.beginPath(); ctx.arc(hq[0], hq[1], 5, 0, 7); ctx.fillStyle = "#e5484d"; ctx.fill(); }
+              else arrowHead(SH[SH.length - 2], SH[SH.length - 1], "#e5484d");
+              label("王濬楼船下益州", [111.6, 29.2], { color: "#e5484d", font: '600 14px "Noto Serif SC","Songti SC",serif' });
             }
             var bt = uk < 2 ? "266 年 · 司马炎代魏，建立西晋" : uk < 5 ? "280 年 · 晋军顺江东下伐吴" : "280 年 · 灭吴，结束三国分裂";
             label(bt, unproj(W / 2, H - 56), { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
@@ -1752,7 +1958,7 @@
           });
           if (L.battles && state.show.battle) L.battles.forEach(function (b) {
             var q = proj(b.ll), on = state.pop === b;
-            ctx.beginPath(); ctx.arc(q[0], q[1], on ? 10 : 8, 0, 7); ctx.fillStyle = b.tr ? "#F2B544" : "#ef6461"; ctx.fill();
+            ctx.beginPath(); ctx.arc(q[0], q[1], on ? 10 : 8, 0, 7); ctx.fillStyle = b.tr ? "#F2B544" : "#e5484d"; ctx.fill();
             ctx.lineWidth = 2; ctx.strokeStyle = c.halo; ctx.stroke();
             if (b.tr) { ctx.beginPath(); ctx.arc(q[0], q[1], 3, 0, 7); ctx.fillStyle = "#fff"; ctx.fill(); }
             else { ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.8; ctx.beginPath();
@@ -1804,9 +2010,9 @@
           label(s.name, s.label, { font: "600 " + (s.id === "qin" || s.main ? 26 : 17) + 'px "Noto Serif SC","Songti SC",serif', color: s.color });
         });
         // 示意图章
-        ctx.font = '600 13px "Noto Serif SC",serif'; ctx.textAlign = "right"; ctx.textBaseline = "top";
-        ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 1.2; ctx.strokeRect(W - 70, 12, 58, 24);
-        ctx.fillStyle = "#ef6461"; ctx.fillText("示意图", W - 19, 17);
+        ctx.font = "600 13px " + X_SANS; ctx.textAlign = "right"; ctx.textBaseline = "top";
+        ctx.strokeStyle = xInk("#e5484d"); ctx.lineWidth = 1.2; ctx.strokeRect(W - 70, 12, 58, 24);
+        ctx.fillStyle = xInk("#e5484d"); ctx.fillText("示意图", W - 19, 17);
         placePop(); if (!qwEl.hidden) placeQw();
       }
       function loop(now) {
@@ -1922,7 +2128,7 @@
           return '<button data-id="' + s.id + '"><i style="background:' + s.color + '"></i><span>' + esc(s.name) + "<small>" + esc(s.sub) + "</small></span></button>";
         }).join("") + "</div></div>";
         if (L.battles) h += '<div class="x-card"><h3>' + (L.bn || "战役标记") + ' <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">点击查看简介</small></h3><div class="x-pol">' + L.battles.map(function (b, k) {
-          return '<button data-bt="' + k + '"><i style="background:' + (b.tr ? "#F2B544" : "#ef6461") + ';border-radius:50%"></i><span>' + esc(b.name) + "<small>" + b.y + " 年</small></span></button>";
+          return '<button data-bt="' + k + '"><i style="background:' + (b.tr ? "#F2B544" : "#e5484d") + ';border-radius:50%"></i><span>' + esc(b.name) + "<small>" + b.y + " 年</small></span></button>";
         }).join("") + "</div>" + (L.fs ? '<button class="x-sw x-fs" aria-pressed="false" style="margin-top:8px">▶ 播放战役动画</button>' : "") + "</div>";
         if (c.kd) h += '<div class="x-card"><h3>十六国更替 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">点击在地图上闪烁标注（示意）</small></h3><div class="x-pol">' + c.kd.map(function (d, k) {
           return '<button data-kd="' + k + '"><i style="background:var(--x-ink-2)"></i><span>' + esc(d[0]) + "<small>" + d[1] + " 年 · " + esc(d[2]) + "</small></span></button>";
@@ -2126,6 +2332,10 @@
       $("reset").onclick = function () { resetView(false); };
       $("full").onclick = toggleFull;
       $("fold").onclick = function () { var m = $("over").classList.toggle("min"); this.textContent = m ? "+" : "−"; this.setAttribute("aria-label", m ? "展开讲解" : "折叠讲解"); };
+      $("toc").onclick = function () {
+        var off = $("top").classList.toggle("x-toc-off"); this.setAttribute("aria-expanded", !off);
+        window.dispatchEvent(new Event("resize"));
+      };
       $("drawer").onclick = function () { var o = $("panel").classList.toggle("open"); this.textContent = o ? "▼ 收起面板" : "▲ 本章面板"; };
       document.addEventListener("keydown", function (e) {
         if (e.metaKey || e.ctrlKey || e.altKey || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
