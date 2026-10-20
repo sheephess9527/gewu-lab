@@ -1,0 +1,1976 @@
+<!doctype html>
+<html lang="zh-CN" data-skin="night">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>格物实验室 · 等高线</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+    />
+    <link rel="stylesheet" href="hark.css" />
+    <style>
+      :root {
+        --bg1: #0e1420; --bg2: #121a2a; --panel: rgba(21, 30, 48, 0.82); --line: rgba(255, 255, 255, 0.08);
+        --acc: #2ec4b6; --acc2: #f2b544; --warn: #ef6461; --ink: #e6ecf5; --ink2: #8a97ad;
+        --serif: "Noto Serif SC", "Songti SC", serif; --mono: "Geist Mono", ui-monospace, monospace;
+        --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+        --r: 10px; --dur: 200ms;
+      }
+      :root[data-skin="paper"] {
+        --bg1: #f6f3ec; --bg2: #efebe1; --panel: rgba(255, 255, 255, 0.88); --line: rgba(29, 36, 51, 0.12);
+        --acc: #0b7a70; --acc2: #9a690c; --ink: #1d2433; --ink2: #5d6880;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        background-color: var(--bg1);
+        background-image: linear-gradient(160deg, var(--bg1), var(--bg2));
+        color: var(--ink); font: 400 14px/1.6 var(--sans); overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+      button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+      .app { display: grid; grid-template-rows: 56px 1fr; height: 100%; }
+      /* top bar */
+      .top { display: flex; align-items: center; gap: 16px; padding: 0 14px; border-bottom: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(14px); }
+      .brand { font-family: var(--serif); font-weight: 700; white-space: nowrap; }
+      .brand small { display: block; font: 400 12px/1.2 var(--sans); color: var(--ink2); letter-spacing: .08em; }
+      .prog { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; }
+      .prog__bars { display: flex; gap: 4px; flex: 1; min-width: 0; }
+      .prog__bars i { flex: 1; height: 4px; border-radius: 2px; background: var(--line); transition: background var(--dur); }
+      .prog__bars i.on { background: var(--acc); }
+      .prog__n { font: 500 12px var(--mono); color: var(--ink2); white-space: nowrap; }
+      .tools { display: flex; gap: 6px; }
+      .tbtn { width: 44px; height: 44px; border: 1px solid var(--line); border-radius: var(--r); display: grid; place-items: center; font: 500 13px var(--mono); transition: background var(--dur), border-color var(--dur); }
+      .tbtn:hover { background: var(--line); border-color: var(--acc); }
+      /* body grid */
+      .body { display: grid; grid-template-columns: 220px minmax(0, 1fr) 340px; min-height: 0; }
+      .chaps { border-right: 1px solid var(--line); overflow: auto; padding: 8px 0; background-color: var(--bg1); }
+      .app, .body { background-color: var(--bg1); }
+      .chap { display: block; width: 100%; text-align: left; padding: 10px 14px 10px 16px; border-left: 3px solid transparent; transition: background var(--dur); }
+      .chap b { display: block; font: 500 12px var(--mono); color: var(--ink2); letter-spacing: .1em; }
+      .chap span { font-family: var(--serif); font-size: 15px; }
+      .chap:hover { background: var(--line); }
+      .chap.on { border-left-color: var(--acc); background: color-mix(in srgb, var(--acc) 12%, transparent); }
+      .chap.on b, .chap.on span { color: var(--acc); }
+      /* stage */
+      .stage { position: relative; min-width: 0; overflow: hidden; }
+      #gl { display: block; width: 100%; height: 100%; touch-action: none; }
+      .float { position: absolute; top: 14px; left: 14px; width: min(380px, calc(100% - 28px)); background: var(--panel); backdrop-filter: blur(14px); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; }
+      .float h2 { margin: 0 0 6px; font: 700 17px/1.3 var(--serif); }
+      .float p { margin: 0 0 6px; color: var(--ink2); font-size: 13px; }
+      .float p:last-child { margin-bottom: 0; }
+      .float__src { font: 400 12px var(--mono); color: var(--acc2); letter-spacing: .02em; padding-right: 40px; }
+      .float h2 { padding-right: 40px; }
+      .fold { position: absolute; top: 4px; right: 4px; width: 44px; height: 44px; border-radius: 8px; color: var(--ink2); }
+      .float.min .float__body { display: none; }
+      .readout { position: absolute; left: 14px; bottom: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 12px; font: 500 12px var(--mono); backdrop-filter: blur(14px); }
+      .readout b { color: var(--acc); }
+      .lab { position: absolute; transform: translate(-50%, -50%); pointer-events: none; font: 500 12px var(--sans); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; white-space: nowrap; transition: opacity var(--dur); }
+      .lab[data-kind="water"] { color: #5aa9e6; }
+      .lab[data-kind="cliff"] { color: var(--warn); }
+      .lab[data-kind="saddle"] { color: var(--acc2); }
+      /* panel */
+      .panel { background-color: var(--bg2); border-left: 1px solid var(--line); overflow: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+      .card { border: 1px solid var(--line); border-radius: var(--r); padding: 12px; background: var(--panel); }
+      .card h3 { margin: 0 0 8px; font: 700 14px var(--serif); }
+      .card ul { margin: 0; padding-left: 18px; color: var(--ink2); font-size: 13px; }
+      .card li { margin-bottom: 5px; }
+      .ttl { font: 500 12px var(--mono); letter-spacing: .14em; color: var(--ink2); text-transform: uppercase; }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; }
+      .row label { font-size: 13px; }
+      .val { font: 500 12px var(--mono); color: var(--acc); }
+      .sw { position: relative; width: 46px; height: 26px; border-radius: 999px; background: var(--line); border: 1px solid var(--line); transition: background var(--dur); flex: none; }
+      .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink2); transition: transform var(--dur), background var(--dur); }
+      .sw[aria-pressed="true"] { background: color-mix(in srgb, var(--acc) 35%, transparent); }
+      .sw[aria-pressed="true"]::after { transform: translateX(20px); background: var(--acc); }
+      input[type="range"] { width: 100%; accent-color: var(--acc); height: 44px; }
+      .dock { position: absolute; right: 14px; bottom: 14px; display: flex; gap: 6px; padding: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); backdrop-filter: blur(14px); }
+      .dock button { min-height: 44px; min-width: 44px; padding: 0 12px; border: 1px solid transparent; border-radius: 8px; font-size: 13px; transition: background var(--dur); }
+      .dock button:hover { background: var(--line); }
+      .dock button[aria-pressed="true"] { background: color-mix(in srgb, var(--acc) 18%, transparent); border-color: var(--acc); color: var(--acc); }
+      @media (max-width: 1023px) { .readout { bottom: 132px; } .top { gap: 8px; padding: 0 8px; } .tools { gap: 3px; } .dock { bottom: 62px; left: 14px; right: auto; flex-wrap: wrap; } }
+      .note { font-size: 12px; color: var(--ink2); }
+      .hl { color: var(--acc2); }
+      .soon { border: 1px dashed var(--line); border-radius: var(--r); padding: 12px; color: var(--ink2); font-size: 13px; }
+      .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font: 400 12px var(--mono); color: var(--ink2); }
+      .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+      .drawer__grab { display: none; }
+      .x-btns { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+      .x-btn { min-height: 44px; min-width: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; transition: background var(--dur), border-color var(--dur); }
+      .x-btn:hover { background: var(--line); border-color: var(--acc); }
+      .x-btn[aria-pressed="true"] { background: color-mix(in srgb, var(--acc) 18%, transparent); border-color: var(--acc); color: var(--acc); }
+      @media (max-width: 1023px) {
+        .body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+        .chaps { display: flex; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 6px; gap: 6px; }
+        .chap { width: auto; white-space: nowrap; border-left: 0; border-bottom: 3px solid transparent; border-radius: 8px; padding: 6px 10px; }
+        .chap.on { border-left: 0; border-bottom-color: var(--acc); }
+        .chap b { display: inline; margin-right: 6px; }
+        .panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 72vh; border-left: 0; border-top: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(16px); border-radius: 16px 16px 0 0; transform: translateY(calc(100% - 52px)); transition: transform var(--dur); z-index: 5; }
+        .panel.open { transform: translateY(0); }
+        .chap { min-height: 44px; }
+        .drawer__grab { display: block; width: 100%; min-height: 44px; font: 500 12px var(--mono); color: var(--ink2); }
+        .prog__bars { display: none; }
+        .brand small { display: none; }
+      }
+      @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="top">
+        <div class="brand">等高线<small>格物实验室</small></div>
+        <div class="prog"><div class="prog__bars" id="bars"></div><span class="prog__n" id="count">01 / 10</span></div>
+        <div class="tools">
+          <button class="tbtn" id="prev" aria-label="上一章">←</button>
+          <button class="tbtn" id="next" aria-label="下一章">→</button>
+          <button class="tbtn" id="theme" aria-label="切换主题">T</button>
+          <button class="tbtn" id="reset" aria-label="重置视角">R</button>
+          <button class="tbtn" id="full" aria-label="全屏">F</button>
+        </div>
+      </header>
+      <div class="body">
+        <nav class="chaps" id="chaps" aria-label="章节"></nav>
+        <div class="stage" id="stage">
+          <canvas id="gl"></canvas>
+          <div class="float" id="float">
+            <button class="fold" id="fold" aria-label="折叠讲解">—</button>
+            <h2 id="f-title">认识等高线地形图</h2>
+            <div class="float__body" id="f-body"></div>
+          </div>
+          <div class="readout" id="readout">悬停地表读取海拔</div>
+          <div class="dock" id="dock" role="toolbar" aria-label="视角">
+            <button data-view="persp" aria-pressed="true">斜视</button>
+            <button data-view="top" aria-pressed="false">俯视</button>
+            <button data-view="south" aria-pressed="false">南望</button>
+            <button id="spin" aria-pressed="false">自动旋转</button>
+          </div>
+        </div>
+        <aside class="panel" id="panel">
+          <button class="drawer__grab" id="grab">控制面板 ▲</button>
+          <div id="panel-body"></div>
+        </aside>
+      </div>
+    </div>
+    <script src="hark.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script>
+      /* ---------- 内容：10 章讲解（取自 contour.txt） ---------- */
+      const CH = [
+        { t: "认识等高线地形图", p: ["等高线是地面上海拔相同的各点连成的闭合曲线。把立体的地表“压”成平面上的一圈圈线条，就能在一张纸上读出山的高低、坡的陡缓和地形的起伏。", "8 km × 8 km 虚拟山区北部三座山峰连成东西向山脉，西支流发源于西峰—主峰之间的鞍部，东支流发源于主峰—东峰之间的鞍部，在中南部汇合；东峰东南翼被断层切出一道陡崖；西南有盆地湖泊，南部还有一座孤丘。下方悬浮的是同一地区的等高线地形图。", "拖动旋转视角，滚轮缩放，右键平移；鼠标悬停地表可读取该点海拔与坡度。"] },
+        { t: "等高线的形成", p: ["用一组间隔相等的水平面去截切地表，每个水平面与地表的交线就是一条等高线；再把这些交线垂直投影到同一平面上，便得到等高线地形图。", "同线等高：同一条等高线上各点的海拔相等。同图等距：同一幅图中，相邻等高线的高差（等高距）相同。", "闭合曲线：每条等高线都是闭合的，可能在图幅外闭合。一般不相交：只有在陡崖处才会重合。"] },
+        { t: "海拔与相对高度", p: ["海拔（绝对高度）是地面某点高出海平面的垂直距离；相对高度是两个地点之间的海拔差。", "相对高度 = 海拔高 − 海拔低。"] },
+        { t: "等高距与坡度", p: ["相邻两条等高线之间的高差叫等高距。在同一幅图中，等高线越密集，坡度越陡；越稀疏，坡度越缓。", "密陡·疏缓：水平距离越短、升高同样的等高距，坡就越陡。"] },
+        { t: "山顶与盆地", p: ["两者都表现为一组闭合等高线。数值内高外低为山顶，内低外高为盆地（洼地）。", "示坡线是垂直于等高线的短线，指向海拔较低的一侧。山顶的示坡线画在闭合线外侧，盆地的画在内侧。"] },
+        { t: "山脊与山谷", p: ["等高线向同一方向弯曲时：弯曲部分凸向低处为山脊，凸向高处为山谷。", "凸低为脊 · 凸高为谷", "山脊线（金色）是分水线：雨水沿它向两侧分流。", "山谷线是集水线，河流多发育在山谷中（蓝色河流）。", "河流的流向与山谷处等高线的凸出方向相反；本图两条支流都发源于北部鞍部，自北向南流，在中南部汇合。"] },
+        { t: "鞍部", p: ["鞍部是相邻两个山顶之间相对低洼的部位，形似马鞍。在图上表现为两组闭合等高线之间的部分。", "两山夹一低：比两侧山顶低，又比两侧山谷高。"] },
+        { t: "陡崖", p: ["多条等高线在某处重合的地方是陡崖。图上常用专门的陡崖符号表示，短齿指向崖下低处。", "本图东峰的东南翼被一条东北—西南走向的断层切断，下降盘一侧沉落，留下高耸的断层崖：崖高在中段最大，向两端逐渐消失，等高线也只在中段重合。"] },
+        { t: "地形剖面图", p: ["剖面图反映沿某条直线方向的地势起伏。在地形图上确定剖面线，找出它与各等高线的交点，按比例标出交点海拔，再用平滑曲线连接。", "四步：01 定剖面线 · 02 找交点 · 03 定海拔 · 04 连曲线。"] },
+        { t: "随堂检测", p: ["用 4–6 道单选题检查等高线形成、地形部位判断、相对高度计算与剖面图绘制的掌握情况，作答后即时给出对错与解析。"] },
+      ];
+      /* ---------- 地形高度函数（后续章节复用） ---------- */
+      const SIZE = 8, HMAX = 1500, CI = 100;
+      const sq = (v) => v * v;
+      const RIV = [
+        [[3.0, 6.15], [3.1, 5.2], [3.5, 4.2], [4.0, 3.3]],
+        [[5.0, 6.1], [4.9, 5.2], [4.5, 4.2], [4.0, 3.3]],
+        [[4.0, 3.3], [3.8, 2.2], [3.95, 1.0], [3.75, 0.0]],
+      ];
+      function gauss(x, y, cx, cy, a, s) { return a * Math.exp(-(sq(x - cx) + sq(y - cy)) / (2 * s * s)); }
+      function segDist(x, y, a, b) {
+        const vx = b[0] - a[0], vy = b[1] - a[1];
+        let t = ((x - a[0]) * vx + (y - a[1]) * vy) / (vx * vx + vy * vy);
+        t = Math.max(0, Math.min(1, t));
+        return Math.hypot(a[0] + vx * t - x, a[1] + vy * t - y);
+      }
+      function riverW(x, y) {
+        let c = 0;
+        for (let i = 0; i < RIV.length; i++) {
+          const p = RIV[i]; let d = 1e9;
+          for (let k = 0; k < p.length - 1; k++) d = Math.min(d, segDist(x, y, p[k], p[k + 1]));
+          const ramp = i < 2 ? Math.min(1, Math.max(0, (p[0][1] + 0.25 - y) / 0.8)) : 1;
+          c = Math.max(c, ramp * Math.exp(-d * d / (2 * 0.24 * 0.24)));
+        }
+        return c;
+      }
+      // 海拔（米），x,y 单位 km，范围 0–8
+      function H(x, y) {
+        let h = 110 + 34 * y + 190 * Math.exp(-sq((y - 6.75) / 0.9)) * Math.exp(-sq(sq((x - 4) / 3.2)));
+        h += gauss(x, y, 2.0, 6.7, 640, 0.62) + gauss(x, y, 4.0, 6.9, 900, 0.68) + gauss(x, y, 6.0, 6.6, 740, 0.62) + gauss(x, y, 6.75, 5.5, 420, 0.8);
+        const r = Math.hypot(x - 1.7, y - 2.1);
+        h += 230 * Math.exp(-sq((r - 1.05) / 0.42)) - 60 * Math.exp(-r * r / 0.5);
+        h += gauss(x, y, 6.3, 1.5, 420, 0.45);
+        const w = riverW(x, y);
+        h += (1 - w) * (18 * Math.sin(x * 2.1 + 1.3) * Math.sin(y * 1.7 + 0.4) + 9 * Math.sin(x * 4.3 + y * 3.1) + 5 * Math.sin(x * 7.9 - y * 6.7));
+        h -= w * (60 + 0.25 * Math.max(0, h - 200));
+        const ax = 7.3, ay = 5.9, vx = 6.1 - ax, vy = 4.5 - ay, L = Math.hypot(vx, vy);
+        const t = ((x - ax) * vx + (y - ay) * vy) / (L * L), s = -((x - ax) * vy - (y - ay) * vx) / L;
+        const sm = Math.min(1, Math.max(0, (s + 0.03) / 0.06));
+        h -= 300 * Math.exp(-sq((t - 0.5) / 0.3)) * (sm * sm * (3 - 2 * sm)) * Math.exp(-sq(Math.max(s, 0)) / 1.2);
+        return Math.max(0, Math.min(HMAX, h));
+      }
+      // 坡度（度）
+      function slopeDeg(x, y) {
+        const e = 0.02;
+        const gx = (H(x + e, y) - H(x - e, y)) / (2 * e * 1000);
+        const gy = (H(x, y + e) - H(x, y - e)) / (2 * e * 1000);
+        return Math.atan(Math.hypot(gx, gy)) * 180 / Math.PI;
+      }
+      // 按海拔分层设色 绿→黄→褐→白
+      const RAMP = [[0, 46, 102, 66], [120, 86, 140, 72], [320, 150, 170, 86], [600, 186, 158, 104], [900, 150, 118, 86], [1150, 170, 150, 140], [1350, 240, 244, 250], [1500, 255, 255, 255]];
+      function colorAt(h) {
+        for (let i = 1; i < RAMP.length; i++) {
+          if (h <= RAMP[i][0]) {
+            const a = RAMP[i - 1], b = RAMP[i], t = (h - a[0]) / (b[0] - a[0]);
+            return [(a[1] + (b[1] - a[1]) * t) / 255, (a[2] + (b[2] - a[2]) * t) / 255, (a[3] + (b[3] - a[3]) * t) / 255];
+          }
+        }
+        return [1, 1, 1];
+      }
+      /* ---------- 等高线提取（marching squares，可复用） ---------- */
+      const GRIDS = {};
+      function heightGrid(n) {
+        if (GRIDS[n]) return GRIDS[n];
+        const st = SIZE / n, g = [];
+        for (let j = 0; j <= n; j++) { const row = new Float32Array(n + 1); for (let i = 0; i <= n; i++) row[i] = H(i * st, j * st); g.push(row); }
+        return (GRIDS[n] = g);
+      }
+      function contourSegs(level, n) {
+        n = n || 180; const st = SIZE / n, out = [];
+        const grid = heightGrid(n);
+        const ip = (x1, v1, x2, v2) => x1 + (x2 - x1) * ((level - v1) / (v2 - v1));
+        for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+          const x0 = i * st, y0 = j * st, x1 = x0 + st, y1 = y0 + st;
+          const a = grid[j][i], b = grid[j][i + 1], c = grid[j + 1][i + 1], d = grid[j + 1][i];
+          const idx = (a > level) | ((b > level) << 1) | ((c > level) << 2) | ((d > level) << 3);
+          if (idx === 0 || idx === 15) continue;
+          const pt = { 0: [x0, ip(y0, a, y1, d)], 1: [ip(x0, a, x1, b), y0], 2: [x1, ip(y0, b, y1, c)], 3: [ip(x0, d, x1, c), y1] };
+          const T = { 1: [[0, 1]], 2: [[1, 2]], 3: [[0, 2]], 4: [[2, 3]], 5: [[0, 1], [2, 3]], 6: [[1, 3]], 7: [[0, 3]], 8: [[0, 3]], 9: [[1, 3]], 10: [[0, 3], [1, 2]], 11: [[2, 3]], 12: [[0, 2]], 13: [[1, 2]], 14: [[0, 1]] }[idx];
+          T.forEach((e) => out.push([pt[e[0]], pt[e[1]]]));
+        }
+        return out;
+      }
+    </script>
+    <script>
+      /* ---------- 外壳：章节、主题、键盘、hash ---------- */
+      const el = (id) => document.getElementById(id);
+      let cur = 0;
+      const chapsEl = el("chaps"), barsEl = el("bars");
+      CH.forEach((c, i) => {
+        const b = document.createElement("button");
+        b.className = "chap"; b.innerHTML = "<b>" + String(i + 1).padStart(2, "0") + "</b><span>" + c.t + "</span>";
+        b.onclick = () => go(i); chapsEl.appendChild(b);
+        const s = document.createElement("i"); barsEl.appendChild(s);
+      });
+      function go(i) {
+        cur = Math.max(0, Math.min(CH.length - 1, i));
+        [].forEach.call(chapsEl.children, (b, k) => b.classList.toggle("on", k === cur));
+        [].forEach.call(barsEl.children, (b, k) => b.classList.toggle("on", k <= cur));
+        el("count").textContent = String(cur + 1).padStart(2, "0") + " / " + String(CH.length).padStart(2, "0");
+        el("f-title").textContent = CH[cur].t;
+        el("f-body").innerHTML = (cur === 0 ? '<p class="float__src">教材：湘教版 必修第一册·第二章 第一节 地形图的判读（等高线地形图）</p>' : cur === 1 ? '<p class="float__src">教材：湘教版 必修第一册·地理实践 等高线地形图的判读</p>' : cur >= 2 && cur <= 8 ? '<p class="float__src">教材：湘教版 必修第一册·地理实践 等高线地形图的判读</p>' : cur === 9 ? '<p class="float__src">教材：湘教版 必修第一册·地理实践 等高线地形图的判读（综合）</p>' : "") + CH[cur].p.map((t) => "<p>" + t + "</p>").join("");
+        el("panel-body").innerHTML = cur === 0 ? PANEL1 : cur === 1 && window.C2 ? C2.panel : cur === 2 && window.C3 ? C3.panel : cur === 3 && window.C4 ? C4.panel : cur === 4 && window.C5 ? C5.panel : cur === 5 && window.C6 ? C6.panel : cur === 6 && window.C7 ? C7.panel : cur === 7 && window.C8 ? C8.panel : cur === 8 && window.C9 ? C9.panel : cur === 9 && window.C10 ? C10.panel : PANELX(cur);
+        if (cur === 0) bindPanel1();
+        if (window.C5) C5.enter(cur === 4);
+        if (window.C2) C2.enter(cur === 1);
+        if (window.C3) C3.enter(cur === 2);
+        if (window.C4) C4.enter(cur === 3);
+        if (window.C6) C6.enter(cur === 5);
+        if (window.C7) C7.enter(cur === 6);
+        if (window.C8) C8.enter(cur === 7);
+        if (window.C9) C9.enter(cur === 8);
+        if (window.C10) C10.enter(cur === 9);
+        history.replaceState(null, "", "#" + (cur + 1));
+        el("readout").style.display = cur === 0 ? "" : "none";
+        setLabels(cur === 0 && showLabels);
+      }
+      el("prev").onclick = () => go(cur - 1);
+      el("next").onclick = () => go(cur + 1);
+      el("theme").onclick = () => {
+        const n = document.documentElement.dataset.skin === "night" ? "paper" : "night";
+        document.documentElement.dataset.skin = n;
+        try { localStorage.setItem("gw-skin", n); } catch (e) {}
+        applySkin();
+      };
+      el("full").onclick = () => {
+        const d = document, r = d.documentElement;
+        try {
+          const p = d.fullscreenElement ? d.exitFullscreen() : (r.requestFullscreen || r.webkitRequestFullscreen || (() => null)).call(r);
+          if (p && p.catch) p.catch(() => {});
+        } catch (e) {}
+        el("full").setAttribute("aria-pressed", String(!d.fullscreenElement));
+      };
+      el("fold").onclick = () => el("float").classList.toggle("min");
+      el("grab").onclick = () => el("panel").classList.toggle("open");
+      document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "INPUT") return;
+        if (e.key === "ArrowLeft") go(cur - 1);
+        else if (e.key === "ArrowRight") go(cur + 1);
+        else if (e.key.toLowerCase() === "t") el("theme").click();
+        else if (e.key.toLowerCase() === "r") el("reset").click();
+        else if (e.key.toLowerCase() === "f") el("full").click();
+      });
+      const PANEL1 = [
+        '<p class="ttl">第 01 章 · 控件</p>',
+        '<div class="card"><div class="row"><label for="sw-lab">地物标注</label><button class="sw" id="sw-lab" aria-pressed="true" aria-label="地物标注"></button></div>',
+        '<div class="row"><label for="sw-map">悬浮等高线地形图</label><button class="sw" id="sw-map" aria-pressed="true" aria-label="等高线图"></button></div>',
+        '<div class="row"><label for="ex">垂直夸张 <span class="val" id="ex-val">×2.0</span></label></div><input type="range" id="ex" min="1" max="4" step="0.1" value="2" aria-label="垂直夸张" />',
+        '<p class="note">拖动旋转 · 滚轮缩放 · 右键（或双指）平移 · 悬停读数</p></div>',
+        '<div class="card"><h3>要点</h3><ul><li>等高线＝海拔相同各点连成的<span class="hl">闭合曲线</span>。</li><li>本图等高距 <span class="hl">100 m</span>，海拔 0–1500 m。</li><li>分层设色：绿（低）→黄→褐→白（高）。</li><li>地形部位：山峰·鞍部·山脊·山谷·陡崖·盆地。</li><li><b>高考链接：</b>等高线地形图是浙江地理选考读图题的基础，常考地形部位判断、相对高度计算、河流流向与剖面图；易错：等高线越密坡越陡，但要在同一等高距下比较。</li></ul></div>',
+        '<div class="card"><h3>图例</h3><div class="legend"><span><i style="background:#2e6642"></i>0–300 m</span><span><i style="background:#baa06a"></i>300–900 m</span><span><i style="background:#96765a"></i>900–1200 m</span><span><i style="background:#f0f4fa"></i>1200 m 以上</span><span><i style="background:#5aa9e6"></i>河流湖泊</span><span><i style="background:#ef6461"></i>断层陡崖</span></div></div>',
+      ].join("");
+      const PANELX = (i) => [
+        '<p class="ttl">第 ' + String(i + 1).padStart(2, "0") + " 章 · 讲解</p>",
+        '<div class="card"><h3>' + CH[i].t + "</h3>" + CH[i].p.map((t) => '<p class="note">' + t + "</p>").join("") + "</div>",
+        '<div class="soon">交互即将上线：本章专属模拟正在制作中。当前可在舞台上继续旋转、缩放观察同一座虚拟山区。</div>',
+      ].join("");
+    </script>
+    <script>
+      /* ---------- 三维舞台 ---------- */
+      const canvas = el("gl"), stage = el("stage");
+      let renderer = null;
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      } catch (e) {
+        renderer = null;
+        el("readout").textContent = "当前浏览器不支持 WebGL，三维舞台无法显示";
+      }
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+      const SC = 1, VSCALE0 = 2; // 1 km = 1 单位；高度 m → km × 夸张
+      let exag = 2;
+      const world = new THREE.Group(); scene.add(world);
+      scene.add(new THREE.HemisphereLight(0xdfe9ff, 0x2a3346, 0.85));
+      const sun = new THREE.DirectionalLight(0xffffff, 0.85); sun.position.set(-6, 10, 6); scene.add(sun);
+      // 地形网格
+      const N = 160;
+      const geo = new THREE.PlaneGeometry(SIZE, SIZE, N, N);
+      geo.rotateX(-Math.PI / 2);
+      const pos = geo.attributes.position, colors = new Float32Array(pos.count * 3);
+      const baseH = new Float32Array(pos.count);
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i) + SIZE / 2, z = pos.getZ(i) + SIZE / 2;
+        const h = H(x, SIZE - z); baseH[i] = h;
+        pos.setY(i, (h / 1000) * exag);
+        const c = colorAt(h); colors[i * 3] = c[0]; colors[i * 3 + 1] = c[1]; colors[i * 3 + 2] = c[2];
+      }
+      geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+      geo.computeVertexNormals();
+      const terrain = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: false }));
+      world.add(terrain);
+      // 水体：湖泊 + 河流带
+      const lake = new THREE.Mesh(new THREE.CircleGeometry(0.62, 48), new THREE.MeshBasicMaterial({ color: 0x4a93d6, transparent: true, opacity: 0.8 }));
+      lake.rotation.x = -Math.PI / 2; lake.position.set(1.7 - 4, 0, 4 - 2.1);
+      world.add(lake);
+      function riverLine(pts, y) {
+        const g = new THREE.BufferGeometry(), v = [];
+        for (let k = 0; k < pts.length - 1; k++) for (let u = 0; u <= 1.0001; u += 0.05) {
+          const x = pts[k][0] + (pts[k + 1][0] - pts[k][0]) * u, z = pts[k][1] + (pts[k + 1][1] - pts[k][1]) * u;
+          v.push(x - 4, (H(x, z) / 1000) * exag + 0.02, 4 - z);
+        }
+        g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+        return new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0x5aa9e6 }));
+      }
+      const rivers = new THREE.Group(); RIV.forEach((p) => rivers.add(riverLine(p))); world.add(rivers);
+      // 悬浮等高线地形图（平面投影，等高距 100 m）
+      const mapG = new THREE.Group(); mapG.position.y = -1.5; world.add(mapG);
+      const mapPlane = new THREE.Mesh(new THREE.PlaneGeometry(SIZE, SIZE), new THREE.MeshBasicMaterial({ color: 0xf3efe4, transparent: true, opacity: 0.92, side: THREE.DoubleSide }));
+      mapPlane.rotation.x = -Math.PI / 2; mapG.add(mapPlane);
+      for (let lv = CI; lv < HMAX; lv += CI) {
+        const segs = contourSegs(lv), v = [];
+        segs.forEach((s) => { v.push(s[0][0] - 4, 0.004, 4 - s[0][1], s[1][0] - 4, 0.004, 4 - s[1][1]); });
+        const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+        const idx = lv / CI, major = idx % 5 === 0;
+        mapG.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: major ? 0x6b4a2a : 0x9a7a52, transparent: true, opacity: major ? 0.95 : 0.6 })));
+      }
+      // 地图上的河流与湖泊
+      RIV.forEach((p) => { const g2 = riverLine(p).geometry; const a = g2.attributes.position.array; for (let i = 1; i < a.length; i += 3) a[i] = 0.008; mapG.add(new THREE.Line(g2, new THREE.LineBasicMaterial({ color: 0x3f86c6 }))); });
+      const lake2 = lake.clone(); lake2.position.y = 0.006; lake2.scale.setScalar(0.75); mapG.add(lake2);
+      /* 标注 */
+      const MARKS = [
+        { n: "西峰", x: 2.0, y: 6.7, k: "peak" }, { n: "主峰", x: 4.0, y: 6.9, k: "peak" }, { n: "东峰", x: 6.0, y: 6.6, k: "peak" },
+        { n: "鞍部", x: 3.0, y: 6.84, k: "saddle" }, { n: "鞍部", x: 5.0, y: 6.74, k: "saddle" },
+        { n: "西支流", x: 3.2, y: 5.0, k: "water" }, { n: "东支流", x: 4.9, y: 5.0, k: "water" }, { n: "汇合口", x: 4.0, y: 3.3, k: "water" },
+        { n: "断层陡崖", x: 6.8, y: 5.3, k: "cliff" }, { n: "西南盆地·湖泊", x: 1.7, y: 2.1, k: "water" }, { n: "南部孤丘", x: 6.3, y: 1.5, k: "peak" },
+      ];
+      MARKS.forEach((m) => { if (m.k === "peak" || m.k === "saddle") m.n += " " + Math.round(H(m.x, m.y)) + " m"; });
+      let showLabels = true;
+      const labEls = MARKS.map((m) => {
+        const d = document.createElement("div"); d.className = "lab"; d.dataset.kind = m.k; d.textContent = m.n;
+        stage.appendChild(d); return d;
+      });
+      function setLabels(on) { labEls.forEach((d) => (d.style.display = on ? "" : "none")); }
+      /* 轨道控制 */
+      const target = new THREE.Vector3(0, 0, 0);
+      let az = -0.6, pol = 1.0, dist = 13;
+      function updateCam() {
+        pol = Math.max(0.12, Math.min(1.5, pol)); dist = Math.max(3, Math.min(32, dist));
+        camera.position.set(target.x + dist * Math.sin(pol) * Math.sin(az), target.y + dist * Math.cos(pol), target.z + dist * Math.sin(pol) * Math.cos(az));
+        camera.lookAt(target);
+      }
+      const VIEWS = { persp: [-0.6, 1.0, 13], top: [0, 0.12, 14], south: [0, 1.25, 12] };
+      let spin = false;
+      function setView(k) {
+        const v = VIEWS[k]; az = v[0]; pol = v[1]; dist = v[2]; target.set(0, 0.2, k === "persp" ? 0.6 : 0); updateCam();
+        el("dock").querySelectorAll("[data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === k)));
+      }
+      function resetView() { setView("persp"); }
+      el("reset").onclick = resetView;
+      el("dock").querySelectorAll("[data-view]").forEach((b) => (b.onclick = () => setView(b.dataset.view)));
+      el("spin").onclick = () => { spin = !spin; el("spin").setAttribute("aria-pressed", String(spin)); };
+      let drag = null;
+      canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+      canvas.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, pan: e.button === 2 || e.shiftKey }; canvas.setPointerCapture(e.pointerId); });
+      canvas.addEventListener("pointerup", (e) => {
+        if (drag && cur === 0 && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 6) hover(e);
+        drag = null;
+      });
+      canvas.addEventListener("pointermove", (e) => {
+        if (drag) {
+          const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
+          if (drag.pan) {
+            const s = dist * 0.0015;
+            target.x -= (dx * Math.cos(az) - dy * Math.sin(az) * Math.cos(pol)) * s;
+            target.z += (dx * Math.sin(az) + dy * Math.cos(az) * Math.cos(pol)) * s;
+          } else { az -= dx * 0.006; pol -= dy * 0.006; }
+          updateCam();
+        } else if (cur === 0) hover(e);
+      });
+      canvas.addEventListener("wheel", (e) => { e.preventDefault(); dist *= Math.exp(e.deltaY * 0.0012); updateCam(); }, { passive: false });
+      let pinch = 0;
+      canvas.addEventListener("touchmove", (e) => {
+        if (e.touches.length === 2) {
+          const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+          if (pinch) { dist *= pinch / d; updateCam(); } pinch = d; drag = null;
+        }
+      }, { passive: true });
+      canvas.addEventListener("touchend", () => (pinch = 0));
+      /* 悬停读数 */
+      const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+      function hover(e) {
+        const r = canvas.getBoundingClientRect();
+        ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+        ray.setFromCamera(ndc, camera);
+        const hit = ray.intersectObject(terrain)[0];
+        const out = el("readout");
+        if (!hit) { out.textContent = "悬停地表读取海拔"; return; }
+        const x = hit.point.x + 4, y = 4 - hit.point.z;
+        out.innerHTML = "海拔 <b>" + Math.round(H(x, y)) + " m</b> · 坡度 <b>" + slopeDeg(x, y).toFixed(1) + "°</b> · 坐标 " + x.toFixed(2) + ", " + y.toFixed(2) + " km";
+      }
+      /* 面板绑定 */
+      function bindPanel1() {
+        const sl = el("sw-lab"), sm = el("sw-map"), ex = el("ex");
+        sl.setAttribute("aria-pressed", String(showLabels)); setLabels(showLabels);
+        sl.onclick = () => { showLabels = !showLabels; sl.setAttribute("aria-pressed", String(showLabels)); setLabels(showLabels); };
+        sm.setAttribute("aria-pressed", String(mapG.visible));
+        sm.onclick = () => { mapG.visible = !mapG.visible; sm.setAttribute("aria-pressed", String(mapG.visible)); };
+        ex.value = exag; el("ex-val").textContent = "×" + Number(exag).toFixed(1);
+        ex.oninput = () => { exag = +ex.value; el("ex-val").textContent = "×" + exag.toFixed(1); applyExag(); };
+      }
+      function applyExag() {
+        for (let i = 0; i < pos.count; i++) pos.setY(i, (baseH[i] / 1000) * exag);
+        pos.needsUpdate = true; geo.computeVertexNormals();
+        rivers.children.forEach((l, i) => {
+          const a = l.geometry.attributes.position.array, p = RIV[i]; let k = 0;
+          for (let s = 0; s < p.length - 1; s++) for (let u = 0; u <= 1.0001; u += 0.05) {
+            const x = p[s][0] + (p[s + 1][0] - p[s][0]) * u, z = p[s][1] + (p[s + 1][1] - p[s][1]) * u;
+            a[k * 3 + 1] = (H(x, z) / 1000) * exag + 0.02; k++;
+          }
+          l.geometry.attributes.position.needsUpdate = true;
+        });
+        lake.position.y = 0.185 * exag;
+      }
+      /* 皮肤 */
+      function applySkin() {
+        const paper = document.documentElement.dataset.skin === "paper";
+        if (renderer) renderer.setClearColor(paper ? 0xf6f3ec : 0x0e1420, 1);
+        scene.fog = new THREE.Fog(paper ? 0xf6f3ec : 0x0e1420, 30, 70);
+      }
+      try { const s = localStorage.getItem("gw-skin"); if (s) document.documentElement.dataset.skin = s; } catch (e) {}
+      /* 循环 */
+      function resize() {
+        const w = stage.clientWidth, h = stage.clientHeight;
+        if (renderer) renderer.setSize(w, h, false);
+        camera.aspect = w / h; camera.updateProjectionMatrix();
+      }
+      addEventListener("resize", resize);
+      const v3 = new THREE.Vector3();
+      function tick() {
+        if (spin && !drag) { az += 0.0025; updateCam(); }
+        const r = canvas.getBoundingClientRect();
+        labEls.forEach((d, i) => {
+          if (d.style.display === "none") return;
+          const m = MARKS[i];
+          v3.set(m.x - 4, (H(m.x, m.y) / 1000) * exag + 0.12, 4 - m.y).project(camera);
+          const vis = v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05;
+          d.style.opacity = vis ? 1 : 0;
+          d.style.left = ((v3.x * 0.5 + 0.5) * r.width) + "px";
+          d.style.top = ((-v3.y * 0.5 + 0.5) * r.height) + "px";
+        });
+        if (renderer) renderer.render(scene, camera);
+        requestAnimationFrame(tick);
+      }
+      applySkin(); resize(); resetView(); applyExag();
+      go(Math.max(0, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+      tick();
+    </script>
+    <script>
+      /* ---------- 第 02 章：等高线的形成（复用 H / contourSegs / 舞台） ---------- */
+      (function () {
+        const Y = (h) => (h / 1000) * exag, MAPY = -1.5 + 0.012, ease = (t) => t * t * (3 - 2 * t);
+        const g2 = new THREE.Group(); g2.visible = false; world.add(g2);
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(SIZE + 0.6, SIZE + 0.6), new THREE.MeshBasicMaterial({ color: 0x7fd3ff, transparent: true, opacity: 0.28, side: THREE.DoubleSide, depthWrite: false }));
+        plane.rotation.x = -Math.PI / 2; g2.add(plane);
+        const layers = new THREE.Group(), fx = new THREE.Group(); g2.add(layers); g2.add(fx);
+        let level = 500, mode = "", proj = 0, layerOn = {}, curLine = null, on = false, last = 0, labs = [];
+        const pool = [];
+        function segLine(lv, color, n) {
+          const v = [];
+          contourSegs(lv, n).forEach((s) => v.push(s[0][0] - 4, 0, 4 - s[0][1], s[1][0] - 4, 0, 4 - s[1][1]));
+          const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+          return new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: color }));
+        }
+        const drop = (o) => { o.parent.remove(o); if (o.geometry) o.geometry.dispose(); };
+        const layerY = (lv) => Y(lv) + 0.02 + (MAPY - Y(lv) - 0.02) * ease(proj);
+        const st = (t) => { const s = el("c2-st"); if (s) s.textContent = t; };
+        const msg = (t) => { const s = el("c2-msg"); if (s) s.textContent = t; };
+        function setLevel(h) {
+          level = Math.max(0, Math.min(HMAX, h));
+          if (curLine) drop(curLine);
+          curLine = segLine(level, 0xffd166, 120); curLine.position.y = Y(level) + 0.025; g2.add(curLine);
+          plane.position.y = Y(level);
+          const s = el("c2-h"); if (s) { s.value = level; el("c2-hv").textContent = Math.round(level) + " m"; }
+        }
+        function showCut(v) { plane.visible = v; if (curLine) curLine.visible = v; }
+        function addLayer(lv) {
+          if (layerOn[lv]) return;
+          const l = segLine(lv, 0x2ec4b6); l.userData.lv = lv; l.position.y = layerY(lv); layers.add(l); layerOn[lv] = l;
+        }
+        function allLayers() { for (let lv = CI; lv < HMAX; lv += CI) addLayer(lv); }
+        function clearLayers() { layers.children.slice().forEach(drop); layerOn = {}; proj = 0; }
+        function clearFx() {
+          fx.children.slice().forEach(drop); labs = [];
+          pool.forEach((d) => (d.style.display = "none"));
+          document.querySelectorAll("#c2-tags .x-btn").forEach((b) => b.setAttribute("aria-pressed", "false"));
+        }
+        const lab = (x, y, h, t, wy) => labs.push({ x: x, y: y, h: h, t: t, wy: wy });
+        function hiLine(lv, color) {
+          const a = segLine(lv, color); a.position.y = Y(lv) + 0.035; fx.add(a);
+          const b = segLine(lv, color); b.position.y = MAPY + 0.004; fx.add(b);
+        }
+        function dotAt(x, y, h) {
+          const s = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffd166 }));
+          s.position.set(x - 4, Y(h) + 0.04, 4 - y); fx.add(s);
+        }
+        /* 四个特征 */
+        const FEAT = {
+          same: () => {
+            const lv = 800, segs = contourSegs(lv); hiLine(lv, 0xffd166);
+            [0.12, 0.45, 0.78].forEach((f) => { const p = segs[Math.floor(segs.length * f)][0]; dotAt(p[0], p[1], lv); lab(p[0], p[1], lv, "海拔 " + lv + " m"); });
+            msg("同线等高：在这条 800 m 等高线上任取 3 个点，海拔都是 800 m。");
+          },
+          equal: () => {
+            const lvs = [400, 500, 600, 700], cross = {}, x = 2;
+            for (let y = 4.3; y < 6.7; y += 0.005) lvs.forEach((lv) => { if (!cross[lv] && H(x, y) >= lv) cross[lv] = y; });
+            lvs.forEach((lv, i) => {
+              hiLine(lv, 0xf2b544); dotAt(x, cross[lv], lv); lab(x, cross[lv], lv, lv + " m");
+              if (i) lab(x, (cross[lv] + cross[lvs[i - 1]]) / 2, 0, "高差 100 m", MAPY + 0.1);
+            });
+            msg("同图等距：沿西峰南坡，400、500、600、700 m 相邻两线的高差都是 100 m——本图等高距 100 m。");
+          },
+          closed: () => {
+            const lv = 600; hiLine(lv, 0xffd166);
+            const xs = [];
+            contourSegs(lv).forEach((s) => s.forEach((p) => { if (p[1] > SIZE - 1e-6) xs.push(p[0]); }));
+            const a = Math.min.apply(null, xs), b = Math.max.apply(null, xs), v = [];
+            for (let i = 0; i <= 40; i++) { const t = i / 40; v.push(a + (b - a) * t - 4, MAPY + 0.004, 4 - (SIZE + 0.6 * Math.sin(Math.PI * t))); }
+            const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+            const d = new THREE.Line(g, new THREE.LineDashedMaterial({ color: 0xffd166, dashSize: 0.08, gapSize: 0.06 }));
+            d.computeLineDistances(); fx.add(d);
+            lab((a + b) / 2, SIZE + 0.75, 0, "在图幅外闭合", MAPY + 0.1);
+            lab((a + b) / 2, SIZE - 0.3, lv, "600 m 线伸出北边图框");
+            msg("闭合曲线：这条 600 m 等高线在图内两端都碰到北边图框，虚线是它在图幅外的闭合部分。");
+          },
+          cross: () => {
+            allLayers(); layers.children.forEach((l) => (l.position.y = layerY(l.userData.lv)));
+            const x = 6.8, y = 5.3, h = H(x, y);
+            lab(x, y, h, "陡崖：多条等高线在此重合");
+            target.set(x - 4, Y(h), 4 - y); az = 0.75; pol = 0.95; dist = 5; updateCam();
+            msg("一般不相交：等高线互不相交，只在陡崖处重合。镜头已飞到东峰东南翼的断层陡崖。");
+          },
+        };
+        const TAGS = [["same", "同线等高"], ["equal", "同图等距"], ["closed", "闭合曲线"], ["cross", "一般不相交"]];
+        /* 面板 */
+        const panel = [
+          '<p class="ttl">第 02 章 · 交互</p>',
+          '<div class="card"><div class="row"><label for="c2-h">水平截面高度 0–1500 m</label><span class="val" id="c2-hv">500 m</span></div>',
+          '<input type="range" id="c2-h" min="0" max="1500" step="10" value="500" aria-label="水平截面高度" />',
+          '<div class="x-btns"><button class="x-btn" id="c2-cut">逐层切割</button><button class="x-btn" id="c2-proj">垂直投影</button><button class="x-btn" id="c2-rst">重置</button></div>',
+          '<p class="note" id="c2-st">拖动滑块升降半透明水平面，亮黄线就是它与地表的交线——一条等高线。</p></div>',
+          '<div class="card"><h3>等高线的四个特征</h3><div class="x-btns" id="c2-tags">',
+          TAGS.map((t) => '<button class="x-btn" data-f="' + t[0] + '" aria-pressed="false">' + t[1] + "</button>").join(""),
+          '</div><p class="note" id="c2-msg">点一个特征，在舞台上看它。</p></div>',
+          '<div class="card"><h3>要点</h3><ul>',
+          '<li>间隔相等的水平面截切地表，交线就是<span class="hl">等高线</span>；交线垂直投影到同一平面，得到等高线地形图。</li>',
+          '<li>同线等高 · 同图等距（本图 <span class="hl">100 m</span>）。</li>',
+          '<li>闭合曲线（可能在图幅外闭合）· 一般不相交（陡崖处重合）。</li>',
+          '<li><b>高考链接：</b>等高线特征是判读一切地形部位和剖面图的基础；易错：等高线在图内不闭合不代表不闭合，可能在图幅外闭合。</li></ul></div>',
+        ].join("");
+        function bind() {
+          el("c2-h").oninput = (e) => {
+            if (mode === "proj") return;
+            mode = ""; showCut(true); setLevel(+e.target.value);
+            st("截面高度 " + Math.round(level) + " m：亮黄线上各点海拔都是 " + Math.round(level) + " m。");
+          };
+          el("c2-cut").onclick = () => {
+            clearFx(); clearLayers(); showCut(true); setLevel(0); mode = "cut";
+            st("从 0 m 起每升高 100 m 切一刀，每层留下一条交线……");
+          };
+          el("c2-proj").onclick = () => {
+            if (mode === "proj") return;
+            clearFx(); if (!layers.children.length) allLayers();
+            proj = 0; mode = "proj"; mapG.visible = true; showCut(false);
+            st("把各层交线垂直落到下方平面上……");
+          };
+          el("c2-rst").onclick = () => { mode = ""; clearFx(); clearLayers(); showCut(true); setLevel(500); st("已重置。拖动滑块或点「逐层切割」。"); };
+          document.querySelectorAll("#c2-tags .x-btn").forEach((b) => (b.onclick = () => {
+            clearFx(); b.setAttribute("aria-pressed", "true"); FEAT[b.dataset.f]();
+          }));
+          setLevel(level);
+        }
+        /* 动画循环 */
+        const v3b = new THREE.Vector3();
+        function loop(t) {
+          if (!on) return;
+          const dt = Math.min(0.05, (t - (last || t)) / 1000); last = t;
+          if (mode === "cut") {
+            const nl = Math.min(HMAX, level + dt * 260);
+            for (let lv = Math.floor(level / CI) * CI + CI; lv <= nl; lv += CI) if (lv >= CI && lv < HMAX) addLayer(lv);
+            setLevel(nl);
+            if (nl >= HMAX) { mode = ""; st("切割完成：14 个水平面留下 100–1400 m 共一组等高线。再点「垂直投影」。"); }
+          } else if (mode === "proj") {
+            proj = Math.min(1, proj + dt / 2.4);
+            layers.children.forEach((l) => (l.position.y = layerY(l.userData.lv)));
+            if (proj >= 1) { mode = ""; st("投影完成：3D 交线落到平面上，与下方等高线地形图完全重合。"); }
+          }
+          const r = canvas.getBoundingClientRect();
+          labs.forEach((L, i) => {
+            let d = pool[i];
+            if (!d) { d = document.createElement("div"); d.className = "lab"; stage.appendChild(d); pool.push(d); }
+            d.style.display = ""; d.textContent = L.t;
+            v3b.set(L.x - 4, L.wy != null ? L.wy : Y(L.h) + 0.18, 4 - L.y).project(camera);
+            d.style.opacity = v3b.z < 1 && Math.abs(v3b.x) < 1.05 && Math.abs(v3b.y) < 1.05 ? 1 : 0;
+            d.style.left = (v3b.x * 0.5 + 0.5) * r.width + "px";
+            d.style.top = (-v3b.y * 0.5 + 0.5) * r.height + "px";
+          });
+          requestAnimationFrame(loop);
+        }
+        window.C2 = {
+          panel: panel,
+          enter: (active) => {
+            g2.visible = active;
+            if (!active) { on = false; mode = ""; clearFx(); return; }
+            mapG.visible = true; mode = ""; clearFx(); showCut(true);
+            layers.children.forEach((l) => (l.position.y = layerY(l.userData.lv)));
+            bind();
+            if (!on) { on = true; last = 0; requestAnimationFrame(loop); }
+          },
+        };
+        if (cur === 1) go(1);
+      })();
+    </script>
+    <script>
+      /* ---------- 第 03 章：海拔与相对高度（复用 H / 舞台 / 平面图） ---------- */
+      (function () {
+        const Y = (h) => (h / 1000) * exag, MAPY = -1.5 + 0.012, COL = [0xf2b544, 0xef6461];
+        const g3 = new THREE.Group(); g3.visible = false; world.add(g3);
+        const sea = new THREE.Mesh(new THREE.PlaneGeometry(SIZE + 1, SIZE + 1), new THREE.MeshBasicMaterial({ color: 0x3a8fe0, transparent: true, opacity: 0.3, side: THREE.DoubleSide, depthWrite: false }));
+        sea.rotation.x = -Math.PI / 2; sea.position.y = 0.002; g3.add(sea);
+        const fx = new THREE.Group(); g3.add(fx);
+        let pts = [], labs = [], on = false, down = null;
+        const pool = [];
+        function line(a, b, color, dashed) {
+          const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a[0], a[1], a[2]), new THREE.Vector3(b[0], b[1], b[2])]);
+          const m = dashed
+            ? new THREE.LineDashedMaterial({ color: color, dashSize: 0.06, gapSize: 0.05, depthTest: false, transparent: true })
+            : new THREE.LineBasicMaterial({ color: color, depthTest: false, transparent: true });
+          const l = new THREE.Line(g, m); if (dashed) l.computeLineDistances(); l.renderOrder = 5; fx.add(l);
+        }
+        function flag(x, z, y, color) {
+          line([x, y, z], [x, y + 0.4, z], 0xffffff);
+          const g = new THREE.BufferGeometry();
+          g.setAttribute("position", new THREE.Float32BufferAttribute([x, y + 0.4, z, x, y + 0.26, z, x + 0.22, y + 0.33, z], 3));
+          const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide, depthTest: false }));
+          m.renderOrder = 6; fx.add(m);
+        }
+        const band = (h) => { const lo = Math.floor(h / CI) * CI; return "位于 " + lo + " 与 " + (lo + CI) + " m 等高线之间"; };
+        const set = (id, t) => { const s = el(id); if (s) s.textContent = t; };
+        function draw() {
+          fx.children.slice().forEach((o) => { fx.remove(o); o.geometry.dispose(); }); labs = [];
+          pts.forEach((p, i) => {
+            const X = p.x - 4, Z = 4 - p.y, n = "AB"[i];
+            flag(X, Z, Y(p.h), COL[i]); flag(X, Z, MAPY, COL[i]);
+            line([X, 0, Z], [X, Y(p.h), Z], 0x7fd3ff, true);
+            labs.push({ p: [X, Y(p.h) + 0.55, Z], t: n + " · " + p.h + " m", k: "" });
+            labs.push({ p: [X, Y(p.h) / 2, Z], t: "海拔 " + n, k: "water" });
+            labs.push({ p: [X, MAPY + 0.55, Z], t: n, k: "" });
+          });
+          set("c3-a", pts[0] ? pts[0].h + " m" : "—");
+          set("c3-b", pts[1] ? pts[1].h + " m" : "—");
+          set("c3-ab", pts[0] ? "A " + band(pts[0].h) + (pts[1] ? "；B " + band(pts[1].h) : "") + "。" : "");
+          if (pts.length === 2) {
+            const hi = pts[0].h >= pts[1].h ? pts[0] : pts[1], lo = hi === pts[0] ? pts[1] : pts[0];
+            const hX = hi.x - 4, hZ = 4 - hi.y, lX = lo.x - 4, lZ = 4 - lo.y, d = hi.h - lo.h;
+            line([hX, Y(hi.h), hZ], [lX, Y(hi.h), lZ], 0xffffff, true);
+            line([lX, Y(lo.h), lZ], [lX, Y(hi.h), lZ], 0xffd166);
+            labs.push({ p: [lX, (Y(lo.h) + Y(hi.h)) / 2, lZ], t: "相对高度 = " + hi.h + " − " + lo.h + " = " + d + " m", k: "saddle" });
+            set("c3-d", d + " m");
+            set("c3-f", "相对高度 = 海拔高 − 海拔低 = " + hi.h + " − " + lo.h + " = " + d + " m（" + (hi === pts[0] ? "A" : "B") + " 高）");
+            set("c3-st", "完成。再点一次地形可重新选 A。");
+          } else {
+            set("c3-d", "—"); set("c3-f", "相对高度 = 海拔高 − 海拔低");
+            set("c3-st", pts.length ? "再点一点作为 B。" : "在 3D 地形或下方平面等高线图上依次点击 A、B 两点。");
+          }
+        }
+        function pick(e) {
+          const r = canvas.getBoundingClientRect();
+          ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+          ray.setFromCamera(ndc, camera);
+          const hit = ray.intersectObjects(mapG.visible ? [terrain, mapPlane] : [terrain])[0];
+          if (!hit) return;
+          const x = Math.max(0, Math.min(SIZE, hit.point.x + 4)), y = Math.max(0, Math.min(SIZE, 4 - hit.point.z));
+          if (pts.length === 2) pts = [];
+          pts.push({ x: x, y: y, h: Math.round(H(x, y)) }); draw();
+        }
+        canvas.addEventListener("pointerdown", (e) => { down = on && e.button === 0 && !e.shiftKey ? [e.clientX, e.clientY] : null; });
+        canvas.addEventListener("pointerup", (e) => { if (on && down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 6) pick(e); down = null; });
+        const panel = [
+          '<p class="ttl">第 03 章 · 交互</p>',
+          '<div class="card"><h3>点两点，算相对高度</h3><p class="note" id="c3-st"></p>',
+          '<div class="row"><label>A 点海拔</label><span class="val" id="c3-a">—</span></div>',
+          '<div class="row"><label>B 点海拔</label><span class="val" id="c3-b">—</span></div>',
+          '<div class="row"><label>相对高度</label><span class="val" id="c3-d">—</span></div>',
+          '<p class="note" id="c3-f"></p><p class="note" id="c3-ab"></p>',
+          '<div class="x-btns"><button class="x-btn" id="c3-clr">清除重选</button></div>',
+          '<p class="note">蓝色半透明平面是海平面（0 m 基准面）；蓝虚线是海拔，黄竖线是两点的高度差。</p></div>',
+          '<div class="card"><h3>练习：读范围</h3>',
+          '<p class="note">等高距 100 m。平面图上 A 点位于 600 m 与 700 m 等高线之间，B 点位于 200 m 与 300 m 等高线之间。A 点海拔范围是多少？A、B 两点相对高度范围是多少？</p>',
+          '<div class="x-btns"><button class="x-btn" id="c3-ans" aria-pressed="false">显示答案</button></div>',
+          '<p class="note" id="c3-key" hidden>A 点海拔范围 600–700 m（600 m < H<sub>A</sub> < 700 m）。相对高度范围的计算：(H大−L小) 到 (H小−L大)，即 700 − 200 = 500 m 到 600 − 300 = 300 m，所以 <span class="hl">300 m < ΔH < 500 m</span>。</p></div>',
+          '<div class="card"><h3>要点</h3><ul>',
+          '<li>海拔（绝对高度）：地面某点高出<span class="hl">海平面</span>的垂直距离。</li>',
+          '<li>相对高度：两地之间的海拔差，<span class="hl">相对高度 = 海拔高 − 海拔低</span>。</li>',
+          '<li>由等高线只能读出海拔<span class="hl">范围</span>：点在两条等高线之间，海拔介于两线数值之间。</li>',
+          '<li><b>高考链接：</b>常考由等高线读海拔范围、计算两地相对高度范围（大减小、小减大，开区间）；易错：陡崖相对高度 ΔH 满足 (n−1)d ≤ ΔH < (n+1)d。</li></ul></div>',
+        ].join("");
+        function bind() {
+          el("c3-clr").onclick = () => { pts = []; draw(); };
+          el("c3-ans").onclick = (e) => {
+            const k = el("c3-key"), show = k.hidden; k.hidden = !show;
+            e.target.setAttribute("aria-pressed", String(show)); e.target.textContent = show ? "隐藏答案" : "显示答案";
+          };
+          draw();
+        }
+        const v3c = new THREE.Vector3();
+        function loop() {
+          if (!on) return;
+          const r = canvas.getBoundingClientRect();
+          pool.forEach((d, i) => { if (i >= labs.length) d.style.display = "none"; });
+          labs.forEach((L, i) => {
+            let d = pool[i];
+            if (!d) { d = document.createElement("div"); d.className = "lab"; stage.appendChild(d); pool.push(d); }
+            d.style.display = ""; d.textContent = L.t; d.dataset.kind = L.k;
+            v3c.set(L.p[0], L.p[1], L.p[2]).project(camera);
+            d.style.opacity = v3c.z < 1 && Math.abs(v3c.x) < 1.05 && Math.abs(v3c.y) < 1.05 ? 1 : 0;
+            d.style.left = (v3c.x * 0.5 + 0.5) * r.width + "px";
+            d.style.top = (-v3c.y * 0.5 + 0.5) * r.height + "px";
+          });
+          requestAnimationFrame(loop);
+        }
+        window.C3 = {
+          panel: panel,
+          enter: (active) => {
+            g3.visible = active;
+            if (!active) { on = false; pool.forEach((d) => (d.style.display = "none")); return; }
+            mapG.visible = true; bind();
+            if (!on) { on = true; requestAnimationFrame(loop); }
+          },
+        };
+        if (cur === 2) go(2);
+      })();
+    </script>
+    <script>
+      /* ---------- 第 04 章：等高距与坡度（复用 H / slopeDeg / contourSegs / 地形与平面图） ---------- */
+      (function () {
+        const Y = (h) => (h / 1000) * exag, L = 1000;
+        const g4 = new THREE.Group(); g4.visible = false; world.add(g4);
+        const c3d = new THREE.Group(), rt3d = new THREE.Group(); g4.add(c3d); g4.add(rt3d);
+        const mapC = new THREE.Group(); mapC.visible = false; mapG.add(mapC);
+        const oldC = mapG.children.filter((o) => o.isLineSegments);
+        const orig = colors.slice(), slopeCol = new Float32Array(colors.length);
+        const SL = [[10, [0.3, 0.69, 0.31]], [25, [0.95, 0.77, 0.2]], [99, [0.9, 0.3, 0.25]]];
+        let slopeReady = false, ci = 100, sloped = false, cmp = false, on = false, labs = [];
+        const pool = [];
+        const sGeo = new THREE.PlaneGeometry(SIZE, SIZE, N, N); sGeo.rotateX(-Math.PI / 2);
+        sGeo.setAttribute("color", new THREE.BufferAttribute(slopeCol, 3));
+        const sMap = new THREE.Mesh(sGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }));
+        sMap.position.y = 0.002; sMap.visible = false; mapG.add(sMap);
+        const R = [
+          { n: "A", a: [2, 5.6], b: [2, 6.6], c: 0xff4fa3, css: "#ff4fa3", w: "西峰南坡" },
+          { n: "B", a: [1, 0.3], b: [1, 1.3], c: 0x7fd3ff, css: "#7fd3ff", w: "西南缓坡" },
+        ];
+        R.forEach((r) => { r.ha = H(r.a[0], r.a[1]); r.hb = H(r.b[0], r.b[1]); r.deg = Math.atan((r.hb - r.ha) / L) * 180 / Math.PI; });
+        const drop = (g) => g.children.slice().forEach((o) => { g.remove(o); o.geometry.dispose(); });
+        const set = (id, t) => { const s = el(id); if (s) s.innerHTML = t; };
+        function calcSlope() {
+          for (let i = 0; i < pos.count; i++) {
+            const s = slopeDeg(pos.getX(i) + 4, SIZE - (pos.getZ(i) + 4)), c = SL.find((t) => s < t[0])[1];
+            slopeCol.set(c, i * 3);
+          }
+          slopeReady = true; sGeo.attributes.color.needsUpdate = true;
+        }
+        function applySlope() {
+          if (sloped && !slopeReady) calcSlope();
+          geo.attributes.color.array.set(sloped ? slopeCol : orig); geo.attributes.color.needsUpdate = true;
+          sMap.visible = sloped;
+        }
+        function drawC() {
+          drop(c3d); drop(mapC); let n = 0;
+          for (let lv = ci; lv < HMAX; lv += ci) {
+            const v = [];
+            contourSegs(lv).forEach((s) => v.push(s[0][0] - 4, 0, 4 - s[0][1], s[1][0] - 4, 0, 4 - s[1][1]));
+            if (!v.length) continue; n++;
+            const major = lv % (ci * 5) === 0;
+            const mk = (geom, color, op) => new THREE.LineSegments(geom, new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: op }));
+            const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+            const a = mk(g, 0x24180e, major ? 0.95 : 0.6); a.position.y = Y(lv) + 0.015; c3d.add(a);
+            const b = mk(g.clone(), major ? 0x4a3018 : 0x7a5a36, major ? 1 : 0.75); b.position.y = 0.006; mapC.add(b);
+          }
+          set("c4-n", "当前等高距 <span class=\"hl\">" + ci + " m</span>：图上共 " + n + " 条等高线（每 5 条加粗一条计曲线）。等高距越小，地形表达越细。");
+          document.querySelectorAll("#c4-ci .x-btn").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.ci === ci)));
+          drawCmp();
+        }
+        function routePts(r, yf) {
+          const p = [];
+          for (let k = 0; k <= 40; k++) { const x = r.a[0] + (r.b[0] - r.a[0]) * k / 40, y = r.a[1] + (r.b[1] - r.a[1]) * k / 40; p.push(new THREE.Vector3(x - 4, yf(x, y), 4 - y)); }
+          return p;
+        }
+        function tri(r, ox) {
+          const k = 0.12, x0 = ox + 14, y0 = 128, x1 = x0 + L * k, y1 = y0 - (r.hb - r.ha) * k;
+          let s = '<path d="M' + x0 + " " + y0 + "H" + x1 + "V" + y1 + 'Z" fill="' + r.css + '" fill-opacity=".18" stroke="' + r.css + '" stroke-width="1.5"/>';
+          for (let lv = Math.ceil(r.ha / ci) * ci; lv <= r.hb; lv += ci) {
+            const f = (lv - r.ha) / (r.hb - r.ha), x = x0 + (x1 - x0) * f, y = y0 + (y1 - y0) * f;
+            s += '<line x1="' + x + '" y1="' + y + '" x2="' + x1 + '" y2="' + y + '" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="2 3"/><circle cx="' + x + '" cy="' + y + '" r="2.5" fill="currentColor"/>';
+          }
+          s += '<text x="' + (x0 + 26) + '" y="' + (y0 - 5) + '" font-size="12" fill="currentColor">θ ' + r.deg.toFixed(1) + '°</text>';
+          s += '<text x="' + x0 + '" y="' + (y0 + 16) + '" font-size="12" fill="currentColor">' + r.n + " · 水平 1 km</text>";
+          return s;
+        }
+        function drawCmp() {
+          drop(rt3d); labs = [];
+          const out = el("c4-out"); if (out) out.hidden = !cmp;
+          if (!cmp) return;
+          R.forEach((r) => {
+            const tube = (pts, m) => new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 60, 0.04, 6), m);
+            rt3d.add(tube(routePts(r, (x, y) => Y(H(x, y)) + 0.05), new THREE.MeshBasicMaterial({ color: r.c })));
+            rt3d.add(tube(routePts(r, () => -1.5 + 0.02), new THREE.MeshBasicMaterial({ color: r.c })));
+            labs.push({ p: [r.b[0] - 4, Y(r.hb) + 0.3, 4 - r.b[1]], t: "路线 " + r.n + " · " + r.deg.toFixed(1) + "°" });
+            labs.push({ p: [r.b[0] - 4, -1.5 + 0.25, 4 - r.b[1]], t: r.n });
+            r.cnt = Math.floor(r.hb / ci) - Math.floor(r.ha / ci);
+          });
+          const a = R[0], b = R[1];
+          set("c4-svg", tri(a, 0) + tri(b, 150));
+          R.forEach((r) => set("c4-" + r.n, r.deg.toFixed(1) + "° · 升高 " + Math.round(r.hb - r.ha) + " m · 穿过 " + r.cnt + " 条"));
+          set("c4-msg", "两条路线水平距离都是 1 km。A（" + a.w + "）穿过 " + a.cnt + " 条等高线，B（" + b.w + "）只穿过 " + b.cnt + " 条：等高线密的 A 坡度角大，疏的 B 坡度角小。");
+        }
+        const panel = [
+          '<p class="ttl">第 04 章 · 交互</p>',
+          '<div class="card"><h3>等高距</h3><div class="x-btns" id="c4-ci">',
+          [50, 100, 200].map((v) => '<button class="x-btn" data-ci="' + v + '" aria-pressed="false">' + v + " m</button>").join(""),
+          '</div><p class="note" id="c4-n"></p></div>',
+          '<div class="card"><div class="row"><label for="c4-sl">坡度着色</label><button class="sw" id="c4-sl" aria-pressed="false" aria-label="坡度着色"></button></div>',
+          '<div class="legend"><span><i style="background:#4db04f"></i>缓 &lt;10°</span><span><i style="background:#f2c433"></i>中 10–25°</span><span><i style="background:#e64d40"></i>陡 &gt;25°</span></div>',
+          '<p class="note">3D 地表和平面图同时按坡度上色：红色带上等高线挤在一起，绿色带上等高线稀疏。</p></div>',
+          '<div class="card"><div class="row"><label for="c4-cmp">比较两段坡</label><button class="sw" id="c4-cmp" aria-pressed="false" aria-label="比较两段坡"></button></div>',
+          '<div id="c4-out" hidden><svg id="c4-svg" viewBox="0 0 300 150" width="100%" role="img" aria-label="路线 A 与 B 的剖面三角形，水平距离相同，A 升高更多、坡度角更大" style="color:var(--ink2);font-family:var(--mono)"></svg>',
+          '<div class="row"><label><span style="color:#ff4fa3">●</span> A 平均坡度</label><span class="val" id="c4-A"></span></div>',
+          '<div class="row"><label><span style="color:#7fd3ff">●</span> B 平均坡度</label><span class="val" id="c4-B"></span></div>',
+          '<p class="note" id="c4-msg"></p></div></div>',
+          '<div class="card"><h3>要点</h3><ul>',
+          '<li>相邻两条等高线之间的高差叫<span class="hl">等高距</span>；同一幅图中等高距相同。</li>',
+          '<li><span class="hl">密陡 · 疏缓</span>：水平距离越短、升高同样的等高距，坡就越陡。</li>',
+          '<li>等高距越小，等高线越多，地形表达越细。</li>',
+          '<li><b>高考链接：</b>等高线疏密判断坡度陡缓，常结合选线（公路沿等高线或缓坡）、登山路线、水能与水土流失考查；易错：比较疏密必须在同一幅图（同一等高距、同一比例尺）里比较。</li></ul></div>',
+        ].join("");
+        function bind() {
+          document.querySelectorAll("#c4-ci .x-btn").forEach((b) => (b.onclick = () => { ci = +b.dataset.ci; drawC(); }));
+          const sl = el("c4-sl"), cp = el("c4-cmp");
+          sl.setAttribute("aria-pressed", String(sloped)); cp.setAttribute("aria-pressed", String(cmp));
+          sl.onclick = () => { sloped = !sloped; sl.setAttribute("aria-pressed", String(sloped)); applySlope(); };
+          cp.onclick = () => { cmp = !cmp; cp.setAttribute("aria-pressed", String(cmp)); drawCmp(); };
+        }
+        const v3d = new THREE.Vector3();
+        function loop() {
+          if (!on) return;
+          const r = canvas.getBoundingClientRect();
+          pool.forEach((d, i) => { if (i >= labs.length) d.style.display = "none"; });
+          labs.forEach((Lb, i) => {
+            let d = pool[i];
+            if (!d) { d = document.createElement("div"); d.className = "lab"; stage.appendChild(d); pool.push(d); }
+            d.style.display = ""; d.textContent = Lb.t;
+            v3d.set(Lb.p[0], Lb.p[1], Lb.p[2]).project(camera);
+            d.style.opacity = v3d.z < 1 && Math.abs(v3d.x) < 1.05 && Math.abs(v3d.y) < 1.05 ? 1 : 0;
+            d.style.left = (v3d.x * 0.5 + 0.5) * r.width + "px";
+            d.style.top = (-v3d.y * 0.5 + 0.5) * r.height + "px";
+          });
+          requestAnimationFrame(loop);
+        }
+        window.C4 = {
+          panel: panel,
+          enter: (active) => {
+            g4.visible = active; mapC.visible = active; oldC.forEach((o) => (o.visible = !active));
+            if (!active) {
+              if (on) { on = false; geo.attributes.color.array.set(orig); geo.attributes.color.needsUpdate = true; sMap.visible = false; pool.forEach((d) => (d.style.display = "none")); }
+              return;
+            }
+            mapG.visible = true; bind(); applySlope(); drawC();
+            if (!on) { on = true; requestAnimationFrame(loop); }
+          },
+        };
+        if (cur === 3) go(3);
+      })();
+    </script>
+    <script>
+      /* ---------- 第 05 章：山顶与盆地（复用 H / contourSegs / 地形与平面图） ---------- */
+      (function () {
+        const Y = (h) => (h / 1000) * exag, MY = -1.5;
+        const g5 = new THREE.Group(); g5.visible = false; world.add(g5);
+        const m5 = new THREE.Group(); m5.visible = false; mapG.add(m5);
+        const orig = colors.slice();
+        const F = {
+          peak: { c: [4.02, 6.9], r: 1.4, lv: [1200, 1300, 1400], col: 0xe8590c, tint: [0.98, 0.5, 0.18], name: "主峰", view: [-0.35, 0.95, 7.5] },
+          basin: { c: [1.7, 2.1], r: 1.05, lv: [200, 300], col: 0x1c7ed6, tint: [0.2, 0.7, 1], name: "西南盆地", view: [-0.7, 0.9, 6.5] },
+        };
+        F.peak.h = Math.round(H(4.02, 6.9)); F.basin.h = Math.round(H(1.54, 1.94));
+        let sel = null, on = false, labs = [], fly = null;
+        const pool = [], v3 = new THREE.Vector3();
+        const drop = (g) => g.children.slice().forEach((o) => { g.remove(o); o.geometry.dispose(); });
+        // 线段 → 加粗色带（WebGL 线宽恒为 1，用平面四边形代替）
+        function ribbon(segs, y, w, color) {
+          const v = [];
+          segs.forEach((s) => {
+            const ax = s[0][0] - 4, az = 4 - s[0][1], bx = s[1][0] - 4, bz = 4 - s[1][1];
+            const L = Math.hypot(bx - ax, bz - az) || 1, nx = (-(bz - az) / L) * w / 2, nz = ((bx - ax) / L) * w / 2;
+            v.push(ax + nx, y, az + nz, ax - nx, y, az - nz, bx + nx, y, bz + nz, bx + nx, y, bz + nz, ax - nx, y, az - nz, bx - nx, y, bz - nz);
+          });
+          const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+          return new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide }));
+        }
+        function grad(x, y) { const e = 0.01; return [(H(x + e, y) - H(x - e, y)) / (2 * e), (H(x, y + e) - H(x, y - e)) / (2 * e)]; }
+        function tintTerrain(f) {
+          const a = geo.attributes.color.array; a.set(orig);
+          if (f) for (let i = 0; i < pos.count; i++) {
+            const x = pos.getX(i) + 4, y = SIZE - (pos.getZ(i) + 4), h = baseH[i];
+            if (Math.hypot(x - f.c[0], y - f.c[1]) > f.r) continue;
+            const inside = f === F.peak ? h >= f.lv[0] : h <= f.lv[f.lv.length - 1];
+            if (inside) for (let k = 0; k < 3; k++) a[i * 3 + k] = a[i * 3 + k] * 0.4 + f.tint[k] * 0.6;
+          }
+          geo.attributes.color.needsUpdate = true;
+        }
+        function draw() {
+          drop(g5); drop(m5); labs = [];
+          tintTerrain(sel ? F[sel] : null);
+          if (!sel) return;
+          const f = F[sel];
+          f.lv.forEach((lv, li) => {
+            const segs = contourSegs(lv).filter((s) => Math.hypot(s[0][0] - f.c[0], s[0][1] - f.c[1]) < f.r);
+            if (!segs.length) return;
+            const top = ribbon(segs, Y(lv) + 0.03, 0.05, f.col); g5.add(top);
+            m5.add(ribbon(segs, 0.01, 0.06, f.col));
+            // 示坡线：沿闭合线均匀取 10 处，垂直于等高线指向低处
+            const ang = (s) => Math.atan2(s[0][1] - f.c[1], s[0][0] - f.c[0]), tk = [];
+            for (let k = 0; k < 10; k++) {
+              const a0 = -Math.PI + (k + 0.5) * Math.PI / 5;
+              let best = segs[0], bd = 9;
+              segs.forEach((s) => { const d = Math.abs(Math.atan2(Math.sin(ang(s) - a0), Math.cos(ang(s) - a0))); if (d < bd) { bd = d; best = s; } });
+              const mx = (best[0][0] + best[1][0]) / 2, my = (best[0][1] + best[1][1]) / 2, g = grad(mx, my), gl = Math.hypot(g[0], g[1]) || 1;
+              tk.push([[mx, my], [mx - (g[0] / gl) * 0.16, my - (g[1] / gl) * 0.16]]);
+            }
+            m5.add(ribbon(tk, 0.012, 0.035, f.col));
+            // 数值标注：取闭合线南侧（错开角度避免重叠）
+            const a1 = -Math.PI / 2 + (li - 1) * 0.35;
+            let lp = segs[0], ld = 9;
+            segs.forEach((s) => { const d = Math.abs(Math.atan2(Math.sin(ang(s) - a1), Math.cos(ang(s) - a1))); if (d < ld) { ld = d; lp = s; } });
+            labs.push({ p: [lp[0][0] - 4, MY + 0.05, 4 - lp[0][1]], t: lv + "" });
+          });
+          labs.push({ p: [f.c[0] - 4, Y(f.h) + 0.35, 4 - f.c[1]], t: (sel === "peak" ? "山顶 · " : "盆地 · ") + f.name + " " + f.h + " m" });
+          const lv = f.lv, msg = sel === "peak"
+            ? f.name + " " + f.h + " m：平面图上 " + lv.join("、") + " m 三条闭合等高线，数值<span class=\"hl\">内高外低</span> → 山顶。示坡线画在闭合线<span class=\"hl\">外侧</span>，指向低处。"
+            : f.name + "：最低处约 " + f.h + " m，" + lv.join("、") + " m 两条闭合等高线，数值<span class=\"hl\">内低外高</span> → 盆地（湖泊所在）。示坡线画在闭合线<span class=\"hl\">内侧</span>，指向低处。";
+          const out = el("c5-msg"); if (out) out.innerHTML = msg;
+        }
+        function flyTo(k) {
+          const f = F[k], s = { az: az, pol: pol, dist: dist, t: target.clone() };
+          const e = { az: f.view[0], pol: f.view[1], dist: f.view[2], t: new THREE.Vector3(f.c[0] - 4, -0.5, 4 - f.c[1] + 0.6) };
+          const t0 = performance.now(), D = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 900;
+          fly = () => {
+            const u = Math.min(1, (performance.now() - t0) / D), q = u * u * (3 - 2 * u);
+            az = s.az + (e.az - s.az) * q; pol = s.pol + (e.pol - s.pol) * q; dist = s.dist + (e.dist - s.dist) * q;
+            target.lerpVectors(s.t, e.t, q); updateCam();
+            if (u >= 1) fly = null;
+          };
+        }
+        function mini(inner, outer, hach) {
+          let s = '<ellipse cx="70" cy="50" rx="58" ry="38" fill="none" stroke="currentColor" stroke-width="1.5"/><ellipse cx="70" cy="50" rx="28" ry="17" fill="none" stroke="currentColor" stroke-width="1.5"/>';
+          if (outer) s += '<text x="70" y="16" text-anchor="middle" font-size="12" fill="currentColor" style="paint-order:stroke;stroke:var(--bg2);stroke-width:4px">' + outer + "</text>";
+          if (inner) s += '<text x="70" y="54" text-anchor="middle" font-size="12" fill="currentColor">' + inner + "</text>";
+          if (hach) for (let k = 0; k < 10; k++) {
+            const a = k * Math.PI / 5, c = Math.cos(a), sn = Math.sin(a), x = 70 + 28 * c, y = 50 + 17 * sn;
+            const nx = c / 28, ny = sn / 17, L = Math.hypot(nx, ny);
+            s += '<line x1="' + x + '" y1="' + y + '" x2="' + (x - (nx / L) * 7) + '" y2="' + (y - (ny / L) * 7) + '" stroke="currentColor" stroke-width="1.5"/>';
+          }
+          return '<svg viewBox="0 0 140 100" width="100%" role="img" aria-label="' + (inner ? "闭合等高线，内 " + inner + " 外 " + outer : "无数值闭合等高线，示坡线画在内侧指向圈内") + '" style="color:var(--ink2);font-family:var(--mono)">' + s + "</svg>";
+        }
+        const Q = [
+          { svg: mini(500, 400), a: "山顶", why: "内 500 > 外 400，内高外低为山顶。" },
+          { svg: mini(300, 400), a: "盆地", why: "内 300 < 外 400，内低外高为盆地。" },
+          { svg: mini(0, 0, true), a: "盆地", why: "示坡线画在闭合线内侧、指向圈内，说明圈内更低：内低外高为盆地。" },
+        ];
+        const quiz = Q.map((q, i) =>
+          '<div style="flex:1 1 140px;min-width:0"><p class="note" style="margin:0">第 ' + (i + 1) + (i === 2 ? " 题 · 看示坡线" : " 题") + "</p>" + q.svg +
+          '<div class="x-btns" style="margin:4px 0">' + ["山顶", "盆地"].map((t) => '<button class="x-btn" data-q="' + i + '" data-a="' + t + '" aria-pressed="false">' + t + "</button>").join("") +
+          '</div><p class="note" id="c5-f' + i + '" aria-live="polite" style="margin:0"></p></div>'
+        ).join("");
+        const panel = [
+          '<p class="ttl">第 05 章 · 交互</p>',
+          '<div class="card"><h3>观察部位</h3><div class="x-btns" id="c5-go">',
+          '<button class="x-btn" data-k="peak" aria-pressed="false">看山顶</button><button class="x-btn" data-k="basin" aria-pressed="false">看盆地</button></div>',
+          '<p class="note" id="c5-msg">选一个部位：镜头飞过去，3D 中该部位高亮；下方平面图上对应的闭合等高线加粗、标出数值，并画出示坡线。</p></div>',
+          '<div class="card"><h3>判读练习</h3><div style="display:flex;flex-wrap:wrap;gap:10px">' + quiz + "</div></div>",
+          '<div class="card"><h3>要点</h3><ul>',
+          '<li>山顶与盆地都表现为一组<span class="hl">闭合等高线</span>。</li>',
+          '<li><span class="hl">内高外低 → 山顶；内低外高 → 盆地</span>（洼地）。</li>',
+          '<li>示坡线垂直于等高线，指向海拔较低的一侧：山顶画在闭合线外侧，盆地画在内侧。</li>',
+          '<li><b>高考链接：</b>闭合等高线判断山顶/洼地，常与“大于大的、小于小的”规律一起考（闭合区内海拔 H：若与较高线等值则 H 在 (高, 高+d)，若与较低线等值则 H 在 (低−d, 低)）；易错：示坡线指向低处，不是指向高处。</li></ul></div>',
+        ].join("");
+        function bind() {
+          document.querySelectorAll("#c5-go .x-btn").forEach((b) => {
+            b.setAttribute("aria-pressed", String(b.dataset.k === sel));
+            b.onclick = () => {
+              sel = b.dataset.k;
+              document.querySelectorAll("#c5-go .x-btn").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+              mapG.visible = true; draw(); flyTo(sel);
+            };
+          });
+          document.querySelectorAll("[data-q]").forEach((b) => (b.onclick = () => {
+            const q = Q[+b.dataset.q], ok = b.dataset.a === q.a;
+            document.querySelectorAll('[data-q="' + b.dataset.q + '"]').forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+            el("c5-f" + b.dataset.q).innerHTML = (ok ? '<span style="color:var(--acc)">✓ 正确。</span>' : '<span style="color:var(--warn)">✗ 应为' + q.a + "。</span>") + q.why;
+          }));
+        }
+        function loop() {
+          if (!on) return;
+          if (fly) fly();
+          const r = canvas.getBoundingClientRect();
+          pool.forEach((d, i) => { if (i >= labs.length) d.style.display = "none"; });
+          labs.forEach((Lb, i) => {
+            let d = pool[i];
+            if (!d) { d = document.createElement("div"); d.className = "lab"; stage.appendChild(d); pool.push(d); }
+            d.style.display = ""; d.textContent = Lb.t;
+            v3.set(Lb.p[0], Lb.p[1], Lb.p[2]).project(camera);
+            d.style.opacity = v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05 ? 1 : 0;
+            d.style.left = (v3.x * 0.5 + 0.5) * r.width + "px";
+            d.style.top = (-v3.y * 0.5 + 0.5) * r.height + "px";
+          });
+          requestAnimationFrame(loop);
+        }
+        window.C5 = {
+          ribbon: ribbon,
+          panel: panel,
+          enter: (active) => {
+            g5.visible = active; m5.visible = active;
+            if (!active) {
+              if (on) { on = false; fly = null; tintTerrain(null); pool.forEach((d) => (d.style.display = "none")); }
+              return;
+            }
+            bind(); Promise.resolve().then(() => { if (cur === 4) draw(); }); // 等其它章节先复原地表颜色
+            if (!on) { on = true; requestAnimationFrame(loop); }
+          },
+        };
+        if (cur === 4) go(4);
+      })();
+    </script>
+    <script>
+      /* ---------- 第 06 章：山脊与山谷（复用 H / RIV / contourSegs / 地形与平面图） ---------- */
+      (function () {
+        const Y = (x, y) => (H(x, y) / 1000) * exag;
+        const g6 = new THREE.Group(); g6.visible = false; world.add(g6);
+        const m6 = new THREE.Group(); m6.visible = false; mapG.add(m6);
+        const GOLD = 0xf2b544, BLUE = 0x2f8fe0, RC = 0xe8590c, VC = 0x1c7ed6, AC = 0xd6336c;
+        const RIDGES = [
+          [[1.0, 6.75], [2.0, 6.7], [3.0, 6.85], [4.0, 6.9], [5.0, 6.75], [6.0, 6.6], [7.0, 6.2], [7.5, 5.95]],
+          [[4.0, 6.9], [4.0, 6.0], [4.0, 5.0], [4.02, 4.3]],
+          [[2.0, 6.7], [2.0, 6.0], [2.05, 5.4]],
+        ];
+        let mode = null, on = false, labs = [];
+        const pool = [], v3 = new THREE.Vector3();
+        const drop = (g) => g.children.slice().forEach((o) => { g.remove(o); o.geometry.dispose(); o.material.dispose(); });
+        const unit = (a, b) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [(b[0] - a[0]) / L, (b[1] - a[1]) / L]; };
+        function dense(p, st) {
+          const out = [];
+          for (let k = 0; k < p.length - 1; k++) {
+            const n = Math.max(1, Math.ceil(Math.hypot(p[k + 1][0] - p[k][0], p[k + 1][1] - p[k][1]) / st));
+            for (let i = 0; i < n; i++) out.push([p[k][0] + (p[k + 1][0] - p[k][0]) * i / n, p[k][1] + (p[k + 1][1] - p[k][1]) * i / n]);
+          }
+          out.push(p[p.length - 1]); return out;
+        }
+        const path = (p) => { const d = dense(p, 0.05), s = []; for (let i = 0; i < d.length - 1; i++) s.push([d[i], d[i + 1]]); return s; };
+        // 线段 → 平面色带（WebGL 线宽恒为 1），yf 给出每个端点的高度
+        function band(segs, w, color, yf) {
+          const v = [];
+          segs.forEach((s) => {
+            const ax = s[0][0] - 4, az = 4 - s[0][1], bx = s[1][0] - 4, bz = 4 - s[1][1], ay = yf(s[0][0], s[0][1]), by = yf(s[1][0], s[1][1]);
+            const L = Math.hypot(bx - ax, bz - az) || 1, nx = (-(bz - az) / L) * w / 2, nz = ((bx - ax) / L) * w / 2;
+            v.push(ax + nx, ay, az + nz, ax - nx, ay, az - nz, bx + nx, by, bz + nz, bx + nx, by, bz + nz, ax - nx, ay, az - nz, bx - nx, by, bz - nz);
+          });
+          const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+          return new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide }));
+        }
+        const onT = (x, y) => Y(x, y) + 0.035, onM = () => 0.014;
+        function arrow(a, d, len) {
+          const b = [a[0] + d[0] * len, a[1] + d[1] * len], s = [[a, b]];
+          [0.5, -0.5].forEach((r) => { const c = Math.cos(r), n = Math.sin(r); s.push([b, [b[0] - (d[0] * c - d[1] * n) * 0.16, b[1] - (d[0] * n + d[1] * c) * 0.16]]); });
+          return { segs: s, tip: b };
+        }
+        function grad(x, y) { const e = 0.01; return [(H(x + e, y) - H(x - e, y)) / (2 * e), (H(x, y + e) - H(x, y - e)) / (2 * e)]; }
+        // 沿折线找与某几条等高线的交点（含该处折线方向）
+        function cross(p, lvs) {
+          const d = dense(p, 0.02), out = [];
+          for (let i = 0; i < d.length - 1; i++) {
+            const h0 = H(d[i][0], d[i][1]), h1 = H(d[i + 1][0], d[i + 1][1]);
+            lvs.forEach((lv) => {
+              if ((h0 - lv) * (h1 - lv) <= 0 && h0 !== h1) {
+                const u = (lv - h0) / (h1 - h0);
+                out.push({ lv: lv, p: [d[i][0] + (d[i + 1][0] - d[i][0]) * u, d[i][1] + (d[i + 1][1] - d[i][1]) * u], t: unit(d[i], d[i + 1]) });
+              }
+            });
+          }
+          return out;
+        }
+        /* 粒子：雨滴（山脊/山谷）与河水（流向） */
+        const NP = 260, P = new Float32Array(NP * 3), PM = new Float32Array(NP * 3), drops = [];
+        const pg = new THREE.BufferGeometry(); pg.setAttribute("position", new THREE.BufferAttribute(P, 3));
+        const pgm = new THREE.BufferGeometry(); pgm.setAttribute("position", new THREE.BufferAttribute(PM, 3));
+        const pts = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0x9fd8ff, size: 0.08, transparent: true, opacity: 0.95, depthWrite: false }));
+        const ptm = new THREE.Points(pgm, new THREE.PointsMaterial({ color: VC, size: 0.06, transparent: true, opacity: 0.9, depthWrite: false }));
+        pts.visible = ptm.visible = false; pts.frustumCulled = ptm.frustumCulled = false; world.add(pts); mapG.add(ptm);
+        const RD = [].concat.apply([], RIDGES.map((r) => dense(r, 0.05))), RV = RIV.map((r) => dense(r, 0.05));
+        const FLOW = [dense(RIV[0].concat(RIV[2].slice(1)), 0.03), dense(RIV[1].concat(RIV[2].slice(1)), 0.03)];
+        for (let i = 0; i < NP; i++) drops.push({});
+        function spawn(d, init) {
+          d.age = 0; d.life = 50 + Math.random() * 70;
+          if (mode === "ridge") {
+            const q = RD[(Math.random() * RD.length) | 0]; d.x = q[0] + (Math.random() - 0.5) * 0.05; d.y = q[1] + (Math.random() - 0.5) * 0.05;
+          } else if (mode === "valley") {
+            const r = RV[(Math.random() * 3) | 0], i = (Math.random() * (r.length - 1)) | 0, t = unit(r[i], r[i + 1]);
+            const off = (Math.random() < 0.5 ? -1 : 1) * (0.3 + Math.random() * 0.6); d.x = r[i][0] - t[1] * off; d.y = r[i][1] + t[0] * off;
+          } else { d.f = i0++ % 2; d.s = init ? Math.random() * FLOW[d.f].length : 0; d.life = 1e9; }
+          if (init) d.age = Math.random() * d.life * 0.6;
+        }
+        let i0 = 0;
+        function stepDrops() {
+          drops.forEach((d, i) => {
+            if (mode === "flow") {
+              const F = FLOW[d.f]; d.s += 0.55; if (d.s >= F.length - 1) d.s = 0;
+              const q = F[d.s | 0]; d.x = q[0]; d.y = q[1];
+            } else {
+              const g = grad(d.x, d.y), L = Math.hypot(g[0], g[1]) || 1;
+              d.x -= (g[0] / L) * 0.012; d.y -= (g[1] / L) * 0.012; d.age++;
+              if (d.age > d.life || d.x < 0.05 || d.x > 7.95 || d.y < 0.05 || d.y > 7.95) spawn(d);
+            }
+            P[i * 3] = PM[i * 3] = d.x - 4; P[i * 3 + 2] = PM[i * 3 + 2] = 4 - d.y;
+            P[i * 3 + 1] = Y(d.x, d.y) + 0.05; PM[i * 3 + 1] = 0.02;
+          });
+          pg.attributes.position.needsUpdate = true; pgm.attributes.position.needsUpdate = true;
+        }
+        const MSG = {
+          ridge: '金色为山脊线。雨滴落在山脊上，沿两侧坡面向下<span class="hl">分流</span>：山脊线是<span class="hl">分水线</span>。',
+          valley: '蓝色为山谷线与河流。两侧坡面的雨滴向谷底<span class="hl">汇集</span>，再顺谷而下：山谷线是<span class="hl">集水线</span>，河流发育在山谷中。',
+          bend: '加粗的是 300、400、500 m 等高线的弯曲段。中部山脊处凸向南（低处）<span class="hl">→ 山脊</span>；西支流河谷处凸向北（高处）<span class="hl">→ 山谷</span>。',
+          flow: '两条支流发源于北部鞍部，自北向南流，在中南部汇合。河谷处等高线都凸向北（上游）：<span class="hl">河流流向与等高线凸出方向相反</span>。',
+        };
+        function draw() {
+          drop(g6); drop(m6); labs = [];
+          pts.visible = ptm.visible = mode === "ridge" || mode === "valley" || mode === "flow";
+          const out = el("c6-msg"); if (out) out.innerHTML = mode ? MSG[mode] : "选一个按钮：3D 地形与下方平面图同步演示。";
+          if (!mode) return;
+          mapG.visible = true;
+          pts.material.color.setHex(mode === "flow" ? 0x7fd3ff : 0x9fd8ff); pts.material.size = mode === "flow" ? 0.1 : 0.08;
+          if (mode === "ridge") {
+            RIDGES.forEach((r) => { g6.add(band(path(r), 0.07, GOLD, onT)); m6.add(band(path(r), 0.06, GOLD, onM)); });
+            labs.push({ p: [0, Y(4, 5.6) + 0.35, 4 - 5.6], t: "山脊线 · 分水线" });
+            labs.push({ p: [-2, Y(2, 6.1) + 0.35, 4 - 6.1], t: "雨水向两侧分流" });
+          } else if (mode === "valley") {
+            RIV.forEach((r) => { g6.add(band(path(r), 0.08, BLUE, onT)); m6.add(band(path(r), 0.07, BLUE, onM)); });
+            labs.push({ p: [3.1 - 4, Y(3.1, 5.0) + 0.3, 4 - 5.0], t: "山谷线 · 集水线" });
+            labs.push({ p: [0, Y(4, 3.3) + 0.3, 4 - 3.3], t: "两支流汇合" });
+          } else if (mode === "bend") {
+            [{ c: cross(RIDGES[1], [300, 400, 500]), col: RC, dir: 1, t: "凸向低处 → 山脊" }, { c: cross(RIV[0], [300, 400, 500]), col: VC, dir: -1, t: "凸向高处 → 山谷" }].forEach((S) => {
+              S.c.forEach((k) => {
+                const segs = contourSegs(k.lv).filter((s) => Math.hypot(s[0][0] - k.p[0], s[0][1] - k.p[1]) < 0.42);
+                g6.add(band(segs, 0.05, S.col, () => (k.lv / 1000) * exag + 0.03)); m6.add(band(segs, 0.06, S.col, onM));
+              });
+              const k = S.c.filter((c) => c.lv === 400)[0] || S.c[0]; if (!k) return;
+              const d = [k.t[0] * S.dir, k.t[1] * S.dir], a = arrow([k.p[0] - d[0] * 0.15, k.p[1] - d[1] * 0.15], d, 0.6);
+              g6.add(band(a.segs, 0.05, AC, onT)); m6.add(band(a.segs, 0.05, AC, onM));
+              labs.push({ p: [a.tip[0] - 4, Y(a.tip[0], a.tip[1]) + 0.3, 4 - a.tip[1]], t: S.t });
+              labs.push({ p: [a.tip[0] - 4, -1.5 + 0.06, 4 - a.tip[1]], t: S.t });
+            });
+          } else {
+            RIV.forEach((r) => m6.add(band(path(r), 0.05, BLUE, onM)));
+            const marks = [].concat(cross(RIV[0], [300, 500]), cross(RIV[1], [300, 500]), cross(RIV[2], [100, 200]));
+            marks.forEach((k) => {
+              const segs = contourSegs(k.lv).filter((s) => Math.hypot(s[0][0] - k.p[0], s[0][1] - k.p[1]) < 0.35);
+              m6.add(band(segs, 0.05, GOLD, onM)); g6.add(band(segs, 0.04, GOLD, () => (k.lv / 1000) * exag + 0.03));
+              const a = arrow(k.p, [-k.t[0], -k.t[1]], 0.35); m6.add(band(a.segs, 0.04, AC, onM)); g6.add(band(a.segs, 0.04, AC, onT));
+            });
+            labs.push({ p: [3.9 - 4, Y(3.9, 1.8) + 0.3, 4 - 1.8], t: "流向：自北向南 ↓" });
+            if (marks[0]) labs.push({ p: [marks[0].p[0] - 4, -1.5 + 0.06, 4 - marks[0].p[1]], t: "等高线凸向北（上游）" });
+          }
+          drops.forEach((d) => spawn(d, true));
+        }
+        const panel = [
+          '<p class="ttl">第 06 章 · 交互</p>',
+          '<div class="card"><h3>演示</h3><div class="x-btns" id="c6-go">',
+          '<button class="x-btn" data-k="ridge" aria-pressed="false">山脊线</button><button class="x-btn" data-k="valley" aria-pressed="false">山谷线</button>',
+          '<button class="x-btn" data-k="bend" aria-pressed="false">判读弯曲</button><button class="x-btn" data-k="flow" aria-pressed="false">河流流向</button></div>',
+          '<p class="note" id="c6-msg" aria-live="polite"></p></div>',
+          '<div class="card"><h3>要点</h3><ul>',
+          '<li>等高线向同一方向弯曲：<span class="hl">凸向低处为山脊，凸向高处为山谷</span>（凸低为脊 · 凸高为谷）。</li>',
+          '<li>山脊线是<span class="hl">分水线</span>，雨水沿它向两侧分流；山谷线是<span class="hl">集水线</span>，河流多发育在山谷中。</li>',
+          '<li>河流流向与山谷处等高线的凸出方向相反；本图两条支流发源于北部鞍部，自北向南流，在中南部汇合。</li>',
+          '<li><b>高考链接：</b>山脊、山谷判读常与河流发育、流向、汇水范围（集水区以山脊线为界）、选址（水库坝址、引水线路）结合考查；易错：凸低为脊、凸高为谷，河流只发育在山谷，不会在山脊上。</li></ul></div>',
+        ].join("");
+        function bind() {
+          document.querySelectorAll("#c6-go .x-btn").forEach((b) => {
+            b.setAttribute("aria-pressed", String(b.dataset.k === mode));
+            b.onclick = () => {
+              mode = mode === b.dataset.k ? null : b.dataset.k;
+              document.querySelectorAll("#c6-go .x-btn").forEach((o) => o.setAttribute("aria-pressed", String(o.dataset.k === mode)));
+              draw();
+            };
+          });
+        }
+        function loop() {
+          if (!on) return;
+          if (pts.visible) stepDrops();
+          const r = canvas.getBoundingClientRect();
+          pool.forEach((d, i) => { if (i >= labs.length) d.style.display = "none"; });
+          labs.forEach((Lb, i) => {
+            let d = pool[i];
+            if (!d) { d = document.createElement("div"); d.className = "lab"; stage.appendChild(d); pool.push(d); }
+            d.style.display = ""; d.textContent = Lb.t;
+            v3.set(Lb.p[0], Lb.p[1], Lb.p[2]).project(camera);
+            d.style.opacity = v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05 ? 1 : 0;
+            d.style.left = (v3.x * 0.5 + 0.5) * r.width + "px";
+            d.style.top = (-v3.y * 0.5 + 0.5) * r.height + "px";
+          });
+          requestAnimationFrame(loop);
+        }
+        window.C6 = {
+          panel: panel,
+          enter: (active) => {
+            g6.visible = m6.visible = active;
+            if (!active) {
+              if (on) { on = false; pts.visible = ptm.visible = false; pool.forEach((d) => (d.style.display = "none")); }
+              return;
+            }
+            bind(); draw();
+            if (!on) { on = true; requestAnimationFrame(loop); }
+          },
+        };
+        if (cur === 5) go(5);
+      })();
+    </script>
+    <script>
+      /* ---------- 第 07 章：鞍部（复用 H / RIV / contourSegs / 地形与平面图） ---------- */
+      (function () {
+        const Y = (x, y) => (H(x, y) / 1000) * exag, MY = 0.016;
+        const g7 = new THREE.Group(); g7.visible = false; world.add(g7);
+        const m7 = new THREE.Group(); m7.visible = false; mapG.add(m7);
+        const GOLD = 0xf2b544, PK = 0xe8590c, BLUE = 0x2f8fe0, ROAD = 0xd6336c, SAD = 0x2ec4b6;
+        // 西峰与主峰之间的鞍部（由 H 数值求得）
+        const S = [2.88, 6.82], PA = [2.0, 6.7], PB = [4.0, 6.9];
+        const RD = (() => { const L = Math.hypot(PB[0] - PA[0], PB[1] - PA[1]); return [(PB[0] - PA[0]) / L, (PB[1] - PA[1]) / L]; })();
+        const VD = [-RD[1], RD[0]];
+        const RIDGE = [[S[0] - RD[0] * 1.35, S[1] - RD[1] * 1.35], [S[0] + RD[0] * 1.55, S[1] + RD[1] * 1.55]];
+        const VALLEY = [[S[0] - VD[0] * 1.15, S[1] - VD[1] * 1.15], [S[0] + VD[0] * 1.05, S[1] + VD[1] * 1.05]];
+        const HS = Math.round(H(S[0], S[1])), HA = Math.round(H(PA[0], PA[1])), HB = Math.round(H(PB[0], PB[1]));
+        let look = false, crossOn = false, app = false, on = false, labs = [], fly = null;
+        const pool = [], v3 = new THREE.Vector3();
+        const drop = (g) => g.children.slice().forEach((o) => { g.remove(o); o.geometry.dispose(); o.material.dispose(); });
+        function dense(p, st) {
+          const out = [];
+          for (let k = 0; k < p.length - 1; k++) {
+            const n = Math.max(1, Math.ceil(Math.hypot(p[k + 1][0] - p[k][0], p[k + 1][1] - p[k][1]) / st));
+            for (let i = 0; i < n; i++) out.push([p[k][0] + (p[k + 1][0] - p[k][0]) * i / n, p[k][1] + (p[k + 1][1] - p[k][1]) * i / n]);
+          }
+          out.push(p[p.length - 1]); return out;
+        }
+        const path = (p) => { const d = dense(p, 0.05), s = []; for (let i = 0; i < d.length - 1; i++) s.push([d[i], d[i + 1]]); return s; };
+        function band(segs, w, color, yf, op) {
+          const v = [];
+          segs.forEach((s) => {
+            const ax = s[0][0] - 4, az = 4 - s[0][1], bx = s[1][0] - 4, bz = 4 - s[1][1], ay = yf(s[0][0], s[0][1]), by = yf(s[1][0], s[1][1]);
+            const L = Math.hypot(bx - ax, bz - az) || 1, nx = (-(bz - az) / L) * w / 2, nz = ((bx - ax) / L) * w / 2;
+            v.push(ax + nx, ay, az + nz, ax - nx, ay, az - nz, bx + nx, by, bz + nz, bx + nx, by, bz + nz, ax - nx, ay, az - nz, bx - nx, by, bz - nz);
+          });
+          const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+          return new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide, transparent: op < 1, opacity: op || 1, depthWrite: !op }));
+        }
+        const onT = (x, y) => Y(x, y) + 0.035, onM = () => MY;
+        // 某山顶周围、高于鞍部的闭合等高线
+        function rings(p, lvs) { return lvs.map((lv) => contourSegs(lv).filter((s) => Math.hypot(s[0][0] - p[0], s[0][1] - p[1]) < 1.0)); }
+        function disc(r, color, op, y, x, z) {
+          const m = new THREE.Mesh(new THREE.CircleGeometry(r, 40), new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: op, depthWrite: false, side: THREE.DoubleSide }));
+          m.rotation.x = -Math.PI / 2; m.position.set(x, y, z); return m;
+        }
+        const ICON = '<svg viewBox="0 0 64 34" width="56" height="30" aria-hidden="true" style="display:block"><path d="M4 8 C14 6 18 22 32 22 C46 22 50 6 60 8 L60 14 C50 12 46 28 32 28 C18 28 14 12 4 14 Z" fill="currentColor" opacity=".85"/><path d="M26 28 L24 33 M38 28 L40 33" stroke="currentColor" stroke-width="2"/></svg>马鞍';
+        function draw() {
+          drop(g7); drop(m7); labs = [];
+          const msg = [];
+          if (look || crossOn || app) mapG.visible = true;
+          if (look) {
+            const sx = S[0] - 4, sz = 4 - S[1];
+            g7.add(disc(0.32, SAD, 0.45, Y(S[0], S[1]) + 0.04, sx, sz));
+            const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.6, 8), new THREE.MeshBasicMaterial({ color: SAD }));
+            pin.position.set(sx, Y(S[0], S[1]) + 0.3, sz); g7.add(pin);
+            [[PA, [1000, 1100]], [PB, [1100, 1200, 1300, 1400]]].forEach((q) => rings(q[0], q[1]).forEach((s) => { m7.add(band(s, 0.05, PK, onM)); g7.add(band(s, 0.035, PK, (x, y) => Y(x, y) + 0.03)); }));
+            const e = disc(0.42, SAD, 0.35, MY - 0.002, sx, sz); e.scale.set(1, 0.6, 1); e.rotation.z = Math.atan2(RD[1], RD[0]); m7.add(e);
+            labs.push({ p: [sx + 0.55, Y(S[0], S[1]) + 0.75, sz], h: ICON });
+            labs.push({ p: [sx, Y(S[0], S[1]) + 0.12, sz + 0.35], t: "鞍部 " + HS + " m" });
+            labs.push({ p: [sx, -1.5 + 0.06, sz], t: "鞍部：两组闭合线之间" });
+            labs.push({ p: [PA[0] - 4, -1.5 + 0.06, 4 - PA[1] - 0.15], t: "西峰 " + HA + " m" });
+            labs.push({ p: [PB[0] - 4, -1.5 + 0.06, 4 - PB[1] - 0.15], t: "主峰 " + HB + " m" });
+            msg.push('橙色为西峰、主峰各自的<span class="hl">闭合等高线</span>，青色区域夹在两组闭合线之间，就是<span class="hl">鞍部</span>（' + HS + " m）。");
+          }
+          if (crossOn) {
+            g7.add(band(path(RIDGE), 0.06, GOLD, onT)); m7.add(band(path(RIDGE), 0.05, GOLD, onM));
+            g7.add(band(path(VALLEY), 0.06, BLUE, onT)); m7.add(band(path(VALLEY), 0.05, BLUE, onM));
+            labs.push({ p: [RIDGE[1][0] - 4, Y(RIDGE[1][0], RIDGE[1][1]) + 0.3, 4 - RIDGE[1][1]], t: "沿山脊 A—B" });
+            labs.push({ p: [VALLEY[0][0] - 4, Y(VALLEY[0][0], VALLEY[0][1]) + 0.3, 4 - VALLEY[0][1]], t: "沿山谷 C—D" });
+            msg.push("金线连两山顶（沿山脊），蓝线连两侧谷地（沿山谷），在鞍部十字相交。");
+          }
+          if (app) {
+            RIV.slice(0, 2).forEach((r, i) => {
+              g7.add(band(path(r), 0.08, BLUE, onT)); m7.add(band(path(r), 0.06, BLUE, onM));
+              g7.add(disc(0.09, BLUE, 0.9, Y(r[0][0], r[0][1]) + 0.05, r[0][0] - 4, 4 - r[0][1]));
+              labs.push({ p: [r[0][0] - 4, Y(r[0][0], r[0][1]) + 0.3, 4 - r[0][1]], t: (i ? "东" : "西") + "支流源头" });
+            });
+            const road = [[2.6, 5.4], [2.95, 6.1], [S[0], S[1]], [2.75, 7.9]];
+            g7.add(band(path(road), 0.06, ROAD, onT)); m7.add(band(path(road), 0.05, ROAD, onM));
+            labs.push({ p: [2.75 - 4, Y(2.75, 7.6) + 0.3, 4 - 7.6], t: "翻山公路走鞍部" });
+            msg.push("红线为翻山公路：走鞍部爬升最少。西支流发源于西峰—主峰之间的鞍部，东支流发源于主峰—东峰之间的鞍部，鞍部是分水岭。");
+          }
+          const out = el("c7-msg"); if (out) out.innerHTML = msg.length ? msg.join("<br>") : "点「看鞍部」：镜头飞到西峰与主峰之间的鞍部。";
+          const pf = el("c7-prof"); if (pf) { pf.hidden = !crossOn; if (crossOn) pf.innerHTML = prof(RIDGE, "沿山脊 A—B：鞍部最低", "A 西侧", "B 主峰") + prof(VALLEY, "沿山谷 C—D：鞍部最高", "C 南谷", "D 北谷") + '<p class="note"><span class="hl">比两侧山顶低，又比两侧山谷高。</span></p>'; }
+        }
+        // 小剖面曲线：鞍部用青色点标出
+        function prof(L, title, a, b) {
+          const d = dense(L, 0.04), hs = d.map((p) => H(p[0], p[1])), W = 280, Hh = 90, top = 18, bot = 72;
+          const lo = Math.floor(Math.min.apply(null, hs) / 100) * 100, hi = Math.ceil(Math.max.apply(null, hs) / 100) * 100;
+          const X = (i) => 10 + (i / (d.length - 1)) * (W - 20), Yv = (h) => bot - ((h - lo) / (hi - lo)) * (bot - top);
+          let k = 0, best = 1e9; d.forEach((p, i) => { const q = Math.hypot(p[0] - S[0], p[1] - S[1]); if (q < best) { best = q; k = i; } });
+          const pts = hs.map((h, i) => X(i).toFixed(1) + "," + Yv(h).toFixed(1)).join(" ");
+          const t = 'font-size="12" fill="currentColor"';
+          return '<svg viewBox="0 0 ' + W + " " + Hh + '" width="100%" role="img" aria-label="' + title + "，鞍部海拔 " + HS + ' 米" style="color:var(--ink2);font-family:var(--mono);margin-top:6px">' +
+            '<text x="10" y="12" ' + t + ">" + title + "</text>" +
+            '<polygon points="10,' + bot + " " + pts + " " + (W - 10) + "," + bot + '" fill="currentColor" opacity=".12"/>' +
+            '<polyline points="' + pts + '" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+            '<circle cx="' + X(k) + '" cy="' + Yv(hs[k]) + '" r="4" fill="var(--acc)"/>' +
+            '<text x="' + X(k) + '" y="' + (Yv(hs[k]) + (Yv(hs[k]) < 40 ? 16 : -8)) + '" text-anchor="middle" ' + t + ' style="fill:var(--acc)">鞍部 ' + HS + "</text>" +
+            '<text x="10" y="86" ' + t + ">" + a + '</text><text x="' + (W - 10) + '" y="86" text-anchor="end" ' + t + ">" + b + "</text></svg>";
+        }
+        function flyTo() {
+          const s = { az: az, pol: pol, dist: dist, t: target.clone() };
+          const e = { az: -0.35, pol: 0.95, dist: 5.5, t: new THREE.Vector3(S[0] - 4, Y(S[0], S[1]) * 0.6, 4 - S[1] + 0.3) };
+          const t0 = performance.now(), D = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 900;
+          fly = () => {
+            const u = Math.min(1, (performance.now() - t0) / D), q = u * u * (3 - 2 * u);
+            az = s.az + (e.az - s.az) * q; pol = s.pol + (e.pol - s.pol) * q; dist = s.dist + (e.dist - s.dist) * q;
+            target.lerpVectors(s.t, e.t, q); updateCam();
+            if (u >= 1) fly = null;
+          };
+        }
+        const panel = [
+          '<p class="ttl">第 07 章 · 交互</p>',
+          '<div class="card"><h3>演示</h3><div class="x-btns" id="c7-go">',
+          '<button class="x-btn" data-k="look" aria-pressed="false">看鞍部</button><button class="x-btn" data-k="cross" aria-pressed="false">十字剖面</button></div>',
+          '<p class="note" id="c7-msg" aria-live="polite"></p><div id="c7-prof" hidden></div></div>',
+          '<div class="card"><h3>应用：鞍部选什么</h3><p class="note">鞍部常是<span class="hl">翻山公路、隧道口或山口</span>的选址，也是<span class="hl">两条河流的分水岭和源头</span>所在。</p>',
+          '<div class="x-btns" id="c7-app"><button class="x-btn" data-k="app" aria-pressed="false">显示公路与支流源头</button></div></div>',
+          '<div class="card"><h3>要点</h3><ul>',
+          '<li>鞍部是相邻两个山顶之间相对低洼的部位，形似马鞍；图上为<span class="hl">两组闭合等高线之间</span>的部分。</li>',
+          '<li>两山夹一低：<span class="hl">比两侧山顶低，又比两侧山谷高</span>。</li>',
+          '<li><b>高考链接：</b>鞍部常考选线（翻越山岭走鞍部最省力）、河流源头、风口（山口风大）；易错：鞍部在两山顶之间，不是两山谷之间。</li></ul></div>',
+        ].join("");
+        function sync() {
+          document.querySelectorAll("#c7-go .x-btn, #c7-app .x-btn").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === "look" ? look : b.dataset.k === "cross" ? crossOn : app)));
+        }
+        function bind() {
+          document.querySelectorAll("#c7-go .x-btn, #c7-app .x-btn").forEach((b) => {
+            b.onclick = () => {
+              const k = b.dataset.k;
+              if (k === "look") { look = !look; if (look) flyTo(); }
+              else if (k === "cross") crossOn = !crossOn;
+              else { app = !app; if (app && !look) flyTo(); }
+              sync(); draw();
+            };
+          });
+          sync();
+        }
+        function loop() {
+          if (!on) return;
+          if (fly) fly();
+          const r = canvas.getBoundingClientRect();
+          pool.forEach((d, i) => { if (i >= labs.length) d.style.display = "none"; });
+          labs.forEach((Lb, i) => {
+            let d = pool[i];
+            if (!d) { d = document.createElement("div"); d.className = "lab"; stage.appendChild(d); pool.push(d); }
+            d.style.display = "";
+            if (Lb.h) { d.innerHTML = Lb.h; d.style.color = "var(--acc)"; d.style.textAlign = "center"; d.style.borderRadius = "12px"; }
+            else { d.textContent = Lb.t; d.style.color = ""; d.style.textAlign = ""; d.style.borderRadius = ""; }
+            v3.set(Lb.p[0], Lb.p[1], Lb.p[2]).project(camera);
+            d.style.opacity = v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05 ? 1 : 0;
+            d.style.left = (v3.x * 0.5 + 0.5) * r.width + "px";
+            d.style.top = (-v3.y * 0.5 + 0.5) * r.height + "px";
+          });
+          requestAnimationFrame(loop);
+        }
+        window.C7 = {
+          panel: panel,
+          enter: (active) => {
+            g7.visible = m7.visible = active;
+            if (!active) {
+              if (on) { on = false; fly = null; pool.forEach((d) => (d.style.display = "none")); }
+              return;
+            }
+            bind(); draw();
+            if (!on) { on = true; requestAnimationFrame(loop); }
+          },
+        };
+        if (cur === 6) go(6);
+      })();
+    </script>
+    <script>
+      /* ---------- 第 08 章：陡崖（复用 H 中的断层、地形网格与平面图） ---------- */
+      (function () {
+        const ax = 7.3, ay = 5.9, vx = 6.1 - ax, vy = 4.5 - ay, LEN = Math.hypot(vx, vy), ND = [-vy / LEN, vx / LEN]; // ND 指向崖下（东南）
+        const TS = (x, y) => [((x - ax) * vx + (y - ay) * vy) / (LEN * LEN), -((x - ax) * vy - (y - ay) * vx) / LEN];
+        const P = (t, s) => [ax + vx * t + ND[0] * s, ay + vy * t + ND[1] * s];
+        const Y = (x, y) => (H(x, y) / 1000) * exag, MY = 0.016, MAP = -1.5 + 0.06;
+        const RED = 0xef6461, ORG = 0xe8590c, BLUE = 0x2f8fe0;
+        // 断层位移（与 H 中的写法一致），用于沉落动画
+        function drop(x, y) {
+          const q = TS(x, y), t = q[0], s = q[1], sm = Math.min(1, Math.max(0, (s + 0.03) / 0.06));
+          return 300 * Math.exp(-sq((t - 0.5) / 0.3)) * (sm * sm * (3 - 2 * sm)) * Math.exp(-sq(Math.max(s, 0)) / 1.2);
+        }
+        // 崖高最大处的数值（由 H 求得）
+        const TM = 0.45, PT = P(TM, 0), TOP = H.apply(null, P(TM, -0.04)), BOT = H.apply(null, P(TM, 0.04));
+        const LV = []; for (let l = CI; l < HMAX; l += CI) if (l > BOT && l < TOP) LV.push(l);
+        const n = LV.length, HL = LV[n - 1], LL = LV[0], d = CI;
+        // 网格中受断层影响的顶点
+        const AFF = [], DR = [], TI = [], TF = [], C0 = [];
+        for (let i = 0; i < pos.count; i++) {
+          const x = pos.getX(i) + 4, y = 4 - pos.getZ(i), dr = drop(x, y), q = TS(x, y);
+          if (dr > 0.5) { AFF.push(i); DR.push(dr); }
+          if (Math.abs(q[1]) < 0.09 && q[0] > -0.02 && q[0] < 1.02) { TI.push(i); TF.push(Math.min(1, 1.3 * Math.exp(-sq((q[0] - 0.5) / 0.3)))); C0.push(colors[i * 3], colors[i * 3 + 1], colors[i * 3 + 2]); }
+        }
+        const cAttr = geo.attributes.color;
+        function tint(k) {
+          TI.forEach((i, j) => { const f = k * TF[j]; cAttr.array[i * 3] = C0[j * 3] + (0.94 - C0[j * 3]) * f; cAttr.array[i * 3 + 1] = C0[j * 3 + 1] + (0.39 - C0[j * 3 + 1]) * f; cAttr.array[i * 3 + 2] = C0[j * 3 + 2] + (0.38 - C0[j * 3 + 2]) * f; });
+          cAttr.needsUpdate = true;
+        }
+        function setH(k) {
+          AFF.forEach((i, j) => pos.setY(i, ((baseH[i] + DR[j] * (1 - k)) / 1000) * exag));
+          pos.needsUpdate = true; geo.computeVertexNormals();
+        }
+        const m8 = new THREE.Group(); m8.visible = false; mapG.add(m8);
+        const dispose = (g) => g.children.slice().forEach((o) => { g.remove(o); o.geometry.dispose(); o.material.dispose(); });
+        function band(segs, w, color) {
+          const v = [];
+          segs.forEach((s) => {
+            const x1 = s[0][0] - 4, z1 = 4 - s[0][1], x2 = s[1][0] - 4, z2 = 4 - s[1][1];
+            const l = Math.hypot(x2 - x1, z2 - z1) || 1, nx = (-(z2 - z1) / l) * w / 2, nz = ((x2 - x1) / l) * w / 2;
+            v.push(x1 + nx, MY, z1 + nz, x1 - nx, MY, z1 - nz, x2 + nx, MY, z2 + nz, x2 + nx, MY, z2 + nz, x1 - nx, MY, z1 - nz, x2 - nx, MY, z2 - nz);
+          });
+          const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+          return new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide }));
+        }
+        const mid = (s) => TS((s[0][0] + s[1][0]) / 2, (s[0][1] + s[1][1]) / 2);
+        const near = (lv, r) => contourSegs(lv).filter((s) => Math.hypot(s[0][0] - PT[0], s[0][1] - PT[1]) < r);
+        let look = false, calc = false, demoed = false, anim = null, fly = null, on = false, labs = [];
+        const pool = [], v3 = new THREE.Vector3(), ease = (u) => u * u * (3 - 2 * u);
+        function draw() {
+          dispose(m8); labs = [];
+          const msg = [];
+          if (look || calc || anim || demoed) mapG.visible = true;
+          if (look) {
+            // 重合的等高线段加粗
+            for (let lv = CI; lv < HMAX; lv += CI) {
+              const segs = contourSegs(lv).filter((s) => { const q = mid(s); return Math.abs(q[1]) < 0.07 && q[0] > 0 && q[0] < 0.92; });
+              if (segs.length) m8.add(band(segs, 0.05, RED));
+            }
+            // 陡崖符号：崖顶线 + 短齿指向崖下
+            const line = [], teeth = [];
+            for (let t = 0.05; t < 0.85; t += 0.02) line.push([P(t, -0.07), P(t + 0.02, -0.07)]);
+            for (let t = 0.07; t < 0.84; t += 0.04) teeth.push([P(t, -0.07), P(t, 0.07)]);
+            m8.add(band(line, 0.035, RED)); m8.add(band(teeth, 0.025, RED));
+            labs.push({ p: [PT[0] - 4 - 0.3, Y(PT[0], PT[1]) + 0.45, 4 - PT[1] - 0.3], t: "断层崖 崖高约 " + Math.round(TOP - BOT) + " m" });
+            labs.push({ p: [P(0.85, 0)[0] - 4, MAP, 4 - P(0.85, 0)[1]], t: "陡崖符号：短齿指向崖下" });
+            msg.push('红色为崖面；平面图上中段<span class="hl">多条等高线重合</span>（加粗），向两端分开，崖也逐渐消失。');
+          }
+          if (calc) {
+            m8.add(band(near(HL, 0.9), 0.055, ORG)); m8.add(band(near(LL, 0.9), 0.055, BLUE));
+            const a = P(TM, -0.45), b = P(TM, 0.5), c = P(0.2, 0.35);
+            labs.push({ p: [a[0] - 4, MAP, 4 - a[1]], t: "H = " + HL + " m 崖顶最高线" });
+            labs.push({ p: [b[0] - 4, MAP, 4 - b[1]], t: "L = " + LL + " m 崖底最低线" });
+            labs.push({ p: [c[0] - 4, MAP, 4 - c[1]], t: "重合 n = " + n + " 条" });
+            msg.push("橙线为崖顶最高线 H，蓝线为崖底最低线 L，中段共重合 " + n + " 条等高线。");
+          }
+          if (anim || demoed) {
+            const up = P(TM, -0.5), dn = P(TM, 0.5);
+            labs.push({ p: [up[0] - 4, Y(up[0], up[1]) + 0.25, 4 - up[1]], t: "上升盘（相对）" });
+            labs.push({ f: () => [dn[0] - 4, ((H(dn[0], dn[1]) + drop(dn[0], dn[1]) * (1 - (anim ? anim.k : 1))) / 1000) * exag + 0.25, 4 - dn[1]], t: "下降盘 ↓ 沉落" });
+            msg.push(anim ? "断层错动中：东南侧的下降盘沿断层面沉落……" : "下降盘沉落，断层一侧留下高耸的崖面，即断层崖。再点「断层演示」可重播。");
+          }
+          const out = el("c8-msg"); if (out) out.innerHTML = msg.length ? msg.join("<br>") : "点「看陡崖」：镜头飞到东峰东南翼的断层崖。";
+          const cc = el("c8-calc"); if (cc) cc.hidden = !calc;
+          tint(look || demoed ? 1 : 0);
+        }
+        function flyTo() {
+          const s = { az: az, pol: pol, dist: dist, t: target.clone() };
+          const e = { az: 0.8, pol: 0.95, dist: 5.5, t: new THREE.Vector3(PT[0] - 4, Y(PT[0], PT[1]) * 0.6, 4 - PT[1]) };
+          const t0 = performance.now(), D = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 900;
+          fly = () => {
+            const u = Math.min(1, (performance.now() - t0) / D), q = ease(u);
+            az = s.az + (e.az - s.az) * q; pol = s.pol + (e.pol - s.pol) * q; dist = s.dist + (e.dist - s.dist) * q;
+            target.lerpVectors(s.t, e.t, q); updateCam();
+            if (u >= 1) fly = null;
+          };
+        }
+        const panel = [
+          '<p class="ttl">第 08 章 · 交互</p>',
+          '<div class="card"><h3>演示</h3><div class="x-btns" id="c8-go">',
+          '<button class="x-btn" data-k="look" aria-pressed="false">看陡崖</button><button class="x-btn" data-k="demo" aria-pressed="false">断层演示</button><button class="x-btn" data-k="calc" aria-pressed="false">崖高计算</button></div>',
+          '<p class="note" id="c8-msg" aria-live="polite"></p>',
+          '<div id="c8-calc" hidden><p class="note">公式：<span class="hl">(n−1)d ≤ ΔH &lt; (n+1)d</span></p>',
+          '<p class="note">本图 n = ' + n + "，d = " + d + " m → <b>" + (n - 1) * d + " m ≤ ΔH &lt; " + (n + 1) * d + " m</b></p>",
+          '<p class="note">崖顶：H ≤ 崖顶 &lt; H+d → <b>' + HL + " m ≤ 崖顶 &lt; " + (HL + d) + " m</b></p>",
+          '<p class="note">崖底：L−d &lt; 崖底 ≤ L → <b>' + (LL - d) + " m &lt; 崖底 ≤ " + LL + " m</b></p>",
+          '<p class="note">核对：此处崖顶约 ' + Math.round(TOP) + " m、崖底约 " + Math.round(BOT) + " m，崖高约 " + Math.round(TOP - BOT) + " m，均落在范围内。</p></div></div>",
+          '<div class="card"><h3>应用</h3><ul><li>陡崖处河流跌落，可形成<span class="hl">瀑布</span>。</li><li>岩壁陡峭，<span class="hl">适合攀岩</span>。</li><li>坡陡、易崩塌，<span class="hl">不宜修路</span>。</li></ul></div>',
+          '<div class="card"><h3>要点</h3><ul>',
+          '<li>多条等高线在某处<span class="hl">重合</span>的地方是陡崖。</li>',
+          '<li>陡崖符号的<span class="hl">短齿指向崖下低处</span>。</li>',
+          '<li>本图断层崖：东北—西南走向，中段崖高最大，向两端消失，等高线只在中段重合。</li>',
+          '<li><b>高考链接：</b>陡崖常考崖高与崖顶/崖底海拔范围计算、瀑布与水能、攀岩选址；易错：重合 n 条等高线，崖高范围是 (n−1)d ≤ ΔH &lt; (n+1)d。</li></ul></div>',
+        ].join("");
+        function sync() {
+          document.querySelectorAll("#c8-go .x-btn").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === "look" ? look : b.dataset.k === "calc" ? calc : !!anim)));
+        }
+        function bind() {
+          document.querySelectorAll("#c8-go .x-btn").forEach((b) => {
+            b.onclick = () => {
+              const k = b.dataset.k;
+              if (k === "look") { look = !look; if (look) flyTo(); }
+              else if (k === "calc") { calc = !calc; if (calc && !look) flyTo(); }
+              else { if (!look) flyTo(); anim = { t0: performance.now(), k: 0 }; demoed = false; setH(0); }
+              sync(); draw();
+            };
+          });
+          sync();
+        }
+        function loop() {
+          if (!on) return;
+          if (fly) fly();
+          if (anim) {
+            const u = Math.min(1, (performance.now() - anim.t0) / 3000);
+            anim.k = ease(u); setH(anim.k); tint(look ? 1 : anim.k);
+            if (u >= 1) { anim = null; demoed = true; sync(); draw(); }
+          }
+          const r = canvas.getBoundingClientRect();
+          pool.forEach((dv, i) => { if (i >= labs.length) dv.style.display = "none"; });
+          labs.forEach((Lb, i) => {
+            let dv = pool[i];
+            if (!dv) { dv = document.createElement("div"); dv.className = "lab"; stage.appendChild(dv); pool.push(dv); }
+            dv.style.display = ""; dv.textContent = Lb.t;
+            const p = Lb.f ? Lb.f() : Lb.p;
+            v3.set(p[0], p[1], p[2]).project(camera);
+            dv.style.opacity = v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05 ? 1 : 0;
+            dv.style.left = (v3.x * 0.5 + 0.5) * r.width + "px";
+            dv.style.top = (-v3.y * 0.5 + 0.5) * r.height + "px";
+          });
+          requestAnimationFrame(loop);
+        }
+        window.C8 = {
+          panel: panel,
+          enter: (active) => {
+            m8.visible = active;
+            if (!active) {
+              if (on) { on = false; fly = null; if (anim) { anim = null; setH(1); } tint(0); pool.forEach((dv) => (dv.style.display = "none")); }
+              return;
+            }
+            bind(); draw();
+            if (!on) { on = true; requestAnimationFrame(loop); }
+          },
+        };
+        if (cur === 7) go(7);
+      })();
+    </script>
+    <script>
+      /* ---------- 第 09 章：地形剖面图（复用 H / contourSegs / RIV / 地形与平面图） ---------- */
+      (function () {
+        const MS = 35, NS = 240, GREEN = "#2fb36b";
+        let A = [3.6, 7.8], B = [4.6, 1.0], step = 0, timer = null, vex = 2, los = false, sel = [], on = false, S = null, CT = null, dragK = null;
+        const g9 = new THREE.Group(); g9.visible = false; world.add(g9);
+        const m9 = new THREE.Group(); m9.visible = false; mapG.add(m9);
+        const dispose = (g) => g.children.slice().forEach((o) => { g.remove(o); o.geometry.dispose(); o.material.dispose(); });
+        const mx = (x) => (x * MS).toFixed(1), my = (y) => ((SIZE - y) * MS).toFixed(1);
+        function base() {
+          if (CT) return CT;
+          let s = '<rect width="280" height="280" fill="#f3efe4"/>';
+          for (let lv = CI; lv < HMAX; lv += CI) {
+            let d = "";
+            contourSegs(lv, 120).forEach((q) => (d += "M" + mx(q[0][0]) + " " + my(q[0][1]) + "L" + mx(q[1][0]) + " " + my(q[1][1])));
+            s += '<path d="' + d + '" fill="none" stroke="' + (lv % 500 ? "#9a7a52" : "#6b4a2a") + '" stroke-width="' + (lv % 500 ? 0.6 : 1.1) + '"/>';
+          }
+          RIV.forEach((p) => (s += '<polyline points="' + p.map((q) => mx(q[0]) + "," + my(q[1])).join(" ") + '" fill="none" stroke="#3f86c6" stroke-width="1.4"/>'));
+          s += '<circle cx="' + mx(1.7) + '" cy="' + my(2.1) + '" r="16" fill="#4a93d6" opacity=".75"/>';
+          s += '<text x="' + mx(4) + '" y="' + (+my(6.9) - 6) + '" text-anchor="middle" font-size="12" fill="#6b4a2a">▲主峰</text>';
+          return (CT = s);
+        }
+        function sample() {
+          const L = Math.hypot(B[0] - A[0], B[1] - A[1]), pts = [], X = [];
+          for (let i = 0; i <= NS; i++) { const t = i / NS; pts.push({ t: t, d: t * L, h: H(A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t) }); }
+          for (let i = 0; i < NS; i++) {
+            const a = pts[i].h, b = pts[i + 1].h;
+            for (let lv = CI; lv < HMAX; lv += CI) if ((a - lv) * (b - lv) < 0) { const t = (i + (lv - a) / (b - a)) / NS; X.push({ t: t, d: t * L, h: lv }); }
+          }
+          X.sort((p, q) => p.t - q.t);
+          // 曲线控制点：端点 + 交点；相邻两交点同值时，山顶/谷底按半个等高距估计
+          const P = [{ t: 0, d: 0, h: pts[0].h, e: 1 }];
+          X.forEach((p, i) => {
+            P.push(p); const q = X[i + 1];
+            if (q && q.h === p.h) { const tm = (p.t + q.t) / 2, hm = pts[Math.round(tm * NS)].h; P.push({ t: tm, d: tm * L, h: p.h + (hm > p.h ? CI / 2 : -CI / 2), e: 1 }); }
+          });
+          P.push({ t: 1, d: L, h: pts[NS].h, e: 1 });
+          return { L: L, pts: pts, X: X, P: P };
+        }
+        const at = (t) => [A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t];
+        function drawMap() {
+          const ov = el("c9-ov"); if (!ov) return;
+          let s = '<line x1="' + mx(A[0]) + '" y1="' + my(A[1]) + '" x2="' + mx(B[0]) + '" y2="' + my(B[1]) + '" stroke="' + (step >= 1 ? "#e8590c" : "#d6336c") + '" stroke-width="' + (step >= 1 ? 3.5 : 2) + '"' + (step === 0 ? ' stroke-dasharray="6 4"' : "") + "/>";
+          if (step >= 2) S.X.forEach((p) => { const q = at(p.t); s += '<circle cx="' + mx(q[0]) + '" cy="' + my(q[1]) + '" r="3.2" fill="#fff" stroke="#e8590c" stroke-width="1.5"/>'; });
+          [["A", A], ["B", B]].forEach((k) => {
+            s += '<g data-k="' + k[0] + '" style="cursor:grab"><circle cx="' + mx(k[1][0]) + '" cy="' + my(k[1][1]) + '" r="22" fill="transparent"/><circle cx="' + mx(k[1][0]) + '" cy="' + my(k[1][1]) + '" r="9" fill="#d6336c"/>' +
+              '<text x="' + mx(k[1][0]) + '" y="' + (+my(k[1][1]) + 4) + '" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">' + k[0] + "</text></g>";
+          });
+          ov.innerHTML = s;
+        }
+        function smooth(P) {
+          let d = "M" + P[0][0].toFixed(1) + " " + P[0][1].toFixed(1);
+          for (let i = 0; i < P.length - 1; i++) {
+            const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2;
+            d += "C" + [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6, p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6, p2[0], p2[1]].map((v) => v.toFixed(1)).join(" ");
+          }
+          return d;
+        }
+        let PX = null;
+        function drawProf() {
+          const sv = el("c9-prof"); if (!sv) return;
+          const W = 300, X0 = 40, pw = W - X0 - 12, kx = pw / S.L, hs = S.pts.map((p) => p.h);
+          const lo = Math.max(0, Math.floor(Math.min.apply(null, hs) / 100) * 100 - 100), hi = Math.ceil(Math.max.apply(null, hs) / 100) * 100 + 100;
+          const ph = Math.max(40, ((hi - lo) / 1000) * kx * vex), T = 12, Hh = T + ph + 34;
+          const px = (d) => X0 + d * kx, py = (h) => T + ph - ((h - lo) / (hi - lo)) * ph;
+          PX = { X0: X0, kx: kx, W: W };
+          const tick = [100, 200, 500, 1000].find((s) => (ph / (hi - lo)) * s >= 18) || 1000;
+          let s = "";
+          for (let h = lo; h <= hi; h += tick) s += '<line x1="' + X0 + '" x2="' + (W - 12) + '" y1="' + py(h) + '" y2="' + py(h) + '" stroke="currentColor" opacity=".15"/><text x="' + (X0 - 4) + '" y="' + (py(h) + 4) + '" text-anchor="end" font-size="12" fill="currentColor">' + h + "</text>";
+          const ks = S.L > 4 ? 2 : 1;
+          for (let k = 0; k <= S.L + 1e-6; k += ks) s += '<text x="' + px(k) + '" y="' + (T + ph + 15) + '" text-anchor="middle" font-size="12" fill="currentColor">' + k + "</text>";
+          s += '<line x1="' + X0 + '" x2="' + (W - 12) + '" y1="' + (T + ph) + '" y2="' + (T + ph) + '" stroke="currentColor"/><line x1="' + X0 + '" x2="' + X0 + '" y1="' + T + '" y2="' + (T + ph) + '" stroke="currentColor"/>';
+          s += '<text x="' + X0 + '" y="' + (Hh - 3) + '" font-size="12" fill="currentColor">A</text><text x="' + (W - 12) + '" y="' + (Hh - 3) + '" text-anchor="end" font-size="12" fill="currentColor">B</text><text x="' + (X0 + pw / 2) + '" y="' + (Hh - 3) + '" text-anchor="middle" font-size="12" fill="currentColor">距离 km · 海拔 m</text>';
+          if (step >= 4) {
+            s += '<polyline points="' + S.pts.map((p) => px(p.d).toFixed(1) + "," + py(p.h).toFixed(1)).join(" ") + '" fill="none" stroke="#9aa3b2" stroke-width="1"/>';
+            s += '<path d="' + smooth(S.P.map((p) => [px(p.d), py(p.h)])) + '" fill="none" stroke="#e8590c" stroke-width="2"/>';
+          }
+          if (step >= 3) S.P.forEach((p) => {
+            s += '<line x1="' + px(p.d) + '" x2="' + px(p.d) + '" y1="' + (T + ph) + '" y2="' + py(p.h) + '" stroke="#e8590c" stroke-dasharray="2 3" opacity=".6"/>';
+            s += '<circle cx="' + px(p.d) + '" cy="' + py(p.h) + '" r="3" fill="' + (p.e ? "none" : "#e8590c") + '" stroke="#e8590c" stroke-width="1.5"/>';
+          });
+          if (sel.length) {
+            const pt = sel.map((t) => [px(t * S.L), py(S.pts[Math.round(t * NS)].h)]);
+            if (sel.length === 2) s += '<line x1="' + pt[0][0] + '" y1="' + pt[0][1] + '" x2="' + pt[1][0] + '" y2="' + pt[1][1] + '" stroke="' + (vis() ? GREEN : "var(--warn)") + '" stroke-width="2"/>';
+            pt.forEach((q) => (s += '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="5" fill="' + (sel.length === 2 ? (vis() ? GREEN : "var(--warn)") : "var(--acc)") + '"/>'));
+            if (sel.length === 2 && step < 4) s += '<polyline points="' + S.pts.map((p) => px(p.d).toFixed(1) + "," + py(p.h).toFixed(1)).join(" ") + '" fill="none" stroke="#9aa3b2" stroke-width="1"/>';
+          }
+          sv.setAttribute("viewBox", "0 0 " + W + " " + Hh.toFixed(0));
+          sv.innerHTML = s;
+          // 坡度视觉变化
+          let g = 0; for (let i = 0; i < NS; i++) g = Math.max(g, Math.abs(S.pts[i + 1].h - S.pts[i].h) / ((S.L / NS) * 1000));
+          const r = (v) => (Math.atan(v) * 180 / Math.PI).toFixed(0);
+          el("c9-slope").innerHTML = "最陡段真实坡度约 <b>" + r(g) + "°</b>，在 " + vex + "× 夸张下图上看起来约 <b>" + r(g * vex) + "°</b>。" + (vex > 1 ? '<span class="hl">垂直夸张越大，坡显得越陡。</span>' : "1× 为真实比例，起伏显得很平缓。");
+        }
+        function vis() {
+          const a = Math.round(Math.min(sel[0], sel[1]) * NS), b = Math.round(Math.max(sel[0], sel[1]) * NS), ha = S.pts[a].h + 2, hb = S.pts[b].h + 2;
+          for (let i = a + 1; i < b; i++) if (S.pts[i].h > ha + ((hb - ha) * (i - a)) / (b - a)) return false;
+          return true;
+        }
+        const MSG = ["拖动 A、B 改变剖面线，点「分步绘制」开始。", "01 定剖面线：在等高线图上连接 A、B（橙线）。", "02 找交点：剖面线与等高线共有 ", "03 定海拔：把交点按水平距离投到下方坐标系，按海拔定点；空心点为端点和按半个等高距估计的山顶/谷底。", "04 连曲线：用平滑曲线连接各点；细灰线为真实地形高程，可对比误差。"];
+        function draw3D() {
+          dispose(g9); dispose(m9);
+          const v = [], top = [];
+          for (let i = 0; i < NS; i++) {
+            const a = at(i / NS), b = at((i + 1) / NS), ya = Y9(S.pts[i].h), yb = Y9(S.pts[i + 1].h), ax = a[0] - 4, az = 4 - a[1], bx = b[0] - 4, bz = 4 - b[1];
+            v.push(ax, 0, az, bx, 0, bz, ax, ya, az, ax, ya, az, bx, 0, bz, bx, yb, bz);
+          }
+          S.pts.forEach((p, i) => { const q = at(i / NS); top.push(q[0] - 4, Y9(p.h) + 0.01, 4 - q[1]); });
+          const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+          g9.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0xe8590c, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false })));
+          const gt = new THREE.BufferGeometry(); gt.setAttribute("position", new THREE.Float32BufferAttribute(top, 3));
+          g9.add(new THREE.Line(gt, new THREE.LineBasicMaterial({ color: 0xffffff })));
+          const gm = new THREE.BufferGeometry(); gm.setAttribute("position", new THREE.Float32BufferAttribute([A[0] - 4, 0.014, 4 - A[1], B[0] - 4, 0.014, 4 - B[1]], 3));
+          m9.add(new THREE.Line(gm, new THREE.LineBasicMaterial({ color: 0xd6336c })));
+        }
+        const Y9 = (h) => (h / 1000) * exag;
+        function draw(rebuild) {
+          if (rebuild !== false) { S = sample(); draw3D(); }
+          drawMap(); drawProf();
+          const m = el("c9-msg"); if (m) m.textContent = step === 2 ? MSG[2] + S.X.length + " 个交点（白点），每点海拔等于该等高线数值。" : MSG[step];
+          const lm = el("c9-losmsg");
+          if (lm) lm.innerHTML = !los ? "" : sel.length < 2 ? "通视判断：在剖面图上点选两点（已选 " + sel.length + "）。" : vis() ? '<b style="color:' + GREEN + '">通视</b>：两点连线不受地形遮挡。' : '<b style="color:var(--warn)">不通视</b>：连线被中间地形挡住。';
+        }
+        function play() {
+          clearInterval(timer); step = 1; draw(false);
+          timer = setInterval(() => { step++; draw(false); if (step >= 4) clearInterval(timer); }, 1500);
+        }
+        const panel = [
+          '<p class="ttl">第 09 章 · 交互</p>',
+          '<div class="card"><h3>剖面线 AB</h3>',
+          '<svg id="c9-map" viewBox="0 0 280 280" width="100%" role="img" aria-label="等高线地形图，可拖动 A、B 两点设置剖面线" style="display:block;border-radius:8px;touch-action:none">' + "</svg>",
+          '<div class="x-btns"><button class="x-btn" id="c9-play">分步绘制</button><button class="x-btn" id="c9-los" aria-pressed="false">通视判断</button></div>',
+          '<p class="note" id="c9-msg" aria-live="polite"></p>',
+          '<svg id="c9-prof" width="100%" role="img" aria-label="沿 AB 的地形剖面图" style="display:block;color:var(--ink2);font-family:var(--mono);cursor:crosshair;touch-action:none"></svg>',
+          '<p class="note" id="c9-losmsg" aria-live="polite"></p>',
+          '<div class="row"><label for="c9-ex">垂直夸张 <span class="val" id="c9-exv">×2</span></label></div><input type="range" id="c9-ex" min="1" max="5" step="0.5" value="2" aria-label="垂直夸张" />',
+          '<p class="note" id="c9-slope"></p></div>',
+          '<div class="card"><h3>要点</h3><ul>',
+          '<li>剖面图反映沿某条直线方向的<span class="hl">地势起伏</span>。</li>',
+          '<li>四步：<span class="hl">01 定剖面线 · 02 找交点 · 03 定海拔 · 04 连曲线</span>。</li>',
+          '<li>横轴为水平距离，纵轴为海拔；纵横比例不同即为<span class="hl">垂直夸张</span>。</li>',
+          '<li><b>高考链接：</b>常考根据等高线选正确剖面图（看起止海拔、最高最低点、凹凸与坡度）、通视判断；易错：剖面图的山顶、谷底须与交点海拔范围一致，垂直比例改变会夸大坡度。</li></ul></div>',
+        ].join("");
+        function bind() {
+          const mp = el("c9-map");
+          mp.innerHTML = base() + '<g id="c9-ov"></g>';
+          const toKm = (e) => { const r = mp.getBoundingClientRect(); return [Math.max(0.1, Math.min(7.9, ((e.clientX - r.left) / r.width) * SIZE)), Math.max(0.1, Math.min(7.9, SIZE - ((e.clientY - r.top) / r.height) * SIZE))]; };
+          mp.onpointerdown = (e) => { const g = e.target.closest("[data-k]"); if (g) { dragK = g.dataset.k; mp.setPointerCapture(e.pointerId); } };
+          mp.onpointermove = (e) => {
+            if (!dragK) return;
+            const p = toKm(e), o = dragK === "A" ? B : A;
+            if (Math.hypot(p[0] - o[0], p[1] - o[1]) < 1) return;
+            if (dragK === "A") A = p; else B = p;
+            sel = []; draw();
+          };
+          mp.onpointerup = mp.onpointercancel = () => (dragK = null);
+          el("c9-play").onclick = play;
+          el("c9-los").onclick = () => { los = !los; sel = []; el("c9-los").setAttribute("aria-pressed", String(los)); draw(false); };
+          el("c9-prof").onclick = (e) => {
+            if (!los || !PX) return;
+            const r = e.currentTarget.getBoundingClientRect(), x = ((e.clientX - r.left) / r.width) * PX.W;
+            const t = Math.max(0, Math.min(1, (x - PX.X0) / PX.kx / S.L));
+            sel = sel.length >= 2 ? [t] : sel.concat([t]); draw(false);
+          };
+          const ex = el("c9-ex");
+          ex.value = vex; el("c9-exv").textContent = "×" + vex;
+          ex.oninput = () => { vex = +ex.value; el("c9-exv").textContent = "×" + vex; draw(false); };
+          el("c9-los").setAttribute("aria-pressed", String(los));
+        }
+        window.C9 = {
+          smooth: smooth,
+          panel: panel,
+          enter: (active) => {
+            g9.visible = m9.visible = active;
+            if (!active) { if (on) { on = false; clearInterval(timer); if (step > 0 && step < 4) step = 4; } return; }
+            on = true; mapG.visible = true; bind(); draw();
+          },
+        };
+        if (cur === 8) go(8);
+      })();
+    </script>
+    <script>
+      /* ---------- 第 10 章：随堂检测（复用 H / contourSegs / RIV / C5.ribbon / C9.smooth / 舞台视角） ---------- */
+      (function () {
+        const Y = (h) => (h / 1000) * exag, MY = -1.5, RED = 0xef6461, GOLD = 0xf2b544, BLUE = 0x2f8fe0, PINK = 0xd6336c, ORG = 0xe8590c;
+        const g10 = new THREE.Group(), m10 = new THREE.Group(); g10.visible = m10.visible = false; world.add(g10); mapG.add(m10);
+        let qi = 0, ans = [], on = false, labs = [];
+        const pool = [], v3 = new THREE.Vector3();
+        const clear = () => { [g10, m10].forEach((g) => g.children.slice().forEach((o) => { g.remove(o); o.geometry.dispose(); o.material.dispose(); })); labs = []; };
+        const near = (lv, c, r) => contourSegs(lv).filter((s) => Math.hypot(s[0][0] - c[0], s[0][1] - c[1]) < r);
+        const mapLab = (x, y, t) => labs.push({ p: [x - 4, MY + 0.05, 4 - y], t: t });
+        const topLab = (x, y, t) => labs.push({ p: [x - 4, Y(H(x, y)) + 0.32, 4 - y], t: t });
+        // 高亮一条等高线（地表 + 平面图），a 为数值标注方向
+        function hi(lv, c, r, col, a) {
+          const segs = near(lv, c, r); if (!segs.length) return;
+          g10.add(C5.ribbon(segs, Y(lv) + 0.03, 0.05, col)); m10.add(C5.ribbon(segs, 0.01, 0.06, col));
+          if (a != null) {
+            const f = [c[0] + 3 * Math.cos(a), c[1] + 3 * Math.sin(a)], d = (p) => Math.hypot(p[0] - f[0], p[1] - f[1]);
+            const s = segs.reduce((b, q) => (d(q[0]) < d(b[0]) ? q : b));
+            mapLab(s[0][0], s[0][1], lv + "");
+          }
+        }
+        function dot(x, y, col, t, r) {
+          const s = new THREE.Mesh(new THREE.SphereGeometry(r || 0.08, 12, 8), new THREE.MeshBasicMaterial({ color: col }));
+          s.position.set(x - 4, Y(H(x, y)) + 0.05, 4 - y); g10.add(s);
+          const c = new THREE.Mesh(new THREE.CircleGeometry(r || 0.08, 16), new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide }));
+          c.rotation.x = -Math.PI / 2; c.position.set(x - 4, 0.014, 4 - y); m10.add(c);
+          if (t) topLab(x, y, t);
+        }
+        function path(pts, col) {
+          const d = [];
+          for (let k = 0; k < pts.length - 1; k++) for (let i = 0; i < 40; i++) { const u = i / 40; d.push([pts[k][0] + (pts[k + 1][0] - pts[k][0]) * u, pts[k][1] + (pts[k + 1][1] - pts[k][1]) * u]); }
+          d.push(pts[pts.length - 1]);
+          const v = d.map((p) => new THREE.Vector3(p[0] - 4, Y(H(p[0], p[1])) + 0.04, 4 - p[1]));
+          g10.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(v), v.length, 0.03, 6), new THREE.MeshBasicMaterial({ color: col })));
+          m10.add(C5.ribbon(d.slice(1).map((p, i) => [d[i], p]), 0.012, 0.07, col));
+          return d;
+        }
+        // 视角：复用舞台的轨道相机（target / az / pol / dist / updateCam）
+        function aim(x, y, a, p, d) { mapG.visible = true; target.set(x - 4, 0.2, 4 - y); az = a; pol = p; dist = d; updateCam(); }
+        function crossings(A, B, col) {
+          let n = 0, p = H(A[0], A[1]);
+          for (let i = 1; i <= 300; i++) {
+            const x = A[0] + ((B[0] - A[0]) * i) / 300, y = A[1] + ((B[1] - A[1]) * i) / 300, q = H(x, y);
+            if (Math.floor(q / CI) !== Math.floor(p / CI)) { n++; dot(x, y, col, "", 0.045); }
+            p = q;
+          }
+          return n;
+        }
+        /* 剖面选项：沿 AB 采样，用第 09 章的平滑曲线函数绘制 */
+        const PA = [0.6, 6.75], PB = [6.6, 6.75], NP = 30;
+        const base = Array.from({ length: NP + 1 }, (_, i) => H(PA[0] + ((PB[0] - PA[0]) * i) / NP, PA[1]));
+        const lo = Math.min.apply(null, base), hi0 = Math.max.apply(null, base);
+        const PROF = [base.slice().reverse(), base.map((h) => lo + hi0 - h), base, base.map((_, i) => { const t = i / NP; return 425 + 600 * t + 700 * Math.sin(Math.PI * t); })];
+        function mini(hs, k) {
+          const P = hs.map((h, i) => [16 + (i / NP) * 118, 66 - ((h - 200) / 1400) * 56]);
+          return '<div style="min-width:0"><svg viewBox="0 0 140 84" width="100%" role="img" aria-label="剖面选项 ' + "①②③④"[k] + '" style="display:block;color:var(--ink2);font-family:var(--mono)">' +
+            '<line x1="16" y1="66" x2="134" y2="66" stroke="currentColor"/><line x1="16" y1="8" x2="16" y2="66" stroke="currentColor"/>' +
+            '<path d="' + C9.smooth(P) + '" fill="none" stroke="var(--acc)" stroke-width="2"/>' +
+            '<text x="16" y="80" font-size="12" fill="currentColor">A</text><text x="134" y="80" text-anchor="end" font-size="12" fill="currentColor">B</text><text x="74" y="80" text-anchor="middle" font-size="12" fill="currentColor">' + "①②③④"[k] + "</text></svg></div>";
+        }
+        const R1 = [4, 5.4], R甲 = [4, 6.9], R乙 = [5.3, 6.15];
+        const Q = [
+          { t: "地形部位", s: "图中 P 点位于西峰与主峰之间，P 点所在的地形部位是", o: ["山顶", "鞍部", "山谷", "陡崖"], a: 1,
+            why: "P 位于西峰、主峰两组闭合等高线之间，比两侧山顶低、又比南北两侧山谷高——<span class=\"hl\">两山夹一低</span>，为鞍部。",
+            pre: () => { aim(3, 6.8, -0.2, 0.9, 6); dot(3, 6.84, PINK, "P"); },
+            post: () => { hi(1000, [3, 6.84], 1.6, GOLD, -Math.PI / 2); dot(2, 6.7, ORG, "西峰 " + Math.round(H(2, 6.7)) + " m"); dot(4, 6.9, ORG, "主峰 " + Math.round(H(4, 6.9)) + " m"); topLab(3, 7.3, "鞍部 P " + Math.round(H(3, 6.84)) + " m"); } },
+          { t: "河流流向", s: "图中某河段处的等高线向北凸出，该河段的流向是", o: ["自北向南", "自南向北", "自西向东", "自东向西"], a: 0,
+            why: "等高线向北凸出，凸向数值高处，说明这里是<span class=\"hl\">山谷</span>，北高南低；河流流向与等高线凸出方向相反，故<span class=\"hl\">自北向南</span>。",
+            pre: () => { aim(3.1, 5.4, 0, 0.85, 5); hi(300, [3.1, 5.5], 0.7, GOLD, 0); hi(400, [3.1, 5.9], 0.7, GOLD, 0); topLab(3.1, 5.2, "该河段"); },
+            post: () => { path(RIV[0], BLUE); topLab(3.1, 6.0, "等高线凸向北（高处）"); topLab(3.6, 4.4, "↓ 自北向南流"); } },
+          { t: "陡崖崖高", s: "东峰东南翼陡崖处有 3 条等高线重合，等高距 100 m，崖高 ΔH 的范围是", o: ["100 ≤ ΔH < 200 m", "200 ≤ ΔH < 300 m", "200 ≤ ΔH < 400 m", "300 ≤ ΔH < 400 m"], a: 2,
+            why: "公式 <span class=\"hl\">(n−1)d ≤ ΔH &lt; (n+1)d</span>，n = 3、d = 100 m，得 <span class=\"hl\">200 ≤ ΔH &lt; 400 m</span>。重合的是 500、600、700 m 线：崖顶 700–800 m，崖底 400–500 m。",
+            pre: () => { aim(6.8, 5.3, 0.75, 0.95, 5); [500, 600, 700].forEach((lv) => hi(lv, [6.8, 5.3], 0.45, RED)); mapLab(6.8, 5.3, "3 条线重合"); },
+            post: () => { dot(6.75, 5.39, ORG, "崖顶 " + Math.round(H(6.75, 5.39)) + " m"); dot(6.92, 5.24, BLUE, "崖底 " + Math.round(H(6.92, 5.24)) + " m"); } },
+          { t: "坡度缓陡", s: "从同一起点出发的登山路线甲（红）、乙（蓝），水平长度都是 1.5 km，坡度较缓的是", o: ["路线甲", "路线乙", "一样缓", "无法判断"], a: 1,
+            why: "同一幅图等高距相同，<span class=\"hl\">等高线越稀疏，坡度越缓</span>。同样 1.5 km，乙穿过的等高线远少于甲，所以乙更缓。",
+            pre: () => { aim(4.5, 6.0, 0.3, 0.9, 7); path([R1, R甲], RED); path([R1, R乙], BLUE); topLab(R甲[0], R甲[1], "甲"); topLab(R乙[0], R乙[1], "乙"); },
+            post: () => { const a = crossings(R1, R甲, RED), b = crossings(R1, R乙, BLUE); mapLab(3.6, 6.3, "甲穿过 " + a + " 条（密·陡）"); mapLab(5.6, 5.6, "乙穿过 " + b + " 条（疏·缓）"); } },
+          { t: "剖面图", s: "沿图中 A—B 线（自西向东）作地形剖面，正确的剖面图是", o: ["①", "②", "③", "④"], a: 2,
+            fig: () => '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">' + PROF.map(mini).join("") + "</div>",
+            why: "AB 依次经过西峰、主峰、东峰：三个峰中<span class=\"hl\">中间最高</span>、东侧高于西侧，A 端低于 B 端。② 起伏颠倒，① 东西反向，④ 少了两侧山峰，只有 ③ 正确。",
+            pre: () => { aim(3.6, 6.4, 0, 0.9, 9); path([PA, PB], PINK); topLab(PA[0], PA[1], "A"); topLab(PB[0], PB[1], "B"); },
+            post: () => { [2.1, 4.0, 6.0].forEach((x) => dot(x, 6.75, ORG, Math.round(H(x, 6.75)) + " m")); } },
+          { t: "闭合等高线", s: "主峰处最内一条闭合等高线与外侧较高的一条同为 1400 m（等高距 100 m），闭合区内山顶海拔 H 可能是", o: ["1300 < H < 1400 m", "H = 1400 m", "1400 < H < 1500 m", "1300 < H < 1500 m"], a: 2,
+            why: "闭合区与<span class=\"hl\">较高线等值</span>、内高外低，是山顶：H 在 (高, 高+d)，即 <span class=\"hl\">1400 &lt; H &lt; 1500 m</span>（“大于大的”）。",
+            pre: () => { aim(4, 6.9, -0.35, 0.95, 6); hi(1300, [4, 6.9], 1, GOLD, -Math.PI / 2); hi(1400, [4, 6.9], 0.6, RED, -Math.PI / 3); },
+            post: () => { dot(4, 6.9, ORG, "主峰 " + Math.round(H(4, 6.9)) + " m"); } },
+        ];
+        const ok = (i) => '<span style="color:var(--acc)">✓</span>', no = '<span style="color:var(--warn)">✗</span>';
+        function score() {
+          const s = el("c10-sc"); if (!s) return;
+          const n = ans.filter(Boolean).length;
+          s.innerHTML = '<h3>得分卡</h3><p style="margin:0;font:600 28px var(--mono);color:var(--acc)">' + n + ' <span class="note">/ ' + Q.length + "</span></p>" +
+            '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:8px">' + Q.map((q, i) =>
+              '<span style="text-align:center;border:1px solid ' + (i === qi ? "var(--acc)" : "var(--line)") + ';border-radius:6px;padding:4px 0;font:400 12px var(--mono)">' + (i + 1) + " " + (ans[i] == null ? "·" : ans[i] ? ok() : no) + "</span>").join("") +
+            '</div><p class="note">已答 ' + ans.filter((a) => a != null).length + " / " + Q.length + " 题</p>";
+        }
+        function render() {
+          const box = el("c10-q"); if (!box) return;
+          clear(); score();
+          if (qi >= Q.length) {
+            aim(4, 4.6, -0.6, 1.0, 12);
+            box.innerHTML = '<p>得分 <b style="color:var(--acc)">' + ans.filter(Boolean).length + " / " + Q.length + '</b></p><ul style="margin:0;padding-left:18px;font-size:13px">' +
+              Q.map((q, i) => "<li>" + (ans[i] ? ok() : no) + " 第 " + (i + 1) + " 题 · " + q.t + "</li>").join("") +
+              '</ul><div class="x-btns"><button class="x-btn" id="c10-redo">重新作答</button></div>';
+            el("c10-redo").onclick = () => { ans = []; qi = 0; render(); };
+            return;
+          }
+          const q = Q[qi]; q.pre();
+          box.innerHTML = '<p class="note" style="margin:0">第 ' + (qi + 1) + " / " + Q.length + " 题 · 单选</p><p>" + q.s + "</p>" + (q.fig ? q.fig() : "") +
+            '<div class="x-btns">' + q.o.map((t, i) => '<button class="x-btn" data-i="' + i + '" aria-pressed="false">' + "ABCD"[i] + ". " + t + "</button>").join("") +
+            '</div><div class="note" id="c10-f" aria-live="polite"></div>';
+          box.querySelectorAll("[data-i]").forEach((b) => (b.onclick = () => {
+            if (ans[qi] != null) return;
+            const i = +b.dataset.i, right = i === q.a; ans[qi] = right;
+            b.setAttribute("aria-pressed", "true");
+            box.querySelectorAll("[data-i]").forEach((o) => { if (+o.dataset.i === q.a) o.style.borderColor = "var(--acc)"; else if (o === b) { o.style.borderColor = "var(--warn)"; o.style.color = "var(--warn)"; } });
+            el("c10-f").innerHTML = "<p>" + (right ? ok() + " 正确。" : no + " 错误，正确答案 " + "ABCD"[q.a] + "。") + q.why + '</p><div class="x-btns"><button class="x-btn" id="c10-n">' + (qi < Q.length - 1 ? "下一题 →" : "查看得分") + "</button></div>";
+            q.post(); score();
+            el("c10-n").onclick = () => { qi++; render(); };
+          }));
+        }
+        const panel = [
+          '<p class="ttl">第 10 章 · 随堂检测</p>',
+          '<div class="card" id="c10-sc"></div>',
+          '<div class="card"><h3>单选题</h3><div id="c10-q"></div></div>',
+          '<div class="card"><h3>要点</h3><ul>',
+          '<li>地形部位：闭合内高外低为山顶；<span class="hl">两山夹一低</span>为鞍部；多线重合为陡崖。</li>',
+          '<li>凸低为脊、凸高为谷；河流流向与谷地等高线凸出方向<span class="hl">相反</span>。</li>',
+          '<li>崖高 <span class="hl">(n−1)d ≤ ΔH &lt; (n+1)d</span>；密陡·疏缓；闭合区“大于大的，小于小的”。</li>',
+          '<li><b>高考链接：</b>等高线判读是浙江地理选考必考基础，常与河流、选址、通视、剖面图组合出题。</li></ul></div>',
+        ].join("");
+        function loop() {
+          if (!on) return;
+          const r = canvas.getBoundingClientRect();
+          pool.forEach((d, i) => { if (i >= labs.length) d.style.display = "none"; });
+          labs.forEach((Lb, i) => {
+            let d = pool[i];
+            if (!d) { d = document.createElement("div"); d.className = "lab"; stage.appendChild(d); pool.push(d); }
+            d.style.display = ""; d.textContent = Lb.t;
+            v3.set(Lb.p[0], Lb.p[1], Lb.p[2]).project(camera);
+            d.style.opacity = v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05 ? 1 : 0;
+            d.style.left = (v3.x * 0.5 + 0.5) * r.width + "px";
+            d.style.top = (-v3.y * 0.5 + 0.5) * r.height + "px";
+          });
+          requestAnimationFrame(loop);
+        }
+        window.C10 = {
+          panel: panel,
+          enter: (active) => {
+            g10.visible = m10.visible = active;
+            if (!active) { if (on) { on = false; pool.forEach((d) => (d.style.display = "none")); } return; }
+            if (qi < Q.length && ans[qi] != null) qi++;
+            render();
+            if (!on) { on = true; requestAnimationFrame(loop); }
+          },
+        };
+        if (cur === 9) go(9);
+      })();
+    </script>
+  </body>
+</html>
