@@ -1,24 +1,25 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>格物实验室 · 地球运动</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
-    />
     <link rel="stylesheet" href="hark.css" />
     <link rel="stylesheet" href="hark-hero.css" />
     <style>
-      :root[data-theme="dark"] { --x-bg1:#0E1420; --x-bg2:#121A2A; --x-panel:#151E30; --x-line:rgba(255,255,255,.08); --x-tx:#E6ECF5; --x-tx2:#8A97AD; --x-ac:#2EC4B6; --x-ac2:#F2B544; --x-red:#EF6461; --x-soft:#163437; --x-card:#1B2436; }
-      :root[data-theme="light"] { --x-bg1:#F6F3EC; --x-bg2:#F6F3EC; --x-panel:#FFFFFF; --x-line:rgba(29,36,51,.1); --x-tx:#1D2433; --x-tx2:#5B6577; --x-ac:#139A8E; --x-ac2:#C98A12; --x-red:#D2453F; --x-soft:#E2F1EE; --x-card:#F4F2EC; }
+      :root, :root[data-theme="light"] { --x-bg1:#fbfbfd; --x-bg2:#fbfbfd; --x-panel:#ffffff; --x-line:rgba(0,0,0,.08); --x-tx:#1d1d1f; --x-tx2:#6e6e73; --x-ac:#0a9396; --x-ac2:#c98a12; --x-red:#e5484d; --x-soft:#e8f1fc; --x-card:#f5f5f7;
+        --x-blue:#0071e3; --x-blue-tx:#0062c4; --x-btn-bg:#0071e3; --x-gold-tx:#8a5c00; --x-red-tx:#c4262c; --x-teal-tx:#077a7d; --x-ok-bg:#077a7d;
+        --x-glass:rgba(251,251,253,.72); --x-float:rgba(255,255,255,.86); --x-btn2:#f5f5f7; --x-btn2-h:#e8e8ed; --x-track:#e5e5ea; --x-stage:#fbfbfd; --x-stage2:#f2f2f6;
+        --x-shadow:0 4px 24px rgba(0,0,0,.04), 0 0 0 .5px rgba(0,0,0,.06); --x-ease:cubic-bezier(.2,.8,.2,1);
+        --x-sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif; --x-mono-f:ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
+      :root[data-theme="dark"] { --x-bg1:#000000; --x-bg2:#000000; --x-panel:#1d1d1f; --x-line:rgba(255,255,255,.12); --x-tx:#f5f5f7; --x-tx2:#a1a1a6; --x-ac:#2ec4b6; --x-ac2:#f2b544; --x-red:#ff6961; --x-soft:#0b2a4a; --x-card:#2c2c2e;
+        --x-blue:#2997ff; --x-blue-tx:#2997ff; --x-btn-bg:#0071e3; --x-gold-tx:#f2b544; --x-red-tx:#ff6961; --x-teal-tx:#40c8bc; --x-ok-bg:#077a7d;
+        --x-glass:rgba(29,29,31,.72); --x-float:rgba(29,29,31,.86); --x-btn2:#2c2c2e; --x-btn2-h:#3a3a3c; --x-track:#3a3a3c; --x-stage:#000000; --x-stage2:#0b0b0d;
+        --x-shadow:0 4px 24px rgba(0,0,0,.4), 0 0 0 .5px rgba(255,255,255,.08); }
       html:has(body.x-app) { background:var(--x-bg1); }
       body.x-app { margin:0; max-width:100vw; height:100vh; height:100dvh; overflow:hidden; color:var(--x-tx); background:linear-gradient(160deg,var(--x-bg1),var(--x-bg2)); font:15px/1.6 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
       .x-app * { transition:background-color 200ms, border-color 200ms, color 200ms; }
-      .x-mono { font-family:"Geist Mono",ui-monospace,Menlo,monospace; }
+      .x-mono { font-family:ui-monospace,Menlo,monospace; }
       .x-serif { font-family:"Noto Serif SC","Songti SC",serif; }
       .x-shell { display:grid; height:100%; max-width:none; margin:0; padding:0; gap:0; grid-template-columns:220px 1fr 340px; grid-template-rows:56px 1fr; }
       .x-top { grid-column:1/-1; display:flex; align-items:center; gap:16px; padding:0 14px; border-bottom:1px solid var(--x-line); background:var(--x-panel); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
@@ -117,13 +118,156 @@
         .x-handle span:last-child { color:var(--x-tx2); font-size:12px; }
       }
     </style>
+    <style>
+      /* ===== 视觉改版：与门户首页一致的极简风格（只覆盖样式） ===== */
+      body.x-app { font:15px/1.6 var(--x-sans); letter-spacing:0; -webkit-font-smoothing:antialiased; background:var(--x-bg1); }
+      .x-app * { transition:background-color .3s var(--x-ease), border-color .3s var(--x-ease), color .3s var(--x-ease), box-shadow .3s var(--x-ease); }
+      .x-app :focus-visible { outline:2px solid var(--x-blue); outline-offset:2px; }
+      .x-mono { font-family:var(--x-mono-f); font-variant-numeric:tabular-nums; }
+      .x-serif { font-family:var(--x-sans); }
+      [hidden] { display:none !important; }
+
+      /* 顶栏 */
+      .x-top { position:relative; z-index:6; gap:16px; padding:0 16px; background:var(--x-glass); border-bottom:.5px solid var(--x-line); backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px); }
+      .x-brand { flex-direction:row; align-items:center; gap:10px; line-height:1.3; }
+      .x-back { display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0 4px; margin-left:-4px; color:var(--x-blue-tx); text-decoration:none; font-size:14px; white-space:nowrap; border-radius:10px; }
+      .x-back span[aria-hidden] { font-size:22px; line-height:1; margin-top:-2px; }
+      .x-back:hover .x-back-t { text-decoration:underline; text-underline-offset:3px; }
+      .x-brand b { font-size:15px; font-weight:600; letter-spacing:-.01em; overflow:hidden; text-overflow:ellipsis; }
+      .x-brand b .x-en { color:var(--x-tx2); font-weight:400; }
+      .x-segs { gap:4px; }
+      .x-segs i { height:3px; border-radius:980px; background:var(--x-line); }
+      .x-segs i.on { background:var(--x-blue); }
+      .x-count { color:var(--x-tx2); }
+      .x-tools { gap:4px; }
+      .x-ib { width:44px; height:44px; border:0; border-radius:980px; background:transparent; color:var(--x-tx); font-size:19px; }
+      .x-ib:hover { background:var(--x-btn2); border-color:transparent; }
+      .x-toc { display:none; }
+
+      /* 章节栏 */
+      .x-chap { padding:12px 10px; border-right:.5px solid var(--x-line); background:var(--x-bg1); }
+      .x-chap button { margin-bottom:2px; padding:9px 12px; border:0; border-radius:12px; color:var(--x-tx2); }
+      .x-chap button:hover { background:var(--x-btn2); }
+      .x-chap button span { color:var(--x-tx2); font-size:12px; }
+      .x-chap button b { font-weight:500; color:var(--x-tx); }
+      .x-chap button[aria-current="true"] { background:var(--x-soft); border:0; }
+      .x-chap button[aria-current="true"] span { color:var(--x-blue-tx); }
+      .x-chap button[aria-current="true"] b { font-weight:600; color:var(--x-tx); }
+
+      /* 舞台 */
+      .x-stage { background:radial-gradient(ellipse at 50% 40%, var(--x-stage), var(--x-stage2) 80%); }
+      .x-ov { left:16px; top:16px; max-width:min(460px,calc(100% - 32px)); padding:16px 18px; border:0; border-radius:22px; background:var(--x-float); box-shadow:var(--x-shadow); backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px); }
+      .x-ov .x-book { color:var(--x-tx2); font-size:12px; }
+      .x-ov h1 { font-size:22px; font-weight:600; letter-spacing:-.02em; line-height:1.25; }
+      .x-ov h1 .x-mono { font-size:13px; font-weight:400; letter-spacing:0; color:var(--x-blue-tx); }
+      .x-ov p.x-lead { font-size:15px; line-height:1.6; color:var(--x-tx); }
+      .x-fold { right:4px; top:4px; border-radius:980px; color:var(--x-tx2); }
+      .x-fold:hover { background:var(--x-btn2); }
+      .x-mini { border:0; border-radius:18px; background:var(--x-float); box-shadow:var(--x-shadow); backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px); }
+      .x-soon, .x-err { background:var(--x-glass); color:var(--x-tx); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+      .x-soon div, .x-err div { border:0; border-radius:22px; background:var(--x-panel); box-shadow:var(--x-shadow); }
+      .x-soon .x-fine { color:var(--x-tx2) !important; }
+      .x-err div { box-shadow:var(--x-shadow), inset 0 0 0 1.5px var(--x-red); color:var(--x-red-tx); }
+
+      /* 控制面板 */
+      .x-panel { padding:20px; gap:16px; border-left:.5px solid var(--x-line); background:var(--x-panel); backdrop-filter:none; -webkit-backdrop-filter:none; }
+      .x-grp h2, .x-card h2 { margin:0 0 10px; font-size:13px; font-weight:600; letter-spacing:0; color:var(--x-tx2); }
+      .x-read { gap:8px; }
+      .x-read div { padding:10px 14px; border:0; border-radius:14px; background:var(--x-card); }
+      .x-read small { color:var(--x-tx2); line-height:1.45; }
+      .x-read b { font-weight:600; letter-spacing:-.01em; overflow-wrap:anywhere; }
+      .x-read div, .x-card, .x-grp { min-width:0; }
+      .x-read .x-big { color:var(--x-gold-tx); }
+      .x-slider label { align-items:baseline; gap:8px; font-size:14px; color:var(--x-tx2); }
+      .x-slider label output { color:var(--x-blue-tx); font-weight:500; }
+      .x-ticks { color:var(--x-tx2); }
+      .x-hint { font-size:13px; line-height:1.55; color:var(--x-tx2); }
+      .x-fine { color:var(--x-tx2); line-height:1.55; }
+
+      /* 滑块（细轨道 + 白色拇指） */
+      .x-slider input[type="range"] { -webkit-appearance:none; appearance:none; background:transparent; height:44px; cursor:pointer; }
+      .x-slider input[type="range"]::-webkit-slider-runnable-track { height:4px; border-radius:980px; background:var(--x-track); }
+      .x-slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:26px; height:26px; margin-top:-11px; border:0; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.16), 0 0 0 .5px rgba(0,0,0,.1); transition:transform .3s var(--x-ease); }
+      .x-slider input[type="range"]:active::-webkit-slider-thumb { transform:scale(1.08); }
+      .x-slider input[type="range"]::-moz-range-track { height:4px; border:0; border-radius:980px; background:var(--x-track); }
+      .x-slider input[type="range"]::-moz-range-progress { height:4px; border-radius:980px; background:var(--x-blue); }
+      .x-slider input[type="range"]::-moz-range-thumb { width:26px; height:26px; border:0; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.16), 0 0 0 .5px rgba(0,0,0,.1); }
+      .x-slider input[type="range"]:focus-visible { outline:none; }
+      .x-slider input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow:0 0 0 3px var(--x-soft), 0 0 0 5px var(--x-blue); }
+      .x-slider input[type="range"]:focus-visible::-moz-range-thumb { box-shadow:0 0 0 3px var(--x-soft), 0 0 0 5px var(--x-blue); }
+
+      /* 按钮：胶囊形；次按钮浅灰，选中/主按钮蓝底白字 */
+      .x-btn { min-height:44px; padding:0 18px; border:0; border-radius:980px; background:var(--x-btn2); color:var(--x-tx); font:500 15px/1.3 var(--x-sans); }
+      .x-btn:hover { background:var(--x-btn2-h); color:var(--x-tx); }
+      .x-btn[aria-pressed="true"], .x-btn[aria-pressed="true"]:hover,
+      #x-play, #x-play3, #x-play4, #x-play5, #x-play8, #x-pause, #x-q9next, #x-q9again { background:var(--x-btn-bg); color:#fff; }
+      #x-play:hover, #x-play3:hover, #x-play4:hover, #x-play5:hover, #x-play8:hover, #x-pause:hover, #x-q9next:hover, #x-q9again:hover { background:var(--x-btn-bg); color:#fff; filter:brightness(1.08); }
+      .x-row { gap:8px; }
+      .x-q5 .x-btn { padding:0 12px; font-size:14px; }
+      .x-q9t { font-size:16px; line-height:1.6; }
+      .x-q9o .x-btn { padding:11px 16px; border-radius:16px; line-height:1.5; font-weight:400; }
+      .x-q9o .x-btn:disabled:hover { background:var(--x-btn2); color:var(--x-tx); }
+      .x-q9o .x-btn.x-ok, .x-q9o .x-btn.x-ok:hover { background:var(--x-ok-bg); color:#fff; box-shadow:none; }
+      .x-q9o .x-btn.x-no, .x-q9o .x-btn.x-no:hover { background:transparent; color:var(--x-red-tx); box-shadow:inset 0 0 0 1.5px var(--x-red); }
+      .x-q9g { color:var(--x-teal-tx); } .x-q9b { color:var(--x-red-tx); }
+
+      /* 卡片 */
+      .x-card { padding:18px; border:0; border-radius:20px; background:var(--x-panel); box-shadow:var(--x-shadow); }
+      .x-card ul { padding-left:18px; font-size:15px; line-height:1.6; }
+      .x-card li + li { margin-top:8px; }
+      .x-card li b { color:var(--x-tx); font-weight:600; }
+      .x-gk { margin:14px 0 0; padding:12px 14px; border:0; border-radius:14px; background:var(--x-card); font-size:14px; line-height:1.6; }
+      .x-gk b { color:var(--x-gold-tx); font-weight:600; }
+      .x-gk em { color:var(--x-red-tx); }
+      .x-chip { padding:4px 12px; border:1px solid currentColor; border-radius:980px; color:var(--x-gold-tx); }
+
+      /* 开关（iOS 风格） */
+      .x-tg { gap:8px 20px; }
+      .x-tg label { gap:10px; font-size:15px; }
+      .x-tg input[type="checkbox"] { -webkit-appearance:none; appearance:none; flex:none; width:44px; height:26px; margin:0; border-radius:980px; cursor:pointer;
+        background:radial-gradient(circle at 13px 50%, #fff 0 10.5px, rgba(0,0,0,.12) 11px, transparent 12px), var(--x-track); }
+      .x-tg input[type="checkbox"]:checked { background:radial-gradient(circle at calc(100% - 13px) 50%, #fff 0 10.5px, rgba(0,0,0,.12) 11px, transparent 12px), var(--x-blue); }
+
+      @media (max-width:1023px) { .x-panel { padding:16px; } }
+      @media (max-width:767px) {
+        .x-shell { grid-template-rows:56px auto 1fr; }
+        .x-top { gap:6px; padding:0 8px 0 10px; }
+        .x-tools { gap:2px; }
+        .x-toc { display:grid; font-size:17px; }
+        .x-brand { gap:2px; }
+        .x-back { padding:0; margin-left:-6px; min-width:44px; justify-content:center; }
+        .x-back-t { display:none; }
+        .x-brand b { font-size:16px; }
+        .x-chap { display:flex; gap:4px; height:52px; box-sizing:border-box; padding:4px 10px; border-right:0; border-bottom:.5px solid var(--x-line); background:var(--x-bg1); scrollbar-width:none;
+          transition:height .3s var(--x-ease), padding .3s var(--x-ease), background-color .3s var(--x-ease); }
+        .x-chap::-webkit-scrollbar { display:none; }
+        .x-chap button { flex:none; margin:0; min-height:44px; padding:0 14px; border:0; border-radius:980px; }
+        .x-chap button[aria-current="true"] { border:0; }
+        .x-chap button[aria-current="true"] b { color:var(--x-blue-tx); }
+        .x-shell.x-tocoff .x-chap { height:0; padding-top:0; padding-bottom:0; border-bottom-width:0; visibility:hidden; }
+        .x-ov { left:12px; top:12px; max-width:calc(100% - 24px); padding:12px 14px; border-radius:18px; }
+        .x-ov h1 { font-size:18px; } .x-ov p.x-lead { font-size:14px; }
+        .x-mini { right:12px; width:calc(100% - 24px); border-radius:16px; }
+        .x-panel { padding:0 16px 20px; border:0; border-radius:24px 24px 0 0; background:var(--x-panel); box-shadow:0 -4px 24px rgba(0,0,0,.08), 0 0 0 .5px var(--x-line);
+          transition:transform .3s var(--x-ease), background-color .3s var(--x-ease); }
+        .x-handle { background:var(--x-panel); font-weight:500; }
+        .x-handle::before { width:36px; height:5px; border-radius:980px; background:var(--x-tx2); opacity:.35; }
+        .x-handle span:last-child { color:var(--x-blue-tx); font-size:13px; }
+        .x-read b { font-size:15px; } .x-read .x-big { font-size:18px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .x-app *, .x-app *::before, .x-app *::after { transition:none !important; animation:none !important; }
+        .x-panel, .x-chap { transition:none !important; }
+      }
+    </style>
   </head>
   <body class="x-app">
     <div class="page x-shell" id="top">
       <header class="x-top">
-        <div class="x-brand"><small>格物实验室</small><b class="x-serif">地球运动<span class="x-en"> · EarthLab</span></b></div>
+        <div class="x-brand"><a class="x-back" href="../" aria-label="返回格物实验室"><span aria-hidden="true">‹</span><span class="x-back-t">格物实验室</span></a><b class="x-serif">地球运动<span class="x-en"> · EarthLab</span></b></div>
         <div class="x-prog"><div class="x-segs" id="x-segs"></div><span class="x-count x-mono" id="x-count">01 / 09</span></div>
         <div class="x-tools">
+          <button class="x-ib x-toc" id="x-toc" aria-label="收起目录" aria-expanded="true" aria-controls="x-chap" title="目录">☰</button>
           <button class="x-ib" id="x-prev" aria-label="上一章（←）" title="上一章 ←">‹</button>
           <button class="x-ib" id="x-next" aria-label="下一章（→）" title="下一章 →">›</button>
           <button class="x-ib x-hide-m" id="x-theme" aria-label="切换主题（T）" title="主题：青黛夜 / 宣纸（T）">◐</button>
@@ -487,6 +631,16 @@
       </aside>
     </div>
     <script src="hark.js"></script>
+    <script>
+      (function () {
+        var b = document.getElementById("x-toc"), s = document.querySelector(".x-shell");
+        b.onclick = function () {
+          var off = s.classList.toggle("x-tocoff");
+          b.setAttribute("aria-expanded", off ? "false" : "true");
+          b.setAttribute("aria-label", off ? "展开目录" : "收起目录");
+        };
+      })();
+    </script>
     <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
     <script>
@@ -664,7 +818,7 @@
         c.width = 512; c.height = 96;
         x.font = '500 46px "PingFang SC","Microsoft YaHei",sans-serif';
         x.textAlign = "center"; x.textBaseline = "middle";
-        x.lineWidth = 8; x.strokeStyle = "rgba(7,11,20,.85)"; x.strokeText(text, 256, 48);
+        x.lineWidth = 8; x.strokeStyle = "rgba(255,255,255,.92)"; x.strokeText(text, 256, 48);
         x.fillStyle = color; x.fillText(text, 256, 48);
         var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
         sp.scale.set(5.33 * scale, scale, 1); sp.renderOrder = 10; labels.push(sp);
@@ -721,20 +875,20 @@
         glow.scale.set(16, 16, 1); scene.add(glow);
         scene.add(new THREE.PointLight(0xffffff, 1.5, 0));
         scene.add(new THREE.AmbientLight(0xffffff, 0.12));
-        var sl = label("太阳", "#F2B544", 1.1); sl.position.set(0, 4.6, 0); scene.add(sl);
+        var sl = label("太阳", "#8a5c00", 1.1); sl.position.set(0, 4.6, 0); scene.add(sl);
         // 轨道
         var op = [];
         for (var a = 0; a <= 360; a += 1) op.push(orbitPos(a));
-        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(op), new THREE.LineBasicMaterial({ color: 0x2ec4b6, transparent: true, opacity: 0.6 })));
+        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(op), new THREE.LineBasicMaterial({ color: 0x0a9396, transparent: true, opacity: 0.6 })));
         // 二分二至、近日点、远日点
-        var marks = EV.map(function (e) { return [e[0] + 180, e[1] + " " + fmt(evDay(e[0]) + 20 / 24), "#E6ECF5", true]; });
-        marks.push([PSI_P, "近日点 1月初", "#F2B544"], [PSI_P + 180, "远日点 7月初", "#F2B544"]);
+        var marks = EV.map(function (e) { return [e[0] + 180, e[1] + " " + fmt(evDay(e[0]) + 20 / 24), "#1d1d1f", true]; });
+        marks.push([PSI_P, "近日点 1月初", "#8a5c00"], [PSI_P + 180, "远日点 7月初", "#8a5c00"]);
         marks.forEach(function (m) {
-          var p = orbitPos(m[0]), dot = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 8), new THREE.MeshBasicMaterial({ color: m[2] === "#F2B544" ? 0xf2b544 : 0x2ec4b6 }));
+          var p = orbitPos(m[0]), dot = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 8), new THREE.MeshBasicMaterial({ color: m[2] === "#8a5c00" ? 0xc98a12 : 0x0a9396 }));
           dot.position.copy(p); scene.add(dot);
           var l = label(m[1], m[2], 1.0), out = p.clone().setLength(p.length() + 3.4); l.position.set(out.x, m[3] ? -1.6 : 1.4, out.z); scene.add(l);
           if (m[3]) {
-            var g = new THREE.Line(new THREE.BufferGeometry().setFromPoints([p.clone().addScaledVector(AXIS, -2.2), p.clone().addScaledVector(AXIS, 2.6)]), new THREE.LineBasicMaterial({ color: 0x8a97ad, transparent: true, opacity: 0.55 }));
+            var g = new THREE.Line(new THREE.BufferGeometry().setFromPoints([p.clone().addScaledVector(AXIS, -2.2), p.clone().addScaledVector(AXIS, 2.6)]), new THREE.LineBasicMaterial({ color: 0x8e8e93, transparent: true, opacity: 0.55 }));
             scene.add(g); aux.push(g);
           }
         });
@@ -742,11 +896,11 @@
         tiltG = new THREE.Group(); tiltG.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), AXIS); scene.add(tiltG);
         earth = new THREE.Mesh(new THREE.SphereGeometry(ER, 64, 40), new THREE.MeshLambertMaterial({ map: earthTexture() }));
         tiltG.add(earth);
-        tiltG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -ER * 1.6, 0), new THREE.Vector3(0, ER * 3.2, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
-        var eq = new THREE.Mesh(new THREE.TorusGeometry(ER * 1.01, 0.025, 6, 96), new THREE.MeshBasicMaterial({ color: 0x5aa9ff }));
+        tiltG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -ER * 1.6, 0), new THREE.Vector3(0, ER * 3.2, 0)]), new THREE.LineBasicMaterial({ color: 0xc98a12 })));
+        var eq = new THREE.Mesh(new THREE.TorusGeometry(ER * 1.01, 0.025, 6, 96), new THREE.MeshBasicMaterial({ color: 0x2f7fd6 }));
         eq.rotation.x = Math.PI / 2; tiltG.add(eq); aux.push(eq);
-        var ns = label("北极星方向 ↑", "#F2B544", 0.9); ns.position.set(0, ER * 3.2 + 0.7, 0); tiltG.add(ns);
-        line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineDashedMaterial({ color: 0xf2b544, dashSize: 0.6, gapSize: 0.5, transparent: true, opacity: 0.5 }));
+        var ns = label("北极星方向 ↑", "#8a5c00", 0.9); ns.position.set(0, ER * 3.2 + 0.7, 0); tiltG.add(ns);
+        line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineDashedMaterial({ color: 0xc98a12, dashSize: 0.6, gapSize: 0.5, transparent: true, opacity: 0.5 }));
         scene.add(line); aux.push(line);
         $("x-lab").onchange = function () { var on = this.checked; labels.forEach(function (l) { l.visible = on; }); loop(); };
         $("x-aux").onchange = function () { var on = this.checked; aux.forEach(function (l) { l.visible = on; }); loop(); };
@@ -820,32 +974,32 @@
         return new THREE.Line(new THREE.BufferGeometry().setFromPoints(p), new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: op }));
       }
       function arc(h, txt) {
-        var g = new THREE.Group(), r = R2 * 1.3, p = [], teal = new THREE.MeshBasicMaterial({ color: 0x2ec4b6 }), e = Math.PI * 1.5;
+        var g = new THREE.Group(), r = R2 * 1.3, p = [], teal = new THREE.MeshBasicMaterial({ color: 0x0a9396 }), e = Math.PI * 1.5;
         for (var k = 0; k <= 60; k++) { var t = (k / 60) * e; p.push(new THREE.Vector3(r * Math.cos(t), h, -r * Math.sin(t))); }
         g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(p), 80, 0.09, 8), teal));
         var cn = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1, 16), teal);
         cn.position.set(r * Math.cos(e), h, -r * Math.sin(e));
         cn.quaternion.setFromUnitVectors(Y2, new THREE.Vector3(-Math.sin(e), 0, -Math.cos(e)));
         g.add(cn);
-        var l = label(txt, "#2EC4B6", 1.5); l.position.set(r * 0.95, h, r * 0.95); g.add(l);
+        var l = label(txt, "#077a7d", 1.5); l.position.set(r * 0.95, h, r * 0.95); g.add(l);
         g.visible = false; g2.add(g);
         return g;
       }
       function build2() {
         Y2 = new THREE.Vector3(0, 1, 0);
-        var gold = new THREE.MeshBasicMaterial({ color: 0xf2b544 });
+        var gold = new THREE.MeshBasicMaterial({ color: 0xc98a12 });
         main1 = scene.children.filter(function (c) { return !(c instanceof THREE.Points); });
         g2 = new THREE.Group(); g2.visible = false; scene.add(g2);
         var dl = new THREE.DirectionalLight(0xffffff, 1.1); dl.position.set(10, 6, 12);
         g2.add(dl, new THREE.AmbientLight(0xffffff, 0.35));
         spin2 = new THREE.Group(); g2.add(spin2);
         spin2.add(new THREE.Mesh(new THREE.SphereGeometry(R2, 64, 40), earth.material));
-        g2.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R2 * 1.5, 0), new THREE.Vector3(0, R2 * 1.5, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
-        [["北极 N", 1], ["南极 S", -1]].forEach(function (a) { var l = label(a[0], "#E6ECF5", 1.1); l.position.set(1.8, a[1] * R2 * 1.5, 0); g2.add(l); });
-        var al = label("地轴", "#F2B544", 0.9); al.position.set(-1.6, R2 * 1.3, 0); g2.add(al);
+        g2.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R2 * 1.5, 0), new THREE.Vector3(0, R2 * 1.5, 0)]), new THREE.LineBasicMaterial({ color: 0xc98a12 })));
+        [["北极 N", 1], ["南极 S", -1]].forEach(function (a) { var l = label(a[0], "#1d1d1f", 1.1); l.position.set(1.8, a[1] * R2 * 1.5, 0); g2.add(l); });
+        var al = label("地轴", "#8a5c00", 0.9); al.position.set(-1.6, R2 * 1.3, 0); g2.add(al);
         [0, 30, 60, 90].forEach(function (d) {
           var f = d * RAD, c = Math.cos(f), s = Math.sin(f), v = Math.round(1670 * c), L = 4 * c;
-          if (d < 90) { var ring = circle(R2 * c * 1.003, R2 * s * 1.003, 0xf2b544, 0.35); g2.add(ring); aux.push(ring); }
+          if (d < 90) { var ring = circle(R2 * c * 1.003, R2 * s * 1.003, 0xc98a12, 0.35); g2.add(ring); aux.push(ring); }
           var p = new THREE.Vector3(R2 * c, R2 * s, 0).multiplyScalar(1.03);
           if (d === 90) { var dot = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 12), gold); dot.position.copy(p); spin2.add(dot); }
           else {
@@ -854,11 +1008,11 @@
             var cn = new THREE.Mesh(new THREE.ConeGeometry(0.26, h, 16), gold); cn.position.y = L - h / 2;
             ar.add(sh, cn); ar.position.copy(p); ar.quaternion.setFromUnitVectors(Y2, new THREE.Vector3(0, 0, -1)); spin2.add(ar);
           }
-          var l = label(d + "° · " + v + " km/h", "#F2B544", 0.75);
+          var l = label(d + "° · " + v + " km/h", "#8a5c00", 0.75);
           l.material.depthTest = true;
           l.position.copy(p).multiplyScalar(1.1).add(new THREE.Vector3(0, 0.3, d === 90 ? 0 : 1.6)); spin2.add(l);
         });
-        latRing = circle(1, 0, 0x2ec4b6, 1); g2.add(latRing);
+        latRing = circle(1, 0, 0x0a9396, 1); g2.add(latRing);
         arcN = arc(R2 + 0.3, "逆时针"); arcS = arc(-R2 - 0.3, "顺时针");
       }
       function view2(v) {
@@ -913,7 +1067,7 @@
         var c = sp.material.map.image, x = c.getContext("2d");
         x.clearRect(0, 0, c.width, c.height);
         x.font = '500 46px "PingFang SC","Microsoft YaHei",sans-serif'; x.textAlign = "center"; x.textBaseline = "middle";
-        x.lineWidth = 8; x.strokeStyle = "rgba(7,11,20,.85)"; x.strokeText(text, 256, 48);
+        x.lineWidth = 8; x.strokeStyle = "rgba(255,255,255,.92)"; x.strokeText(text, 256, 48);
         x.fillStyle = color; x.fillText(text, 256, 48);
         sp.material.map.needsUpdate = true;
       }
@@ -932,24 +1086,24 @@
         });
         spin3 = new THREE.Group(); g3.add(spin3);
         spin3.add(new THREE.Mesh(new THREE.SphereGeometry(R3, 64, 40), mat));
-        g3.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R3 * 1.4, 0), new THREE.Vector3(0, R3 * 1.4, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
-        var eq = circle(R3 * 1.004, 0, 0x5aa9ff, 0.7); g3.add(eq); aux.push(eq);
-        var nl = label("北极 N", "#E6ECF5", 1); nl.position.set(1.6, R3 * 1.4, 0); g3.add(nl);
+        g3.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R3 * 1.4, 0), new THREE.Vector3(0, R3 * 1.4, 0)]), new THREE.LineBasicMaterial({ color: 0xc98a12 })));
+        var eq = circle(R3 * 1.004, 0, 0x2f7fd6, 0.7); g3.add(eq); aux.push(eq);
+        var nl = label("北极 N", "#1d1d1f", 1); nl.position.set(1.6, R3 * 1.4, 0); g3.add(nl);
         CITY3.forEach(function (c) {
           var f = c[2] * RAD, l = c[1] * RAD, p = new THREE.Vector3(Math.cos(f) * Math.cos(l), Math.sin(f), -Math.cos(f) * Math.sin(l)).multiplyScalar(R3 * 1.005);
           var dot = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
           dot.position.copy(p); spin3.add(dot);
-          var lb = label(c[0], "#E6ECF5", 0.8); lb.position.copy(p).multiplyScalar(1.13); spin3.add(lb); cities3.push(lb);
+          var lb = label(c[0], "#1d1d1f", 0.8); lb.position.copy(p).multiplyScalar(1.13); spin3.add(lb); cities3.push(lb);
         });
         // 晨昏线：垂直于太阳光的大圆；z>0 一侧随自转由夜入昼 = 晨线
         term3 = new THREE.Group(); g3.add(term3);
-        term3.add(half3(0x2ec4b6, 1), half3(0xff8a3d, -1));
-        var a = label("晨线", "#2EC4B6", 1.2); a.position.set(0, R3 * 0.6, R3 * 1.05); term3.add(a);
-        var b = label("昏线", "#FF8A3D", 1.2); b.position.set(0, R3 * 0.6, -R3 * 1.05); term3.add(b);
+        term3.add(half3(0x0a9396, 1), half3(0xe8772e, -1));
+        var a = label("晨线", "#077a7d", 1.2); a.position.set(0, R3 * 0.6, R3 * 1.05); term3.add(a);
+        var b = label("昏线", "#b8500f", 1.2); b.position.set(0, R3 * 0.6, -R3 * 1.05); term3.add(b);
         [[0, 0], [0, 3], [0, -3], [3, 0], [-3, 0]].forEach(function (o) {
-          term3.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R3 + 5.5, o[0], o[1]), 4, 0xffd36b, 0.8, 0.45));
+          term3.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R3 + 5.5, o[0], o[1]), 4, 0xd99a1a, 0.8, 0.45));
         });
-        var sl = label("太阳光（平行光）", "#F2B544", 1); sl.position.set(R3 + 4, 4.4, 0); term3.add(sl);
+        var sl = label("太阳光（平行光）", "#8a5c00", 1); sl.position.set(R3 + 4, 4.4, 0); term3.add(sl);
         arc3 = arc(R3 + 0.3, "逆时针自转"); g3.add(arc3);
       }
       function view3(v) {
@@ -980,7 +1134,7 @@
           var lt = (((t3 - (120 - c[1]) / 15) % 24) + 24) % 24, a = c[1] * RAD + th, f = c[2] * RAD;
           var isDay = Math.cos(f) * Math.cos(a) * Math.cos(dr) + Math.sin(f) * Math.sin(dr) > 0, dn = isDay ? "昼" : "夜";
           $("x-c" + i).textContent = hm(lt) + " · " + dn;
-          if (g3) draw3(cities3[i], c[0] + " " + hm(lt) + " " + dn, isDay ? "#F2B544" : "#B8C4DA");
+          if (g3) draw3(cities3[i], c[0] + " " + hm(lt) + " " + dn, isDay ? "#8a5c00" : "#6e6e73");
         });
         if (g3) { SUN3.set(Math.cos(dr), Math.sin(dr), 0); term3.rotation.z = dr; spin3.rotation.y = th; }
         loop();
@@ -1026,19 +1180,19 @@
         g4 = new THREE.Group(); g4.visible = false; scene.add(g4);
         var op = [];
         for (var d = 0; d <= 366; d += 0.5) op.push(kep4(d));
-        g4.add(new THREE.Line(geo4(op), new THREE.LineBasicMaterial({ color: 0x2ec4b6, transparent: true, opacity: 0.75 })));
+        g4.add(new THREE.Line(geo4(op), new THREE.LineBasicMaterial({ color: 0x0a9396, transparent: true, opacity: 0.75 })));
         // 黄道面：金色半透明圆盘 + 环
-        var disc = new THREE.Mesh(new THREE.CircleGeometry(27, 96), new THREE.MeshBasicMaterial({ color: 0xf2b544, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false }));
-        disc.rotation.x = -Math.PI / 2; g4.add(disc, circle(27, 0, 0xf2b544, 0.55));
-        var el = label("黄道面", "#F2B544", 1.1), ep = kep4(PH4 + 91).setLength(29); el.position.set(ep.x, 0.8, ep.z); g4.add(el);
+        var disc = new THREE.Mesh(new THREE.CircleGeometry(27, 96), new THREE.MeshBasicMaterial({ color: 0xc98a12, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false }));
+        disc.rotation.x = -Math.PI / 2; g4.add(disc, circle(27, 0, 0xc98a12, 0.55));
+        var el = label("黄道面", "#8a5c00", 1.1), ep = kep4(PH4 + 91).setLength(29); el.position.set(ep.x, 0.8, ep.z); g4.add(el);
         // 长轴：近日点—太阳—远日点
         var pp = kep4(PH4), ap = kep4(PH4 + 182.6);
-        g4.add(new THREE.Line(geo4([pp, ap]), new THREE.LineBasicMaterial({ color: 0x8a97ad, transparent: true, opacity: 0.4 })));
+        g4.add(new THREE.Line(geo4([pp, ap]), new THREE.LineBasicMaterial({ color: 0x8e8e93, transparent: true, opacity: 0.4 })));
         // 近日点、远日点、二分二至
-        var mk = EV.map(function (e) { var dd = evDay(e[0]); return [dd, e[1] + " " + fmt(dd + 20 / 24), "#E6ECF5"]; });
-        mk.push([PH4, "近日点 1月初", "#F2B544"], [184, "远日点 7月初", "#F2B544"]);
+        var mk = EV.map(function (e) { var dd = evDay(e[0]); return [dd, e[1] + " " + fmt(dd + 20 / 24), "#1d1d1f"]; });
+        mk.push([PH4, "近日点 1月初", "#8a5c00"], [184, "远日点 7月初", "#8a5c00"]);
         mk.forEach(function (m) {
-          var p = kep4(m[0]), gold = m[2] === "#F2B544", dot = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 8), new THREE.MeshBasicMaterial({ color: gold ? 0xf2b544 : 0x2ec4b6 }));
+          var p = kep4(m[0]), gold = m[2] === "#8a5c00", dot = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 8), new THREE.MeshBasicMaterial({ color: gold ? 0xc98a12 : 0x0a9396 }));
           dot.position.copy(p);
           var l = label(m[1], m[2], 1), o = p.clone().setLength(p.length() + 3.6);
           l.position.set(o.x, gold ? 1.5 : -1.6, o.z); g4.add(dot, l);
@@ -1049,24 +1203,24 @@
           var v = [];
           for (var s = 0; s < 30; s++) { var a = kep4(PH4 + k * 30 + s), b = kep4(PH4 + k * 30 + s + 1); v.push(0, 0.03, 0, a.x, 0.03, a.z, b.x, 0.03, b.z); }
           var sg = new THREE.BufferGeometry(); sg.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
-          sw4.add(new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ color: k % 2 ? 0xf2b544 : 0x2ec4b6, transparent: true, opacity: 0.32, side: THREE.DoubleSide, depthWrite: false })));
+          sw4.add(new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ color: k % 2 ? 0xc98a12 : 0x0a9396, transparent: true, opacity: 0.32, side: THREE.DoubleSide, depthWrite: false })));
         }
         // 日地连线
-        line4 = new THREE.Line(geo4([new THREE.Vector3(), new THREE.Vector3(1, 0, 0)]), new THREE.LineDashedMaterial({ color: 0xf2b544, dashSize: 0.6, gapSize: 0.5, transparent: true, opacity: 0.55 }));
+        line4 = new THREE.Line(geo4([new THREE.Vector3(), new THREE.Vector3(1, 0, 0)]), new THREE.LineDashedMaterial({ color: 0xc98a12, dashSize: 0.6, gapSize: 0.5, transparent: true, opacity: 0.55 }));
         g4.add(line4);
         // 地球：地轴倾斜方向不变（夏至时北极倾向太阳）
         DJ4 = kep4(evDay(90)).negate().normalize();
         hub4 = new THREE.Group(); g4.add(hub4);
-        hub4.add(circle(RQ4, 0, 0xf2b544, 0.95));
+        hub4.add(circle(RQ4, 0, 0xc98a12, 0.95));
         tilt4 = new THREE.Group(); hub4.add(tilt4);
         earth4 = new THREE.Mesh(new THREE.SphereGeometry(ER4, 48, 32), earth.material); tilt4.add(earth4);
-        tilt4.add(new THREE.Line(geo4([new THREE.Vector3(0, -ER4 * 1.8, 0), new THREE.Vector3(0, ER4 * 3, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
-        var ql = label("地轴 → 北极星附近", "#F2B544", 0.85); ql.position.set(0, ER4 * 3 + 0.6, 0); tilt4.add(ql);
-        var eqd = new THREE.Mesh(new THREE.CircleGeometry(RQ4, 64), new THREE.MeshBasicMaterial({ color: 0x5aa9ff, transparent: true, opacity: 0.2, side: THREE.DoubleSide, depthWrite: false }));
-        eqd.rotation.x = -Math.PI / 2; tilt4.add(eqd, circle(RQ4, 0, 0x5aa9ff, 0.95));
-        var eql = label("赤道面", "#5AA9FF", 0.85); eql.position.set(0, 0.5, -RQ4 - 1.2); tilt4.add(eql);
-        arc4 = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0xf2b544 })); hub4.add(arc4);
-        arcL4 = label("黄赤交角 23°26′", "#F2B544", 1); hub4.add(arcL4);
+        tilt4.add(new THREE.Line(geo4([new THREE.Vector3(0, -ER4 * 1.8, 0), new THREE.Vector3(0, ER4 * 3, 0)]), new THREE.LineBasicMaterial({ color: 0xc98a12 })));
+        var ql = label("地轴 → 北极星附近", "#8a5c00", 0.85); ql.position.set(0, ER4 * 3 + 0.6, 0); tilt4.add(ql);
+        var eqd = new THREE.Mesh(new THREE.CircleGeometry(RQ4, 64), new THREE.MeshBasicMaterial({ color: 0x2f7fd6, transparent: true, opacity: 0.2, side: THREE.DoubleSide, depthWrite: false }));
+        eqd.rotation.x = -Math.PI / 2; tilt4.add(eqd, circle(RQ4, 0, 0x2f7fd6, 0.95));
+        var eql = label("赤道面", "#0062c4", 0.85); eql.position.set(0, 0.5, -RQ4 - 1.2); tilt4.add(eql);
+        arc4 = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0xc98a12 })); hub4.add(arc4);
+        arcL4 = label("黄赤交角 23°26′", "#8a5c00", 1); hub4.add(arcL4);
         setOb4();
       }
       function setOb4() {
@@ -1076,7 +1230,7 @@
         arc4.geometry.dispose();
         arc4.geometry = ob4 > 0.5 ? new THREE.TubeGeometry(new THREE.CatmullRomCurve3(p), 32, 0.07, 6) : new THREE.BufferGeometry();
         arcL4.position.copy(p[12]).multiplyScalar(1 + 2.6 / r).addScaledVector(Y4, -0.4);
-        draw3(arcL4, "黄赤交角 " + dm(ob4), "#F2B544");
+        draw3(arcL4, "黄赤交角 " + dm(ob4), "#8a5c00");
       }
       function view4() {
         var k = window.innerWidth < 768 ? 1.45 : 1;
@@ -1147,26 +1301,26 @@
         mat.uniforms.map.value = earth.material.map; mat.uniforms.sunDir.value = new THREE.Vector3(1, 0, 0);
         tilt5 = new THREE.Group(); g5.add(tilt5);
         tilt5.add(new THREE.Mesh(new THREE.SphereGeometry(R5, 64, 40), mat));
-        tilt5.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R5 * 1.35, 0), new THREE.Vector3(0, R5 * 1.35, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
-        var nl = label("北极 N", "#E6ECF5", 0.9); nl.position.set(0, R5 * 1.35 + 0.6, 0); tilt5.add(nl);
-        [[66.56, "北极圈 66°34′N", 0xb8c4da, "#B8C4DA"], [23.44, "北回归线 23°26′N", 0xf2b544, "#F2B544"], [0, "赤道 0°", 0x5aa9ff, "#5AA9FF"], [-23.44, "南回归线 23°26′S", 0xf2b544, "#F2B544"], [-66.56, "南极圈 66°34′S", 0xb8c4da, "#B8C4DA"]].forEach(function (z) {
+        tilt5.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R5 * 1.35, 0), new THREE.Vector3(0, R5 * 1.35, 0)]), new THREE.LineBasicMaterial({ color: 0xc98a12 })));
+        var nl = label("北极 N", "#1d1d1f", 0.9); nl.position.set(0, R5 * 1.35 + 0.6, 0); tilt5.add(nl);
+        [[66.56, "北极圈 66°34′N", 0x8e8e93, "#6e6e73"], [23.44, "北回归线 23°26′N", 0xc98a12, "#8a5c00"], [0, "赤道 0°", 0x2f7fd6, "#0062c4"], [-23.44, "南回归线 23°26′S", 0xc98a12, "#8a5c00"], [-66.56, "南极圈 66°34′S", 0x8e8e93, "#6e6e73"]].forEach(function (z) {
           var f = z[0] * RAD, c = Math.cos(f) * R5 * 1.006, s = Math.sin(f) * R5 * 1.006;
           tilt5.add(circle(c, s, z[2], 0.95));
           var l = label(z[1], z[3], 0.75); l.position.set(-c - 2.3, s, 0); tilt5.add(l);
         });
         dot5 = new THREE.Group(); tilt5.add(dot5);
-        dot5.add(new THREE.Mesh(new THREE.SphereGeometry(0.26, 16, 12), new THREE.MeshBasicMaterial({ color: 0xff4d4d })));
+        dot5.add(new THREE.Mesh(new THREE.SphereGeometry(0.26, 16, 12), new THREE.MeshBasicMaterial({ color: 0xe5484d })));
         var gc = document.createElement("canvas"); gc.width = gc.height = 64;
         var gx = gc.getContext("2d"), gr = gx.createRadialGradient(32, 32, 0, 32, 32, 32);
         gr.addColorStop(0, "rgba(255,90,80,1)"); gr.addColorStop(0.35, "rgba(255,60,60,.5)"); gr.addColorStop(1, "rgba(255,40,40,0)");
         gx.fillStyle = gr; gx.fillRect(0, 0, 64, 64);
         var glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(gc), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
         glow.scale.set(2.2, 2.2, 1); dot5.add(glow);
-        dotL5 = label("直射点", "#FF6B66", 0.85); dotL5.position.set(1.2, 0.9, 0); dot5.add(dotL5);
+        dotL5 = label("直射点", "#c4262c", 0.85); dotL5.position.set(1.2, 0.9, 0); dot5.add(dotL5);
         [-3.4, -1.7, 0, 1.7, 3.4].forEach(function (y) {
-          g5.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R5 + 7, y, 0), 5, 0xffd36b, 0.7, 0.4));
+          g5.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R5 + 7, y, 0), 5, 0xd99a1a, 0.7, 0.4));
         });
-        var sl = label("太阳光（平行光）", "#F2B544", 0.9); sl.position.set(R5 + 4.5, 4.4, 0); g5.add(sl);
+        var sl = label("太阳光（平行光）", "#8a5c00", 0.9); sl.position.set(R5 + 4.5, 4.4, 0); g5.add(sl);
       }
       function view5() {
         var k = window.innerWidth < 768 ? 1.5 : 1;
@@ -1217,7 +1371,7 @@
           var dr = v * RAD;
           tilt5.rotation.z = -dr;
           dot5.position.set(R5 * 1.01 * Math.cos(dr), R5 * 1.01 * Math.sin(dr), 0);
-          draw3(dotL5, "直射点 " + ls, "#FF6B66");
+          draw3(dotL5, "直射点 " + ls, "#c4262c");
         }
         loop();
       }
@@ -1257,19 +1411,19 @@
         mat.uniforms.map.value = earth.material.map; mat.uniforms.sunDir.value = new THREE.Vector3(1, 0, 0);
         tilt6 = new THREE.Group(); g6.add(tilt6);
         tilt6.add(new THREE.Mesh(new THREE.SphereGeometry(R6, 64, 40), mat));
-        tilt6.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R6 * 1.35, 0), new THREE.Vector3(0, R6 * 1.35, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
-        var nl = label("北极 N", "#E6ECF5", 0.9); nl.position.set(0, R6 * 1.35 + 0.6, 0); tilt6.add(nl);
-        tilt6.add(circle(R6 * 1.004, 0, 0xb8c4da, 0.45));
-        var term = circle(R6 * 1.008, 0, 0xe6ecf5, 0.9); term.rotation.z = Math.PI / 2; g6.add(term); // 晨昏线 ⟂ 太阳光
-        var tl = label("晨昏线", "#E6ECF5", 0.85); tl.position.set(0.3, -R6 - 0.8, 0); g6.add(tl);
-        day6m = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0xf2b544 }));
+        tilt6.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R6 * 1.35, 0), new THREE.Vector3(0, R6 * 1.35, 0)]), new THREE.LineBasicMaterial({ color: 0xc98a12 })));
+        var nl = label("北极 N", "#1d1d1f", 0.9); nl.position.set(0, R6 * 1.35 + 0.6, 0); tilt6.add(nl);
+        tilt6.add(circle(R6 * 1.004, 0, 0x8e8e93, 0.45));
+        var term = circle(R6 * 1.008, 0, 0x6e6e73, 0.9); term.rotation.z = Math.PI / 2; g6.add(term); // 晨昏线 ⟂ 太阳光
+        var tl = label("晨昏线", "#1d1d1f", 0.85); tl.position.set(0.3, -R6 - 0.8, 0); g6.add(tl);
+        day6m = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0xc98a12 }));
         night6m = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0x3d7bff }));
         tilt6.add(day6m, night6m);
-        latL6 = label("30°N", "#F2B544", 0.85); tilt6.add(latL6);
+        latL6 = label("30°N", "#8a5c00", 0.85); tilt6.add(latL6);
         [-3.4, -1.7, 0, 1.7, 3.4].forEach(function (y) {
-          g6.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R6 + 7, y, 0), 5, 0xffd36b, 0.7, 0.4));
+          g6.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R6 + 7, y, 0), 5, 0xd99a1a, 0.7, 0.4));
         });
-        var sl = label("太阳光（平行光）", "#F2B544", 0.9); sl.position.set(R6 + 4.5, 4.4, 0); g6.add(sl);
+        var sl = label("太阳光（平行光）", "#8a5c00", 0.9); sl.position.set(R6 + 4.5, 4.4, 0); g6.add(sl);
       }
       function arc6(m, t0, t1, rc, y) {
         m.geometry.dispose();
@@ -1333,7 +1487,7 @@
           tilt6.rotation.z = -dec * RAD; // 本地太阳方向 (cosδ, sinδ, 0)，昼弧以 t = 0 为中心
           arc6(day6m, -H, H, rc, y); arc6(night6m, H, 2 * Math.PI - H, rc, y);
           latL6.position.set(-rc - 2.4, y, 0);
-          draw3(latL6, ls + " 昼长 " + D.toFixed(1) + "h", "#F2B544");
+          draw3(latL6, ls + " 昼长 " + D.toFixed(1) + "h", "#8a5c00");
         }
         loop();
       }
@@ -1353,19 +1507,19 @@
         mat.uniforms.map.value = earth.material.map; mat.uniforms.sunDir.value = new THREE.Vector3(1, 0, 0);
         tilt7 = new THREE.Group(); g7.add(tilt7);
         tilt7.add(new THREE.Mesh(new THREE.SphereGeometry(R6, 64, 40), mat));
-        tilt7.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R6 * 1.35, 0), new THREE.Vector3(0, R6 * 1.35, 0)]), new THREE.LineBasicMaterial({ color: 0xf2b544 })));
-        var nl = label("北极 N", "#E6ECF5", 0.9); nl.position.set(0, R6 * 1.35 + 0.6, 0); tilt7.add(nl);
-        tilt7.add(circle(R6 * 1.004, 0, 0xb8c4da, 0.5));
-        [23.44, -23.44].forEach(function (a) { var f = a * RAD; tilt7.add(circle(R6 * Math.cos(f) * 1.004, R6 * Math.sin(f) * 1.004, 0xb8c4da, 0.25)); });
-        lat7m = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0xf2b544 })); tilt7.add(lat7m);
-        dot7 = new THREE.Mesh(new THREE.SphereGeometry(0.26, 16, 12), new THREE.MeshBasicMaterial({ color: 0xff6b66 })); tilt7.add(dot7);
+        tilt7.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -R6 * 1.35, 0), new THREE.Vector3(0, R6 * 1.35, 0)]), new THREE.LineBasicMaterial({ color: 0xc98a12 })));
+        var nl = label("北极 N", "#1d1d1f", 0.9); nl.position.set(0, R6 * 1.35 + 0.6, 0); tilt7.add(nl);
+        tilt7.add(circle(R6 * 1.004, 0, 0x8e8e93, 0.5));
+        [23.44, -23.44].forEach(function (a) { var f = a * RAD; tilt7.add(circle(R6 * Math.cos(f) * 1.004, R6 * Math.sin(f) * 1.004, 0x8e8e93, 0.25)); });
+        lat7m = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0xc98a12 })); tilt7.add(lat7m);
+        dot7 = new THREE.Mesh(new THREE.SphereGeometry(0.26, 16, 12), new THREE.MeshBasicMaterial({ color: 0xe5484d })); tilt7.add(dot7);
         noon7 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffffff })); tilt7.add(noon7);
-        dotL7 = label("直射点", "#FF6B66", 0.85); g7.add(dotL7);
-        latL7 = label("30°N", "#F2B544", 0.85); tilt7.add(latL7);
+        dotL7 = label("直射点", "#c4262c", 0.85); g7.add(dotL7);
+        latL7 = label("30°N", "#8a5c00", 0.85); tilt7.add(latL7);
         [-3.4, -1.7, 0, 1.7, 3.4].forEach(function (y) {
-          g7.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R6 + 7, y, 0), 5, 0xffd36b, 0.7, 0.4));
+          g7.add(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(R6 + 7, y, 0), 5, 0xd99a1a, 0.7, 0.4));
         });
-        var sl = label("太阳光（平行光）", "#F2B544", 0.9); sl.position.set(R6 + 4.5, 4.4, 0); g7.add(sl);
+        var sl = label("太阳光（平行光）", "#8a5c00", 0.9); sl.position.set(R6 + 4.5, 4.4, 0); g7.add(sl);
       }
       function mode7(on) {
         if (!g7 || on === in7) return;
@@ -1464,9 +1618,9 @@
           noon7.position.set(rc, y, 0);
           dot7.position.set(R6 * 1.01 * Math.cos(dr), R6 * 1.01 * Math.sin(dr), 0);
           dotL7.position.set(R6 + 2.2, 0.8, 0);
-          draw3(dotL7, "直射点 " + latStr5(dec), "#FF6B66");
+          draw3(dotL7, "直射点 " + latStr5(dec), "#c4262c");
           latL7.position.set(-rc - 2.4, y, 0);
-          draw3(latL7, ls + " H " + Math.max(0, H).toFixed(1) + "°", "#F2B544");
+          draw3(latL7, ls + " H " + Math.max(0, H).toFixed(1) + "°", "#8a5c00");
         }
         loop();
       }
