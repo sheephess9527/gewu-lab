@@ -1,0 +1,1657 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>函数图像 · FuncLab — 格物实验室</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
+    />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-hero.css" />
+    <style>
+      :root[data-theme="dark"] {
+        --x-bg: linear-gradient(160deg, #0e1420, #121a2a);
+        --x-panel: rgba(21, 30, 48, 0.82);
+        --x-solid: #151e30;
+        --x-chip: #1d2740;
+        --x-base: #0e1420;
+        --x-ink: #2ec4b6;
+        --x-line: rgba(255, 255, 255, 0.08);
+        --x-text: #e6ecf5;
+        --x-sub: #8a97ad;
+        --x-teal: #2ec4b6;
+        --x-gold: #f2b544;
+        --x-red: #ef6461;
+        --x-soft: rgba(255, 255, 255, 0.05);
+        --x-grid: rgba(255, 255, 255, 0.05);
+        --x-axis: rgba(230, 236, 245, 0.45);
+        --x-orig: rgba(230, 236, 245, 0.35);
+      }
+      :root[data-theme="light"] {
+        --x-bg: #f6f3ec;
+        --x-panel: rgba(255, 255, 255, 0.9);
+        --x-solid: #ffffff;
+        --x-chip: #ece8df;
+        --x-base: #f6f3ec;
+        --x-ink: #0b6b62;
+        --x-line: rgba(29, 36, 51, 0.1);
+        --x-text: #1d2433;
+        --x-sub: #5c677a;
+        --x-teal: #139a8e;
+        --x-gold: #c98a12;
+        --x-red: #d64b48;
+        --x-soft: rgba(29, 36, 51, 0.05);
+        --x-grid: rgba(29, 36, 51, 0.06);
+        --x-axis: rgba(29, 36, 51, 0.5);
+        --x-orig: rgba(29, 36, 51, 0.3);
+      }
+      .x-app {
+        --serif: "Noto Serif SC", "Songti SC", serif;
+        --mono: "Geist Mono", ui-monospace, Menlo, monospace;
+        --ui: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+        position: fixed; inset: 0; display: grid;
+        grid-template-rows: 56px minmax(0, 1fr);
+        grid-template-columns: 220px minmax(0, 1fr) 340px;
+        background: var(--x-bg); background-color: var(--x-base); color: var(--x-text); font: 14px/1.6 var(--ui);
+        transition: background 200ms, color 200ms;
+      }
+      .x-top {
+        grid-column: 1 / -1; display: flex; align-items: center; gap: 16px;
+        padding: 0 16px; border-bottom: 1px solid var(--x-line); background: var(--x-solid);
+        -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+      }
+      .x-brand { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+      .x-brand small { font-size: 12px; color: var(--x-sub); letter-spacing: 0.1em; }
+      .x-brand b { font: 600 16px/1.3 var(--serif); white-space: nowrap; }
+      .x-prog { flex: 1; display: flex; align-items: center; gap: 12px; justify-content: center; min-width: 0; }
+      .x-segs { display: flex; gap: 4px; width: min(320px, 100%); }
+      .x-segs i { flex: 1; height: 4px; border-radius: 2px; background: var(--x-line); transition: background 200ms; }
+      .x-segs i.on { background: var(--x-teal); }
+      .x-count { font: 12px var(--mono); color: var(--x-sub); white-space: nowrap; }
+      .x-tools { display: flex; gap: 6px; }
+      .x-ib {
+        width: 40px; height: 40px; min-width: 40px; border-radius: 10px; border: 1px solid var(--x-line);
+        background: var(--x-chip); color: var(--x-text); font: 14px var(--mono); cursor: pointer;
+        transition: border-color 200ms, color 200ms;
+      }
+      .x-ib:hover { border-color: var(--x-teal); color: var(--x-ink); }
+      .x-side { border-right: 1px solid var(--x-line); overflow-y: auto; padding: 12px 0; background: var(--x-solid); }
+      .x-side button {
+        display: block; width: 100%; text-align: left; border: 0; background: none; color: var(--x-sub);
+        padding: 10px 16px 10px 20px; cursor: pointer; border-left: 3px solid transparent;
+        font: 14px/1.4 var(--ui); transition: background 200ms, color 200ms, border-color 200ms;
+      }
+      .x-side button span { display: block; font: 12px var(--mono); opacity: 0.8; }
+      .x-side button:hover { color: var(--x-text); }
+      .x-side button.on { color: var(--x-text); background: var(--x-chip); border-left-color: var(--x-teal); }
+      .x-side button.on span { color: var(--x-ink); }
+      .x-stage { position: relative; overflow: hidden; touch-action: none; }
+      .x-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; }
+      .x-stage canvas:active { cursor: grabbing; }
+      .x-note {
+        position: absolute; left: 16px; top: 16px; max-width: 380px; padding: 14px 16px; border-radius: 10px;
+        background: var(--x-panel); border: 1px solid var(--x-line);
+        -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+      }
+      .x-note h2 { font: 600 18px/1.4 var(--serif); display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+      .x-note h2 button { border: 0; background: none; color: var(--x-sub); font: 12px var(--ui); cursor: pointer; min-height: 44px; min-width: 44px; }
+      .x-note p { margin-top: 6px; color: var(--x-sub); font-size: 13px; }
+      .x-note.closed p { display: none; }
+      .x-soon {
+        position: absolute; inset: 0; display: none; place-items: center; text-align: center; pointer-events: none;
+      }
+      .x-soon div { font: 600 28px var(--serif); }
+      .x-soon small { display: block; font: 13px var(--ui); color: var(--x-sub); margin-top: 8px; }
+      .x-app.is-soon .x-soon { display: grid; }
+      .x-app.is-soon .x-note p, .x-app.is-soon .x-ctl { display: none; }
+      .x-app:not(.is-soon) .x-wait { display: none; }
+      .x-panel { border-left: 1px solid var(--x-line); overflow-y: auto; padding: 16px; background: var(--x-solid); }
+      .x-handle { display: none; }
+      .x-h { font: 12px var(--mono); color: var(--x-sub); letter-spacing: 0.08em; margin: 18px 0 8px; }
+      .x-h:first-child { margin-top: 0; }
+      .x-fns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+      .x-fns button {
+        min-height: 40px; border-radius: 10px; border: 1px solid var(--x-line); background: var(--x-soft);
+        color: var(--x-text); font: 14px var(--mono); cursor: pointer; transition: all 200ms;
+      }
+      .x-fns button.on { border-color: var(--x-teal); color: var(--x-ink); background: color-mix(in srgb, var(--x-teal) 12%, transparent); }
+      .x-sl { margin-bottom: 12px; }
+      .x-sl label { display: flex; justify-content: space-between; font-size: 13px; }
+      .x-sl label b { font: 14px var(--mono); color: var(--x-ink); font-weight: 400; }
+      .x-sl small { color: var(--x-sub); font-size: 12px; }
+      .x-sl input { width: 100%; accent-color: var(--x-teal); height: 28px; margin: 0; }
+      .x-formula {
+        padding: 12px; border-radius: 10px; border: 1px solid var(--x-line); background: var(--x-soft);
+        font: 15px/1.5 var(--mono); word-break: break-all;
+      }
+      .x-formula small { display: block; font-size: 12px; color: var(--x-sub); }
+      .x-formula .t { color: var(--x-ink); }
+      .x-btn {
+        width: 100%; min-height: 40px; margin-top: 10px; border-radius: 10px; border: 1px solid var(--x-line);
+        background: none; color: var(--x-text); font: 14px var(--ui); cursor: pointer; transition: border-color 200ms;
+      }
+      .x-btn:hover { border-color: var(--x-teal); }
+      .x-card { padding: 12px 14px; border-radius: 10px; background: var(--x-soft); border: 1px solid var(--x-line); }
+      .x-card ul { margin: 0; padding-left: 18px; font-size: 13px; }
+      .x-card li + li { margin-top: 4px; }
+      .x-card em { font-style: normal; color: var(--x-gold); }
+      .x-sw { display: flex; justify-content: space-between; align-items: center; min-height: 40px; font-size: 13px; cursor: pointer; }
+      .x-sw input { width: 20px; height: 20px; accent-color: var(--x-teal); }
+      .x-legend { display: flex; gap: 14px; font-size: 12px; color: var(--x-sub); margin-top: 8px; }
+      .x-legend i { display: inline-block; width: 16px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+      .x-wait { color: var(--x-sub); font-size: 13px; }
+      .x-ctl2, .x-n2 { display: none; }
+      .x-app.ch2 .x-ctl2 { display: block; }
+      .x-app.ch2 .x-note:not(.closed) p.x-n2 { display: block; }
+      .x-app.ch2 .x-ctl, .x-app.ch2 .x-note p.x-n1 { display: none; }
+      .x-ctl3, .x-n3 { display: none; }
+      .x-app.ch3 .x-ctl3 { display: block; }
+      .x-app.ch3 .x-note:not(.closed) p.x-n3 { display: block; }
+      .x-app.ch3 .x-ctl, .x-app.ch3 .x-note p.x-n1 { display: none; }
+      .x-ctl3 .x-btn:first-of-type { margin-top: 0; }
+      .x-ctl4, .x-n4 { display: none; }
+      .x-app.ch4 .x-ctl4 { display: block; }
+      .x-app.ch4 .x-note:not(.closed) p.x-n4 { display: block; }
+      .x-app.ch4 .x-ctl, .x-app.ch4 .x-note p.x-n1 { display: none; }
+      .x-ctl5, .x-n5 { display: none; }
+      .x-app.ch5 .x-ctl5 { display: block; }
+      .x-app.ch5 .x-note:not(.closed) p.x-n5 { display: block; }
+      .x-app.ch5 .x-ctl, .x-app.ch5 .x-note p.x-n1 { display: none; }
+      .x-ctl6, .x-n6 { display: none; }
+      .x-app.ch6 .x-ctl6 { display: block; }
+      .x-app.ch6 .x-note:not(.closed) p.x-n6 { display: block; }
+      .x-app.ch6 .x-ctl, .x-app.ch6 .x-note p.x-n1 { display: none; }
+      .x-ctl7, .x-n7 { display: none; }
+      .x-app.ch7 .x-ctl7 { display: block; }
+      .x-app.ch7 .x-note:not(.closed) p.x-n7 { display: block; }
+      .x-app.ch7 .x-ctl, .x-app.ch7 .x-note p.x-n1 { display: none; }
+      .x-note p.x-src7 { font: 12px var(--mono); color: var(--x-ink); }
+      .x-ctl8, .x-n8 { display: none; }
+      .x-app.ch8 .x-ctl8 { display: block; }
+      .x-ctl8 { background: var(--x-solid); color: var(--x-text); }
+      .x-ctl8 .x-fns button, .x-ctl8 .x-btn { min-height: 44px; }
+      .x-ctl8 .x-fns button, .x-ctl8 .x-stats div, .x-ctl8 .x-card, .x-ctl8 .x-formula { background: color-mix(in srgb, var(--x-text) 5%, var(--x-solid)); }
+      .x-ctl8 .x-fns button.on { background: color-mix(in srgb, var(--x-teal) 12%, var(--x-solid)); }
+      .x-ctl8 .x-btn { background: var(--x-solid); }
+      .x-app.ch8 .x-note:not(.closed) p.x-n8 { display: block; }
+      .x-app.ch8 .x-ctl, .x-app.ch8 .x-note p.x-n1 { display: none; }
+      .x-btns7 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .x-btns7 .x-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+      .x-warn7 { margin-top: 8px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--x-red); color: var(--x-red); font-size: 13px; }
+      .x-tb7 { max-height: 260px; overflow: auto; border-radius: 10px; border: 1px solid var(--x-line); background: var(--x-soft); }
+      .x-tb7 table { width: 100%; border-collapse: collapse; font: 12px/1.5 var(--mono); }
+      .x-tb7 th, .x-tb7 td { padding: 5px 6px; text-align: right; border-bottom: 1px solid var(--x-line); white-space: nowrap; font-weight: 400; }
+      .x-tb7 thead th { position: sticky; top: 0; background: var(--x-solid); color: var(--x-sub); }
+      .x-tb7 .p { color: var(--x-teal); } .x-tb7 .r { color: var(--x-red); }
+      .x-mono.dec { color: var(--x-red); }
+      .x-mono.flat { color: var(--x-gold); }
+      .x-pts .r { color: var(--x-red); }
+      .x-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .x-stats div { padding: 8px 10px; border-radius: 10px; background: var(--x-soft); border: 1px solid var(--x-line); min-width: 0; }
+      .x-stats small { display: block; font-size: 12px; color: var(--x-sub); }
+      .x-stats b { display: block; font: 14px/1.4 var(--mono); color: var(--x-ink); font-weight: 400; word-break: break-all; }
+      .x-mono { margin-top: 6px; font: 600 16px/1.4 var(--ui); }
+      .x-mono.up { color: var(--x-teal); }
+      .x-mono.down { color: var(--x-gold); }
+      .x-pts { font: 13px/1.7 var(--mono); }
+      .x-pts .p { color: var(--x-teal); }
+      .x-pts .q { color: var(--x-gold); }
+      @media (max-width: 1023px) { .x-app { grid-template-columns: 180px minmax(0, 1fr) 300px; } }
+      @media (max-width: 767px) {
+        .x-app { grid-template-columns: minmax(0, 1fr); grid-template-rows: 52px 48px minmax(0, 1fr); }
+        .x-top { gap: 8px; padding: 0 10px; }
+        .x-brand small, .x-segs, .x-hide-m { display: none; }
+        .x-brand b { font-size: 15px; }
+        .x-prog { justify-content: flex-end; }
+        .x-ib { width: 44px; min-width: 44px; height: 44px; }
+        .x-tools { gap: 4px; }
+        .x-side { display: flex; overflow-x: auto; padding: 0; border-right: 0; border-bottom: 1px solid var(--x-line); }
+        .x-side button { width: auto; flex: none; white-space: nowrap; border-left: 0; border-bottom: 3px solid transparent; padding: 4px 14px; }
+        .x-side button span { display: inline; margin-right: 6px; }
+        .x-side button.on { border-bottom-color: var(--x-teal); }
+        .x-note { left: 10px; right: 10px; top: 10px; max-width: none; padding: 10px 12px; }
+        .x-panel {
+          position: fixed; left: 0; right: 0; bottom: 0; max-height: 72vh; border-left: 0;
+          border-top: 1px solid var(--x-line); border-radius: 16px 16px 0 0; padding: 0 16px 24px;
+          -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+          transform: translateY(calc(100% - 64px)); transition: transform 250ms ease; z-index: 5;
+        }
+        .x-panel.open { transform: none; }
+        .x-handle {
+          display: block; position: sticky; top: 0; width: 100%; min-height: 56px; border: 0; margin-bottom: 8px;
+          background: inherit; color: var(--x-sub); font: 13px var(--ui); cursor: pointer;
+        }
+        .x-handle::before { content: ""; display: block; width: 40px; height: 4px; border-radius: 2px; background: var(--x-sub); margin: 0 auto 8px; opacity: 0.5; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page" id="top">
+      <div class="x-app" id="app">
+        <header class="x-top">
+          <div class="x-brand"><small>格物实验室</small><b>函数图像 · FuncLab</b></div>
+          <div class="x-prog">
+            <div class="x-segs" id="segs"></div>
+            <span class="x-count" id="count">01 / 08</span>
+          </div>
+          <div class="x-tools">
+            <button class="x-ib" id="prev" title="上一章 (←)" aria-label="上一章">←</button>
+            <button class="x-ib" id="next" title="下一章 (→)" aria-label="下一章">→</button>
+            <button class="x-ib" id="theme" title="主题切换 (T)" aria-label="切换主题">T</button>
+            <button class="x-ib x-hide-m" id="resetView" title="重置视角 (R)" aria-label="重置视角">R</button>
+            <button class="x-ib x-hide-m" id="full" title="全屏 (F)" aria-label="全屏">F</button>
+          </div>
+        </header>
+        <nav class="x-side" id="side" aria-label="章节"></nav>
+        <main class="x-stage" id="stage">
+          <canvas id="cv" role="img" aria-label="可拖动缩放的坐标系与函数图像"></canvas>
+          <div class="x-note" id="note">
+            <h2><span id="noteTitle">图像变换</span><button id="noteToggle">收起</button></h2>
+            <p class="x-n1">从基本函数 y = f(x) 出发，y = a·f(b(x − h)) + k 的图像可以由四步变换得到。</p>
+            <p class="x-n1">h 左右平移（“左加右减”），k 上下平移，a 纵向伸缩（a &lt; 0 时还要关于 x 轴翻折），b 横向伸缩为原来的 1/b。</p>
+            <p class="x-n1">淡色是原函数，圆点标出一个特征点在变换前后的位置。拖动平移，滚轮或双指缩放。</p>
+            <p class="x-n2">y = aˣ 与 y = logₐx（a &gt; 0 且 a ≠ 1）互为反函数，它们的图像关于直线 y = x 对称。</p>
+            <p class="x-n2">指数函数恒过 (0, 1)，对数函数恒过 (1, 0)。a &gt; 1 时两者都递增，0 &lt; a &lt; 1 时都递减。</p>
+            <p class="x-n2">拖动曲线 aˣ 上的点 P，它关于 y = x 的对称点 Q 始终落在 logₐx 上。</p>
+            <p class="x-n3">角 θ 的终边与单位圆交于 P(cosθ, sinθ)：纵坐标是 sinθ，横坐标是 cosθ。</p>
+            <p class="x-n3">把 P 的高度随 θ 记录下来，就展开成正弦曲线。转一圈是 2π，所以周期是 2π。</p>
+            <p class="x-n3">可以暂停后拖动点 P，手动改变 θ。</p>
+            <p class="x-n4">y = A sin(ωx + φ) + k：A 决定振幅，ω 决定周期 T = 2π/ω，φ 决定初相，k 让图像上下平移。</p>
+            <p class="x-n4">从 y = sin x 出发，先向左平移 φ 得 y = sin(x + φ)，再把横坐标缩短为原来的 1/ω；若先伸缩得 y = sin ωx，则只需平移 φ/ω。</p>
+            <p class="x-n4">淡色是 y = sin x，青绿是变换后的图像。打开“五点法”可看一个周期内的五个关键点。</p>
+            <p class="x-n5">割线 PQ 的斜率 (f(x₀ + h) − f(x₀)) / h 是 f(x) 在 [x₀, x₀ + h] 上的平均变化率。</p>
+            <p class="x-n5">h → 0 时，Q 沿曲线滑向 P，割线趋近切线；切线的斜率就是导数 f′(x₀)。</p>
+            <p class="x-n5">拖动点 P 改变 x₀，拖 h 滑块或点“h → 0”看割线如何转向切线。</p>
+            <p class="x-n6">上图是 f(x)，下图是导函数 f′(x)，两图共用 x 轴。</p>
+            <p class="x-n6">f′(x) &gt; 0 的区间上 f(x) 单调递增（青绿），f′(x) &lt; 0 的区间上单调递减（红）。</p>
+            <p class="x-n6">f′(x) 由正变负的点是极大值点 ▲，由负变正的点是极小值点 ▼；f′(x₀) = 0 但不变号的点（如 x³ 在 0 处）不是极值点。</p>
+            <p class="x-n6">拖动竖直游标看各处的 f(x)、f′(x) 与切线；拖空白处平移，滚轮或双指缩放 x 轴。</p>
+            <p class="x-n7 x-src7">教材：人教A版 必修第一册·第四章 4.5 函数的应用（二）</p>
+            <p class="x-n7">函数零点就是 f(x) = 0 的实数根，也是图像与 x 轴交点的横坐标。</p>
+            <p class="x-n7">零点存在定理：f 在 [a, b] 上连续且 f(a)·f(b) &lt; 0，则 (a, b) 内至少有一个零点。</p>
+            <p class="x-n7">二分法每步取中点 m，保留端点异号的一半，区间缩小一半。拖动竖线 a、b 设定初始区间。</p>
+            <p class="x-n8 x-src7">教材：人教A版 选择性必修第二册·第五章 一元函数的导数及其应用（拓展阅读，现行高考不作要求）</p>
+            <p class="x-n8">把 [a, b] 分成 n 等份，每份取一点 ξᵢ 作高，用 n 个矩形面积之和 Sₙ = Σ f(ξᵢ)·Δx 近似曲边梯形的面积。</p>
+            <p class="x-n8">n → ∞ 时，黎曼和 Sₙ 趋于定积分 ∫ₐᵇ f(x)dx；在 x 轴下方（f &lt; 0，红色）的部分计为负。</p>
+            <p class="x-n8">微积分基本定理：若 F′(x) = f(x)，则 ∫ₐᵇ f(x)dx = F(b) − F(a)。拖动竖线 a、b 改变区间。</p>
+          </div>
+          <div class="x-soon"><div>即将上线<small id="soonName"></small></div></div>
+        </main>
+        <aside class="x-panel" id="panel">
+          <button class="x-handle" id="handle">控制面板</button>
+          <p class="x-wait">本章演示即将上线，先去第 1 章「图像变换」看看吧。</p>
+          <div class="x-ctl">
+            <p class="x-h">基本函数 f(x)</p>
+            <div class="x-fns" id="fns"></div>
+            <p class="x-h">参数</p>
+            <div id="sliders"></div>
+            <p class="x-h">解析式</p>
+            <div class="x-formula">
+              <small>y = a·f(b(x − h)) + k</small>
+              <span class="t" id="formula">y = x²</span>
+            </div>
+            <div class="x-legend"><span><i style="background: var(--x-orig)"></i>原函数</span><span><i style="background: var(--x-teal)"></i>变换后</span><span><i style="background: var(--x-gold)"></i>特征点</span></div>
+            <button class="x-btn" id="resetParams">恢复 h = 0, k = 0, a = 1, b = 1</button>
+            <p class="x-h">要点</p>
+            <div class="x-card">
+              <ul>
+                <li><em>h</em>：向左右平移 |h|，“左加右减”——f(x + 1) 左移 1</li>
+                <li><em>k</em>：向上下平移 |k|，k &gt; 0 上移</li>
+                <li><em>a</em>：纵坐标变为原来的 a 倍；a &lt; 0 时关于 x 轴翻折</li>
+                <li><em>b</em>：横坐标变为原来的 1/b</li>
+              </ul>
+            </div>
+            <p class="x-h">显示</p>
+            <label class="x-sw">显示原函数<input type="checkbox" id="showOrig" checked /></label>
+            <label class="x-sw">特征点与辅助线<input type="checkbox" id="showGuide" checked /></label>
+            <label class="x-sw">坐标标签<input type="checkbox" id="showLabels" checked /></label>
+          </div>
+          <div class="x-ctl2">
+            <p class="x-h">底数 a</p>
+            <div class="x-sl">
+              <label for="sl-ea"><span>a <small>0.1 – 5，a ≠ 1</small></span><b id="v-ea">2</b></label>
+              <input type="range" id="sl-ea" min="0.1" max="5" step="0.05" value="2" />
+            </div>
+            <div class="x-fns" id="eaPre">
+              <button data-a="0.5">1/2</button><button data-a="2">2</button><button data-a="3">3</button><button data-a="e">e</button>
+            </div>
+            <p class="x-h">单调性</p>
+            <div class="x-card">
+              <span id="monoCond" class="x-pts">a = 2 &gt; 1</span>
+              <p class="x-mono up" id="mono">y = aˣ 与 y = logₐx 都单调递增</p>
+            </div>
+            <p class="x-h">解析式</p>
+            <div class="x-formula">
+              <small>互为反函数</small>
+              <span class="t" id="ef1">y = 2ˣ</span><br /><span style="color: var(--x-gold)" id="ef2">y = log₂x</span>
+            </div>
+            <div class="x-legend"><span><i style="background: var(--x-teal)"></i>aˣ</span><span><i style="background: var(--x-gold)"></i>logₐx</span><span><i style="background: var(--x-sub)"></i>y = x</span></div>
+            <p class="x-h">对称点</p>
+            <div class="x-card x-pts">
+              <span class="p" id="ptP">P(1, 2)</span> 在 y = aˣ 上<br />
+              <span class="q" id="ptQ">Q(2, 1)</span> 在 y = logₐx 上
+            </div>
+            <button class="x-btn" id="resetExp">恢复 a = 2，P 回到 x = 1</button>
+            <p class="x-h">要点</p>
+            <div class="x-card">
+              <ul>
+                <li>y = aˣ 与 y = logₐx <em>互为反函数</em>，图像关于 y = x 对称</li>
+                <li>(m, n) 在 aˣ 上 ⇔ (n, m) 在 logₐx 上</li>
+                <li>指数函数恒过 <em>(0, 1)</em>，对数函数恒过 <em>(1, 0)</em></li>
+                <li>a &gt; 1 递增，0 &lt; a &lt; 1 递减</li>
+              </ul>
+            </div>
+            <p class="x-h">显示</p>
+            <label class="x-sw">坐标标签<input type="checkbox" id="showLabels2" checked /></label>
+          </div>
+          <div class="x-ctl3">
+            <p class="x-h">动画</p>
+            <button class="x-btn" id="play3" aria-pressed="true">暂停</button>
+            <div class="x-sl" style="margin-top: 12px">
+              <label for="sl-sp"><span>旋转速度 <small>弧度 / 秒</small></span><b id="v-sp">0.8</b></label>
+              <input type="range" id="sl-sp" min="0.1" max="3" step="0.1" value="0.8" />
+            </div>
+            <p class="x-h">当前角 θ</p>
+            <div class="x-card x-pts">
+              θ = <span id="thR">0</span> rad<br />
+              θ = <span id="thD">0°</span><br />
+              <span class="p">sinθ = <span id="sinV">0</span></span><br />
+              <span class="q">cosθ = <span id="cosV">1</span></span>
+            </div>
+            <div class="x-legend"><span><i style="background: var(--x-teal)"></i>sin x</span><span><i style="background: var(--x-gold)"></i>cos x</span><span><i style="background: var(--x-orig)"></i>上一圈</span></div>
+            <p class="x-h">显示</p>
+            <label class="x-sw">同时显示 y = cos x<input type="checkbox" id="showCos" /></label>
+            <label class="x-sw">坐标标签<input type="checkbox" id="showLabels3" checked /></label>
+            <button class="x-btn" id="reset3">θ 回到 0，重新描线</button>
+            <p class="x-h">要点</p>
+            <div class="x-card">
+              <ul>
+                <li>终边与单位圆交于 <em>P(cosθ, sinθ)</em></li>
+                <li>纵坐标是 sinθ，横坐标是 cosθ</li>
+                <li>P 的高度随 θ 记录下来，展开成 y = sin x</li>
+                <li>转一圈是 2π，所以周期 <em>T = 2π</em></li>
+              </ul>
+            </div>
+          </div>
+          <div class="x-ctl4">
+            <p class="x-h">参数</p>
+            <div class="x-sl">
+              <label for="sl-s4a"><span>A 振幅 <small>0.2 – 3</small></span><b id="v-s4a">1</b></label>
+              <input type="range" id="sl-s4a" min="0.2" max="3" step="0.05" value="1" />
+            </div>
+            <div class="x-sl">
+              <label for="sl-s4w"><span>ω 角频率 <small>0.25 – 4</small></span><b id="v-s4w">1</b></label>
+              <input type="range" id="sl-s4w" min="0.25" max="4" step="0.05" value="1" />
+            </div>
+            <div class="x-sl">
+              <label for="sl-s4p"><span>φ 初相 <small>−π 到 π</small></span><b id="v-s4p">0</b></label>
+              <input type="range" id="sl-s4p" min="-12" max="12" step="1" value="0" />
+            </div>
+            <div class="x-sl">
+              <label for="sl-s4k"><span>k 上下平移 <small>−3 到 3</small></span><b id="v-s4k">0</b></label>
+              <input type="range" id="sl-s4k" min="-3" max="3" step="0.1" value="0" />
+            </div>
+            <p class="x-h">解析式</p>
+            <div class="x-formula">
+              <small>y = A sin(ωx + φ) + k</small>
+              <span class="t" id="f4">y = sin x</span>
+            </div>
+            <div class="x-legend"><span><i style="background: var(--x-orig)"></i>y = sin x</span><span><i style="background: var(--x-teal)"></i>变换后</span><span><i style="background: var(--x-gold)"></i>五点</span></div>
+            <p class="x-h">特征量</p>
+            <div class="x-stats">
+              <div><small>振幅 A</small><b id="amp4">1</b></div>
+              <div><small>周期 T = 2π/ω</small><b id="per4">2π</b></div>
+              <div><small>初相 φ</small><b id="ph4">0</b></div>
+            </div>
+            <p class="x-h">五点法</p>
+            <label class="x-sw">令 ωx + φ = 0, π/2, π, 3π/2, 2π<input type="checkbox" id="five4" checked /></label>
+            <div class="x-card x-pts" id="pts4"></div>
+            <button class="x-btn" id="reset4">重置：A = 1, ω = 1, φ = 0, k = 0</button>
+            <p class="x-h">本例的变换路径</p>
+            <div class="x-card"><ul id="path4"></ul></div>
+            <p class="x-h">要点</p>
+            <div class="x-card">
+              <ul>
+                <li><em>A</em> 决定振幅，最大值 k + A，最小值 k − A</li>
+                <li><em>ω</em> 决定周期 T = 2π/ω</li>
+                <li><em>φ</em> 决定初相，φ &gt; 0 左移</li>
+                <li><em>k</em> 上下平移，k &gt; 0 上移</li>
+                <li>先平移后伸缩：左移 φ，横坐标变为 1/ω</li>
+                <li>先伸缩后平移：只需平移 <em>φ/ω</em></li>
+              </ul>
+            </div>
+            <p class="x-h">显示</p>
+            <label class="x-sw">坐标标签<input type="checkbox" id="showLabels4" checked /></label>
+          </div>
+          <div class="x-ctl5">
+            <p class="x-h">函数 f(x)</p>
+            <div class="x-fns" id="fns5">
+              <button data-i="0">x³−3x</button><button data-i="1">sin x</button><button data-i="2">eˣ</button><button data-i="3">x²</button>
+            </div>
+            <p class="x-h">步长 h</p>
+            <div class="x-sl">
+              <label for="sl-h5"><span>h <small>0.01 – 3</small></span><b id="v-h5">1</b></label>
+              <input type="range" id="sl-h5" min="0.01" max="3" step="0.01" value="1" />
+            </div>
+            <button class="x-btn" id="play5" aria-pressed="false">h → 0 播放</button>
+            <p class="x-h">点</p>
+            <div class="x-card x-pts">
+              <span class="p" id="pt5P">P</span><br />
+              <span class="q" id="pt5Q">Q</span>
+            </div>
+            <p class="x-h">割线斜率（平均变化率）</p>
+            <div class="x-formula">
+              <small>k<sub>PQ</sub> = (f(x₀ + h) − f(x₀)) / h</small>
+              <span id="sec5f">—</span>
+            </div>
+            <div class="x-stats" style="margin-top: 8px">
+              <div><small>割线 k<sub>PQ</sub></small><b id="k5" style="color: var(--x-gold)">0</b></div>
+              <div><small>导数 f′(x₀)</small><b id="d5">0</b></div>
+              <div><small>差值</small><b id="e5">0</b></div>
+            </div>
+            <div class="x-legend"><span><i style="background: var(--x-text)"></i>f(x)</span><span><i style="background: var(--x-gold)"></i>割线 PQ</span><span><i style="background: repeating-linear-gradient(90deg, var(--x-teal) 0 4px, transparent 4px 7px)"></i>切线</span></div>
+            <button class="x-btn" id="reset5">重置：h = 1，P 回到默认位置</button>
+            <p class="x-h">要点</p>
+            <div class="x-card">
+              <ul>
+                <li>割线 PQ 的斜率是<em>平均变化率</em> Δy / Δx</li>
+                <li>h → 0 时，割线趋近<em>切线</em></li>
+                <li>切线斜率就是导数 <em>f′(x₀)</em></li>
+                <li>(x³−3x)′ = 3x² − 3，(sin x)′ = cos x，(eˣ)′ = eˣ，(x²)′ = 2x</li>
+              </ul>
+            </div>
+            <p class="x-h">显示</p>
+            <label class="x-sw">坐标标签<input type="checkbox" id="showLabels5" checked /></label>
+          </div>
+          <div class="x-ctl6">
+            <p class="x-h">函数 f(x)</p>
+            <div class="x-fns" id="fns6" style="grid-template-columns: repeat(3, 1fr)">
+              <button data-i="0">x³−3x</button><button data-i="1">x³</button><button data-i="2">x⁴−2x²</button><button data-i="3">sin x</button><button data-i="4">x·eˣ</button>
+            </div>
+            <p class="x-h">游标位置</p>
+            <div class="x-sl">
+              <label for="sl-c6"><span>x <small>也可拖动舞台上的竖线</small></span><b id="v-c6">0</b></label>
+              <input type="range" id="sl-c6" min="-2.6" max="2.6" step="0.01" value="-1.6" />
+            </div>
+            <div class="x-stats">
+              <div><small>x</small><b id="x6v">0</b></div>
+              <div><small>f(x)</small><b id="f6v">0</b></div>
+              <div><small>f′(x) 切线斜率</small><b id="d6v">0</b></div>
+            </div>
+            <div class="x-card" style="margin-top: 8px"><p class="x-mono up" id="mono6" style="margin-top: 0">—</p></div>
+            <p class="x-h">解析式</p>
+            <div class="x-formula">
+              <small>函数与导函数</small>
+              <span class="t" id="ff6">f(x) = x³ − 3x</span><br /><span id="fd6">f′(x) = 3x² − 3</span>
+            </div>
+            <div class="x-legend"><span><i style="background: var(--x-teal)"></i>f′ &gt; 0 递增</span><span><i style="background: var(--x-red)"></i>f′ &lt; 0 递减</span><span><i style="background: var(--x-gold)"></i>切线</span></div>
+            <p class="x-h">单调区间与极值</p>
+            <div class="x-card x-pts" id="ext6"></div>
+            <button class="x-btn" id="reset6">重置游标与视角</button>
+            <p class="x-h">要点</p>
+            <div class="x-card">
+              <ul>
+                <li>f′(x) &gt; 0 的区间上 f(x) <em>单调递增</em></li>
+                <li>f′(x) &lt; 0 的区间上 f(x) <em>单调递减</em></li>
+                <li>f′ 由正变负：<em>极大值点 ▲</em></li>
+                <li>f′ 由负变正：<em>极小值点 ▼</em></li>
+                <li>f′(x₀) = 0 但不变号（如 x³ 在 0 处）<em>不是极值点</em></li>
+              </ul>
+            </div>
+            <p class="x-h">显示</p>
+            <label class="x-sw">切线<input type="checkbox" id="tan6" checked /></label>
+            <label class="x-sw">坐标标签<input type="checkbox" id="showLabels6" checked /></label>
+          </div>
+          <div class="x-ctl7">
+            <p class="x-h">函数 f(x)</p>
+            <div class="x-fns" id="fns7" style="grid-template-columns: repeat(2, 1fr)">
+              <button data-i="0">x³−x−1</button><button data-i="1">2ˣ+3x−6</button><button data-i="2">ln x+2x−6</button><button data-i="3">x²−2</button>
+            </div>
+            <p class="x-h">区间 [a, b]（拖动舞台上的竖线）</p>
+            <div class="x-stats">
+              <div><small>a</small><b id="a7">1</b></div>
+              <div><small>b</small><b id="b7">2</b></div>
+              <div><small>b − a</small><b id="l7">1</b></div>
+            </div>
+            <div class="x-card x-pts" id="sg7" style="margin-top: 8px"></div>
+            <p class="x-warn7" id="warn7" hidden>端点函数值同号，无法保证区间内有零点</p>
+            <p class="x-h">精度 ε</p>
+            <div class="x-fns" id="eps7" style="grid-template-columns: repeat(3, 1fr)">
+              <button data-e="0.1">0.1</button><button data-e="0.01">0.01</button><button data-e="0.001">0.001</button>
+            </div>
+            <div class="x-btns7">
+              <button class="x-btn" id="step7">下一步</button><button class="x-btn" id="auto7" aria-pressed="false">自动</button><button class="x-btn" id="reset7">重置</button>
+            </div>
+            <p class="x-h">近似零点</p>
+            <div class="x-formula"><small id="rs7">区间长度 &lt; ε 时停止</small><span class="t" id="r7">—</span></div>
+            <p class="x-h">二分记录</p>
+            <div class="x-tb7">
+              <table>
+                <thead><tr><th>n</th><th>a</th><th>b</th><th>m</th><th>f(m)</th><th>b − a</th></tr></thead>
+                <tbody id="tb7"></tbody>
+              </table>
+            </div>
+            <div class="x-legend"><span><i style="background: var(--x-teal)"></i>f &gt; 0</span><span><i style="background: var(--x-red)"></i>f &lt; 0</span><span><i style="background: var(--x-gold)"></i>中点 m</span></div>
+            <p class="x-h">要点</p>
+            <div class="x-card">
+              <ul>
+                <li>零点是 f(x) = 0 的<em>实数根</em>，即图像与 x 轴交点的横坐标</li>
+                <li>f 在 [a, b] 上连续且 <em>f(a)·f(b) &lt; 0</em> ⇒ (a, b) 内至少一个零点</li>
+                <li>二分法每步区间<em>缩小一半</em>，n 步后长度为 (b − a)/2ⁿ</li>
+                <li>高考链接：零点个数判断常转化为<em>两图像交点个数</em>；易错：f(a)f(b) &gt; 0 不代表区间内没有零点。</li>
+              </ul>
+            </div>
+            <p class="x-h">显示</p>
+            <label class="x-sw">坐标标签<input type="checkbox" id="showLabels7" checked /></label>
+          </div>
+          <div class="x-ctl8">
+            <p class="x-h">函数 f(x)</p>
+            <div class="x-fns" id="fns8" style="grid-template-columns: repeat(3, 1fr)">
+              <button data-i="0">x²</button><button data-i="1">sin x</button><button data-i="2">eˣ</button><button data-i="3">1/x</button><button data-i="4">√x</button>
+            </div>
+            <p class="x-h">区间与分割（可拖动舞台上的竖线）</p>
+            <div class="x-sl"><label>左端点 a <b id="v-a8">0</b></label><input type="range" id="sl-a8" step="0.05" /></div>
+            <div class="x-sl"><label>右端点 b <b id="v-b8">2</b></label><input type="range" id="sl-b8" step="0.05" /></div>
+            <div class="x-sl"><label>分割份数 n <b id="v-n8">10</b></label><input type="range" id="sl-n8" min="1" max="200" step="1" value="10" /></div>
+            <p class="x-h">取点方式 ξᵢ</p>
+            <div class="x-fns" id="mode8" style="grid-template-columns: repeat(3, 1fr)">
+              <button data-m="0">左端点</button><button data-m="1">右端点</button><button data-m="0.5">中点</button>
+            </div>
+            <div class="x-btns7" style="grid-template-columns: repeat(2, 1fr)">
+              <button class="x-btn" id="play8" aria-pressed="false">n 递增 ▶</button><button class="x-btn" id="reset8">重置</button>
+            </div>
+            <p class="x-h">结果</p>
+            <div class="x-stats">
+              <div><small>黎曼和 Sₙ</small><b id="s8">—</b></div>
+              <div><small>精确值</small><b id="e8">—</b></div>
+              <div><small>|Sₙ − 精确值|</small><b id="d8">—</b></div>
+            </div>
+            <div class="x-formula" style="margin-top: 8px"><small id="fs8">∫ₐᵇ f(x)dx = F(b) − F(a)</small><span class="t" id="ff8">—</span></div>
+            <div class="x-legend"><span><i style="background: var(--x-teal)"></i>f ≥ 0 矩形</span><span><i style="background: var(--x-red)"></i>f &lt; 0 矩形</span></div>
+            <p class="x-h">要点</p>
+            <div class="x-card">
+              <ul>
+                <li><em>分割、近似、求和、取极限</em>：Sₙ = Σ f(ξᵢ)Δx，Δx = (b − a)/n</li>
+                <li>n → ∞ 时三种取法的 Sₙ 都趋于同一个值 <em>∫ₐᵇ f(x)dx</em></li>
+                <li>微积分基本定理：<em>∫ₐᵇ f(x)dx = F(b) − F(a)</em>，其中 F′(x) = f(x)</li>
+                <li>x 轴下方的面积在定积分中<em>计为负</em></li>
+                <li>高考链接：定积分不在新高考考查范围，作为理解导数与面积关系的拓展；数列求和中的“以直代曲”思想可借鉴。</li>
+              </ul>
+            </div>
+            <p class="x-h">显示</p>
+            <label class="x-sw">坐标标签<input type="checkbox" id="showLabels8" checked /></label>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="hark.js"></script>
+    <script>
+      (function () {
+        var CH = ["图像变换", "指数与对数", "单位圆与三角函数", "正弦型函数", "导数的几何意义", "单调性与极值", "零点与二分法", "定积分（拓展）"];
+        var FN = [
+          { id: "x2", name: "x²", f: function (x) { return x * x; }, w: function (s) { return P(s) + "²"; }, p: [1, 1] },
+          { id: "x3", name: "x³", f: function (x) { return x * x * x; }, w: function (s) { return P(s) + "³"; }, p: [1, 1] },
+          { id: "sqrt", name: "√x", f: function (x) { return x >= 0 ? Math.sqrt(x) : NaN; }, w: function (s) { return "√" + P(s); }, p: [1, 1] },
+          { id: "abs", name: "|x|", f: Math.abs, w: function (s) { return "|" + s + "|"; }, p: [0, 0] },
+          { id: "inv", name: "1/x", f: function (x) { return 1 / x; }, w: function (s) { return "1/" + P(s); }, p: [1, 1] },
+          { id: "exp", name: "2ˣ", f: function (x) { return Math.pow(2, x); }, w: function (s) { return "2^" + P(s); }, p: [0, 1] },
+          { id: "log", name: "log₂x", f: function (x) { return x > 0 ? Math.log2(x) : NaN; }, w: function (s) { return "log₂" + P(s); }, p: [1, 0] },
+          { id: "sin", name: "sin x", f: Math.sin, w: function (s) { return "sin" + P(s); }, p: [Math.PI / 2, 1] }
+        ];
+        var SL = [
+          { k: "h", label: "h 左右平移", hint: "左加右减", min: -5, max: 5, step: 0.1, d: 0 },
+          { k: "k", label: "k 上下平移", hint: "k > 0 上移", min: -5, max: 5, step: 0.1, d: 0 },
+          { k: "a", label: "a 纵向伸缩", hint: "a < 0 关于 x 轴翻折", min: -3, max: 3, step: 0.1, d: 1 },
+          { k: "b", label: "b 横向伸缩", hint: "横坐标变为 1/b", min: 0.2, max: 4, step: 0.05, d: 1 }
+        ];
+        function P(s) { return s === "x" ? "x" : "(" + s + ")"; }
+        function num(n) { var r = Math.round(n * 100) / 100; return (r < 0 ? "−" : "") + Math.abs(r); }
+
+        var $ = function (id) { return document.getElementById(id); };
+        var app = $("app"), cv = $("cv"), ctx = cv.getContext("2d"), stage = $("stage");
+        var st = { ch: 0, fn: 0, h: 0, k: 0, a: 1, b: 1, orig: true, guide: true, labels: true, ea: 2, t: 1 };
+        var view = { cx: 0, cy: 0, s: 50 }, dirty = true, W = 0, H = 0, dpr = 1;
+        var C = {};
+
+        // build chapter nav + progress
+        CH.forEach(function (name, i) {
+          var b = document.createElement("button");
+          b.innerHTML = "<span>" + String(i + 1).padStart(2, "0") + "</span>" + name;
+          b.onclick = function () { go(i); };
+          $("side").appendChild(b);
+          $("segs").appendChild(document.createElement("i"));
+        });
+        FN.forEach(function (f, i) {
+          var b = document.createElement("button");
+          b.textContent = f.name;
+          b.onclick = function () { st.fn = i; sync(); };
+          $("fns").appendChild(b);
+        });
+        SL.forEach(function (s) {
+          var d = document.createElement("div");
+          d.className = "x-sl";
+          d.innerHTML = '<label for="sl-' + s.k + '"><span>' + s.label + ' <small>' + s.hint + '</small></span><b id="v-' + s.k + '"></b></label>' +
+            '<input type="range" id="sl-' + s.k + '" min="' + s.min + '" max="' + s.max + '" step="' + s.step + '">';
+          $("sliders").appendChild(d);
+          $("sl-" + s.k).addEventListener("input", function (e) { st[s.k] = parseFloat(e.target.value); sync(); });
+        });
+
+        function go(i) {
+          st.ch = (i + CH.length) % CH.length;
+          if (location.hash !== "#" + (st.ch + 1)) history.replaceState(null, "", "#" + (st.ch + 1));
+          [].forEach.call($("side").children, function (b, j) { b.classList.toggle("on", j === st.ch); if (j === st.ch && b.scrollIntoView) b.scrollIntoView({ block: "nearest", inline: "nearest" }); });
+          [].forEach.call($("segs").children, function (s, j) { s.classList.toggle("on", j <= st.ch); });
+          $("count").textContent = String(st.ch + 1).padStart(2, "0") + " / 08";
+          $("noteTitle").textContent = CH[st.ch];
+          $("soonName").textContent = "第 " + (st.ch + 1) + " 章「" + CH[st.ch] + "」正在制作中";
+          app.classList.toggle("is-soon", st.ch > 7);
+          app.classList.toggle("ch7", st.ch === 6);
+          app.classList.toggle("ch8", st.ch === 7);
+          if (st.ch === 7) fit8(); else stop8();
+          if (st.ch === 6) fit7(); else stop7();
+          app.classList.toggle("ch6", st.ch === 5);
+          app.classList.toggle("ch5", st.ch === 4);
+          app.classList.toggle("ch2", st.ch === 1);
+          app.classList.toggle("ch3", st.ch === 2);
+          app.classList.toggle("ch4", st.ch === 3);
+          dirty = true;
+        }
+
+        // chapter 2: exponent & log
+        var SUB = { "0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄", "5": "₅", "6": "₆", "7": "₇", "8": "₈", "9": "₉", ".": "." };
+        function isE() { return st.ea === Math.E; }
+        function aTxt() { return isE() ? "e" : num(st.ea); }
+        function expTxt() { var s = aTxt(); return "y = " + (s.indexOf(".") >= 0 ? "(" + s + ")" : s) + "ˣ"; }
+        function logTxt() { return isE() ? "y = ln x" : "y = log" + aTxt().split("").map(function (c) { return SUB[c] || c; }).join("") + "x"; }
+        function ex(x) { return Math.pow(st.ea, x); }
+        function lg(x) { return x > 0 ? Math.log(x) / Math.log(st.ea) : NaN; }
+        function sync2() {
+          $("sl-ea").value = st.ea;
+          $("v-ea").textContent = aTxt();
+          [].forEach.call($("eaPre").children, function (b) {
+            var v = b.getAttribute("data-a"); b.classList.toggle("on", v === "e" ? isE() : Math.abs(parseFloat(v) - st.ea) < 1e-9);
+          });
+          var up = st.ea > 1;
+          $("monoCond").textContent = up ? "a = " + aTxt() + " > 1" : "0 < a = " + aTxt() + " < 1";
+          $("mono").textContent = "y = aˣ 与 y = logₐx 都单调" + (up ? "递增" : "递减");
+          $("mono").className = "x-mono " + (up ? "up" : "down");
+          $("ef1").textContent = expTxt(); $("ef2").textContent = logTxt();
+          var y = ex(st.t);
+          $("ptP").textContent = "P(" + num(st.t) + ", " + num(y) + ")";
+          $("ptQ").textContent = "Q(" + num(y) + ", " + num(st.t) + ")";
+          dirty = true;
+        }
+        $("sl-ea").addEventListener("input", function (e) {
+          var v = parseFloat(e.target.value);
+          if (Math.abs(v - 1) < 0.025) { v = st.ea > 1 ? 0.95 : 1.05; e.target.value = v; }
+          st.ea = v; sync2();
+        });
+        [].forEach.call($("eaPre").children, function (b) {
+          b.onclick = function () { var v = b.getAttribute("data-a"); st.ea = v === "e" ? Math.E : parseFloat(v); sync2(); };
+        });
+        function hit2(sx, sy) {
+          var y = ex(st.t);
+          if (Math.hypot(sx - X(st.t), sy - Y(y)) < 18) return "P";
+          if (Math.hypot(sx - X(y), sy - Y(st.t)) < 18) return "Q";
+          return null;
+        }
+        function draw2() {
+          var x0 = view.cx - W / 2 / view.s, x1 = view.cx + W / 2 / view.s;
+          ctx.setLineDash([6, 5]); ctx.strokeStyle = C.sub; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(X(x0), Y(x0)); ctx.lineTo(X(x1), Y(x1)); ctx.stroke(); ctx.setLineDash([]);
+          plot(ex, C.teal, 2.5);
+          plot(lg, C.gold, 2.5);
+          var y = ex(st.t);
+          ctx.setLineDash([4, 4]); ctx.strokeStyle = C.text; ctx.globalAlpha = 0.5; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(X(st.t), Y(y)); ctx.lineTo(X(y), Y(st.t)); ctx.stroke();
+          ctx.setLineDash([]); ctx.globalAlpha = 1;
+          dot(0, 1, C.teal, "(0, 1)");
+          dot(1, 0, C.gold, "(1, 0)");
+          ctx.strokeStyle = C.text; ctx.lineWidth = 2;
+          [[st.t, y, C.teal, "P(" + num(st.t) + ", " + num(y) + ")"], [y, st.t, C.gold, "Q(" + num(y) + ", " + num(st.t) + ")"]].forEach(function (p) {
+            ctx.fillStyle = p[2]; ctx.beginPath(); ctx.arc(X(p[0]), Y(p[1]), 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            if (st.labels) {
+              ctx.font = "12px 'Geist Mono', ui-monospace, monospace"; ctx.fillStyle = C.text;
+              ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(p[3], X(p[0]) + 10, Y(p[1]) + 8);
+            }
+          });
+          if (st.labels) {
+            ctx.font = "13px 'Geist Mono', ui-monospace, monospace"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+            ctx.fillStyle = C.gold; ctx.fillText(logTxt(), W - 12, H - 12);
+            ctx.fillStyle = C.teal; ctx.fillText(expTxt(), W - 12, H - 30);
+          }
+        }
+
+        // chapter 3: unit circle & trig
+        var TAU = Math.PI * 2, rm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var s3 = { th: 0, play: !rm, sp: 0.8, cos: false, lap: false, drag: false };
+        var MONO = "12px 'Geist Mono', ui-monospace, monospace";
+        function lay3() {
+          var sr = stage.getBoundingClientRect(), nr = $("note").getBoundingClientRect();
+          var nb = nr.height ? nr.bottom - sr.top : 0, bot = W < 768 ? 80 : 28;
+          var top = nb + 16, avail = H - top - bot, R = Math.min(avail / 2.5, W * 0.14, 150), cy;
+          if (R < 46) { R = Math.max(30, Math.min((H - bot) / 3, W * 0.14, 150)); cy = (H - bot) / 2 + 12; }
+          else cy = top + avail / 2;
+          var cx = 30 + R, gx = cx + R + Math.max(40, R * 0.5);
+          return { R: R, cx: cx, cy: cy, gx: gx, gw: Math.max(60, W - 36 - gx) };
+        }
+        function sync3() {
+          var th = s3.th, s = Math.sin(th), c = Math.cos(th), z = function (v) { return Math.abs(v) < 0.005 ? 0 : v; };
+          $("thR").textContent = th.toFixed(2) + "（" + (th / Math.PI).toFixed(2) + "π）";
+          $("thD").textContent = (th * 180 / Math.PI).toFixed(1) + "°";
+          $("sinV").textContent = num(z(s)); $("cosV").textContent = num(z(c));
+          $("play3").textContent = s3.play ? "暂停" : "播放";
+          $("play3").setAttribute("aria-pressed", s3.play ? "true" : "false");
+          dirty = true;
+        }
+        function setTh3(sx, sy) {
+          var L = lay3(), a = Math.atan2(-(sy - L.cy), sx - L.cx);
+          s3.th = (a + TAU) % TAU; sync3();
+        }
+        function hit3(sx, sy) {
+          var L = lay3(), d = Math.hypot(sx - L.cx, sy - L.cy);
+          return Math.abs(d - L.R) < 24 || Math.hypot(sx - L.cx - L.R * Math.cos(s3.th), sy - L.cy + L.R * Math.sin(s3.th)) < 24;
+        }
+        function draw3() {
+          var L = lay3(), R = L.R, cx = L.cx, cy = L.cy, gx = L.gx, gw = L.gw, th = s3.th;
+          var s = Math.sin(th), c = Math.cos(th), px = cx + R * c, py = cy - R * s;
+          var gX = function (v) { return gx + v / TAU * gw; }, gY = function (v) { return cy - R * v; };
+          function curve(fn, color, to, w) {
+            if (to <= 0) return;
+            var n = Math.max(2, Math.ceil(to / TAU * gw / 2));
+            ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.beginPath();
+            for (var i = 0; i <= n; i++) { var v = to * i / n; if (i) ctx.lineTo(gX(v), gY(fn(v))); else ctx.moveTo(gX(v), gY(fn(v))); }
+            ctx.stroke();
+          }
+          // grid on the unwrapped graph
+          ctx.lineWidth = 1; ctx.strokeStyle = C.grid; ctx.beginPath();
+          [1, -1].forEach(function (v) { ctx.moveTo(gx, Math.round(gY(v)) + 0.5); ctx.lineTo(gx + gw, Math.round(gY(v)) + 0.5); });
+          for (var k = 1; k <= 4; k++) { ctx.moveTo(Math.round(gX(k * Math.PI / 2)) + 0.5, gY(1) - 8); ctx.lineTo(Math.round(gX(k * Math.PI / 2)) + 0.5, gY(-1) + 8); }
+          ctx.moveTo(cx - R, gY(1)); ctx.lineTo(gx, gY(1)); ctx.moveTo(cx - R, gY(-1)); ctx.lineTo(gx, gY(-1));
+          ctx.stroke();
+          // axes
+          ctx.strokeStyle = C.axis; ctx.beginPath();
+          ctx.moveTo(cx - R - 16, cy); ctx.lineTo(cx + R + 16, cy); ctx.moveTo(cx, cy - R - 16); ctx.lineTo(cx, cy + R + 16);
+          ctx.moveTo(gx, cy); ctx.lineTo(gx + gw + 14, cy); ctx.moveTo(gx, gY(1) - 16); ctx.lineTo(gx, gY(-1) + 16);
+          ctx.stroke();
+          ctx.fillStyle = C.sub; ctx.font = MONO; ctx.textAlign = "center"; ctx.textBaseline = "top";
+          ["π/2", "π", "3π/2", "2π"].forEach(function (t, i) { var x = gX((i + 1) * Math.PI / 2); ctx.fillRect(x - 0.5, cy - 3, 1, 6); ctx.fillText(t, x, cy + 6); });
+          ctx.textAlign = "right"; ctx.textBaseline = "middle";
+          ctx.fillText("1", gx - 6, gY(1)); ctx.fillText("−1", gx - 6, gY(-1));
+          ctx.textBaseline = "top"; ctx.fillText("O", gx - 5, cy + 5); ctx.fillText("O", cx - 5, cy + 5);
+          ctx.textAlign = "left"; ctx.fillText("x", gx + gw + 6, cy + 6); ctx.fillText("y", gx + 8, gY(1) - 16);
+          ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText("1", cx + R + 4, cy + 4);
+          // unit circle
+          ctx.strokeStyle = C.text; ctx.globalAlpha = 0.55; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1;
+          // previous lap, then the curve traced so far
+          if (s3.lap) { curve(Math.sin, C.orig, TAU, 1.5); if (s3.cos) curve(Math.cos, C.orig, TAU, 1.5); }
+          if (s3.cos) curve(Math.cos, C.gold, th, 2.5);
+          curve(Math.sin, C.teal, th, 2.5);
+          // angle arc
+          if (th > 0.01) {
+            var ar = Math.max(14, R * 0.22);
+            ctx.strokeStyle = C.sub; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(cx, cy, ar, 0, -th, true); ctx.stroke();
+            ctx.fillStyle = C.sub; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText("θ", cx + (ar + 10) * Math.cos(th / 2), cy - (ar + 10) * Math.sin(th / 2));
+          }
+          // cos (horizontal) and sin (vertical) legs, radius OP
+          ctx.lineCap = "round";
+          ctx.strokeStyle = C.gold; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(px, cy); ctx.stroke();
+          ctx.strokeStyle = C.teal; ctx.beginPath(); ctx.moveTo(px, cy); ctx.lineTo(px, py); ctx.stroke();
+          ctx.strokeStyle = C.text; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(px, py); ctx.stroke();
+          // horizontal projection to the graph
+          var qx = gX(th);
+          ctx.setLineDash([4, 4]); ctx.strokeStyle = C.teal; ctx.lineWidth = 1; ctx.globalAlpha = 0.75;
+          ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(qx, py); ctx.stroke();
+          ctx.strokeStyle = C.sub; ctx.beginPath(); ctx.moveTo(qx, cy); ctx.lineTo(qx, py); ctx.stroke();
+          ctx.setLineDash([]); ctx.globalAlpha = 1;
+          if (s3.cos) { ctx.fillStyle = C.gold; ctx.beginPath(); ctx.arc(qx, gY(c), 5, 0, TAU); ctx.fill(); }
+          ctx.fillStyle = C.teal; ctx.beginPath(); ctx.arc(qx, py, 5, 0, TAU); ctx.fill();
+          ctx.strokeStyle = C.text; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, py, 8, 0, TAU); ctx.fill(); ctx.stroke();
+          if (st.labels) {
+            ctx.font = MONO; ctx.fillStyle = C.text;
+            ctx.textAlign = c >= 0 ? "left" : "right"; ctx.textBaseline = s >= 0 ? "bottom" : "top";
+            var z = function (v) { return num(Math.abs(v) < 0.005 ? 0 : v); };
+            ctx.fillText("P(" + z(c) + ", " + z(s) + ")", px + (c >= 0 ? 10 : -10), py + (s >= 0 ? -8 : 8));
+            ctx.font = "13px 'Geist Mono', ui-monospace, monospace"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+            ctx.fillStyle = C.teal; ctx.fillText("y = sin x", W - 12, H - (W < 768 ? 76 : 12));
+            if (s3.cos) { ctx.fillStyle = C.gold; ctx.fillText("y = cos x", W - 12, H - (W < 768 ? 94 : 30)); }
+          }
+        }
+        $("play3").onclick = function () { s3.play = !s3.play; sync3(); };
+        $("sl-sp").addEventListener("input", function (e) { s3.sp = parseFloat(e.target.value); $("v-sp").textContent = num(s3.sp); });
+        $("showCos").addEventListener("change", function (e) { s3.cos = e.target.checked; dirty = true; });
+        $("reset3").onclick = function () { s3.th = 0; s3.lap = false; sync3(); };
+
+        // chapter 4: y = A sin(ωx + φ) + k, φ in steps of π/12, ω in steps of 1/20
+        var s4 = { A: 1, w: 1, n: 0, k: 0, five: true };
+        var PH = ["0", "π/2", "π", "3π/2", "2π"];
+        function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a || 1; }
+        function fracPi(p, q) {
+          if (p === 0) return "0";
+          var d = gcd(p, q); p /= d; q /= d;
+          if (q < 0) { p = -p; q = -q; }
+          var s = (p < 0 ? "−" : "") + (Math.abs(p) === 1 ? "" : Math.abs(p)) + "π";
+          return q === 1 ? s : s + "/" + q;
+        }
+        function piOr(p, q) { return Math.abs(q / gcd(p, q)) <= 24 ? fracPi(p, q) : num(p * Math.PI / q); }
+        function q4() { return Math.round(s4.w * 20); }
+        function g4(x) { return s4.A * Math.sin(s4.w * x + s4.n * Math.PI / 12) + s4.k; }
+        function formula4() {
+          var A = Math.abs(s4.A - 1) < 1e-9 ? "" : num(s4.A), w = Math.abs(s4.w - 1) < 1e-9 ? "" : num(s4.w);
+          var arg = w + "x" + (s4.n ? (s4.n > 0 ? " + " : " − ") + fracPi(Math.abs(s4.n), 12) : "");
+          var out = "y = " + A + "sin" + (arg === "x" ? " x" : "(" + arg + ")");
+          if (Math.abs(s4.k) > 1e-9) out += (s4.k > 0 ? " + " : " − ") + num(Math.abs(s4.k));
+          return out;
+        }
+        function five4() {
+          var q = q4();
+          return PH.map(function (t, m) {
+            var p = (6 * m - s4.n) * 5, d = 3 * q;
+            return { t: t, m: m, x: p * Math.PI / d, y: s4.k + s4.A * [0, 1, 0, -1, 0][m], xs: piOr(p, d) };
+          });
+        }
+        function sync4() {
+          [["A", "s4a", num(s4.A)], ["w", "s4w", num(s4.w)], ["n", "s4p", fracPi(s4.n, 12)], ["k", "s4k", num(s4.k)]].forEach(function (r) {
+            $("sl-" + r[1]).value = s4[r[0]]; $("v-" + r[1]).textContent = r[2];
+          });
+          var q = q4(), T = 2 * Math.PI / s4.w, Tx = piOr(40, q);
+          $("f4").textContent = formula4();
+          $("amp4").textContent = num(s4.A);
+          $("per4").textContent = Tx.indexOf("π") >= 0 && Tx !== "2π" && Tx !== "π" ? Tx + " ≈ " + num(T) : Tx.indexOf("π") >= 0 ? Tx : num(T);
+          $("ph4").textContent = fracPi(s4.n, 12);
+          $("five4").checked = s4.five;
+          $("pts4").hidden = !s4.five;
+          $("pts4").innerHTML = five4().map(function (p) {
+            return '<span class="q">ωx + φ = ' + p.t + "</span> → (" + p.xs + ", " + num(p.y) + ")";
+          }).join("<br />");
+          var phi = fracPi(Math.abs(s4.n), 12), dir = s4.n > 0 ? "向左" : "向右";
+          var sc = Math.abs(s4.w - 1) < 1e-9 ? "横坐标不变" : "横坐标" + (s4.w > 1 ? "缩短" : "伸长") + "为原来的 " + (s4.w > 1 ? "1/" + num(s4.w) : num(1 / s4.w)) + " 倍";
+          var li = [];
+          if (s4.n === 0) li.push("φ = 0，不平移，只需" + sc);
+          else {
+            li.push("先平移：" + dir + "平移 " + phi + "，再" + sc);
+            li.push("先伸缩：" + sc + "，再" + dir + "平移 φ/ω = " + piOr(5 * Math.abs(s4.n), 3 * q));
+          }
+          var v = [];
+          if (Math.abs(s4.A - 1) > 1e-9) v.push("纵坐标变为原来的 " + num(s4.A) + " 倍");
+          if (Math.abs(s4.k) > 1e-9) v.push((s4.k > 0 ? "向上" : "向下") + "平移 " + num(Math.abs(s4.k)));
+          if (v.length) li.push("最后" + v.join("，再"));
+          $("path4").innerHTML = li.map(function (t) { return "<li>" + t + "</li>"; }).join("");
+          dirty = true;
+        }
+        [["s4a", "A"], ["s4w", "w"], ["s4p", "n"], ["s4k", "k"]].forEach(function (p) {
+          $("sl-" + p[0]).addEventListener("input", function (e) { s4[p[1]] = parseFloat(e.target.value); sync4(); });
+        });
+        $("five4").addEventListener("change", function (e) { s4.five = e.target.checked; sync4(); });
+        $("reset4").onclick = function () { s4.A = 1; s4.w = 1; s4.n = 0; s4.k = 0; sync4(); };
+        function draw4() {
+          plot(Math.sin, C.orig, 2);
+          if (Math.abs(s4.k) > 1e-9) {
+            ctx.setLineDash([4, 4]); ctx.strokeStyle = C.sub; ctx.lineWidth = 1; ctx.globalAlpha = 0.6;
+            ctx.beginPath(); ctx.moveTo(0, Y(s4.k)); ctx.lineTo(W, Y(s4.k)); ctx.stroke();
+            ctx.setLineDash([]); ctx.globalAlpha = 1;
+          }
+          if (s4.five) {
+            var P = five4();
+            ctx.fillStyle = C.teal; ctx.globalAlpha = 0.07;
+            ctx.fillRect(X(P[0].x), 0, X(P[4].x) - X(P[0].x), H); ctx.globalAlpha = 1;
+          }
+          plot(g4, C.teal, 2.5);
+          if (s4.five) {
+            P.forEach(function (p) {
+              var sx = X(p.x), sy = Y(p.y);
+              if (p.m === 1 || p.m === 3) {
+                ctx.setLineDash([3, 4]); ctx.strokeStyle = C.gold; ctx.lineWidth = 1; ctx.globalAlpha = 0.7;
+                ctx.beginPath(); ctx.moveTo(sx, Y(s4.k)); ctx.lineTo(sx, sy); ctx.stroke();
+                ctx.setLineDash([]); ctx.globalAlpha = 1;
+              }
+              ctx.fillStyle = C.gold; ctx.strokeStyle = C.text; ctx.lineWidth = 1.5;
+              ctx.beginPath(); ctx.arc(sx, sy, 5, 0, TAU); ctx.fill(); ctx.stroke();
+              if (st.labels) {
+                var below = p.m === 3 || p.m === 0 || p.m === 4;
+                ctx.font = MONO; ctx.fillStyle = C.text; ctx.textAlign = "center";
+                ctx.textBaseline = below ? "top" : "bottom";
+                ctx.fillText("(" + p.xs + ", " + num(p.y) + ")", sx, sy + (below ? 10 : -10));
+              }
+            });
+          }
+          if (st.labels) {
+            ctx.font = "13px 'Geist Mono', ui-monospace, monospace"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+            var b = W < 768 ? 76 : 12;
+            ctx.fillStyle = C.teal; ctx.fillText(formula4(), W - 12, H - b);
+            ctx.fillStyle = C.sub; ctx.fillText("y = sin x", W - 12, H - b - 18);
+          }
+        }
+
+        // chapter 5: derivative as tangent slope
+        var F5 = [
+          { name: "x³ − 3x", f: function (x) { return x * x * x - 3 * x; }, d: function (x) { return 3 * x * x - 3; }, x0: 0.5 },
+          { name: "sin x", f: Math.sin, d: Math.cos, x0: 0.5 },
+          { name: "eˣ", f: Math.exp, d: Math.exp, x0: 0 },
+          { name: "x²", f: function (x) { return x * x; }, d: function (x) { return 2 * x; }, x0: 1 }
+        ];
+        var s5 = { fn: 0, x0: 0.5, h: 1, play: false };
+        function n4(v) { var r = Math.abs(v) < 5e-5 ? 0 : v; return (r < 0 ? "−" : "") + Math.abs(r).toFixed(4); }
+        function sgn4(v) { return (v > 0 && Math.abs(v) >= 5e-5 ? "+" : "") + n4(v); }
+        function sync5() {
+          var F = F5[s5.fn], x0 = s5.x0, h = s5.h, y0 = F.f(x0), y1 = F.f(x0 + h), k = (y1 - y0) / h, d = F.d(x0);
+          [].forEach.call($("fns5").children, function (b, i) { b.classList.toggle("on", i === s5.fn); });
+          $("sl-h5").value = h; $("v-h5").textContent = h.toFixed(2);
+          $("pt5P").textContent = "P(" + num(x0) + ", " + num(y0) + ")";
+          $("pt5Q").textContent = "Q(" + num(x0 + h) + ", " + num(y1) + ")";
+          $("sec5f").innerHTML = '<span class="t">= (' + n4(y1) + " − " + (y0 < 0 ? "(" + n4(y0) + ")" : n4(y0)) + ") / " + h.toFixed(2) + "</span>";
+          $("k5").textContent = n4(k); $("d5").textContent = n4(d); $("e5").textContent = sgn4(k - d);
+          $("play5").textContent = s5.play ? "暂停" : "h → 0 播放";
+          $("play5").setAttribute("aria-pressed", s5.play ? "true" : "false");
+          dirty = true;
+        }
+        function hit5(sx, sy) { var F = F5[s5.fn]; return Math.hypot(sx - X(s5.x0), sy - Y(F.f(s5.x0))) < 22; }
+        function line5(x0, y0, m) {
+          var xa = view.cx - W / 2 / view.s - 1, xb = view.cx + W / 2 / view.s + 1;
+          ctx.beginPath(); ctx.moveTo(X(xa), Y(y0 + m * (xa - x0))); ctx.lineTo(X(xb), Y(y0 + m * (xb - x0))); ctx.stroke();
+        }
+        function draw5() {
+          var F = F5[s5.fn], x0 = s5.x0, h = s5.h, x1 = x0 + h, y0 = F.f(x0), y1 = F.f(x1), k = (y1 - y0) / h, d = F.d(x0);
+          plot(F.f, C.text, 2.5);
+          // Δx and Δy legs
+          ctx.setLineDash([3, 4]); ctx.strokeStyle = C.sub; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(X(x0), Y(y0)); ctx.lineTo(X(x1), Y(y0)); ctx.lineTo(X(x1), Y(y1)); ctx.stroke();
+          // tangent: teal dashed
+          ctx.setLineDash([8, 6]); ctx.strokeStyle = C.teal; ctx.lineWidth = 2; line5(x0, y0, d);
+          ctx.setLineDash([]);
+          // secant: warm gold, faint extension and solid PQ segment
+          ctx.strokeStyle = C.gold; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.55; line5(x0, y0, k); ctx.globalAlpha = 1;
+          ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(X(x0), Y(y0)); ctx.lineTo(X(x1), Y(y1)); ctx.stroke();
+          ctx.strokeStyle = C.text; ctx.lineWidth = 2;
+          ctx.fillStyle = C.gold; ctx.beginPath(); ctx.arc(X(x1), Y(y1), 6, 0, TAU); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = C.teal; ctx.beginPath(); ctx.arc(X(x0), Y(y0), 8, 0, TAU); ctx.fill(); ctx.stroke();
+          if (st.labels) {
+            ctx.font = MONO; ctx.fillStyle = C.text; ctx.textBaseline = "top";
+            ctx.textAlign = "right"; ctx.fillText("P(" + num(x0) + ", " + num(y0) + ")", X(x0) - 12, Y(y0) + 10);
+            ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillText("Q", X(x1) + 10, Y(y1) - 6);
+            if (h * view.s > 28) { ctx.fillStyle = C.sub; ctx.textAlign = "center"; ctx.textBaseline = y1 >= y0 ? "top" : "bottom"; ctx.fillText("h", (X(x0) + X(x1)) / 2, Y(y0) + (y1 >= y0 ? 4 : -4)); }
+            ctx.font = "13px 'Geist Mono', ui-monospace, monospace"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+            var b = W < 768 ? 76 : 12;
+            ctx.fillStyle = C.text; ctx.fillText("y = " + F.name, W - 12, H - b - 36);
+            ctx.fillStyle = C.gold; ctx.fillText("割线 k = " + n4(k), W - 12, H - b - 18);
+            ctx.fillStyle = C.teal; ctx.fillText("切线 f′(x₀) = " + n4(d), W - 12, H - b);
+          }
+        }
+        [].forEach.call($("fns5").children, function (b) {
+          b.onclick = function () { s5.fn = +b.getAttribute("data-i"); s5.x0 = F5[s5.fn].x0; sync5(); };
+        });
+        $("sl-h5").addEventListener("input", function (e) { s5.h = parseFloat(e.target.value); s5.play = false; sync5(); });
+        function play5() {
+          if (!s5.play && s5.h <= 0.011) s5.h = 2;
+          s5.play = !s5.play; sync5();
+        }
+        $("play5").onclick = play5;
+        $("reset5").onclick = function () { s5.h = 1; s5.play = false; s5.x0 = F5[s5.fn].x0; sync5(); };
+
+        // chapter 6: monotonicity & extrema — f(x) above, f′(x) below, shared x axis
+        function critList(pts) {
+          return function (xa, xb) { return pts.filter(function (p) { return p.x >= xa && p.x <= xb; }); };
+        }
+        var F6 = [
+          { fx: "x³ − 3x", dx: "3x² − 3", f: function (x) { return x * x * x - 3 * x; }, d: function (x) { return 3 * x * x - 3; },
+            r: [-2.6, 2.6], fy: [-3.5, 3.5], dy: [-4, 7], c0: -1.6, flat: [],
+            crit: critList([{ x: -1, t: 1, xs: "−1" }, { x: 1, t: -1, xs: "1" }]),
+            info: '<span class="p">增</span> (−∞, −1)、(1, +∞)<br /><span class="r">减</span> (−1, 1)<br /><span class="q">极大值</span> f(−1) = 2<br /><span class="q">极小值</span> f(1) = −2' },
+          { fx: "x³", dx: "3x²", f: function (x) { return x * x * x; }, d: function (x) { return 3 * x * x; },
+            r: [-2, 2], fy: [-4, 4], dy: [-1.5, 7], c0: 0.8, flat: [0], crit: critList([]),
+            info: '<span class="p">增</span> (−∞, +∞)<br /><span class="r">减</span> 无<br /><span class="q">极值</span> 无：x = 0 处 f′ = 0，但两侧 f′ &gt; 0，不变号' },
+          { fx: "x⁴ − 2x²", dx: "4x³ − 4x", f: function (x) { return x * x * x * x - 2 * x * x; }, d: function (x) { return 4 * x * x * x - 4 * x; },
+            r: [-1.9, 1.9], fy: [-1.6, 3], dy: [-6, 6], c0: 0.5, flat: [],
+            crit: critList([{ x: -1, t: -1, xs: "−1" }, { x: 0, t: 1, xs: "0" }, { x: 1, t: -1, xs: "1" }]),
+            info: '<span class="p">增</span> (−1, 0)、(1, +∞)<br /><span class="r">减</span> (−∞, −1)、(0, 1)<br /><span class="q">极大值</span> f(0) = 0<br /><span class="q">极小值</span> f(−1) = f(1) = −1' },
+          { fx: "sin x", dx: "cos x", f: Math.sin, d: Math.cos, r: [-6.6, 6.6], fy: [-1.5, 1.5], dy: [-1.5, 1.5], c0: 1, flat: [],
+            crit: function (xa, xb) {
+              var out = [], k;
+              for (k = Math.ceil((xa - Math.PI / 2) / TAU); Math.PI / 2 + k * TAU <= xb; k++) out.push({ x: Math.PI / 2 + k * TAU, t: 1, xs: fracPi(1 + 4 * k, 2) });
+              for (k = Math.ceil((xa + Math.PI / 2) / TAU); -Math.PI / 2 + k * TAU <= xb; k++) out.push({ x: -Math.PI / 2 + k * TAU, t: -1, xs: fracPi(4 * k - 1, 2) });
+              return out;
+            },
+            info: '<span class="p">增</span> (−π/2 + 2kπ, π/2 + 2kπ)<br /><span class="r">减</span> (π/2 + 2kπ, 3π/2 + 2kπ)<br /><span class="q">极大值</span> 1，x = π/2 + 2kπ<br /><span class="q">极小值</span> −1，x = −π/2 + 2kπ' },
+          { fx: "x·eˣ", dx: "(x + 1)eˣ", f: function (x) { return x * Math.exp(x); }, d: function (x) { return (x + 1) * Math.exp(x); },
+            r: [-5, 1.2], fy: [-0.7, 3.2], dy: [-0.5, 3.5], c0: -2, flat: [],
+            crit: critList([{ x: -1, t: -1, xs: "−1" }]),
+            info: '<span class="p">增</span> (−1, +∞)<br /><span class="r">减</span> (−∞, −1)<br /><span class="q">极小值</span> f(−1) = −1/e ≈ −0.37<br /><span class="q">极大值</span> 无' }
+        ];
+        var s6 = { fn: 0, c: -1.6, tan: true }, v6 = { cx: 0, s: 0, w: 0 };
+        function X6(x) { return W / 2 + (x - v6.cx) * v6.s; }
+        function XW6(sx) { return v6.cx + (sx - W / 2) / v6.s; }
+        function YP(p, y) { return p.b - 10 - (y - p.lo) / (p.hi - p.lo) * (p.b - p.t - 20); }
+        function niceOf(raw) { var p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p; return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p; }
+        function fit6() { var F = F6[s6.fn]; v6.s = (W - 64) / (F.r[1] - F.r[0]); v6.cx = (F.r[0] + F.r[1]) / 2; v6.w = W; dirty = true; }
+        function lay6() {
+          var sr = stage.getBoundingClientRect(), nr = $("note").getBoundingClientRect();
+          var nb = nr.height ? nr.bottom - sr.top : 0, bot = W < 768 ? 76 : 16, gap = 30, top = nb + 12;
+          var ph = (H - top - bot - gap) / 2;
+          if (ph < 100) { top = 12; ph = (H - top - bot - gap) / 2; }
+          var F = F6[s6.fn];
+          return [{ t: top, b: top + ph, lo: F.fy[0], hi: F.fy[1] }, { t: top + ph + gap, b: top + 2 * ph + gap, lo: F.dy[0], hi: F.dy[1] }];
+        }
+        function clip6(p) { ctx.save(); ctx.beginPath(); ctx.rect(8, p.t, W - 16, p.b - p.t); ctx.clip(); }
+        function pane6(p) {
+          ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.strokeRect(8.5, Math.round(p.t) + 0.5, W - 17, Math.round(p.b - p.t));
+          clip6(p);
+          var xs = niceOf(70 / v6.s), xa = XW6(8), xb = XW6(W - 8), ppu = (p.b - p.t - 20) / (p.hi - p.lo), ys = niceOf(34 / ppu), v;
+          ctx.strokeStyle = C.grid; ctx.beginPath();
+          for (v = Math.ceil(xa / xs) * xs; v <= xb; v += xs) { ctx.moveTo(Math.round(X6(v)) + 0.5, p.t); ctx.lineTo(Math.round(X6(v)) + 0.5, p.b); }
+          for (v = Math.ceil(p.lo / ys) * ys; v <= p.hi; v += ys) { ctx.moveTo(8, Math.round(YP(p, v)) + 0.5); ctx.lineTo(W - 8, Math.round(YP(p, v)) + 0.5); }
+          ctx.stroke();
+          var ax = YP(p, 0), ay = Math.min(Math.max(X6(0), 8), W - 8);
+          ctx.strokeStyle = C.axis; ctx.beginPath();
+          ctx.moveTo(8, Math.round(ax) + 0.5); ctx.lineTo(W - 8, Math.round(ax) + 0.5);
+          ctx.moveTo(Math.round(ay) + 0.5, p.t); ctx.lineTo(Math.round(ay) + 0.5, p.b); ctx.stroke();
+          ctx.fillStyle = C.sub; ctx.font = MONO; ctx.textAlign = "center"; ctx.textBaseline = "top";
+          for (v = Math.ceil(xa / xs) * xs; v <= xb; v += xs) {
+            if (Math.abs(v) < xs / 2) continue;
+            ctx.fillRect(X6(v) - 0.5, ax - 3, 1, 6); ctx.fillText(fmtTick(v, xs), X6(v), Math.min(ax + 5, p.b - 15));
+          }
+          ctx.textAlign = "right"; ctx.textBaseline = "middle";
+          for (v = Math.ceil(p.lo / ys) * ys; v <= p.hi; v += ys) {
+            var yy = YP(p, v);
+            if (Math.abs(v) < ys / 2 || yy < p.t + 8 || yy > p.b - 8) continue;
+            ctx.fillRect(ay - 3, yy - 0.5, 6, 1); ctx.fillText(fmtTick(v, ys), Math.max(ay - 6, 40), yy);
+          }
+          ctx.textBaseline = "top"; ctx.fillText("O", ay - 5, ax + 5);
+          ctx.restore();
+        }
+        function curve6(p, fn, sg, fill) {
+          clip6(p);
+          var runs = [], cur = null, y0 = YP(p, 0);
+          for (var px = 6; px <= W - 6; px++) {
+            var x = XW6(px), d = sg(x), s = d > 1e-9 ? 1 : d < -1e-9 ? -1 : 0;
+            var sy = Math.min(Math.max(YP(p, fn(x)), p.t - 40), p.b + 40);
+            if (!cur || cur.s !== s) { if (cur) { cur.pts.push([px, sy]); runs.push(cur); } cur = { s: s, pts: [[px, sy]] }; }
+            else cur.pts.push([px, sy]);
+          }
+          if (cur) runs.push(cur);
+          runs.forEach(function (r) {
+            var col = r.s > 0 ? C.teal : r.s < 0 ? C.red : C.gold, a = r.pts[0][0], b = r.pts[r.pts.length - 1][0];
+            ctx.fillStyle = col;
+            if (fill) {
+              ctx.globalAlpha = 0.2; ctx.beginPath(); ctx.moveTo(a, y0);
+              r.pts.forEach(function (q) { ctx.lineTo(q[0], q[1]); });
+              ctx.lineTo(b, y0); ctx.closePath(); ctx.fill();
+            } else { ctx.globalAlpha = 0.05; ctx.fillRect(a, p.t, b - a, p.b - p.t); }
+            ctx.globalAlpha = 1; ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.lineJoin = "round"; ctx.lineCap = "round";
+            ctx.beginPath(); r.pts.forEach(function (q, i) { if (i) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]); }); ctx.stroke();
+          });
+          ctx.restore();
+        }
+        function tri6(sx, sy, upw) {
+          var r = 8; ctx.beginPath();
+          if (upw) { ctx.moveTo(sx, sy - r); ctx.lineTo(sx + r * 0.9, sy + r * 0.55); ctx.lineTo(sx - r * 0.9, sy + r * 0.55); }
+          else { ctx.moveTo(sx, sy + r); ctx.lineTo(sx + r * 0.9, sy - r * 0.55); ctx.lineTo(sx - r * 0.9, sy - r * 0.55); }
+          ctx.closePath(); ctx.fillStyle = C.gold; ctx.fill(); ctx.strokeStyle = C.text; ctx.lineWidth = 1.5; ctx.stroke();
+        }
+        function draw6() {
+          if (v6.w !== W || !v6.s) fit6();
+          var P = lay6(), T = P[0], B = P[1], F = F6[s6.fn];
+          pane6(T); pane6(B);
+          curve6(T, F.f, F.d, false); curve6(B, F.d, F.d, true);
+          var xa = XW6(8), xb = XW6(W - 8), lt = function (y, p) { return Math.min(Math.max(y, p.t + 4), p.b - 18); };
+          // extrema: ▲ max, ▼ min, linked to the zero of f′ below
+          F.crit(xa, xb).forEach(function (c) {
+            var sx = X6(c.x), fy = YP(T, F.f(c.x)), dz = YP(B, 0);
+            ctx.setLineDash([3, 4]); ctx.strokeStyle = C.gold; ctx.lineWidth = 1; ctx.globalAlpha = 0.6;
+            ctx.beginPath(); ctx.moveTo(sx, fy); ctx.lineTo(sx, dz); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+            ctx.fillStyle = C.gold; ctx.beginPath(); ctx.arc(sx, dz, 4, 0, TAU); ctx.fill();
+            tri6(sx, fy, c.t > 0);
+            if (st.labels) {
+              ctx.font = MONO; ctx.fillStyle = C.text; ctx.textAlign = "center"; ctx.textBaseline = "top";
+              ctx.fillText((c.t > 0 ? "极大值 f(" : "极小值 f(") + c.xs + ") = " + num(F.f(c.x)), sx, lt(c.t > 0 ? fy - 30 : fy + 13, T));
+            }
+          });
+          // f′ = 0 without a sign change
+          F.flat.forEach(function (x) {
+            if (x < xa || x > xb) return;
+            var sx = X6(x), fy = YP(T, F.f(x)), dz = YP(B, F.d(x));
+            ctx.setLineDash([3, 4]); ctx.strokeStyle = C.sub; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(sx, fy); ctx.lineTo(sx, dz); ctx.stroke(); ctx.setLineDash([]);
+            ctx.lineWidth = 2; ctx.fillStyle = C.sub;
+            [[fy, 6], [dz, 5]].forEach(function (q) { ctx.beginPath(); ctx.arc(sx, q[0], q[1], 0, TAU); ctx.stroke(); });
+            ctx.font = "13px 'Geist Mono', ui-monospace, monospace"; ctx.fillStyle = C.text;
+            var right = sx < W - 230;
+            ctx.textAlign = right ? "left" : "right"; ctx.textBaseline = "top";
+            ctx.fillText("f′=0 但不变号，不是极值点", sx + (right ? 12 : -12), lt(fy + 10, T));
+          });
+          // cursor through both panes, with the tangent above
+          var c = s6.c, sx = X6(c), y = F.f(c), m = F.d(c);
+          if (sx >= 8 && sx <= W - 8) {
+            var col = m > 1e-9 ? C.teal : m < -1e-9 ? C.red : C.gold, fy = YP(T, y), dy = YP(B, m);
+            if (s6.tan) {
+              clip6(T); ctx.strokeStyle = C.gold; ctx.lineWidth = 1.8;
+              ctx.beginPath(); ctx.moveTo(8, YP(T, y + m * (xa - c))); ctx.lineTo(W - 8, YP(T, y + m * (xb - c))); ctx.stroke();
+              ctx.restore();
+            }
+            ctx.setLineDash([5, 4]); ctx.strokeStyle = C.text; ctx.globalAlpha = 0.55; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(sx, T.t); ctx.lineTo(sx, B.b); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+            ctx.fillStyle = C.text; ctx.beginPath(); ctx.arc(sx, (T.b + B.t) / 2, 6, 0, TAU); ctx.fill();
+            ctx.strokeStyle = C.text; ctx.lineWidth = 2; ctx.fillStyle = col;
+            [[fy, T, 7], [dy, B, 6]].forEach(function (q) {
+              if (q[0] < q[1].t || q[0] > q[1].b) return;
+              ctx.beginPath(); ctx.arc(sx, q[0], q[2], 0, TAU); ctx.fill(); ctx.stroke();
+            });
+            if (st.labels) {
+              var rt = sx < W - 170;
+              ctx.font = MONO; ctx.fillStyle = C.text; ctx.textAlign = rt ? "left" : "right"; ctx.textBaseline = "middle";
+              ctx.fillText("f(" + num(c) + ") = " + num(y), sx + (rt ? 12 : -12), Math.min(Math.max(fy - 14, T.t + 34), T.b - 10));
+              ctx.fillText("f′(" + num(c) + ") = " + num(m), sx + (rt ? 12 : -12), Math.min(Math.max(dy - 14, B.t + 34), B.b - 10));
+            }
+          }
+          if (st.labels) {
+            ctx.font = "13px 'Geist Mono', ui-monospace, monospace"; ctx.textAlign = "right"; ctx.textBaseline = "top";
+            ctx.fillStyle = C.text; ctx.fillText("f(x) = " + F.fx, W - 18, T.t + 8);
+            ctx.fillText("f′(x) = " + F.dx, W - 18, B.t + 8);
+          }
+        }
+        function snap6(x, tol) {
+          var F = F6[s6.fn], best = x, bd = tol;
+          F.crit(x - tol, x + tol).map(function (c) { return c.x; }).concat(F.flat).forEach(function (cx) {
+            if (Math.abs(cx - x) < bd) { bd = Math.abs(cx - x); best = cx; }
+          });
+          return best;
+        }
+        function hit6(sx, sy) { var P = lay6(); return sy >= P[0].t && sy <= P[1].b && Math.abs(sx - X6(s6.c)) < 22; }
+        function setC6(sx) { s6.c = Math.max(-30, Math.min(30, snap6(XW6(sx), 8 / v6.s))); sync6(); }
+        function sync6() {
+          var F = F6[s6.fn], c = s6.c, d = F.d(c), z = function (v) { return Math.abs(v) < 0.005 ? 0 : v; };
+          [].forEach.call($("fns6").children, function (b, i) { b.classList.toggle("on", i === s6.fn); });
+          $("sl-c6").min = F.r[0]; $("sl-c6").max = F.r[1]; $("sl-c6").value = c;
+          $("v-c6").textContent = num(z(c)); $("x6v").textContent = num(z(c));
+          $("f6v").textContent = num(z(F.f(c))); $("d6v").textContent = num(z(d));
+          $("ff6").textContent = "f(x) = " + F.fx; $("fd6").textContent = "f′(x) = " + F.dx;
+          $("ext6").innerHTML = F.info;
+          var hit = F.crit(c - 1e-6, c + 1e-6)[0], flat = F.flat.some(function (x) { return Math.abs(x - c) < 1e-6; }), t, k;
+          if (hit) { t = hit.t > 0 ? "f′ = 0，由正变负：极大值点 ▲" : "f′ = 0，由负变正：极小值点 ▼"; k = "flat"; }
+          else if (flat) { t = "f′ = 0 但不变号：不是极值点"; k = "flat"; }
+          else if (d > 0) { t = "f′(x) > 0：f(x) 在此单调递增"; k = "up"; }
+          else { t = "f′(x) < 0：f(x) 在此单调递减"; k = "dec"; }
+          $("mono6").textContent = t; $("mono6").className = "x-mono " + k;
+          dirty = true;
+        }
+        [].forEach.call($("fns6").children, function (b) {
+          b.onclick = function () { s6.fn = +b.getAttribute("data-i"); s6.c = F6[s6.fn].c0; fit6(); sync6(); };
+        });
+        $("sl-c6").addEventListener("input", function (e) { s6.c = snap6(parseFloat(e.target.value), 0.02); sync6(); });
+        $("tan6").addEventListener("change", function (e) { s6.tan = e.target.checked; dirty = true; });
+        $("reset6").onclick = function () { s6.c = F6[s6.fn].c0; fit6(); sync6(); };
+        $("noteToggle").addEventListener("click", function () { dirty = true; });
+        function zoom6(sx, f) {
+          var wx = XW6(sx);
+          v6.s = Math.min(1500, Math.max(8, v6.s * f)); v6.cx = wx - (sx - W / 2) / v6.s; dirty = true;
+        }
+
+        // chapter 7: zeros & bisection
+        var F7 = [
+          { n: "x³ − x − 1", f: function (x) { return x * x * x - x - 1; }, a: 1, b: 2, lo: -20 },
+          { n: "2ˣ + 3x − 6", f: function (x) { return Math.pow(2, x) + 3 * x - 6; }, a: 1, b: 2, lo: -20 },
+          { n: "ln x + 2x − 6", f: function (x) { return x > 0 ? Math.log(x) + 2 * x - 6 : NaN; }, a: 2, b: 3, lo: 0.05 },
+          { n: "x² − 2", f: function (x) { return x * x - 2; }, a: 1, b: 2, lo: -20 }
+        ];
+        var s7 = { fn: 0, a: 1, b: 2, eps: 0.01, rows: [], prev: null, m: null, done: false, root: null, timer: null };
+        function f7(x) { return F7[s7.fn].f(x); }
+        function bad7() { var p = f7(s7.a) * f7(s7.b); return !(p < 0); }
+        function dig7() { return Math.round(-Math.log10(s7.eps)) + 1; }
+        function sg7(v) { return isNaN(v) ? "无定义" : v > 0 ? '<span class="p">+</span>' : v < 0 ? '<span class="r">−</span>' : "0"; }
+        function stop7() { if (s7.timer) { clearInterval(s7.timer); s7.timer = null; } if ($("auto7")) { $("auto7").textContent = "自动"; $("auto7").setAttribute("aria-pressed", "false"); } }
+        function fit7() { var F = F7[s7.fn]; view.cx = (F.a + F.b) / 2; view.cy = 0; view.s = Math.max(24, Math.min(W, H) / 8); dirty = true; }
+        function reset7() {
+          stop7(); s7.rows = []; s7.prev = null; s7.m = null; s7.done = false; s7.root = null;
+          if (!bad7() && s7.b - s7.a < s7.eps) { s7.done = true; s7.root = (s7.a + s7.b) / 2; }
+          sync7();
+        }
+        function step7() {
+          var a = s7.a, b = s7.b, fa = f7(a);
+          if (s7.done || bad7()) { stop7(); return; }
+          var m = (a + b) / 2, fm = f7(m);
+          s7.rows.push([a, b, m, fm, b - a]); s7.prev = [a, b]; s7.m = m;
+          if (fm === 0) { s7.a = s7.b = m; } else if (fa * fm < 0) s7.b = m; else s7.a = m;
+          if (fm === 0 || s7.b - s7.a < s7.eps) { s7.done = true; s7.root = fm === 0 ? m : (s7.a + s7.b) / 2; stop7(); }
+          sync7();
+        }
+        function sync7() {
+          var fa = f7(s7.a), fb = f7(s7.b), bad = bad7(), d = dig7();
+          [].forEach.call($("fns7").children, function (b, i) { b.classList.toggle("on", i === s7.fn); });
+          [].forEach.call($("eps7").children, function (b) { b.classList.toggle("on", +b.getAttribute("data-e") === s7.eps); });
+          $("a7").textContent = n4(s7.a); $("b7").textContent = n4(s7.b); $("l7").textContent = n4(s7.b - s7.a);
+          $("sg7").innerHTML = "f(a) = " + (isNaN(fa) ? "无定义" : n4(fa)) + "，符号 " + sg7(fa) + "<br />f(b) = " + (isNaN(fb) ? "无定义" : n4(fb)) + "，符号 " + sg7(fb) +
+            "<br />f(a)·f(b) " + (bad ? "≥ 0" : '<span class="p">&lt; 0</span>，(a, b) 内有零点');
+          $("warn7").hidden = !bad;
+          $("step7").disabled = $("auto7").disabled = bad || s7.done;
+          $("rs7").textContent = s7.done ? "区间长度 " + n4(s7.b - s7.a) + " < ε = " + s7.eps + "，共 " + s7.rows.length + " 步" : "区间长度 < ε = " + s7.eps + " 时停止";
+          $("r7").textContent = s7.done ? "x₀ ≈ " + s7.root.toFixed(d) : bad ? "—" : "继续二分…";
+          $("tb7").innerHTML = s7.rows.map(function (r, i) {
+            return "<tr><td>" + (i + 1) + "</td><td>" + n4(r[0]) + "</td><td>" + n4(r[1]) + "</td><td>" + n4(r[2]) + '</td><td class="' + (r[3] > 0 ? "p" : r[3] < 0 ? "r" : "") + '">' + n4(r[3]) + "</td><td>" + n4(r[4]) + "</td></tr>";
+          }).join("");
+          var tw = $("tb7").parentNode.parentNode; tw.scrollTop = tw.scrollHeight;
+          dirty = true;
+        }
+        function hit7(sx) { if (Math.abs(sx - X(s7.b)) < 16) return "B7"; if (Math.abs(sx - X(s7.a)) < 16) return "A7"; return null; }
+        function setEnd7(which, sx) {
+          var x = Math.round((view.cx + (sx - W / 2) / view.s) * 100) / 100;
+          if (which === "A7") s7.a = Math.max(F7[s7.fn].lo, Math.min(s7.b - 0.02, x));
+          else s7.b = Math.min(20, Math.max(s7.a + 0.02, x));
+          reset7();
+        }
+        function draw7() {
+          var a = s7.a, b = s7.b, mob = W < 768, yb = H - (mob ? 96 : 44);
+          if (s7.prev) { ctx.globalAlpha = 0.06; ctx.fillStyle = C.text; ctx.fillRect(X(s7.prev[0]), 0, X(s7.prev[1]) - X(s7.prev[0]), H); }
+          ctx.globalAlpha = 0.16; ctx.fillStyle = C.teal; ctx.fillRect(X(a), 0, Math.max(2, X(b) - X(a)), H); ctx.globalAlpha = 1;
+          plot(f7, C.text, 2.5);
+          if (s7.m !== null && !s7.done) {
+            ctx.setLineDash([4, 4]); ctx.strokeStyle = C.gold; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(X(s7.m), 0); ctx.lineTo(X(s7.m), H); ctx.stroke(); ctx.setLineDash([]);
+            dot(s7.m, f7(s7.m), C.gold, st.labels ? "m = " + n4(s7.m) : "");
+          }
+          [["a", a, yb - 20], ["b", b, yb]].forEach(function (e) {
+            var v = f7(e[1]), col = v > 0 ? C.teal : v < 0 ? C.red : C.sub, sx = X(e[1]);
+            ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, H); ctx.stroke();
+            dot(e[1], v, col, "");
+            if (st.labels) {
+              ctx.font = MONO; ctx.fillStyle = col; ctx.textAlign = e[0] === "a" ? "right" : "left"; ctx.textBaseline = "bottom";
+              ctx.fillText(e[0] + " = " + num(e[1]) + "  f(" + e[0] + ") " + (isNaN(v) ? "无定义" : v > 0 ? "> 0" : v < 0 ? "< 0" : "= 0"), sx + (e[0] === "a" ? -6 : 6), e[2]);
+            }
+          });
+          if (s7.done) dot(s7.root, 0, C.gold, "x₀ ≈ " + s7.root.toFixed(dig7()));
+          if (st.labels) {
+            ctx.font = "13px 'Geist Mono', ui-monospace, monospace"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+            ctx.fillStyle = C.text; ctx.fillText("f(x) = " + F7[s7.fn].n, W - 12, mob ? 22 : H - 12);
+          }
+        }
+        [].forEach.call($("fns7").children, function (b) {
+          b.onclick = function () { s7.fn = +b.getAttribute("data-i"); s7.a = F7[s7.fn].a; s7.b = F7[s7.fn].b; fit7(); reset7(); };
+        });
+        [].forEach.call($("eps7").children, function (b) { b.onclick = function () { s7.eps = +b.getAttribute("data-e"); reset7(); }; });
+        $("step7").onclick = step7;
+        $("auto7").onclick = function () {
+          if (s7.timer) { stop7(); return; }
+          if (s7.done || bad7()) return;
+          this.textContent = "暂停"; this.setAttribute("aria-pressed", "true");
+          step7(); if (!s7.done) s7.timer = setInterval(step7, 700);
+        };
+        $("reset7").onclick = function () { s7.a = F7[s7.fn].a; s7.b = F7[s7.fn].b; fit7(); reset7(); };
+
+        // chapter 8: definite integral (Riemann sums)
+        var F8 = [
+          { n: "x²", F: "x³/3", f: function (x) { return x * x; }, P: function (x) { return x * x * x / 3; }, a: 0, b: 2, lo: -5, hi: 5 },
+          { n: "sin x", F: "−cos x", f: Math.sin, P: function (x) { return -Math.cos(x); }, a: 0, b: 3.15, lo: -10, hi: 10 },
+          { n: "eˣ", F: "eˣ", f: Math.exp, P: Math.exp, a: 0, b: 1, lo: -5, hi: 4 },
+          { n: "1/x", F: "ln x", f: function (x) { return 1 / x; }, P: Math.log, a: 1, b: 3, lo: 0.1, hi: 10 },
+          { n: "√x", F: "(2/3)x^{3/2}", f: function (x) { return x >= 0 ? Math.sqrt(x) : NaN; }, P: function (x) { return 2 / 3 * Math.pow(x, 1.5); }, a: 0, b: 4, lo: 0, hi: 10 }
+        ];
+        var s8 = { fn: 0, a: 0, b: 2, n: 10, m: 0, play: false, nf: 10 };
+        function f8(x) { return F8[s8.fn].f(x); }
+        function n6(v) { var r = Math.abs(v) < 5e-7 ? 0 : v; return (r < 0 ? "−" : "") + Math.abs(r).toFixed(6); }
+        function sum8() { var dx = (s8.b - s8.a) / s8.n, s = 0; for (var i = 0; i < s8.n; i++) s += f8(s8.a + (i + s8.m) * dx) * dx; return s; }
+        function fit8() {
+          var lo = 0, hi = 0, a = s8.a, b = s8.b;
+          for (var i = 0; i <= 100; i++) { var v = f8(a + (b - a) * i / 100); if (isFinite(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v); } }
+          var span = Math.max(hi - lo, 0.5);
+          view.s = Math.max(10, Math.min((W - 80) / (b - a) * 0.6, (H - 160) / span * 0.7));
+          view.cx = (a + b) / 2; view.cy = (lo + hi) / 2; dirty = true;
+        }
+        function stop8() { s8.play = false; $("play8").textContent = "n 递增 ▶"; $("play8").setAttribute("aria-pressed", "false"); }
+        function sync8() {
+          var F = F8[s8.fn], ex = F.P(s8.b) - F.P(s8.a), S = sum8();
+          [].forEach.call($("fns8").children, function (b, i) { b.classList.toggle("on", i === s8.fn); });
+          [].forEach.call($("mode8").children, function (b) { b.classList.toggle("on", +b.getAttribute("data-m") === s8.m); });
+          [["a8", s8.a, F.lo, F.hi - 0.05], ["b8", s8.b, F.lo + 0.05, F.hi]].forEach(function (r) {
+            var el = $("sl-" + r[0]); el.min = r[2]; el.max = r[3]; el.value = r[1]; $("v-" + r[0]).textContent = num(r[1]);
+          });
+          $("sl-n8").value = s8.n; $("v-n8").textContent = s8.n;
+          $("s8").textContent = n6(S); $("e8").textContent = n6(ex); $("d8").textContent = n6(Math.abs(S - ex));
+          $("fs8").textContent = "F(x) = " + F.F + "，∫ₐᵇ f(x)dx = F(b) − F(a)";
+          $("ff8").textContent = "F(" + num(s8.b) + ") − F(" + num(s8.a) + ") = " + n6(ex);
+          dirty = true;
+        }
+        function setAB8(which, x) {
+          var F = F8[s8.fn]; x = Math.round(x * 20) / 20;
+          if (which === "A8") s8.a = Math.max(F.lo, Math.min(s8.b - 0.05, x));
+          else s8.b = Math.min(F.hi, Math.max(s8.a + 0.05, x));
+          sync8();
+        }
+        function hit8(sx) { if (Math.abs(sx - X(s8.b)) < 16) return "B8"; if (Math.abs(sx - X(s8.a)) < 16) return "A8"; return null; }
+        function draw8() {
+          var a = s8.a, b = s8.b, dx = (b - a) / s8.n, y0 = Y(0), mob = W < 768, yb = H - (mob ? 96 : 44);
+          for (var i = 0; i < s8.n; i++) {
+            var x = a + i * dx, v = f8(x + s8.m * dx); if (!isFinite(v)) continue;
+            var col = v < 0 ? C.red : C.teal, l = X(x), r = X(x + dx), t = Y(v);
+            ctx.globalAlpha = 0.28; ctx.fillStyle = col; ctx.fillRect(l, Math.min(t, y0), r - l, Math.abs(t - y0));
+            ctx.globalAlpha = s8.n > 80 ? 0.35 : 0.9; ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.strokeRect(l, Math.min(t, y0), r - l, Math.abs(t - y0));
+          }
+          ctx.globalAlpha = 1;
+          plot(f8, C.text, 2.5);
+          [["a", a, yb - 20], ["b", b, yb]].forEach(function (e) {
+            var sx = X(e[1]);
+            ctx.strokeStyle = C.gold; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, H); ctx.stroke();
+            if (st.labels) {
+              ctx.font = MONO; ctx.fillStyle = C.gold; ctx.textAlign = e[0] === "a" ? "right" : "left"; ctx.textBaseline = "bottom";
+              ctx.fillText(e[0] + " = " + num(e[1]), sx + (e[0] === "a" ? -6 : 6), e[2]);
+            }
+          });
+          if (st.labels) {
+            ctx.font = "13px 'Geist Mono', ui-monospace, monospace"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+            ctx.fillStyle = C.text; ctx.fillText("f(x) = " + F8[s8.fn].n + "   n = " + s8.n + "   Sₙ = " + n6(sum8()), W - 12, mob ? 22 : H - 12);
+          }
+        }
+        [].forEach.call($("fns8").children, function (b) {
+          b.onclick = function () { var F = F8[s8.fn = +b.getAttribute("data-i")]; s8.a = F.a; s8.b = F.b; sync8(); fit8(); };
+        });
+        [].forEach.call($("mode8").children, function (b) { b.onclick = function () { s8.m = +b.getAttribute("data-m"); sync8(); }; });
+        $("sl-a8").addEventListener("input", function (e) { setAB8("A8", parseFloat(e.target.value)); });
+        $("sl-b8").addEventListener("input", function (e) { setAB8("B8", parseFloat(e.target.value)); });
+        $("sl-n8").addEventListener("input", function (e) { stop8(); s8.n = s8.nf = parseInt(e.target.value, 10); sync8(); });
+        $("play8").onclick = function () {
+          if (s8.play) { stop8(); return; }
+          s8.play = true; s8.n = s8.nf = 1; this.textContent = "暂停"; this.setAttribute("aria-pressed", "true"); sync8();
+        };
+        $("reset8").onclick = function () { stop8(); var F = F8[s8.fn]; s8.a = F.a; s8.b = F.b; s8.n = s8.nf = 10; s8.m = 0; sync8(); fit8(); };
+
+        function sync() {
+          [].forEach.call($("fns").children, function (b, i) { b.classList.toggle("on", i === st.fn); });
+          SL.forEach(function (s) { $("sl-" + s.k).value = st[s.k]; $("v-" + s.k).textContent = num(st[s.k]); });
+          $("formula").textContent = formula();
+          dirty = true;
+        }
+
+        function formula() {
+          var h = st.h, b = st.b, a = st.a, k = st.k;
+          var inner = Math.abs(h) < 1e-9 ? "x" : "x " + (h > 0 ? "− " : "+ ") + num(Math.abs(h));
+          if (Math.abs(b - 1) > 1e-9) inner = num(b) + P(inner);
+          var body = FN[st.fn].w(inner);
+          var pre = Math.abs(a) < 1e-9 ? "0" : Math.abs(a - 1) < 1e-9 ? "" : Math.abs(a + 1) < 1e-9 ? "−" : num(a) + "·";
+          var out = Math.abs(a) < 1e-9 ? "0" : pre + body;
+          if (Math.abs(k) > 1e-9) out += (k > 0 ? " + " : " − ") + num(Math.abs(k));
+          return "y = " + out;
+        }
+
+        function g(x) { return st.a * FN[st.fn].f(st.b * (x - st.h)) + st.k; }
+
+        // canvas
+        function resize() {
+          var r = stage.getBoundingClientRect();
+          dpr = window.devicePixelRatio || 1; W = r.width; H = r.height;
+          cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+          dirty = true;
+        }
+        function readColors() {
+          var cs = getComputedStyle(app);
+          ["grid", "axis", "orig", "teal", "gold", "red", "sub", "text", "line"].forEach(function (n) { C[n] = cs.getPropertyValue("--x-" + n).trim(); });
+          dirty = true;
+        }
+        function X(x) { return W / 2 + (x - view.cx) * view.s; }
+        function Y(y) { return H / 2 - (y - view.cy) * view.s; }
+        function niceStep() {
+          var raw = 70 / view.s, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+          return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p;
+        }
+        function fmtTick(v, step) { var d = Math.max(0, -Math.floor(Math.log10(step) + 1e-9)); return num(+v.toFixed(d)); }
+
+        function drawGrid() {
+          var step = niceStep(), x0 = view.cx - W / 2 / view.s, x1 = view.cx + W / 2 / view.s;
+          var y0 = view.cy - H / 2 / view.s, y1 = view.cy + H / 2 / view.s, v;
+          ctx.lineWidth = 1; ctx.strokeStyle = C.grid; ctx.beginPath();
+          for (v = Math.ceil(x0 / step) * step; v <= x1; v += step) { ctx.moveTo(Math.round(X(v)) + 0.5, 0); ctx.lineTo(Math.round(X(v)) + 0.5, H); }
+          for (v = Math.ceil(y0 / step) * step; v <= y1; v += step) { ctx.moveTo(0, Math.round(Y(v)) + 0.5); ctx.lineTo(W, Math.round(Y(v)) + 0.5); }
+          ctx.stroke();
+          var ax = Math.min(Math.max(Y(0), 0), H), ay = Math.min(Math.max(X(0), 0), W);
+          ctx.strokeStyle = C.axis; ctx.beginPath();
+          ctx.moveTo(0, Math.round(ax) + 0.5); ctx.lineTo(W, Math.round(ax) + 0.5);
+          ctx.moveTo(Math.round(ay) + 0.5, 0); ctx.lineTo(Math.round(ay) + 0.5, H); ctx.stroke();
+          ctx.fillStyle = C.sub; ctx.font = "12px 'Geist Mono', ui-monospace, monospace";
+          ctx.textAlign = "center"; ctx.textBaseline = "top";
+          for (v = Math.ceil(x0 / step) * step; v <= x1; v += step) {
+            if (Math.abs(v) < step / 2) continue;
+            ctx.fillRect(X(v) - 0.5, ax - 3, 1, 6);
+            ctx.fillText(fmtTick(v, step), X(v), Math.min(ax + 6, H - 16));
+          }
+          ctx.textAlign = "right"; ctx.textBaseline = "middle";
+          for (v = Math.ceil(y0 / step) * step; v <= y1; v += step) {
+            if (Math.abs(v) < step / 2) continue;
+            ctx.fillRect(ay - 3, Y(v) - 0.5, 6, 1);
+            ctx.fillText(fmtTick(v, step), Math.max(ay - 6, 30), Y(v));
+          }
+          ctx.textAlign = "right"; ctx.textBaseline = "top"; ctx.fillText("O", ay - 5, ax + 5);
+          ctx.fillText("x", W - 8, ax + 6); ctx.textAlign = "left"; ctx.fillText("y", ay + 8, 6);
+        }
+
+        function plot(fn, color, width) {
+          ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineJoin = "round"; ctx.lineCap = "round";
+          ctx.beginPath();
+          var pen = false, prev = null, lim = H * 4;
+          for (var px = -2; px <= W + 2; px += 1) {
+            var x = view.cx + (px - W / 2) / view.s, y = fn(x), sy = Y(y);
+            if (!isFinite(y) || Math.abs(sy) > lim || (prev !== null && Math.abs(sy - prev) > H)) {
+              pen = false; prev = isFinite(y) && Math.abs(sy) <= lim ? sy : null;
+              if (prev !== null) { ctx.moveTo(px, sy); pen = true; }
+              continue;
+            }
+            if (pen) ctx.lineTo(px, sy); else { ctx.moveTo(px, sy); pen = true; }
+            prev = sy;
+          }
+          ctx.stroke();
+        }
+
+        function dot(x, y, fill, label) {
+          if (!isFinite(y)) return;
+          ctx.fillStyle = fill; ctx.beginPath(); ctx.arc(X(x), Y(y), 5, 0, Math.PI * 2); ctx.fill();
+          if (st.labels && label) {
+            ctx.font = "12px 'Geist Mono', ui-monospace, monospace"; ctx.fillStyle = C.text;
+            ctx.textAlign = "left"; ctx.textBaseline = "bottom";
+            ctx.fillText(label, X(x) + 8, Y(y) - 6);
+          }
+        }
+
+        function draw() {
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.clearRect(0, 0, W, H);
+          if (st.ch === 2) { draw3(); return; }
+          if (st.ch === 5) { draw6(); return; }
+          drawGrid();
+          if (st.ch === 1) { draw2(); return; }
+          if (st.ch === 3) { draw4(); return; }
+          if (st.ch === 4) { draw5(); return; }
+          if (st.ch === 6) { draw7(); return; }
+          if (st.ch === 7) { draw8(); return; }
+          if (st.ch !== 0) return;
+          var F = FN[st.fn];
+          if (st.orig) plot(F.f, C.orig, 2);
+          plot(g, C.teal, 2.5);
+          if (st.guide) {
+            var p0 = F.p, px = p0[0] / st.b + st.h, py = st.a * p0[1] + st.k;
+            var lx = function (v) { return Math.abs(v - Math.PI / 2) < 1e-9 ? "π/2" : num(v); };
+            ctx.setLineDash([4, 4]); ctx.strokeStyle = C.gold; ctx.lineWidth = 1; ctx.globalAlpha = 0.7;
+            ctx.beginPath(); ctx.moveTo(X(p0[0]), Y(p0[1])); ctx.lineTo(X(px), Y(py)); ctx.stroke();
+            ctx.setLineDash([]); ctx.globalAlpha = 1;
+            if (st.orig) dot(p0[0], p0[1], C.orig, "(" + lx(p0[0]) + ", " + num(p0[1]) + ")");
+            dot(px, py, C.gold, "(" + (st.fn === 7 && st.b === 1 && st.h === 0 ? "π/2" : num(px)) + ", " + num(py) + ")");
+          }
+          if (st.labels) {
+            ctx.font = "13px 'Geist Mono', ui-monospace, monospace"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+            ctx.fillStyle = C.teal; ctx.fillText(formula(), W - 12, H - 12);
+          }
+        }
+
+        var last3 = 0;
+        function loop(t) {
+          t = t || 0;
+          if (st.ch === 2 && s3.play && !s3.drag && last3) {
+            s3.th += Math.min(0.05, (t - last3) / 1000) * s3.sp;
+            if (s3.th >= TAU) { s3.th -= TAU; s3.lap = true; }
+            sync3();
+          }
+          if (st.ch === 4 && s5.play && last3) {
+            s5.h = Math.max(0.01, s5.h * Math.exp(-Math.min(0.05, (t - last3) / 1000) * 0.9));
+            if (s5.h <= 0.01) s5.play = false;
+            sync5();
+          }
+          if (st.ch === 7 && s8.play && last3) {
+            var d8 = Math.min(0.05, (t - last3) / 1000);
+            s8.nf = Math.min(200, s8.nf * Math.exp(d8 * 1.1) + d8 * 2);
+            if (Math.floor(s8.nf) !== s8.n) { s8.n = Math.floor(s8.nf); sync8(); }
+            if (s8.nf >= 200) stop8();
+          }
+          last3 = t;
+          if (dirty) { dirty = false; draw(); }
+          requestAnimationFrame(loop);
+        }
+
+        // pan & zoom
+        var ptrs = {}, pinch = null, drag = null;
+        function local(e) { var r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+        cv.addEventListener("pointerdown", function (e) {
+          drag = null;
+          if (st.ch === 1 && !Object.keys(ptrs).length) { var l = local(e); drag = hit2(l[0], l[1]); }
+          if (st.ch === 4 && !Object.keys(ptrs).length) { var l5 = local(e); if (hit5(l5[0], l5[1])) drag = "P5"; }
+          if (st.ch === 6 && !Object.keys(ptrs).length) { drag = hit7(local(e)[0]); }
+          if (st.ch === 7 && !Object.keys(ptrs).length) { drag = hit8(local(e)[0]); }
+          if (st.ch === 5 && !Object.keys(ptrs).length) { var l6 = local(e); if (hit6(l6[0], l6[1])) { drag = "C6"; setC6(l6[0]); } }
+          if (st.ch === 2 && !Object.keys(ptrs).length) { var l3 = local(e); if (hit3(l3[0], l3[1])) { drag = "T"; s3.drag = true; setTh3(l3[0], l3[1]); } }
+        });
+        cv.addEventListener("pointermove", function (e) {
+          var l = local(e);
+          if (st.ch === 5) {
+            var p6 = ptrs[e.pointerId];
+            if (p6) {
+              var ids6 = Object.keys(ptrs);
+              if (ids6.length === 1) {
+                if (drag === "C6") setC6(l[0]);
+                else { v6.cx -= (e.clientX - p6.x) / v6.s; dirty = true; }
+              } else if (ids6.length === 2) {
+                p6.x = e.clientX; p6.y = e.clientY;
+                var a6 = ptrs[ids6[0]], b6 = ptrs[ids6[1]], d6 = Math.hypot(a6.x - b6.x, a6.y - b6.y), r6 = cv.getBoundingClientRect();
+                if (pinch) zoom6((a6.x + b6.x) / 2 - r6.left, d6 / pinch);
+                pinch = d6;
+              }
+              p6.x = e.clientX; p6.y = e.clientY;
+              e.stopImmediatePropagation(); return;
+            }
+            cv.style.cursor = hit6(l[0], l[1]) ? "ew-resize" : ""; return;
+          }
+          if (st.ch === 2) {
+            if (ptrs[e.pointerId]) { if (drag === "T") setTh3(l[0], l[1]); e.stopImmediatePropagation(); return; }
+            cv.style.cursor = hit3(l[0], l[1]) ? "pointer" : "default"; return;
+          }
+          if (st.ch === 4) {
+            if (drag === "P5" && ptrs[e.pointerId]) {
+              s5.x0 = Math.max(-8, Math.min(8, view.cx + (l[0] - W / 2) / view.s)); sync5();
+              ptrs[e.pointerId].x = e.clientX; ptrs[e.pointerId].y = e.clientY;
+              e.stopImmediatePropagation(); return;
+            }
+            if (!Object.keys(ptrs).length) cv.style.cursor = hit5(l[0], l[1]) ? "pointer" : "";
+            return;
+          }
+          if (st.ch === 6) {
+            if ((drag === "A7" || drag === "B7") && ptrs[e.pointerId]) {
+              setEnd7(drag, l[0]);
+              ptrs[e.pointerId].x = e.clientX; ptrs[e.pointerId].y = e.clientY;
+              e.stopImmediatePropagation(); return;
+            }
+            if (!Object.keys(ptrs).length) cv.style.cursor = hit7(l[0]) ? "ew-resize" : "";
+            return;
+          }
+          if (st.ch === 7) {
+            if ((drag === "A8" || drag === "B8") && ptrs[e.pointerId]) {
+              setAB8(drag, view.cx + (l[0] - W / 2) / view.s);
+              ptrs[e.pointerId].x = e.clientX; ptrs[e.pointerId].y = e.clientY;
+              e.stopImmediatePropagation(); return;
+            }
+            if (!Object.keys(ptrs).length) cv.style.cursor = hit8(l[0]) ? "ew-resize" : "";
+            return;
+          }
+          if (drag && ptrs[e.pointerId]) {
+            var v = drag === "P" ? view.cx + (l[0] - W / 2) / view.s : view.cy - (l[1] - H / 2) / view.s;
+            st.t = Math.max(-10, Math.min(10, v)); sync2();
+            ptrs[e.pointerId].x = e.clientX; ptrs[e.pointerId].y = e.clientY;
+            e.stopImmediatePropagation(); return;
+          }
+          if (!Object.keys(ptrs).length) cv.style.cursor = st.ch === 1 && hit2(l[0], l[1]) ? "pointer" : "";
+        });
+        function zoomAt(sx, sy, f) {
+          var wx = view.cx + (sx - W / 2) / view.s, wy = view.cy - (sy - H / 2) / view.s;
+          view.s = Math.min(800, Math.max(5, view.s * f));
+          view.cx = wx - (sx - W / 2) / view.s; view.cy = wy + (sy - H / 2) / view.s; dirty = true;
+        }
+        cv.addEventListener("pointerdown", function (e) { cv.setPointerCapture(e.pointerId); ptrs[e.pointerId] = { x: e.clientX, y: e.clientY }; pinch = null; });
+        cv.addEventListener("pointermove", function (e) {
+          var p = ptrs[e.pointerId]; if (!p) return;
+          var ids = Object.keys(ptrs);
+          if (ids.length === 1) {
+            view.cx -= (e.clientX - p.x) / view.s; view.cy += (e.clientY - p.y) / view.s; dirty = true;
+          } else if (ids.length === 2) {
+            p.x = e.clientX; p.y = e.clientY;
+            var a = ptrs[ids[0]], b = ptrs[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y), r = cv.getBoundingClientRect();
+            if (pinch) zoomAt((a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top, d / pinch);
+            pinch = d; return;
+          }
+          p.x = e.clientX; p.y = e.clientY;
+        });
+        function up(e) { delete ptrs[e.pointerId]; pinch = null; if (!Object.keys(ptrs).length) { s3.drag = false; if (drag === "T") drag = null; } }
+        cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+        cv.addEventListener("wheel", function (e) {
+          e.preventDefault(); if (st.ch === 2) return; var r = cv.getBoundingClientRect();
+          if (st.ch === 5) { zoom6(e.clientX - r.left, Math.exp(-e.deltaY * 0.0015)); return; }
+          zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0015));
+        }, { passive: false });
+        function resetView() { if (st.ch === 5) { fit6(); return; } if (st.ch === 6) { fit7(); return; } if (st.ch === 7) { fit8(); return; } view.cx = 0; view.cy = 0; view.s = Math.max(24, Math.min(W, H) / 12); dirty = true; }
+
+        // controls
+        function toggleTheme() {
+          var root = document.documentElement, next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+          root.setAttribute("data-theme", next);
+          try { localStorage.setItem("hark-theme", next); } catch (e) {}
+          readColors();
+        }
+        function fullscreen() {
+          if (document.fullscreenElement) document.exitFullscreen();
+          else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {});
+        }
+        $("prev").onclick = function () { go(st.ch - 1); };
+        $("next").onclick = function () { go(st.ch + 1); };
+        $("theme").onclick = toggleTheme;
+        $("resetView").onclick = resetView;
+        $("full").onclick = fullscreen;
+        $("resetParams").onclick = function () { st.h = 0; st.k = 0; st.a = 1; st.b = 1; sync(); };
+        $("noteToggle").onclick = function () { var c = $("note").classList.toggle("closed"); this.textContent = c ? "展开" : "收起"; };
+        $("handle").onclick = function () { $("panel").classList.toggle("open"); };
+        [["showOrig", "orig"], ["showGuide", "guide"], ["showLabels", "labels"]].forEach(function (p) {
+          $(p[0]).addEventListener("change", function (e) { st[p[1]] = e.target.checked; dirty = true; });
+        });
+        ["showLabels", "showLabels2", "showLabels3", "showLabels4", "showLabels5", "showLabels6", "showLabels7", "showLabels8"].forEach(function (id, i, all) {
+          $(id).addEventListener("change", function (e) { st.labels = e.target.checked; all.forEach(function (o) { $(o).checked = st.labels; }); dirty = true; });
+        });
+        $("resetExp").onclick = function () { st.ea = 2; st.t = 1; sync2(); };
+        document.addEventListener("keydown", function (e) {
+          if (e.metaKey || e.ctrlKey || e.altKey) return;
+          if (e.target.tagName === "INPUT" && (e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
+          var k = e.key.toLowerCase();
+          if (e.key === "ArrowLeft") go(st.ch - 1);
+          else if (e.key === "ArrowRight") go(st.ch + 1);
+          else if (k === "t") toggleTheme();
+          else if (k === "r") resetView();
+          else if (k === "f") fullscreen();
+          else if (k === " " && st.ch === 2 && e.target.tagName !== "BUTTON" && e.target.tagName !== "INPUT") { e.preventDefault(); s3.play = !s3.play; sync3(); }
+          else if (k === " " && st.ch === 4 && e.target.tagName !== "BUTTON" && e.target.tagName !== "INPUT") { e.preventDefault(); play5(); }
+        });
+        window.addEventListener("hashchange", function () { var n = parseInt(location.hash.slice(1), 10); if (n >= 1 && n <= 8 && n - 1 !== st.ch) go(n - 1); });
+        window.addEventListener("resize", resize);
+
+        // theme: default 青黛夜 unless 宣纸 was saved
+        try { if (localStorage.getItem("hark-theme") !== "light") document.documentElement.setAttribute("data-theme", "dark"); } catch (e) {}
+        var n0 = parseInt(location.hash.slice(1), 10);
+        resize(); readColors(); resetView(); sync(); sync2(); sync3(); sync4(); sync5(); sync6(); reset7(); sync8(); go(n0 >= 1 && n0 <= 8 ? n0 - 1 : 0);
+        requestAnimationFrame(loop);
+      })();
+    </script>
+  </body>
+</html>
