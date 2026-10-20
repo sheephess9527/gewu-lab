@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>圆锥曲线 · ConicLab｜格物实验室</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&family=Noto+Serif+SC:wght@500;600&display=swap"
+    />
+    <link rel="stylesheet" href="hark.css" />
+    <style>
+      :root {
+        --x-bg1: #0e1420; --x-bg2: #121a2a; --x-solid: #151e30; --x-panel: rgba(21, 30, 48, 0.82);
+        --x-line: rgba(255, 255, 255, 0.08); --x-line2: rgba(255, 255, 255, 0.16);
+        --x-acc: #2ec4b6; --x-acc2: #f2b544; --x-red: #ef6461;
+        --x-ink: #e6ecf5; --x-ink2: #8a97ad; --x-soft: rgba(255, 255, 255, 0.05);
+        --x-serif: "Noto Serif SC", "Songti SC", serif;
+        --x-mono: "Geist Mono", ui-monospace, monospace;
+      }
+      html[data-theme="light"] {
+        --x-bg1: #f6f3ec; --x-bg2: #f6f3ec; --x-solid: #ffffff; --x-panel: rgba(255, 255, 255, 0.9);
+        --x-line: rgba(29, 36, 51, 0.1); --x-line2: rgba(29, 36, 51, 0.2);
+        --x-acc: #139a8e; --x-acc2: #c98a12; --x-red: #d2453f;
+        --x-ink: #1d2433; --x-ink2: #5e6b80; --x-soft: rgba(29, 36, 51, 0.04);
+      }
+      html, body { height: 100%; overflow: hidden; }
+      body {
+        margin: 0; background: var(--x-bg1) linear-gradient(160deg, var(--x-bg1), var(--x-bg2));
+        color: var(--x-ink); font-family: var(--sans), system-ui, sans-serif;
+      }
+      .x-app { height: 100dvh; display: grid; grid-template-rows: 56px 1fr; }
+      /* top bar */
+      .x-top {
+        display: flex; align-items: center; gap: 16px; padding: 0 14px;
+        border-bottom: 1px solid var(--x-line); background: var(--x-panel);
+        -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+      }
+      .x-brand { font-family: var(--x-serif); font-size: 16px; white-space: nowrap; }
+      .x-brand small { display: block; font-family: var(--sans); font-size: 12px; color: var(--x-ink2); letter-spacing: .08em; }
+      .x-prog { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; }
+      .x-bars { display: flex; gap: 4px; flex: 1; min-width: 0; }
+      .x-bars i { flex: 1; height: 4px; border-radius: 2px; background: var(--x-line2); transition: background .2s; }
+      .x-bars i.on { background: var(--x-acc); }
+      .x-count { font-family: var(--x-mono); font-size: 12px; color: var(--x-ink2); white-space: nowrap; }
+      .x-tools { display: flex; gap: 6px; }
+      .x-ic {
+        width: 44px; height: 36px; display: grid; place-items: center; cursor: pointer;
+        border: 1px solid var(--x-line2); background: var(--x-solid); color: var(--x-ink);
+        border-radius: 10px; font: 400 13px var(--x-mono); transition: all .2s;
+      }
+      .x-ic:hover { border-color: var(--x-acc); color: var(--x-acc); }
+      .x-body { display: grid; grid-template-columns: 220px minmax(0, 1fr) 340px; min-height: 0; }
+      /* chapters */
+      .x-chaps { border-right: 1px solid var(--x-line); overflow: auto; padding: 8px 0; background: var(--x-bg1); }
+      .x-chap {
+        display: block; width: 100%; min-height: 44px; text-align: left; cursor: pointer; background: var(--x-bg1);
+        border: 0; border-left: 3px solid transparent; padding: 9px 14px; color: var(--x-ink2);
+        font-family: inherit; transition: all .2s;
+      }
+      .x-chap b { display: block; font: 400 12px var(--x-mono); letter-spacing: .1em; color: var(--x-ink2); }
+      .x-chap span { font-family: var(--x-serif); font-size: 15px; color: var(--x-ink); }
+      .x-chap:hover { background: var(--x-solid); }
+      .x-chap.on { border-left-color: var(--x-acc); background: var(--x-solid); }
+      .x-chap.on b, .x-chap.on span { color: var(--x-acc); }
+      html[data-theme="light"] .x-chap.on b, html[data-theme="light"] .x-chap.on span { color: #0d7a70; }
+      /* stage */
+      .x-stage { position: relative; min-width: 0; overflow: hidden; }
+      .x-stage canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+      .x-over {
+        position: absolute; left: 16px; top: 16px; max-width: min(380px, 70%);
+        background: var(--x-panel); border: 1px solid var(--x-line); border-radius: 10px;
+        padding: 12px 14px; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+      }
+      .x-over h1 { font: 600 17px var(--x-serif); margin: 0 0 6px; }
+      .x-over p { font-size: 13px; line-height: 1.6; color: var(--x-ink2); margin: 0 0 4px; }
+      .x-over.min .x-overbody { display: none; }
+      .x-fold {
+        position: absolute; right: 4px; top: 4px; width: 44px; height: 44px; border-radius: 8px;
+        border: 0; background: var(--x-solid); color: var(--x-ink); cursor: pointer;
+        font: 400 14px var(--x-mono);
+      }
+      .x-over { background: var(--x-solid); }
+      .x-over h1 { padding-right: 40px; min-height: 30px; }
+      .x-soon {
+        position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+      }
+      .x-soon span {
+        font-family: var(--x-serif); font-size: 15px; color: var(--x-ink); background: var(--x-solid);
+        border: 1px dashed var(--x-line2); border-radius: 10px; padding: 14px 20px;
+      }
+      /* panel */
+      .x-panel {
+        border-left: 1px solid var(--x-line); overflow: auto; padding: 14px;
+        display: flex; flex-direction: column; gap: 12px; background: var(--x-soft);
+      }
+      .x-card { border: 1px solid var(--x-line); border-radius: 10px; padding: 12px; background: var(--x-panel); }
+      .x-card h2 { font: 600 13px var(--sans); letter-spacing: .08em; color: var(--x-ink2); margin: 0 0 10px; text-transform: uppercase; }
+      .x-ctl { margin-bottom: 12px; }
+      .x-ctl:last-child { margin-bottom: 0; }
+      .x-lab { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; margin-bottom: 6px; }
+      .x-val { font: 400 13px var(--x-mono); color: var(--x-acc); }
+      input[type="range"] { width: 100%; height: 24px; accent-color: var(--x-acc); background: none; }
+      .x-btn {
+        min-height: 44px; padding: 8px 12px; border-radius: 10px; cursor: pointer;
+        border: 1px solid var(--x-line2); background: var(--x-solid); color: var(--x-ink);
+        font: 400 13px var(--sans); transition: all .2s;
+      }
+      .x-btn:hover { border-color: var(--x-acc); color: var(--x-acc); }
+      .x-row { display: flex; gap: 8px; flex-wrap: wrap; }
+      .x-sw { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 36px; font-size: 13px; cursor: pointer; }
+      .x-sw input { width: 40px; height: 22px; accent-color: var(--x-acc); }
+      .x-key { font-family: var(--x-serif); font-size: 13.5px; line-height: 1.75; color: var(--x-ink); margin: 0 0 6px; }
+      .x-key:last-child { margin-bottom: 0; }
+      .x-key em { font-style: normal; font-family: var(--x-mono); color: var(--x-acc2); }
+      .x-read { font: 400 12.5px var(--x-mono); color: var(--x-ink2); line-height: 1.9; }
+      .x-read b { color: var(--x-ink); font-weight: 400; }
+      .x-drawer-handle { display: none; }
+      .x-c3 { position: absolute; inset: 0; }
+      .x-l3 {
+        position: absolute; left: 0; top: 0; pointer-events: none; white-space: nowrap;
+        font: 600 14px var(--x-serif); color: var(--x-ink); text-shadow: 0 0 4px var(--x-bg1), 0 0 2px var(--x-bg1);
+      }
+      .x-l3.p { color: var(--x-acc2); }
+      .x-l3.f { color: var(--x-red); }
+      .x-book {
+        display: inline-block; font: 400 12px var(--sans); color: var(--x-acc2);
+        border: 1px solid var(--x-line2); border-radius: 6px; padding: 2px 8px;
+      }
+      .x-ok { color: var(--x-acc); }
+      .x-btn.on { border-color: var(--x-acc); color: var(--x-acc); }
+      .x-no { color: var(--x-red); }
+      .x-tag3 {
+        position: absolute; right: 18px; bottom: 18px; pointer-events: none;
+        font: 600 22px var(--x-serif); color: var(--x-acc);
+      }
+      @media (max-width: 1023px) {
+        .x-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+        .x-chaps {
+          border-right: 0; border-bottom: 1px solid var(--x-line); display: flex; gap: 4px;
+          overflow-x: auto; padding: 6px 8px; scrollbar-width: none;
+        }
+        .x-chaps::-webkit-scrollbar { display: none; }
+        .x-chap {
+          border-left: 0; border-bottom: 2px solid transparent; white-space: nowrap;
+          border-radius: 8px 8px 0 0; padding: 6px 10px; flex: 0 0 auto; width: auto; min-height: 44px;
+        }
+        .x-chap.on { border-left: 0; border-bottom-color: var(--x-acc); }
+        .x-chap b { display: inline; margin-right: 6px; }
+        .x-chap span { font-size: 14px; }
+        .x-panel {
+          position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; max-height: 72dvh;
+          border-left: 0; border-top: 1px solid var(--x-line); border-radius: 16px 16px 0 0;
+          background: var(--x-panel); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+          transform: translateY(calc(100% - 52px)); transition: transform .2s var(--ease-out, ease);
+          padding-bottom: calc(14px + env(safe-area-inset-bottom));
+        }
+        .x-panel.open { transform: translateY(0); }
+        .x-drawer-handle {
+          display: block; width: 100%; min-height: 44px; margin: -14px 0 0; background: none; border: 0;
+          color: var(--x-ink); font: 500 13px var(--sans); cursor: pointer;
+        }
+        .x-drawer-handle::before {
+          content: ""; display: block; width: 38px; height: 4px; border-radius: 2px;
+          background: var(--x-line2); margin: 8px auto 6px;
+        }
+        .x-over { left: 10px; top: 10px; max-width: 78%; padding: 10px 12px; }
+        .x-over p { font-size: 12px; }
+        .x-tag3 { bottom: 66px; font-size: 18px; }
+        .x-top { gap: 10px; padding: 0 8px; }
+        .x-bars { display: none; }
+        .x-ic { width: 44px; height: 44px; }
+        .x-tools { gap: 2px; }
+      }
+      @media (max-width: 560px) {
+        .x-brand .x-en, .x-brand small, #full { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="x-app">
+      <header class="x-top">
+        <div class="x-brand">圆锥曲线<span class="x-en"> · ConicLab</span><small>格物实验室</small></div>
+        <div class="x-prog">
+          <div class="x-bars" id="bars"></div>
+          <div class="x-count" id="count">03 / 09</div>
+        </div>
+        <div class="x-tools">
+          <button class="x-ic" id="prev" title="上一章 (←)" aria-label="上一章">←</button>
+          <button class="x-ic" id="next" title="下一章 (→)" aria-label="下一章">→</button>
+          <button class="x-ic" id="theme" title="主题切换 (T)" aria-label="切换主题">T</button>
+          <button class="x-ic" id="reset" title="重置视角 (R)" aria-label="重置视角">R</button>
+          <button class="x-ic" id="full" title="全屏 (F)" aria-label="全屏">F</button>
+        </div>
+      </header>
+      <div class="x-body">
+        <nav class="x-chaps" id="chaps" aria-label="章节"></nav>
+        <section class="x-stage" id="stage">
+          <canvas id="cv"></canvas>
+          <div class="x-c3" id="c3" style="display: none"></div>
+          <div class="x-c3" id="c3b" style="display: none"></div>
+          <div class="x-tag3" id="tag3" hidden></div>
+          <div class="x-over" id="over">
+            <h1 id="ovt">椭圆</h1>
+            <button class="x-fold" id="fold" aria-label="折叠讲解">−</button>
+            <div class="x-overbody" id="ovb"></div>
+          </div>
+          <div class="x-soon" id="soon" hidden><span>该章节即将上线</span></div>
+        </section>
+        <aside class="x-panel" id="panel">
+          <button class="x-drawer-handle" id="handle">控制面板</button>
+          <div class="x-card" id="controls"><h2>控制</h2><div id="ctls"></div></div>
+          <div class="x-card" id="readout-card"><h2>读数</h2><div class="x-read" id="readout"></div></div>
+          <div class="x-card"><h2>要点</h2><div id="keys"></div></div>
+          <div class="x-card"><h2>显示</h2><div id="shows"></div></div>
+        </aside>
+      </div>
+    </div>
+    <script src="hark.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        var $ = function (id) { return document.getElementById(id); };
+        var root = document.documentElement;
+        var CH = [
+          { t: "圆锥的截线", p: ["用平面去截一个对顶圆锥，截线随平面的倾斜程度变化：平面垂直于轴时是圆，稍微倾斜是椭圆，与某条母线平行时是抛物线，同时截到上下两个圆锥时是双曲线。", "拖动旋转视角，滚轮或双指缩放，R 键复位。"],
+            k: ["设截面与轴所成的角为 β，圆锥的半顶角为 α，则 <em>e = cos β / cos α</em>", "<em>β = 90°</em> 圆 · <em>β &gt; α</em> 椭圆 · <em>β = α</em> 抛物线 · <em>β &lt; α</em> 双曲线", "平面过顶点（d = 0）时，截线退化为一个点或两条直线"] },
+          { t: "Dandelin 双球", p: ['<span class="x-book">教材：人教A版 选择性必修一·第三章 3.1 椭圆（阅读与思考）</span>', "在圆锥里放两个球，都与圆锥侧面相切、也与截平面相切。两球与截平面的切点 F₁、F₂ 就是椭圆的焦点；两球与圆锥相切于上、下两个圆。", "从球外一点引球的切线，切线长相等：PF₁、PQ₁ 都是 P 到上球的切线，所以 PF₁ = PQ₁；同理 PF₂ = PQ₂。", "所以 PF₁ + PF₂ = PQ₁ + PQ₂ = Q₁Q₂，是两切圆之间的母线长，与 P 的位置无关：这就是椭圆的定义（第一定义）。"],
+            k: ["<em>PF₁ = PQ₁</em>，<em>PF₂ = PQ₂</em>（从球外一点引球的切线，切线长相等）", "<em>PF₁ + PF₂ = Q₁Q₂</em>，是两个切圆之间的母线长，与 P 的位置无关：这就是椭圆的定义", "高考链接：椭圆定义 <em>|PF₁|+|PF₂|=2a</em>（<em>2a&gt;|F₁F₂|</em>）常用于焦点三角形周长、面积问题；易错：忘记 <em>2a&gt;|F₁F₂|</em> 条件。"] },
+          { t: "椭圆", p: ["平面内到两个定点 F₁、F₂ 的距离之和等于常数 2a（2a &gt; |F₁F₂|）的点的轨迹叫椭圆。", "把细绳两端钉在焦点上，用笔拉紧绳子转一圈，就画出一个椭圆。拖动动点 P 试试。"],
+            k: ["<em>x²/a² + y²/b² = 1</em>（a &gt; b &gt; 0）", "<em>a² = b² + c²</em>", "<em>e = c/a</em>，越接近 1，椭圆越扁"] },
+          { t: "双曲线", p: ["平面内到两个定点 F₁、F₂ 的距离之差的绝对值等于常数 2a（0 &lt; 2a &lt; |F₁F₂|）的点的轨迹叫双曲线。", "离曲线中心越远，曲线越贴近渐近线。"],
+            k: ["<em>x²/a² − y²/b² = 1</em>，<em>c² = a² + b²</em>", "渐近线 <em>y = ±(b/a)x</em>", "a = b 时为等轴双曲线：渐近线互相垂直，<em>e = √2</em>"] },
+          { t: "抛物线", p: ["平面内到一个定点 F 和一条定直线 l（F 不在 l 上）的距离相等的点的轨迹叫抛物线。F 是焦点，l 是准线。", "p 是焦点到准线的距离。"],
+            k: ["<em>y² = 2px</em>（p &gt; 0）", "焦点 <em>(p/2, 0)</em>，准线 <em>x = −p/2</em>", "过焦点且垂直于对称轴的弦叫通径，长 <em>2p</em>"] },
+          { t: "离心率", p: ["三种曲线可以统一起来：平面内到定点 F 的距离与到定直线 l 的距离之比为常数 e 的点的轨迹。", "拖动 e 的滑块，看曲线如何连续地从圆变成椭圆、抛物线、双曲线。"],
+            k: ["<em>|PF| / d = e</em>", "<em>0 &lt; e &lt; 1</em> 椭圆 · <em>e = 1</em> 抛物线 · <em>e &gt; 1</em> 双曲线", "e 越接近 0，椭圆越圆"] },
+          { t: "光学性质", p: ['<span class="x-book">教材：人教A版 选择性必修第一册·第三章 圆锥曲线的方程（3.2、3.3 阅读与思考：圆锥曲线的光学性质）</span>', "从椭圆一个焦点发出的光，经椭圆反射后汇聚到另一个焦点。从抛物线焦点发出的光，反射后平行于对称轴射出，探照灯、卫星天线都用这个原理。", "从双曲线一个焦点发出的光，反射后的反向延长线经过另一个焦点。拖动光源离开焦点，反射光就不再汇聚。"],
+            k: ["椭圆：F₁ 发出 → 汇聚到 <em>F₂</em>", "抛物线：F 发出 → <em>平行于对称轴</em>", "双曲线：反向延长线过 <em>另一焦点</em>", "光源离开焦点 → 反射光<em>不再汇聚</em>", "<b>高考链接：</b>光学性质本质是<em>切线与焦半径夹角相等</em>，常用于求切线方程或角平分线问题；易错：双曲线是<em>反向延长线</em>过另一焦点。"] },
+          { t: "直线与圆锥曲线", p: ['<span class="x-book">教材：人教A版 选择性必修第一册·第三章 圆锥曲线的方程（3.1–3.3 直线与圆锥曲线的位置关系）</span>', "把直线方程 y = kx + m 代入曲线方程，消去 y，得到关于 x 的方程 Ax² + Bx + C = 0。", "二次项系数 A ≠ 0 时用判别式判断：Δ &gt; 0 相交，Δ = 0 相切，Δ &lt; 0 相离。A = 0 时只有一个交点，但不是相切。", "相交时由韦达定理得弦长 |AB| = √(1 + k²)·|x₁ − x₂|；点差法得中点弦斜率关系 k<sub>AB</sub>·k<sub>OM</sub> = −b²/a²。"],
+            k: ["联立消元：代入后得 <em>Ax² + Bx + C = 0</em>", "<em>A ≠ 0</em> 时：<em>Δ &gt; 0</em> 相交 · <em>Δ = 0</em> 相切 · <em>Δ &lt; 0</em> 相离", "韦达定理：<em>x₁ + x₂ = −B/A</em>，<em>x₁x₂ = C/A</em>", "弦长 <em>|AB| = √(1 + k²)·|x₁ − x₂|</em>", "点差法：椭圆 <em>k<sub>AB</sub> · k<sub>OM</sub> = −b²/a²</em>，双曲线 <em>= b²/a²</em>", "<b>高考链接：</b>解析几何大题必考<em>“设而不求+韦达定理”</em>，弦长、中点弦、定点定值是高频；易错：联立后先验证<em>二次项系数是否为零</em>，并保证 <em>Δ&gt;0</em>。"] },
+          { t: "随堂检测", soon: true, p: ["4–6 道单选题，覆盖截线、焦点、离心率、光学性质与判别式；作答后立即显示对错与解析，最后给出得分。"],
+            k: ["先回顾前 8 章要点，再来作答"] }
+        ];
+        var S = {
+          0: { b: 60, d: 1.2, dirty: true },
+          1: { b: 55, th: 30, play: true, dirty: true },
+          2: { a: 4, b: 3, t: 0.8, play: true, trace: false, tr: 0 },
+          3: { a: 2, b: 1.5, u: 0.6, dir: 1, play: true, asym: true, branch: 1 },
+          4: { p: 2, t: 2, dir: 1, play: true },
+          5: { e: 0.6, th: 1.0, play: true, sweep: false, sdir: 1 },
+          6: { k: 0, lx: -4, ly: 0, n: 16, u: 0 },
+          7: { c: 0, k: 0.5, m: 1, v: false, t: 1 }
+        };
+        /* chapter 7 curves: A x² + C y² + D x + E = 0 */
+        var CURV = [
+          { A: 1 / 25, C: 1 / 9, D: 0, E: -1, f1: [-4, 0], f2: [4, 0], eq: "x²/25 + y²/9 = 1",
+            pt: function (t) { return [5 * Math.cos(Math.PI * t), 3 * Math.sin(Math.PI * t)]; }, ok: function () { return true; } },
+          { A: 0, C: 1, D: -4, E: 0, f1: [1, 0], f2: null, eq: "y² = 4x",
+            pt: function (t) { return [25 * t * t, 10 * t]; }, ok: function (x, y) { return Math.abs(y) <= 10; } },
+          { A: 1 / 9, C: -1 / 16, D: 0, E: -1, f1: [-5, 0], f2: [5, 0], eq: "x²/9 − y²/16 = 1（右支）",
+            pt: function (t) { return [3 * Math.cosh(2.2 * t), 4 * Math.sinh(2.2 * t)]; }, ok: function (x, y) { return x > 0 && Math.abs(y) <= 18; } }
+        ];
+        function hit6(G, sx, sy, dx, dy) {
+          var a = G.A * dx * dx + G.C * dy * dy, b = 2 * G.A * sx * dx + 2 * G.C * sy * dy + G.D * dx;
+          var c = G.A * sx * sx + G.C * sy * sy + G.D * sx + G.E, ts = [];
+          if (Math.abs(a) < 1e-9) { if (Math.abs(b) > 1e-12) ts.push(-c / b); }
+          else { var q = b * b - 4 * a * c; if (q < 0) return null; q = Math.sqrt(q); ts.push((-b - q) / (2 * a), (-b + q) / (2 * a)); }
+          ts.sort(function (m, n) { return m - n; });
+          for (var i = 0; i < ts.length; i++) if (ts[i] > 1e-4 && G.ok(sx + dx * ts[i], sy + dy * ts[i])) return ts[i];
+          return null;
+        }
+        var show = { labels: true, aux: true };
+        var cur = 2, view = { x: 0, y: 0, s: 40 }, col = {};
+        var cv = $("cv"), ctx = cv.getContext("2d"), W = 0, H = 0, dpr = 1;
+
+        function readCol() {
+          var cs = getComputedStyle(root);
+          ["acc", "acc2", "red", "ink", "ink2", "line", "line2"].forEach(function (k) { col[k] = cs.getPropertyValue("--x-" + k).trim(); });
+        }
+        function resize() {
+          var r = cv.parentNode.getBoundingClientRect();
+          dpr = Math.min(window.devicePixelRatio || 1, 2); W = r.width; H = r.height;
+          cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+        }
+        function resetView() {
+          if (cur === 0) { if (T3) T3.home(); return; }
+          if (cur === 1) { if (DB) DB.home(); return; }
+          var m = Math.min(W, H) || 600, mob = W < 1024 && innerWidth < 1024;
+          var span = { 2: 11, 3: 13, 4: 12, 5: 16 }[cur] || 12;
+          view.s = m / span; view.x = cur === 4 ? -2 * view.s : 0; view.y = mob ? 30 : 0;
+          if (cur === 5) view.x = -1.5 * view.s;
+          if (cur === 7 && S[7].c === 2) view.x = -2.5 * view.s;
+          if (cur === 6) { var k6 = S[6].k; view.s = m / [13, 15, 19][k6]; view.x = -[0, 3, 1.5][k6] * view.s; }
+        }
+        var X = function (x) { return W / 2 + view.x + x * view.s; };
+        var Y = function (y) { return H / 2 + view.y - y * view.s; };
+        var wx = function (px) { return (px - W / 2 - view.x) / view.s; };
+        var wy = function (py) { return -(py - H / 2 - view.y) / view.s; };
+        var f2 = function (v) { return (Math.round(v * 100) / 100).toFixed(2); };
+
+        /* drawing helpers */
+        function line(x1, y1, x2, y2, c, w, dash) {
+          ctx.beginPath(); ctx.setLineDash(dash || []); ctx.strokeStyle = c; ctx.lineWidth = w || 1.5;
+          ctx.moveTo(X(x1), Y(y1)); ctx.lineTo(X(x2), Y(y2)); ctx.stroke(); ctx.setLineDash([]);
+        }
+        function path(pts, c, w) {
+          ctx.beginPath(); ctx.strokeStyle = c; ctx.lineWidth = w || 2.2; ctx.lineJoin = "round";
+          var pen = false;
+          pts.forEach(function (p) {
+            if (!p) { pen = false; return; }
+            if (pen) ctx.lineTo(X(p[0]), Y(p[1])); else { ctx.moveTo(X(p[0]), Y(p[1])); pen = true; }
+          });
+          ctx.stroke();
+        }
+        function dot(x, y, c, r) { ctx.beginPath(); ctx.fillStyle = c; ctx.arc(X(x), Y(y), r || 4.5, 0, 7); ctx.fill(); }
+        function ring(x, y, c) {
+          ctx.beginPath(); ctx.fillStyle = c; ctx.arc(X(x), Y(y), 7, 0, 7); ctx.fill();
+          ctx.beginPath(); ctx.strokeStyle = col.ink; ctx.lineWidth = 2; ctx.arc(X(x), Y(y), 7, 0, 7); ctx.stroke();
+        }
+        function label(txt, x, y, c, dx, dy, mono) {
+          if (!show.labels) return;
+          ctx.font = (mono ? "12px " + "'Geist Mono', monospace" : "600 14px 'Noto Serif SC', serif");
+          ctx.fillStyle = c || col.ink; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+          ctx.fillText(txt, X(x) + (dx || 8), Y(y) + (dy || -10));
+        }
+        function segLabel(txt, x1, y1, x2, y2, c) {
+          if (!show.labels) return;
+          var mx = (X(x1) + X(x2)) / 2, my = (Y(y1) + Y(y2)) / 2;
+          ctx.font = "12px 'Geist Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          var w = ctx.measureText(txt).width + 10;
+          ctx.fillStyle = root.getAttribute("data-theme") === "light" ? "rgba(255,255,255,.88)" : "rgba(14,20,32,.82)";
+          ctx.fillRect(mx - w / 2, my - 10, w, 20); ctx.fillStyle = c; ctx.fillText(txt, mx, my);
+        }
+        function grid() {
+          var x0 = Math.floor(wx(0)), x1 = Math.ceil(wx(W)), y0 = Math.floor(wy(H)), y1 = Math.ceil(wy(0));
+          if (show.aux && view.s > 12) {
+            ctx.beginPath(); ctx.strokeStyle = col.line; ctx.lineWidth = 1;
+            for (var i = x0; i <= x1; i++) { ctx.moveTo(X(i), 0); ctx.lineTo(X(i), H); }
+            for (var j = y0; j <= y1; j++) { ctx.moveTo(0, Y(j)); ctx.lineTo(W, Y(j)); }
+            ctx.stroke();
+          }
+          ctx.beginPath(); ctx.strokeStyle = col.line2; ctx.lineWidth = 1.2;
+          ctx.moveTo(0, Y(0)); ctx.lineTo(W, Y(0)); ctx.moveTo(X(0), 0); ctx.lineTo(X(0), H); ctx.stroke();
+          if (show.labels && view.s > 18) {
+            ctx.font = "11px 'Geist Mono', monospace"; ctx.fillStyle = col.ink2; ctx.textAlign = "center"; ctx.textBaseline = "top";
+            var st = view.s > 40 ? 1 : 2;
+            for (var k = Math.ceil(x0 / st) * st; k <= x1; k += st) if (k) ctx.fillText(k, X(k), Y(0) + 4);
+            ctx.textAlign = "right"; ctx.textBaseline = "middle";
+            for (var m = Math.ceil(y0 / st) * st; m <= y1; m += st) if (m) ctx.fillText(m, X(0) - 5, Y(m));
+          }
+        }
+        var P = null; /* current moving point in world coords, for hit testing */
+
+        /* chapter 1: three.js double cone and cutting plane */
+        var RAD = Math.PI / 180, ALPHA = 30, T3 = null, T3fail = false, glState = null;
+        function glOK() {
+          if (glState === null) {
+            try { var t = document.createElement("canvas"); glState = !!(window.WebGLRenderingContext && (t.getContext("webgl2") || t.getContext("webgl"))); } catch (e) { glState = false; }
+          }
+          return glState;
+        }
+        function three() {
+          if (T3 || T3fail || !window.THREE || !THREE.OrbitControls) return T3;
+          var V3 = THREE.Vector3, box = $("c3");
+          var ren;
+          if (!glOK()) { T3fail = true; return null; }
+          try { ren = new THREE.WebGLRenderer({ antialias: true, alpha: true }); } catch (err) { T3fail = true; return null; }
+          ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); box.appendChild(ren.domElement);
+          var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+          var ctl = new THREE.OrbitControls(cam, ren.domElement);
+          ctl.enableDamping = true; ctl.minDistance = 5; ctl.maxDistance = 30; ctl.enablePan = false;
+          scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+          var dl = new THREE.DirectionalLight(0xffffff, 0.6); dl.position.set(5, 8, 6); scene.add(dl);
+          var HH = 3, k = Math.tan(ALPHA * RAD), r = HH * k;
+          var coneMat = new THREE.MeshLambertMaterial({ transparent: true, opacity: 0.16, side: THREE.DoubleSide, depthWrite: false });
+          var up = new THREE.Mesh(new THREE.ConeGeometry(r, HH, 72, 1, true), coneMat);
+          up.rotation.x = Math.PI; up.position.y = HH / 2;
+          var dn = new THREE.Mesh(new THREE.ConeGeometry(r, HH, 72, 1, true), coneMat);
+          dn.position.y = -HH / 2;
+          scene.add(up); scene.add(dn);
+          /* generators and rims */
+          var gp = [], i, th, th2;
+          for (i = 0; i < 16; i++) { th = Math.PI * 2 * i / 16; gp.push(-r * Math.cos(th), -HH, -r * Math.sin(th), r * Math.cos(th), HH, r * Math.sin(th)); }
+          [HH, -HH].forEach(function (y) {
+            for (var j = 0; j < 72; j++) { th = Math.PI * 2 * j / 72; th2 = Math.PI * 2 * (j + 1) / 72; gp.push(r * Math.cos(th), y, r * Math.sin(th), r * Math.cos(th2), y, r * Math.sin(th2)); }
+          });
+          var gGeo = new THREE.BufferGeometry(); gGeo.setAttribute("position", new THREE.Float32BufferAttribute(gp, 3));
+          var genMat = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.35 });
+          var aux = new THREE.Group(); aux.add(new THREE.LineSegments(gGeo, genMat));
+          var axMat = new THREE.LineDashedMaterial({ dashSize: 0.15, gapSize: 0.12, transparent: true, opacity: 0.6 });
+          var axis = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new V3(0, -3.8, 0), new V3(0, 3.8, 0)]), axMat);
+          axis.computeLineDistances(); aux.add(axis); scene.add(aux);
+          /* cutting plane */
+          var pGeo = new THREE.PlaneGeometry(10, 10);
+          var planeMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.14, side: THREE.DoubleSide, depthWrite: false });
+          var plane = new THREE.Mesh(pGeo, planeMat);
+          var edgeMat = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.55 });
+          plane.add(new THREE.LineSegments(new THREE.EdgesGeometry(pGeo), edgeMat));
+          scene.add(plane);
+          /* intersection curve */
+          var curveMat = new THREE.MeshBasicMaterial(), curves = new THREE.Group(); scene.add(curves);
+          function colors() {
+            coneMat.color.set(col.ink2); genMat.color.set(col.ink2); axMat.color.set(col.ink);
+            planeMat.color.set(col.acc2); edgeMat.color.set(col.acc2); curveMat.color.set(col.acc);
+          }
+          function tube(path, n, closed) { curves.add(new THREE.Mesh(new THREE.TubeGeometry(path, n, 0.045, 8, closed), curveMat)); }
+          function update(s) {
+            var b = s.b * RAD, d = s.d, sb = Math.sin(b), cb = Math.cos(b);
+            var n = new V3(-cb, sb, 0), u = new V3(sb, cb, 0);
+            plane.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(u, new V3(0, 0, -1), n));
+            plane.position.set(0, d, 0);
+            curves.children.forEach(function (m) { m.geometry.dispose(); });
+            curves.clear();
+            if (Math.abs(d) < 0.05) {
+              /* plane through the apex: a point, or one or two generators */
+              var c0 = sb / (k * cb || 1e-9);
+              if (c0 > 1 || cb < 1e-6) { curves.add(new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 12), curveMat)); return; }
+              var t0 = Math.acos(c0);
+              [t0, -t0].forEach(function (t, j) {
+                if (j && t0 < 1e-3) return;
+                tube(new THREE.LineCurve3(new V3(-r * Math.cos(t), -HH, -r * Math.sin(t)), new V3(r * Math.cos(t), HH, r * Math.sin(t))), 2, false);
+              });
+              return;
+            }
+            /* sample the cone (t·tanα·cosθ, t, t·tanα·sinθ) and solve the plane for t at each θ */
+            var N = 720, pts = [];
+            for (var q = 0; q < N; q++) {
+              var a = Math.PI * 2 * q / N, den = sb - k * cb * Math.cos(a), t = d * sb / den;
+              pts.push(Math.abs(den) < 1e-7 || !isFinite(t) || Math.abs(t) > HH ? null : new V3(t * k * Math.cos(a), t, t * k * Math.sin(a)));
+            }
+            var runs = [], run = null;
+            pts.forEach(function (p) { if (p) { if (!run) { run = []; runs.push(run); } run.push(p); } else run = null; });
+            var closed = runs.length === 1 && runs[0].length === N;
+            if (!closed && runs.length > 1 && pts[0] && pts[N - 1]) runs[0] = runs.pop().concat(runs[0]);
+            runs.forEach(function (rr) { if (rr.length >= 2) tube(new THREE.CatmullRomCurve3(rr, closed), Math.min(800, rr.length * 2), closed); });
+          }
+          function size() { if (W && H) { ren.setSize(W, H, false); cam.aspect = W / H; cam.updateProjectionMatrix(); } }
+          function home() { cam.position.set(7.5, 3.2, 9.5); ctl.target.set(0, 0, 0); ctl.update(); }
+          T3 = { ren: ren, scene: scene, cam: cam, ctl: ctl, aux: aux, update: update, size: size, home: home, colors: colors };
+          colors(); size(); home();
+          return T3;
+        }
+
+        /* chapter 2: Dandelin spheres. Single cone, apex at the origin, opening down (depth t = −y). */
+        var DB = null, DBfail = false, f3 = function (v) { return v.toFixed(3); };
+        function dandelin() {
+          if (DB || DBfail || !window.THREE || !THREE.OrbitControls) return DB;
+          var V3 = THREE.Vector3, box = $("c3b"), ren;
+          if (!glOK()) { DBfail = true; return null; }
+          try { ren = new THREE.WebGLRenderer({ antialias: true, alpha: true }); } catch (err) { DBfail = true; return null; }
+          ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); box.appendChild(ren.domElement);
+          var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
+          var ctl = new THREE.OrbitControls(cam, ren.domElement);
+          ctl.enableDamping = true; ctl.minDistance = 4; ctl.maxDistance = 30; ctl.enablePan = false;
+          scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+          var dl = new THREE.DirectionalLight(0xffffff, 0.6); dl.position.set(5, 8, 6); scene.add(dl);
+          var k = Math.tan(ALPHA * RAD), sa = Math.sin(ALPHA * RAD), ca = Math.cos(ALPHA * RAD), HC = 6.6, H2 = 4, rim = HC * k;
+          var coneMat = new THREE.MeshLambertMaterial({ transparent: true, opacity: 0.13, side: THREE.DoubleSide, depthWrite: false });
+          var cone = new THREE.Mesh(new THREE.ConeGeometry(rim, HC, 96, 1, true), coneMat);
+          cone.position.y = -HC / 2; scene.add(cone);
+          var gp = [], i, th, th2;
+          for (i = 0; i < 24; i++) { th = Math.PI * 2 * i / 24; gp.push(0, 0, 0, rim * Math.cos(th), -HC, rim * Math.sin(th)); }
+          for (i = 0; i < 96; i++) { th = Math.PI * 2 * i / 96; th2 = Math.PI * 2 * (i + 1) / 96; gp.push(rim * Math.cos(th), -HC, rim * Math.sin(th), rim * Math.cos(th2), -HC, rim * Math.sin(th2)); }
+          var gGeo = new THREE.BufferGeometry(); gGeo.setAttribute("position", new THREE.Float32BufferAttribute(gp, 3));
+          var genMat = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.3 });
+          var aux = new THREE.Group(); aux.add(new THREE.LineSegments(gGeo, genMat));
+          var axMat = new THREE.LineDashedMaterial({ dashSize: 0.15, gapSize: 0.12, transparent: true, opacity: 0.6 });
+          var axis = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new V3(0, 0.6, 0), new V3(0, -HC - 0.4, 0)]), axMat);
+          axis.computeLineDistances(); aux.add(axis); scene.add(aux);
+          /* spheres and tangent circles */
+          var sphMat = new THREE.MeshLambertMaterial({ transparent: true, opacity: 0.2, depthWrite: false });
+          var s1 = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 32), sphMat), s2 = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 32), sphMat);
+          scene.add(s1); scene.add(s2);
+          var ringMat = new THREE.MeshBasicMaterial(), rings = new THREE.Group(); scene.add(rings);
+          /* cutting plane and ellipse */
+          var pGeo = new THREE.PlaneGeometry(1, 1);
+          var planeMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.12, side: THREE.DoubleSide, depthWrite: false });
+          var plane = new THREE.Mesh(pGeo, planeMat), edgeMat = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.5 });
+          plane.add(new THREE.LineSegments(new THREE.EdgesGeometry(pGeo), edgeMat)); scene.add(plane);
+          var curveMat = new THREE.MeshBasicMaterial(), curve = new THREE.Group(); scene.add(curve);
+          /* moving parts */
+          var UP = new V3(0, 1, 0), m1 = new THREE.MeshBasicMaterial(), m2 = new THREE.MeshBasicMaterial(), mPt = new THREE.MeshBasicMaterial(), mP = new THREE.MeshBasicMaterial();
+          function rod(mat) { var m = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 1, 8, 1), mat); scene.add(m); return m; }
+          function ball(mat, r) { var m = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 12), mat); scene.add(m); return m; }
+          var rPF1 = rod(m1), rPQ1 = rod(m1), rPF2 = rod(m2), rPQ2 = rod(m2);
+          var bF1 = ball(m1, 0.075), bF2 = ball(m2, 0.075), bQ1 = ball(mPt, 0.065), bQ2 = ball(mPt, 0.065), bP = ball(mP, 0.09);
+          var lineMat = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.85 });
+          var gen = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new V3(), new V3()]), lineMat); scene.add(gen);
+          function place(m, a, b) {
+            var d = b.clone().sub(a), L = d.length();
+            m.position.copy(a).add(b).multiplyScalar(0.5); m.scale.set(1, Math.max(L, 1e-4), 1);
+            if (L > 1e-6) m.quaternion.setFromUnitVectors(UP, d.multiplyScalar(1 / L));
+          }
+          /* HTML labels */
+          var labs = {};
+          [["F1", "F₁", "f"], ["F2", "F₂", ""], ["Q1", "Q₁", ""], ["Q2", "Q₂", ""], ["P", "P", "p"]].forEach(function (l) {
+            var d = document.createElement("div"); d.className = "x-l3 " + l[2]; d.textContent = l[1]; box.appendChild(d); labs[l[0]] = d;
+          });
+          function tag(id, v, dx, dy) {
+            var d = labs[id];
+            if (!show.labels) { d.style.display = "none"; return; }
+            var p = v.clone().project(cam);
+            if (p.z > 1) { d.style.display = "none"; return; }
+            d.style.display = "";
+            d.style.transform = "translate(" + ((p.x + 1) / 2 * W + dx).toFixed(1) + "px," + ((1 - p.y) / 2 * H + dy).toFixed(1) + "px)";
+          }
+          var g = {};
+          function onGen(t, a) { return new V3(t * k * Math.cos(a), -t, t * k * Math.sin(a)); }
+          function onEll(a) { return onGen(g.d0 * g.sb / (g.sb + k * g.cb * Math.cos(a)), a); }
+          function update(bdeg) {
+            var b = bdeg * RAD, sb = Math.sin(b), cb = Math.cos(b);
+            /* keep the big sphere's centre at depth H2; the plane passes the axis at depth d0 */
+            var d0 = H2 * (sb - sa) / sb, h1 = d0 * sb / (sb + sa), h2 = H2;
+            var n = new V3(-cb, sb, 0), u = new V3(sb, cb, 0), p0 = new V3(0, -d0, 0);
+            var c1 = new V3(0, -h1, 0), c2 = new V3(0, -h2, 0);
+            var foot = function (c) { return c.clone().sub(n.clone().multiplyScalar(n.dot(c.clone().sub(p0)))); };
+            g = { sb: sb, cb: cb, d0: d0, h1: h1, h2: h2, r1: h1 * sa, r2: h2 * sa, F1: foot(c1), F2: foot(c2), t1: h1 * ca * ca, t2: h2 * ca * ca };
+            s1.position.copy(c1); s1.scale.setScalar(g.r1); s2.position.copy(c2); s2.scale.setScalar(g.r2);
+            rings.children.forEach(function (m) { m.geometry.dispose(); }); rings.clear();
+            [h1, h2].forEach(function (h) {
+              var m = new THREE.Mesh(new THREE.TorusGeometry(h * ca * sa, 0.035, 8, 140), ringMat);
+              m.rotation.x = Math.PI / 2; m.position.y = -h * ca * ca; rings.add(m);
+            });
+            curve.children.forEach(function (m) { m.geometry.dispose(); }); curve.clear();
+            var pts = []; for (var q = 0; q < 360; q++) pts.push(onEll(Math.PI * 2 * q / 360));
+            curve.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 480, 0.045, 8, true), curveMat));
+            var A = onEll(0), B = onEll(Math.PI), ctr = A.clone().add(B).multiplyScalar(0.5);
+            var a = A.distanceTo(B) / 2, c = g.F1.distanceTo(g.F2) / 2, bb = Math.sqrt(Math.max(a * a - c * c, 0));
+            plane.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(u, new V3(0, 0, -1), n));
+            plane.position.copy(ctr); plane.scale.set(2 * a + 1.4, 2 * bb + 1.4, 1);
+            bF1.position.copy(g.F1); bF2.position.copy(g.F2);
+          }
+          function frame(thDeg) {
+            var a = thDeg * RAD, P = onEll(a), Q1 = onGen(g.t1, a), Q2 = onGen(g.t2, a);
+            place(rPF1, P, g.F1); place(rPQ1, P, Q1); place(rPF2, P, g.F2); place(rPQ2, P, Q2);
+            bP.position.copy(P); bQ1.position.copy(Q1); bQ2.position.copy(Q2);
+            var gpos = gen.geometry.attributes.position, E = onGen(HC, a);
+            gpos.setXYZ(0, 0, 0, 0); gpos.setXYZ(1, E.x, E.y, E.z); gpos.needsUpdate = true;
+            aux.visible = show.aux; ctl.update(); ren.render(scene, cam);
+            tag("F1", g.F1, -22, -24); tag("F2", g.F2, 8, -24); tag("Q1", Q1, 8, -24); tag("Q2", Q2, 8, -6); tag("P", P, 10, -26);
+            return { PF1: P.distanceTo(g.F1), PQ1: P.distanceTo(Q1), PF2: P.distanceTo(g.F2), PQ2: P.distanceTo(Q2), QQ: Q1.distanceTo(Q2) };
+          }
+          function colors() {
+            coneMat.color.set(col.ink2); genMat.color.set(col.ink2); axMat.color.set(col.ink); sphMat.color.set(col.acc);
+            ringMat.color.set(col.acc2); planeMat.color.set(col.ink2); edgeMat.color.set(col.ink2); curveMat.color.set(col.acc);
+            m1.color.set(col.red); m2.color.set(col.ink); mPt.color.set(col.ink); mP.color.set(col.acc2); lineMat.color.set(col.ink2);
+          }
+          function size() { if (W && H) { ren.setSize(W, H, false); cam.aspect = W / H; cam.updateProjectionMatrix(); } }
+          function home() { cam.position.set(9, -0.5, 11.5); ctl.target.set(0, -2.9, 0); ctl.update(); }
+          DB = { ctl: ctl, update: update, frame: frame, size: size, home: home, colors: colors, g: function () { return g; } };
+          colors(); size(); home();
+          return DB;
+        }
+
+        /* chapter renderers: return readout html */
+        var R = {
+          0: function (s) {
+            var T = three(), b = s.b, e = Math.cos(b * RAD) / Math.cos(ALPHA * RAD);
+            var kind = b >= 89.75 ? "圆" : Math.abs(b - ALPHA) < 0.25 ? "抛物线" : b > ALPHA ? "椭圆" : "双曲线";
+            var degen = Math.abs(s.d) < 0.05;
+            if (T) {
+              if (s.dirty) { T.update(s); s.dirty = false; }
+              T.aux.visible = show.aux; T.ctl.update(); T.ren.render(T.scene, T.cam);
+            }
+            var tag = degen ? "退化：过顶点" : kind + "　e = " + f2(e);
+            if ($("tag3").textContent !== tag) $("tag3").textContent = tag;
+            return "α = <b>" + ALPHA + "°</b>（半顶角）　β = <b>" + b.toFixed(1) + "°</b><br>e = cos β / cos α = <b>" + f2(e) + "</b><br>曲线类型：<b>" + kind + "</b>" +
+              (degen ? "<br>平面过顶点：退化为" + (kind === "抛物线" ? "一条母线" : b > ALPHA ? "一个点" : "两条母线") : "") +
+              (T ? "" : "<br>3D 引擎未能加载，请检查网络后刷新");
+          },
+          1: function (s, dt) {
+            var D = dandelin();
+            if (!D) return "3D 引擎未能加载，请检查网络后刷新";
+            if (s.dirty) { D.update(s.b); s.dirty = false; }
+            if (s.play) {
+              s.th = (s.th + dt * 36) % 360;
+              var ri = $("r-th"), vo = $("v-th");
+              if (ri) { ri.value = s.th; vo.textContent = Math.round(s.th) + "°"; }
+            }
+            var m = D.frame(s.th), g = D.g(), tol = 5e-4;
+            var ok = function (x, y) { return Math.abs(x - y) < tol ? '<span class="x-ok">✓ 相等</span>' : "≠"; };
+            return "α = <b>" + ALPHA + "°</b>（半顶角）　β = <b>" + s.b.toFixed(1) + "°</b><br>" +
+              "球半径 r₁ = <b>" + f3(g.r1) + "</b>　r₂ = <b>" + f3(g.r2) + "</b><br>" +
+              "PF₁ = <b>" + f3(m.PF1) + "</b>　PQ₁ = <b>" + f3(m.PQ1) + "</b>　" + ok(m.PF1, m.PQ1) + "<br>" +
+              "PF₂ = <b>" + f3(m.PF2) + "</b>　PQ₂ = <b>" + f3(m.PQ2) + "</b>　" + ok(m.PF2, m.PQ2) + "<br>" +
+              "PF₁ + PF₂ = <b>" + f3(m.PF1 + m.PF2) + "</b><br>" +
+              "Q₁Q₂ = <b>" + f3(m.QQ) + "</b>　" + ok(m.PF1 + m.PF2, m.QQ) + "<br>" +
+              "PF₁ + PF₂ = Q₁Q₂ = 2a，<b>恒定</b>，与 P 的位置无关";
+          },
+          2: function (s, dt) {
+            if (s.b > s.a - 0.05) s.b = s.a - 0.05;
+            var a = s.a, b = s.b, c = Math.sqrt(a * a - b * b), e = c / a;
+            if (s.trace) { s.tr += dt * 1.6; s.t = s.tr; if (s.tr >= Math.PI * 2) { s.trace = false; s.t = 0; } }
+            else if (s.play && !drag.pt) s.t += dt * 0.6;
+            var pts = [], end = s.trace ? s.tr : Math.PI * 2;
+            for (var i = 0; i <= 240; i++) { var t = end * i / 240; pts.push([a * Math.cos(t), b * Math.sin(t)]); }
+            if (s.trace && show.aux) {
+              var ghost = []; for (var g = 0; g <= 120; g++) ghost.push([a * Math.cos(g / 120 * 7), b * Math.sin(g / 120 * 7)]);
+              ctx.globalAlpha = 0.25; path(ghost, col.ink2, 1); ctx.globalAlpha = 1;
+            }
+            path(pts, col.acc);
+            var px = a * Math.cos(s.t), py = b * Math.sin(s.t); P = [px, py];
+            var d1 = Math.hypot(px + c, py), d2 = Math.hypot(px - c, py);
+            line(-c, 0, px, py, col.acc2, 2); line(c, 0, px, py, col.acc2, 2);
+            if (show.aux) { line(-a, 0, a, 0, col.ink2, 1, [4, 4]); line(0, -b, 0, b, col.ink2, 1, [4, 4]); label("a", a / 2, 0, col.ink2, -4, 12, true); label("b", 0, b / 2, col.ink2, 6, 0, true); }
+            segLabel("PF₁=" + f2(d1), -c, 0, px, py, col.acc2); segLabel("PF₂=" + f2(d2), c, 0, px, py, col.acc2);
+            ctx.beginPath(); ctx.strokeStyle = col.ink; ctx.lineWidth = 2; ctx.arc(X(-c), Y(0), 6, 0, 7); ctx.arc(X(c), Y(0), 6, 0, 7); ctx.stroke();
+            dot(-c, 0, col.red); dot(c, 0, col.red); ring(px, py, col.acc2);
+            label("F₁", -c, 0, col.red, -10, 18); label("F₂", c, 0, col.red, -8, 18); label("P", px, py, col.ink, 10, -12);
+            return "<b>x²/" + f2(a * a) + " + y²/" + f2(b * b) + " = 1</b><br>c = √(a²−b²) = <b>" + f2(c) + "</b>　e = c/a = <b>" + f2(e) + "</b><br>PF₁ + PF₂ = " + f2(d1) + " + " + f2(d2) + " = <b>" + f2(d1 + d2) + "</b> = 2a";
+          },
+          3: function (s, dt) {
+            var a = s.a, b = s.b, c = Math.sqrt(a * a + b * b), e = c / a, U = 2.4;
+            if (s.play && !drag.pt) { s.u += dt * 0.5 * s.dir; if (s.u > U - 0.3) s.dir = -1; if (s.u < -U + 0.3) s.dir = 1; }
+            if (s.asym) {
+              var L = 40; line(-L, -L * b / a, L, L * b / a, col.ink2, 1.2, [6, 5]); line(-L, L * b / a, L, -L * b / a, col.ink2, 1.2, [6, 5]);
+              var ax = Math.min(wx(W) - 0.3, 6); label("y = " + f2(b / a) + "x", ax * 0.85, ax * 0.85 * b / a, col.ink2, -60, -14, true);
+            }
+            if (show.aux) { line(-a, -b, a, -b, col.line2, 1, [3, 4]); line(-a, b, a, b, col.line2, 1, [3, 4]); line(-a, -b, -a, b, col.line2, 1, [3, 4]); line(a, -b, a, b, col.line2, 1, [3, 4]); }
+            [1, -1].forEach(function (sg) {
+              var pts = []; for (var i = 0; i <= 200; i++) { var u = -3 + 6 * i / 200; pts.push([sg * a * Math.cosh(u), b * Math.sinh(u)]); }
+              path(pts, col.acc);
+            });
+            var px = s.branch * a * Math.cosh(s.u), py = b * Math.sinh(s.u); P = [px, py];
+            var d1 = Math.hypot(px + c, py), d2 = Math.hypot(px - c, py);
+            line(-c, 0, px, py, col.acc2, 2); line(c, 0, px, py, col.acc2, 2);
+            segLabel("PF₁=" + f2(d1), -c, 0, px, py, col.acc2); segLabel("PF₂=" + f2(d2), c, 0, px, py, col.acc2);
+            dot(-c, 0, col.red); dot(c, 0, col.red); dot(-a, 0, col.ink2, 3); dot(a, 0, col.ink2, 3); ring(px, py, col.acc2);
+            label("F₁", -c, 0, col.red, -10, 18); label("F₂", c, 0, col.red, -8, 18); label("P", px, py, col.ink, 10, -12);
+            var eq = Math.abs(a - b) < 0.01;
+            return "<b>x²/" + f2(a * a) + " − y²/" + f2(b * b) + " = 1</b>" + (eq ? "　<b style=\"color:var(--x-acc)\">等轴</b>" : "") + "<br>c = √(a²+b²) = <b>" + f2(c) + "</b>　e = <b>" + f2(e) + "</b><br>|PF₁ − PF₂| = |" + f2(d1) + " − " + f2(d2) + "| = <b>" + f2(Math.abs(d1 - d2)) + "</b> = 2a";
+          },
+          4: function (s, dt) {
+            var p = s.p, T = 3.2 * Math.sqrt(p);
+            if (s.play && !drag.pt) { s.t += dt * 1.2 * s.dir; if (s.t > T) s.dir = -1; if (s.t < -T) s.dir = 1; }
+            var pts = [], M = 8 * Math.sqrt(p) + 4;
+            for (var i = 0; i <= 200; i++) { var y = -M + 2 * M * i / 200; pts.push([y * y / (2 * p), y]); }
+            line(-p / 2, -40, -p / 2, 40, col.ink2, 1.5, [7, 5]); label("l：x = −" + f2(p / 2), -p / 2, wy(30), col.ink2, -8, 0, true);
+            path(pts, col.acc);
+            if (show.aux) {
+              line(p / 2, -p, p / 2, p, col.acc2, 1.5, [2, 3]); dot(p / 2, p, col.acc2, 3); dot(p / 2, -p, col.acc2, 3);
+              label("通径 2p = " + f2(2 * p), p / 2, p, col.acc2, 8, -4, true);
+            }
+            var py = s.t, px = py * py / (2 * p); P = [px, py];
+            var dF = Math.hypot(px - p / 2, py), dl = px + p / 2;
+            line(p / 2, 0, px, py, col.acc2, 2); line(-p / 2, py, px, py, col.acc2, 2);
+            ctx.strokeStyle = col.ink2; ctx.lineWidth = 1; ctx.strokeRect(X(-p / 2), Y(py) - (py >= 0 ? 0 : 8), 8, 8);
+            segLabel("PF=" + f2(dF), p / 2, 0, px, py, col.acc2); segLabel("d=" + f2(dl), -p / 2, py, px, py, col.acc2);
+            dot(p / 2, 0, col.red); dot(-p / 2, py, col.ink2, 3); ring(px, py, col.acc2);
+            label("F", p / 2, 0, col.red, -4, 18); label("P", px, py, col.ink, 10, -12); label("D", -p / 2, py, col.ink2, -20, -10);
+            return "<b>y² = " + f2(2 * p) + "x</b><br>焦点 F(<b>" + f2(p / 2) + "</b>, 0)　准线 x = <b>−" + f2(p / 2) + "</b><br>|PF| = <b>" + f2(dF) + "</b>　|PD| = <b>" + f2(dl) + "</b><br>通径长 2p = <b>" + f2(2 * p) + "</b>";
+          },
+          5: function (s, dt) {
+            if (s.sweep) { s.e += dt * 0.25 * s.sdir; if (s.e >= 2) { s.e = 2; s.sdir = -1; } if (s.e <= 0) { s.e = 0; s.sdir = 1; } syncCtl("e", s.e); }
+            if (s.play && !drag.pt) s.th += dt * 0.5;
+            var e = s.e, l = 2, pts = [], prev = null;
+            for (var i = 0; i <= 720; i++) {
+              var th = Math.PI * 2 * i / 720, den = 1 - e * Math.cos(th);
+              if (Math.abs(den) < 0.012 || (prev !== null && den * prev < 0)) { pts.push(null); prev = den; continue; }
+              prev = den; var r = l / den;
+              if (Math.abs(r) > 60) { pts.push(null); continue; }
+              pts.push([r * Math.cos(th), r * Math.sin(th)]);
+            }
+            var kind = e < 0.005 ? "圆" : Math.abs(e - 1) < 0.005 ? "抛物线" : e < 1 ? "椭圆" : "双曲线";
+            var dx = e > 0.005 ? -l / e : null;
+            if (dx !== null && dx > wx(0) - 1) { line(dx, -60, dx, 60, col.ink2, 1.5, [7, 5]); label("l", dx, wy(30), col.ink2, -14, 0); }
+            path(pts, col.acc);
+            /* moving point: pick θ where den > 0 */
+            var th2 = s.th, dd = 1 - e * Math.cos(th2);
+            if (e >= 1) { var lim = Math.acos(Math.min(1, 1 / e)) + 0.25; th2 = lim + (Math.PI - lim) * (0.5 + 0.5 * Math.sin(s.th)); th2 *= Math.cos(s.th * 0.5) >= 0 ? 1 : -1; dd = 1 - e * Math.cos(th2); }
+            var rr = l / dd, px = rr * Math.cos(th2), py = rr * Math.sin(th2); P = [px, py];
+            var dF = Math.hypot(px, py);
+            line(0, 0, px, py, col.acc2, 2);
+            if (dx !== null) { line(dx, py, px, py, col.acc2, 2); segLabel("d=" + f2(px - dx), dx, py, px, py, col.acc2); dot(dx, py, col.ink2, 3); }
+            segLabel("PF=" + f2(dF), 0, 0, px, py, col.acc2);
+            dot(0, 0, col.red); ring(px, py, col.acc2); label("F", 0, 0, col.red, -4, 18); label("P", px, py, col.ink, 10, -12);
+            if (show.labels) {
+              ctx.font = "600 22px 'Noto Serif SC', serif"; ctx.fillStyle = col.acc; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+              ctx.fillText(kind + "　e = " + f2(e), W - 18, H - (innerWidth < 1024 ? 66 : 18));
+            }
+            $("etype") && ($("etype").textContent = kind);
+            return "类型：<b>" + kind + "</b><br>e = <b>" + f2(e) + "</b>　" + (dx !== null ? "准线 x = <b>" + f2(dx) + "</b>" : "e = 0：准线在无穷远") + "<br>" + (dx !== null ? "|PF| / d = " + f2(dF) + " / " + f2(px - dx) + " = <b>" + f2(dF / (px - dx)) + "</b>" : "|PF| = <b>" + f2(dF) + "</b>（半径）");
+          },
+          6: function (s, dt) {
+            var k = s.k, G = CURV[k], sx = s.lx, sy = s.ly, i, pts = [];
+            if (drag.pt) s.u = 1; else if (s.u < 1) s.u = Math.min(1, s.u + dt / 2.6);
+            if (show.aux && k === 2) { line(-15, -20, 15, 20, col.ink2, 1, [6, 5]); line(-15, 20, 15, -20, col.ink2, 1, [6, 5]); }
+            for (i = 0; i <= 240; i++) pts.push(G.pt(-1 + 2 * i / 240));
+            path(pts, col.ink, 2.4);
+            var n = s.n, fan = k === 2 ? 52 * RAD : Math.PI, worst = 0, hits = 0;
+            var u1 = Math.min(1, s.u * 2), u2 = Math.max(0, s.u * 2 - 1);
+            ctx.lineCap = "round";
+            for (i = 0; i < n; i++) {
+              var th = -fan + 2 * fan * (i + 0.5) / n, dx = Math.cos(th), dy = Math.sin(th), t1 = hit6(G, sx, sy, dx, dy);
+              if (t1 === null) { ctx.globalAlpha = 0.25; line(sx, sy, sx + dx * 30 * u1, sy + dy * 30 * u1, col.acc2, 1.2); ctx.globalAlpha = 1; continue; }
+              var px = sx + dx * t1, py = sy + dy * t1, nx = 2 * G.A * px + G.D, ny = 2 * G.C * py, nl = Math.hypot(nx, ny);
+              nx /= nl; ny /= nl;
+              var dn = dx * nx + dy * ny, rx = dx - 2 * dn * nx, ry = dy - 2 * dn * ny;
+              hits++;
+              worst = Math.max(worst, k === 1 ? Math.abs(ry) : Math.abs((G.f2[0] - px) * ry - (G.f2[1] - py) * rx));
+              line(sx, sy, sx + dx * t1 * u1, sy + dy * t1 * u1, col.acc2, 1.6);
+              if (u2 > 0) {
+                var L = k === 0 ? (hit6(G, px, py, rx, ry) || 10) : 18;
+                line(px, py, px + rx * L * u2, py + ry * L * u2, col.acc, 1.6);
+                if (k === 2) { var B = Math.hypot(px - 5, py) + 1.5; line(px, py, px - rx * B * u2, py - ry * B * u2, col.acc, 1.1, [4, 4]); }
+              }
+            }
+            var F1 = G.f1, dF = Math.hypot(sx - F1[0], sy - F1[1]), conv = hits > 0 && worst < 0.02;
+            dot(F1[0], F1[1], col.red); if (G.f2) dot(G.f2[0], G.f2[1], col.red);
+            label(G.f2 ? "F₁" : "F", F1[0], F1[1], col.red, -6, 18); if (G.f2) label("F₂", G.f2[0], G.f2[1], col.red, -6, 18);
+            P = [sx, sy]; ring(sx, sy, col.acc2); label("光源", sx, sy, col.acc2, 10, -14);
+            var msg = conv ? ["✓ 反射光汇聚于 F₂", "✓ 反射光平行于对称轴", "✓ 反向延长线交于 F₂"][k] : "✗ 光源离开焦点，反射光不再汇聚";
+            if (s.u >= 1) {
+              ctx.font = "600 20px 'Noto Serif SC', serif"; ctx.fillStyle = conv ? col.acc : col.red; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+              ctx.fillText(msg, W - 18, H - (innerWidth < 1024 ? 66 : 18));
+            }
+            return "<b>" + G.eq + "</b><br>光源 (<b>" + f2(sx) + "</b>, <b>" + f2(sy) + "</b>)　距焦点 <b>" + f2(dF) + "</b><br>命中曲线 <b>" + hits + "</b> / " + n + " 条　" + (k === 1 ? "最大偏角 sin" : "到 F₂ 最大距离") + " <b>" + f2(worst) + "</b><br><span class=\"" + (conv ? "x-ok" : "x-no") + "\">" + msg + "</span>";
+          },
+          7: function (s) {
+            var c = s.c, k = s.k, m = s.m, v = s.v, t = s.t, i, u, pts = [], A, B, C, n = v ? "y" : "x", r3 = Math.sqrt(3);
+            if (show.aux && c === 1) { line(-20, -10 * r3, 20, 10 * r3, col.ink2, 1, [6, 5]); line(-20, 10 * r3, 20, -10 * r3, col.ink2, 1, [6, 5]); }
+            if (c === 0) for (i = 0; i <= 240; i++) { u = Math.PI * 2 * i / 240; pts.push([2 * Math.cos(u), r3 * Math.sin(u)]); }
+            else if (c === 1) [1, -1].forEach(function (sg) { for (var j = 0; j <= 120; j++) { var w = -3 + j / 20; pts.push([sg * 2 * Math.cosh(w), r3 * Math.sinh(w)]); } pts.push(null); });
+            else for (i = 0; i <= 200; i++) { u = -12 + i * 0.12; pts.push([u * u / 4, u]); }
+            path(pts, col.acc, 2.4);
+            if (v) { A = [4, -4, 1][c]; B = 0; C = c === 2 ? -4 * t : 3 * t * t - 12; }
+            else if (c === 0) { A = 3 + 4 * k * k; B = 8 * k * m; C = 4 * m * m - 12; }
+            else if (c === 1) { A = 3 - 4 * k * k; B = -8 * k * m; C = -4 * m * m - 12; }
+            else { A = k * k; B = 2 * k * m - 4; C = m * m; }
+            var lin = Math.abs(A) < 1e-9, D = B * B - 4 * A * C, z = !lin && Math.abs(D) < 1e-7 * (B * B + Math.abs(4 * A * C) + 1), roots = [];
+            if (lin) { if (Math.abs(B) > 1e-9) roots = [-C / B]; }
+            else if (z) roots = [-B / (2 * A)];
+            else if (D > 0) { u = Math.sqrt(D); roots = [(-B - u) / (2 * A), (-B + u) / (2 * A)]; }
+            var Q = roots.map(function (q) { return v ? [t, q] : [q, k * q + m]; });
+            var lc = z ? col.acc2 : col.ink, lw = z ? 3 : 1.8;
+            if (v) line(t, wy(H) - 1, t, wy(0) + 1, lc, lw);
+            else { var xa = wx(0) - 1, xb = wx(W) + 1; line(xa, k * xa + m, xb, k * xb + m, lc, lw); }
+            var two = Q.length === 2, M = null;
+            if (two) {
+              M = [(Q[0][0] + Q[1][0]) / 2, (Q[0][1] + Q[1][1]) / 2];
+              line(Q[0][0], Q[0][1], Q[1][0], Q[1][1], col.red, 3);
+              if (show.aux && c < 2) line(0, 0, M[0], M[1], col.ink2, 1.4, [4, 4]);
+              dot(Q[0][0], Q[0][1], col.red); dot(Q[1][0], Q[1][1], col.red); ring(M[0], M[1], col.acc2);
+              label("A", Q[0][0], Q[0][1], col.red, 8, -12); label("B", Q[1][0], Q[1][1], col.red, 8, -12); label("M", M[0], M[1], col.acc2, 10, 14);
+              if (show.aux && c < 2) { dot(0, 0, col.ink2, 3); label("O", 0, 0, col.ink2, -16, 14); }
+            } else if (Q.length) { if (z) ring(Q[0][0], Q[0][1], col.acc2); else dot(Q[0][0], Q[0][1], col.red); label(z ? "切点" : "交点", Q[0][0], Q[0][1], z ? col.acc2 : col.red, 10, -12); }
+            var st = lin ? (Q.length ? "只有一个交点，但不是相切" : "直线就是渐近线：没有交点") : z ? "相切" : D > 0 ? "相交" : "相离";
+            if (show.labels) {
+              ctx.font = "600 20px 'Noto Serif SC', serif"; ctx.fillStyle = z ? col.acc2 : two ? col.acc : col.red; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+              ctx.fillText(st, W - 18, H - (innerWidth < 1024 ? 66 : 18));
+            }
+            var pf = function (a, b, cc) { return f2(a) + n + "²" + (b < 0 ? " − " : " + ") + f2(Math.abs(b)) + n + (cc < 0 ? " − " : " + ") + f2(Math.abs(cc)) + " = 0"; };
+            var o = "<b>" + ["x²/4 + y²/3 = 1", "x²/4 − y²/3 = 1", "y² = 4x"][c] + "</b>　直线 <b>" + (v ? "x = " + f2(t) : "y = " + f2(k) + "x " + (m < 0 ? "− " : "+ ") + f2(Math.abs(m))) + "</b><br>";
+            o += "消去 " + (v ? "x" : "y") + "：<b>" + pf(A, B, C) + "</b><br>A = <b>" + f2(A) + "</b>　B = <b>" + f2(B) + "</b>　C = <b>" + f2(C) + "</b><br>";
+            if (lin) o += '<span class="x-no">二次项系数 A = 0（直线平行于' + (c === 1 ? "渐近线" : "对称轴") + "）：" + st + "</span>";
+            else o += "Δ = B² − 4AC = <b>" + (z ? "0" : f2(D)) + "</b>（" + (z ? "= 0" : D > 0 ? "&gt; 0" : "&lt; 0") + '）→ <span class="' + (D > 0 || z ? "x-ok" : "x-no") + '"><b>' + st + "</b></span>";
+            if (two) {
+              var dd = Math.sqrt(D) / Math.abs(A);
+              o += "<br>" + n + "₁ + " + n + "₂ = −B/A = <b>" + f2(-B / A) + "</b>　" + n + "₁" + n + "₂ = C/A = <b>" + f2(C / A) + "</b>";
+              o += "<br>|" + n + "₁ − " + n + "₂| = √Δ/|A| = <b>" + f2(dd) + "</b><br>" + (v ? "|AB| = |y₁ − y₂| = <b>" + f2(dd) : "|AB| = √(1 + k²)·|x₁ − x₂| = <b>" + f2(Math.sqrt(1 + k * k) * dd)) + "</b>";
+              o += "<br>中点 M(<b>" + f2(M[0]) + "</b>, <b>" + f2(M[1]) + "</b>)";
+              if (c < 2) {
+                var ref = c === 0 ? "−b²/a² = <b>−0.75</b>" : "b²/a² = <b>0.75</b>";
+                if (v) o += "<br>竖直弦：k<sub>AB</sub> 不存在";
+                else if (Math.abs(M[0]) < 1e-9) o += "<br>M 在 y 轴上，k<sub>OM</sub> 不存在";
+                else { var pr = k * M[1] / M[0]; o += "<br>k<sub>AB</sub>·k<sub>OM</sub> = <b>" + f2(pr) + "</b>　" + ref + (Math.abs(pr - (c === 0 ? -0.75 : 0.75)) < 1e-6 ? ' <span class="x-ok">✓ 相等</span>' : ""); }
+              }
+            }
+            return o;
+          }
+        };
+
+        /* panel builders */
+        function slider(id, name, min, max, step, st, key, after) {
+          var d = document.createElement("div"); d.className = "x-ctl";
+          d.innerHTML = '<label class="x-lab" for="r-' + id + '"><span>' + name + '</span><span class="x-val" id="v-' + id + '"></span></label><input type="range" id="r-' + id + '" min="' + min + '" max="' + max + '" step="' + step + '">';
+          var inp = d.querySelector("input"), out = d.querySelector(".x-val");
+          inp.value = st[key]; out.textContent = (+st[key]).toFixed(2);
+          inp.addEventListener("input", function () { st[key] = +inp.value; out.textContent = (+inp.value).toFixed(2); if (after) after(); });
+          return d;
+        }
+        function syncCtl(id, v) { var i = $("r-" + id), o = $("v-" + id); if (i) { i.value = v; o.textContent = (+v).toFixed(2); } }
+        function btn(txt, fn, id) { var b = document.createElement("button"); b.className = "x-btn"; b.textContent = txt; if (id) b.id = id; b.addEventListener("click", fn); return b; }
+        function sw(txt, obj, key) {
+          var l = document.createElement("label"); l.className = "x-sw";
+          l.innerHTML = "<span>" + txt + '</span><input type="checkbox"' + (obj[key] ? " checked" : "") + ">";
+          l.querySelector("input").addEventListener("change", function (e) { obj[key] = e.target.checked; });
+          return l;
+        }
+        function row(items) { var r = document.createElement("div"); r.className = "x-row x-ctl"; items.forEach(function (i) { r.appendChild(i); }); return r; }
+        function playBtn(s) { var b = btn(s.play ? "暂停动点" : "播放动点", function () { s.play = !s.play; b.textContent = s.play ? "暂停动点" : "播放动点"; }); return b; }
+
+        function buildPanel() {
+          var c = $("ctls"), s = S[cur]; c.innerHTML = "";
+          $("readout-card").hidden = !!CH[cur].soon;
+          if (cur === 0) {
+            var degLab = function () { var o = $("v-beta"); if (o) o.textContent = (+s.b).toFixed(1) + "°"; };
+            c.appendChild(slider("beta", "倾角 β（截面与轴所成角）", 0, 90, 0.5, s, "b", function () { s.dirty = true; degLab(); }));
+            c.appendChild(slider("off", "平面沿轴偏移 d", -2.5, 2.5, 0.05, s, "d", function () { s.dirty = true; }));
+            var pickB = function (v) { return function () { s.b = v; s.dirty = true; syncCtl("beta", v); degLab(); }; };
+            c.appendChild(row([btn("圆", pickB(90)), btn("椭圆", pickB(60)), btn("抛物线", pickB(30)), btn("双曲线", pickB(15))]));
+            degLab();
+          } else if (cur === 1) {
+            var bLab = function () { var o = $("v-beta2"); if (o) o.textContent = (+s.b).toFixed(1) + "°"; };
+            var tLab = function () { var o = $("v-th"); if (o) o.textContent = Math.round(s.th) + "°"; };
+            c.appendChild(slider("beta2", "截面倾角 β（与轴所成角，椭圆范围 36°–85°）", 36, 85, 0.5, s, "b", function () { s.dirty = true; bLab(); }));
+            c.appendChild(slider("th", "动点 P 在椭圆上的位置", 0, 360, 1, s, "th", function () { if (s.play) { s.play = false; pb.textContent = "播放动点"; } tLab(); }));
+            var pb = playBtn(s); c.appendChild(row([pb]));
+            bLab(); tLab();
+          } else if (cur === 2) {
+            c.appendChild(slider("a", "长半轴 a", 1, 5, 0.05, s, "a", function () { if (s.b > s.a - 0.05) { s.b = s.a - 0.05; syncCtl("b", s.b); } }));
+            c.appendChild(slider("b", "短半轴 b", 0.5, 4.95, 0.05, s, "b", function () { if (s.b > s.a - 0.05) { s.b = s.a - 0.05; syncCtl("b", s.b); } }));
+            c.appendChild(row([btn("拉绳画椭圆", function () { s.trace = true; s.tr = 0; }), playBtn(s)]));
+          } else if (cur === 3) {
+            c.appendChild(slider("a", "实半轴 a", 0.5, 4, 0.05, s, "a"));
+            c.appendChild(slider("b", "虚半轴 b", 0.5, 4, 0.05, s, "b"));
+            c.appendChild(sw("显示渐近线", s, "asym"));
+            c.appendChild(row([btn("等轴双曲线 a = b", function () { s.b = s.a; syncCtl("b", s.b); }), btn("切换分支", function () { s.branch *= -1; }), playBtn(s)]));
+          } else if (cur === 4) {
+            c.appendChild(slider("p", "焦准距 p", 0.5, 4, 0.05, s, "p"));
+            c.appendChild(row([playBtn(s)]));
+          } else if (cur === 5) {
+            c.appendChild(slider("e", "离心率 e", 0, 2, 0.01, s, "e", function () { s.sweep = false; sb.textContent = "自动扫描 e"; }));
+            var sb = btn(s.sweep ? "停止扫描" : "自动扫描 e", function () { s.sweep = !s.sweep; sb.textContent = s.sweep ? "停止扫描" : "自动扫描 e"; });
+            var pick = function (v) { return function () { s.sweep = false; sb.textContent = "自动扫描 e"; s.e = v; syncCtl("e", v); }; };
+            c.appendChild(row([btn("圆 0", pick(0)), btn("椭圆 0.6", pick(0.6)), btn("抛物线 1", pick(1)), btn("双曲线 1.5", pick(1.5))]));
+            c.appendChild(row([sb, playBtn(s)]));
+          } else if (cur === 6) {
+            var home6 = function () { s.lx = CURV[s.k].f1[0]; s.ly = CURV[s.k].f1[1]; s.u = 0; };
+            c.appendChild(row(["椭圆", "抛物线", "双曲线"].map(function (nm, k) {
+              var b = btn(nm, function () { s.k = k; home6(); resetView(); buildPanel(); });
+              b.classList.toggle("on", k === s.k); b.setAttribute("aria-pressed", k === s.k); return b;
+            })));
+            var nLab = function () { var o = $("v-rays"); if (o) o.textContent = s.n + " 条"; };
+            c.appendChild(slider("rays", "光线数量", 8, 48, 1, s, "n", nLab)); nLab();
+            c.appendChild(row([btn("发射", function () { s.u = 0; }), btn("回到焦点", home6)]));
+            var tip = document.createElement("p"); tip.className = "x-key"; tip.textContent = "拖动金色光源可离开焦点。"; c.appendChild(tip);
+          } else if (cur === 7) {
+            var snap8 = function () {
+              var h = Math.sqrt(3) / 2;
+              if (s.c === 1 && Math.abs(Math.abs(s.k) - h) < 0.012) { s.k = s.k < 0 ? -h : h; syncCtl("k8", s.k); }
+              var k = s.k, r = s.c === 0 ? Math.sqrt(4 * k * k + 3) : 4 * k * k > 3 ? Math.sqrt(4 * k * k - 3) : 0;
+              var L = s.c === 2 ? (k ? [1 / k] : []) : r ? [r, -r] : [];
+              L.forEach(function (w) { if (Math.abs(s.m - w) < 0.04) { s.m = w; syncCtl("m8", w); } });
+            };
+            c.appendChild(row(["椭圆", "双曲线", "抛物线"].map(function (nm, i) {
+              var b = btn(nm, function () { s.c = i; snap8(); resetView(); buildPanel(); });
+              b.classList.toggle("on", i === s.c); b.setAttribute("aria-pressed", i === s.c); return b;
+            })));
+            c.appendChild(slider("k8", "斜率 k", -3, 3, 0.01, s, "k", snap8));
+            c.appendChild(slider("m8", "截距 m", -4, 4, 0.01, s, "m", snap8));
+            c.appendChild(sw("竖直线 x = t", s, "v"));
+            c.appendChild(slider("t8", "竖直线位置 t", -4, 6, 0.01, s, "t"));
+            var tip8 = document.createElement("p"); tip8.className = "x-key"; tip8.textContent = "滑块靠近相切位置时会自动吸附；相切时直线变为金色。"; c.appendChild(tip8);
+          } else {
+            c.innerHTML = '<p class="x-key">本章的交互演示<em>即将上线</em>，先阅读舞台左上角的讲解与下方要点。</p>';
+          }
+          $("keys").innerHTML = CH[cur].k.map(function (k) { return '<p class="x-key">' + k + "</p>"; }).join("");
+        }
+
+        function go(i, push) {
+          cur = (i + CH.length) % CH.length;
+          [].forEach.call($("chaps").children, function (b, k) { b.classList.toggle("on", k === cur); if (k === cur) { b.setAttribute("aria-current", "true"); b.scrollIntoView({ block: "nearest", inline: "nearest" }); } else b.removeAttribute("aria-current"); });
+          [].forEach.call($("bars").children, function (b, k) { b.classList.toggle("on", k <= cur); });
+          $("count").textContent = String(cur + 1).padStart(2, "0") + " / " + String(CH.length).padStart(2, "0");
+          $("ovt").textContent = CH[cur].t;
+          $("ovb").innerHTML = CH[cur].p.map(function (p) { return "<p>" + p + "</p>"; }).join("");
+          $("soon").hidden = !CH[cur].soon;
+          var on3 = cur === 0, onD = cur === 1;
+          cv.style.display = on3 || onD ? "none" : ""; $("c3").style.display = on3 ? "" : "none"; $("tag3").hidden = !on3;
+          $("c3b").style.display = onD ? "" : "none";
+          if (on3) { S[0].dirty = true; if (three()) T3.size(); }
+          if (onD) { S[1].dirty = true; if (dandelin()) DB.size(); }
+          if (T3) T3.ctl.enabled = on3;
+          if (DB) DB.ctl.enabled = onD;
+          buildPanel(); resetView(); lastRead = "";
+          if (push !== false) history.replaceState(null, "", "#" + (cur + 1));
+        }
+
+        /* build nav */
+        CH.forEach(function (c, i) {
+          var b = document.createElement("button"); b.className = "x-chap";
+          b.innerHTML = "<b>" + String(i + 1).padStart(2, "0") + "</b><span>" + c.t + "</span>";
+          b.addEventListener("click", function () { go(i); });
+          $("chaps").appendChild(b);
+          $("bars").appendChild(document.createElement("i"));
+        });
+        var sh = $("shows");
+        sh.appendChild(sw("标签", show, "labels")); sh.appendChild(sw("辅助线", show, "aux"));
+
+        /* top tools */
+        function toggleTheme() {
+          var n = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+          root.setAttribute("data-theme", n); try { localStorage.setItem("hark-theme", n); } catch (e) {}
+          readCol(); themeLabel();
+        }
+        function themeLabel() { $("theme").title = (root.getAttribute("data-theme") === "light" ? "宣纸 → 青黛夜" : "青黛夜 → 宣纸") + " (T)"; }
+        function full() { if (document.fullscreenElement) document.exitFullscreen(); else if (root.requestFullscreen) root.requestFullscreen().catch(function () {}); }
+        $("prev").onclick = function () { go(cur - 1); };
+        $("next").onclick = function () { go(cur + 1); };
+        $("theme").onclick = toggleTheme;
+        $("reset").onclick = resetView;
+        $("full").onclick = full;
+        $("fold").onclick = function () { var o = $("over"); o.classList.toggle("min"); this.textContent = o.classList.contains("min") ? "+" : "−"; };
+        $("handle").onclick = function () { var p = $("panel"); p.classList.toggle("open"); };
+        document.addEventListener("keydown", function (e) {
+          if (e.metaKey || e.ctrlKey || e.altKey) return;
+          var t = e.target, typing = t && (t.type === "range" || t.tagName === "INPUT" || t.tagName === "TEXTAREA");
+          if (e.key === "ArrowRight" && !typing) go(cur + 1);
+          else if (e.key === "ArrowLeft" && !typing) go(cur - 1);
+          else if (e.key === "t" || e.key === "T") toggleTheme();
+          else if (e.key === "r" || e.key === "R") resetView();
+          else if (e.key === "f" || e.key === "F") full();
+        });
+        window.addEventListener("hashchange", function () { var n = parseInt(location.hash.slice(1), 10); if (n >= 1 && n <= CH.length && n - 1 !== cur) go(n - 1, false); });
+
+        /* pointer: drag point, pan, wheel and pinch zoom */
+        var drag = { pt: false, pan: false, lx: 0, ly: 0 }, ptrs = {}, pinch = 0;
+        function zoomAt(px, py, k) {
+          var ns = Math.max(8, Math.min(400, view.s * k)); k = ns / view.s;
+          view.x = px - W / 2 - (px - W / 2 - view.x) * k; view.y = py - H / 2 - (py - H / 2 - view.y) * k; view.s = ns;
+        }
+        function movePoint(x, y) {
+          var s = S[cur];
+          if (cur === 2) s.t = Math.atan2(y / s.b, x / s.a);
+          else if (cur === 3) { s.branch = x >= 0 ? 1 : -1; s.u = Math.max(-2.4, Math.min(2.4, Math.asinh(y / s.b))); }
+          else if (cur === 4) s.t = y;
+          else if (cur === 5) { if (s.e < 1) s.th = Math.atan2(y, x); }
+          else if (cur === 6) {
+            var f = CURV[s.k].f1, snap = Math.hypot(x - f[0], y - f[1]) < 0.2;
+            s.lx = snap ? f[0] : Math.max(-14, Math.min(14, x)); s.ly = snap ? f[1] : Math.max(-12, Math.min(12, y));
+          }
+        }
+        cv.addEventListener("pointerdown", function (e) {
+          var r = cv.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+          ptrs[e.pointerId] = [mx, my]; cv.setPointerCapture(e.pointerId);
+          var ids = Object.keys(ptrs);
+          if (ids.length === 2) { var a = ptrs[ids[0]], b = ptrs[ids[1]]; pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); drag.pt = false; drag.pan = false; return; }
+          var hit = P && !CH[cur].soon && Math.hypot(X(P[0]) - mx, Y(P[1]) - my) < 22 && !(cur === 2 && S[2].trace) && !(cur === 5 && S[5].e >= 1);
+          if (hit) drag.pt = true; else { drag.pan = true; cv.style.cursor = "grabbing"; }
+          drag.lx = mx; drag.ly = my;
+        });
+        cv.addEventListener("pointermove", function (e) {
+          if (!ptrs[e.pointerId]) return;
+          var r = cv.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+          ptrs[e.pointerId] = [mx, my];
+          var ids = Object.keys(ptrs);
+          if (ids.length === 2 && pinch) {
+            var a = ptrs[ids[0]], b = ptrs[ids[1]], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+            zoomAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, d / pinch); pinch = d; return;
+          }
+          if (drag.pt) movePoint(wx(mx), wy(my));
+          else if (drag.pan) { view.x += mx - drag.lx; view.y += my - drag.ly; }
+          drag.lx = mx; drag.ly = my;
+        });
+        function up(e) { delete ptrs[e.pointerId]; if (Object.keys(ptrs).length < 2) pinch = 0; if (!Object.keys(ptrs).length) { drag.pt = false; drag.pan = false; cv.style.cursor = ""; } }
+        cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+        cv.addEventListener("wheel", function (e) { e.preventDefault(); var r = cv.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
+
+        /* loop */
+        var last = performance.now(), lastRead = "";
+        function frame(now) {
+          var dt = Math.min(0.05, (now - last) / 1000); last = now;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+          if (cur > 1) grid();
+          P = null;
+          if (R[cur]) {
+            var html = R[cur](S[cur], dt);
+            if (html !== lastRead) { $("readout").innerHTML = html; lastRead = html; }
+          }
+          requestAnimationFrame(frame);
+        }
+        new ResizeObserver(function () { var first = !W; resize(); if (T3) T3.size(); if (DB) DB.size(); if (first) resetView(); }).observe(cv.parentNode);
+        new MutationObserver(function () { readCol(); themeLabel(); if (T3) T3.colors(); if (DB) DB.colors(); }).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+        readCol(); themeLabel(); resize();
+        var h = parseInt(location.hash.slice(1), 10);
+        go(h >= 1 && h <= CH.length ? h - 1 : 2, !!h);
+        requestAnimationFrame(frame);
+      })();
+    </script>
+  </body>
+</html>
