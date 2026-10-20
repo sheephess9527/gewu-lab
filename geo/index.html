@@ -1,15 +1,9 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>立体几何 · GeoSpace｜格物实验室</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
-    />
     <link rel="stylesheet" href="hark.css" />
     <link rel="stylesheet" href="hark-hero.css" />
     <style>
@@ -186,13 +180,254 @@
         .x-stage { padding-bottom: 64px; }
       }
     </style>
+    <style>
+      /* ===== Apple 式极简改版：只改视觉 ===== */
+      :root {
+        --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+        --x-ui: var(--sans);
+        --x-serif: var(--sans);
+        --x-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --x-bg: #fbfbfd;
+        --x-stage: #fbfbfd;
+        --x-panel: #ffffff;
+        --x-card: #ffffff;
+        --x-fill: #f5f5f7;
+        --x-fill-2: #e8e8ed;
+        --x-line: rgba(0, 0, 0, 0.08);
+        --x-hair: rgba(0, 0, 0, 0.14);
+        --x-gridline: #d2d2d7;
+        --x-text: #1d1d1f;
+        --x-sub: #6e6e73;
+        --x-blue: #0071e3;
+        --x-blue-fill: #0071e3;
+        --x-blue-tint: #ebf3fc;
+        --x-blue-ink: #0066cc;
+        --x-top: rgba(251, 251, 253, 0.72);
+        --x-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 4px 24px rgba(0, 0, 0, 0.04);
+        --x-shadow-up: 0 -6px 30px rgba(0, 0, 0, 0.08);
+        --x-thumb: 0 0.5px 4px rgba(0, 0, 0, 0.12), 0 3px 8px rgba(0, 0, 0, 0.1);
+        /* 语义色：白底上清晰、略降饱和 */
+        --x-acc: #0a8588;
+        --x-red: #d93a40;
+        --x-gold: #9a6a0a;
+        --x-vio: #7b5fc9;
+        --x-tint: rgba(10, 133, 136, 0.1);
+        --x-tint-solid: #ffffff;
+        --x-r: 14px;
+        --x-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+        --x-dur: 0.3s;
+        color-scheme: light;
+      }
+      [data-theme="dark"] {
+        --x-bg: #000000;
+        --x-stage: #000000;
+        --x-panel: #1d1d1f;
+        --x-card: #1d1d1f;
+        --x-fill: #2c2c2e;
+        --x-fill-2: #3a3a3c;
+        --x-line: rgba(255, 255, 255, 0.1);
+        --x-hair: rgba(255, 255, 255, 0.16);
+        --x-gridline: #48484a;
+        --x-text: #f5f5f7;
+        --x-sub: #86868b;
+        --x-blue: #2997ff;
+        --x-blue-fill: #0071e3;
+        --x-blue-tint: #0b1f33;
+        --x-blue-ink: #2997ff;
+        --x-top: rgba(22, 22, 23, 0.72);
+        --x-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.08), 0 4px 24px rgba(0, 0, 0, 0.4);
+        --x-shadow-up: 0 -6px 30px rgba(0, 0, 0, 0.5);
+        --x-thumb: 0 0.5px 4px rgba(0, 0, 0, 0.3), 0 3px 8px rgba(0, 0, 0, 0.3);
+        --x-acc: #30b8ac;
+        --x-red: #ff6369;
+        --x-gold: #e8a93a;
+        --x-vio: #b9a2f2;
+        --x-tint: rgba(48, 184, 172, 0.16);
+        --x-tint-solid: #1d1d1f;
+        color-scheme: dark;
+      }
+      body.x-app {
+        font: 15px/1.6 var(--x-ui); background: var(--x-bg); letter-spacing: 0;
+        -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        transition: background var(--x-dur) var(--x-ease), color var(--x-dur) var(--x-ease);
+      }
+      .x-shell { grid-template-rows: 52px 1fr; grid-template-columns: 236px 1fr 352px; }
+
+      /* 顶栏 */
+      .x-top {
+        gap: 14px; padding: 0 18px; background: var(--x-top); border-bottom: 0.5px solid var(--x-hair);
+        -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+        position: relative; z-index: 6;
+      }
+      .x-brand { flex-direction: row; align-items: center; gap: 12px; }
+      .x-back {
+        position: relative; display: inline-flex; align-items: center; min-height: 44px; white-space: nowrap;
+        color: var(--x-blue); text-decoration: none; font-size: 14px; letter-spacing: -0.01em;
+      }
+      .x-back:hover { text-decoration: underline; text-underline-offset: 3px; }
+      .x-brand b { font: 600 15px/1.2 var(--x-ui); letter-spacing: -0.02em; color: var(--x-text); }
+      .x-segs { gap: 3px; width: min(320px, 100%); }
+      .x-segs i { height: 3px; border-radius: 980px; background: var(--x-fill-2); transition: background var(--x-dur) var(--x-ease); }
+      .x-segs i.on { background: var(--x-blue); }
+      .x-count { font-size: 12px; color: var(--x-sub); }
+      .x-tools { gap: 6px; }
+      .x-ib {
+        width: 36px; height: 36px; border-radius: 980px; border: 0; background: var(--x-fill); color: var(--x-text);
+        font: 500 14px var(--x-ui); transition: background var(--x-dur) var(--x-ease), transform var(--x-dur) var(--x-ease);
+      }
+      .x-ib:hover { background: var(--x-fill-2); border-color: transparent; }
+      .x-ib:active { transform: scale(0.94); }
+      .x-toc { display: none; }
+      :where(.x-app) button:focus-visible, .x-back:focus-visible, .x-app input:focus-visible, .x-app select:focus-visible {
+        outline: 2px solid var(--x-blue); outline-offset: 2px;
+      }
+
+      /* 侧栏目录 */
+      .x-side { background: var(--x-bg); border-right: 0.5px solid var(--x-line); padding: 14px 10px; }
+      .x-side button {
+        border: 0; border-radius: 12px; padding: 9px 14px; margin-bottom: 2px; color: var(--x-text);
+        transition: background var(--x-dur) var(--x-ease), color var(--x-dur) var(--x-ease);
+      }
+      .x-side button span { font: 12px var(--x-mono); color: var(--x-sub); opacity: 1; }
+      .x-side button b { font-weight: 500; font-size: 14.5px; letter-spacing: -0.01em; }
+      .x-side button:hover { background: var(--x-fill); }
+      .x-side button.on { background: var(--x-blue-tint); color: var(--x-blue-ink); border-color: transparent; }
+      [data-theme] .x-side button.on span, .x-side button.on span { color: var(--x-blue-ink); }
+
+      /* 舞台 */
+      .x-stage { background: var(--x-stage); }
+      .x-note {
+        left: 20px; top: 20px; padding: 18px 20px; background: var(--x-card); border: 0; border-radius: 22px;
+        box-shadow: var(--x-shadow); -webkit-backdrop-filter: none; backdrop-filter: none;
+      }
+      .x-note h1 { font: 600 21px/1.25 var(--x-ui); letter-spacing: -0.02em; }
+      .x-note h1 button { color: var(--x-blue); font: 14px var(--x-ui); border-radius: 980px; }
+      .x-note p { font-size: 15px; line-height: 1.6; color: var(--x-sub); }
+      .x-note p b { color: var(--x-text); font-weight: 600; }
+      .x-soon b { font: 600 28px var(--x-ui); letter-spacing: -0.02em; }
+      .x-lbls span { color: var(--x-sub); }
+
+      /* 右侧面板 */
+      .x-panel { background: var(--x-panel); border-left: 0.5px solid var(--x-line); padding: 20px; -webkit-backdrop-filter: none; backdrop-filter: none; }
+      .x-h { font: 600 13px/1.4 var(--x-ui); color: var(--x-sub); letter-spacing: -0.01em; margin: 22px 0 10px; }
+      .x-card {
+        border: 0; border-radius: 18px; padding: 14px 16px; margin-top: 10px; background: var(--x-card); box-shadow: var(--x-shadow);
+      }
+      .x-card ul { font-size: 14px; line-height: 1.6; }
+      .x-tag { font: 12.5px/1.5 var(--x-ui); color: var(--x-sub); }
+      .x-vef b { font: 600 28px/1.2 var(--x-ui); letter-spacing: -0.02em; color: var(--x-text); }
+      .x-euler { font: 15px var(--x-mono); }
+      .x-stem { font-size: 15px; }
+      .x-exp { font-size: 14px; }
+
+      /* 胶囊按钮 */
+      .x-grid { gap: 8px; }
+      .x-grid button, .x-btn {
+        border: 0; border-radius: 980px; background: var(--x-fill); color: var(--x-text); font: 500 14px var(--x-ui);
+        padding: 0 10px; transition: background var(--x-dur) var(--x-ease), color var(--x-dur) var(--x-ease), transform var(--x-dur) var(--x-ease);
+      }
+      .x-grid button:hover:not(.on), .x-btn:hover { background: var(--x-fill-2); border-color: transparent; }
+      .x-grid button:active, .x-btn:active { transform: scale(0.97); }
+      .x-grid button.on { background: var(--x-blue-fill); color: #ffffff; font-weight: 600; }
+      #play, #play2, #playOb, #play5, #sub9, .x-card + p .x-btn { background: var(--x-blue-fill); color: #ffffff; }
+      #play:hover, #play2:hover, #playOb:hover, #play5:hover, #sub9:hover, .x-card + p .x-btn:hover { background: #0077ed; }
+      .x-btn[aria-pressed="true"] { background: var(--x-blue-tint); color: var(--x-blue-ink); }
+      .x-g3 .x-btn[aria-pressed="true"] { border: 0; background: rgba(217, 58, 64, 0.1); color: var(--x-red); }
+      .x-q9n button.ok:not(.on) { background: var(--x-tint); color: var(--x-acc); }
+      .x-q9n button.no:not(.on) { background: rgba(217, 58, 64, 0.1); color: var(--x-red); }
+      .x-opt { border-radius: 16px; padding: 11px 16px; font: 14px/1.5 var(--x-ui); }
+      .x-opt[aria-pressed="true"] { background: var(--x-blue-tint); color: var(--x-blue-ink); box-shadow: inset 0 0 0 1px var(--x-blue); }
+      .x-opt.ok { background: var(--x-tint); color: var(--x-acc); box-shadow: inset 0 0 0 1px var(--x-acc); }
+      .x-opt.no { background: rgba(217, 58, 64, 0.08); color: var(--x-red); box-shadow: inset 0 0 0 1px var(--x-red); }
+
+      /* 表单：滑块、开关、下拉、输入 */
+      .x-row { min-height: 44px; }
+      .x-row output { color: var(--x-gold); font-weight: 600; }
+      .x-row input[type="range"] {
+        -webkit-appearance: none; appearance: none; height: 44px; margin: 0; background: transparent; cursor: pointer;
+      }
+      .x-row input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 980px; background: var(--x-fill-2); }
+      .x-row input[type="range"]::-moz-range-track { height: 4px; border-radius: 980px; background: var(--x-fill-2); }
+      .x-row input[type="range"]::-moz-range-progress { height: 4px; border-radius: 980px; background: var(--x-blue); }
+      .x-row input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none; width: 26px; height: 26px; margin-top: -11px; border-radius: 50%; background: #ffffff; border: 0; box-shadow: var(--x-thumb);
+      }
+      .x-row input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #ffffff; border: 0; box-shadow: var(--x-thumb); }
+      .x-row input[type="checkbox"] {
+        -webkit-appearance: none; appearance: none; position: relative; flex: none; width: 46px; height: 28px; margin: 0;
+        border-radius: 980px; background: var(--x-fill-2); cursor: pointer; transition: background var(--x-dur) var(--x-ease);
+      }
+      .x-row input[type="checkbox"]::before {
+        content: ""; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%;
+        background: #ffffff; box-shadow: var(--x-thumb); transition: transform var(--x-dur) var(--x-ease);
+      }
+      .x-row input[type="checkbox"]:checked { background: var(--x-blue-fill); }
+      .x-row input[type="checkbox"]:checked::before { transform: translateX(18px); }
+      .x-row select {
+        -webkit-appearance: none; appearance: none; min-height: 40px; border: 0; border-radius: 980px; padding: 0 32px 0 14px;
+        background: var(--x-fill) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2386868b' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 14px center;
+        color: var(--x-text); font: 14px var(--x-ui); cursor: pointer;
+      }
+      .x-row select option { background: var(--x-card); color: var(--x-text); }
+      .x-in { border: 0; border-radius: 12px; background: var(--x-fill); padding: 0 14px; transition: box-shadow var(--x-dur) var(--x-ease); }
+      .x-in:focus { box-shadow: 0 0 0 3px var(--x-blue-tint), inset 0 0 0 1px var(--x-blue); }
+
+      /* 浮层与小画布 */
+      .x-g3 {
+        left: 20px; bottom: 20px; padding: 14px 16px; background: var(--x-card); border: 0; border-radius: 22px;
+        box-shadow: var(--x-shadow); -webkit-backdrop-filter: none; backdrop-filter: none;
+      }
+      .x-g3grid button { border: 1px solid var(--x-gridline); border-radius: 10px; background-color: var(--x-fill); transition: border-color var(--x-dur) var(--x-ease); }
+      .x-g3grid button:hover { border-color: var(--x-blue); }
+      .x-views canvas { border: 0; border-radius: 14px; background: var(--x-card); box-shadow: var(--x-shadow); }
+      .x-views figcaption { font: 12px var(--x-ui); margin-top: 6px; }
+      .x-tb8 { font-size: 13.5px; }
+      .x-tb8 th, .x-tb8 td { padding: 8px 4px; border-bottom: 0.5px solid var(--x-hair); }
+
+      @media (max-width: 1023px) { .x-shell { grid-template-columns: 200px 1fr 312px; } }
+      @media (max-width: 767px) {
+        .x-shell { grid-template-columns: 1fr; grid-template-rows: 56px auto 1fr; }
+        .x-top { padding: 0 10px 0 14px; gap: 8px; }
+        .x-prog { display: none; }
+        .x-brand { flex: 1; flex-direction: column; align-items: flex-start; gap: 0; line-height: 1.25; }
+        .x-back { min-height: 44px; min-width: 44px; font-size: 12px; line-height: 16px; padding: 14px 0; margin: -14px 0; box-sizing: border-box; position: relative; z-index: 1; }
+        .x-brand b { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .x-ib { width: 44px; height: 44px; }
+        .x-toc { display: inline-block; font-size: 17px; line-height: 1; }
+        .x-toc[aria-expanded="true"] { background: var(--x-blue-tint); color: var(--x-blue-ink); }
+        .x-side { padding: 6px 10px; gap: 6px; border-right: 0; border-bottom: 0.5px solid var(--x-line); scrollbar-width: none; }
+        .x-side::-webkit-scrollbar { display: none; }
+        .x-side.x-closed { display: none; }
+        .x-side button {
+          display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: 0; padding: 0 16px;
+          border: 0; border-radius: 980px; background: var(--x-fill);
+        }
+        .x-side button.on { background: var(--x-blue-tint); }
+        .x-side button span { display: inline; }
+        .x-panel {
+          border: 0; border-radius: 24px 24px 0 0; box-shadow: var(--x-shadow-up); padding-left: 16px; padding-right: 16px;
+          transition: transform var(--x-dur) var(--x-ease);
+        }
+        .x-handle { background: var(--x-panel); color: var(--x-sub); font: 500 14px var(--x-ui); border-radius: 24px 24px 0 0; }
+        .x-handle::before { width: 36px; height: 5px; border-radius: 980px; background: var(--x-fill-2); opacity: 1; margin-bottom: 8px; }
+        .x-note { left: 12px; top: 12px; padding: 12px 14px; border-radius: 18px; max-width: calc(100% - 24px); }
+        .x-note h1 { font-size: 17px; }
+        .x-note p { font-size: 14.5px; }
+        .x-g3 { left: 12px; bottom: 76px; padding: 10px 12px; border-radius: 18px; }
+        .x-grid button, .x-btn { font-size: 14.5px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .x-app *, .x-app *::before, .x-app *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; scroll-behavior: auto !important; }
+      }
+    </style>
   </head>
   <body class="x-app">
     <div class="page x-shell" id="top">
       <header class="x-top">
-        <div class="x-brand"><small>格物实验室</small><b>立体几何 · GeoSpace</b></div>
+        <div class="x-brand"><a class="x-back" href="../">‹ 格物实验室</a><b>立体几何 · GeoSpace</b></div>
         <div class="x-prog"><div class="x-segs" id="segs"></div><span class="x-count" id="count">01 / 09</span></div>
         <div class="x-tools">
+          <button class="x-ib x-toc" id="tocBtn" data-k="toc" aria-controls="side" aria-expanded="true" aria-label="收起章节目录" title="章节目录">☰</button>
           <button class="x-ib" data-k="prev" aria-label="上一章" title="上一章 (←)">←</button>
           <button class="x-ib" data-k="next" aria-label="下一章" title="下一章 (→)">→</button>
           <button class="x-ib" id="theme-btn" data-k="t" title="切换主题：青黛夜 / 宣纸 (T)">T</button>
@@ -458,8 +693,8 @@
         const light = root.getAttribute("data-theme") === "light";
         mats.face.color.copy(acc);
         mats.face.opacity = light ? 0.12 : 0.16;
-        mats.solid.color.set(light ? "#1d2433" : "#e6ecf5");
-        mats.dash.color.set(light ? "#5d6878" : "#8a97ad");
+        mats.solid.color.set(light ? "#1d1d1f" : "#f5f5f7");
+        mats.dash.color.set(light ? "#6e6e73" : "#86868b");
         mats.gen.color.copy(gold);
         mats.genLine.color.copy(gold);
         mats.axis.color.copy(gold);
@@ -753,7 +988,7 @@
       function update3() { grid3(); build3(); draw3(); const t = $("cnt3"); if (t) t.textContent = st3.h.flat().reduce((a, b) => a + b, 0); }
       function init3() {
         group3 = new THREE.Group();
-        const gh = new THREE.GridHelper(4 * S3, 4, 0x8a97ad, 0x8a97ad);
+        const gh = new THREE.GridHelper(4 * S3, 4, 0x86868b, 0x86868b);
         gh.material.transparent = true;
         gh.material.opacity = 0.4;
         gh.position.y = -1.4;
@@ -784,7 +1019,7 @@
         g.setTransform(dpr, 0, 0, dpr, 0, 0);
         const p = 8, u = (w - 2 * p) / 4;
         g.lineWidth = 1;
-        g.strokeStyle = css("--x-line");
+        g.strokeStyle = css("--x-gridline");
         for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) g.strokeRect(p + i * u, p + j * u, u, u);
         for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
           if (!filled(i, j)) continue;
@@ -1739,6 +1974,17 @@
       if (window.THREE && THREE.OrbitControls) { initThree(); init4(); init5(); init6(); init7(); init8(); init9(); init3(); }
       else $("noteBody").insertAdjacentHTML("beforeend", "<p>三维引擎加载失败，请检查网络后刷新。</p>");
       go(st.ch, true);
+    </script>
+    <script>
+      /* 手机端：章节目录收起 / 展开 */
+      (function () {
+        var b = document.getElementById("tocBtn"), s = document.getElementById("side");
+        b.addEventListener("click", function () {
+          var closed = s.classList.toggle("x-closed");
+          b.setAttribute("aria-expanded", String(!closed));
+          b.setAttribute("aria-label", closed ? "展开章节目录" : "收起章节目录");
+        });
+      })();
     </script>
   </body>
 </html>
