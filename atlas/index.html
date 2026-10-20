@@ -1,0 +1,2142 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>格物实验室 · 疆域变迁</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&family=Noto+Serif+SC:wght@500;600&display=swap"
+    />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-charts.css" />
+    <style>
+      /* 格物实验室外壳：青黛夜 / 宣纸 */
+      :root {
+        --x-bg-1: #0e1420; --x-bg-2: #121a2a; --x-panel: rgba(21, 30, 48, .82);
+        --x-line: rgba(255, 255, 255, .08); --x-line-2: rgba(255, 255, 255, .16);
+        --x-ink: #e6ecf5; --x-ink-2: #8a97ad;
+        --x-acc: #2ec4b6; --x-gold: #f2b544; --x-red: #ef6461;
+        --x-sea: #0b1220; --x-land: #1b2538; --x-r: 10px;
+        --x-card: #172133; --x-sel: #133039; --x-hover: #15252f;
+        --x-acc-ink: #2ec4b6; --x-gold-ink: #f2b544;
+        --x-serif: "Noto Serif SC", "Songti SC", serif;
+        --x-mono: "Geist Mono", ui-monospace, monospace;
+        --x-top: 56px; --x-side: 220px; --x-right: 340px; --x-bottom: 92px;
+      }
+      :root[data-theme="light"] {
+        --x-bg-1: #f6f3ec; --x-bg-2: #efeade; --x-panel: rgba(255, 255, 255, .88);
+        --x-line: rgba(29, 36, 51, .12); --x-line-2: rgba(29, 36, 51, .22);
+        --x-ink: #1d2433; --x-ink-2: #6b7384;
+        --x-acc: #139a8e; --x-gold: #c98a12; --x-red: #cf4b48;
+        --x-sea: #e3e8ea; --x-land: #f0ece0;
+        --x-card: #fbfaf7; --x-sel: #dff0ed; --x-hover: #edf5f3;
+        --x-acc-ink: #0b6a62; --x-gold-ink: #8a5a00;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0; overflow: hidden; color: var(--x-ink);
+        background: linear-gradient(160deg, var(--x-bg-1), var(--x-bg-2));
+        font: 14px/1.6 var(--sans), system-ui, sans-serif;
+      }
+      button { font: inherit; color: inherit; cursor: pointer; }
+      .x-app { display: grid; height: 100vh; height: 100dvh;
+        grid-template-columns: var(--x-side) minmax(0, 1fr) var(--x-right);
+        grid-template-rows: var(--x-top) minmax(0, 1fr) var(--x-bottom);
+        grid-template-areas: "top top top" "chs stage panel" "chs bar panel"; }
+      /* 顶栏 */
+      .x-top { grid-area: top; display: flex; align-items: center; gap: 14px;
+        padding: 0 14px; border-bottom: 1px solid var(--x-line); background: var(--x-panel);
+        backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+      .x-brand { display: flex; flex-direction: column; line-height: 1.2; min-width: 136px; }
+      .x-brand b { font: 600 15px/1.2 var(--x-serif); letter-spacing: .02em; }
+      .x-brand span { font-size: 12px; color: var(--x-ink-2); }
+      .x-prog { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; }
+      .x-prog__segs { display: flex; gap: 3px; flex: 1; min-width: 0; }
+      .x-prog__segs i { flex: 1; height: 4px; border-radius: 2px; background: var(--x-line-2); }
+      .x-prog__segs i.on { background: var(--x-acc); }
+      .x-count { font: 12px var(--x-mono); color: var(--x-ink-2); white-space: nowrap; }
+      .x-tools { display: flex; gap: 6px; }
+      .x-btn { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center;
+        justify-content: center; gap: 4px; padding: 0 10px; border: 1px solid var(--x-line-2);
+        border-radius: var(--x-r); background: transparent; transition: 200ms var(--ease-out);
+        font-size: 13px; }
+      .x-btn:hover { border-color: var(--x-acc); color: var(--x-acc); }
+      .x-btn[disabled] { opacity: .35; cursor: not-allowed; }
+      .x-btn.on { background: var(--x-acc); border-color: var(--x-acc); color: #04201d; }
+      /* 章节栏 */
+      .x-chs { grid-area: chs; overflow: auto; border-right: 1px solid var(--x-line);
+        background: var(--x-panel); padding: 8px 0; }
+      .x-ch { display: block; width: 100%; text-align: left; background: transparent;
+        border: 0; border-left: 3px solid transparent; padding: 8px 12px; min-height: 48px;
+        transition: 200ms var(--ease-out); }
+      .x-ch b { display: block; font: 12px var(--x-mono); color: var(--x-ink-2); }
+      .x-ch span { font: 500 14px/1.35 var(--x-serif); }
+      .x-ch:hover { background: var(--x-hover); }
+      .x-ch.on { border-left-color: var(--x-acc); background: var(--x-sel); }
+      .x-ch.on b, .x-ch.on span { color: var(--x-acc-ink); }
+      .x-ch.soon span { color: var(--x-ink-2); }
+      /* 舞台 */
+      .x-stage { grid-area: stage; position: relative; overflow: hidden; }
+      #map { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+      .x-over { position: absolute; top: 12px; left: 12px; max-width: min(380px, 62%);
+        background: var(--x-panel); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+        border: 1px solid var(--x-line); border-radius: var(--x-r); padding: 12px 14px; }
+      .x-over h2 { margin: 0 0 4px; font: 600 17px/1.3 var(--x-serif); }
+      .x-over p { margin: 6px 0 0; font-size: 13px; color: var(--x-ink-2); }
+      .x-over.min p, .x-over.min .x-over__src { display: none; }
+      .x-over__src { font-size: 12px; color: var(--x-ink-2); margin-top: 8px; }
+      .x-fold { position: absolute; top: 8px; right: 8px; border: 1px solid var(--x-line-2);
+        background: transparent; border-radius: 8px; width: 44px; height: 44px; min-width: 0;
+        min-height: 0; line-height: 1; font-size: 14px; top: 4px; right: 4px; }
+      .x-over { padding-right: 52px; }
+      .x-note { position: absolute; bottom: 12px; right: 12px; font: 12px var(--x-mono);
+        color: var(--x-ink-2); background: var(--x-panel); padding: 4px 8px; border-radius: 8px;
+        border: 1px solid var(--x-line); }
+      /* 底部时间轴 */
+      .x-bar { grid-area: bar; border-top: 1px solid var(--x-line); background: var(--x-panel);
+        padding: 8px 16px; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+      .x-bar__row { display: flex; align-items: center; gap: 10px; }
+      .x-ticks { display: flex; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: thin; }
+      .x-tick { flex: 1 0 44px; min-width: 44px; min-height: 44px; background: transparent; border: 0;
+        padding: 4px 0 0; position: relative;
+        display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .x-tick::before { content: ""; position: absolute; left: 0; right: 0; top: 11px;
+        height: 1px; background: var(--x-line-2); }
+      .x-tick i { width: 9px; height: 9px; border-radius: 50%; background: var(--x-bg-2);
+        border: 1px solid var(--x-line-2); position: relative; z-index: 1; }
+      .x-tick em { font: 12px var(--x-mono); color: var(--x-ink-2); font-style: normal; white-space: nowrap; }
+      .x-tick.live i { background: var(--x-acc); border-color: var(--x-acc);
+        box-shadow: 0 0 0 4px rgba(46, 196, 182, .2); }
+      .x-tick.live em { color: var(--x-acc-ink); font-weight: 600; }
+      .x-tick:not([disabled]) i { border-color: var(--x-acc); }
+      .x-tick[disabled] { cursor: not-allowed; }
+      .x-bar__meta { font: 12px var(--x-mono); color: var(--x-ink-2); text-align: center; }
+      /* 右侧面板 */
+      .x-panel { grid-area: panel; overflow: auto; border-left: 1px solid var(--x-line);
+        background: var(--x-panel); padding: 14px; }
+      .x-card { border: 1px solid var(--x-line); border-radius: var(--x-r); padding: 12px;
+        margin-bottom: 12px; background: var(--x-card); color: var(--x-ink); }
+      .x-card > h3 { margin: 0 0 8px; font: 600 13px/1.3 var(--x-serif); letter-spacing: .04em; color: var(--x-ink); }
+      .x-card--text { font-size: 13px; color: var(--x-ink-2); }
+      .x-card--text summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: var(--x-ink); }
+      .x-tag { display: inline-block; font: 12px var(--x-mono); color: var(--x-acc-ink);
+        border: 1px solid var(--x-acc); border-radius: 999px; padding: 1px 8px; margin-bottom: 8px; }
+      .x-figs { display: flex; gap: 12px; margin: 0 0 10px; }
+      .x-fig b { display: block; font: 600 22px/1.1 var(--x-mono); }
+      .x-fig span { font-size: 12px; color: var(--x-ink-2); }
+      .x-pol { display: flex; flex-direction: column; gap: 6px; }
+      .x-pol button { display: flex; align-items: center; gap: 8px; min-height: 44px;
+        padding: 6px 10px; border: 1px solid var(--x-line); border-radius: var(--x-r);
+        background: transparent; text-align: left; transition: 200ms var(--ease-out); }
+      .x-pol button:hover { border-color: var(--x-line-2); }
+      .x-pol button.on { border-color: var(--x-acc); background: var(--x-sel); }
+      .x-pol i { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+      .x-pol small { display: block; color: var(--x-ink-2); font-size: 12px; }
+      .x-switches { display: flex; flex-wrap: wrap; gap: 6px; }
+      .x-sw { min-height: 44px; min-width: 56px; padding: 0 12px; border: 1px solid var(--x-line-2);
+        border-radius: 999px; background: transparent; font-size: 13px; }
+      .x-sw.on { background: var(--x-acc); border-color: var(--x-acc); color: #04201d; }
+      .x-q { font-size: 13px; }
+      .x-q p { margin: 0 0 8px; }
+      .x-q__opts { display: flex; flex-direction: column; gap: 6px; }
+      .x-q__opts button { min-height: 44px; text-align: left; padding: 8px 10px;
+        border: 1px solid var(--x-line); border-radius: var(--x-r); background: transparent; }
+      .x-q__opts button.right { border-color: var(--x-acc); color: var(--x-acc-ink); }
+      .x-q__opts button.wrong { border-color: var(--x-red); color: var(--x-red); }
+      .x-ans { margin-top: 10px; font-size: 12px; color: var(--x-ink-2);
+        border-left: 2px solid var(--x-gold); padding-left: 10px; display: none; }
+      .x-ans.show { display: block; }
+      /* 第 17 章：随堂检测 */
+      .x-qz__opts { display: flex; flex-direction: column; gap: 6px; }
+      .x-qz__opts button { min-height: 44px; text-align: left; padding: 8px 10px; font-size: 13px;
+        border: 1px solid var(--x-line); border-radius: var(--x-r); background: transparent; color: var(--x-ink); }
+      .x-qz__opts button:not([disabled]):hover { border-color: var(--x-line-2); background: var(--x-hover); }
+      .x-qz__opts button.right { border-color: var(--x-acc); color: var(--x-acc-ink); background: var(--x-sel); }
+      .x-qz__opts button.wrong { border-color: var(--x-red); color: var(--x-red); }
+      .x-qz__ctx { font-size: 12px; color: var(--x-ink-2); margin: 0 0 6px; }
+      .x-qz__go { margin-top: 10px; width: 100%; }
+      .x-qz__list { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+      .x-qz__list li { display: flex; gap: 8px; padding: 6px 0; border-top: 1px solid var(--x-line); }
+      .x-qz__list li:first-child { border-top: 0; }
+      .x-qz__list b { flex: none; width: 18px; color: var(--x-acc-ink); }
+      .x-qz__list li.no b { color: var(--x-red); }
+      .x-gk { border-left: 2px solid var(--x-gold); padding-left: 10px; font-size: 12px;
+        color: var(--x-ink-2); margin-top: 10px; }
+      .x-soon { font: 12px var(--x-mono); color: var(--x-gold-ink); border: 1px dashed var(--x-gold);
+        border-radius: 999px; padding: 2px 8px; display: inline-block; }
+      .x-chart { margin: 0; }
+      .x-chart .chart__canvas { height: 150px; }
+      /* 第 4 章：战役弹窗 */
+      .x-pop { position: absolute; z-index: 5; width: 240px; background: var(--x-panel);
+        backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--x-line-2);
+        border-radius: var(--x-r); padding: 10px 44px 10px 12px; font-size: 13px; color: var(--x-ink-2);
+        transform: translate(-50%, calc(-100% - 16px)); }
+      .x-pop[hidden] { display: none; }
+      .x-pop h3 { margin: 0 0 4px; font: 600 14px/1.3 var(--x-serif); color: var(--x-ink); }
+      .x-pop p { margin: 0; }
+      .x-pop .x-fold { width: 36px; height: 36px; }
+      /* 第 5 章：西晋时间线 */
+      .x-tl { list-style: none; margin: 0 0 10px; padding: 0; font-size: 13px; }
+      .x-tl li { display: flex; gap: 10px; padding: 6px 0 6px 14px; border-left: 2px solid var(--x-line-2); position: relative; }
+      .x-tl li::before { content: ""; position: absolute; left: -5px; top: 11px; width: 8px; height: 8px; border-radius: 50%; background: var(--x-gold); }
+      .x-tl b { font: 12px var(--x-mono); color: var(--x-gold-ink); min-width: 64px; padding-top: 1px; }
+      /* 第 7 章：孝文帝改革小卡 */
+      .x-qwc ul { margin: 4px 0 0; padding-left: 18px; color: var(--x-ink); }
+      .x-qwc li { opacity: 0.15; transition: opacity 200ms; }
+      .x-qwc li.on { opacity: 1; }
+      .x-drawer__btn { display: none; }
+      @media (max-width: 1023px) {
+        :root { --x-right: 300px; --x-side: 180px; }
+      }
+      @media (max-width: 767px) {
+        .x-app { grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: var(--x-top) 44px minmax(0, 1fr) auto;
+          grid-template-areas: "top" "chs" "stage" "bar"; }
+        .x-chs { display: flex; overflow-x: auto; border-right: 0;
+          border-bottom: 1px solid var(--x-line); padding: 0; }
+        .x-ch { width: auto; white-space: nowrap; border-left: 0; border-bottom: 2px solid transparent;
+          min-height: 44px; display: flex; align-items: center; gap: 6px; padding: 0 12px; }
+        .x-ch.on { border-bottom-color: var(--x-acc); }
+        .x-ch b { display: inline; }
+        .x-brand { min-width: 0; }
+        .x-tools .x-btn span { display: none; }
+        .x-panel { grid-area: auto; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+          max-height: 76vh; border-left: 0; border-top: 1px solid var(--x-line-2);
+          border-radius: 16px 16px 0 0; transform: translateY(calc(100% - 50px));
+          transition: transform 200ms var(--ease-out); padding-top: 50px;
+          backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+        .x-panel.open { transform: translateY(0); }
+        .x-drawer__btn { display: block; position: absolute; top: 0; left: 0; right: 0;
+          height: 48px; border: 0; background: transparent; font-size: 13px; }
+        .x-over { max-width: 86%; font-size: 12px; }
+        .x-bar { padding-bottom: 58px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="x-app" id="top">
+      <header class="x-top">
+        <div class="x-brand"><b>格物实验室 · 疆域变迁</b><span>HistoryAtlas · 历史</span></div>
+        <div class="x-prog">
+          <div class="x-prog__segs" id="segs"></div>
+          <span class="x-count" id="count">01 / 17</span>
+        </div>
+        <div class="x-tools">
+          <button class="x-btn" id="prev" aria-label="上一章">←</button>
+          <button class="x-btn" id="next" aria-label="下一章">→</button>
+          <button class="x-btn" id="theme" aria-label="切换主题（T）">T</button>
+          <button class="x-btn" id="reset" aria-label="重置视角（R）">R</button>
+          <button class="x-btn" id="full" aria-label="全屏（F）">F</button>
+        </div>
+      </header>
+
+      <nav class="x-chs" id="chs" aria-label="章节"></nav>
+
+      <section class="x-stage">
+        <canvas id="map" role="img" aria-label="东亚风格化地形底图与历代疆域示意图"></canvas>
+        <div class="x-over" id="over">
+          <button class="x-fold" id="fold" aria-label="折叠讲解">−</button>
+          <h2 id="over-title">秦朝疆域</h2>
+          <p id="over-text"></p>
+          <p class="x-over__src" id="over-book"></p>
+        </div>
+        <p class="x-note">疆域均为示意图 · 拖动平移，滚轮/双指缩放</p>
+      </section>
+
+      <div class="x-bar">
+        <div class="x-bar__row"><div class="x-ticks" id="ticks"></div></div>
+        <p class="x-bar__meta" id="bar-meta">时间轴：16 个关键年份，本版本「前 221 年 秦」「前 60 年 西汉」「91 年 东汉」可选</p>
+      </div>
+
+      <aside class="x-panel" id="panel" aria-label="本章控制面板">
+        <button class="x-drawer__btn" id="drawer">▲ 本章面板</button>
+        <div id="panel-body"></div>
+      </aside>
+    </div>
+
+    <script src="hark.js"></script>
+    <script src="chart.js"></script>
+    <script src="datalabels.js"></script>
+    <script src="hark-charts.js"></script>
+    <script>
+      /* ---------- 章节数据：全部 16 个时期 + 随堂检测，讲解取自 atlas.txt ---------- */
+      var CH = [
+        { y: -221, tick: "前221", name: "秦朝疆域",
+          text: "公元前 221 年，秦灭六国，建立中国历史上第一个统一的中央集权国家。秦朝北击匈奴、修筑长城，南征百越、设置桂林、南海、象三郡。疆域东至大海，西到陇西，北抵长城一线，南达南海。",
+          book: "教材：统编版《中外历史纲要（上）》第 1 单元 第 3 课 秦统一多民族封建国家的建立",
+          area: 340,
+          q: { q: "秦朝修筑长城，主要是为了防御哪个民族的南下？", opts: ["匈奴", "鲜卑", "百越", "月氏"], right: 0,
+               ans: "秦始皇派蒙恬北击匈奴，把战国时秦、赵、燕的长城连接起来，西起临洮，东到辽东。" },
+          gk: "高考链接：秦朝疆域四至、郡县制与长城常与“统一多民族国家的奠基”结合考查；易错：秦长城是连接战国秦、赵、燕长城而成，不是全新修建。",
+          pts: ["前 221 年秦灭六国，建立第一个统一的中央集权国家。", "北：蒙恬北击匈奴，连接秦、赵、燕长城，西起临洮，东到辽东。", "南：南征百越，设桂林、南海、象三郡。", "四至：东至大海，西到陇西，北抵长城一线，南达南海。"],
+          ready: true },
+        { y: -60, tick: "前60", name: "西汉疆域",
+          text: "汉武帝派卫青、霍去病北击匈奴，夺取河西走廊，设置河西四郡；又派张骞出使西域，开辟丝绸之路。公元前 60 年，西汉设立西域都护府，今新疆地区从此正式归属中央政权管辖。",
+          book: "教材：统编版《中外历史纲要（上）》第 1 单元 第 4 课 西汉与东汉——统一多民族封建国家的巩固",
+          area: 600,
+          q: { q: "公元前 60 年，西汉设立什么机构管辖西域？", opts: ["西域都护府", "安西都护府", "伊犁将军", "宣政院"], right: 0, sel: "xiyu",
+               ans: "西域都护府设在乌垒城（今新疆轮台东），这是今新疆地区正式归属中央政权管辖的开始。" },
+          gk: "高考链接：西域都护府设立标志新疆正式纳入中央管辖，常与张骞通西域、丝绸之路结合考查；易错：张骞通西域（前 138 年起）与设西域都护府（前 60 年，宣帝）不是同一时间。",
+          pts: ["北：汉武帝派卫青、霍去病北击匈奴，夺取河西走廊，设武威、张掖、酒泉、敦煌四郡。", "西：张骞出使西域，开辟丝绸之路；前 60 年设西域都护府，治乌垒城（今新疆轮台东）。", "东北设朝鲜半岛北部四郡，南至今越南中部；都城长安。", "疆域约 600 万平方公里（约数，示意），比秦朝大为拓展。"],
+          ready: true },
+        { y: 91, tick: "91", name: "东汉疆域",
+          text: "东汉初年，西域一度与中原隔绝。班超经营西域三十余年，使西域重新归附，91 年东汉恢复设置西域都护。这时北匈奴已经西迁，鲜卑逐渐占据了蒙古高原。",
+          book: "教材：统编版《中外历史纲要（上）》第 1 单元 第 4 课 西汉与东汉——统一多民族封建国家的巩固",
+          area: 650,
+          q: { q: "东汉时，谁经营西域三十余年，使西域重新归附？", opts: ["班超", "张骞", "甘英", "窦固"], right: 0, sel: "xiyu",
+               ans: "班超“投笔从戎”，73 年出使西域，此后在西域活动三十多年，还派甘英出使大秦。" },
+          gk: "高考链接：东汉班超经营西域、甘英出使大秦，体现中外交流；北匈奴西迁、鲜卑兴起为后来民族交融埋下伏笔；易错：西域都护府初设于西汉宣帝（前 60 年），东汉是恢复设置。",
+          pts: ["东汉初年，西域一度与中原隔绝。", "班超经营西域三十余年，使西域重新归附；91 年东汉恢复设置西域都护。", "班超还派甘英出使大秦，到达条支（西海）。", "北匈奴西迁，鲜卑逐渐占据蒙古高原；南匈奴内附；都城洛阳。", "疆域约 650 万平方公里（约数，示意），与西汉相近，北界略向南收。"],
+          ready: true },
+        { y: 262, tick: "262", name: "三国鼎立",
+          text: "东汉末年群雄割据，赤壁之战后逐渐形成三国鼎立：魏据北方，蜀占西南，吴有江东。魏在西域设置长史；蜀国诸葛亮经营南中，开发了西南地区；吴的船队曾到达夷洲（今台湾）。",
+          book: "教材：统编版《中外历史纲要（上）》第 2 单元 第 5 课 三国两晋南北朝的政权更迭与民族交融",
+          area: 500, split: [["wei", "xiyu"], ["shu"], ["wu"]],
+          q: { q: "三国鼎立时，蜀国的都城在哪里？", opts: ["成都", "洛阳", "建业", "长安"], right: 0, sel: "shu",
+               ans: "220 年曹丕称帝，定都洛阳；221 年刘备在成都称帝；229 年孙权称帝，后定都建业。" },
+          gk: "高考链接：三国鼎立促进了区域开发（江南、西南），吴与夷洲往来是大陆与台湾联系的早期记载；易错：魏都洛阳、蜀都成都、吴后定都建业（今南京），赤壁之战（208）在三国建立（220–229）之前。",
+          pts: ["东汉末年群雄割据：200 年官渡之战，208 年赤壁之战后逐渐形成三国鼎立。", "魏据北方，都洛阳；在西域设置长史。", "蜀占西南，都成都；诸葛亮经营南中，开发了西南地区。", "吴有江东及岭南，后定都建业；船队曾到达夷洲（今台湾）。", "三国合计约 500 万平方公里（约数，示意）。"],
+          ready: true },
+        { y: 280, tick: "280", name: "西晋统一",
+          text: "266 年司马炎建立西晋，280 年灭吴，结束了三国分裂的局面。但这次统一只维持了三十多年：八王之乱后北方各族纷纷起兵，316 年西晋灭亡。",
+          book: "教材：统编版《中外历史纲要（上）》第 2 单元 第 5 课 三国两晋南北朝的政权更迭与民族交融",
+          area: 540,
+          q: { q: "西晋在哪一年灭吴，结束了三国分裂的局面？", opts: ["280 年", "266 年", "316 年", "265 年"], right: 0, sel: "jin",
+               ans: "265 年司马炎代魏称帝（史书多记为 266 年建国），280 年灭吴；316 年西晋灭亡。" },
+          tl: [["266", "司马炎代魏，建立西晋"], ["280", "灭吴，结束三国分裂"], ["291–306", "八王之乱"], ["316", "西晋灭亡"]],
+          gk: "高考链接：西晋短暂统一后因八王之乱与内迁各族起兵而灭亡，引出东晋十六国与民族交融；易错：西晋灭吴是 280 年，西晋灭亡是 316 年。",
+          pts: ["266 年司马炎建立西晋，都洛阳；280 年灭吴，结束了三国分裂的局面。", "疆域大体为魏、蜀、吴合并；在西域沿置西域长史。", "周边：鲜卑（拓跋、慕容、宇文、段部）、高句丽；匈奴、羯、氐、羌等族已大量内迁。", "统一只维持三十多年：八王之乱后北方各族纷纷起兵，316 年西晋灭亡。", "疆域约 540 万平方公里（约数，示意）。"],
+          ready: true },
+        { y: 376, tick: "376", name: "东晋与十六国",
+          text: "西晋灭亡后，司马睿在建康建立东晋；北方先后出现多个政权，史称“十六国”。376 年前秦统一北方，383 年苻坚率大军南下攻晋，在淝水之战中大败，北方再度陷入分裂。",
+          book: "教材：统编版《中外历史纲要（上）》第 2 单元 第 5 课 三国两晋南北朝的政权更迭与民族交融",
+          area: 240, an: "，东晋（面积曲线取此值）", fx: [["前秦", 370, "#7FBF6A"]],
+          q: { q: "前秦统一北方后南下攻晋，在哪一场战役中大败？", opts: ["淝水之战", "赤壁之战", "官渡之战", "巨鹿之战"], right: 0, sel: "qianqin",
+               ans: "383 年淝水之战，东晋以少胜多，留下“投鞭断流”“草木皆兵”“风声鹤唳”等成语。" },
+          kd: [["前赵", "304–329", "匈奴", [111.5, 36.1]], ["后赵", "319–351", "羯", [114.5, 37]], ["前燕", "337–370", "鲜卑", [120.4, 41.6]],
+               ["前秦", "351–394", "氐", [108.9, 34.3]], ["后秦", "384–417", "羌", [107.6, 35.2]], ["北凉", "397–439", "匈奴卢水胡", [101, 38.6]]],
+          gk: "高考链接：东晋时北方人口南迁带动江南开发，淝水之战后南北分裂延续；易错：“十六国”是对北方多个政权的统称，实际不止十六个。",
+          pts: ["西晋灭亡后，司马睿在建康建立东晋，疆域大致在淮河—汉水以南；四川（蜀地）373 年已被前秦夺取。", "北方先后出现多个政权，史称“十六国”；376 年前秦统一北方（含河西、辽东及蜀地），都长安。", "383 年苻坚率大军南下攻晋，在淝水之战中大败，北方再度陷入分裂。", "衣冠南渡：北方人口大量南迁江南。周边有青海的吐谷浑、东北的高句丽。", "东晋约 240 万、前秦约 370 万平方公里（约数，示意）。"],
+          ready: true },
+        { y: 494, tick: "494", name: "南北朝对峙",
+          text: "439 年北魏统一北方，与南方的宋、齐、梁、陈长期对峙，史称南北朝。494 年北魏孝文帝迁都洛阳，推行汉化改革，促进了民族交融。北方草原上的柔然、青海的吐谷浑与南北两朝并立。",
+          book: "教材：统编版《中外历史纲要（上）》第 2 单元 第 5 课 三国两晋南北朝的政权更迭与民族交融",
+          area: 400, an: "，北魏 + 南齐合计（面积曲线取此值）", fx: [["北魏", 200, "#5B9BEF"], ["南齐", 200, "#3FB89A"]],
+          q: { q: "北魏孝文帝把都城从平城迁到了哪里？", opts: ["洛阳", "长安", "建康", "邺城"], right: 0, sel: "beiwei",
+               ans: "494 年孝文帝迁都洛阳，随后改汉姓、穿汉服、说汉话、与汉族通婚，史称孝文帝改革。" },
+          tls: [["南朝更替", [["420", "宋"], ["479", "齐"], ["502", "梁"], ["557", "陈"], ["589", "隋灭陈"]]],
+                ["北朝", [["439", "北魏统一北方"], ["534", "分裂为东魏、西魏"], ["其后", "东魏→北齐，西魏→北周"], ["577", "北周灭北齐"]]]],
+          gk: "高考链接：北魏孝文帝改革是民族交融的典型，常考迁都原因与改革措施；江南开发在南朝继续推进；易错：北魏统一北方是 439 年，孝文帝迁都洛阳是 494 年。",
+          pts: ["439 年北魏统一北方，与南方的宋、齐、梁、陈长期对峙，史称南北朝。", "北魏：鲜卑拓跋部建立，都城先平城（今大同），494 年孝文帝迁都洛阳。", "南朝依次为宋、齐、梁、陈，都建康；494 年时为南齐。", "孝文帝改革：改汉姓、穿汉服、说汉话、与汉族通婚、改革官制，促进了民族交融。", "北方草原上的柔然、青海的吐谷浑与南北两朝并立；东北有高句丽。", "北魏约 200 万、南齐约 200 万平方公里（约数，示意）。"],
+          ready: true },
+        { y: 609, tick: "609", name: "隋朝疆域",
+          text: "581 年杨坚建立隋朝，589 年灭陈，重新统一全国。隋炀帝开凿以洛阳为中心的大运河，北通涿郡、南达余杭；609 年击败吐谷浑，在今青海和新疆东南部设置西海、河源、鄯善、且末四郡。",
+          book: "教材：统编版《中外历史纲要（上）》第 2 单元 第 6 课 从隋唐盛世到五代十国",
+          area: 467,
+          q: { q: "隋朝开凿的大运河以哪里为中心？", opts: ["洛阳", "长安", "涿郡", "余杭"], right: 0, sel: "sui",
+               ans: "大运河以洛阳为中心，北到涿郡，南至余杭，分为永济渠、通济渠、邗沟、江南河四段。" },
+          tl: [["581", "杨坚建立隋朝，都大兴（长安）"], ["589", "灭陈，重新统一全国"]], unl: "统一进程 581→589",
+          gk: "高考链接：隋朝大运河以洛阳为中心、北达涿郡南至余杭，沟通海河、黄河、淮河、长江、钱塘江五大水系，常考作用与影响；浙江考生注意南端余杭即今杭州；易错：隋大运河中心是洛阳，元朝京杭大运河才取直不经洛阳。",
+          pts: ["581 年杨坚建立隋朝，都大兴（长安），以洛阳为东都；589 年灭陈，重新统一全国。", "隋炀帝开凿以洛阳为中心的大运河，北通涿郡、南达余杭，分为永济渠、通济渠、邗沟、江南河四段。", "609 年击败吐谷浑，在今青海和新疆东南部设置西海、河源、鄯善、且末四郡。", "周边：北有东突厥，西有西突厥，东北有高句丽。", "疆域约 467 万平方公里（约数，示意）。"],
+          ready: true },
+        { y: 669, tick: "669", name: "唐朝前期疆域",
+          text: "唐朝前期国力强盛。唐太宗、唐高宗先后击败东突厥、西突厥，设置安西、安北、单于、安东等都护府。669 年前后唐朝疆域空前辽阔：东至朝鲜半岛北部，西达咸海一带，北抵贝加尔湖以北，南到今越南中部。这些都护府下辖的多是羁縻府州，由归附部族的首领管理，和内地州县不同。",
+          book: "教材：统编版《中外历史纲要（上）》第 2 单元 第 6 课 从隋唐盛世到五代十国",
+          area: 1076, an: "，唐前期，含羁縻区",
+          q: { q: "图中唐朝在今新疆地区设立的管理机构是哪一个？", opts: ["安西都护府", "安东都护府", "安北都护府", "单于都护府"], right: 0, sel: "anxi",
+               ans: "640 年唐朝在西州设安西都护府，后移治龟兹；702 年又设北庭都护府，分管天山南北。" },
+          gk: "高考链接：唐前期设都护府、行羁縻府州，体现因俗而治的边疆管理；安西、北庭分管天山南北；易错：羁縻府州由部族首领世袭管理，不同于内地州县。",
+          pts: ["唐太宗、唐高宗先后击败东突厥（630）、西突厥（657），设置安西、安北、单于、安东等都护府。", "安西都护府：640 年设于西州，后移治龟兹，辖天山以南及葱岭以西至咸海一带；702 年又设北庭都护府，管天山以北。", "669 年前后四至：东至朝鲜半岛北部（安东，治平壤），西达咸海一带，北抵贝加尔湖以北（安北），南到今越南中部（安南）；都城长安。", "都护府下辖多为羁縻府州，由归附部族的首领管理，和内地州县不同。", "周边：吐蕃据青藏高原，641 年文成公主入藏；东有新罗、日本。", "疆域约 1076 万平方公里（约数，含羁縻区，示意），面积曲线至此达到峰值。"],
+          ready: true },
+        { y: 790, tick: "790", name: "唐朝后期形势",
+          text: "755 年爆发安史之乱，唐朝由盛转衰。吐蕃乘机占领河西、陇右，回鹘称雄漠北，南诏崛起于云南，东北的渤海国被称为“海东盛国”。唐朝实际控制的范围大为缩小，内地又出现藩镇割据。",
+          book: "教材：统编版《中外历史纲要（上）》第 2 单元 第 6 课 从隋唐盛世到五代十国",
+          area: 400, an: "，唐后期实际控制",
+          q: { q: "安史之乱后，河西、陇右地区被哪个政权占据？", opts: ["吐蕃", "回鹘", "南诏", "渤海"], right: 0, sel: "tubo",
+               ans: "唐朝调西北边兵平叛，吐蕃乘虚占领河西、陇右，763 年还一度攻入长安。" },
+          gk: "高考链接：安史之乱是唐由盛转衰的转折点，导致藩镇割据、边疆收缩、经济重心南移加速；易错：河西、陇右被吐蕃占据，不是回鹘。",
+          pts: ["755 年安史之乱爆发：叛军从范阳南下，攻陷洛阳、长安；763 年叛乱平定，唐朝由盛转衰。", "唐调西北边兵东援平叛，吐蕃乘虚占领河西、陇右，763 年一度攻入长安；吐蕃范围最大时可达今新疆南部。", "回鹘称雄漠北；南诏崛起于云南；东北的渤海国被称为“海东盛国”；新罗据朝鲜半岛中南部。", "都护府羁縻区基本丧失；内地出现藩镇割据，河北的卢龙、成德、魏博合称“河朔三镇”。", "唐后期实际控制约 400 万平方公里（约数，示意），比前期明显缩小。"],
+          ready: true },
+        { y: 950, tick: "950", name: "五代十国",
+          text: "907 年唐朝灭亡，北方相继出现后梁、后唐、后晋、后汉、后周五个朝代，南方和山西先后出现十个割据政权，史称五代十国。936 年石敬瑭把燕云十六州割给契丹，此后中原王朝失去了北方的天然屏障。",
+          book: "教材：统编版《中外历史纲要（上）》第 2 单元 第 6 课 从隋唐盛世到五代十国",
+          area: 100, an: "，后周，仅中原王朝",
+          q: { q: "后晋石敬瑭把哪一地区割让给了契丹？", opts: ["燕云十六州", "河西走廊", "河套地区", "辽东半岛"], right: 0, sel: "liao",
+               ans: "936 年石敬瑭以割让燕云十六州为条件，借契丹兵灭后唐，建立后晋。" },
+          tls: [["五代更替", [["907", "后梁"], ["923", "后唐"], ["936", "后晋"], ["947", "后汉"], ["951", "后周"], ["960", "北宋建立"]]]],
+          gk: "高考链接：五代十国是唐末藩镇割据的延续，燕云十六州割让影响此后宋辽格局；南方相对安定，吴越等国推动江南经济发展，经济重心继续南移；易错：十国主要在南方，北汉在山西，不在南方。",
+          pts: ["907 年唐朝灭亡，北方相继出现后梁、后唐、后晋、后汉、后周五个朝代，都城多在开封（汴梁）。", "南方和山西先后出现十个割据政权；约 950 年同时存在的主要有南唐、吴越、闽（故地）、南汉、楚、后蜀、荆南和山西的北汉。", "936 年石敬瑭以割让燕云十六州为条件，借契丹兵灭后唐，建立后晋；幽州（今北京）、云州（今大同）一带归契丹，中原王朝失去北方的天然屏障。", "周边：契丹（947 年改称辽）据北方，926 年已灭渤海；吐蕃诸部分立，回鹘分居河西与高昌；937 年大理承南诏而建。", "后周约 100 万平方公里（约数，示意，仅中原王朝）。"],
+          ready: true },
+        { y: 1005, tick: "1005", name: "北宋、辽、西夏并立",
+          text: "960 年赵匡胤建立北宋，结束了五代十国的局面，但始终没有收复燕云十六州。北宋与辽、西夏长期并立：1005 年宋辽订立澶渊之盟，1044 年宋夏议和，此后宋与辽、夏之间长期保持和平。西南有大理，西北有回鹘、吐蕃诸部。",
+          book: "教材：统编版《中外历史纲要（上）》第 3 单元 第 9 课 两宋的政治和军事 / 第 10 课 辽夏金元的统治",
+          area: 280, an: "，北宋",
+          q: { q: "1005 年北宋与辽订立的盟约叫什么？", opts: ["澶渊之盟", "绍兴和议", "宋夏和议", "白沟之约"], right: 0, sel: "liao",
+               ans: "澶渊之盟后，宋每年给辽银、绢，双方以白沟河一带为界，此后百余年间很少发生大的战争。" },
+          tl: [["960", "陈桥兵变，赵匡胤建立北宋，都东京开封"], ["963–978", "先后灭荆南、湖南、后蜀、南汉、南唐；吴越、漳泉纳土"], ["979", "灭北汉，统一中原，结束五代十国局面"], ["1005", "宋辽订立澶渊之盟"], ["1044", "宋夏议和"]], unl: "统一进程 960→979",
+          gk: "高考链接：宋辽澶渊之盟、宋夏和议后长期和平，榷场贸易促进民族交融；常考多政权并立格局与“统一多民族国家发展”的关系；易错：澶渊之盟是 1005 年（景德元年末订立），白沟河为界，燕云十六州仍属辽。",
+          pts: ["960 年赵匡胤发动陈桥兵变建立北宋，都东京开封；979 年灭北汉，结束五代十国局面。", "北宋北界大致在白沟河一线，始终没有收复燕云十六州。", "辽：契丹族建立，都上京临潢府，据燕云十六州、东北与蒙古高原东部。", "西夏：党项族建立，都兴庆府（今银川），据河套与河西走廊；1044 年宋夏议和。", "1005 年澶渊之盟：宋每年给辽银十万两、绢二十万匹，以白沟河为界，此后百余年和平。", "西南有大理，西北有西州回鹘、喀喇汗王朝，青海有吐蕃唃厮啰，东有高丽。", "北宋约 280 万平方公里（约数，示意）。"],
+          ready: true },
+        { y: 1142, tick: "1142", name: "南宋、金、西夏并立",
+          text: "1115 年女真首领阿骨打建立金，先后灭辽和北宋。1127 年宋高宗建立南宋，1142 年宋金达成绍兴和议，双方东以淮水、西以大散关为界。西夏、大理继续存在，契丹贵族耶律大石在中亚建立了西辽。",
+          q: { q: "宋金绍兴和议后，双方大致以哪里为界？", opts: ["东以淮水、西以大散关", "东以黄河、西以陇山", "白沟河一带", "长江一线"], right: 0,
+               ans: "1142 年绍兴和议：南宋向金称臣、每年纳贡，双方东以淮水、西以大散关为界。", sel: "nansong" },
+          book: "教材：统编版《中外历史纲要（上）》第 3 单元 第 9 课 两宋的政治和军事 / 第 10 课 辽夏金元的统治",
+          area: 200, an: "，南宋",
+          tl: [["1115", "女真首领阿骨打建立金"], ["1125", "金灭辽"], ["1127", "靖康之变，金灭北宋；宋高宗南渡建立南宋"], ["1140", "岳飞北伐，郾城大捷"], ["1142", "宋金绍兴和议，东以淮水、西以大散关为界"]], unl: "金灭辽与北宋 1115→1142",
+          gk: "高考链接：宋金对峙以淮水—大散关为界；南宋定都临安（杭州），经济重心南移最终完成（“苏湖熟，天下足”）；易错：绍兴和议是 1142 年，以淮水—大散关为界，不是以长江为界。",
+          pts: ["1115 年女真首领阿骨打建立金，1125 年灭辽，1127 年灭北宋（靖康之变）。", "1127 年宋高宗建立南宋，定都临安（今杭州）。", "1142 年绍兴和议：南宋向金称臣、每年纳贡，东以淮水、西以大散关为界。", "金：据原辽东部与淮河以北华北，后迁都中都（燕京）；西夏都兴庆府，大理据云南。", "契丹贵族耶律大石在中亚七河流域建立西辽；漠北有蒙古诸部，青藏高原为吐蕃诸部，朝鲜半岛为高丽。", "疆域约 200 万平方公里（南宋，约数，示意）。"],
+          ready: true },
+        { y: 1330, tick: "1330", name: "元朝疆域",
+          text: "1206 年铁木真统一蒙古，被尊为成吉思汗。1271 年忽必烈定国号为元，1279 年灭南宋。元朝疆域空前辽阔，在地方实行行省制度：设宣政院管辖西藏，在澎湖设巡检司，岭北行省一直延伸到西伯利亚。",
+          book: "教材：统编版《中外历史纲要（上）》第 3 单元 第 10 课 辽夏金元的统治",
+          area: 1372, an: "，不含四大汗国",
+          q: { q: "元朝管辖西藏地区的中央机构是什么？", opts: ["宣政院", "中书省", "理藩院", "枢密院"], right: 0, sel: "xuanzheng",
+               ans: "元朝设宣政院管理全国佛教事务和西藏地区的军政事务，西藏从此正式成为中国的行政区。" },
+          tl: [["1206", "铁木真统一蒙古，被尊为成吉思汗"], ["1227", "蒙古灭西夏"], ["1234", "蒙古灭金"], ["1271", "忽必烈定国号为元"], ["1279", "崖山之战，元灭南宋"]], unl: "事件动画 1206→1279",
+          gk: "高考链接：元朝行省制度是我国省制的开端；宣政院管辖西藏，西藏正式纳入中央行政管辖；设澎湖巡检司管辖澎湖、台湾；易错：四大汗国不属元朝直接统治范围。",
+          pts: ["1206 年铁木真统一蒙古，被尊为成吉思汗；1227 年灭西夏，1234 年灭金。", "1271 年忽必烈定国号为元，都城大都（今北京），另有上都；1279 年崖山之战灭南宋。", "行省制度：中书省直辖腹里，另设岭北、辽阳、河南江北、陕西、四川、甘肃、云南、江浙、江西、湖广及征东等行省（示意）。", "设宣政院管辖西藏；在澎湖设巡检司，管辖澎湖、台湾。", "四至：北到西伯利亚（岭北行省），东北到鄂霍次克海，西南包括西藏，南到南海。", "周边：西有察合台、钦察、伊利等汗国；高丽为元的藩属；南有安南、缅。", "疆域约 1372 万平方公里（约数，示意，不含四大汗国）。"],
+          ready: true },
+        { y: 1433, tick: "1433", name: "明朝疆域",
+          text: "1368 年朱元璋建立明朝，1421 年明成祖迁都北京。明朝在东北设奴儿干都司，管辖黑龙江下游和库页岛；在西藏设乌思藏、朵甘都司，册封当地僧俗首领。这些边疆地区和哈密卫一样属羁縻性质，由当地首领世袭管理，管控远比内地府州县松散。北方的鞑靼、瓦剌不时南下，明朝修筑了今天我们看到的长城。",
+          book: "教材：统编版《中外历史纲要（上）》第 4 单元 第 13 课 从明朝建立到清军入关",
+          area: 700, an: "，含羁縻都司",
+          q: { q: "明朝在黑龙江下游设立的管辖机构是什么？", opts: ["奴儿干都司", "乌思藏都司", "哈密卫", "辽东都司"], right: 0, sel: "nurgan",
+               ans: "1409 年明朝设奴儿干都司，治所在黑龙江下游的特林，管辖范围包括库页岛。" },
+          tl: [["1368", "朱元璋建立明朝，定都南京"], ["1409", "设奴儿干都司，治特林"], ["1421", "明成祖迁都北京"], ["1405–1433", "郑和七下西洋，从刘家港出发，远至东非"]], unl: "事件动画 1368→1433",
+          gk: "高考链接：明朝设奴儿干都司、乌思藏都司管辖东北与西藏，修长城防御鞑靼、瓦剌；郑和下西洋常与“海禁”对比考查；易错：明朝边疆都司多为羁縻性质，与内地府州县不同。",
+          pts: ["1368 年朱元璋建立明朝，定都南京；1421 年明成祖迁都北京，南京为留都。", "直辖：两京十三布政使司，实行府州县制。", "东北：1409 年设奴儿干都司，治特林，管辖黑龙江下游和库页岛。", "西藏设乌思藏、朵甘都司，册封当地僧俗首领；西北设哈密卫等关西七卫。", "边疆都司、卫属羁縻性质：当地首领世袭管理，管控远比内地府州县松散。", "北方鞑靼（东蒙古）、瓦剌（西蒙古）不时南下；明长城西起嘉峪关、东到山海关（延至鸭绿江），今天看到的长城主要是明长城。", "1405–1433 年郑和七下西洋，从刘家港出发，远至东非。", "周边：西缘有帖木儿帝国，东有朝鲜、日本，南有安南（1407–1427 明一度设交趾布政司）。", "疆域约 700 万平方公里（约数，示意，含羁縻都司）。"],
+          ready: true },
+        { y: 1820, tick: "1820", name: "清朝疆域",
+          text: "清朝统一台湾，平定准噶尔和大小和卓叛乱，设伊犁将军管辖新疆，设驻藏大臣与达赖、班禅共同管理西藏。到 18 世纪中期，清朝奠定了中国的疆域：西跨葱岭，西北到巴尔喀什湖，北接西伯利亚，东北到外兴安岭和库页岛，东临太平洋，南到南海诸岛。",
+          q: { q: "清朝为管理新疆地区设置了什么机构？", opts: ["伊犁将军", "西域都护府", "安西都护府", "驻藏大臣"], right: 0,
+               ans: "1762 年清朝设伊犁将军，管辖天山南北包括巴尔喀什湖在内的广大地区。", sel: "xinjiang" },
+          book: "教材：统编版《中外历史纲要（上）》第 4 单元 第 14 课 清朝前中期的鼎盛与危机",
+          area: 1300,
+          tl: [["1644", "清军入关，定都北京"], ["1683", "郑克塽降清，清统一台湾"], ["1684", "设台湾府，隶属福建"], ["1689", "中俄签订《尼布楚条约》"], ["1727", "设驻藏大臣"], ["1757–1759", "平定准噶尔与大小和卓叛乱"], ["1762", "设伊犁将军，驻惠远城"]], unl: "事件动画 1644→1762",
+          gk: "高考链接：清朝统一台湾、平定准噶尔与大小和卓、设伊犁将军与驻藏大臣，奠定中国版图；《尼布楚条约》是中俄第一个边界条约；易错：伊犁将军设于 1762 年，驻藏大臣设于 1727 年，台湾府设于 1684 年。",
+          pts: ["1644 年清军入关，定都北京。", "1683 年郑克塽降清，清统一台湾；1684 年设台湾府，隶属福建。", "1689 年中俄签订《尼布楚条约》，以外兴安岭—额尔古纳河为界。", "1757–1759 年平定准噶尔和大小和卓叛乱；1762 年设伊犁将军（驻惠远城），管辖新疆。", "1727 年设驻藏大臣，与达赖、班禅共同管理西藏；外札萨克蒙古由乌里雅苏台将军管辖。", "四至：西跨葱岭，西北到巴尔喀什湖，北接西伯利亚，东北到外兴安岭和库页岛，东临太平洋，南到南海诸岛。", "疆域约 1300 万平方公里（约数，示意）。"],
+          ready: true },
+        { y: null, tick: "检测", name: "随堂检测",
+          text: "8 道浙江选考风格单选 + 1 道加分题。每题先把地图切到对应时期，选完立即判对错、给解析，并在地图上演示答案。",
+          book: "教材：统编版《中外历史纲要（上）》第 1–4 单元 综合", ready: true }
+      ];
+    </script>
+    <script type="application/json" id="area-data">
+      [{"t":"前221","a":340},{"t":"前60","a":600},{"t":"91","a":650},{"t":"262","a":500},{"t":"280","a":540},{"t":"376","a":240},{"t":"494","a":400},{"t":"609","a":467},{"t":"669","a":1076},{"t":"790","a":400},{"t":"950","a":100},{"t":"1005","a":280},{"t":"1142","a":200},{"t":"1330","a":1372},{"t":"1433","a":700},{"t":"1820","a":1300}]
+    </script>
+    <script>
+      /* ---------- 底图：东亚风格化地理（经度, 纬度），东经 60°–150°，北纬 0°–60° ---------- */
+      var GEO = {
+        main: [[60,60],[150,60],[150,59.5],[143,59.3],[140,58],[137,54.5],[135,54.6],[141,53],[140.5,50],[140,48],[138,46],[135,43.5],[132,43],[130.7,42.3],[129.7,41],[128,40],[129.4,37],[129.4,35.5],[129,35.1],[127,34.5],[126.3,34.6],[126.5,36],[126.6,37.5],[125,37.7],[124.7,38.5],[125.2,39.5],[124.3,39.9],[122.5,39.2],[121.2,38.8],[121.6,39.5],[122.2,40.5],[121,40.9],[120,40.3],[119,39.3],[118,39],[117.7,38.5],[118.8,37.6],[119.5,37.1],[120.7,37.8],[122.6,37.4],[121,36.5],[120.2,35.9],[119.3,35],[120.3,34.3],[120.9,32.7],[121.9,31.7],[121.9,30.9],[121.3,30.3],[122,29.8],[121.5,28.4],[120.5,27.1],[119.6,25.8],[118.5,24.6],[117,23.6],[115.5,22.8],[114,22.3],[113.5,22.2],[112,21.7],[110.4,21.2],[110.2,20.3],[109.7,21.5],[108.5,21.6],[107,20.8],[106.5,20],[105.8,19],[106.5,17.5],[107.5,16.4],[108.8,15.3],[109.3,13.5],[109.2,12],[108,10.9],[106.7,10.3],[105,8.6],[104.5,10.4],[103,11],[102.3,12.2],[100.9,13.4],[100,13],[99.2,10.4],[100.3,8],[100.6,6.5],[102.3,6.1],[103.4,4.5],[103.4,2.5],[104.2,1.4],[103.4,1.3],[101.3,2.8],[100.4,4.8],[98.3,8],[98.6,10],[98.5,13.5],[97.7,16.5],[97.2,16.9],[95.4,15.8],[94.3,16.2],[94.6,18.5],[93.6,19.7],[92.3,20.8],[91.8,22.3],[90.6,22.5],[89,21.8],[87,21.5],[86.9,20.6],[85,19.3],[82.3,16.6],[80.3,15.5],[80.2,13],[79.8,10.3],[78.2,8.9],[77.5,8.1],[76.3,9.5],[75,12.8],[73.8,15.5],[72.8,19],[72.6,21.4],[70.5,20.8],[69,22.4],[70.2,22.9],[68.5,23.6],[67.3,24.6],[66.5,25.4],[64,25.3],[61.5,25.1],[60,25.3]],
+        islands: [
+          [[121.5,25.3],[122,25],[121.8,24],[121,22.5],[120.8,21.9],[120.2,22.6],[120.1,23.5],[120.7,24.6]],
+          [[110.6,20.1],[111,19.6],[110.5,18.7],[109.5,18.2],[108.7,18.5],[108.6,19.2],[109.2,19.9],[110,20.1]],
+          [[129.6,33.3],[130.2,33.9],[131,33.9],[131.9,33],[131.4,31.4],[130.6,31],[130.2,31.5],[129.8,32.7]],
+          [[132.5,33.2],[133,34],[134.5,34.2],[134.7,33.8],[134.2,33.2],[133,32.8]],
+          [[130.9,34],[131.5,34.6],[133,35.5],[135.2,35.7],[136,36.2],[136.9,37.2],[138.5,37.4],[139.5,38.2],[140,39.5],[140,40.8],[140.8,41.4],[141.4,41.2],[142,39.5],[141,38.2],[141,36.8],[140.7,35.7],[139.8,35],[139,34.7],[137.2,34.6],[136.8,34.3],[136,33.5],[135.1,33.9],[135.4,34.6],[133.5,34.4],[132.2,33.8]],
+          [[140,41.5],[141.2,41.8],[143.2,42],[145.5,43.3],[144.5,44],[141.8,45.4],[141.7,44.1],[141.4,43.3],[140.3,43.3],[140,42.4]],
+          [[142,46],[143.4,46.6],[142.6,48],[143,49.4],[144,49],[143.2,51.5],[143.2,53.5],[142.6,54.3],[142.3,53.3],[141.8,51.5],[142.1,49],[141.9,47.5]],
+          [[120.6,18.5],[122.2,18.5],[122.5,17],[121.5,15.8],[121.6,14.2],[124,13],[123.8,12.7],[122.5,13.3],[121,13.8],[120.6,14.5],[120,16],[120.4,16.5]],
+          [[122,7],[124,8.5],[126.3,9.3],[126.6,7],[125.4,5.6],[124.1,6.5]],
+          [[109,1.8],[110,1.7],[111,2.5],[113,3.1],[114.5,4.6],[116,6],[117.3,7],[118.2,5.8],[119,5],[118,4.3],[117.8,1],[117.5,0],[109.2,0]],
+          [[95.3,5.6],[97.5,5.2],[100.3,2.4],[103.9,0],[99.3,0],[97.3,2.2],[95.5,4.6]],
+          [[79.9,9.8],[81,8.7],[81.9,7.2],[81.6,6.4],[80.6,5.9],[80,6.5],[79.8,8]]
+        ],
+        lakes: [
+          [[59.5,46.6],[61.5,46.5],[61.7,44.5],[60.4,43.5],[59.3,44.4]],
+          [[73.5,46.5],[75,46.7],[77,46.6],[79,46.3],[78.5,45.8],[76,46],[74.2,45.3]],
+          [[76,42.6],[77,42.9],[78.3,42.6],[77.5,42.2],[76.4,42.3]],
+          [[103.8,51.6],[105,51.6],[107.5,52.8],[109.5,54.5],[109.7,55.7],[109,55.5],[107,53.5],[104,51.9]],
+          [[99.7,37],[100.3,37.2],[100.8,36.9],[100.4,36.6],[99.8,36.7]]
+        ],
+        /* 晕渲：high 高原/山地，basin 盆地/荒漠 */
+        relief: [
+          { kind: "high", name: "青藏高原", at: [88, 33], poly: [[74,37],[78,35.5],[84,36.2],[90,36.3],[94,36.5],[98,36],[102,35],[103.5,33],[102.5,30],[100,27.5],[98,28],[95,29],[92,27.8],[88,27.8],[85,28.5],[81,30],[78.5,32],[75.5,34.5]] },
+          { kind: "high", name: "帕米尔", at: [73.5, 38.6], poly: [[71,40],[74.5,40.3],[75.6,38.8],[75,36.6],[72,36.8],[70.5,38.5]] },
+          { kind: "high", name: "蒙古高原", at: [104, 46.5], poly: [[88,49],[92,50.5],[98,51.5],[104,50.5],[110,49.5],[116,49],[120,47],[118,44],[114,42],[109,41],[104,40.5],[98,42],[92,44],[88,47]] },
+          { kind: "high", name: "黄土高原", at: [108.5, 37], poly: [[103,35.5],[105,38],[108,39.2],[111.5,39.8],[113,38],[112,35.5],[109,34.6],[105.5,34.5]] },
+          { kind: "high", name: "云贵高原", at: [104.5, 25.5], poly: [[100.5,27.5],[103,28],[106.5,27.8],[108.8,26.5],[107.5,24.2],[104,23.2],[101,23.8]] },
+          { kind: "high", name: "", poly: [[80,43],[84,44],[88,44],[93,43.3],[94,42.2],[88,42.6],[84,42.2],[80,41.8]] },
+          { kind: "high", name: "", poly: [[85,49.8],[88,49.5],[91,48],[90,47],[87,48]] },
+          { kind: "high", name: "", poly: [[119,49.5],[122,51.5],[124,50],[122.5,46],[120.5,44.5],[119.5,46.5]] },
+          { kind: "basin", name: "塔里木盆地", at: [83, 39.3], poly: [[75.5,39.5],[78,41],[81,41.8],[84,41.8],[88,40.8],[90,39.5],[89,38],[86,37.8],[82,36.9],[79,37],[76.5,38.2]] },
+          { kind: "basin", name: "准噶尔盆地", at: [86.5, 45.2], poly: [[83,45.5],[85,46.8],[88,46.6],[90,45.5],[88.5,44.3],[85,44.4]] },
+          { kind: "basin", name: "戈壁", at: [104, 43], poly: [[96,42.5],[100,44.2],[106,44.3],[111,43.3],[109,41.5],[103,41],[98,41.4]] },
+          { kind: "basin", name: "四川盆地", at: [105.5, 30.2], poly: [[103.4,30.3],[104.5,31.9],[107,32.2],[108.6,30.8],[107.2,28.9],[104.5,29.1]] }
+        ],
+        ridges: [
+          [[73.5,35.5],[76.5,34.5],[80,31.2],[83,29.6],[86,28.1],[89,27.9],[92,27.6],[95,28.7]],
+          [[75,37.2],[79,36.3],[84,36.2],[90,36.6],[95,36.2],[99,35.3]],
+          [[76,41],[80,42.3],[84,43.4],[88,43.4],[93,43]],
+          [[104,34.3],[107,33.8],[110.5,33.6]],
+          [[113,36],[113.6,38],[114.6,40]],
+          [[119,49.5],[121.5,46.5],[120,43.5]],
+          [[86,49.6],[89,48.7],[93,46.5],[97,45]]
+        ],
+        rivers: [
+          { name: "黄河", at: [111.6, 38.2], pts: [[96.2,34.9],[98.2,34.8],[100,34],[101.5,33.8],[102,35.2],[103.6,36],[104.5,37.3],[105.5,37.5],[106.5,39],[107,40.4],[109,40.6],[111,40.3],[111.2,39],[110.5,37],[110.4,35],[111,34.8],[113,34.9],[114.6,35],[116,36],[117,36.7],[118.8,37.6]] },
+          { name: "长江", at: [115.4, 30.4], pts: [[91,33.5],[94,33.8],[97,33],[99,30],[99.5,27.5],[100.2,26.7],[101.5,26.5],[102.8,26.5],[104.6,28.8],[106.5,29.6],[108.5,30.8],[110.3,31],[111.3,30.7],[112.2,30.3],[113,29.5],[114.3,30.6],[116,29.7],[117.6,30.9],[118.8,32],[120.3,32],[121.9,31.7]] },
+          { name: "淮河", pts: [[113.5,32.5],[116,32.5],[118.5,33.2],[120.3,34.2]] },
+          { name: "珠江", pts: [[104,24.8],[107,23.7],[110,23.4],[112.5,23.2],[113.5,22.6]] },
+          { name: "黑龙江", at: [128, 50.5], pts: [[117.5,49.8],[121.5,53.3],[124,53.2],[127.5,50],[130.5,48],[135,48.4],[137,50],[138.5,52.5],[141,53]] },
+          { name: "辽河", pts: [[119.5,43.3],[123.5,43.4],[122.2,41]] },
+          { name: "塔里木河", pts: [[79,40.3],[84,41],[87.5,40.5],[88.5,39.5]] },
+          { name: "湄公河", pts: [[94.5,32.5],[98.5,29],[99.5,25],[101,21.5],[102.3,18],[105.8,15.5],[105.9,12],[106.6,10.2]] },
+          { name: "", pts: [[93,31.5],[98.7,28],[98.8,24],[97.7,19.5],[97.6,16.5]] },
+          { name: "印度河", pts: [[80.3,31.8],[77.5,35],[74.5,35.7],[72.3,33.5],[70.5,30],[68.3,26.5],[67.6,24.2]] },
+          { name: "恒河", pts: [[79,30.4],[80.4,26.4],[83,25.4],[87,25.2],[88.5,23],[89.5,22.2]] },
+          { name: "", pts: [[82,30.3],[88,29.3],[91,29.3],[94.5,29.4],[95.3,28],[92,26.4],[90,25.7],[89.8,23]] },
+          { name: "", pts: [[68,37.2],[64,38.5],[60.5,42],[59.7,43.5]] },
+          { name: "", pts: [[71,41],[68.5,40.5],[66.5,44],[61.7,46]] }
+        ]
+      };
+      /* 取主海岸线上从 a 到 b 的一段（含端点附近），供疆域多边形沿海岸复用 */
+      function coast(a, b) {
+        function near(p) { var bi = 0, bd = 1e9; GEO.main.forEach(function (q, i) { var d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd) { bd = d; bi = i; } }); return bi; }
+        return GEO.main.slice(near(a), near(b) + 1);
+      }
+
+      /* ---------- 通用疆域图层：每个时期 → 政权多边形 + 颜色 + 名称 + 都城；长城；注记 ---------- */
+      var LAYERS = {
+        0: {
+          view: [92, 16, 134, 48],
+          states: [
+            { id: "qin", name: "秦", sub: "前 221 年统一六国，都咸阳", color: "#F2B544", label: [111, 31.5],
+              capital: { name: "咸阳", ll: [108.7, 34.35] },
+              poly: [[103.3,34.5],[103.5,35.8],[104.3,37],[105.5,38.2],[106.3,40],[107.4,41.6],[109.5,42],[112,41.8],[114,42],[116,42.4],[118,42.6],[120,42.9],[122,43.2],[124,42.6],[125.1,41.3]]
+                .concat(coast([124.3, 39.9], [105.8, 19]))
+                .concat([[104.5,20.5],[103.5,22],[102,23.5],[101.2,25],[101.5,26.5],[102,28],[102.5,30],[102.8,31.5],[103.2,33]]) },
+            { id: "xiongnu", name: "匈奴", sub: "蒙古高原游牧政权，被蒙恬北击", color: "#C07CCF", label: [106, 45.5],
+              poly: [[96,42],[99,46],[103,49.5],[110,50.2],[115,48.8],[116.3,45.5],[115,43.2],[112,42.1],[109.5,42.3],[107.2,42],[105.6,40.4],[102.5,40.2],[99,41.2]] },
+            { id: "donghu", name: "东胡", sub: "东北方游牧部族联盟", color: "#5B9BEF", label: [120.5, 46],
+              poly: [[116.6,42.8],[116.8,46],[119.5,49.5],[124,48.8],[126.5,45.5],[125.5,43],[122,43.7],[118,43.1]] },
+            { id: "yuezhi", name: "月氏", sub: "游牧于河西走廊一带", color: "#7FBF6A", label: [98.6, 39.6],
+              poly: [[93.5,39.6],[96.5,41.4],[100.5,40.3],[103.6,37.8],[103.4,36.4],[101.2,37.2],[98,38.4],[94,38.6]] }
+          ],
+          walls: [{ name: "秦长城", pts: [[103.9,35.4],[104.5,36.4],[105.5,37.2],[106.2,38.3],[106.8,39.6],[107.3,40.8],[108.5,41.3],[110,41.3],[111.5,41],[113,41.2],[114.5,41.6],[116,41.8],[117.5,41.9],[119,42.2],[120.5,42.3],[122,42.4],[123.5,41.8],[124.4,41]] }],
+          notes: [
+            { t: "临洮（长城西起）", ll: [103.9, 35.4] }, { t: "辽东（长城东到）", ll: [123.3, 41.4] },
+            { t: "陇西", ll: [104.6, 34.9] }, { t: "桂林郡", ll: [109.6, 24.4] }, { t: "南海郡", ll: [113.6, 23.6] },
+            { t: "象郡", ll: [106.4, 21.6] }, { t: "百越（南征）", ll: [116.5, 25.8], big: true }, { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ]
+        },
+        /* 西汉（约前 60 年）：m 指向形变时对应的上一时期政权 */
+        1: {
+          view: [62, 14, 134, 51],
+          states: [
+            { id: "han", m: "qin", main: true, name: "西汉", sub: "约前 60 年，都长安", color: "#E8795A", label: [111, 30.5],
+              capital: { name: "长安", ll: [108.9, 34.3] },
+              poly: [[101.5,35.5],[101,37.2],[99,38.3],[97,39],[95,39.4],[93.3,39.6],[93.3,40.6],[95.5,41],[97.5,40.6],[99.5,40.2],[101.5,39.4],[103.5,39.3],[105.5,40.8],[107,41.8],[109.5,42.2],[112,42],[114,42.2],[116,42.5],[118,42.8],[120,43.2],[122,43.5],[124,43],[126,42.6],[128.5,42.6]]
+                .concat(coast([130.7, 42.3], [129.4, 37]))
+                .concat([[128,37.3],[127.2,37.4]])
+                .concat(coast([126.6, 37.5], [107.5, 16.4]))
+                .concat([[106.5,16.2],[105.5,17.5],[104.8,19],[104,20.8],[103,22.3],[101.5,22.6],[99.5,23.5],[98.6,24.8],[98.8,26.5],[100,27.6],[101.5,28.8],[102.3,30.5],[102.8,32.2],[102.2,33.6]]) },
+            { id: "xiyu", name: "西域都护府", sub: "前 60 年设，治乌垒城（今新疆轮台东）", color: "#3FB8C9", label: [84.5, 38],
+              poly: [[75,39.6],[76.5,40.8],[79,41.8],[82,42.5],[85,43],[88,43.6],[90.5,43.3],[92.5,42],[93,40.8],[92.8,39.8],[91,39.2],[89,38.3],[86,37.4],[83,36.5],[80,36.2],[77.5,36.5],[75.5,37.5],[74.5,38.6]] },
+            { id: "xiongnu", name: "匈奴", sub: "北方游牧政权，被卫青、霍去病击败北退", color: "#C07CCF", label: [106, 47.6],
+              poly: [[88,44.5],[92,47],[96,50],[103,51],[110,51],[116,49.5],[118,46.5],[117,43.6],[114,42.8],[112,42.6],[109.5,42.8],[107,42.4],[105,41.2],[103.3,39.9],[101.5,40],[99.5,40.7],[97.5,41.2],[95.5,41.6],[93,43.5],[90.5,44]] },
+            { id: "wusun", name: "乌孙", sub: "伊犁河流域游牧政权，与汉和亲结盟", color: "#8FA3E8", label: [79.5, 44.6],
+              poly: [[74.5,42.6],[76,44.5],[79,46],[82.5,46],[84,44.6],[83,43.6],[80.5,43.2],[78,42.7],[76,42.4]] },
+            { id: "yuezhi", name: "大月氏", sub: "原居河西，被匈奴击败后西迁妫水（阿姆河）流域", color: "#7FBF6A", label: [67, 37.4],
+              poly: [[63,37.5],[65,39],[68,39.2],[70.5,38.4],[71,37],[69.5,35.8],[66,35.5],[63.5,36]] },
+            { id: "qiang", name: "羌", sub: "河湟、青海一带的羌人诸部", color: "#E0A0C0", label: [96.5, 35.4],
+              poly: [[92,36.5],[94,38.6],[97,38.7],[99,37.9],[101,36.9],[101.2,35.3],[101.9,33.6],[100.5,32],[97,32.5],[94,33.8]] }
+          ],
+          walls: [{ name: "汉长城", pts: [[94,40.3],[96,40.6],[98.5,40.2],[100.5,39.6],[102.5,38.6],[103.9,37.8],[105.5,37.6],[106.6,39.4],[107.4,41],[109,41.5],[111,41.4],[113,41.3],[115,41.7],[117.5,41.9],[120,42.3],[122.5,42.6],[124.5,41.6]] }],
+          notes: [
+            { t: "武威", ll: [102.6, 37.9] }, { t: "张掖", ll: [100.4, 38.9] }, { t: "酒泉", ll: [98.5, 39.7] }, { t: "敦煌", ll: [94.7, 40.1] },
+            { t: "西域都护府（乌垒）", ll: [84.6, 41.8] }, { t: "乐浪等四郡", ll: [125.8, 39.2] }, { t: "日南郡", ll: [107, 17] },
+            { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ],
+          silk: {
+            routes: [
+              [[108.9,34.3],[105.7,34.6],[103.8,36.1],[102.6,37.9],[100.4,38.9],[98.5,39.7],[94.7,40.1],[93.9,40.3],[89.2,42.9],[86.6,42.1],[84.6,41.8],[83,41.7],[80.3,41.2],[76,39.5],[73.5,40],[71.8,40.8],[66.9,39.6]],
+              [[108.9,34.3],[105.7,34.6],[103.8,36.1],[102.6,37.9],[100.4,38.9],[98.5,39.7],[94.7,40.1],[94,39.9],[89.8,40.5],[85.5,38.1],[79.9,37.1],[77.2,38.4],[75,37.6],[71,36.8],[67,36.7],[62,36.4]]
+            ],
+            notes: [{ t: "北道", ll: [87.6, 43.2] }, { t: "南道", ll: [83, 37.1] }, { t: "葱岭以西", ll: [69.5, 40.3] }, { t: "大宛", ll: [71.8, 41.3] }, { t: "→ 安息", ll: [62.2, 35.6] }]
+          }
+        },
+        /* 东汉（约 91 年）：与西汉相近，北界略南收；西域都护恢复 */
+        2: {
+          view: [60, 14, 134, 52],
+          states: [
+            { id: "han", main: true, name: "东汉", sub: "约 91 年，都洛阳", color: "#D9644A", label: [111, 30.5],
+              capital: { name: "洛阳", ll: [112.45, 34.65] },
+              poly: [[101.5,35.5],[101,37.2],[99,38.3],[97,39],[95,39.4],[93.3,39.6],[93.3,40.4],[95.5,40.6],[97.5,40.2],[99.5,39.8],[101.5,39],[103.5,38.8],[105.5,40],[107,40.9],[109.5,41.2],[112,41.1],[114,41.4],[116,41.8],[118,42.2],[120,42.6],[122,42.8],[124,42.4],[126,42],[128.5,42.2]]
+                .concat(coast([130.7, 42.3], [129.4, 37]))
+                .concat([[128,37.3],[127.2,37.4]])
+                .concat(coast([126.6, 37.5], [107.5, 16.4]))
+                .concat([[106.5,16.2],[105.5,17.5],[104.8,19],[104,20.8],[103,22.3],[101.5,22.6],[99.5,23.5],[98.6,24.8],[98.8,26.5],[100,27.6],[101.5,28.8],[102.3,30.5],[102.8,32.2],[102.2,33.6]]) },
+            { id: "xiyu", name: "西域都护府", sub: "91 年东汉恢复设置（初设于前 60 年西汉）", color: "#3FB8C9", label: [84.5, 38],
+              poly: [[75,39.6],[76.5,40.8],[79,41.8],[82,42.5],[85,43],[88,43.4],[90.5,43.1],[92.5,41.8],[93,40.6],[92.8,39.8],[91,39.2],[89,38.3],[86,37.4],[83,36.5],[80,36.2],[77.5,36.5],[75.5,37.5],[74.5,38.6]] },
+            { id: "xianbei", m: "xiongnu", name: "鲜卑", sub: "北匈奴西迁后，逐渐占据蒙古高原", color: "#5B9BEF", label: [104, 47.4],
+              poly: [[88,45],[92,48],[96,50.5],[103,51.5],[110,51.5],[117,50.5],[120,48.5],[119.5,46],[117.5,44.2],[116,42.8],[114,42.2],[112,41.8],[109.5,42],[107,41.6],[105.5,40.7],[103.5,39.7],[101.5,40],[99.5,40.5],[97.5,41],[95.5,41.4],[93,43.4],[90.5,44.2]] },
+            { id: "nanxiongnu", name: "南匈奴", sub: "内附东汉，居于北边诸郡", color: "#C07CCF", label: [109, 39.4],
+              poly: [[106.5,38.5],[106.8,40.3],[108.5,40.9],[111,40.8],[111.8,39.5],[110.5,38],[108,37.6]] },
+            { id: "wuhuan", name: "乌桓", sub: "东北方部族，与东汉北边相邻", color: "#8FA3E8", label: [121, 44.2],
+              poly: [[116.5,42.6],[118,44.3],[120,46],[123,45.6],[124.6,43.8],[124.2,42.6],[122,43.1],[120,42.9],[118,42.5]] },
+            { id: "qiang", name: "羌", sub: "河湟、青海一带的羌人诸部", color: "#E0A0C0", label: [96.5, 35.4],
+              poly: [[92,36.5],[94,38.6],[97,38.7],[99,37.9],[101,36.9],[101.2,35.3],[101.9,33.6],[100.5,32],[97,32.5],[94,33.8]] }
+          ],
+          walls: [],
+          notes: [
+            { t: "敦煌", ll: [94.7, 40.1] }, { t: "龟兹（西域都护）", ll: [83, 41.7] }, { t: "疏勒", ll: [76, 39.5] },
+            { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ],
+          routes: [
+            { name: "班超经营西域", at2: [99, 41.4], at: 0, dur: 6, pts: [[112.45,34.65],[108.9,34.3],[105.7,34.6],[103.8,36.1],[102.6,37.9],[100.4,38.9],[98.5,39.7],[94.7,40.1],[93.9,40.3],[89.2,42.9],[86.6,42.1],[83,41.7],[80.3,41.2],[76,39.5]] },
+            { name: "甘英出使大秦", at2: [67.5, 38.2], at: 6, dur: 3, dash: true, pts: [[76,39.5],[73.5,38],[71,37],[66.5,36.7],[63,35.5],[60.4,32.6]] }
+          ],
+          routeNotes: [{ t: "条支（西海）→", ll: [62.6, 31.4] }],
+          arrows: [{ t: "北匈奴西迁", at: [80, 48.9], pts: [[97,46.6],[90,47.6],[82,47.6],[74,46.8],[66,46.2]] }]
+        }
+      };
+      /* 三国（约 262 年）：from 指向东汉政权，魏蜀吴三块分别从东汉轮廓插值 */
+      (function () {
+        var weiWu = [[119.5,32.6],[118.3,32.4],[117,31.6],[115.5,31],[114.2,31.1],[113,31.6],[112.2,31.4],[111,31.9],[110.2,32.3]];
+        var weiShu = [[110.2,32.3],[109,33.2],[107.5,33.7],[106.3,34.1],[105,34],[104,34.3],[103,34.6],[102.2,34.8]];
+        var shuWu = [[110.2,32.3],[109.9,31.2],[109.3,30],[108.6,28.8],[108.6,27.2],[108.2,25.6],[106.8,24.4],[105.5,23.5],[104,22.8],[103,22.3]];
+        var rev = function (a) { return a.slice().reverse(); };
+        LAYERS[3] = {
+          view: [72, 14, 134, 50],
+          states: [
+            { id: "wei", from: "han", main: true, name: "魏", sub: "220 年曹丕称帝，都洛阳；据北方", color: "#D9644A", label: [112, 37.5],
+              capital: { name: "洛阳", ll: [112.45, 34.65] },
+              poly: [[101.5,35.5],[101,37.2],[99,38.3],[97,39],[95,39.4],[93.3,39.6],[93.3,40.4],[95.5,40.6],[97.5,40.2],[99.5,39.8],[101.5,39],[103.5,38.8],[105.5,38.8],[107,38.6],[109,39],[111,39.8],[113,40.6],[115,41],[117,41.3],[119,41.6],[121,42],[123,42.2],[124.3,42.3],[125.2,41],[126.5,40],[127.3,38.5],[127.2,37.4]]
+                .concat(coast([126.6, 37.5], [120.9, 32.7])).concat(weiWu).concat(weiShu) },
+            { id: "shu", from: "han", main: true, name: "蜀", sub: "221 年刘备称帝，都成都；占西南，含南中", color: "#5FB35A", label: [104.6, 27.8],
+              capital: { name: "成都", ll: [104.06, 30.67] },
+              poly: rev(weiShu).concat(shuWu.slice(1)).concat([[101.5,22.6],[99.5,23.5],[98.6,24.8],[98.8,26.5],[100,27.6],[101.5,28.8],[102.3,30.5],[102.8,32.2],[102.2,33.6]]) },
+            { id: "wu", from: "han", main: true, name: "吴", sub: "229 年孙权称帝，后定都建业；有江东及岭南", color: "#3FA8D9", label: [114.5, 26.3],
+              capital: { name: "建业", ll: [118.78, 32.06] },
+              poly: coast([120.9, 32.7], [107.5, 16.4]).concat([[106.5,16.2],[105.5,17.5],[104.8,19],[104,20.8]]).concat(rev(shuWu)).concat(rev(weiWu).slice(1)) },
+            { id: "xiyu", name: "西域长史府", sub: "魏在西域设置长史（虚线区，示意）", color: "#D9644A", label: [84.5, 38],
+              poly: LAYERS[2].states[1].poly },
+            { id: "xianbei", m: "xiongnu", name: "鲜卑", sub: "占据蒙古高原，南逼魏北境", color: "#5B9BEF", label: [104, 46.4],
+              poly: [[88,45],[92,48],[96,50.5],[103,51.5],[110,51.5],[117,50.5],[121,48.5],[123,46],[123.6,43],[121,42.2],[119,41.8],[117,41.5],[115,41.2],[113,40.8],[111,40],[109,39.2],[107,38.8],[105.5,39],[103.5,39],[101.5,39.2],[99.5,40],[97.5,40.4],[95.5,40.8],[93,43.4],[90.5,44.2]] },
+            { id: "gaogouli", name: "高句丽", sub: "东北方政权，与魏辽东相邻", color: "#C07CCF", label: [127.6, 42.2],
+              poly: [[124.6,42.6],[125.5,41.2],[126.8,40.1],[127.6,38.8],[128.2,38.9],[128.4,40.3],[129.7,41],[130.7,42.3],[129.5,43.6],[127.5,44.1],[125.5,43.7]] },
+            { id: "qiang", name: "羌", sub: "河湟、青海一带的羌人诸部", color: "#E0A0C0", label: [96.5, 35.4],
+              poly: LAYERS[2].states[5].poly }
+          ],
+          walls: [],
+          notes: [
+            { t: "夷洲（今台湾）", ll: [121.3, 23.4] }, { t: "南中", ll: [102.7, 25.1] }, { t: "西域长史（楼兰）", ll: [89.9, 40.5] },
+            { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ],
+          arrows: [{ t: "诸葛亮经营南中", at: [100.4, 28.6], color: "#5FB35A", pts: [[104.06,30.67],[103.6,28.8],[103.1,26.9],[102.8,25.4]] }],
+          seaLines: [{ t: "吴船队到夷洲", at: [124.2, 27.6], pts: [[118.78,32.06],[120.3,32],[122.3,31.2],[122.8,29.5],[121.8,27.4],[120.9,25.9],[120.5,24.4]] }],
+          battles: [
+            { name: "官渡之战", y: 200, ll: [114.1, 34.75], text: "曹操以少胜多败袁绍，统一北方。" },
+            { name: "赤壁之战", y: 208, ll: [113.9, 29.85], text: "孙刘联军以火攻败曹操，奠定三分格局。" },
+            { name: "夷陵之战", y: 222, ll: [111.3, 30.7], text: "陆逊火烧连营败刘备。" }
+          ]
+        };
+      })();
+      LAYERS[2].walls = LAYERS[1].walls;
+      /* 西晋（约 280 年）：jin 以 m:"han" 承接三国各块的 from:"han"，魏蜀吴三块逆向插值合并为一块 */
+      (function () {
+        var L3 = LAYERS[3].states, wei = L3[0].poly, wu = L3[2].poly;
+        var north = wei.slice(0, wei.findIndex(function (p) { return p[0] === 127.2 && p[1] === 37.4; }) + 1);
+        var sw = [[101.5,22.6],[99.5,23.5],[98.6,24.8],[98.8,26.5],[100,27.6],[101.5,28.8],[102.3,30.5],[102.8,32.2],[102.2,33.6]];
+        var nc = coast([120.9, 32.7], [107.5, 16.4]).length + 4;
+        LAYERS[4] = {
+          view: [72, 14, 134, 50],
+          states: [
+            { id: "jin", m: "han", main: true, name: "西晋", sub: "266 年建国，280 年灭吴；都洛阳", color: "#D9644A", label: [111, 27.5],
+              capital: { name: "洛阳", ll: [112.45, 34.65] },
+              poly: north.concat(coast([126.6, 37.5], [107.5, 16.4])).concat([[106.5,16.2],[105.5,17.5],[104.8,19],[104,20.8],[103,22.3]]).concat(sw) },
+            { id: "xiyu", name: "西域长史府", sub: "西晋沿置西域长史，治楼兰（虚线区，示意）", color: "#D9644A", label: [84.5, 38], poly: L3[3].poly },
+            { id: "xianbei", m: "xiongnu", name: "鲜卑", sub: "拓跋、慕容、宇文、段部等，散居北方草原与辽西", color: "#5B9BEF", label: [104, 46.4], poly: L3[4].poly },
+            { id: "gaogouli", name: "高句丽", sub: "东北方政权，与西晋辽东相邻", color: "#8FA3E8", label: [127.6, 42.2], poly: L3[5].poly },
+            { id: "qiang", name: "羌", sub: "河湟、青海一带，部分内迁关中", color: "#E0A0C0", label: [96.5, 35.4], poly: L3[6].poly },
+            { id: "nxiongnu", name: "匈奴", sub: "南匈奴后裔，内迁于并州一带", color: "#C07CCF", label: [111.9, 38.4],
+              poly: [[110.6,37],[110.9,38.9],[111.8,39.6],[113.2,39.2],[113.4,37.9],[112.4,37.2]] },
+            { id: "jie", name: "羯", sub: "匈奴别部，居上党一带", color: "#E8A23C", label: [113.2, 36.6],
+              poly: [[112.4,36],[112.5,37.1],[113.4,37.6],[114,36.8],[113.6,35.9]] },
+            { id: "di", name: "氐", sub: "居陇右略阳、关中一带", color: "#7FBF6A", label: [105.3, 34.1],
+              poly: [[104,33.4],[104.2,34.9],[105.6,35.4],[106.8,34.8],[106.4,33.5],[105,33]] }
+          ],
+          walls: [],
+          notes: [
+            { t: "拓跋", ll: [111.2, 41.8] }, { t: "段部", ll: [116.8, 42.6] }, { t: "宇文", ll: [119.6, 44.2] }, { t: "慕容", ll: [122.4, 43.1] },
+            { t: "西域长史（楼兰）", ll: [89.9, 40.5] }, { t: "建业", ll: [118.78, 32.06] },
+            { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ],
+          migs: [
+            { c: "#C07CCF", pts: [[109.4,42.2],[110.4,40.8],[111.4,39.4]] },
+            { c: "#5B9BEF", pts: [[118.6,44.2],[118.4,42.6],[118.2,41]] },
+            { c: "#E8A23C", pts: [[115,40],[114.2,38.6],[113.6,37.4]] },
+            { c: "#7FBF6A", pts: [[101.8,32.6],[103.2,33.4],[104.6,34]] },
+            { c: "#E0A0C0", pts: [[100,36.6],[102.2,36],[104.2,35.6]] }
+          ],
+          ship: [[104.06,30.67],[104.3,29.6],[104.6,28.8],[106.5,29.6],[108.5,30.8],[110.3,31],[111.3,30.7],[112.2,30.3],[113,29.5],[114.3,30.6],[116,29.7],[117.6,30.9],[118.78,32.06]]
+        };
+        /* 统一进程第一幕（266）：晋 = 魏 + 已亡之蜀，与吴对峙 */
+        var u = { view: LAYERS[4].view, walls: [], notes: LAYERS[4].notes, states: [
+          { id: "jin266", from: "han", main: true, name: "晋", sub: "266 年司马炎代魏建晋", color: "#D9644A", label: [111, 37.5], capital: { name: "洛阳", ll: [112.45, 34.65] },
+            poly: north.concat(coast([126.6, 37.5], [120.9, 32.7])).concat(wu.slice(nc).reverse()).concat(sw) },
+          Object.assign({}, L3[2], { capital: null })
+        ].concat(LAYERS[4].states.slice(1)) };
+        LAYERS[4].u266 = u;
+      })();
+      /* 东晋与十六国（约 376 年）：西晋一块（m:"han"）分为东晋、前秦南北两块 */
+      (function () {
+        var J = LAYERS[4].states[0].poly, cut = J.findIndex(function (p) { return p[0] === 125.2 && p[1] === 41; });
+        var sw = [[101.5,22.6],[99.5,23.5],[98.6,24.8],[98.8,26.5],[100,27.6],[101.5,28.8],[102.3,30.5],[102.8,32.2],[102.2,33.6]];
+        var bd = [[111,32.6],[112,32.2],[113,32.3],[114,32.6],[116,32.8],[118.5,33.4]];
+        /* 蜀地（四川、汉中）373 年已归前秦：东晋西界沿长江—巫山一线 */
+        var nb = [[103,28.4],[104.6,28.6],[106,28.4],[107.5,28.8],[108.6,29.8],[109.8,30.9],[110.3,31.8],[110.6,32.4]];
+        LAYERS[5] = {
+          view: [86, 14, 134, 48],
+          states: [
+            { id: "dongjin", from: "han", main: true, name: "东晋", sub: "317 年司马睿建立，都建康；淮河—汉水以南（蜀地 373 年已失于前秦）", color: "#3FA8D9", label: [113, 26.5],
+              capital: { name: "建康", ll: [118.78, 32.06] },
+              poly: coast([120.3, 34.3], [107.5, 16.4]).concat([[106.5,16.2],[105.5,17.5],[104.8,19],[104,20.8],[103,22.3]]).concat(sw.slice(0, 6)).concat(nb).concat(bd) },
+            { id: "qianqin", from: "han", main: true, name: "前秦", sub: "氐族苻氏，373 年取蜀，376 年统一北方，含河西、辽东、蜀地；都长安", color: "#7FBF6A", label: [106, 38.8],
+              capital: { name: "长安", ll: [108.9, 34.3] },
+              poly: J.slice(0, cut + 1).concat(coast([124.3, 39.9], [120.3, 34.3])).concat(bd.slice().reverse()).concat(nb.slice().reverse()).concat(sw.slice(5)) },
+            { id: "tuyuhun", m: "qiang", name: "吐谷浑", sub: "鲜卑慕容部西迁青海建立", color: "#E0A0C0", label: [98.4, 34.9],
+              poly: [[96,34],[97,36.8],[99.5,37.6],[101,36.8],[101.5,35.5],[102.2,33.6],[101,32.5],[98,32.6]] },
+            { id: "gaogouli", name: "高句丽", sub: "东北方政权，已据乐浪故地", color: "#8FA3E8", label: [127.4, 41.6],
+              poly: [[124.6,42.6],[125.5,43.7],[127.5,44.1],[129.5,43.6],[130.7,42.3],[129.7,41],[128.4,40.3],[128.2,38.9],[127.6,37.6]].concat(coast([126.6, 37.5], [124.3, 39.9])).concat([[125.2,41]]) }
+          ],
+          walls: [],
+          notes: [
+            { t: "柔然（雏形）", ll: [106, 46.5], big: true }, { t: "河西", ll: [99, 39.4] }, { t: "辽东", ll: [122.8, 41.4] }, { t: "江南", ll: [119.6, 29.6], big: true },
+            { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ],
+          arrows: [
+            { t: "衣冠南渡", at: [112.4, 32.9], color: "#E8A23C", pts: [[112.4,34.8],[113.6,33.2],[114.8,31.6],[117,30.8],[119.4,30.5]] },
+            { t: "", color: "#E8A23C", pts: [[117.8,35.8],[118.9,34.4],[119.6,33],[120,31.4]] }
+          ],
+          battles: [{ name: "淝水之战", y: 383, ll: [116.75, 32.55], anim: true, text: "前秦苻坚率大军南下，东晋谢安、谢玄以八万北府兵大破之。成语：投鞭断流、草木皆兵、风声鹤唳。" }],
+          fs: { go: [[108.9,34.3],[110.8,34.5],[112.8,34.2],[114.6,33.6],[116,33],[116.75,32.6]], back: [[118.78,32.06],[118.1,32.4],[117.3,32.55]], ret: [[116.5,33],[115.2,33.9],[113.4,34.5],[111.4,34.6]] }
+        };
+      })();
+      /* 南北朝（约 494 年）：前秦 → 北魏、东晋 → 南齐 形变；柔然、吐谷浑、高句丽并立 */
+      (function () {
+        var sw = [[101.5,22.6],[99.5,23.5],[98.6,24.8],[98.8,26.5],[100,27.6],[101.5,28.8],[102.3,30.5],[102.8,32.2],[102.5,33.4]];
+        var bd = [[104,33.6],[105.5,33.4],[107,33.6],[109,33.4],[111,33],[112.5,32.6],[114,32.6],[116,32.8],[117.5,33],[118.8,33.6],[119.6,34.2]];
+        var west = [[102,34.8],[101.6,36.4],[100,37.8],[98,38.8],[96,39],[93.5,39.5]];
+        var north = [[93.5,40.6],[96,41],[99,41.2],[101.5,41.8],[104,41.8],[106.5,42.2],[109,42.6],[112,42.8],[115,43],[117.5,42.8],[119.5,42.2],[121,41.6]];
+        LAYERS[6] = {
+          view: [84, 14, 134, 52],
+          states: [
+            { id: "beiwei", m: "qianqin", main: true, name: "北魏", sub: "鲜卑拓跋部，439 年统一北方；都城先平城，494 年迁洛阳", color: "#5B9BEF", label: [108, 38.6],
+              capital: { name: "洛阳", ll: [112.45, 34.65] },
+              poly: [[102.5,33.4]].concat(west, north, coast([121, 40.9], [120.3, 34.3]), bd.slice().reverse()) },
+            { id: "nanqi", m: "dongjin", main: true, name: "南齐", sub: "南朝之一，479–502，都建康；南朝依次为宋、齐、梁、陈", color: "#3FB89A", label: [112, 27],
+              capital: { name: "建康", ll: [118.78, 32.06] },
+              poly: coast([120.3, 34.3], [107.5, 16.4]).concat([[106.5,16.2],[105.5,17.5],[104.8,19],[104,20.8],[103,22.3]], sw, bd) },
+            { id: "rouran", name: "柔然", sub: "蒙古高原游牧政权，与北魏长期对峙", color: "#C07CCF", label: [104, 46.6],
+              poly: [[88,44.5],[90,47.5],[95,50],[103,51.5],[110,51.5],[117,50.5],[121,48.5],[122,46],[119.5,43.6],[117.5,43.3],[115,43.5],[112,43.3],[109,43.1],[106.5,42.7],[104,42.3],[101.5,42.3],[99,41.7],[96,41.5],[93,42.8],[90,43.5]] },
+            { id: "tuyuhun", m: "qiang", name: "吐谷浑", sub: "鲜卑慕容部西迁青海建立，与南北两朝并立", color: "#E0A0C0", label: [96.5, 35.6],
+              poly: [[90,36.5],[92,38.4],[96,39],[98,38.8],[100,37.8],[101.6,36.4],[102,34.8],[102.5,33.4],[101,32.3],[97,32.5],[93,33.8]] },
+            { id: "gaogouli", name: "高句丽", sub: "东北方政权，427 年迁都平壤，据辽东", color: "#E8A23C", label: [126.6, 41.8],
+              poly: [[121.8,41.2],[122.6,42.6],[124.6,43.4],[126.5,44.4],[129.5,43.6],[130.7,42.3],[129.7,41],[128.4,40.3],[128.6,38.5],[128.2,37]].concat(coast([126.6, 37.5], [122.2, 40.5])) }
+          ],
+          walls: [],
+          notes: [
+            { t: "平城（今大同，旧都）", ll: [113.3, 40.1] }, { t: "敦煌", ll: [94.7, 40.1] },
+            { t: "南朝：宋 → 齐 → 梁 → 陈", ll: [113.5, 23.6], big: true }, { t: "江南", ll: [119.6, 29.6], big: true },
+            { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ],
+          arrows: [{ t: "494 迁都", at: [115, 37.4], color: "#F2B544", pts: [[113.3,40.1],[113.1,38.6],[112.8,37],[112.6,35.4]] }],
+          qw: [[113.3,40.1],[113.1,38.6],[112.8,37],[112.6,35.6],[112.45,34.65]]
+        };
+      })();
+      /* 隋（约 609 年）：北魏、南齐两块（from:"sui"）合为隋一块；柔然 → 东突厥，吐谷浑 → 四郡；新增大运河图层 */
+      (function () {
+        var sw = [[101.5,22.6],[99.5,23.5],[98.6,24.8],[98.8,26.5],[100,27.6],[101.5,28.8],[102.3,30.5],[102.8,32.2],[102.5,33.4]];
+        var nw = [[102,34.8],[101.6,36.4],[100,37.8],[98,38.8],[96,39],[93.5,39.5],[93.5,40.6],[96,41],[99,41.2],[101.5,41.6],[104,41.6],[106.5,41.8],[109,41.6],[111.5,41.2],[114,41.4],[116.5,41.8],[118.5,42],[120.5,41.8],[121.6,41.2]];
+        var se = [[106.5,16.2],[105.5,17.5],[104.8,19],[104,20.8],[103,22.3]];
+        var chenB = [[103,22.3],[105,23.5],[107,25],[108.6,27],[109.5,29.2],[110.6,30.6],[112,30.4],[113.5,30.2],[115,30],[116.5,30.4],[117.8,31.2],[118.6,31.9],[120,32.1]];
+        var L6 = LAYERS[6].states, SC = "#E0884A", cap = { name: "大兴（长安）", ll: [108.9, 34.3] };
+        L6[0].from = L6[1].from = "sui";
+        var tj = [
+          { id: "dtujue", m: "rouran", name: "东突厥", sub: "蒙古高原游牧政权，6 世纪中叶代柔然而起", color: "#C07CCF", label: [106, 46.6],
+            poly: [[96,42],[98,46],[103,50],[110,51],[117,50.5],[121,48.5],[122.5,45.5],[121.6,43]].concat(nw.slice(7).reverse()) },
+          { id: "xtujue", name: "西突厥", sub: "据天山南北至中亚的游牧政权", color: "#8FA3E8", label: [80, 44.2],
+            poly: [[70,40],[72,44],[76,46.5],[82,47.5],[88,47],[92,45.5],[95.5,43],[96,41.6],[93.5,40.8],[91,40.6],[88,41.6],[84,41.8],[80,41],[76,39.8],[73,38.6]] },
+          Object.assign({}, L6[4], { sub: "东北方政权，据辽东与朝鲜半岛北部，与隋以辽河为界" })
+        ];
+        LAYERS[7] = {
+          view: [80, 16, 132, 48],
+          states: [
+            { id: "sui", main: true, name: "隋", sub: "581 年杨坚建立，589 年灭陈统一；都大兴（长安），东都洛阳", color: SC, label: [110, 29.5],
+              capital: cap, cap2: { name: "东都洛阳", ll: [112.45, 34.65] },
+              poly: nw.concat(coast([121, 40.9], [107.5, 16.4]), se, sw) },
+            { id: "sijun", m: "qiang", name: "西海等四郡", sub: "609 年击败吐谷浑后设西海、河源、鄯善、且末四郡（今青海、新疆东南）", color: "#E8B47A", label: [93, 36.6],
+              poly: [[86,39.3],[88,39.8],[91,39.8]].concat(nw.slice(0, 6).reverse(), [[101.5,33.8],[99.5,33.2],[97,33.6],[94,34.8],[90,36],[87,37],[85.5,38]]) }
+          ].concat(tj),
+          walls: [],
+          notes: [
+            { t: "西海郡", ll: [99.3, 36.4] }, { t: "河源郡", ll: [99.4, 35.1] }, { t: "鄯善郡", ll: [88.2, 39] }, { t: "且末郡", ll: [85.6, 38.1] },
+            { t: "609 年新设四郡", ll: [92.5, 35.2], big: true }, { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ],
+          canal: [
+            { name: "永济渠", y: 608, c: "#5B9BEF", a: "洛阳", b: "涿郡", ll: [114.9, 36.4], text: "起止：洛阳—涿郡（今北京一带）。沟通黄河与海河水系。",
+              pts: [[112.45,34.65],[113.4,35.1],[114.2,35.6],[114.9,36.4],[115.5,37.4],[116.1,38.3],[116.4,39.2],[116.3,39.9]] },
+            { name: "通济渠", y: 605, c: "#2EC4B6", a: "洛阳", b: "山阳（淮河）", ll: [115.6, 34.4], text: "起止：洛阳—淮河（山阳）。沟通黄河与淮河水系。",
+              pts: [[112.45,34.65],[113.6,34.8],[114.35,34.8],[115.6,34.4],[116.8,33.7],[118.2,33.2],[119.15,33.5]] },
+            { name: "邗沟", y: 605, c: "#F2B544", a: "山阳", b: "江都", ll: [119.3, 33], text: "起止：山阳（今淮安）—江都（今扬州）。沟通淮河与长江水系。",
+              pts: [[119.15,33.5],[119.3,33],[119.42,32.39]] },
+            { name: "江南河", y: 610, c: "#B48CF0", a: "京口", b: "余杭", ll: [120.6, 31.3], text: "起止：京口（今镇江）—余杭（今杭州）。沟通长江与钱塘江水系。",
+              pts: [[119.45,32.2],[119.95,31.78],[120.3,31.57],[120.6,31.3],[120.6,30.75],[120.16,30.27]] }
+          ]
+        };
+        /* 统一进程第一幕（581）：隋与陈南北对峙，吐谷浑仍据青海 */
+        LAYERS[7].u581 = { view: LAYERS[7].view, walls: [], notes: LAYERS[7].notes.slice(-2), states: [
+          { id: "sui581", from: "sui", main: true, name: "隋", sub: "581 年杨坚代北周建隋，都大兴（长安）", color: SC, label: [108, 37.5], capital: cap,
+            poly: nw.concat(coast([121, 40.9], [120.9, 32.7]), chenB.slice().reverse(), sw) },
+          { id: "chen", from: "sui", main: true, name: "陈", sub: "南朝最后一朝，都建康；589 年为隋所灭", color: "#3FB89A", label: [113, 26],
+            capital: { name: "建康", ll: [118.78, 32.06] }, poly: coast([121.9, 31.7], [107.5, 16.4]).concat(se.slice(0, 4), chenB) },
+          Object.assign({}, L6[3], { sub: "据青海；609 年被隋击败" })
+        ].concat(tj) };
+      })();
+      /* 唐前期（约 669 年）：唐直辖州县（实色，m:"sui" 承隋形变）+ 都护府羁縻区（jm：同色浅填 + 斜线 + 虚线边界）；吐蕃、新罗并立 */
+      (function () {
+        var TC = "#E5604A", sw = [[101.5,22.6],[99.5,23.5],[98.6,24.8],[98.8,26.5],[100,27.6],[101.5,28.8],[102.3,30.5],[102.8,32.2],[102.5,33.4]];
+        var west = [[102,34.8],[101.6,36.4],[100,37.8],[98,38.8],[96,39],[93.5,39.5]];
+        var xz = [[91.5,40.6],[88.5,42.3],[89.5,43.5],[93,43.6],[95.5,42.3]];
+        var north = [[96,41],[99,41.2],[101.5,41.6],[104,41.6],[106.5,41.8],[109,41.6],[111.5,41.2],[114,41.4],[116.5,41.8],[118.5,42],[120.5,41.8],[121.6,41.2]];
+        var an = [[107,22.4],[106,22.8],[104.5,23],[103,22.6]], ko = [[128,40],[127.5,39.2],[126.6,38.7]];
+        var mb = [[121.6,43],[120,46],[117,47.5],[112,46.6],[106,46],[100,45.6],[96,46],[95.5,44.5]];
+        var rev = function (a) { return a.slice().reverse(); }, jm = "都护府 · 羁縻府州";
+        LAYERS[8] = {
+          view: [58, 12, 140, 58],
+          states: [
+            { id: "tang", m: "sui", main: true, name: "唐", sub: "直辖州县（实色）；618 年建立，都长安", color: TC, label: [110, 29.5],
+              capital: { name: "长安", ll: [108.9, 34.3] },
+              poly: west.concat(xz, north, coast([121, 40.9], [108.5, 21.6]), an, sw) },
+            { id: "anxi", jm: true, m: "xtujue", name: "安西都护府", sub: jm + "：640 年设于西州，后移治龟兹；辖天山以南及葱岭以西至咸海一带", color: TC, label: [72, 39.6],
+              poly: [[93.5,39.5],[91.5,40.6],[88.5,42.3],[85,42.8],[81,42.6],[77,41.6],[74,42],[71,43.6],[67,45],[63,46.4],[60,46],[60,40.5],[62.5,37.5],[66,36.4],[70.5,36.6],[74,36.4],[77,35.6],[81,35.8],[85,36.6],[89,37.6]] },
+            { id: "beiting", jm: true, name: "北庭（702 年设）", sub: jm + "：702 年设北庭都护府，管天山以北（本图 669 年仍属安西所辖，作注记）", color: TC, label: [83, 45.6],
+              poly: [[88.5,42.3],[89.5,43.5],[93,43.6],[95.5,44.5],[92,47],[88,48.5],[84,48],[79,47.5],[75,46.5],[71,43.6],[74,42],[77,41.6],[81,42.6],[85,42.8]] },
+            { id: "anbei", jm: true, m: "dtujue", name: "安北都护府", sub: jm + "：辖漠北，北抵贝加尔湖以北", color: TC, label: [100.5, 49.6],
+              poly: [[96,46],[95,50],[97,53],[102,55.5],[108,57.5],[114,56.5],[118,53],[120,49.5]].concat(mb.slice(2, 7)) },
+            { id: "danyu", jm: true, name: "单于都护府", sub: jm + "：辖漠南，东突厥故地（630 年击败东突厥）", color: TC, label: [108, 44],
+              poly: north.concat(mb).concat([[95.5,42.3]]) },
+            { id: "andong", jm: true, m: "gaogouli", name: "安东都护府", sub: jm + "：668 年设于平壤，辖朝鲜半岛北部及辽东", color: TC, label: [126.6, 43.6],
+              poly: [[121.6,41.2],[122.5,43],[124,45.5],[127,47],[130,46],[131.5,44]].concat(coast([130.7, 42.3], [128, 40]), ko.slice(1), coast([124.7, 38.5], [121, 40.9])) },
+            { id: "annan", jm: true, name: "安南都护府", sub: jm + "：治交州，南到今越南中部", color: TC, label: [103.6, 18.6],
+              poly: coast([108.5, 21.6], [107.5, 16.4]).concat([[106.5,16.2],[105.5,17.5],[104.8,19],[104,20.8],[103,22.3]], rev(an)) },
+            { id: "tubo", m: "qiang", name: "吐蕃", sub: "据青藏高原，都逻些（今拉萨）；641 年文成公主入藏", color: "#C07CCF", label: [87, 32.6],
+              poly: [[78,35.5],[81,35.8],[85,36.6],[89,37.6],[93.5,39.5]].concat(rev(west), [[102.5,33.4]], rev(sw).slice(1, 6), [[97,27.8],[94,27.5],[91,27],[88,27.2],[85,28.3],[81,29.8],[78.5,32]]) },
+            { id: "xinluo", name: "新罗", sub: "据朝鲜半岛南部，与唐联合灭百济、高句丽", color: "#3FB89A", label: [127.9, 36.2],
+              poly: coast([128, 40], [125, 37.7]).concat(rev(ko).slice(0, 2)) }
+          ],
+          walls: [],
+          notes: [
+            { t: "龟兹（安西都护府治）", ll: [83, 41.7] }, { t: "西州", ll: [89.2, 42.9] }, { t: "平壤（安东都护府治）", ll: [125.75, 39.02] },
+            { t: "交州", ll: [105.8, 21] }, { t: "逻些（今拉萨）", ll: [91.1, 29.65] }, { t: "咸海一带", ll: [60.6, 47.4], big: true },
+            { t: "贝加尔湖以北", ll: [108, 58.3], big: true }, { t: "日本", ll: [137.5, 38.6], big: true }, { t: "漠南", ll: [112, 43.4], big: true },
+            { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ],
+          ev: [
+            { t: "630 · 击败东突厥", y: 630, at: 0, dur: 2.5, c: "#ef6461", ll: [114.8, 40.2], pts: [[108.9,34.3],[109.6,37],[110.6,39.4],[111.4,41.6],[111,44]] },
+            { t: "641 · 文成公主入藏", y: 641, at: 3, dur: 3, dash: true, ll: [97.6, 30.9], pts: [[108.9,34.3],[105.7,34.6],[103.8,36.1],[101.7,36.6],[99.5,35],[97,33],[94,31.5],[91.1,29.65]] },
+            { t: "657 · 灭西突厥", y: 657, at: 6.5, dur: 2.5, c: "#ef6461", ll: [81.5, 45.2], pts: [[89.2,42.9],[86,44],[82,44.2],[78.5,43.4],[75.4,42.8]] }
+          ]
+        };
+      })();
+      /* 唐后期（约 790 年）：唐实际控制区收缩（m:"sui" 承前期形变，羁縻区消失），吐蕃（m:"qiang"）东扩河西陇右，回鹘承安北（m:"dtujue"）；ev 为安史之乱动画，fz 为藩镇示意 */
+      (function () {
+        var tw = [[102.5,33.4],[104,34.6],[105.6,35.6],[106.2,37],[106.4,38.6],[106.6,40.2]];
+        var ny = [[103,22.3],[103.8,23.6],[104.3,25.5],[103.8,27.4],[102.8,28.6]];
+        var rev = function (a) { return a.slice().reverse(); };
+        LAYERS[9] = {
+          view: [70, 14, 138, 56],
+          states: [
+            { id: "tang", m: "sui", main: true, name: "唐", sub: "实际控制区明显缩小，西北失去河西、陇右与西域；都长安", color: "#E5604A", label: [111, 29.5],
+              capital: { name: "长安", ll: [108.9, 34.3] },
+              poly: tw.concat([[106.5,41.8],[109,41.6],[111.5,41.2],[114,41.4],[116.5,41.8],[118.5,42],[120.5,41.8],[121.6,41.2]], coast([121, 40.9], [107.5, 16.4]), [[106.5,16.2],[105.5,17.5],[104.8,19],[104,20.8]], ny, [[102.6,30.3],[102.8,32.2]]) },
+            { id: "tubo", m: "qiang", name: "吐蕃", sub: "据青藏高原，乘安史之乱占领河西、陇右；范围最大时可达今新疆南部", color: "#C07CCF", label: [88, 33],
+              poly: [[74,40],[78,41.2],[82,41.8],[86,42.2],[89,42.6],[93,42],[96,41.2],[99.5,41.2],[102.5,40],[104.8,38.6]].concat(rev(tw).slice(2), [[102.8,32.2],[102.6,30.3],[102.8,28.6],[100.5,28.2],[99,28],[97,27.8],[94,27.5],[91,27],[88,27.2],[85,28.3],[81,29.8],[78.5,32],[78,35.5],[75,36.5],[73.5,38.5]]) },
+            { id: "huigu", m: "dtujue", name: "回鹘", sub: "称雄漠北，曾助唐平定安史之乱", color: "#7FBF6A", label: [104, 48.5],
+              poly: [[95.5,44.5],[95,50],[97,53],[102,55.5],[108,57.5],[114,56.5],[118,53],[120,49.5],[118,47],[112,45],[106,43.6],[100,43.6]] },
+            { id: "nanzhao", name: "南诏", sub: "崛起于云南，都太和城（今大理附近）", color: "#E0A43A", label: [101.2, 25.4],
+              poly: [[98.6,24.8],[98.8,26.5],[100,27.6],[100.5,28.2]].concat(rev(ny), [[101.5,22.6],[99.5,23.5]]) },
+            { id: "bohai", name: "渤海国", sub: "据东北，号称“海东盛国”", color: "#5B9BEF", label: [128.5, 45],
+              poly: [[122,42.2],[123.5,45.5],[126,47.5],[129.5,48],[133,47],[135,45]].concat(coast([135, 43.5], [128, 40]), [[127,39.6],[126,40.6],[124.5,41.5],[123,41.6]]) },
+            { id: "xinluo", name: "新罗", sub: "据朝鲜半岛中南部", color: "#3FB89A", label: [127.9, 36.2],
+              poly: coast([128, 40], [124.7, 38.5]).concat([[125.5,39],[126.2,39.6],[127,39.6]]) }
+          ],
+          walls: [],
+          notes: [
+            { t: "范阳", ll: [116.4, 39.9] }, { t: "洛阳", ll: [112.45, 34.65] }, { t: "灵武", ll: [106.3, 38.1] }, { t: "逻些（今拉萨）", ll: [91.1, 29.65] },
+            { t: "河西", ll: [98.6, 40], big: true }, { t: "陇右", ll: [103, 35.6], big: true }, { t: "“海东盛国”", ll: [128.5, 43.7], big: true },
+            { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ],
+          tgl: "▶ 播放安史之乱 755–763", evn: "安史之乱箭头",
+          ev: [
+            { t: "755–756 · 叛军南下，攻陷洛阳、长安", at: 0, dur: 3.5, c: "#ef6461", ll: [114.6, 36.2], pts: [[116.4,39.9],[115.4,38],[114.5,36.2],[113.2,35.2],[112.45,34.65],[110.5,34.5],[109.2,34.3]] },
+            { t: "调西北边兵东援平叛", at: 3.5, dur: 3, c: "#4A90D9", ll: [104.5, 38.6], pts: [[96.5,40.2],[100.5,38.9],[102.6,37.9],[104.6,37.6],[106.3,38.1],[107.8,36.2],[108.8,34.6]] },
+            { t: "吐蕃东北进，占河西、陇右", at: 6.5, dur: 3, c: "#C07CCF", ll: [97.5, 37.2], pts: [[91.1,31.5],[95,33.6],[99,35.6],[101.7,36.6],[102.6,37.9],[99,39.8]] },
+            { t: "763 · 吐蕃一度攻入长安", at: 9.5, dur: 1.5, dash: true, c: "#C07CCF", ll: [106, 33.4], pts: [[101.7,36.6],[104,35.4],[106.5,34.6],[108.9,34.3]] }
+          ],
+          fz: [
+            { t: "卢龙", h: 1, poly: [[115,39.2],[118.5,39.4],[118.6,41],[115.2,40.8]] }, { t: "成德", h: 1, poly: [[113.8,37.4],[115.8,37.4],[115.9,38.9],[113.9,39]] },
+            { t: "魏博", h: 1, poly: [[114.4,35.5],[116.4,35.6],[116.3,37.1],[114.3,37.1]] }, { t: "淄青", poly: [[116.8,35],[120,35.5],[120,37.2],[117,37.1]] },
+            { t: "淮西", poly: [[113.4,32.4],[115.2,32.4],[115.2,33.6],[113.4,33.6]] }
+          ]
+        };
+      })();
+      /* 五代十国（约 950 年）：唐（m:"sui"）碎裂为后周、北汉与南方诸国（from:"sui"）；契丹承渤海（m:"bohai"），吐蕃诸部、回鹘、大理承前；yy 为燕云十六州 */
+      (function () {
+        var hz = [[104.5,34.5],[105.5,34.4],[107,34],[108.5,33.2],[109.5,32.6],[110,31.8]], hjn = [[111,30.9],[112,31.2],[113.2,30.8],[114.3,31.3],[114.5,32.2]];
+        var huai = [[114.5,32.2],[116,32.5],[117.5,33],[119,33.6],[120.3,34.3]], bh = [[111.2,38.6],[112.2,39.2],[113.4,39.3],[114,38.6],[113.8,37.2],[113.2,36.3],[111.6,36.1],[110.6,36.6]];
+        var yyS = [[112.2,39.2],[113.4,39.3],[114,38.6],[115,39],[116.2,38.9],[117.2,38.9],[117.8,38.7]];
+        var w1 = [[121,31.6],[120.2,31.5],[119.6,31.1],[119.3,30.2],[118.6,28.3]], w2 = [[117.8,27.6],[117,26.4],[116.4,25.3],[116,24.6]], wm = [[118.6,28.3],[118.9,27.9],[119.6,27.4],[120.5,27.1]];
+        var nc = [[113.8,29.2],[113.7,28],[113.9,26.5],[114.2,25.4]], hn = [[114.2,25.4],[113.6,25.3],[112.8,25.2],[111.5,25],[110,25.3],[108.5,25.1],[107,24.8],[105.5,24]];
+        var rev = function (a) { return a.slice().reverse(); };
+        LAYERS[10] = {
+          view: [74, 16, 136, 54],
+          states: [
+            { id: "houzhou", from: "sui", main: true, name: "后周", sub: "五代最后一朝，951 年郭威建立；据中原，都开封（汴梁）", color: "#E5604A", label: [113.6, 35.4],
+              capital: { name: "开封（汴梁）", ll: [114.35, 34.8] },
+              poly: hz.concat(hjn, huai.slice(1), rev(coast([117.8, 38.7], [120.3, 34.3])), rev(yyS).slice(0, 5), [[113.8,37.2],[113.2,36.3],[111.6,36.1],[110.6,36.6],[110.6,38.4],[109.5,38.6],[107.5,37.5],[106,36]]) },
+            { id: "beihan", from: "sui", name: "北汉", sub: "十国中唯一在北方：据今山西，都太原；依附契丹", color: "#E8B47A", label: [112.4, 37.7],
+              capital: { name: "太原", ll: [112.55, 37.87] }, poly: bh },
+            { id: "nantang", from: "sui", name: "南唐", sub: "据江淮及今江西，都金陵（今南京）", color: "#3FA8D9", label: [116.4, 29.8],
+              capital: { name: "金陵", ll: [118.78, 32.06] },
+              poly: huai.concat(coast([120.3, 34.3], [121.9, 31.7]), w1, w2, [[115,24.6]], nc.slice().reverse(), [[114.1,30.3],[114.3,31.3]]) },
+            { id: "wuyue", from: "sui", name: "吴越", sub: "★ 浙江考生重点：据今浙江及苏南，都杭州；保境安民，修海塘，推动江南经济发展", color: "#3FB89A", label: [120.1, 29],
+              capital: { name: "杭州", ll: [120.16, 30.27] },
+              poly: rev(w1).concat(coast([121.9, 31.7], [120.5, 27.1]), rev(wm).slice(1)) },
+            { id: "min", from: "sui", name: "闽", sub: "据今福建，都长乐（今福州）；945 年为南唐、吴越所分（示意其故地）", color: "#8FA3E8", label: [117.9, 25.9],
+              capital: { name: "福州", ll: [119.3, 26.08] },
+              poly: wm.concat(coast([120.5, 27.1], [117, 23.6]), [[116.6,24.2]], rev(w2)) },
+            { id: "nanhan", from: "sui", name: "南汉", sub: "据今广东、广西，都兴王府（今广州）", color: "#E0A0C0", label: [110.8, 23.4],
+              capital: { name: "兴王府", ll: [113.26, 23.13] },
+              poly: [[116,24.6],[116.6,24.2]].concat(coast([117, 23.6], [108.5, 21.6]), [[107.5,22],[106.5,22.6],[105.8,23.3]], rev(hn), [[115,24.6]]) },
+            { id: "chu", from: "sui", name: "楚", sub: "据今湖南，都长沙；951 年为南唐所灭", color: "#E8A23C", label: [111.6, 27.2],
+              capital: { name: "长沙", ll: [112.94, 28.23] },
+              poly: hn.slice(0, 6).concat([[109.2,26],[109.5,27.5],[109.8,29.2],[111,29.6],[112.2,29.5],[113.4,29.6]], nc) },
+            { id: "jingnan", from: "sui", name: "荆南", sub: "又称南平，十国中最小，据江陵一带", color: "#D9822B", label: [112.1, 30.25],
+              capital: { name: "江陵", ll: [112.2, 30.35] },
+              poly: [[111,29.6],[111,30.9],[112,31.2],[113.2,30.8],[113.8,29.9],[113.4,29.6],[112.2,29.5]] },
+            { id: "houshu", from: "sui", name: "后蜀", sub: "据今四川及汉中，都成都", color: "#5FB35A", label: [105.6, 31.6],
+              capital: { name: "成都", ll: [104.07, 30.67] },
+              poly: hz.concat([[110.5,30.9],[109.8,29.2],[108,28.5],[106,28],[104.5,27.8],[103.5,28],[102.8,29.2],[102.5,30.5],[102.6,31.5],[103,32.5],[103.6,33.5]]) },
+            { id: "liao", m: "bohai", name: "契丹（辽）", sub: "据北方，都上京临潢府；936 年得燕云十六州，947 年改国号为辽；926 年灭渤海", color: "#5B9BEF", label: [118.5, 46],
+              capital: { name: "上京", ll: [119.2, 43.97] },
+              poly: [[111.2,39.6]].concat(yyS, rev(coast([124.3, 39.9], [118, 39])), [[125.6,40.4],[127,41],[128.5,42],[130.7,42.3],[132.5,44.5],[134,47.5],[132,49.2],[128,50.5],[124,51.5],[120,52],[116,50],[112,48.5],[108,47.5],[106,45],[105.5,43],[107,41.8],[109.5,41.2],[111,40.4]]) },
+            { id: "tubo", m: "qiang", name: "吐蕃诸部", sub: "吐蕃王朝已瓦解，青藏高原各部分立", color: "#C07CCF", label: [88, 33],
+              poly: [[78,35.5],[80,36],[84,36.2],[88,37.2],[92,38],[96,38.3],[99,37.6],[101,37.8],[102.5,36],[103.6,33.5],[103,32.5],[102.6,31.5],[102.5,30.5],[102.8,29.2],[100.8,28.4],[100,27.6],[97,27.8],[94,27.5],[91,27],[88,27.2],[85,28.3],[81,29.8],[78.5,32]] },
+            { id: "huigu", m: "dtujue", name: "回鹘", sub: "西迁后分为甘州回鹘（河西）与高昌回鹘（今吐鲁番一带）", color: "#7FBF6A", label: [94, 42.6],
+              poly: [[86,42.2],[88,44.5],[92,45],[96,43.5],[99,41.5],[101.5,39.5],[102.5,38],[101,37.8],[98.5,39],[95.5,40],[92,41.5],[88,41.6]] },
+            { id: "dali", m: "nanzhao", name: "大理", sub: "南诏后继，937 年段思平建立，都羊苴咩城（今大理）", color: "#E0A43A", label: [101.4, 24.9],
+              capital: { name: "大理", ll: [100.2, 25.6] },
+              poly: [[98.6,24.8],[98.8,26.5],[100,27.6],[100.8,28.4],[102.8,29.2],[103.5,28],[104.5,26.5],[105.5,24],[105.8,23.3],[104,22.8],[103,22.3],[101.5,22],[99.5,23]] }
+          ],
+          walls: [],
+          notes: [
+            { t: "幽州（今北京）", ll: [116.4, 39.9] }, { t: "云州（今大同）", ll: [113.3, 40.1] },
+            { t: "渤海已亡于契丹（926）", ll: [129.5, 45.5], big: true }, { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ],
+          yy: [[111.2,39.6]].concat(yyS, [[118,39],[119,39.3],[119.5,40],[118.5,40.9],[117,41.1],[115.5,41.2],[114,41.1],[112.8,40.8],[111.6,40.4]])
+        };
+        /* 北宋、辽、西夏并立（约 1005–1044）：北宋 m:"sui"，五代十国诸块（from:"sui"）形变并入；sg 为 960→979 各国并入时刻（秒） */
+        var L10 = LAYERS[10].states;
+        LAYERS[11] = {
+          view: [70, 16, 136, 54], bn: "和约标记", yun: LAYERS[10].yy, bgh: yyS.slice(2),
+          sg: { jingnan: 1.6, chu: 1.6, houshu: 2.6, nanhan: 3.6, nantang: 4.6, wuyue: 5.6, min: 5.6, beihan: 6.8 },
+          states: [
+            { id: "song", m: "sui", main: true, name: "北宋", sub: "960 年赵匡胤建立，都东京开封；北界白沟河一线，燕云十六州在辽境内", color: "#E5604A", label: [113.4, 30.4],
+              capital: { name: "东京开封", ll: [114.35, 34.8] },
+              poly: [[103.6,33.5],[104.5,34.5],[106,36],[107.5,37.5],[109.5,38.6],[110.6,38.4],[111.2,38.6]].concat(yyS, coast([117.8, 38.7], [108.5, 21.6]),
+                [[107.5,22],[106.5,22.6],[105.8,23.3],[105.5,24],[104.5,26.5],[103.5,28],[102.8,29.2],[102.5,30.5],[102.6,31.5],[103,32.5]]) },
+            Object.assign({}, L10[9], { name: "辽", sub: "契丹族建立，都上京临潢府；含燕云十六州与东北、蒙古高原东部" }),
+            { id: "xixia", name: "西夏", sub: "党项族建立，1038 年元昊称帝，都兴庆府（今银川）；据河套与河西走廊", color: "#E0A43A", label: [102.6, 40.2],
+              capital: { name: "兴庆府", ll: [106.27, 38.47] },
+              poly: [[93.5,39.8],[93.5,40.4],[95,41],[97.5,41.2],[100,41.6],[102.5,42],[105,42.2],[107,41.6],[109.5,41],[111,40.3],[110.8,39.4],[110.6,38.4],[109.5,38.6],[107.5,37.5],[106,36],[104.5,35.6],[103.5,36.3],[102.5,37],[101,38],[99,38.6],[97,39.2],[95,39.5]] },
+            Object.assign({}, L10[12], { id: "dali", sub: "南诏后继，937 年段思平建立，都羊苴咩城（今大理）；据今云南" }),
+            { id: "xizhou", m: "dtujue", name: "西州回鹘", sub: "又称高昌回鹘，据今吐鲁番一带及天山东部", color: "#7FBF6A", label: [88.6, 43.2],
+              poly: [[83,41.5],[83.5,44],[87,45],[90.5,45.2],[93,44],[93.5,42.5],[93.2,40.8],[91,40.6],[88,41],[85.5,41]] },
+            { id: "kara", name: "喀喇汗王朝", sub: "注记：据今新疆西部与中亚，都喀什噶尔（今喀什）等，信奉伊斯兰教", color: "#9A8F86", label: [77.6, 40.2],
+              poly: [[72,37],[72,42],[75,43.5],[78,43.6],[81,43],[83,41.5],[85.5,41],[84,38.5],[81,37.6],[78,36.6],[75,36.5]] },
+            Object.assign({}, L10[10], { name: "吐蕃诸部", sub: "青藏高原各部分立；青海唃厮啰政权都青唐城（今西宁），与宋交好", capital: { name: "青唐（唃厮啰）", ll: [101.78, 36.62] } }),
+            { id: "goryeo", name: "高丽", sub: "918 年王建建立，都开京（今开城）；据朝鲜半岛", color: "#C07CCF", label: [128.1, 36.4],
+              capital: { name: "开京", ll: [126.55, 37.97] },
+              poly: coast([128, 40], [124.3, 39.9]).concat([[125.6,40.4],[126.8,40.7],[127.6,40.4]]) }
+          ],
+          walls: [],
+          battles: [
+            { name: "澶渊之盟", y: 1005, ll: [115.03, 35.76], tr: true,
+              text: "辽军南下，宋真宗亲至澶州（今河南濮阳），景德元年末订立盟约：宋每年给辽银十万两、绢二十万匹，双方以白沟河为界，此后百余年间宋辽保持和平。" },
+            { name: "宋夏和议", y: 1044, ll: [108.6, 36.9], tr: true,
+              text: "宋夏战争后双方议和：西夏向宋称臣，宋每年给西夏银、绢、茶，恢复边境榷场贸易，此后宋夏长期保持和平。" }
+          ],
+          notes: [
+            { t: "幽州（辽南京，今北京）", ll: [116.4, 39.9] }, { t: "云州（辽西京，今大同）", ll: [113.3, 40.1] },
+            { t: "河西走廊", ll: [98.6, 40.3], big: true }, { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ]
+        };
+      })();
+      /* 960→979：后周底图改称北宋，十国按灭亡顺序改为宋色；8.5 s 起形变为并立格局，11.5 s 结束 */
+      var SG_CAP = [[0, "960 年 · 陈桥兵变，赵匡胤建立北宋，都东京开封"], [1.6, "963 年 · 灭荆南、湖南"], [2.6, "965 年 · 灭后蜀"], [3.6, "971 年 · 灭南汉"],
+        [4.6, "975 年 · 灭南唐"], [5.6, "978 年 · 吴越、漳泉纳土归宋"], [6.8, "979 年 · 灭北汉，统一中原（燕云十六州仍属辽）"], [8.5, "此后北宋与辽、西夏长期并立"]];
+      function sgLayer(k) {
+        var A = LAYERS[10], B = LAYERS[11], song = B.states[0];
+        var M = { view: B.view, walls: [], notes: A.notes, states: A.states.map(function (s, i) {
+          if (i > 8) return s;
+          var hz = s.id === "houzhou";
+          return hz || k >= B.sg[s.id] ? Object.assign({}, s, { color: song.color, name: hz ? "北宋" : "", main: hz, capital: hz ? song.capital : null }) : s;
+        }) };
+        if (k < 8.5) return M;
+        var e = Math.min(1, (k - 8.5) / 1.5);
+        return morphLayer(M, B, e < 0.5 ? 2 * e * e : 1 - Math.pow(2 - 2 * e, 2) / 2);
+      }
+      function drawSy(c, now) {
+        var L = LAYERS[11], serif = '600 16px "Noto Serif SC","Songti SC",serif';
+        if (state.un) {
+          var k = unK(), t = SG_CAP.filter(function (x) { return x[0] <= k; }).pop();
+          return label(t[1], unproj(W / 2, H - 56), { color: c.ink, font: serif });
+        }
+        var pulse = RM.matches ? 0.5 : 0.5 + 0.5 * Math.sin((now || 0) / 260);
+        path(L.yun, true); ctx.strokeStyle = c.halo; ctx.lineWidth = 7; ctx.stroke();
+        ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3 + pulse * 1.5; ctx.stroke();
+        path(L.bgh); ctx.strokeStyle = c.halo; ctx.lineWidth = 6; ctx.stroke();
+        ctx.strokeStyle = c.river; ctx.lineWidth = 3; ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([]);
+        if (state.show.note) label("白沟河（宋辽界）", [116.4, 38.4], { color: c.river, font: "600 12px system-ui, sans-serif" });
+        label("燕云十六州", [115.4, 40.6], { color: c.ink, font: serif });
+        label("北宋始终未收复燕云十六州", unproj(W / 2, H - 56), { color: "#ef6461", font: serif });
+      }
+      /* ---------- 第 13 章：南宋、金、西夏并立（约 1142）；sx＝绍兴和议界线（东淮水、西大散关） ---------- */
+      (function () {
+        var B = LAYERS[11].states, sx = [[104.3,34],[105.5,34.3],[106.9,34.3],[108.5,33.8],[110,33.3],[111,33],[112,32.6],[113.5,32.4],[114.5,32.2],[116,32.5],[117.5,33],[119,33.6],[120.3,34.3]];
+        var west = [[107.5,22],[106.5,22.6],[105.8,23.3],[105.5,24],[104.5,26.5],[103.5,28],[102.8,29.2],[102.5,30.5],[102.6,31.5],[103,32.5],[103.6,33.5]];
+        LAYERS[12] = {
+          view: [64, 16, 136, 54], bn: "岳飞北伐", sx: sx,
+          states: [
+            { id: "nansong", m: "sui", main: true, name: "南宋", sub: "1127 年宋高宗建立，定都临安（今杭州）；北界东以淮水、西以大散关", color: "#E5604A", label: [113.4, 27.6],
+              capital: { name: "临安（今杭州）", ll: [120.16, 30.25] }, poly: sx.concat(coast([120.3, 34.3], [108.5, 21.6]), west) },
+            { id: "jin", m: "bohai", main: true, name: "金", sub: "女真族建立，1115 年阿骨打称帝；据原辽东部与淮河以北华北，后迁都中都（燕京，今北京）", color: "#6C8CD5", label: [122.5, 45.6],
+              capital: { name: "中都（燕京）", ll: [116.4, 39.9] },
+              poly: [[104.3,34],[104.5,35.6],[106,36],[107.5,37.5],[109.5,38.6],[110.6,38.4],[110.8,39.4],[111,40.3],[109.5,41],[107,41.6],[109,42.5],[112,44],[115,46],[118,48],[120,50],[124,51.5],[128,50.5],[132,49.2],[134,47.5],[132.5,44.5],[130.7,42.3],[128.5,41.6],[127.6,40.4],[126.8,40.7],[125.6,40.4]].concat(coast([124.3, 39.9], [120.3, 34.3]), sx.slice().reverse().slice(1)) },
+            Object.assign({}, B[2], { sub: "党项族建立，都兴庆府（今银川）；据河套与河西走廊，向金称臣" }),
+            Object.assign({}, B[3], { sub: "段氏政权，都羊苴咩城（今大理）；据今云南，与南宋并存" }),
+            { id: "xiliao", m: "kara", name: "西辽", sub: "1132 年契丹贵族耶律大石建立，据中亚七河流域，都虎思斡耳朵", color: "#5FB35A", label: [78, 43.6],
+              capital: { name: "虎思斡耳朵", ll: [75.3, 42.8] },
+              poly: [[66,40],[68,43],[72,45.5],[77,47],[82,47.5],[86,46.5],[90,45],[93,44],[93.5,42.5],[93.2,40.8],[88,40.5],[84,38.5],[80,37.2],[76,37],[72,37.5],[68,38.5]] },
+            Object.assign({}, B[6], { sub: "青藏高原各部分立，未形成统一政权" }),
+            { id: "mongol", name: "蒙古诸部", sub: "注记：漠北草原诸部（蒙古、克烈、乃蛮等），尚未统一", color: "#9A8F86", label: [103, 47.5],
+              poly: [[88,47],[92,50],[98,52],[106,52.5],[114,51],[120,50],[118,48],[115,46],[112,44],[109,42.5],[107,41.6],[105,42.2],[102.5,42],[100,41.6],[97.5,41.2],[95,41],[93.5,42.5],[93,44],[90,45]] },
+            Object.assign({}, B[7], { sub: "王氏高丽，都开京（今开城）；向金称臣" })
+          ],
+          walls: [],
+          arrows: [{ t: "耶律大石西迁 → 七河流域", at: [92, 47.6], color: "#5FB35A", pts: [[112,44.5],[104,46.8],[96,46.6],[88,45.4],[80,44]] }],
+          battles: [{ name: "郾城大捷", y: 1140, ll: [114.02, 33.58], text: "1140 年岳飞北伐，在郾城（今河南漯河）大败金军，进抵朱仙镇；随后被召回，1142 年宋金达成绍兴和议。" }],
+          notes: [
+            { t: "开封（北宋旧都，1127 陷落）", ll: [114.35, 34.8] }, { t: "上京会宁府（金初都）", ll: [126.95, 45.5] },
+            { t: "漠北", ll: [104, 49.8], big: true }, { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }
+          ]
+        };
+      })();
+      /* 1115→1142 事件动画：0–2 s 阿骨打建金，2–4 s 灭辽，4–7 s 金军南下开封，7–10 s 南渡形变（星标开封→临安），11.5 s 结束 */
+      var NS_J0 = [[124,43.5],[124.5,46.5],[127,47.8],[130,47],[131,45],[129.5,43.6],[127,43]], NS_MV = [[114.35,34.8],[116.4,33.3],[118.6,31.8],[120.16,30.25]];
+      function nsLayer(k) {
+        var A = LAYERS[11], Z = LAYERS[12], liao = A.states[1], jin = Z.states[1], ease = function (e) { return e < 0.5 ? 2 * e * e : 1 - Math.pow(2 - 2 * e, 2) / 2; };
+        var mk = function (poly, a) { return Object.assign({}, jin, { poly: poly, alpha: a, capital: null }); };
+        var mid = { view: Z.view, walls: [], notes: A.notes, states: A.states.map(function (s, i) { return i === 1 ? mk(liao.poly, 1) : s; }) };
+        if (k < 2) { var e = Math.min(1, k / 1.2), c0 = centroid(NS_J0);
+          return { view: Z.view, walls: [], notes: A.notes, states: A.states.concat([mk(NS_J0.map(function (p) { return [c0[0] + (p[0] - c0[0]) * e, c0[1] + (p[1] - c0[1]) * e]; }), e)]) }; }
+        if (k < 4) { var e2 = ease((k - 2) / 2), st = A.states.slice();
+          st[1] = Object.assign({}, liao, { alpha: 1 - e2 }); st.push(mk(morphPoly(NS_J0, liao.poly, e2), 1));
+          return { view: Z.view, walls: [], notes: A.notes, states: st }; }
+        if (k < 7) return mid;
+        var M = morphLayer(mid, Z, ease(Math.min(1, (k - 7) / 3)));
+        M.states.forEach(function (s) { if (s.id === "song" || s.id === "nansong") s.capital = null; });
+        return M;
+      }
+      function drawNs(c, now) {
+        var L = LAYERS[12], serif = '600 16px "Noto Serif SC","Songti SC",serif', bot = unproj(W / 2, H - 56);
+        var line = function (p, col, w, dash) { ctx.strokeStyle = c.halo; ctx.lineWidth = w + 4; ctx.lineJoin = "round"; ctx.lineCap = "round"; path(p); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.setLineDash(dash || []); ctx.stroke(); ctx.setLineDash([]); };
+        if (state.un) {
+          var k = unK();
+          if (k < 2) { star([126.95, 45.5], 9, c.star); label("会宁（阿城）", [126.95, 45.5], { dx: 11, align: "left", color: c.ink, font: "600 12px system-ui, sans-serif" }); }
+          if (k >= 4 && k < 8.5) {
+            var ap = [[116.4,39.9],[115.9,38.2],[115.2,36.6],[114.35,34.8]], pp = part(ap, Math.min(1, (k - 4) / 2));
+            line(pp, "#ef6461", 4); if (k >= 6) arrowHead(ap[2], ap[3], "#ef6461");
+            label("金军南下", [117.2, 37.4], { color: "#ef6461", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+          }
+          if (k >= 7) { var u = Math.min(1, (k - 7) / 3); line(part(NS_MV, u), c.star, 2, [6, 5]); star(along(NS_MV, Math.min(u, 0.999)), 10, c.star);
+            label("宋高宗南渡", [118.6, 33.2], { color: c.star, font: '600 14px "Noto Serif SC","Songti SC",serif' }); }
+          else if (k >= 4) star(NS_MV[0], 8, c.star);
+          return label(k < 2 ? "1115 年 · 女真首领阿骨打建立金" : k < 4 ? "1125 年 · 金灭辽" : k < 7 ? "1127 年 · 靖康之变，金军攻破开封，北宋灭亡" : k < 10 ? "1127 年 · 宋高宗南渡建立南宋，后定都临安" : "1142 年 · 绍兴和议：东以淮水、西以大散关为界", bot, { color: c.ink, font: serif });
+        }
+        var pulse = RM.matches ? 0.5 : 0.5 + 0.5 * Math.sin((now || 0) / 260);
+        line(L.sx, "#ef6461", 3 + pulse * 1.5);
+        label("绍兴和议界线 1142", [116.6, 33.6], { dy: -12, color: "#ef6461", font: '600 15px "Noto Serif SC","Songti SC",serif' });
+        if (state.show.note) { label("淮水", [118.2, 32.9], { dy: 12, color: c.river, font: "600 12px system-ui, sans-serif" });
+          var q = proj([106.9, 34.3]); ctx.beginPath(); ctx.arc(q[0], q[1], 4.5, 0, 7); ctx.fillStyle = "#ef6461"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = c.halo; ctx.stroke();
+          label("大散关", [106.9, 34.3], { dy: -13, color: c.ink, font: "600 12px system-ui, sans-serif" });
+          label("★ 浙江考生重点：临安（今杭州）", [123.6, 28.4], { color: "#F2B544", font: '600 14px "Noto Serif SC","Songti SC",serif' }); }
+        var h = proj([120.16, 30.25]); ctx.beginPath(); ctx.arc(h[0], h[1], 13 + pulse * 3, 0, 7); ctx.strokeStyle = "#F2B544"; ctx.lineWidth = 2; ctx.stroke();
+        label("以淮水—大散关为界，不是长江", bot, { color: "#ef6461", font: serif });
+      }
+      /* ---------- 第 14 章：元朝疆域（约 1330）；xz＝宣政院辖地（交叉斜线），prov＝行省示意线 ---------- */
+      (function () {
+        var Z = LAYERS[12].states, YC = "#2E9E8A";
+        var xz = [[78.5,32],[78,35.5],[80,36],[84,36.2],[88,37.2],[92,38],[96,38.3],[99,37],[101,36],[102.5,33.5],[102,30.5],[100.5,28.5],[99,28.2],[98,27.8],[97,28],[94,27.5],[91,27],[88,27.2],[85,28.3],[81,29.8]];
+        var yn = [[107.5,22],[106.5,22.6],[105.8,23.3],[104,22.6],[103,22.3],[101.5,21.6],[100,21.8],[99,22.5],[98,24],[97.5,25.5]];
+        LAYERS[13] = {
+          view: [60, 12, 150, 60], yuan: true,
+          states: [
+            { id: "yuan", main: true, name: "元", sub: "1271 年忽必烈定国号为元，都大都（今北京），另有上都；实行行省制度", color: YC, label: [112, 52.5],
+              capital: { name: "大都（今北京）", ll: [116.4, 39.9] }, cap2: { name: "上都", ll: [116.18, 42.36] },
+              poly: coast([143, 59.3], [128, 40]).concat([[127.6,40.4],[126.8,40.7],[125.6,40.4]], coast([124.3, 39.9], [108.5, 21.6]), yn, xz.slice(5, 14).reverse(), [[90,40],[88,42.5],[87,45],[85.5,48],[86,50],[88,52],[92,55],[98,59.5],[120,59.6],[135,59.6]]) },
+            { id: "xuanzheng", m: "qiang", name: "宣政院辖地", sub: "西藏：元设宣政院管辖，正式纳入中央行政管辖", color: YC, label: [88.5, 32.4], poly: xz },
+            { id: "chagatai", m: "kara", name: "察合台汗国", sub: "四大汗国之一，不属元朝直接统治", color: "#A68A64", label: [75, 42],
+              poly: [[60,39],[63,38.5],[66,37.5],[67,36],[70,35.5],[74,35.5],[78,35.5],[80,36],[84,36.2],[88,37.2],[92,38],[90,40],[88,42.5],[87,45],[85.5,48],[80,49.5],[74,47.5],[68,46.5],[62,45.5],[60,45]] },
+            { id: "kipchak", name: "钦察汗国", sub: "四大汗国之一，不属元朝直接统治", color: "#8F7FB5", label: [70, 51],
+              poly: [[60,45],[62,45.5],[68,46.5],[74,47.5],[80,49.5],[85.5,48],[86,50],[88,52],[85,56],[80,59],[72,59.8],[60,59.8]] },
+            { id: "ilkhan", name: "伊利汗国", sub: "四大汗国之一，不属元朝直接统治", color: "#B5806F", label: [62.6, 33],
+              poly: [[60,25.4],[61.5,25.1],[63,25.2],[64,29],[66,33],[67,36],[66,37.5],[63,38.5],[60,39]] },
+            Object.assign({}, Z[7], { sub: "元的藩属；元在此设征东行省" }),
+            { id: "annam", name: "安南", sub: "据今越南北部", color: "#E0A0C0", label: [105.4, 20],
+              poly: [[108.5,21.6]].concat(coast([107, 20.8], [107.5, 16.4]), [[106,16.6],[105,18.5],[104,19.8],[103.5,21]], yn.slice(0, 5).reverse()) },
+            { id: "mian", name: "缅", sub: "据今缅甸", color: "#E8B47A", label: [95.8, 21.6],
+              poly: [[97.5,25.5],[98,24],[99,22.5],[100,21.8],[100.5,20],[99,17.5]].concat(coast([97.7, 16.5], [92.3, 20.8]), [[93,23],[94.5,25.5],[96,26.5]]) }
+          ],
+          walls: [],
+          prov: [[[87,45],[94,43],[100,42.5],[106,42],[111,43],[114,44],[118,46.5],[120,50],[121,55],[124,59.6]], [[118,46.5],[119.5,43],[119.5,41],[120,40.3]],
+            [[106,42],[105.5,38],[104,36],[102.5,33.5]], [[111,43],[110.8,39.4],[110.4,36],[111.5,34.8],[114,34.2],[116.5,34.4],[119.3,35]], [[102.2,32],[104.5,33],[107,32.5],[110,32.6],[111.5,33],[111.5,34.8]],
+            [[110,32.6],[109.5,31.5],[111,30.5],[113,29.8],[114.5,30.5],[116,29.9],[117.6,30.9],[119,31.8],[121.9,31.7]], [[109.5,31.5],[108.8,29.5],[107.5,28.2],[105.5,27.6],[103.8,26.8],[102,27.5],[100.5,28.5]],
+            [[103.8,26.8],[104.5,25],[105.8,23.3]], [[114.5,30.5],[114,28],[114.2,26],[113.4,25],[112,24.2],[111.6,22.8],[112,21.7]], [[117.6,30.9],[117.3,29.6],[118.2,28.2],[117.4,26.5],[116.4,25],[117,23.6]]],
+          provN: [["中书省（腹里）", [114.6, 38]], ["岭北", [102, 49]], ["辽阳", [127, 47]], ["河南江北", [114.6, 32.3]], ["陕西", [108, 35.6]], ["四川", [104.8, 30]], ["甘肃", [98.5, 40.6]],
+            ["云南", [101.6, 24.6]], ["江浙", [119.6, 28]], ["江西", [115.6, 26.6]], ["湖广", [110, 26.4]], ["征东", [126.6, 39]]],
+          notes: [{ t: "西伯利亚", ll: [104, 56.8], big: true }, { t: "鄂霍次克海", ll: [146.5, 54.5], sea: true }, { t: "南海", ll: [114, 17.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }]
+        };
+        /* 南宋并立 → 元：五块各自形变并入元（from:"yuan"），吐蕃诸部 → 宣政院辖地，西辽 → 察合台汗国 */
+        LAYERS[13].pre = Object.assign({}, LAYERS[12], { states: Z.map(function (s) {
+          return ["nansong", "jin", "xixia", "dali", "mongol"].indexOf(s.id) >= 0 ? Object.assign({}, s, { from: "yuan" }) : s; }) });
+      })();
+      /* 1206→1279：0 蒙古、2.5 西夏、5 金、7.5 定国号元、10 南宋依次变为元色；10.5–12.5 s 形变为元朝疆域，13 s 结束 */
+      var Y_CAP = [[0, "1206 年 · 铁木真统一蒙古，被尊为成吉思汗"], [2.5, "1227 年 · 蒙古灭西夏"], [5, "1234 年 · 蒙古灭金"], [7.5, "1271 年 · 忽必烈定国号为元"], [10, "1279 年 · 崖山之战，元灭南宋"]];
+      function yLayer(k) {
+        var A = LAYERS[13].pre, Y = LAYERS[13], T = { mongol: 0, xixia: 2.5, jin: 5, nansong: 10, dali: 10 };
+        var M = { view: Y.view, walls: [], notes: A.notes, states: A.states.map(function (s) {
+          if (T[s.id] == null || k < T[s.id]) return s; var mg = s.id === "mongol";
+          return Object.assign({}, s, { color: Y.states[0].color, main: mg, name: mg ? (k < 7.5 ? "大蒙古国" : "元") : "", capital: mg && k >= 7.5 ? Y.states[0].capital : null });
+        }) };
+        if (k < 10.5) return M;
+        var e = Math.min(1, (k - 10.5) / 2); return morphLayer(M, Y, e < 0.5 ? 2 * e * e : 1 - Math.pow(2 - 2 * e, 2) / 2);
+      }
+      function drawYuan(c) {
+        var L = LAYERS[13], serif = '600 16px "Noto Serif SC","Songti SC",serif', sm = "600 12px system-ui, sans-serif", bot = unproj(W / 2, H - 56);
+        if (state.un) {
+          var k = unK(), t = Y_CAP.filter(function (x) { return x[0] <= k; }).pop();
+          if (k >= 10) { var y = proj([113.05, 22.2]); ctx.beginPath(); ctx.arc(y[0], y[1], 8, 0, 7); ctx.fillStyle = "#ef6461"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = c.halo; ctx.stroke();
+            label("崖山", [113.05, 22.2], { dx: 12, align: "left", color: c.ink, font: sm }); }
+          return label(t[1], bot, { color: c.ink, font: serif });
+        }
+        /* 宣政院辖地：交叉斜线纹理，区别于行省 */
+        var xs = L.states[1], q = xs.poly.map(proj), X = q.map(function (p) { return p[0]; }), Yy = q.map(function (p) { return p[1]; });
+        var x0 = Math.min.apply(0, X), x1 = Math.max.apply(0, X), y0 = Math.min.apply(0, Yy), y1 = Math.max.apply(0, Yy), h = y1 - y0;
+        ctx.save(); path(xs.poly, true); ctx.clip(); ctx.strokeStyle = xs.color; ctx.lineWidth = 1; ctx.globalAlpha = state.sel && state.sel !== "xuanzheng" ? 0.2 : 0.55; ctx.beginPath();
+        for (var x = x0 - h; x < x1; x += 9) { ctx.moveTo(x, y1); ctx.lineTo(x + h, y0); ctx.moveTo(x, y0); ctx.lineTo(x + h, y1); }
+        ctx.stroke(); ctx.restore();
+        if (!state.show.name) label("宣政院辖地", xs.label, { color: xs.color, font: sm });
+        if (state.show.prov) {
+          ctx.strokeStyle = c.ink; ctx.globalAlpha = 0.55; ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
+          L.prov.forEach(function (p) { path(p); ctx.stroke(); }); ctx.setLineDash([]); ctx.globalAlpha = 1;
+          L.provN.forEach(function (n) { label(n[0], n[1], { color: c.ink, font: "500 12px system-ui, sans-serif" }); });
+          label("行省区划为示意", [127, 55], { font: "italic 12px system-ui, sans-serif" });
+        }
+        var ph = proj([119.6, 23.55]); ctx.fillStyle = "#F2B544"; ctx.fillRect(ph[0] - 4.5, ph[1] - 4.5, 9, 9); ctx.lineWidth = 1.5; ctx.strokeStyle = c.halo; ctx.strokeRect(ph[0] - 4.5, ph[1] - 4.5, 9, 9);
+        label("澎湖巡检司", [119.6, 23.55], { dx: -9, align: "right", color: c.ink, font: sm });
+        if (state.show.note) {
+          var from = [72, 56.5], tos = [[66, 53], [75, 45], [63.5, 35]];
+          tos.forEach(function (to) { ctx.strokeStyle = c.halo; ctx.lineWidth = 4; path([from, to]); ctx.stroke(); ctx.strokeStyle = "#A68A64"; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([]); arrowHead(from, to, "#A68A64"); });
+          label("四大汗国 · 不属元直接统治", [72, 57.6], { color: "#A68A64", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+        }
+        label("四大汗国不属元朝直接统治范围", bot, { color: "#ef6461", font: serif });
+      }
+      /* ---------- 第 15 章：明朝疆域（约 1433）；jm＝羁縻都司卫（同色浅色＋斜线），WL＝明长城 ---------- */
+      (function () {
+        var MC = "#D9534F", JM = "当地首领世袭管理，管控松散";
+        var WL = [[98.2,39.8],[99.5,39.4],[100.5,38.9],[101.8,38.4],[102.6,37.9],[103.6,37.2],[104.6,37.3],[105.6,37.8],[106.3,38.6],[107.3,38],[108.6,37.9],[109.7,38.3],[110.6,39],[111.5,39.5],[112.6,40.2],[113.4,40.5],[114.6,40.8],[115.6,40.6],[116.1,40.35],[117.2,40.7],[118.4,40.4],[119.75,40],[120.8,41.2],[121.8,42],[123,42.6],[124.1,42.5],[124.7,41.5],[124.6,40.6],[124.4,40.1]];
+        var yn = [[107.5,22],[106.5,22.6],[105.8,23.3],[104,22.6],[103,22.3],[101.5,21.6],[100,21.8],[99,22.5],[98,24],[97.5,25.5]];
+        LAYERS[14] = {
+          view: [62, 0, 148, 58], ming: true, wn: "明长城",
+          states: [
+            { id: "ming", m: "yuan", main: true, name: "明", sub: "直辖两京十三布政使司；1368 年都南京，1421 年迁都北京", color: MC, label: [111, 30.5],
+              capital: { name: "北京", ll: [116.4, 39.9] }, cap2: { name: "南京", ll: [118.8, 32.05] },
+              poly: coast([124.3, 39.9], [108.5, 21.6]).concat(yn, [[98.5,27.5],[99,28.2],[100.5,28.5],[102,30.5],[102.5,33.5],[101,36],[99,37]], WL) },
+            { id: "nurgan", jm: true, name: "奴儿干都司", sub: "1409 年设，治特林；辖黑龙江下游与库页岛。" + JM, color: MC, label: [129, 49.5],
+              poly: [[121.5,44.5],[119,46.5],[118.5,49.5],[120,52],[122,53.5],[127,55],[135,55.5]].concat(coast([137, 54.5], [130.7, 42.3]), [[129.5,42.5],[128,42],[126.5,41.6],[125.2,40.8]], WL.slice(25, 28).reverse(), [[123,42.6]]) },
+            { id: "wusizang", m: "qiang", jm: true, name: "乌思藏都司", sub: "西藏：册封当地僧俗首领。" + JM, color: MC, label: [85.5, 33.4],
+              poly: [[78.5,32],[78,35.5],[80,36],[84,36.2],[88,37.2],[92,38],[92,33],[93,30],[94,27.5],[91,27],[88,27.2],[85,28.3],[81,29.8]] },
+            { id: "duogan", jm: true, name: "朵甘都司", sub: "西藏东部（康区）：册封当地首领。" + JM, color: MC, label: [97, 33],
+              poly: [[92,38],[96,38.3],[99,37],[101,36],[102.5,33.5],[102,30.5],[100.5,28.5],[99,28.2],[98,27.8],[97,28],[94,27.5],[93,30],[92,33]] },
+            { id: "guanxi", jm: true, name: "关西七卫", sub: "哈密卫等七卫，在嘉峪关以西。" + JM, color: MC, label: [94.3, 41.4],
+              poly: [[91,44],[95,44],[97,43],[98,41.5],[98.2,39.8],[99,37],[96,38.3],[92,38],[90.5,40.5]] },
+            { id: "tatar", name: "鞑靼", sub: "东蒙古；不时南下，明修长城防御", color: "#5B9BEF", label: [111, 45.5],
+              poly: [[100,50],[110,50.5],[118.5,49.5],[119,46.5],[121.5,44.5]].concat(WL.slice(0, 25).reverse(), [[98,41.5],[97,43],[100,46]]) },
+            { id: "oirat", name: "瓦剌", sub: "西蒙古；1449 年土木之变俘明英宗", color: "#8F7FB5", label: [93, 47],
+              poly: [[85,46],[86,49.5],[92,51],[100,50],[100,46],[97,43],[95,44],[91,44],[87,44.5]] },
+            { id: "timurid", m: "kara", name: "帖木儿帝国", sub: "中亚，位于地图西缘（注记示意）", color: "#A68A64", label: [66.5, 39],
+              poly: [[60,25.4],[61.5,25.1],[63,25.2],[64,29],[66,33],[67,36],[70,35.5],[74,35.5],[75,39.5],[72,42.5],[68,44],[60,44]] },
+            { id: "joseon", m: "goryeo", name: "朝鲜", sub: "1392 年李成桂建立，都汉城；与明保持朝贡关系", color: "#C07CCF", label: [127.6, 37.6],
+              poly: coast([130.7, 42.3], [124.3, 39.9]).concat([[125.2,40.8],[126.5,41.6],[128,42],[129.5,42.5]]) },
+            Object.assign({}, LAYERS[13].states[6], { sub: "据今越南北部；1407–1427 明一度设交趾布政司" })
+          ],
+          walls: [{ name: "明长城", pts: WL }],
+          pass: [["嘉峪关", [98.2, 39.8], -1], ["居庸关", [116.1, 40.35], -1], ["山海关", [119.75, 40], 1], ["虎山（鸭绿江）", [124.4, 40.1], 1]],
+          zh: [[118.8,32.05],[121.1,31.6],[122.6,30],[121.5,27.5],[119.8,25.2],[117.5,22.8],[114,20.5],[111.5,17.5],[110,13],[108.5,9.5],[105.5,6.5],[104.8,1.6],[103.6,1],[101.2,2.3],[98.5,5],[95.5,6.3],[90,6],[84,5.5],[80.5,5.2],[76.5,6.5],[71,4],[65,2],[60.3,0.6]],
+          notes: [{ t: "日本", ll: [138.3, 36.6], big: true }, { t: "南海", ll: [114, 15.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }, { t: "印度洋", ll: [82, 2.5], sea: true }]
+        };
+        LAYERS[14].sak = GEO.islands.filter(function (p) { return p[0][0] === 142 && p[0][1] === 46; })[0];
+      })();
+      /* 1368→1433：0 建明（都南京）、2.5 设奴儿干都司、5–8 迁都北京（星标移动）、8–13 郑和航线，14.5 s 结束 */
+      function mgLayer(k) {
+        var L = LAYERS[14];
+        return Object.assign({}, L, { states: L.states.map(function (s) {
+          if (s.id === "ming") return Object.assign({}, s, { capital: null, cap2: null });
+          if (s.id === "nurgan") return Object.assign({}, s, { alpha: Math.max(0, Math.min(1, (k - 2.5) / 1.5)), name: k < 2.5 ? "" : s.name });
+          return s; }) });
+      }
+      function drawMing(c, now) {
+        var L = LAYERS[14], sm = "600 12px system-ui, sans-serif", serif = '600 16px "Noto Serif SC","Songti SC",serif', bot = unproj(W / 2, H - 56);
+        var k = state.un ? unK() : 1e9, ny = Math.max(0, Math.min(1, (k - 2.5) / 1.5)), nr = L.states[1], MC = nr.color;
+        /* 库页岛：属奴儿干都司，同样浅色斜线 */
+        var sk = { poly: L.sak, color: MC }, hi = state.sel === "nurgan" || state.jm;
+        ctx.globalAlpha = ny * (state.sel && state.sel !== "nurgan" ? 0.35 : 1); ctx.fillStyle = MC + (hi ? "55" : "1c"); path(sk.poly, true); ctx.fill();
+        hatch(sk, hi); path(sk.poly, true); ctx.strokeStyle = MC; ctx.lineWidth = 1.4; ctx.setLineDash([5, 4]); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+        if (ny > 0 && state.show.note) {
+          var t = proj([139.8, 52.9]); ctx.fillStyle = MC; ctx.fillRect(t[0] - 4.5, t[1] - 4.5, 9, 9); ctx.lineWidth = 1.5; ctx.strokeStyle = c.halo; ctx.strokeRect(t[0] - 4.5, t[1] - 4.5, 9, 9);
+          label("特林（治所）", [139.8, 52.9], { dx: -9, align: "right", color: c.ink, font: sm });
+          label("库页岛", [142.6, 50.2], { dx: 10, align: "left", color: c.ink, font: sm });
+        }
+        if (state.show.note) {
+          label(JM_NOTE, [85.5, 31.6], { color: MC, font: sm }); label(JM_NOTE, [129, 47.8], { color: MC, font: sm });
+          label("1407–1427 一度设交趾布政司", [105, 17.6], { color: c.ink, font: sm });
+          label("← 帖木儿帝国（西缘）", [66.5, 41.2], { color: "#A68A64", font: sm });
+        }
+        if (state.show.wall) {
+          L.pass.forEach(function (p) { var q = proj(p[1]); ctx.fillStyle = c.wall; ctx.fillRect(q[0] - 4, q[1] - 4, 8, 8); ctx.lineWidth = 1.5; ctx.strokeStyle = c.halo; ctx.strokeRect(q[0] - 4, q[1] - 4, 8, 8);
+            label(p[0], p[1], { dx: 9 * p[2], dy: p[2] < 0 ? 10 : -2, align: p[2] < 0 ? "right" : "left", color: c.wall, font: sm }); });
+          label("明长城 · 今天看到的长城主要是明长城", [107.5, 40.6], { color: c.wall, font: '600 14px "Noto Serif SC","Songti SC",serif' });
+        }
+        /* 郑和下西洋：南京/刘家港出发沿海南下的虚线航线 */
+        var zu = state.un ? Math.max(0, Math.min(1, (k - 8) / 5)) : state.show.ev ? 1 : 0;
+        if (zu > 0) {
+          var p = part(L.zh, zu), m = p.length;
+          ctx.strokeStyle = c.halo; ctx.lineWidth = 5; ctx.lineJoin = "round"; ctx.setLineDash([7, 5]); path(p); ctx.stroke();
+          ctx.strokeStyle = c.silk; ctx.lineWidth = 2.5; ctx.stroke(); ctx.setLineDash([]);
+          if (zu < 1) { var hq = proj(p[m - 1]); ctx.beginPath(); ctx.arc(hq[0], hq[1], 5, 0, 7); ctx.fillStyle = c.star; ctx.fill(); }
+          else { arrowHead(L.zh[L.zh.length - 2], L.zh[L.zh.length - 1], c.silk); label("至东非 →", [63.5, 3.6], { color: c.silk, font: '600 14px "Noto Serif SC","Songti SC",serif' }); }
+          label("刘家港", [121.1, 31.6], { dx: 10, align: "left", color: c.silk, font: sm });
+          label("郑和下西洋 1405–1433", [92, 8.6], { color: c.silk, font: '600 14px "Noto Serif SC","Songti SC",serif' });
+        }
+        if (state.un) {
+          var e = Math.max(0, Math.min(1, (k - 5) / 3)), nj = [118.8, 32.05], bj = [116.4, 39.9], cp = [nj[0] + (bj[0] - nj[0]) * e, nj[1] + (bj[1] - nj[1]) * e];
+          if (e > 0) { star(nj, 6, c.star); label(e < 1 ? "南京" : "南京（留都）", nj, { dx: 9, align: "left", color: c.ink, font: sm }); }
+          star(cp, 10, c.star); label(e < 1 ? (e ? "迁都中" : "南京（都城）") : "北京（都城）", cp, { dx: 12, align: "left", color: c.ink, font: sm });
+          return label(k < 2.5 ? "1368 年 · 朱元璋建立明朝，定都南京" : k < 5 ? "1409 年 · 设奴儿干都司，治特林" : k < 8 ? "1421 年 · 明成祖迁都北京" : "1405–1433 年 · 郑和七下西洋，远至东非", bot, { color: c.ink, font: serif });
+        }
+        if (state.jm) label("羁縻都司：" + JM_NOTE + "，与内地府州县不同", bot, { color: MC, font: '600 15px "Noto Serif SC","Songti SC",serif' });
+      }
+      var JM_NOTE = "当地首领世袭管理，管控松散";
+      /* ---------- 第 16 章：清朝疆域（约 1820）；NB＝《尼布楚条约》界线，PRC＝今中国陆地边界（示意） ---------- */
+      (function () {
+        var QC = "#E0A93A", Y = LAYERS[13].states, find = function (id) { return Y.filter(function (s) { return s.id === id; })[0]; };
+        var yn = [[107.5,22],[106.5,22.6],[105.8,23.3],[104,22.6],[103,22.3],[101.5,21.6],[100,21.8],[99,22.5],[98,24],[97.5,25.5]];
+        var NB = [[117.8,49.6],[119.5,50.5],[120.5,52.3],[121.5,53.3],[120.8,54.4],[123,55],[127,55.3],[131,55.2],[134.5,55],[137,54.5]];
+        LAYERS[15] = {
+          view: [62, 2, 150, 58], qing: true, nb: NB,
+          states: [
+            { id: "qing", m: "yuan", main: true, name: "清", sub: "1644 年入关，定都北京；约 1300 万平方公里（约数，示意）", color: QC, label: [113, 31.5],
+              capital: { name: "北京", ll: [116.4, 39.9] },
+              poly: coast([137, 54.5], [130.7, 42.3]).concat([[129.5,42.5],[128,42],[126.5,41.6],[125.2,40.8]], coast([124.3, 39.9], [108.5, 21.6]), yn,
+                [[98,27.8],[98.8,29.5],[98.5,32],[96,33],[94,34],[92,36.5],[88,37.2],[91,39],[95.5,40],[96.5,42.5],[98,42.6],[103,42.2],[107,42],[111,43.5],[113,45],[116,46.3],[118,47.5]], NB.slice(0, 9)) },
+            { id: "taiwan", name: "台湾府", sub: "1683 年郑克塽降清；1684 年设台湾府，隶属福建", color: QC, label: [122.6, 22.4], poly: GEO.islands[0] },
+            { id: "xinjiang", name: "新疆", sub: "1757–1759 年平定准噶尔与大小和卓；1762 年设伊犁将军，驻惠远城，辖天山南北至巴尔喀什湖", color: QC, label: [84, 42.6],
+              poly: [[73,37],[71.8,38.5],[73,39.5],[73.6,40.5],[71.5,42],[72.5,44],[73.6,45.5],[73.4,46.6],[75,47.8],[79,48.6],[82,49.5],[85.5,49.8],[87.5,49],[90.5,46],[95,44],[96.5,42.5],[95.5,40],[91,39],[88,37.2],[84,36.3],[80,36],[78,35.5],[75.5,36.5]] },
+            { id: "xizang", m: "qiang", name: "西藏", sub: "1727 年设驻藏大臣，与达赖、班禅共同管理西藏", color: QC, label: [86, 31.8],
+              poly: [[78.5,32],[78,35.5],[80,36],[84,36.3],[88,37.2],[92,36.5],[94,34],[96,33],[98.5,32],[98.8,29.5],[98,27.8],[97,28],[94,27.5],[91,27.2],[88,27.2],[85,28.3],[81,29.8]] },
+            { id: "menggu", m: "tatar", name: "外札萨克蒙古", sub: "喀尔喀等部，乌里雅苏台将军管辖", color: QC, label: [101, 47.2],
+              poly: [[87.5,49],[88,50.5],[91,51.5],[95,52.3],[98,52.2],[101,51.6],[104,50.8],[106.5,50.3],[108.5,49.4],[112,49.7],[116,49.8],[117.8,49.6],[118,47.5],[116,46.3],[113,45],[111,43.5],[107,42],[103,42.2],[98,42.6],[96.5,42.5],[95,44],[90.5,46]] },
+            Object.assign({}, LAYERS[14].states[8], { sub: "李氏朝鲜，都汉城；清的藩属国" }),
+            Object.assign({}, find("annam"), { name: "越南", sub: "据今越南；清的藩属国" }),
+            Object.assign({}, find("mian"), { name: "缅甸", sub: "贡榜王朝，与清南境相邻" })
+          ],
+          walls: [],
+          prc: [[124.4,39.9],[126.6,41.7],[129,42],[130.6,42.4],[131,42.9],[131.2,44.9],[133.1,45.3],[134.7,48.3],[133,48.1],[130.7,48.9],[127.5,49.8],[125.7,52.9],[123.3,53.5],[120.8,53.3],[119.5,50.3],[117.8,49.5],[116.2,47.8],[115.5,46.5],[113.5,44.8],[111.8,43.7],[110.4,42.8],[107,42.3],[104.5,41.7],[100.8,42.6],[96.4,42.7],[95.3,44.3],[91,45.3],[90.7,47.7],[87.8,49.1],[86.8,49.1],[85,47],[82.5,47.2],[82.3,45.5],[80.4,45],[80.2,42.2],[76.5,40.5],[73.6,39.4],[74.9,37.2],[77.8,35.5],[79,34.3],[78.8,32.5],[79.3,31],[81.1,30],[85,28.3],[88.9,27.3],[92,26.9],[95.4,29],[97.4,28.3],[98.7,25.9],[97.5,24.8],[99.5,22.1],[101.2,21.2],[102.2,22.4],[105.3,23.3],[106.7,22.8],[108,21.55]],
+          notes: [{ t: "俄国（沙俄）", ll: [108, 57.2], big: true }, { t: "浩罕", ll: [69.6, 41.4], big: true }, { t: "日本", ll: [138.3, 36.6], big: true },
+            { t: "太平洋", ll: [145, 30], sea: true }, { t: "鄂霍次克海", ll: [146, 55.5], sea: true }, { t: "东海", ll: [125, 29], sea: true }, { t: "南海", ll: [116.5, 14], sea: true }]
+        };
+        LAYERS[15].sak = LAYERS[14].sak;
+      })();
+      /* 1644→1762：0 入关、3 统一台湾、6 尼布楚条约、9 平定准噶尔与大小和卓、12 设伊犁将军，15.5 s 结束 */
+      var QG_CAP = [[0, "1644 年 · 清军入关，定都北京"], [3, "1683 年 · 郑克塽降清，清统一台湾"], [6, "1689 年 · 中俄签订《尼布楚条约》"], [9, "1757–1759 年 · 平定准噶尔与大小和卓"], [12, "1762 年 · 设伊犁将军，驻惠远城"]];
+      var QG_AR = [{ at: 0.3, pts: [[123.4,41.8],[121.6,40.9],[119.75,40],[116.4,39.9]], t: "入关" }, { at: 3.3, pts: [[118.1,24.5],[119.6,23.55],[120.2,23]], t: "渡海" },
+        { at: 9.2, pts: [[93.5,43.5],[89,44.2],[85,44.3],[81.3,43.9]], t: "平定准噶尔" }, { at: 10.4, pts: [[87.5,43.3],[86,41.7],[82.5,41.3],[79,40],[76,39.5]], t: "平定大小和卓" }];
+      function qgLayer(k) {
+        var L = LAYERS[15], fade = { taiwan: 4.5, xinjiang: 10 };
+        return Object.assign({}, L, { states: L.states.map(function (s) {
+          if (s.id === "qing" && k < 2) return Object.assign({}, s, { capital: null });
+          if (fade[s.id] == null) return s;
+          var a = Math.max(0, Math.min(1, (k - fade[s.id]) / 1.5)); return Object.assign({}, s, { alpha: a, name: a < 0.5 ? "" : s.name }); }) });
+      }
+      function drawQing(c, now) {
+        var L = LAYERS[15], QC = L.states[0].color, sm = "600 12px system-ui, sans-serif", serif = '600 16px "Noto Serif SC","Songti SC",serif', bot = unproj(W / 2, H - 56);
+        var k = state.un ? unK() : 1e9, dim = state.sel && state.sel !== "qing" ? 0.35 : 1, pulse = 0.5 + 0.5 * Math.sin((now || 0) / 260);
+        /* 库页岛、海南岛：清疆域，同色填充 */
+        [L.sak, GEO.islands[1]].forEach(function (p) { ctx.globalAlpha = dim; ctx.fillStyle = QC + "3a"; path(p, true); ctx.fill(); ctx.strokeStyle = QC; ctx.lineWidth = 1.4; ctx.stroke(); });
+        ctx.globalAlpha = 1;
+        /* 南海诸岛：小点群示意 */
+        [[116.7,20.7],[111.6,16.5],[112.3,16.8],[112.7,16.2],[114.4,15.6],[114,10.4],[114.6,10.9],[112.8,9.6],[115.6,9.9],[113.6,8.7],[112.3,3.9]].forEach(function (p) {
+          var q = proj(p); ctx.beginPath(); ctx.arc(q[0], q[1], 2.6, 0, 7); ctx.fillStyle = QC; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = c.halo; ctx.stroke(); });
+        /* 《尼布楚条约》界线：外兴安岭—额尔古纳河 */
+        var nu = state.un ? Math.max(0, Math.min(1, (k - 6) / 2)) : 1;
+        if (nu > 0) {
+          var np = part(L.nb, nu); ctx.strokeStyle = c.halo; ctx.lineWidth = 7; ctx.lineJoin = "round"; path(np); ctx.stroke();
+          ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3; ctx.setLineDash([9, 5]); ctx.stroke(); ctx.setLineDash([]);
+          if (nu >= 1) label("《尼布楚条约》1689 · 外兴安岭—额尔古纳河", [127, 56.6], { color: "#ef6461", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+        }
+        if (state.show.note) {
+          var mk = function (t, ll, dx, col) { var q = proj(ll); ctx.fillStyle = col || QC; ctx.fillRect(q[0] - 4.5, q[1] - 4.5, 9, 9); ctx.lineWidth = 1.5; ctx.strokeStyle = c.halo; ctx.strokeRect(q[0] - 4.5, q[1] - 4.5, 9, 9);
+            label(t, ll, { dx: dx, align: dx < 0 ? "right" : "left", color: c.ink, font: sm }); };
+          if (k >= 12) mk("惠远城（伊犁将军 1762）", [81.3, 43.9], 9);
+          mk("拉萨（驻藏大臣 1727）", [91.1, 29.65], 9); mk("乌里雅苏台将军", [96.8, 47.75], 9);
+          if (k >= 4.5) mk("台湾府（1684，属福建）", [120.2, 23], 9);
+          if (nu > 0) mk("尼布楚", [116.5, 51.95], -9, "#ef6461");
+          label("库页岛", [142.6, 50.2], { dx: 10, align: "left", color: c.ink, font: sm });
+          label("南海诸岛", [114.2, 12.4], { color: c.ink, font: sm });
+          label("葱岭", [73.6, 38.2], { color: c.ink, font: sm }); label("巴尔喀什湖", [76.2, 47.4], { color: c.river, font: sm });
+          label("外兴安岭", [128, 54.4], { color: c.ink, font: sm }); label("额尔古纳河", [118.2, 51.6], { dx: -6, align: "right", color: c.ink, font: sm });
+        }
+        /* 今中国陆地边界轮廓：虚线叠加对比（示意） */
+        if (state.jd) {
+          ctx.strokeStyle = c.halo; ctx.lineWidth = 5; ctx.lineJoin = "round"; path(L.prc); ctx.stroke();
+          ctx.strokeStyle = c.ink; ctx.lineWidth = 2 + pulse; ctx.setLineDash([8, 6]); ctx.stroke(); ctx.setLineDash([]);
+          label("今中国陆地边界（示意）", [104, 40.6], { color: c.ink, font: sm });
+        }
+        if (state.un) {
+          QG_AR.forEach(function (v) {
+            var u = Math.max(0, Math.min(1, (k - v.at) / 1.8)); if (!u) return; var p = part(v.pts, u);
+            ctx.strokeStyle = c.halo; ctx.lineWidth = 6; ctx.lineJoin = "round"; ctx.lineCap = "round"; path(p); ctx.stroke();
+            ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3; ctx.setLineDash(v.t === "渡海" ? [7, 5] : []); ctx.stroke(); ctx.setLineDash([]);
+            if (u < 1) { var hq = proj(p[p.length - 1]); ctx.beginPath(); ctx.arc(hq[0], hq[1], 5, 0, 7); ctx.fillStyle = "#ef6461"; ctx.fill(); }
+            else arrowHead(v.pts[v.pts.length - 2], v.pts[v.pts.length - 1], "#ef6461");
+            label(v.t, v.pts[1], { dy: -14, color: "#ef6461", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+          });
+          if (k >= 12) { var hy = proj([81.3, 43.9]); ctx.beginPath(); ctx.arc(hy[0], hy[1], 12 + pulse * 6, 0, 7); ctx.strokeStyle = QC; ctx.lineWidth = 2.5; ctx.stroke(); }
+          return label(QG_CAP.filter(function (x) { return x[0] <= k; }).pop()[1], bot, { color: c.ink, font: serif });
+        }
+        if (state.jd) label("18 世纪中期，清朝奠定了中国的疆域", bot, { color: QC, font: serif });
+      }
+      /* 燕云十六州：醒目描边；播放时 0.5–3 s 填色由中原色渐变为契丹色；吴越金色描边（浙江重点） */
+      function drawYy(c, now) {
+        var L = LAYERS[10], wy = L.states[3], pulse = 0.5 + 0.5 * Math.sin((now || 0) / 260);
+        ctx.strokeStyle = "#F2B544"; ctx.lineWidth = 3; ctx.setLineDash([]); path(wy.poly, true); ctx.stroke();
+        if (state.show.note) label("★ 浙江考生重点：吴越", [123.6, 27.6], { color: "#F2B544", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+        if (!state.yy) return;
+        var k = RM.matches ? 1 : Math.max(0, Math.min(1, (performance.now() - state.yy) / 1000 - 0.5) / 2.5);
+        var mix = function (a, b) { return "#" + [1, 3, 5].map(function (i) { var v = Math.round(parseInt(a.substr(i, 2), 16) * (1 - k) + parseInt(b.substr(i, 2), 16) * k); return (v < 16 ? "0" : "") + v.toString(16); }).join(""); };
+        ctx.fillStyle = mix("#E5604A", "#5B9BEF") + "aa"; path(L.yy, true); ctx.fill();
+        ctx.strokeStyle = c.halo; ctx.lineWidth = 7; ctx.stroke(); ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3 + pulse * 1.5; ctx.stroke();
+        label("燕云十六州", [115.4, 40.4], { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
+        label(k < 1 ? "936 年 · 石敬瑭割让燕云十六州给契丹" : "936 年割让后：中原失去北方天然屏障", unproj(W / 2, H - 56), { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
+      }
+      function drawFz(c) {
+        LAYERS[9].fz.forEach(function (f) {
+          ctx.fillStyle = f.h ? "#D9822Bcc" : "#9A8F86aa"; path(f.poly, true); ctx.fill(); ctx.strokeStyle = c.halo; ctx.lineWidth = 1.5; ctx.stroke();
+          label(f.t, centroid(f.poly), { color: c.ink, font: "600 12px system-ui, sans-serif" });
+        });
+        label("河朔三镇（示意）", [110.6, 39.2], { color: "#D9822B", font: '600 15px "Noto Serif SC","Songti SC",serif' });
+      }
+      /* 羁縻区斜线：在多边形内画 45° 细线 */
+      function hatch(s, strong) {
+        var q = s.poly.map(proj), xs = q.map(function (p) { return p[0]; }), ys = q.map(function (p) { return p[1]; });
+        var x0 = Math.min.apply(0, xs), x1 = Math.max.apply(0, xs), y0 = Math.min.apply(0, ys), y1 = Math.max.apply(0, ys), h = y1 - y0;
+        ctx.save(); path(s.poly, true); ctx.clip(); ctx.strokeStyle = s.color; ctx.lineWidth = 1; ctx.globalAlpha *= strong ? 0.7 : 0.4; ctx.beginPath();
+        for (var x = x0 - h; x < x1; x += 8) { ctx.moveTo(x, y1); ctx.lineTo(x + h, y0); }
+        ctx.stroke(); ctx.restore();
+      }
+      /* 唐前期事件：630 击败东突厥、641 文成公主入藏（长安—逻些虚线）、657 灭西突厥；未播放时静态显示全程 */
+      function drawTg(c, now) {
+        var k = state.tg && !RM.matches ? ((now || performance.now()) - state.tg) / 1000 : 1e9, cur = null, EV = LAYERS[state.ch].ev, end = 0;
+        EV.forEach(function (v) { end = Math.max(end, v.at + v.dur + 1); });
+        EV.forEach(function (v) {
+          var u = Math.max(0, Math.min(1, (k - v.at) / v.dur)); if (!u) return; if (u < 1 || k < v.at + v.dur + 0.5) cur = v;
+          var col = v.c || c.silk, p = part(v.pts, u), m = p.length;
+          ctx.strokeStyle = c.halo; ctx.lineWidth = 6; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.setLineDash(v.dash ? [7, 6] : []); path(p); ctx.stroke();
+          ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.stroke(); ctx.setLineDash([]);
+          if (u < 1) { var hq = proj(p[m - 1]); ctx.beginPath(); ctx.arc(hq[0], hq[1], 5, 0, 7); ctx.fillStyle = col; ctx.fill(); }
+          else if (!v.dash) arrowHead(v.pts[v.pts.length - 2], v.pts[v.pts.length - 1], col);
+          else star(v.pts[v.pts.length - 1], 7, col);
+          if (u >= 1 || state.tg) label(v.t, v.ll, { color: col, font: '600 14px "Noto Serif SC","Songti SC",serif' });
+        });
+        if (state.tg && cur) label(cur.t.replace(" · ", " 年 · "), unproj(W / 2, H - 56), { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
+        if (state.tg && k > end) { state.tg = 0; tgButton(); dirty = true; }
+      }
+      function tgButton() { var b = document.querySelector(".x-tg"); if (b) { b.classList.toggle("on", !!state.tg); b.setAttribute("aria-pressed", !!state.tg); b.textContent = state.tg ? "❚❚ 停止动画" : LAYERS[state.ch].tgl || "▶ 播放 630 · 641 · 657"; } }
+      var DEFAULT_VIEW = [68, 6, 142, 56];
+
+      /* ---------- 边界形变插值（后续章启用）：按周长重采样 → 对齐起点 → 线性插值 ---------- */
+      function resample(p, n) {
+        var L = [0], t = 0, i, j = 0, out = [];
+        for (i = 1; i <= p.length; i++) { var a = p[i - 1], b = p[i % p.length]; t += Math.hypot(b[0] - a[0], b[1] - a[1]); L.push(t); }
+        for (i = 0; i < n; i++) {
+          var d = (t * i) / n; while (L[j + 1] < d) j++;
+          var u = p[j], v = p[(j + 1) % p.length], s = (d - L[j]) / (L[j + 1] - L[j] || 1);
+          out.push([u[0] + (v[0] - u[0]) * s, u[1] + (v[1] - u[1]) * s]);
+        }
+        return out;
+      }
+      function centroid(p) { var x = 0, y = 0; p.forEach(function (q) { x += q[0]; y += q[1]; }); return [x / p.length, y / p.length]; }
+      function morphPoly(a, b, t, n) {
+        n = n || 120; var A = resample(a, n), B = resample(b, n), best = 0, bd = Infinity;
+        for (var k = 0; k < n; k++) { var d = 0; for (var i = 0; i < n; i += 6) { var q = B[(i + k) % n]; d += Math.hypot(A[i][0] - q[0], A[i][1] - q[1]); } if (d < bd) { bd = d; best = k; } }
+        return A.map(function (p, i) { var q = B[(i + best) % n]; return [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]; });
+      }
+      /* 两个时期图层之间 t∈[0,1] 的过渡：同 id 政权形变，单边存在的政权向质心收缩/展开并淡入淡出 */
+      function morphLayer(A, B, t) {
+        var key = function (s) { return s.m || s.id; }, ids = [], byId = function (L, id) { return L.states.filter(function (s) { return key(s) === id; })[0]; };
+        /* from：一块分裂为多块（或多块合并为一块），各块从对方的整块轮廓插值 */
+        var split = function (X, Y) { return X.states.filter(function (s) { return s.from && byId(Y, s.from); }).map(function (s) { return s.from; }); };
+        var skip = split(A, B).concat(split(B, A));
+        A.states.concat(B.states).forEach(function (s) { if (ids.indexOf(key(s)) < 0 && skip.indexOf(key(s)) < 0) ids.push(key(s)); });
+        return {
+          view: t < 0.5 ? A.view : B.view, walls: t < 0.5 ? A.walls : B.walls, notes: t < 0.5 ? A.notes : B.notes, silk: t < 0.5 ? A.silk : B.silk,
+          routes: t < 0.5 ? A.routes : B.routes, routeNotes: t < 0.5 ? A.routeNotes : B.routeNotes, arrows: t < 0.5 ? A.arrows : B.arrows,
+          seaLines: t < 0.5 ? A.seaLines : B.seaLines, battles: t < 0.5 ? A.battles : B.battles, migs: t < 0.5 ? A.migs : B.migs,
+          states: ids.map(function (id) {
+            var a = byId(A, id), b = byId(B, id);
+            if (!a && b && b.from && byId(A, b.from)) a = byId(A, b.from);
+            if (a && !b && a.from && byId(B, a.from)) b = byId(B, a.from);
+            if (a && b) return Object.assign({}, t < 0.5 ? a : b, { poly: morphPoly(a.poly, b.poly, t), alpha: 1 });
+            var s = a || b, k = a ? 1 - t : t, c = centroid(s.poly);
+            return Object.assign({}, s, { alpha: k, poly: s.poly.map(function (p) { return [c[0] + (p[0] - c[0]) * k, c[1] + (p[1] - c[1]) * k]; }) });
+          })
+        };
+      }
+      /* 折线上按长度比例 u∈[0,1) 取点：驼队小点沿丝绸之路移动 */
+      function along(p, u) {
+        var L = [0], i; for (i = 1; i < p.length; i++) L.push(L[i - 1] + Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]));
+        var d = u * L[L.length - 1]; for (i = 1; i < p.length - 1 && L[i] < d; i++);
+        var s = (d - L[i - 1]) / (L[i] - L[i - 1] || 1);
+        return [p[i - 1][0] + (p[i][0] - p[i - 1][0]) * s, p[i - 1][1] + (p[i][1] - p[i - 1][1]) * s];
+      }
+      /* 折线从起点画到比例 u 处：路线逐段播放 */
+      function part(p, u) {
+        if (u >= 1) return p;
+        var L = [0], i, o = [p[0]]; for (i = 1; i < p.length; i++) L.push(L[i - 1] + Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]));
+        var d = u * L[L.length - 1]; for (i = 1; i < p.length && L[i] < d; i++) o.push(p[i]);
+        o.push(along(p, u)); return o;
+      }
+      function inPoly(pt, p) {
+        for (var c = false, i = 0, j = p.length - 1; i < p.length; j = i++)
+          if ((p[i][1] > pt[1]) !== (p[j][1] > pt[1]) && pt[0] < ((p[j][0] - p[i][0]) * (pt[1] - p[i][1])) / (p[j][1] - p[i][1]) + p[i][0]) c = !c;
+        return c;
+      }
+    </script>
+    <script>
+      /* ---------- 舞台：Canvas 渲染、平移缩放、点选 ---------- */
+      var $ = function (id) { return document.getElementById(id); };
+      var root = document.documentElement, cv = $("map"), ctx = cv.getContext("2d");
+      var W = 0, H = 0, DPR = 1, K = Math.cos((35 * Math.PI) / 180);
+      var view = { cx: 112, cy: 32, s: 10 }, anim = null, dirty = true;
+      var state = { ch: 0, sel: null, mo: null, car: 0, show: { cap: true, wall: true, note: true, name: true, silk: true, route: true, battle: true, mig: true, canal: true, ev: true }, boat: 0, tg: 0, jm: false, rt: 0, un: 0, pop: null };
+      /* 战役弹窗：随地图平移缩放跟随标记 */
+      var popEl = document.createElement("div"); popEl.className = "x-pop"; popEl.hidden = true; popEl.setAttribute("role", "dialog");
+      popEl.innerHTML = '<button class="x-fold" aria-label="关闭战役简介">×</button><h3></h3><p></p><button class="x-sw x-fs" hidden aria-pressed="false">▶ 播放战役动画</button>';
+      cv.parentNode.appendChild(popEl);
+      popEl.firstChild.onclick = function () { showPop(null); };
+      popEl.querySelector(".x-fs").onclick = toggleFs;
+      /* 淝水之战动画：0–3.5 s 前秦箭头南下，3.5–4.5 s 北府兵反击，4.5–7 s 箭头碎裂北退，9 s 结束 */
+      function toggleFs() { state.fs = state.fs ? 0 : performance.now(); if (state.fs) resetView(false); fsButton(); dirty = true; }
+      function fsButton() { [].forEach.call(document.querySelectorAll(".x-fs"), function (b) { b.classList.toggle("on", !!state.fs); b.setAttribute("aria-pressed", !!state.fs); b.textContent = state.fs ? "❚❚ 停止动画" : "▶ 播放战役动画"; }); }
+      function drawFs(c) {
+        var k = (performance.now() - state.fs) / 1000, F = LAYERS[5].fs, qc = "#7FBF6A", bc = "#3FA8D9", serif = '600 14px "Noto Serif SC","Songti SC",serif';
+        if (k > 9) { state.fs = 0; fsButton(); dirty = true; return; }
+        var line = function (p, col, w, dash) { ctx.strokeStyle = c.halo; ctx.lineWidth = w + 3; ctx.lineJoin = "round"; ctx.setLineDash(dash || []); path(p); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke(); ctx.setLineDash([]); };
+        var a = Math.min(1, k / 3.5), gp = part(F.go, a);
+        if (k < 4.5) { line(gp, qc, 5); if (a < 1) { var hq = proj(gp[gp.length - 1]); ctx.beginPath(); ctx.arc(hq[0], hq[1], 6, 0, 7); ctx.fillStyle = qc; ctx.fill(); } else arrowHead(F.go[F.go.length - 2], F.go[F.go.length - 1], qc); }
+        if (k > 0.8) label("苻坚率前秦大军南下", [112.6, 35.3], { color: qc, font: serif });
+        if (k >= 3.5) {
+          var b = Math.min(1, (k - 3.5) / 1), bp = part(F.back, b); line(bp, bc, 5);
+          if (b >= 1) arrowHead(F.back[F.back.length - 2], F.back[F.back.length - 1], bc);
+          label("谢安、谢玄 · 北府兵八万", [119.2, 31.3], { color: bc, font: serif });
+        }
+        if (k >= 4.5) {
+          var e = Math.min(1, (k - 4.5) / 2.5);
+          ctx.globalAlpha = 0.35; line(part(F.go, 0.55), qc, 4); ctx.globalAlpha = Math.max(0, 1 - e * 0.8);
+          for (var i = 0; i < 6; i++) {
+            var u = 0.55 + i * 0.075, p1 = proj(along(F.go, u)), p2 = proj(along(F.go, Math.min(0.999, u + 0.05)));
+            var mx = (p1[0] + p2[0]) / 2 + ((-24 - i * 8) + Math.sin(i * 2.1) * 16) * e, my = (p1[1] + p2[1]) / 2 + (-30 + Math.cos(i * 1.7) * 22) * e;
+            var ang = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]) + (i % 2 ? 1 : -1) * e * 1.4, hl = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / 2;
+            ctx.strokeStyle = qc; ctx.lineWidth = 4; ctx.lineCap = "round"; ctx.beginPath();
+            ctx.moveTo(mx - hl * Math.cos(ang), my - hl * Math.sin(ang)); ctx.lineTo(mx + hl * Math.cos(ang), my + hl * Math.sin(ang)); ctx.stroke();
+          }
+          ctx.globalAlpha = 1; var rp = part(F.ret, e); line(rp, qc, 2.5, [6, 5]);
+          if (e >= 1) arrowHead(F.ret[F.ret.length - 2], F.ret[F.ret.length - 1], qc);
+        }
+        var cap = k < 3.5 ? "383 年 · 苻坚率前秦大军南下攻晋" : k < 4.5 ? "淝水 · 东晋北府兵反击" : "前秦大败北退 · 投鞭断流、草木皆兵、风声鹤唳";
+        label(cap, unproj(W / 2, H - 56), { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
+      }
+      /* 十六国小卡：北方大致位置闪烁标注（示意） */
+      function drawFl(c) {
+        var fk = (performance.now() - state.fl.t0) / 1000; if (fk > 2.6 && !state.fl.keep) { state.fl = null; dirty = true; return; }
+        var q = proj(state.fl.ll);
+        for (var j = 0; j < 2; j++) { var f = (fk * 1.2 + j * 0.5) % 1; ctx.globalAlpha = 1 - f; ctx.beginPath(); ctx.arc(q[0], q[1], 6 + f * 26, 0, 7); ctx.strokeStyle = c.star; ctx.lineWidth = 2.5; ctx.stroke(); }
+        ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(q[0], q[1], 5, 0, 7); ctx.fillStyle = c.star; ctx.fill();
+        label(state.fl.name + "（示意）", state.fl.ll, { dy: -22, color: c.ink, font: "600 13px system-ui, sans-serif" });
+      }
+      /* 孝文帝迁都：0–0.6 s 平城星标闪烁，0.6–3.6 s 星标沿箭头南移至洛阳，改革要点逐条点亮，7 s 结束（小卡保留） */
+      var qwEl = document.createElement("div"); qwEl.className = "x-pop x-qwc"; qwEl.hidden = true; qwEl.setAttribute("role", "dialog"); qwEl.setAttribute("aria-label", "孝文帝改革要点");
+      qwEl.innerHTML = '<button class="x-fold" aria-label="关闭改革要点">×</button><h3>孝文帝改革 · 494 年迁都洛阳</h3><ul>' +
+        ["改汉姓", "穿汉服", "说汉话", "与汉族通婚", "改革官制"].map(function (t) { return "<li>" + t + "</li>"; }).join("") + "</ul>";
+      cv.parentNode.appendChild(qwEl);
+      qwEl.firstChild.onclick = function () { qwEl.hidden = true; };
+      function qwButton() { [].forEach.call(document.querySelectorAll(".x-qw"), function (b) { b.classList.toggle("on", !!state.qw); b.setAttribute("aria-pressed", !!state.qw); b.textContent = state.qw ? "❚❚ 停止动画" : "▶ 播放孝文帝迁都"; }); }
+      function toggleQw() {
+        state.qw = state.qw ? 0 : performance.now() - (RM.matches ? 6900 : 0); qwEl.hidden = !state.qw;
+        if (state.qw) { resetView(false); [].forEach.call(qwEl.querySelectorAll("li"), function (li) { li.classList.remove("on"); }); }
+        qwButton(); dirty = true;
+      }
+      function drawQw(c) {
+        var k = (performance.now() - state.qw) / 1000, P = LAYERS[6].qw, serif = '600 14px "Noto Serif SC","Songti SC",serif';
+        var u = Math.max(0, Math.min(1, (k - 0.6) / 3)), e = u < 0.5 ? 2 * u * u : 1 - Math.pow(2 - 2 * u, 2) / 2, tp = part(P, e), hp = tp[tp.length - 1];
+        if (e > 0) { ctx.strokeStyle = c.halo; ctx.lineWidth = 6; ctx.lineJoin = "round"; path(tp); ctx.stroke(); ctx.strokeStyle = c.star; ctx.lineWidth = 3; ctx.stroke(); }
+        if (e >= 1) arrowHead(P[P.length - 2], P[P.length - 1], c.star);
+        if (k < 0.6) { var q0 = proj(P[0]), f = (k / 0.6) % 1; ctx.globalAlpha = 1 - f; ctx.beginPath(); ctx.arc(q0[0], q0[1], 8 + f * 22, 0, 7); ctx.strokeStyle = c.star; ctx.lineWidth = 2.5; ctx.stroke(); ctx.globalAlpha = 1; }
+        star(hp, 11, c.star);
+        label(e < 1 ? "平城（今大同）" : "洛阳", hp, { dx: 14, align: "left", color: c.ink, font: serif });
+        [].forEach.call(qwEl.querySelectorAll("li"), function (li, i) { li.classList.toggle("on", k > 1 + i * 0.7); });
+        label(k < 0.6 ? "北魏旧都平城（今大同）" : e < 1 ? "494 年 · 孝文帝自平城南迁" : "494 年 · 迁都洛阳，推行汉化改革", unproj(W / 2, H - 56), { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
+        if (k > 7) { state.qw = 0; qwButton(); dirty = true; }
+      }
+      function placeQw() { var q = proj([112.45, 34.65]); qwEl.style.left = Math.max(124, Math.min(W - 124, q[0] + 150)) + "px"; qwEl.style.top = Math.max(200, q[1] + 20) + "px"; }
+      function showPop(b) {
+        state.pop = b; popEl.hidden = !b; dirty = true; popEl.querySelector(".x-fs").hidden = !(b && b.anim);
+        if (b) { popEl.querySelector("h3").textContent = b.name + "（" + b.y + " 年）"; popEl.querySelector("p").textContent = b.text; }
+      }
+      function placePop() {
+        var b = state.pop;
+        if (b && !state.show.battle) return showPop(null);
+        if (b) { var q = proj(b.ll); popEl.style.left = Math.max(124, Math.min(W - 124, q[0])) + "px"; popEl.style.top = Math.max(110, q[1]) + "px"; }
+      }
+      var RM = matchMedia("(prefers-reduced-motion: reduce)");
+      function arrowHead(a, b, col) {
+        var p = proj(a), q = proj(b), ang = Math.atan2(q[1] - p[1], q[0] - p[0]);
+        ctx.beginPath(); ctx.moveTo(q[0], q[1]);
+        ctx.lineTo(q[0] - 12 * Math.cos(ang - 0.45), q[1] - 12 * Math.sin(ang - 0.45));
+        ctx.lineTo(q[0] - 12 * Math.cos(ang + 0.45), q[1] - 12 * Math.sin(ang + 0.45));
+        ctx.closePath(); ctx.fillStyle = col; ctx.fill();
+      }
+      function rtButton() {
+        var b = document.querySelector(".x-rt"); if (!b) return;
+        b.classList.toggle("on", !!state.rt); b.setAttribute("aria-pressed", !!state.rt); b.textContent = state.rt ? "❚❚ 停止路线" : "▶ 播放路线";
+      }
+      function unButton() {
+        var b = document.querySelector(".x-un"); if (!b) return;
+        b.classList.toggle("on", !!state.un); b.setAttribute("aria-pressed", !!state.un); b.textContent = state.un ? "❚❚ 停止" : "▶ " + (CH[state.ch].unl || "统一进程 266→280");
+      }
+      /* 隋：大运河四段（漕船小点自洛阳向两端流动）、点击段落弹出名称与起止；统一进程字幕 */
+      function drawCanal(c, L, now) {
+        L.canal.forEach(function (s) {
+          var on = state.pop === s;
+          ctx.strokeStyle = c.halo; ctx.lineWidth = on ? 9 : 7; ctx.lineJoin = "round"; ctx.lineCap = "round"; path(s.pts); ctx.stroke();
+          ctx.strokeStyle = s.c; ctx.lineWidth = on ? 5.5 : 3.5; ctx.stroke();
+          if (state.boat) for (var j = 0; j < 3; j++) {
+            var q = proj(along(s.pts, ((((now || 0) - state.boat) / 7000 + j / 3) % 1 + 1) % 1));
+            ctx.beginPath(); ctx.arc(q[0], q[1], 4, 0, 7); ctx.fillStyle = "#fff"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = s.c; ctx.stroke();
+          }
+          [[s.a, s.pts[0]], [s.b, s.pts[s.pts.length - 1]]].forEach(function (e) {
+            if (e[0] === "洛阳") return; var q = proj(e[1]);
+            ctx.beginPath(); ctx.arc(q[0], q[1], 3.5, 0, 7); ctx.fillStyle = s.c; ctx.fill();
+            if (state.show.note) label(e[0].replace("（淮河）", ""), e[1], { dx: e[0] === "京口" ? -8 : 8, align: e[0] === "京口" ? "right" : "left", color: c.ink, font: "600 12px system-ui, sans-serif" });
+          });
+          if (state.show.name) label(s.name, s.ll, { dx: s.name === "邗沟" ? 10 : -10, dy: s.name === "通济渠" ? -12 : 0, align: s.name === "邗沟" ? "left" : "right", color: s.c, font: "600 13px system-ui, sans-serif" });
+        });
+      }
+      function canalHit(p) {
+        var hit = null, L = LAYERS[state.ch];
+        if (L && L.canal && state.show.canal) L.canal.forEach(function (s) {
+          for (var i = 1; i < s.pts.length; i++) {
+            var a = proj(s.pts[i - 1]), b = proj(s.pts[i]), dx = b[0] - a[0], dy = b[1] - a[1];
+            var t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy || 1)));
+            if (Math.hypot(a[0] + dx * t - p[0], a[1] + dy * t - p[1]) < 12) hit = s;
+          }
+        });
+        return hit;
+      }
+      function drawSuiUn(c) {
+        var uk = unK();
+        if (uk >= 2 && uk < 5) {
+          var cr = [[117.6, 34], [118.3, 33], [118.78, 32.06]], cp = part(cr, Math.min(1, (uk - 2) / 2));
+          ctx.strokeStyle = c.halo; ctx.lineWidth = 6; ctx.lineJoin = "round"; path(cp); ctx.stroke();
+          ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3; ctx.stroke(); if (uk >= 4) arrowHead(cr[1], cr[2], "#ef6461");
+          label("隋军渡江", [116.6, 33.2], { color: "#ef6461", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+        }
+        label(uk < 2 ? "581 年 · 杨坚建立隋朝，与陈南北对峙" : uk < 5 ? "589 年 · 隋军渡江伐陈" : "589 年 · 灭陈，重新统一全国", unproj(W / 2, H - 56), { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
+      }
+      var PAL = {
+        dark: { sea: "#0a1120", sea2: "#0f1a2c", land: "#1a2437", high: "rgba(186,150,98,.30)", basin: "rgba(214,180,112,.13)", ridge: "rgba(236,214,170,.22)", river: "rgba(96,168,220,.8)", coast: "rgba(150,180,210,.35)", grat: "rgba(255,255,255,.05)", text: "#8a97ad", ink: "#e6ecf5", halo: "rgba(10,17,32,.85)", wall: "#e0a84a", star: "#f2b544", silk: "#f0d08a" },
+        light: { sea: "#dce6ea", sea2: "#e8eef0", land: "#f4f0e4", high: "rgba(150,108,58,.24)", basin: "rgba(206,164,92,.2)", ridge: "rgba(120,86,46,.3)", river: "rgba(50,118,170,.75)", coast: "rgba(60,80,100,.45)", grat: "rgba(0,0,0,.06)", text: "#6b7384", ink: "#1d2433", halo: "rgba(246,243,236,.9)", wall: "#a8641a", star: "#c98a12", silk: "#9a5b12" }
+      };
+      function pal() { return PAL[root.getAttribute("data-theme") === "light" ? "light" : "dark"]; }
+      function proj(p) { return [(p[0] - view.cx) * view.s * K + W / 2, (view.cy - p[1]) * view.s + H / 2]; }
+      function unproj(x, y) { return [(x - W / 2) / (view.s * K) + view.cx, view.cy - (y - H / 2) / view.s]; }
+      function fitView(b) {
+        var s = Math.min(W / ((b[2] - b[0]) * K), H / (b[3] - b[1])) * 0.94;
+        return { cx: (b[0] + b[2]) / 2, cy: (b[1] + b[3]) / 2, s: s };
+      }
+      function minS() { return fitView([60, 0, 150, 60]).s * 0.8; }
+      function clampView() {
+        view.s = Math.max(minS(), Math.min(80, view.s));
+        view.cx = Math.max(60, Math.min(150, view.cx)); view.cy = Math.max(0, Math.min(60, view.cy));
+      }
+      function resize() {
+        var r = cv.getBoundingClientRect(); DPR = Math.min(window.devicePixelRatio || 1, 2);
+        W = r.width; H = r.height; cv.width = W * DPR; cv.height = H * DPR; dirty = true;
+      }
+      /* 统一进程：0–5 s 晋吴对峙（2–5 s 楼船东下），5–7 s 晋吴合并，至 9 s 结束 */
+      function unK() { return (performance.now() - state.un) / 1000; }
+      function layer() {
+        if (state.un && state.ch === 11) {
+          if (unK() <= 11.5) return sgLayer(unK());
+          state.un = 0; unButton(); dirty = true;
+        }
+        if (state.un && state.ch === 12) {
+          if (unK() <= 11.5) return nsLayer(unK());
+          state.un = 0; unButton(); dirty = true;
+        }
+        if (state.un && state.ch === 13) {
+          if (unK() <= 13) return yLayer(unK());
+          state.un = 0; unButton(); dirty = true;
+        }
+        if (state.un && state.ch === 14) {
+          if (unK() <= 14.5) return mgLayer(unK());
+          state.un = 0; unButton(); dirty = true;
+        }
+        if (state.un && state.ch === 15) {
+          if (unK() <= 15.5) return qgLayer(unK());
+          state.un = 0; unButton(); dirty = true;
+        }
+        if (state.un) {
+          var uk = unK(), U = LAYERS[state.ch].u581 || LAYERS[4].u266;
+          if (uk < 5) return U;
+          if (uk < 7) { var e = (uk - 5) / 2; return morphLayer(U, LAYERS[state.ch], e < 0.5 ? 2 * e * e : 1 - Math.pow(2 - 2 * e, 2) / 2); }
+          if (uk > 9) { state.un = 0; unButton(); dirty = true; }
+        }
+        if (state.mo) {
+          var k = Math.min(1, (performance.now() - state.mo.t0) / 1500);
+          if (k < 1) return morphLayer(state.mo.A, state.mo.B, k < 0.5 ? 2 * k * k : 1 - Math.pow(2 - 2 * k, 2) / 2);
+          state.mo = null; dirty = true;
+        }
+        return LAYERS[state.ch] || (state.qz != null ? LAYERS[state.qz] : null);
+      }
+      function path(pts, close) {
+        ctx.beginPath();
+        pts.forEach(function (p, i) { var q = proj(p); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); });
+        if (close) ctx.closePath();
+      }
+      function label(t, p, o) {
+        var q = proj(p), c = pal(); o = o || {};
+        ctx.font = o.font || "12px system-ui, sans-serif"; ctx.textAlign = o.align || "center"; ctx.textBaseline = "middle";
+        ctx.lineWidth = 3; ctx.strokeStyle = c.halo; ctx.lineJoin = "round";
+        ctx.strokeText(t, q[0] + (o.dx || 0), q[1] + (o.dy || 0));
+        ctx.fillStyle = o.color || c.text; ctx.fillText(t, q[0] + (o.dx || 0), q[1] + (o.dy || 0));
+      }
+      function star(p, r, col) {
+        var q = proj(p); ctx.beginPath();
+        for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + (i * Math.PI) / 5, rr = i % 2 ? r * 0.45 : r; ctx.lineTo(q[0] + rr * Math.cos(a), q[1] + rr * Math.sin(a)); }
+        ctx.closePath(); ctx.fillStyle = col; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = pal().halo; ctx.stroke();
+      }
+      function draw(now) {
+        var c = pal(), L = layer(), z = Math.max(0.7, Math.min(1.4, view.s / 14));
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        var g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, c.sea2); g.addColorStop(1, c.sea);
+        ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = c.grat; ctx.lineWidth = 1;
+        for (var lo = 60; lo <= 150; lo += 10) { path([[lo, 0], [lo, 60]]); ctx.stroke(); }
+        for (var la = 0; la <= 60; la += 10) { path([[60, la], [150, la]]); ctx.stroke(); }
+        // 陆地
+        ctx.fillStyle = c.land; path(GEO.main, true); ctx.fill();
+        GEO.islands.forEach(function (p) { path(p, true); ctx.fill(); });
+        // 晕渲：限制在大陆内，宽描边做柔边
+        ctx.save(); path(GEO.main, true); ctx.clip();
+        GEO.relief.forEach(function (r) {
+          var col = r.kind === "high" ? c.high : c.basin; ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineJoin = "round";
+          path(r.poly, true); ctx.fill();
+          [10, 22].forEach(function (w) { ctx.globalAlpha = 0.35; ctx.lineWidth = w * z; path(r.poly, true); ctx.stroke(); });
+          ctx.globalAlpha = 1;
+        });
+        ctx.strokeStyle = c.ridge; ctx.lineCap = "round";
+        GEO.ridges.forEach(function (p) { ctx.lineWidth = 5 * z; path(p); ctx.stroke(); ctx.lineWidth = 1.5; ctx.stroke(); });
+        ctx.restore();
+        ctx.strokeStyle = c.coast; ctx.lineWidth = 1;
+        path(GEO.main, true); ctx.stroke(); GEO.islands.forEach(function (p) { path(p, true); ctx.stroke(); });
+        ctx.fillStyle = c.sea2; GEO.lakes.forEach(function (p) { path(p, true); ctx.fill(); ctx.stroke(); });
+        ctx.strokeStyle = c.river; ctx.lineJoin = "round";
+        GEO.rivers.forEach(function (r, i) { ctx.lineWidth = i < 2 ? 1.8 : 1.1; path(r.pts); ctx.stroke(); });
+        // 疆域
+        if (L) {
+          var pulse = 0.5 + 0.5 * Math.sin((now || 0) / 260);
+          L.states.forEach(function (s) {
+            var on = state.sel === s.id, jh = state.jm && s.jm, dim = (state.sel && !on) || (state.jm && !s.jm), a = s.alpha == null ? 1 : s.alpha;
+            ctx.globalAlpha = a * (dim ? 0.35 : 1);
+            ctx.fillStyle = s.color + (s.jm ? (on || jh ? "55" : "1c") : on ? "66" : "3a"); path(s.poly, true); ctx.fill();
+            if (s.jm) { hatch(s, on || jh); path(s.poly, true); }
+            ctx.strokeStyle = s.color; ctx.lineWidth = on || jh ? 2.5 + pulse * 1.5 : 1.4;
+            ctx.setLineDash(s.id === "qin" || s.main || (on && !s.jm) ? [] : [5, 4]); ctx.stroke(); ctx.setLineDash([]);
+            ctx.globalAlpha = 1;
+          });
+          if (state.show.wall) L.walls.forEach(function (w) {
+            ctx.strokeStyle = c.halo; ctx.lineWidth = 5; path(w.pts); ctx.stroke();
+            ctx.strokeStyle = c.wall; ctx.lineWidth = 3; ctx.stroke();
+            ctx.strokeStyle = c.halo; ctx.lineWidth = 3; ctx.setLineDash([2, 5]); ctx.stroke(); ctx.setLineDash([]);
+          });
+          if (L.silk && state.show.silk) {
+            ctx.strokeStyle = c.silk; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.setLineDash([7, 5]);
+            L.silk.routes.forEach(function (r) { path(r); ctx.stroke(); }); ctx.setLineDash([]);
+            if (state.car) {
+              var u0 = ((now || 0) - state.car) / 14000;
+              L.silk.routes.forEach(function (r, ri) {
+                for (var j = 0; j < 4; j++) {
+                  var q = proj(along(r, (((u0 + j / 4 + ri * 0.12) % 1) + 1) % 1));
+                  ctx.beginPath(); ctx.arc(q[0], q[1], 4, 0, 7); ctx.fillStyle = c.star; ctx.fill();
+                  ctx.lineWidth = 1.5; ctx.strokeStyle = c.halo; ctx.stroke();
+                }
+              });
+            }
+            if (state.show.note) L.silk.notes.forEach(function (n) { label(n.t, n.ll, { color: c.silk, font: "600 12px system-ui, sans-serif" }); });
+          }
+          if (L.arrows && !state.qw) L.arrows.forEach(function (ar) {
+            var col = ar.color || "#C07CCF", n = ar.pts.length;
+            ctx.strokeStyle = c.halo; ctx.lineWidth = 5; ctx.lineJoin = "round"; path(ar.pts); ctx.stroke();
+            ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.setLineDash([10, 6]); ctx.lineDashOffset = RM.matches ? 0 : -((now || 0) / 30) % 16;
+            ctx.stroke(); ctx.setLineDash([]); ctx.lineDashOffset = 0;
+            arrowHead(ar.pts[n - 2], ar.pts[n - 1], col);
+            if (!RM.matches) { var mq = proj(along(ar.pts, ((now || 0) / 5000) % 1)); ctx.beginPath(); ctx.arc(mq[0], mq[1], 4, 0, 7); ctx.fillStyle = col; ctx.fill(); }
+            if (state.show.note) label(ar.t, ar.at, { color: col, font: "600 13px system-ui, sans-serif" });
+          });
+          if (L.migs && state.show.mig) L.migs.forEach(function (m) {
+            ctx.strokeStyle = c.halo; ctx.lineWidth = 4; ctx.lineJoin = "round"; path(m.pts); ctx.stroke();
+            ctx.strokeStyle = m.c; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.lineDashOffset = RM.matches ? 0 : -((now || 0) / 40) % 10;
+            ctx.stroke(); ctx.setLineDash([]); ctx.lineDashOffset = 0;
+            arrowHead(m.pts[m.pts.length - 2], m.pts[m.pts.length - 1], m.c);
+          });
+          if (L.canal && state.show.canal) drawCanal(c, L, now);
+          if (state.un && state.ch === 7) drawSuiUn(c);
+          if (state.un && state.ch === 4) {
+            var uk = unK(), su = Math.max(0, Math.min(1, (uk - 2) / 3)), SH = LAYERS[4].ship;
+            if (su > 0) {
+              var sp = part(SH, su);
+              ctx.strokeStyle = c.halo; ctx.lineWidth = 6; ctx.lineJoin = "round"; path(sp); ctx.stroke();
+              ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 3; ctx.stroke();
+              if (su < 1) { var hq = proj(sp[sp.length - 1]); ctx.beginPath(); ctx.arc(hq[0], hq[1], 5, 0, 7); ctx.fillStyle = "#ef6461"; ctx.fill(); }
+              else arrowHead(SH[SH.length - 2], SH[SH.length - 1], "#ef6461");
+              label("王濬楼船下益州", [111.6, 29.2], { color: "#ef6461", font: '600 14px "Noto Serif SC","Songti SC",serif' });
+            }
+            var bt = uk < 2 ? "266 年 · 司马炎代魏，建立西晋" : uk < 5 ? "280 年 · 晋军顺江东下伐吴" : "280 年 · 灭吴，结束三国分裂";
+            label(bt, unproj(W / 2, H - 56), { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
+          }
+          if (L.seaLines && state.show.note) L.seaLines.forEach(function (sl) {
+            ctx.strokeStyle = c.halo; ctx.lineWidth = 4; ctx.lineJoin = "round"; path(sl.pts); ctx.stroke();
+            ctx.strokeStyle = c.silk; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.stroke(); ctx.setLineDash([]);
+            arrowHead(sl.pts[sl.pts.length - 2], sl.pts[sl.pts.length - 1], c.silk);
+            label(sl.t, sl.at, { color: c.silk, font: "600 12px system-ui, sans-serif" });
+          });
+          if (L.battles && state.show.battle) L.battles.forEach(function (b) {
+            var q = proj(b.ll), on = state.pop === b;
+            ctx.beginPath(); ctx.arc(q[0], q[1], on ? 10 : 8, 0, 7); ctx.fillStyle = b.tr ? "#F2B544" : "#ef6461"; ctx.fill();
+            ctx.lineWidth = 2; ctx.strokeStyle = c.halo; ctx.stroke();
+            if (b.tr) { ctx.beginPath(); ctx.arc(q[0], q[1], 3, 0, 7); ctx.fillStyle = "#fff"; ctx.fill(); }
+            else { ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.8; ctx.beginPath();
+              ctx.moveTo(q[0] - 4, q[1] - 4); ctx.lineTo(q[0] + 4, q[1] + 4); ctx.moveTo(q[0] + 4, q[1] - 4); ctx.lineTo(q[0] - 4, q[1] + 4); ctx.stroke(); }
+            label(b.name.replace("之战", "") + " " + b.y, b.ll, { dx: 13, align: "left", color: c.ink, font: "600 12px system-ui, sans-serif" });
+          });
+          if (state.fs && state.ch === 5) drawFs(c);
+          if (state.fl) drawFl(c);
+          if (state.qw && state.ch === 6) drawQw(c);
+          if (state.ch === 9 && state.fz && !state.mo) drawFz(c);
+          if (state.ch === 10 && !state.mo) drawYy(c, now);
+          if (state.ch === 11 && !state.mo) drawSy(c, now);
+          if (state.ch === 12 && !state.mo) drawNs(c, now);
+          if (state.ch === 13 && !state.mo) drawYuan(c);
+          if (state.ch === 14 && !state.mo) drawMing(c, now);
+          if (state.ch === 15 && !state.mo) drawQing(c, now);
+          if ((state.ch === 8 || state.ch === 9) && !state.mo && state.show.ev) drawTg(c, now);
+          if (state.ch === 8 && state.jm) label("羁縻府州：由归附部族首领管理，与内地州县不同", unproj(W / 2, H - (state.tg ? 84 : 56)), { color: "#E5604A", font: '600 15px "Noto Serif SC","Songti SC",serif' });
+          if (L.routes && state.show.route) {
+            var rt = state.rt ? ((now || 0) - state.rt) / 1000 : 1e9, end = 0;
+            L.routes.forEach(function (r) {
+              end = Math.max(end, r.at + r.dur);
+              var u = Math.max(0, Math.min(1, (rt - r.at) / r.dur)); if (!u) return;
+              var p = part(r.pts, u), m = p.length;
+              ctx.strokeStyle = c.halo; ctx.lineWidth = 5; ctx.lineJoin = "round"; ctx.setLineDash(r.dash ? [7, 5] : []); path(p); ctx.stroke();
+              ctx.strokeStyle = c.silk; ctx.lineWidth = 2.5; ctx.stroke(); ctx.setLineDash([]);
+              if (u < 1) { var hq = proj(p[m - 1]); ctx.beginPath(); ctx.arc(hq[0], hq[1], 5, 0, 7); ctx.fillStyle = c.star; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = c.halo; ctx.stroke(); }
+              else { arrowHead(p[m - 2], p[m - 1], c.silk); if (state.show.note) label(r.name, r.at2, { color: c.silk, font: "600 12px system-ui, sans-serif" }); }
+            });
+            if (rt >= end && state.show.note && L.routeNotes) L.routeNotes.forEach(function (n) { label(n.t, n.ll, { color: c.silk, font: "600 12px system-ui, sans-serif" }); });
+            if (state.rt && rt >= end) { state.rt = 0; rtButton(); }
+          }
+          if (state.show.cap) L.states.forEach(function (s) {
+            if (!s.capital || (state.qw && s.id === "beiwei")) return;
+            [s.capital, s.cap2].forEach(function (cp) { if (!cp) return; star(cp.ll, 8, c.star);
+              if (state.show.note) label(cp.name, cp.ll, { dx: 10, align: "left", color: c.ink, font: "600 12px system-ui, sans-serif" }); });
+          });
+        }
+        if (state.show.note) {
+          GEO.relief.forEach(function (r) { if (r.name && r.at) label(r.name, r.at, { font: "italic 12px system-ui, sans-serif" }); });
+          GEO.rivers.forEach(function (r) { if (r.name && r.at) label(r.name, r.at, { color: c.river, font: "12px system-ui, sans-serif" }); });
+          if (L) L.notes.forEach(function (n) {
+            if (n.sea) return label(n.t, n.ll, { font: "italic 12px " + "serif", color: c.river });
+            if (!n.big) { var q = proj(n.ll); ctx.fillStyle = c.ink; ctx.beginPath(); ctx.arc(q[0], q[1], 2.5, 0, 7); ctx.fill(); }
+            label(n.t, n.ll, n.big ? { font: "500 13px system-ui, sans-serif", color: c.ink } : { dx: 6, align: "left", dy: -8 });
+          });
+        }
+        if (L && state.show.name) L.states.forEach(function (s) {
+          label(s.name, s.label, { font: "600 " + (s.id === "qin" || s.main ? 26 : 17) + 'px "Noto Serif SC","Songti SC",serif', color: s.color });
+        });
+        // 示意图章
+        ctx.font = '600 13px "Noto Serif SC",serif'; ctx.textAlign = "right"; ctx.textBaseline = "top";
+        ctx.strokeStyle = "#ef6461"; ctx.lineWidth = 1.2; ctx.strokeRect(W - 70, 12, 58, 24);
+        ctx.fillStyle = "#ef6461"; ctx.fillText("示意图", W - 19, 17);
+        placePop(); if (!qwEl.hidden) placeQw();
+      }
+      function loop(now) {
+        if (anim) {
+          var k = Math.min(1, (now - anim.t0) / 450), e = 1 - Math.pow(1 - k, 3);
+          ["cx", "cy", "s"].forEach(function (p) { view[p] = anim.from[p] + (anim.to[p] - anim.from[p]) * e; });
+          if (k >= 1) anim = null; dirty = true;
+        }
+        if (dirty || state.sel || state.mo || state.car || state.rt || state.un || state.fs || state.fl || state.qw || state.boat || state.tg || state.jm || state.yy || state.jd || ((state.ch === 11 || state.ch === 12) && !RM.matches) || (LAYERS[state.ch] && (LAYERS[state.ch].arrows || LAYERS[state.ch].migs) && !RM.matches)) { draw(now); dirty = false; }
+        requestAnimationFrame(loop);
+      }
+      function resetView(instant) {
+        var L = LAYERS[state.ch] || (state.qz != null ? LAYERS[state.qz] : null), to = fitView(L ? L.view : DEFAULT_VIEW);
+        if (instant || matchMedia("(prefers-reduced-motion: reduce)").matches) { anim = null; view = to; dirty = true; }
+        else anim = { t0: performance.now(), from: Object.assign({}, view), to: to };
+      }
+      /* 指针：单指拖动平移，双指缩放，轻点选政权 */
+      var ptr = {}, last = null, moved = 0;
+      function pts() { return Object.keys(ptr).map(function (k) { return ptr[k]; }); }
+      function zoomAt(x, y, f) {
+        var before = unproj(x, y); view.s *= f; clampView();
+        var after = unproj(x, y); view.cx += before[0] - after[0]; view.cy += before[1] - after[1]; clampView(); dirty = true;
+      }
+      cv.addEventListener("pointerdown", function (e) {
+        cv.setPointerCapture(e.pointerId); var r = cv.getBoundingClientRect();
+        ptr[e.pointerId] = [e.clientX - r.left, e.clientY - r.top]; moved = 0; last = null; anim = null;
+      });
+      cv.addEventListener("pointermove", function (e) {
+        if (!ptr[e.pointerId]) return; var r = cv.getBoundingClientRect(), p = [e.clientX - r.left, e.clientY - r.top];
+        var prev = ptr[e.pointerId]; ptr[e.pointerId] = p; var P = pts();
+        if (P.length === 1) {
+          moved += Math.abs(p[0] - prev[0]) + Math.abs(p[1] - prev[1]);
+          view.cx -= (p[0] - prev[0]) / (view.s * K); view.cy += (p[1] - prev[1]) / view.s; clampView(); dirty = true;
+        } else if (P.length === 2) {
+          moved += 10; var d = Math.hypot(P[0][0] - P[1][0], P[0][1] - P[1][1]);
+          if (last) zoomAt((P[0][0] + P[1][0]) / 2, (P[0][1] + P[1][1]) / 2, d / last);
+          last = d;
+        }
+      });
+      function up(e) {
+        if (!ptr[e.pointerId]) return; var p = ptr[e.pointerId]; delete ptr[e.pointerId]; last = null;
+        if (moved < 6 && !pts().length) {
+          var L = layer(), ll = unproj(p[0], p[1]), hit = null, bh = null;
+          if (L && L.battles && state.show.battle) L.battles.forEach(function (b) { var q = proj(b.ll); if (Math.hypot(q[0] - p[0], q[1] - p[1]) < 16) bh = b; });
+          if (!bh && !state.un && !state.mo) bh = canalHit(p);
+          if (bh || state.pop) showPop(bh === state.pop ? null : bh);
+          if (bh) return;
+          if (L) L.states.forEach(function (s) { if (inPoly(ll, s.poly)) hit = s.id; });
+          select(hit === state.sel ? null : hit);
+        }
+      }
+      cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+      cv.addEventListener("wheel", function (e) {
+        e.preventDefault(); var r = cv.getBoundingClientRect();
+        zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0015));
+      }, { passive: false });
+
+      /* ---------- 外壳：章节、时间轴、面板 ---------- */
+      var N = CH.length, chart = null;
+      function pad(n) { return (n < 10 ? "0" : "") + n; }
+      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+      $("segs").innerHTML = CH.map(function () { return "<i></i>"; }).join("");
+      $("chs").innerHTML = CH.map(function (c, i) {
+        return '<button class="x-ch' + (c.ready ? "" : " soon") + '" data-i="' + i + '"><b>' + pad(i + 1) + "</b><span>" + esc(c.name) + "</span></button>";
+      }).join("");
+      $("ticks").innerHTML = CH.slice(0, 16).map(function (c, i) {
+        return '<button class="x-tick" data-i="' + i + '"' + (c.ready ? "" : ' disabled title="交互即将上线"') + ' aria-label="' + c.tick + " " + esc(c.name) + '"><i></i><em>' + c.tick + "</em></button>";
+      }).join("");
+      $("chs").addEventListener("click", function (e) { var b = e.target.closest(".x-ch"); if (b) go(+b.dataset.i); });
+      $("ticks").addEventListener("click", function (e) { var b = e.target.closest(".x-tick"); if (b && !b.disabled) go(+b.dataset.i); });
+
+      function select(id) {
+        state.sel = id; dirty = true;
+        [].forEach.call(document.querySelectorAll(".x-pol button"), function (b) { b.classList.toggle("on", b.dataset.id === id); });
+      }
+      function switchesHTML() {
+        var names = { cap: "都城（星标）", wall: (LAYERS[state.ch] && LAYERS[state.ch].wn) || "长城", note: "注记", name: "政权名称" }, silk = LAYERS[state.ch] && LAYERS[state.ch].silk;
+        if (LAYERS[state.ch] && LAYERS[state.ch].zh) names.ev = "郑和航线";
+        if (silk) names.silk = "丝绸之路";
+        var routes = LAYERS[state.ch] && LAYERS[state.ch].routes;
+        if (routes) names.route = "班超 / 甘英路线";
+        if (LAYERS[state.ch] && LAYERS[state.ch].battles) names.battle = LAYERS[state.ch].bn || "战役标记";
+        if (LAYERS[state.ch] && LAYERS[state.ch].migs) names.mig = "内迁各族";
+        if (LAYERS[state.ch] && LAYERS[state.ch].canal) names.canal = "大运河";
+        if (LAYERS[state.ch] && LAYERS[state.ch].prov) names.prov = "行省（示意）";
+        if (LAYERS[state.ch] && LAYERS[state.ch].ev) names.ev = LAYERS[state.ch].evn || "630 / 641 / 657 事件";
+        return '<div class="x-card"><h3>显示</h3><div class="x-switches">' + Object.keys(names).map(function (k) {
+          return '<button class="x-sw' + (state.show[k] ? " on" : "") + '" data-k="' + k + '" aria-pressed="' + state.show[k] + '">' + names[k] + "</button>";
+        }).join("") + (silk ? '<button class="x-sw x-car' + (state.car ? " on" : "") + '" aria-pressed="' + !!state.car + '">' + (state.car ? "❚❚ 暂停驼队" : "▶ 播放驼队") + "</button>" : "") +
+          (routes ? '<button class="x-sw x-rt' + (state.rt ? " on" : "") + '" aria-pressed="' + !!state.rt + '">' + (state.rt ? "❚❚ 停止路线" : "▶ 播放路线") + "</button>" : "") + "</div></div>";
+      }
+      function panelHTML(i) {
+        var c = CH[i], L = LAYERS[i], h = '<span class="x-tag">第 ' + (i + 1) + " 章" + (c.y != null ? " · " + c.tick.replace("前", "前 ") + " 年" : "") + "</span>";
+        if (i === 16) return h + qzHTML(true);
+        if (!c.ready) {
+          h += '<div class="x-card x-card--text"><h3>' + esc(c.name) + '</h3><p><span class="x-soon">交互即将上线</span></p><p>' + esc(c.text) + "</p></div>";
+          if (c.q) h += '<div class="x-card x-card--text"><h3>章内问题</h3><p>' + esc(c.q.q) + "</p><details><summary>查看解析</summary><p>" + esc(c.q.ans) + "</p></details></div>";
+          return h + switchesHTML();
+        }
+        var got = Hark.data("area-data").filter(function (r) { return r.a != null; }).map(function (r) { return r.t + " 约 " + r.a + " 万"; }).join("、");
+        var figs = c.fx ? c.fx.map(function (f) { return '<div class="x-fig"><b style="font-size:16px;color:' + f[2] + '">≈' + f[1] + "</b><span>" + f[0] + "（万平方公里，示意）</span></div>"; }).join("") : "";
+        if (c.split) {
+          /* 三家分别示意：按图上多边形面积（经纬度×cos 纬度）比例分配合计数，取整到 10 万 */
+          var ar = function (p) { for (var s = 0, k = 0, j = p.length - 1; k < p.length; j = k++) s += (p[j][0] - p[k][0]) * Math.cos(((p[j][1] + p[k][1]) * Math.PI) / 360) * (p[j][1] + p[k][1]) / 2; return Math.abs(s); };
+          var parts = c.split.map(function (ids) { var g = L.states.filter(function (s) { return ids.indexOf(s.id) >= 0; }); return { s: g[0], a: g.reduce(function (t, s) { return t + ar(s.poly); }, 0) }; }), tot = parts.reduce(function (t, p) { return t + p.a; }, 0);
+          var left = c.area;
+          figs = parts.map(function (p, k) { var v = k < parts.length - 1 ? Math.round((c.area * p.a) / tot / 10) * 10 : left; left -= v; return '<div class="x-fig"><b style="font-size:16px;color:' + p.s.color + '">≈' + v + "</b><span>" + p.s.name + "（示意）</span></div>"; }).join("");
+        }
+        h += '<div class="x-card"><h3>疆域面积</h3><div class="x-figs" style="flex-wrap:wrap"><div class="x-fig"' + (c.split || c.fx ? ' style="flex-basis:100%"' : "") + '><b>≈' + c.area + '</b><span>万平方公里' + (c.split ? "，三国合计" : c.an || "") + '（约数，示意）</span></div>' + figs + '</div>' +
+          '<figure class="x-chart"><div class="chart__canvas"><canvas id="area-chart" role="img" aria-label="16 个时期疆域面积曲线，已画出：' + got + '平方公里"></canvas></div></figure>' +
+          '<p class="x-card--text" style="margin:6px 0 0">' + (Hark.data("area-data").every(function (r) { return r.a != null; }) ? "16 个时期面积曲线已完整（约数，示意）。" : "16 时期面积曲线：已画出 " + got + "，其余随后续章节补齐。") + "</p></div>";
+        h += '<div class="x-card"><h3>并立 / 周边政权 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">点击在地图上高亮</small></h3><div class="x-pol">' + L.states.map(function (s) {
+          return '<button data-id="' + s.id + '"><i style="background:' + s.color + '"></i><span>' + esc(s.name) + "<small>" + esc(s.sub) + "</small></span></button>";
+        }).join("") + "</div></div>";
+        if (L.battles) h += '<div class="x-card"><h3>' + (L.bn || "战役标记") + ' <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">点击查看简介</small></h3><div class="x-pol">' + L.battles.map(function (b, k) {
+          return '<button data-bt="' + k + '"><i style="background:' + (b.tr ? "#F2B544" : "#ef6461") + ';border-radius:50%"></i><span>' + esc(b.name) + "<small>" + b.y + " 年</small></span></button>";
+        }).join("") + "</div>" + (L.fs ? '<button class="x-sw x-fs" aria-pressed="false" style="margin-top:8px">▶ 播放战役动画</button>' : "") + "</div>";
+        if (c.kd) h += '<div class="x-card"><h3>十六国更替 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">点击在地图上闪烁标注（示意）</small></h3><div class="x-pol">' + c.kd.map(function (d, k) {
+          return '<button data-kd="' + k + '"><i style="background:var(--x-ink-2)"></i><span>' + esc(d[0]) + "<small>" + d[1] + " 年 · " + esc(d[2]) + "</small></span></button>";
+        }).join("") + "</div></div>";
+        if (L.canal) h += '<div class="x-card"><h3>隋大运河 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">以洛阳为中心，点击查看起止</small></h3><div class="x-pol">' + L.canal.map(function (s, k) {
+          return '<button data-cn="' + k + '"><i style="background:' + s.c + '"></i><span>' + s.name + "<small>" + s.a + "—" + s.b + "</small></span></button>";
+        }).join("") + '</div><button class="x-sw x-boat" aria-pressed="false" style="margin-top:8px">▶ 播放漕船</button></div>';
+        if (L.qw) h += '<div class="x-card"><h3>孝文帝迁都 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">平城（今大同）→ 洛阳，494 年</small></h3><button class="x-sw x-qw" aria-pressed="false">▶ 播放孝文帝迁都</button></div>';
+        if (L.fz) h += '<div class="x-card"><h3>安史之乱与藩镇割据 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">755–763；藩镇色块为示意</small></h3><div class="x-switches">' +
+          '<button class="x-sw x-tg" aria-pressed="false">' + L.tgl + '</button><button class="x-sw x-fz" aria-pressed="false">藩镇割据</button><button class="x-sw x-mo">▶ 唐前期→唐后期形变</button></div>' +
+          '<p class="x-ans" id="fz-tip"><b>河朔三镇：</b>卢龙、成德、魏博，安史余部，长期割据河北（示意）。</p></div>';
+        else if (L.ev) h += '<div class="x-card"><h3>羁縻府州与边疆 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">实色＝直辖州县，浅色斜线＋虚线＝都护府羁縻区</small></h3><div class="x-switches">' +
+          '<button class="x-sw x-jm" aria-pressed="false">羁縻府州</button><button class="x-sw x-tg" aria-pressed="false">▶ 播放 630 · 641 · 657</button></div>' +
+          '<p class="x-ans" id="jm-tip"><b>羁縻府州：</b>由归附部族首领管理，与内地州县不同。</p></div>';
+        if (L.yy) h += '<div class="x-card"><h3>燕云十六州 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">幽州（今北京）、云州（今大同）一带；936 年割给契丹</small></h3><div class="x-switches">' +
+          '<button class="x-sw x-yy" aria-pressed="false">燕云十六州 · 播放 936 割让</button><button class="x-sw x-mo">▶ 唐后期→五代十国形变</button></div>' +
+          '<p class="x-ans" id="yy-tip"><b>936 年：</b>石敬瑭割燕云十六州给契丹，中原失去北方天然屏障。</p></div>';
+        if (L.yun) h += '<div class="x-card"><h3>燕云十六州 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">红色醒目描边</small></h3><div class="x-switches">' +
+          '<button class="x-sw x-mo">▶ 五代十国→北宋并立形变</button></div>' +
+          '<p class="x-ans show"><b>北宋始终未收复：</b>宋辽以白沟河为界，幽州（今北京）、云州（今大同）一带仍在辽境内。</p></div>';
+        if (L.sx) h += '<div class="x-card"><h3>绍兴和议界线 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">1142 · 红色醒目描边</small></h3><div class="x-switches">' +
+          '<button class="x-sw x-mo">▶ 北宋并立→南宋并立形变</button></div>' +
+          '<p class="x-ans show"><b>东以淮水、西以大散关：</b>金吞并辽与淮河以北的北宋地区；南宋定都临安（今杭州）。</p></div>';
+        if (L.yuan) h += '<div class="x-card"><h3>元朝统一 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">多政权并立 → 合并为一</small></h3><div class="x-switches">' +
+          '<button class="x-sw x-mo">▶ 南宋并立→元形变</button></div>' +
+          '<p class="x-ans show"><b>行省制度：</b>中书省直辖腹里，各地设行省；宣政院管辖西藏（交叉斜线），澎湖巡检司管辖澎湖、台湾。</p></div>';
+        if (L.ming) h += '<div class="x-card"><h3>直辖与羁縻 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">实色＝两京十三布政使司，浅色斜线＝羁縻都司、卫</small></h3><div class="x-switches">' +
+          '<button class="x-sw x-jm" aria-pressed="false">羁縻都司</button><button class="x-sw x-mo">▶ 元→明形变</button></div>' +
+          '<p class="x-ans" id="jm-tip"><b>羁縻性质：</b>奴儿干、乌思藏、朵甘都司与哈密卫等关西七卫由当地首领世袭管理，管控松散，与内地府州县不同。</p>' +
+          '<p class="x-ans show"><b>北方大幅收缩：</b>元的岭北、辽阳北部归鞑靼、瓦剌，明修长城防御。</p></div>';
+        if (L.qing) h += '<div class="x-card"><h3>疆域奠定 <small style="font-weight:400;font-size:12px;color:var(--x-ink-2)">虚线＝今中国陆地边界轮廓（示意）</small></h3><div class="x-switches">' +
+          '<button class="x-sw x-jd" aria-pressed="false">疆域奠定</button><button class="x-sw x-mo">▶ 明→清形变</button></div>' +
+          '<p class="x-ans" id="jd-tip"><b>18 世纪中期清朝奠定了中国的疆域：</b>西跨葱岭，西北到巴尔喀什湖，北接西伯利亚，东北到外兴安岭和库页岛，东临太平洋，南到南海诸岛。</p>' +
+          '<p class="x-ans show"><b>大幅扩张：</b>明的羁縻都司与鞑靼、瓦剌之地，均纳入清朝直接管辖。</p></div>';
+        if (c.tls) c.tls.forEach(function (g) { h += '<div class="x-card"><h3>' + esc(g[0]) + '</h3><ol class="x-tl">' + g[1].map(function (t) { return "<li><b>" + t[0] + "</b><span>" + esc(t[1]) + "</span></li>"; }).join("") + "</ol></div>"; });
+        if (c.tl) h += '<div class="x-card"><h3>时间线</h3><ol class="x-tl">' + c.tl.map(function (t) { return "<li><b>" + t[0] + "</b><span>" + esc(t[1]) + "</span></li>"; }).join("") +
+          '</ol><button class="x-sw x-un" aria-pressed="false">▶ ' + (c.unl || "统一进程 266→280") + '</button></div>';
+        h += '<div class="x-card x-q"><h3>章内小问题</h3><p>' + esc(c.q.q) + '</p><div class="x-q__opts">' + c.q.opts.map(function (o, k) {
+          return '<button data-k="' + k + '">' + "ABCD"[k] + ". " + esc(o) + "</button>";
+        }).join("") + '</div><p class="x-ans" id="ans"></p></div>';
+        h += '<div class="x-card"><h3>要点</h3><ul style="margin:0;padding-left:18px;font-size:13px">' +
+          c.pts.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul>" +
+          '<p class="x-gk">' + esc(c.gk) + "</p></div>";
+        return h + switchesHTML();
+      }
+      function buildChart() {
+        if (chart) { chart.destroy(); chart = null; }
+        var el = $("area-chart"); if (!el || !window.Chart) return;
+        var d = Hark.data("area-data"), pk = state.ch >= 8 && state.ch <= 15 ? d.map(function (r) { return r.t; }).indexOf(["669", "790", "950", "1005", "1142", "1330", "1433", "1820"][state.ch - 8]) : -1;
+        chart = new Chart(el, {
+          type: "line",
+          data: { labels: d.map(function (r) { return r.t; }), datasets: [{ label: "疆域面积", data: d.map(function (r) { return r.a; }), pointRadius: d.map(function (r, i) { return i === pk ? 7 : 4; }), spanGaps: false }] },
+          options: {
+            scales: { y: { min: 0, suggestedMax: 400, ticks: { callback: function (v) { return v + "万"; } } }, x: { ticks: { maxRotation: 0, autoSkip: true } } },
+            plugins: { legend: { display: false }, datalabels: Object.assign({}, Hark.labels.points, { display: function (c) { return c.dataset.data[c.dataIndex] != null; }, formatter: function (v, x) { return "≈" + v + " 万" + (x.dataIndex === pk ? [" · 峰值", " · 唐后期", " · 仅中原王朝", " · 北宋", " · 南宋", " · 元", " · 明", " · 清"][state.ch - 8] : ""); } }),
+              tooltip: { callbacks: { label: function (ctx) { return "约 " + ctx.raw + " 万平方公里（示意）"; } } } }
+          }
+        });
+      }
+      $("panel-body").addEventListener("click", function (e) {
+        var car = e.target.closest(".x-car");
+        if (car) { state.car = state.car ? 0 : performance.now(); car.classList.toggle("on", !!state.car); car.setAttribute("aria-pressed", !!state.car); car.textContent = state.car ? "❚❚ 暂停驼队" : "▶ 播放驼队"; if (state.car) { state.show.silk = true; var s1 = document.querySelector('.x-sw[data-k="silk"]'); if (s1) { s1.classList.add("on"); s1.setAttribute("aria-pressed", true); } } dirty = true; return; }
+        var bo = e.target.closest(".x-boat");
+        if (bo) { state.boat = state.boat ? 0 : performance.now(); bo.classList.toggle("on", !!state.boat); bo.setAttribute("aria-pressed", !!state.boat); bo.textContent = state.boat ? "❚❚ 暂停漕船" : "▶ 播放漕船"; if (state.boat) { state.show.canal = true; var s4 = document.querySelector('.x-sw[data-k="canal"]'); if (s4) { s4.classList.add("on"); s4.setAttribute("aria-pressed", true); } } dirty = true; return; }
+        if (e.target.closest(".x-fs")) { toggleFs(); return; }
+        if (e.target.closest(".x-qw")) { toggleQw(); return; }
+        var jb = e.target.closest(".x-jm");
+        if (jb) { state.jm = !state.jm; jb.classList.toggle("on", state.jm); jb.setAttribute("aria-pressed", state.jm); $("jm-tip").classList.toggle("show", state.jm); if (state.jm) select(null); dirty = true; return; }
+        if (e.target.closest(".x-tg")) { state.tg = state.tg ? 0 : performance.now(); if (state.tg) { state.show.ev = true; var s6 = document.querySelector('.x-sw[data-k="ev"]'); if (s6) { s6.classList.add("on"); s6.setAttribute("aria-pressed", true); } resetView(false); } tgButton(); dirty = true; return; }
+        var yb = e.target.closest(".x-yy");
+        if (yb) { state.yy = state.yy ? 0 : performance.now(); yb.classList.toggle("on", !!state.yy); yb.setAttribute("aria-pressed", !!state.yy); $("yy-tip").classList.toggle("show", !!state.yy); if (state.yy) select(null); dirty = true; return; }
+        var jd = e.target.closest(".x-jd");
+        if (jd) { state.jd = !state.jd; jd.classList.toggle("on", state.jd); jd.setAttribute("aria-pressed", state.jd); $("jd-tip").classList.toggle("show", state.jd); if (state.jd) resetView(false); dirty = true; return; }
+        var fb = e.target.closest(".x-fz");
+        if (fb) { state.fz = !state.fz; fb.classList.toggle("on", state.fz); fb.setAttribute("aria-pressed", state.fz); $("fz-tip").classList.toggle("show", state.fz); dirty = true; return; }
+        if (e.target.closest(".x-mo")) { state.tg = 0; tgButton(); state.mo = RM.matches ? null : { A: LAYERS[state.ch].pre || LAYERS[state.ch - 1], B: LAYERS[state.ch], t0: performance.now() }; resetView(false); dirty = true; return; }
+        if (e.target.closest(".x-un")) { state.un = state.un ? 0 : performance.now(); state.mo = null; if (state.un) resetView(false); unButton(); dirty = true; return; }
+        var rtb = e.target.closest(".x-rt");
+        if (rtb) { state.rt = state.rt ? 0 : performance.now(); if (state.rt) { state.show.route = true; var s2 = document.querySelector('.x-sw[data-k="route"]'); if (s2) { s2.classList.add("on"); s2.setAttribute("aria-pressed", true); } } rtButton(); dirty = true; return; }
+        var sw = e.target.closest(".x-sw"), pol = e.target.closest(".x-pol button"), opt = e.target.closest(".x-q__opts button");
+        if (sw) { var k = sw.dataset.k; state.show[k] = !state.show[k]; sw.classList.toggle("on", state.show[k]); sw.setAttribute("aria-pressed", state.show[k]); dirty = true; }
+        if (pol && pol.dataset.bt) { var bt = LAYERS[state.ch].battles[+pol.dataset.bt]; if (!state.show.battle) { state.show.battle = true; var s3 = document.querySelector('.x-sw[data-k="battle"]'); if (s3) { s3.classList.add("on"); s3.setAttribute("aria-pressed", true); } } showPop(bt === state.pop ? null : bt); return; }
+        if (pol && pol.dataset.kd) { var kd = CH[state.ch].kd[+pol.dataset.kd]; state.fl = { ll: kd[3], name: kd[0], t0: performance.now() }; [].forEach.call(document.querySelectorAll("[data-kd]"), function (b) { b.classList.toggle("on", b === pol); }); dirty = true; return; }
+        if (pol && pol.dataset.cn) { var cs = LAYERS[state.ch].canal[+pol.dataset.cn]; if (!state.show.canal) { state.show.canal = true; var s5 = document.querySelector('.x-sw[data-k="canal"]'); if (s5) { s5.classList.add("on"); s5.setAttribute("aria-pressed", true); } } showPop(cs === state.pop ? null : cs); return; }
+        if (pol) select(pol.dataset.id === state.sel ? null : pol.dataset.id);
+        if (opt && !opt.parentNode.dataset.done) {
+          var q = CH[state.ch].q, k2 = +opt.dataset.k, btns = opt.parentNode.children;
+          opt.parentNode.dataset.done = 1; btns[q.right].classList.add("right"); if (k2 !== q.right) opt.classList.add("wrong");
+          var a = $("ans"); a.innerHTML = "<b>" + (k2 === q.right ? "回答正确。" : "正确答案：" + q.opts[q.right] + "。") + "</b> " + esc(q.ans); a.classList.add("show");
+          select(q.sel || "xiongnu");
+        }
+      });
+      /* ---------- 第 17 章：随堂检测（复用 state.qz 切换时期、select/state.fl 高亮） ---------- */
+      var QZ = [
+        { k: 0, t: "秦长城防御", ctx: "前 221 年后的秦朝疆域，北部有一道连接旧城的防御工事。", q: "图中北方这道工事由蒙恬连接战国秦、赵、燕旧墙而成，它主要用于防御", opts: ["匈奴", "鲜卑", "突厥", "女真"], right: 0,
+          ans: "秦长城西起临洮、东到辽东，主要防御北方匈奴南下；鲜卑、突厥、女真都是后世政权。", sel: "xiongnu", fl: [[111, 41.2], "秦长城"] },
+        { k: 1, t: "西域都护府", ctx: "约前 60 年的西汉疆域，天山南北出现一块虚线区域。", q: "图中虚线区域标志今新疆地区正式归属中央管辖。前 60 年西汉在此设立的机构是", opts: ["安西都护府", "北庭都护府", "西域都护府", "伊犁将军"], right: 2,
+          ans: "前 60 年（汉宣帝时）设西域都护府，治乌垒城（今新疆轮台东）；安西、北庭是唐代机构，伊犁将军属清代。", sel: "xiyu", fl: [[84.6, 41.8], "西域都护府 · 乌垒"] },
+        { k: 3, t: "蜀都成都", ctx: "魏、蜀、吴三国鼎立。", q: "图中位于西南、诸葛亮曾经营南中的政权，其都城是", opts: ["洛阳", "成都", "建业", "长安"], right: 1,
+          ans: "蜀（221 年刘备称帝）都成都；魏都洛阳，吴后定都建业。", sel: "shu", fl: [[104.06, 30.67], "蜀都 成都"] },
+        { k: 5, t: "淝水之战", ctx: "376 年前后，北方归于一个政权，南方政权据淮河—汉水以南。", q: "383 年，图中南北两大政权在淝水交战，留下“草木皆兵”“风声鹤唳”等成语。交战双方是", opts: ["曹魏与孙吴", "北魏与南朝宋", "西晋与孙吴", "前秦与东晋"], right: 3,
+          ans: "376 年前秦统一北方，383 年苻坚南下攻东晋，东晋以少胜多；此后北方重陷分裂，南北对峙延续。", sel: "qianqin", fl: [[116.75, 32.55], "淝水之战 · 前秦对东晋"] },
+        { k: 7, t: "运河中心", ctx: "隋朝疆域与一条贯通南北的人工水道。", q: "图中这条水道北达涿郡、南至余杭（今杭州），其中心是", opts: ["洛阳", "大兴（长安）", "江都", "涿郡"], right: 0,
+          ans: "隋大运河以洛阳为中心，沟通海河、黄河、淮河、长江、钱塘江五大水系；南端余杭即今杭州。", sel: "sui", fl: [[112.45, 34.65], "运河中心 洛阳"] },
+        { k: 9, t: "河西、陇右", ctx: "约 790 年，唐朝实际控制区明显缩小，西北出现大片他族控制区。", q: "安史之乱后，乘唐朝西北兵力内调而占据河西、陇右的政权是", opts: ["回鹘", "南诏", "吐蕃", "渤海"], right: 2,
+          ans: "吐蕃乘安史之乱占领河西、陇右；回鹘曾助唐平叛，南诏在云南，渤海在东北。", sel: "tubo", fl: [[101, 37.5], "河西、陇右（吐蕃）"] },
+        { k: 12, t: "宋金分界", ctx: "1142 年后南宋与金南北对峙。", q: "依据 1142 年绍兴和议，图中南宋与金的分界是", opts: ["白沟河一线", "东以淮水、西以大散关", "长江一线", "东以黄河、西以秦岭"], right: 1,
+          ans: "绍兴和议规定宋金东以淮水、西以大散关为界；白沟河是北宋与辽的界河。", sel: "nansong", fl: [[106.9, 34.3], "大散关 · 东接淮水"] },
+        { k: 13, t: "宣政院", ctx: "元朝疆域，青藏高原一带单独标出。", q: "图中青藏高原地区由元朝中央的哪一机构管辖？", opts: ["驻藏大臣", "乌思藏都司", "理藩院", "宣政院"], right: 3,
+          ans: "元设宣政院管辖西藏，西藏正式纳入中央行政管辖；乌思藏都司属明代，驻藏大臣、理藩院属清代。", sel: "xuanzheng", fl: [[91.1, 29.65], "宣政院辖地"] },
+        { k: 15, t: "伊犁将军", bonus: true, ctx: "清朝疆域，天山南北已经统一。", q: "1762 年清朝在惠远城设立、管辖天山南北的机构是", opts: ["伊犁将军", "西域都护府", "乌里雅苏台将军", "驻藏大臣"], right: 0,
+          ans: "1762 年设伊犁将军，驻惠远城，管辖天山南北包括巴尔喀什湖在内的广大地区；乌里雅苏台将军管外札萨克蒙古。", sel: "xinjiang", fl: [[81.3, 43.9], "伊犁将军 · 惠远城"] }
+      ];
+      var QZ_GK = "高考链接：疆域与边疆管理机构（都护府、宣政院、都司、伊犁将军、驻藏大臣）是浙江历史选考高频考点，常用历史地图作情境。";
+      var QS = { i: 0, picks: [] };
+      function qzEnter(morph) {
+        var q = QZ[QS.i], old = state.qz;
+        state.qz = q.k; state.sel = null; state.fl = null; showPop(null);
+        state.mo = morph && old != null && old !== q.k && !RM.matches ? { A: LAYERS[old], B: LAYERS[q.k], t0: performance.now() } : null;
+        $("over-title").textContent = "随堂检测 · " + (q.bonus ? "加分题" : "第 " + (QS.i + 1) + " 题");
+        $("over-text").textContent = "地图已切换到「" + CH[q.k].name + "」。读图后在右侧作答，答完地图会演示答案。";
+        if (morph) resetView(false); dirty = true;
+      }
+      function qzScore() { var s = 0, b = 0; QS.picks.forEach(function (p, k) { if (p === QZ[k].right) QZ[k].bonus ? b++ : s++; }); return { s: s, b: b }; }
+      function qzHTML() {
+        if (state.qz == null) { QS = { i: 0, picks: [] }; qzEnter(false); }
+        var gk = '<div class="x-card"><h3>要点</h3><ul style="margin:0;padding-left:18px;font-size:13px"><li>每题地图先切到对应时期，作答后高亮答案所在政权或地点。</li>' +
+          "<li>基础题 8 道，每题 1 分；第 9 题为加分题。</li></ul><p class=\"x-gk\">" + esc(QZ_GK) + "</p></div>";
+        var base = QZ.filter(function (q) { return !q.bonus; }).length, sc = qzScore();
+        if (QS.i >= QZ.length) {
+          return '<div class="x-card"><h3>得分卡</h3><div class="x-figs"><div class="x-fig"><b>' + sc.s + " / " + base + '</b><span>基础题得分</span></div><div class="x-fig"><b>+' + sc.b +
+            '</b><span>加分题</span></div></div><p style="margin:0;font-size:13px;color:var(--x-ink-2)">' + (sc.s === base ? "全部答对，边疆管理机构掌握扎实。" : sc.s >= 6 ? "基础较好，回看答错的题对应章节。" : "建议回看答错题对应章节的地图与要点。") + "</p></div>" +
+            '<div class="x-card"><h3>每题对错</h3><ol class="x-qz__list">' + QZ.map(function (q, k) {
+              var ok = QS.picks[k] === q.right;
+              return '<li class="' + (ok ? "ok" : "no") + '"><b>' + (ok ? "✓" : "✗") + "</b><span>" + (q.bonus ? "加分 · " : k + 1 + ". ") + esc(q.t) + '<br><small style="color:var(--x-ink-2)">答案：' + esc(q.opts[q.right]) + (ok ? "" : "；你选：" + esc(q.opts[QS.picks[k]])) + "</small></span></li>";
+            }).join("") + '</ol><button class="x-sw x-qz__go" id="qz-again">↺ 重新作答</button></div>' + gk;
+        }
+        var q = QZ[QS.i], p = QS.picks[QS.i], done = p != null;
+        return '<div class="x-card x-q"><h3>' + (q.bonus ? "加分题 · 第 9 题" : "第 " + (QS.i + 1) + " / " + base + " 题") + '</h3><p class="x-qz__ctx">地图情境：' + esc(q.ctx) + "</p><p>" + esc(q.q) + '</p><div class="x-qz__opts">' +
+          q.opts.map(function (o, k) {
+            return '<button data-qk="' + k + '"' + (done ? " disabled" : "") + ' class="' + (done && k === q.right ? "right" : done && k === p ? "wrong" : "") + '">' + "ABCD"[k] + ". " + esc(o) + "</button>";
+          }).join("") + '</div><p class="x-ans' + (done ? " show" : "") + '" id="qz-ans">' + (done ? qzAns(q, p) : "") + "</p>" +
+          '<button class="x-sw x-qz__go" id="qz-next"' + (done ? "" : " hidden") + ">" + (QS.i === QZ.length - 1 ? "查看得分 →" : "下一题 →") + "</button></div>" +
+          '<div class="x-card"><h3>进度</h3><p style="margin:0;font-size:13px;color:var(--x-ink-2)">已答 ' + QS.picks.filter(function (x) { return x != null; }).length + " / " + QZ.length + " 题 · 当前得分 " + sc.s + (sc.b ? " +" + sc.b : "") + "</p></div>" + gk;
+      }
+      function qzAns(q, p) { return "<b>" + (p === q.right ? "回答正确。" : "回答错误，正确答案：" + "ABCD"[q.right] + ". " + esc(q.opts[q.right]) + "。") + "</b> " + esc(q.ans); }
+      function qzRender() { $("panel-body").innerHTML = panelHTML(16); }
+      $("panel-body").addEventListener("click", function (e) {
+        if (state.ch !== 16) return;
+        var b = e.target.closest(".x-qz__opts button");
+        if (b && QS.picks[QS.i] == null) {
+          var q = QZ[QS.i]; QS.picks[QS.i] = +b.dataset.qk; qzRender();
+          state.sel = q.sel; state.fl = { ll: q.fl[0], name: q.fl[1], t0: performance.now(), keep: true }; dirty = true;
+          var n = $("qz-next"); if (n) n.focus({ preventScroll: true });
+          return;
+        }
+        if (e.target.closest("#qz-next")) {
+          QS.i++;
+          if (QS.i < QZ.length) qzEnter(true);
+          else { state.sel = null; state.fl = null; $("over-title").textContent = "随堂检测 · 得分"; $("over-text").textContent = "得分卡见右侧面板，可重新作答。"; dirty = true; }
+          qzRender(); $("panel").scrollTop = 0; return;
+        }
+        if (e.target.closest("#qz-again")) { QS = { i: 0, picks: [] }; qzEnter(true); qzRender(); $("panel").scrollTop = 0; }
+      });
+      function go(i, fromHash) {
+        i = Math.max(0, Math.min(N - 1, i)); var was = state.ch;
+        state.mo = was !== i && LAYERS[was] && LAYERS[i] && started && !matchMedia("(prefers-reduced-motion: reduce)").matches ? { A: (i === was + 1 && LAYERS[i].pre) || LAYERS[was], B: LAYERS[i], t0: performance.now() } : null;
+        state.ch = i; state.sel = null; state.car = 0; state.boat = 0; state.rt = 0; state.un = 0; state.fs = 0; state.fl = null; state.qw = 0; state.tg = 0; state.jm = false; state.fz = false; state.yy = 0; state.jd = false; state.qz = null; qwEl.hidden = true; showPop(null); var c = CH[i];
+        if (i === 14) state.show.wall = true;
+        [].forEach.call($("segs").children, function (s, k) { s.classList.toggle("on", k <= i); });
+        $("count").textContent = pad(i + 1) + " / " + N;
+        [].forEach.call($("chs").children, function (b, k) { b.classList.toggle("on", k === i); if (k === i) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); });
+        var cur = $("chs").children[i]; if (cur.scrollIntoView && window.innerWidth < 768) cur.scrollIntoView({ inline: "center", block: "nearest" });
+        [].forEach.call($("ticks").children, function (b, k) { b.classList.toggle("live", k === i); });
+        $("over-title").textContent = c.name + (c.ready ? "" : " · 交互即将上线");
+        $("over-text").textContent = c.text; $("over-book").textContent = c.book || "";
+        $("bar-meta").textContent = c.y != null ? (c.ready ? c.tick.replace("前", "公元前 ") + " 年 · " + c.name + " · 疆域为示意图" : c.tick + " · " + c.name + " · 交互即将上线") : "随堂检测 · 8 题 + 加分题 · 地图随题切换";
+        $("panel-body").innerHTML = panelHTML(i); buildChart();
+        $("prev").disabled = i === 0; $("next").disabled = i === N - 1;
+        if (!fromHash) history.replaceState(null, "", "#" + (i + 1));
+        resetView(false); dirty = true;
+      }
+      function fromHash() { var n = parseInt(location.hash.slice(1), 10); return n >= 1 && n <= N ? n - 1 : 0; }
+      window.addEventListener("hashchange", function () { go(fromHash(), true); });
+
+      /* 顶栏按钮与键盘 */
+      function toggleTheme() {
+        var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+        root.setAttribute("data-theme", next); try { localStorage.setItem("hark-theme", next); } catch (e) {}
+        $("theme").title = next === "light" ? "宣纸（浅色）" : "青黛夜（深色）"; dirty = true;
+      }
+      function toggleFull() {
+        var d = document, el = d.documentElement;
+        if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+        else if (el.requestFullscreen) el.requestFullscreen().catch(function () {});
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      }
+      $("prev").onclick = function () { go(state.ch - 1); };
+      $("next").onclick = function () { go(state.ch + 1); };
+      $("theme").onclick = toggleTheme;
+      $("reset").onclick = function () { resetView(false); };
+      $("full").onclick = toggleFull;
+      $("fold").onclick = function () { var m = $("over").classList.toggle("min"); this.textContent = m ? "+" : "−"; this.setAttribute("aria-label", m ? "展开讲解" : "折叠讲解"); };
+      $("drawer").onclick = function () { var o = $("panel").classList.toggle("open"); this.textContent = o ? "▼ 收起面板" : "▲ 本章面板"; };
+      document.addEventListener("keydown", function (e) {
+        if (e.metaKey || e.ctrlKey || e.altKey || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+        var k = e.key.toLowerCase();
+        if (k === "arrowleft") go(state.ch - 1); else if (k === "arrowright") go(state.ch + 1);
+        else if (k === "t") toggleTheme(); else if (k === "r") resetView(false); else if (k === "f") toggleFull();
+      });
+      window.addEventListener("resize", function () { resize(); resetView(true); });
+      try { if (localStorage.getItem("hark-theme") === "light") root.setAttribute("data-theme", "light"); } catch (e) {}
+      var started = false;
+      resize(); go(fromHash(), true); started = true; resetView(true); requestAnimationFrame(loop);
+    </script>
+  </body>
+</html>
