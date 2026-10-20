@@ -1,15 +1,9 @@
 <!doctype html>
-<html lang="zh-CN" data-skin="night">
+<html lang="zh-CN" data-skin="paper">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>格物实验室 · 等高线</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
-    />
     <link rel="stylesheet" href="hark.css" />
     <style>
       :root {
@@ -117,12 +111,151 @@
       }
       @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
     </style>
+    <style>
+      /* ====== 视觉改版：门户同款极简风格（只改样式） ====== */
+      :root, :root[data-skin="paper"] {
+        --bg1: #fbfbfd; --bg2: #fbfbfd; --panel: #ffffff; --glass: rgba(251, 251, 253, 0.72); --line: rgba(0, 0, 0, 0.08);
+        --acc: #0071e3; --acc-ink: #0062c4; --acc-fill: #0071e3; --acc-soft: #e8f1fc;
+        --acc2: #8a5c00; --warn: #d6373c; --ok: #0a7f84; --water: #1f6fb5;
+        --ink: #1d1d1f; --ink2: #6e6e73; --chip: #f5f5f7; --chip-hover: #e8e8ed; --track: #e5e5ea;
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.04); --shadow-thumb: 0 1px 4px rgba(0, 0, 0, 0.18), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+        --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+        --serif: var(--sans); --mono: ui-monospace, Menlo, "SF Mono", monospace;
+        --r: 18px; --r-l: 24px; --pill: 980px; --dur: 0.3s; --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+        color-scheme: light;
+      }
+      :root[data-skin="night"] {
+        --bg1: #000000; --bg2: #000000; --panel: #1d1d1f; --glass: rgba(0, 0, 0, 0.72); --line: rgba(255, 255, 255, 0.12);
+        --acc: #2997ff; --acc-ink: #2997ff; --acc-fill: #0071e3; --acc-soft: #0d2a47;
+        --acc2: #f2b544; --warn: #ff6b6e; --ok: #2ec4b6; --water: #64b5f6;
+        --ink: #f5f5f7; --ink2: #a1a1a6; --chip: #2c2c2e; --chip-hover: #3a3a3c; --track: #3a3a3c;
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.5); --shadow-thumb: 0 1px 4px rgba(0, 0, 0, 0.5);
+        color-scheme: dark;
+      }
+      body { background: var(--bg1); font: 400 15px/1.6 var(--sans); letter-spacing: 0; }
+      button { transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease); }
+      :focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+      /* 顶栏 */
+      .top { position: relative; z-index: 6; gap: 12px; padding: 0 16px; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-bottom: 0.5px solid var(--line); }
+      .brand { display: flex; align-items: center; gap: 6px; min-width: 0; font: 600 15px/1.2 var(--sans); letter-spacing: -0.01em; }
+      .x-back { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; padding-right: 4px; color: var(--acc-ink); text-decoration: none; font: 400 14px/1 var(--sans); white-space: nowrap; border-radius: 10px; }
+      .x-back span:first-child { font-size: 22px; line-height: 1; margin-top: -2px; }
+      .x-back:hover .x-back__t { text-decoration: underline; text-underline-offset: 3px; }
+      .x-sep { width: 0.5px; height: 16px; background: var(--line); flex: none; }
+      .x-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .prog { gap: 12px; justify-content: flex-end; }
+      .prog__bars { max-width: 520px; gap: 3px; }
+      .prog__bars i { height: 3px; border-radius: var(--pill); background: var(--track); transition: background var(--dur) var(--ease); }
+      .prog__bars i.on { background: var(--acc); }
+      .prog__n { font: 400 12px var(--mono); color: var(--ink2); }
+      .x-toc { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 10px; border-radius: var(--pill); }
+      .x-toc::after { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform var(--dur) var(--ease); }
+      .x-toc[aria-expanded="false"]::after { transform: translateY(1px) rotate(-135deg); }
+      .x-toc:hover { background: var(--chip); color: var(--ink); }
+      .tools { gap: 2px; }
+      .tbtn { border: 0; border-radius: var(--pill); font: 500 13px var(--mono); color: var(--ink); background: transparent; }
+      .tbtn:hover { background: var(--chip); border-color: transparent; }
+      .tbtn:active { transform: scale(0.94); }
+      /* 主体 */
+      .body { grid-template-columns: 232px minmax(0, 1fr) 360px; }
+      .x-toc-off .body { grid-template-columns: minmax(0, 1fr) 360px; }
+      .x-toc-off .chaps { display: none; }
+      .chaps { border-right: 0.5px solid var(--line); padding: 12px 10px; background: var(--bg1); }
+      .chap { border-left: 0; border-radius: 12px; padding: 9px 12px; margin-bottom: 2px; min-height: 44px; }
+      .chap b { font: 400 12px var(--mono); letter-spacing: 0.04em; }
+      .chap span { font: 500 15px/1.4 var(--sans); letter-spacing: -0.01em; }
+      .chap:hover { background: var(--chip); }
+      .chap.on { background: var(--acc-soft); border-left-color: transparent; }
+      .chap.on b, .chap.on span { color: var(--acc-ink); }
+      /* 舞台浮层 */
+      .float { top: 16px; left: 16px; width: min(400px, calc(100% - 32px)); background: var(--panel); border: 0; border-radius: var(--r-l); padding: 16px 18px; box-shadow: var(--shadow), 0 0 0 0.5px var(--line); }
+      .float h2 { font: 600 20px/1.3 var(--sans); letter-spacing: -0.02em; margin-bottom: 8px; }
+      .float p { font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
+      .float__src { font: 400 12px/1.5 var(--mono) !important; color: var(--acc2) !important; }
+      .fold { top: 8px; right: 8px; border-radius: var(--pill); }
+      .fold:hover { background: var(--chip); }
+      .readout { left: 16px; bottom: 16px; border: 0; border-radius: 14px; background: var(--panel); box-shadow: var(--shadow), 0 0 0 0.5px var(--line); font: 400 12px/1.5 var(--mono); padding: 9px 14px; color: var(--ink); }
+      .readout b { color: var(--acc-ink); font-weight: 600; }
+      .lab { font: 500 12px var(--sans); border: 0; background: var(--panel); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08), 0 0 0 0.5px var(--line); border-radius: var(--pill); padding: 3px 10px; transition: opacity var(--dur) var(--ease); }
+      .lab[data-kind="water"] { color: var(--water); }
+      .lab[data-kind="cliff"] { color: var(--warn); }
+      .lab[data-kind="saddle"] { color: var(--acc2); }
+      .dock { right: 16px; bottom: 16px; gap: 2px; padding: 4px; border: 0; border-radius: var(--pill); background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); box-shadow: var(--shadow), 0 0 0 0.5px var(--line); }
+      .dock button { border: 0; border-radius: var(--pill); padding: 0 16px; font-size: 14px; }
+      .dock button:hover { background: var(--chip); }
+      .dock button[aria-pressed="true"] { background: var(--acc-fill); color: #fff; border-color: transparent; }
+      /* 控制面板 */
+      .panel { background: var(--bg1); border-left: 0.5px solid var(--line); padding: 16px; gap: 14px; }
+      .card { border: 0; border-radius: var(--r); padding: 16px 18px; background: var(--panel); box-shadow: var(--shadow), 0 0 0 0.5px var(--line); }
+      .card h3 { font: 600 16px/1.35 var(--sans); letter-spacing: -0.02em; margin-bottom: 8px; }
+      .card ul { font-size: 15px; line-height: 1.6; padding-left: 18px; }
+      .card li { margin-bottom: 6px; }
+      .card p { line-height: 1.6; }
+      .ttl { font: 400 12px var(--mono); letter-spacing: 0.06em; text-transform: none; margin: 4px 2px 0; }
+      .row label { font-size: 15px; }
+      .val { font: 500 13px var(--mono); color: var(--acc-ink); }
+      .note { font-size: 13px; line-height: 1.6; }
+      .hl { color: var(--acc2); font-weight: 500; }
+      .soon { border: 0; background: var(--chip); border-radius: var(--r); padding: 14px 16px; font-size: 14px; }
+      .legend i { border-radius: 3px; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.25); }
+      /* iOS 开关 */
+      .sw { width: 51px; height: 31px; border: 0; border-radius: var(--pill); background: var(--track); transition: background var(--dur) var(--ease); }
+      .sw::after { top: 2px; left: 2px; width: 27px; height: 27px; background: #fff; box-shadow: var(--shadow-thumb); transition: transform var(--dur) var(--ease); }
+      .sw[aria-pressed="true"] { background: var(--acc-fill); }
+      .sw[aria-pressed="true"]::after { transform: translateX(20px); background: #fff; }
+      /* 滑块：细轨道 + 白色拇指 */
+      input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; height: 44px; margin: 0; cursor: pointer; }
+      input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: var(--pill); background: var(--track); }
+      input[type="range"]::-moz-range-track { height: 4px; border-radius: var(--pill); background: var(--track); }
+      input[type="range"]::-moz-range-progress { height: 4px; border-radius: var(--pill); background: var(--acc); }
+      input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -11px; border-radius: 50%; background: #fff; border: 0; box-shadow: var(--shadow-thumb); }
+      input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 0; box-shadow: var(--shadow-thumb); }
+      /* 胶囊按钮：次按钮浅灰，选中/主按钮蓝底白字 */
+      .x-btns { gap: 8px; margin: 10px 0; }
+      .x-btn { border: 1.5px solid transparent; border-radius: var(--pill); padding: 0 18px; font-size: 14px; background: var(--chip); color: var(--ink); }
+      .x-btn:hover { background: var(--chip-hover); border-color: transparent; }
+      .x-btn:active { transform: scale(0.97); }
+      .x-btn[aria-pressed="true"] { background: var(--acc-fill); border-color: transparent; color: #fff; }
+      .x-btn[data-i] { flex: 1 1 100%; border-radius: 16px; padding: 10px 16px; text-align: left; line-height: 1.5; }
+      .drawer__grab { border-radius: var(--pill); }
+      @media (max-width: 1023px) {
+        .top { gap: 6px; padding: 0 8px; }
+        .tools { gap: 0; }
+        .body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+        .x-toc-off .body { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+        .chaps { border-right: 0; border-bottom: 0.5px solid var(--line); padding: 6px 8px; gap: 6px; scrollbar-width: none; }
+        .chaps::-webkit-scrollbar { display: none; }
+        .chap { border-bottom: 0; border-radius: var(--pill); padding: 0 14px; margin: 0; display: inline-flex; align-items: center; background: var(--chip); }
+        .chap.on { border-bottom-color: transparent; background: var(--acc-soft); }
+        .chap span { font-size: 14px; }
+        .float { top: 12px; left: 12px; width: calc(100% - 24px); padding: 14px 16px; border-radius: 20px; }
+        .float h2 { font-size: 18px; }
+        .float p { font-size: 15px; }
+        .readout { left: 12px; right: 12px; width: auto; }
+        .dock { left: 12px; right: auto; max-width: calc(100% - 24px); }
+        .panel { background: var(--panel); border-top: 0; border-radius: 24px 24px 0 0; box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08), 0 0 0 0.5px var(--line); padding: 4px 16px calc(16px + env(safe-area-inset-bottom)); transition: transform var(--dur) var(--ease); }
+        .panel .card { box-shadow: 0 0 0 0.5px var(--line); }
+        .drawer__grab { position: relative; padding-top: 10px; font: 500 13px var(--sans); color: var(--ink2); }
+        .drawer__grab::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 5px; margin-left: -18px; border-radius: var(--pill); background: var(--track); }
+      }
+      @media (max-width: 560px) {
+        .x-back__t, .x-sep { display: none; }
+        .x-back { justify-content: center; min-width: 44px; padding: 0; }
+        .brand { gap: 2px; }
+        .x-toc { padding: 0 6px; }
+        #full { display: none; }
+        .dock button { padding: 0 12px; font-size: 13px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { transition: none !important; animation: none !important; }
+      }
+    </style>
   </head>
   <body>
     <div class="app">
       <header class="top">
-        <div class="brand">等高线<small>格物实验室</small></div>
-        <div class="prog"><div class="prog__bars" id="bars"></div><span class="prog__n" id="count">01 / 10</span></div>
+        <div class="brand"><a class="x-back" href="../" aria-label="返回格物实验室"><span aria-hidden="true">‹</span><span class="x-back__t">格物实验室</span></a><i class="x-sep" aria-hidden="true"></i><span class="x-name">等高线</span></div>
+        <div class="prog"><div class="prog__bars" id="bars"></div><button class="prog__n x-toc" id="count" aria-controls="chaps" aria-expanded="true" title="收起 / 展开目录">01 / 10</button></div>
         <div class="tools">
           <button class="tbtn" id="prev" aria-label="上一章">←</button>
           <button class="tbtn" id="next" aria-label="下一章">→</button>
@@ -155,6 +288,17 @@
       </div>
     </div>
     <script src="hark.js"></script>
+    <script>
+      /* 目录收起 / 展开（仅布局） */
+      (function () {
+        var b = document.getElementById("count"), app = document.querySelector(".app");
+        b.addEventListener("click", function () {
+          var off = app.classList.toggle("x-toc-off");
+          b.setAttribute("aria-expanded", String(!off));
+          window.dispatchEvent(new Event("resize"));
+        });
+      })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script>
       /* ---------- 内容：10 章讲解（取自 contour.txt） ---------- */
@@ -319,7 +463,7 @@
         '<div class="row"><label for="ex">垂直夸张 <span class="val" id="ex-val">×2.0</span></label></div><input type="range" id="ex" min="1" max="4" step="0.1" value="2" aria-label="垂直夸张" />',
         '<p class="note">拖动旋转 · 滚轮缩放 · 右键（或双指）平移 · 悬停读数</p></div>',
         '<div class="card"><h3>要点</h3><ul><li>等高线＝海拔相同各点连成的<span class="hl">闭合曲线</span>。</li><li>本图等高距 <span class="hl">100 m</span>，海拔 0–1500 m。</li><li>分层设色：绿（低）→黄→褐→白（高）。</li><li>地形部位：山峰·鞍部·山脊·山谷·陡崖·盆地。</li><li><b>高考链接：</b>等高线地形图是浙江地理选考读图题的基础，常考地形部位判断、相对高度计算、河流流向与剖面图；易错：等高线越密坡越陡，但要在同一等高距下比较。</li></ul></div>',
-        '<div class="card"><h3>图例</h3><div class="legend"><span><i style="background:#2e6642"></i>0–300 m</span><span><i style="background:#baa06a"></i>300–900 m</span><span><i style="background:#96765a"></i>900–1200 m</span><span><i style="background:#f0f4fa"></i>1200 m 以上</span><span><i style="background:#5aa9e6"></i>河流湖泊</span><span><i style="background:#ef6461"></i>断层陡崖</span></div></div>',
+        '<div class="card"><h3>图例</h3><div class="legend"><span><i style="background:#2e6642"></i>0–300 m</span><span><i style="background:#baa06a"></i>300–900 m</span><span><i style="background:#96765a"></i>900–1200 m</span><span><i style="background:#f0f4fa"></i>1200 m 以上</span><span><i style="background:#5aa9e6"></i>河流湖泊</span><span><i style="background:#e5484d"></i>断层陡崖</span></div></div>',
       ].join("");
       const PANELX = (i) => [
         '<p class="ttl">第 ' + String(i + 1).padStart(2, "0") + " 章 · 讲解</p>",
@@ -486,8 +630,8 @@
       /* 皮肤 */
       function applySkin() {
         const paper = document.documentElement.dataset.skin === "paper";
-        if (renderer) renderer.setClearColor(paper ? 0xf6f3ec : 0x0e1420, 1);
-        scene.fog = new THREE.Fog(paper ? 0xf6f3ec : 0x0e1420, 30, 70);
+        if (renderer) renderer.setClearColor(paper ? 0xfbfbfd : 0x000000, 1);
+        scene.fog = new THREE.Fog(paper ? 0xfbfbfd : 0x000000, 30, 70);
       }
       try { const s = localStorage.getItem("gw-skin"); if (s) document.documentElement.dataset.skin = s; } catch (e) {}
       /* 循环 */
@@ -540,14 +684,14 @@
         function setLevel(h) {
           level = Math.max(0, Math.min(HMAX, h));
           if (curLine) drop(curLine);
-          curLine = segLine(level, 0xffd166, 120); curLine.position.y = Y(level) + 0.025; g2.add(curLine);
+          curLine = segLine(level, 0xe8a20c, 120); curLine.position.y = Y(level) + 0.025; g2.add(curLine);
           plane.position.y = Y(level);
           const s = el("c2-h"); if (s) { s.value = level; el("c2-hv").textContent = Math.round(level) + " m"; }
         }
         function showCut(v) { plane.visible = v; if (curLine) curLine.visible = v; }
         function addLayer(lv) {
           if (layerOn[lv]) return;
-          const l = segLine(lv, 0x2ec4b6); l.userData.lv = lv; l.position.y = layerY(lv); layers.add(l); layerOn[lv] = l;
+          const l = segLine(lv, 0x0a9396); l.userData.lv = lv; l.position.y = layerY(lv); layers.add(l); layerOn[lv] = l;
         }
         function allLayers() { for (let lv = CI; lv < HMAX; lv += CI) addLayer(lv); }
         function clearLayers() { layers.children.slice().forEach(drop); layerOn = {}; proj = 0; }
@@ -562,13 +706,13 @@
           const b = segLine(lv, color); b.position.y = MAPY + 0.004; fx.add(b);
         }
         function dotAt(x, y, h) {
-          const s = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffd166 }));
+          const s = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 8), new THREE.MeshBasicMaterial({ color: 0xe8a20c }));
           s.position.set(x - 4, Y(h) + 0.04, 4 - y); fx.add(s);
         }
         /* 四个特征 */
         const FEAT = {
           same: () => {
-            const lv = 800, segs = contourSegs(lv); hiLine(lv, 0xffd166);
+            const lv = 800, segs = contourSegs(lv); hiLine(lv, 0xe8a20c);
             [0.12, 0.45, 0.78].forEach((f) => { const p = segs[Math.floor(segs.length * f)][0]; dotAt(p[0], p[1], lv); lab(p[0], p[1], lv, "海拔 " + lv + " m"); });
             msg("同线等高：在这条 800 m 等高线上任取 3 个点，海拔都是 800 m。");
           },
@@ -576,19 +720,19 @@
             const lvs = [400, 500, 600, 700], cross = {}, x = 2;
             for (let y = 4.3; y < 6.7; y += 0.005) lvs.forEach((lv) => { if (!cross[lv] && H(x, y) >= lv) cross[lv] = y; });
             lvs.forEach((lv, i) => {
-              hiLine(lv, 0xf2b544); dotAt(x, cross[lv], lv); lab(x, cross[lv], lv, lv + " m");
+              hiLine(lv, 0xc98a12); dotAt(x, cross[lv], lv); lab(x, cross[lv], lv, lv + " m");
               if (i) lab(x, (cross[lv] + cross[lvs[i - 1]]) / 2, 0, "高差 100 m", MAPY + 0.1);
             });
             msg("同图等距：沿西峰南坡，400、500、600、700 m 相邻两线的高差都是 100 m——本图等高距 100 m。");
           },
           closed: () => {
-            const lv = 600; hiLine(lv, 0xffd166);
+            const lv = 600; hiLine(lv, 0xe8a20c);
             const xs = [];
             contourSegs(lv).forEach((s) => s.forEach((p) => { if (p[1] > SIZE - 1e-6) xs.push(p[0]); }));
             const a = Math.min.apply(null, xs), b = Math.max.apply(null, xs), v = [];
             for (let i = 0; i <= 40; i++) { const t = i / 40; v.push(a + (b - a) * t - 4, MAPY + 0.004, 4 - (SIZE + 0.6 * Math.sin(Math.PI * t))); }
             const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
-            const d = new THREE.Line(g, new THREE.LineDashedMaterial({ color: 0xffd166, dashSize: 0.08, gapSize: 0.06 }));
+            const d = new THREE.Line(g, new THREE.LineDashedMaterial({ color: 0xe8a20c, dashSize: 0.08, gapSize: 0.06 }));
             d.computeLineDistances(); fx.add(d);
             lab((a + b) / 2, SIZE + 0.75, 0, "在图幅外闭合", MAPY + 0.1);
             lab((a + b) / 2, SIZE - 0.3, lv, "600 m 线伸出北边图框");
@@ -685,7 +829,7 @@
     <script>
       /* ---------- 第 03 章：海拔与相对高度（复用 H / 舞台 / 平面图） ---------- */
       (function () {
-        const Y = (h) => (h / 1000) * exag, MAPY = -1.5 + 0.012, COL = [0xf2b544, 0xef6461];
+        const Y = (h) => (h / 1000) * exag, MAPY = -1.5 + 0.012, COL = [0xc98a12, 0xe5484d];
         const g3 = new THREE.Group(); g3.visible = false; world.add(g3);
         const sea = new THREE.Mesh(new THREE.PlaneGeometry(SIZE + 1, SIZE + 1), new THREE.MeshBasicMaterial({ color: 0x3a8fe0, transparent: true, opacity: 0.3, side: THREE.DoubleSide, depthWrite: false }));
         sea.rotation.x = -Math.PI / 2; sea.position.y = 0.002; g3.add(sea);
@@ -700,7 +844,7 @@
           const l = new THREE.Line(g, m); if (dashed) l.computeLineDistances(); l.renderOrder = 5; fx.add(l);
         }
         function flag(x, z, y, color) {
-          line([x, y, z], [x, y + 0.4, z], 0xffffff);
+          line([x, y, z], [x, y + 0.4, z], 0x3a3a3c);
           const g = new THREE.BufferGeometry();
           g.setAttribute("position", new THREE.Float32BufferAttribute([x, y + 0.4, z, x, y + 0.26, z, x + 0.22, y + 0.33, z], 3));
           const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide, depthTest: false }));
@@ -713,7 +857,7 @@
           pts.forEach((p, i) => {
             const X = p.x - 4, Z = 4 - p.y, n = "AB"[i];
             flag(X, Z, Y(p.h), COL[i]); flag(X, Z, MAPY, COL[i]);
-            line([X, 0, Z], [X, Y(p.h), Z], 0x7fd3ff, true);
+            line([X, 0, Z], [X, Y(p.h), Z], 0x1f6fb5, true);
             labs.push({ p: [X, Y(p.h) + 0.55, Z], t: n + " · " + p.h + " m", k: "" });
             labs.push({ p: [X, Y(p.h) / 2, Z], t: "海拔 " + n, k: "water" });
             labs.push({ p: [X, MAPY + 0.55, Z], t: n, k: "" });
@@ -724,8 +868,8 @@
           if (pts.length === 2) {
             const hi = pts[0].h >= pts[1].h ? pts[0] : pts[1], lo = hi === pts[0] ? pts[1] : pts[0];
             const hX = hi.x - 4, hZ = 4 - hi.y, lX = lo.x - 4, lZ = 4 - lo.y, d = hi.h - lo.h;
-            line([hX, Y(hi.h), hZ], [lX, Y(hi.h), lZ], 0xffffff, true);
-            line([lX, Y(lo.h), lZ], [lX, Y(hi.h), lZ], 0xffd166);
+            line([hX, Y(hi.h), hZ], [lX, Y(hi.h), lZ], 0x3a3a3c, true);
+            line([lX, Y(lo.h), lZ], [lX, Y(hi.h), lZ], 0xe8a20c);
             labs.push({ p: [lX, (Y(lo.h) + Y(hi.h)) / 2, lZ], t: "相对高度 = " + hi.h + " − " + lo.h + " = " + d + " m", k: "saddle" });
             set("c3-d", d + " m");
             set("c3-f", "相对高度 = 海拔高 − 海拔低 = " + hi.h + " − " + lo.h + " = " + d + " m（" + (hi === pts[0] ? "A" : "B") + " 高）");
@@ -820,7 +964,7 @@
         sMap.position.y = 0.002; sMap.visible = false; mapG.add(sMap);
         const R = [
           { n: "A", a: [2, 5.6], b: [2, 6.6], c: 0xff4fa3, css: "#ff4fa3", w: "西峰南坡" },
-          { n: "B", a: [1, 0.3], b: [1, 1.3], c: 0x7fd3ff, css: "#7fd3ff", w: "西南缓坡" },
+          { n: "B", a: [1, 0.3], b: [1, 1.3], c: 0x0a9396, css: "#0a9396", w: "西南缓坡" },
         ];
         R.forEach((r) => { r.ha = H(r.a[0], r.a[1]); r.hb = H(r.b[0], r.b[1]); r.deg = Math.atan((r.hb - r.ha) / L) * 180 / Math.PI; });
         const drop = (g) => g.children.slice().forEach((o) => { g.remove(o); o.geometry.dispose(); });
@@ -897,7 +1041,7 @@
           '<div class="card"><div class="row"><label for="c4-cmp">比较两段坡</label><button class="sw" id="c4-cmp" aria-pressed="false" aria-label="比较两段坡"></button></div>',
           '<div id="c4-out" hidden><svg id="c4-svg" viewBox="0 0 300 150" width="100%" role="img" aria-label="路线 A 与 B 的剖面三角形，水平距离相同，A 升高更多、坡度角更大" style="color:var(--ink2);font-family:var(--mono)"></svg>',
           '<div class="row"><label><span style="color:#ff4fa3">●</span> A 平均坡度</label><span class="val" id="c4-A"></span></div>',
-          '<div class="row"><label><span style="color:#7fd3ff">●</span> B 平均坡度</label><span class="val" id="c4-B"></span></div>',
+          '<div class="row"><label><span style="color:#0a9396">●</span> B 平均坡度</label><span class="val" id="c4-B"></span></div>',
           '<p class="note" id="c4-msg"></p></div></div>',
           '<div class="card"><h3>要点</h3><ul>',
           '<li>相邻两条等高线之间的高差叫<span class="hl">等高距</span>；同一幅图中等高距相同。</li>',
@@ -1068,7 +1212,7 @@
           document.querySelectorAll("[data-q]").forEach((b) => (b.onclick = () => {
             const q = Q[+b.dataset.q], ok = b.dataset.a === q.a;
             document.querySelectorAll('[data-q="' + b.dataset.q + '"]').forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
-            el("c5-f" + b.dataset.q).innerHTML = (ok ? '<span style="color:var(--acc)">✓ 正确。</span>' : '<span style="color:var(--warn)">✗ 应为' + q.a + "。</span>") + q.why;
+            el("c5-f" + b.dataset.q).innerHTML = (ok ? '<span style="color:var(--ok)">✓ 正确。</span>' : '<span style="color:var(--warn)">✗ 应为' + q.a + "。</span>") + q.why;
           }));
         }
         function loop() {
@@ -1109,7 +1253,7 @@
         const Y = (x, y) => (H(x, y) / 1000) * exag;
         const g6 = new THREE.Group(); g6.visible = false; world.add(g6);
         const m6 = new THREE.Group(); m6.visible = false; mapG.add(m6);
-        const GOLD = 0xf2b544, BLUE = 0x2f8fe0, RC = 0xe8590c, VC = 0x1c7ed6, AC = 0xd6336c;
+        const GOLD = 0xc98a12, BLUE = 0x2f8fe0, RC = 0xe8590c, VC = 0x1c7ed6, AC = 0xd6336c;
         const RIDGES = [
           [[1.0, 6.75], [2.0, 6.7], [3.0, 6.85], [4.0, 6.9], [5.0, 6.75], [6.0, 6.6], [7.0, 6.2], [7.5, 5.95]],
           [[4.0, 6.9], [4.0, 6.0], [4.0, 5.0], [4.02, 4.3]],
@@ -1301,7 +1445,7 @@
         const Y = (x, y) => (H(x, y) / 1000) * exag, MY = 0.016;
         const g7 = new THREE.Group(); g7.visible = false; world.add(g7);
         const m7 = new THREE.Group(); m7.visible = false; mapG.add(m7);
-        const GOLD = 0xf2b544, PK = 0xe8590c, BLUE = 0x2f8fe0, ROAD = 0xd6336c, SAD = 0x2ec4b6;
+        const GOLD = 0xc98a12, PK = 0xe8590c, BLUE = 0x2f8fe0, ROAD = 0xd6336c, SAD = 0x0a9396;
         // 西峰与主峰之间的鞍部（由 H 数值求得）
         const S = [2.88, 6.82], PA = [2.0, 6.7], PB = [4.0, 6.9];
         const RD = (() => { const L = Math.hypot(PB[0] - PA[0], PB[1] - PA[1]); return [(PB[0] - PA[0]) / L, (PB[1] - PA[1]) / L]; })();
@@ -1472,7 +1616,7 @@
         const TS = (x, y) => [((x - ax) * vx + (y - ay) * vy) / (LEN * LEN), -((x - ax) * vy - (y - ay) * vx) / LEN];
         const P = (t, s) => [ax + vx * t + ND[0] * s, ay + vy * t + ND[1] * s];
         const Y = (x, y) => (H(x, y) / 1000) * exag, MY = 0.016, MAP = -1.5 + 0.06;
-        const RED = 0xef6461, ORG = 0xe8590c, BLUE = 0x2f8fe0;
+        const RED = 0xe5484d, ORG = 0xe8590c, BLUE = 0x2f8fe0;
         // 断层位移（与 H 中的写法一致），用于沉落动画
         function drop(x, y) {
           const q = TS(x, y), t = q[0], s = q[1], sm = Math.min(1, Math.max(0, (s + 0.03) / 0.06));
@@ -1634,7 +1778,7 @@
     <script>
       /* ---------- 第 09 章：地形剖面图（复用 H / contourSegs / RIV / 地形与平面图） ---------- */
       (function () {
-        const MS = 35, NS = 240, GREEN = "#2fb36b";
+        const MS = 35, NS = 240, GREEN = "#1a8a4f";
         let A = [3.6, 7.8], B = [4.6, 1.0], step = 0, timer = null, vex = 2, los = false, sel = [], on = false, S = null, CT = null, dragK = null;
         const g9 = new THREE.Group(); g9.visible = false; world.add(g9);
         const m9 = new THREE.Group(); m9.visible = false; mapG.add(m9);
@@ -1705,7 +1849,7 @@
           s += '<line x1="' + X0 + '" x2="' + (W - 12) + '" y1="' + (T + ph) + '" y2="' + (T + ph) + '" stroke="currentColor"/><line x1="' + X0 + '" x2="' + X0 + '" y1="' + T + '" y2="' + (T + ph) + '" stroke="currentColor"/>';
           s += '<text x="' + X0 + '" y="' + (Hh - 3) + '" font-size="12" fill="currentColor">A</text><text x="' + (W - 12) + '" y="' + (Hh - 3) + '" text-anchor="end" font-size="12" fill="currentColor">B</text><text x="' + (X0 + pw / 2) + '" y="' + (Hh - 3) + '" text-anchor="middle" font-size="12" fill="currentColor">距离 km · 海拔 m</text>';
           if (step >= 4) {
-            s += '<polyline points="' + S.pts.map((p) => px(p.d).toFixed(1) + "," + py(p.h).toFixed(1)).join(" ") + '" fill="none" stroke="#9aa3b2" stroke-width="1"/>';
+            s += '<polyline points="' + S.pts.map((p) => px(p.d).toFixed(1) + "," + py(p.h).toFixed(1)).join(" ") + '" fill="none" stroke="#8e8e93" stroke-width="1"/>';
             s += '<path d="' + smooth(S.P.map((p) => [px(p.d), py(p.h)])) + '" fill="none" stroke="#e8590c" stroke-width="2"/>';
           }
           if (step >= 3) S.P.forEach((p) => {
@@ -1716,7 +1860,7 @@
             const pt = sel.map((t) => [px(t * S.L), py(S.pts[Math.round(t * NS)].h)]);
             if (sel.length === 2) s += '<line x1="' + pt[0][0] + '" y1="' + pt[0][1] + '" x2="' + pt[1][0] + '" y2="' + pt[1][1] + '" stroke="' + (vis() ? GREEN : "var(--warn)") + '" stroke-width="2"/>';
             pt.forEach((q) => (s += '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="5" fill="' + (sel.length === 2 ? (vis() ? GREEN : "var(--warn)") : "var(--acc)") + '"/>'));
-            if (sel.length === 2 && step < 4) s += '<polyline points="' + S.pts.map((p) => px(p.d).toFixed(1) + "," + py(p.h).toFixed(1)).join(" ") + '" fill="none" stroke="#9aa3b2" stroke-width="1"/>';
+            if (sel.length === 2 && step < 4) s += '<polyline points="' + S.pts.map((p) => px(p.d).toFixed(1) + "," + py(p.h).toFixed(1)).join(" ") + '" fill="none" stroke="#8e8e93" stroke-width="1"/>';
           }
           sv.setAttribute("viewBox", "0 0 " + W + " " + Hh.toFixed(0));
           sv.innerHTML = s;
@@ -1742,7 +1886,7 @@
           const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
           g9.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0xe8590c, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false })));
           const gt = new THREE.BufferGeometry(); gt.setAttribute("position", new THREE.Float32BufferAttribute(top, 3));
-          g9.add(new THREE.Line(gt, new THREE.LineBasicMaterial({ color: 0xffffff })));
+          g9.add(new THREE.Line(gt, new THREE.LineBasicMaterial({ color: 0x1d1d1f })));
           const gm = new THREE.BufferGeometry(); gm.setAttribute("position", new THREE.Float32BufferAttribute([A[0] - 4, 0.014, 4 - A[1], B[0] - 4, 0.014, 4 - B[1]], 3));
           m9.add(new THREE.Line(gm, new THREE.LineBasicMaterial({ color: 0xd6336c })));
         }
@@ -1815,7 +1959,7 @@
     <script>
       /* ---------- 第 10 章：随堂检测（复用 H / contourSegs / RIV / C5.ribbon / C9.smooth / 舞台视角） ---------- */
       (function () {
-        const Y = (h) => (h / 1000) * exag, MY = -1.5, RED = 0xef6461, GOLD = 0xf2b544, BLUE = 0x2f8fe0, PINK = 0xd6336c, ORG = 0xe8590c;
+        const Y = (h) => (h / 1000) * exag, MY = -1.5, RED = 0xe5484d, GOLD = 0xc98a12, BLUE = 0x2f8fe0, PINK = 0xd6336c, ORG = 0xe8590c;
         const g10 = new THREE.Group(), m10 = new THREE.Group(); g10.visible = m10.visible = false; world.add(g10); mapG.add(m10);
         let qi = 0, ans = [], on = false, labs = [];
         const pool = [], v3 = new THREE.Vector3();
@@ -1900,7 +2044,7 @@
             pre: () => { aim(4, 6.9, -0.35, 0.95, 6); hi(1300, [4, 6.9], 1, GOLD, -Math.PI / 2); hi(1400, [4, 6.9], 0.6, RED, -Math.PI / 3); },
             post: () => { dot(4, 6.9, ORG, "主峰 " + Math.round(H(4, 6.9)) + " m"); } },
         ];
-        const ok = (i) => '<span style="color:var(--acc)">✓</span>', no = '<span style="color:var(--warn)">✗</span>';
+        const ok = (i) => '<span style="color:var(--ok)">✓</span>', no = '<span style="color:var(--warn)">✗</span>';
         function score() {
           const s = el("c10-sc"); if (!s) return;
           const n = ans.filter(Boolean).length;
@@ -1928,7 +2072,7 @@
             if (ans[qi] != null) return;
             const i = +b.dataset.i, right = i === q.a; ans[qi] = right;
             b.setAttribute("aria-pressed", "true");
-            box.querySelectorAll("[data-i]").forEach((o) => { if (+o.dataset.i === q.a) o.style.borderColor = "var(--acc)"; else if (o === b) { o.style.borderColor = "var(--warn)"; o.style.color = "var(--warn)"; } });
+            box.querySelectorAll("[data-i]").forEach((o) => { if (+o.dataset.i === q.a) o.style.borderColor = "var(--ok)"; else if (o === b) { o.style.borderColor = "var(--warn)"; o.style.color = "var(--warn)"; } });
             el("c10-f").innerHTML = "<p>" + (right ? ok() + " 正确。" : no + " 错误，正确答案 " + "ABCD"[q.a] + "。") + q.why + '</p><div class="x-btns"><button class="x-btn" id="c10-n">' + (qi < Q.length - 1 ? "下一题 →" : "查看得分") + "</button></div>";
             q.post(); score();
             el("c10-n").onclick = () => { qi++; render(); };
