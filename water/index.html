@@ -1,0 +1,1942 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>格物实验室 · 水循环三维沙盘</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Geist+Mono:wght@400&display=swap"
+    />
+    <style>
+      :root {
+        --bg1: #0e1420; --bg2: #121a2a; --panel: rgba(21, 30, 48, 0.82);
+        --line: rgba(255, 255, 255, 0.08); --ink: #e6ecf5; --ink2: #8a97ad;
+        --acc: #2ec4b6; --gold: #f2b544; --red: #ef6461;
+        --serif: "Noto Serif SC", "Songti SC", serif;
+        --sans: -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+        --mono: "Geist Mono", ui-monospace, monospace;
+        --r: 10px;
+      }
+      html[data-theme="light"] {
+        --bg1: #f6f3ec; --bg2: #f6f3ec; --panel: rgba(255, 255, 255, 0.9);
+        --line: rgba(29, 36, 51, 0.12); --ink: #1d2433; --ink2: #5d6880;
+        --acc: #139a8e; --gold: #c98a12; --acc-t: #0c6f66; --gold-t: #8a5a00;
+      }
+      :root { --acc-t: var(--acc); --gold-t: var(--gold); --sel: #122d35; }
+      html[data-theme="light"] { --sel: #d6e7df; }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        background-color: var(--bg1);
+        background-image: linear-gradient(160deg, var(--bg1), var(--bg2));
+        color: var(--ink); font-family: var(--sans); font-size: 14px;
+        overflow: hidden; -webkit-text-size-adjust: 100%;
+      }
+      button { font: inherit; color: inherit; cursor: pointer; }
+      .x-app { display: flex; flex-direction: column; height: 100%; }
+      /* top bar */
+      .x-top {
+        height: 56px; flex: none; display: flex; align-items: center; gap: 14px;
+        padding: 0 14px; border-bottom: 1px solid var(--line); background: var(--panel);
+        backdrop-filter: blur(12px);
+      }
+      .x-brand { font-family: var(--serif); font-weight: 700; white-space: nowrap; }
+      .x-brand small { display: block; font-family: var(--sans); font-weight: 400; font-size: 12px; color: var(--ink2); }
+      .x-prog { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; }
+      .x-seg { flex: 1; display: flex; gap: 3px; min-width: 60px; }
+      .x-seg i { flex: 1; height: 4px; border-radius: 2px; background: var(--line); transition: background 200ms; }
+      .x-seg i.on { background: var(--acc); }
+      .x-count { font-family: var(--mono); font-size: 12px; color: var(--ink2); white-space: nowrap; }
+      .x-tools { display: flex; gap: 6px; }
+      .x-ic {
+        width: 44px; height: 44px; border: 1px solid var(--line); border-radius: var(--r);
+        background: transparent; font-family: var(--mono); font-size: 13px; transition: 200ms;
+      }
+      .x-ic:hover { border-color: var(--acc); color: var(--acc); }
+      .x-body { flex: 1; display: flex; min-height: 0; }
+      /* chapters */
+      .x-chaps { width: 220px; flex: none; overflow-y: auto; background: var(--bg1); border-right: 1px solid var(--line); padding: 8px 0; }
+      .x-chap {
+        display: block; width: 100%; text-align: left; background: transparent; border: 0;
+        border-left: 3px solid transparent; padding: 9px 14px; transition: 200ms;
+      }
+      .x-chap b { display: block; font-family: var(--mono); font-size: 12px; color: var(--ink2); font-weight: 400; }
+      .x-chap span { font-family: var(--serif); font-size: 14px; }
+      .x-chap:hover { background: var(--sel); }
+      .x-chap.on { border-left-color: var(--acc); background: var(--sel); }
+      .x-chap.on span { color: var(--acc-t); }
+      /* stage */
+      .x-stage { flex: 1; position: relative; min-width: 0; }
+      #scene { display: block; width: 100%; height: 100%; }
+      .x-over {
+        position: absolute; top: 14px; left: 14px; max-width: 330px; padding: 12px 14px;
+        background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
+        backdrop-filter: blur(12px);
+      }
+      .x-over h1 { font-family: var(--serif); font-size: 17px; margin: 0 0 4px; }
+      .x-over .x-src { font-size: 12px; color: var(--gold-t); font-family: var(--mono); margin: 0 0 8px; }
+      .x-over p { margin: 0 0 6px; font-size: 12.5px; line-height: 1.6; color: var(--ink2); }
+      .x-over.min p, .x-over.min .x-src { display: none; }
+      .x-fold { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 8px; background: transparent; font-size: 12px; line-height: 1; }
+      .x-tip {
+        position: absolute; left: 14px; bottom: 14px; padding: 8px 12px; font-size: 12px;
+        background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); color: var(--ink2);
+      }
+      .x-tip b { color: var(--acc-t); font-family: var(--mono); }
+      /* right panel */
+      .x-panel { width: 340px; flex: none; overflow-y: auto; background: var(--bg2); border-left: 1px solid var(--line); padding: 14px; }
+      .x-h { font-family: var(--serif); font-size: 13px; letter-spacing: .04em; color: var(--ink2); margin: 0 0 8px; }
+      .x-card { border: 1px solid var(--line); border-radius: var(--r); padding: 12px; margin-bottom: 14px; background: var(--panel); }
+      .x-card p { margin: 0 0 8px; font-size: 12.5px; line-height: 1.65; }
+      .x-card p:last-child { margin-bottom: 0; }
+      .x-key { border-color: rgba(242, 181, 68, .35); }
+      .x-key h3 { font-family: var(--serif); font-size: 14px; margin: 0 0 8px; color: var(--gold); }
+      .x-gk { font-size: 12px; color: var(--ink2); border-top: 1px dashed var(--line); padding-top: 8px; margin-top: 8px; }
+      .x-gk b { color: var(--red); }
+      #donut { width: 100%; height: 190px; }
+      .x-list { list-style: none; margin: 0; padding: 0; }
+      .x-list button {
+        width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px;
+        background: transparent; border: 1px solid transparent; border-radius: 8px;
+        padding: 6px 8px; text-align: left; transition: 200ms;
+      }
+      .x-list button:hover { border-color: var(--line); }
+      .x-list button.on { border-color: var(--acc); background: var(--sel); }
+      .x-sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+      .x-nm { flex: 1; font-size: 13px; }
+      .x-pc { font-family: var(--mono); font-size: 12px; color: var(--ink2); }
+      .x-read { border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; margin-bottom: 14px; font-size: 12.5px; line-height: 1.6; }
+      .x-read b { color: var(--acc-t); font-family: var(--serif); }
+      .x-read u { text-decoration: none; font-family: var(--mono); color: var(--gold); }
+      .x-soon { border: 1px dashed var(--line); border-radius: var(--r); padding: 14px; text-align: center; color: var(--ink2); font-size: 12.5px; }
+      .x-toggle { display: flex; align-items: center; justify-content: space-between; min-height: 44px; font-size: 13px; }
+      .x-toggle input { width: 18px; height: 18px; accent-color: var(--acc); }
+      .x-hide { display: none; }
+      .x-s6 circle { fill: transparent; stroke: var(--ink2); stroke-opacity: .4; stroke-width: 1.5; transition: 200ms; }
+      .x-s6 text { fill: var(--ink2); font-size: 12px; font-family: var(--serif); }
+      .x-s6.on circle { fill: var(--sel); stroke: var(--acc); stroke-opacity: 1; }
+      .x-s6.on text { fill: var(--acc-t); }
+      .x-e6 { stroke: var(--ink2); stroke-width: 1.5; opacity: .3; transition: 200ms; }
+      .x-e6.on { stroke: var(--acc); opacity: 1; }
+      #c5, #c7 { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+      #c5.x-hide, #c7.x-hide { display: none; }
+      .x-bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: var(--line); margin-bottom: 8px; }
+      .x-bar i { display: block; height: 100%; transition: width 200ms; }
+      /* mobile */
+      .x-tag8 { display: inline-block; font-size: 12px; padding: 2px 8px; margin: 0 4px 4px 0; border: 1px solid var(--line); border-radius: 10px; color: var(--ink2); }
+      .x-tag8.on { border-color: var(--acc); background: var(--sel); color: var(--acc-t); }
+      .x-eq9 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-family: var(--mono); font-size: 13px; }
+      .x-eq9 b { color: var(--acc-t); font-weight: 500; }
+      .x-list button.x-ok { border-color: var(--acc); background: var(--sel); }
+      .x-list button.x-no { border-color: var(--red); }
+      .x-ok .x-pc { color: var(--acc-t); } .x-no .x-pc { color: var(--red); }
+      .x-q10 { margin: 0 0 8px; font-size: 13.5px; line-height: 1.6; }
+      #w9 { transform-box: fill-box; transform-origin: bottom; transition: transform 300ms; }
+      #bk9 text { fill: var(--ink2); font-size: 12px; font-family: var(--mono); }
+      .x-drawer-h { display: none; }
+      @media (max-width: 1023px) { .x-chaps { width: 170px; } .x-panel { width: 290px; } }
+      @media (max-width: 767px) {
+        .x-body { flex-direction: column; }
+        .x-chaps {
+          width: 100%; display: flex; overflow-x: auto; overflow-y: hidden; border-right: 0;
+          border-bottom: 1px solid var(--line); padding: 6px 8px; gap: 6px; flex: none;
+        }
+        .x-chap { width: auto; flex: none; border-left: 0; border-bottom: 3px solid transparent; border-radius: 8px; padding: 6px 10px; white-space: nowrap; }
+        .x-chap.on { border-bottom-color: var(--acc); }
+        .x-stage { flex: 1; min-height: 180px; }
+        .x-over { max-width: calc(100% - 28px); }
+        .x-panel {
+          width: 100%; border-left: 0; border-top: 1px solid var(--line); background: var(--bg2);
+          max-height: 46vh; flex: none; padding-top: 4px;
+        }
+        .x-panel.down { max-height: 52px; overflow: hidden; }
+        .x-drawer-h { display: flex; align-items: center; justify-content: center; height: 48px; }
+        .x-drawer-h button { background: transparent; border: 0; color: var(--ink2); font-size: 13px; min-height: 44px; min-width: 120px; }
+        .x-brand small { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="x-app">
+      <header class="x-top">
+        <div class="x-brand">格物实验室<small>水循环三维沙盘 · WaterCycle</small></div>
+        <div class="x-prog">
+          <div class="x-seg" id="seg"></div>
+          <div class="x-count" id="count">01 / 11</div>
+        </div>
+        <div class="x-tools">
+          <button class="x-ic" id="prev" title="上一章 (←)" aria-label="上一章">←</button>
+          <button class="x-ic" id="next" title="下一章 (→)" aria-label="下一章">→</button>
+          <button class="x-ic" id="theme" title="主题切换 (T)" aria-label="主题切换">T</button>
+          <button class="x-ic" id="reset" title="重置视角 (R)" aria-label="重置视角">R</button>
+          <button class="x-ic" id="full" title="全屏 (F)" aria-label="全屏">F</button>
+        </div>
+      </header>
+      <div class="x-body">
+        <nav class="x-chaps" id="chaps" aria-label="章节"></nav>
+        <div class="x-stage">
+          <canvas id="scene"></canvas>
+          <canvas id="c5" class="x-hide" role="img" aria-label="坡面剖面沙盘：地表、土壤层与地下水"></canvas>
+          <canvas id="c7" class="x-hide" role="img" aria-label="城市剖面沙盘：硬化率越高，绿地农田越少，建筑和路面越多；海绵城市设施增加下渗与蓄水"></canvas>
+          <div class="x-over" id="over">
+            <button class="x-fold" id="fold" aria-label="折叠讲解">—</button>
+            <h1 id="ovTitle">地球上的水体</h1>
+            <p class="x-src" id="ovSrc">教材：湘教版 必修第一册·第四章 第一节 水循环</p>
+            <div id="ovText"></div>
+          </div>
+          <div class="x-tip">拖动旋转 · 滚轮缩放 · 双指可缩放 &nbsp;<b>R</b> 重置视角</div>
+        </div>
+        <aside class="x-panel" id="panel">
+          <div class="x-drawer-h"><button id="drawer">▲ 控制面板</button></div>
+          <div id="panelBody"></div>
+        </aside>
+      </div>
+    </div>
+
+    <script type="application/json" id="water-data">
+      [
+        {"name":"海洋水","pct":96.5,"cycle":"约 2500 年","where":"沙盘最左侧的大洋","color":"#2EC4B6"},
+        {"name":"冰川","pct":1.74,"cycle":"约 9700 年","where":"高山雪线以上的积雪与冰川","color":"#9FD8F2"},
+        {"name":"地下水","pct":1.69,"cycle":"约 1400 年","where":"剖面中潜水面以下的透水层","color":"#F2B544"},
+        {"name":"湖泊水","pct":0.013,"cycle":"—","where":"水库与山后的内陆湖","color":"#7E9CD8"},
+        {"name":"土壤水","pct":0.001,"cycle":"—","where":"剖面上层的土壤层","color":"#C98A12"},
+        {"name":"大气水","pct":0.001,"cycle":"约 8 天","where":"沙盘上空的云与水汽","color":"#E6ECF5"},
+        {"name":"河流水","pct":0.0002,"cycle":"约 16 天","where":"自高山流向海洋的河道","color":"#4FA3E3"},
+        {"name":"生物水","pct":0.0001,"cycle":"—","where":"坡地上的植被","color":"#6FCF97"}
+      ]
+    </script>
+    <script type="application/json" id="chapters">
+      [
+        {"t":"地球上的水体","p":["地球上的水以海洋水为主，约占全球总水量的 96.5%。陆地上的冰川、地下水、湖泊、河流，大气中的水汽与生物体内的水，合起来只占 3.5% 左右。","淡水只占约 2.5%，其中近七成是两极和高山的冰川。人类容易利用的河流水、淡水湖泊水和浅层地下水，不到淡水总量的 0.3%。","点击右侧的水体，沙盘上会标出它的位置。注意比较各水体的更新周期：大气水约 8 天就更新一次，地下水要上千年。"]},
+        {"t":"水的三态变化","p":["水在固态（冰、雪）、液态（水）、气态（水汽）之间不断转化，水循环就是靠这些状态变化推动的。","海面和湖面的水吸收太阳辐射的热量，汽化成水汽；水汽上升遇冷，液化成云中的小水滴，在高空更冷的地方直接凝华成冰晶。冬季山地降雪、积雪，春夏积雪和冰川熔化，融水汇入河流。","切换夏季 / 冬季，看雪线怎样升降；拖动“全球变暖”，看冰川和积雪的变化。"]},
+        {"t":"海陆间循环","p":["海陆间循环发生在海洋与陆地之间，是最重要的水循环类型：它使陆地上的水不断得到补充，水资源得以再生。","① 蒸发 → ② 水汽输送 → ③ 降水 → ④ 地表径流 / ⑤ 下渗 → ⑥ 地下径流 → 海洋","点击下面的步骤逐个观察，或按分步演示自动播放。下渗和地下径流发生在地下，看沙盘前侧的剖面：雨水穿过土壤到达潜水面，再沿透水层缓慢流向海洋。"]},
+        {"t":"三类水循环","p":["按发生的空间范围，水循环分为三类，沙盘上用颜色区分：","海上内循环：海洋水蒸发，在海洋上空凝结后又降回海洋。参与的水量最大。","海陆间循环：海洋与陆地之间的循环，使陆地水不断得到补充、更新。","陆地内循环：陆地上的水通过蒸发和植物蒸腾进入大气，又降落到陆地。山后的内陆盆地是内流区：内流河注入内陆湖，湖水只能靠蒸发离开，参与的水量最小。"]},
+        {"t":"下渗与地表径流","p":["雨水落到地面后有三条去路：被植被截留后蒸发，下渗进入土壤，或者形成地表径流。下渗得多，地表径流就少，地下水得到的补给就多。","影响下渗的主要因素：降水强度（雨越急，来不及下渗的越多）、坡度（坡越陡，水流越快，下渗越少）、植被（根系和枯枝落叶层使土壤疏松，下渗增多）、土壤质地（砂土孔隙大、下渗快，黏土下渗慢）、地面硬化（水泥、沥青路面几乎不透水）。","调节参数后按「来一场暴雨」，比较分配比例和流量过程线。"]},
+        {"t":"水循环的地理意义","p":["水循环把大气圈、水圈、岩石圈和生物圈联系在一起：","① 维持全球水量的动态平衡：海洋蒸发的水，通过降水和径流又回到海洋。","② 物质迁移与能量交换：河流把泥沙和溶解物质从陆地搬运到海洋；水汽蒸发时吸热、凝结时放热，把低纬的热量带到高纬，缓解了不同纬度热量收支的不平衡。","③ 塑造地表形态：流水在上游侵蚀出 V 形谷，在下游和河口堆积成冲积平原和三角洲。","④ 使水资源不断更新：淡水被使用后，通过水循环得到补充。"]},
+        {"t":"城市化与海绵城市","p":["城市扩张后，农田和绿地变成了建筑、水泥地和沥青路，雨水下渗减少、地表径流增加，又通过排水管网迅速汇入河道：洪峰流量增大，峰现时间提前，城市更容易内涝；地下水得不到补给，河流枯水期流量减少；蒸发、蒸腾减少，城市更干热。","海绵城市用透水铺装、绿色屋顶、下沉式绿地和雨水花园，让城市像海绵一样「吸水、蓄水、渗水、净水」，需要时再把蓄存的水「释放」出来。","拖动硬化率、打开海绵城市，再来一场暴雨，比较流量过程线。"]},
+        {"t":"人类活动的影响","p":["人类活动对水循环影响最大的是地表径流环节，也能影响下渗、蒸发和降水。","修建水库：拦蓄洪水、枯水期放水，削峰补枯；库区水面扩大，蒸发增加。跨流域调水（如南水北调）：改变地表径流的空间分布。","植树造林：增加下渗和蒸腾，减少地表径流和水土流失。过量抽取地下水：形成地下水降落漏斗，引起地面沉降，沿海地区海水入侵。人工增雨：向云中播撒催化剂，促使水汽凝结降水。"]},
+        {"t":"水量平衡","p":["从多年平均看，全球的水量收支是平衡的。海洋：降水 + 径流入海 = 蒸发；陆地：降水 = 蒸发 + 径流。","海洋蒸发的水比降回海洋的多，多出的部分随水汽输送到陆地，等于陆地流入海洋的径流量。","对一个流域，在一段时间里：P = E + R + ΔS。P 为降水，E 为蒸发（含蒸腾），R 为径流，ΔS 为流域蓄水量的变化。多年平均 ΔS ≈ 0。内流区没有径流流出，降水最终全部蒸发：P ≈ E。"]},
+        {"t":"随堂检测","p":["沙盘上的箭头已换成字母。读图并回答问题，答完会显示解析。"]},
+        {"t":"自由探索","p":["所有参数都已开放。试着组合不同的条件，观察水循环各环节怎样变化：强向陆风 + 夏季，迎风坡暴雨、河流水量大；冬季，山地积雪、河流靠地下水补给；毁林 + 高硬化率 + 暴雨，洪峰陡涨；全球变暖，雪线上升、冰川退缩。"]}
+      ]
+    </script>
+
+    <script type="application/json" id="ch8-data">
+      {"m":[
+        {"n":"修建水库","c":"#2A7FA8","s":[0,3,4],"t":"修建水库：拦蓄洪水、枯水期放水，削峰补枯；库区水面扩大，蒸发增加","y":"拦蓄洪水、枯水期放水，削峰补枯；兼顾防洪、灌溉、发电、供水。","b":"库区水面扩大、蒸发增加；下游泥沙减少，淹没土地、需要移民。"},
+        {"n":"跨流域调水","c":"#4FA3E3","s":[0,3],"t":"跨流域调水（如南水北调）：改变地表径流的空间分布","y":"缓解调入区（北方）缺水，补给地下水、改善生态。","b":"调出区水量减少，河口可能海水倒灌；沿线蒸发、渗漏，工程投资大。"},
+        {"n":"植树造林","c":"#4E8F5E","s":[0,3,4,5],"t":"植树造林：增加下渗和蒸腾，减少地表径流和水土流失","y":"涵养水源、保持水土，削减洪峰、增加枯水期流量。","b":"干旱区大规模造林会过度消耗土壤水，须因地制宜。"},
+        {"n":"过量抽取地下水","c":"#F2B544","s":[5],"t":"过量抽取地下水：形成地下水降落漏斗，引起地面沉降，沿海地区海水入侵","y":"短期内获得稳定的水源。","b":"形成降落漏斗，引起地面沉降，沿海地区海水入侵，地下水水质变差。"},
+        {"n":"人工增雨","c":"#B48CF2","s":[2],"t":"人工增雨：向云中播撒催化剂，促使水汽凝结降水","y":"缓解旱情、森林防火、增加水库蓄水。","b":"须有合适的云，只增加局部降水，改变不了大范围的水汽输送。"}],
+       "q":{"labels":["汛期","枯水期"],"before":[80,12],"after":[52,30]}}
+    </script>
+    <script type="application/json" id="ch9-data">
+      {"f":[
+        {"n":"海洋蒸发","v":434,"c":"#9FD8F2","a":[-10.5,1,-1],"b":[-10.5,6.5,-1],"o":[-2,0,0]},
+        {"n":"海洋降水","v":398,"c":"#4FA3E3","a":[-7,6.5,-1],"b":[-7,1.1,-1],"o":[2,0,0]},
+        {"n":"水汽输送（海→陆）","v":36,"c":"#CFD6DE","a":[-9,8.2,-1.5],"b":[2.5,8.2,-1.5],"o":[0,0.7,0],"k":1},
+        {"n":"陆地降水","v":107,"c":"#4FA3E3","a":[3.5,7,-3.8],"b":[3.5,1.2,-3.8],"o":[-2,0,0]},
+        {"n":"陆地蒸发","v":71,"c":"#9FD8F2","a":[9,1.3,-3.8],"b":[9,6.5,-3.8],"o":[2,0,0]},
+        {"n":"径流入海","v":36,"c":"#2EC4B6","a":[1.5,1.2,3.6],"b":[-4.5,1.2,3.6],"o":[0,0.7,0],"k":1}],
+       "eq":{"oP":398,"oE":434,"lP":107,"lE":71,"V":36,"R":36}}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+    <script src="chart.js"></script>
+    <script>
+      /* ---------- data ---------- */
+      var WATER = JSON.parse(document.getElementById("water-data").textContent);
+      var CH = JSON.parse(document.getElementById("chapters").textContent);
+      var root = document.documentElement, cur = 0, donut = null, picked = -1;
+
+      /* ---------- shell ---------- */
+      var chaps = document.getElementById("chaps"), seg = document.getElementById("seg");
+      CH.forEach(function (c, i) {
+        var b = document.createElement("button");
+        b.className = "x-chap"; b.innerHTML = "<b>" + String(i + 1).padStart(2, "0") + "</b><span>" + c.t + "</span>";
+        b.onclick = function () { go(i); };
+        chaps.appendChild(b);
+        seg.appendChild(document.createElement("i"));
+      });
+
+      function go(i) {
+        cur = Math.max(0, Math.min(CH.length - 1, i));
+        location.hash = "#" + (cur + 1);
+        var bs = chaps.children, ss = seg.children;
+        for (var k = 0; k < CH.length; k++) {
+          bs[k].classList.toggle("on", k === cur);
+          ss[k].classList.toggle("on", k <= cur);
+        }
+        if (window.innerWidth < 768) bs[cur].scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+        document.getElementById("count").textContent = String(cur + 1).padStart(2, "0") + " / 11";
+        document.getElementById("ovTitle").textContent = CH[cur].t;
+        var src = document.getElementById("ovSrc");
+        src.textContent = cur >= 9 ? "教材：湘教版 必修第一册·第四章 综合" : cur === 7 ? "教材：湘教版 必修第一册·第四章 水循环与人类活动" : cur === 6 ? "教材：湘教版 必修第一册·第四章 水循环与城市化" : "教材：湘教版 必修第一册·第四章 第一节 水循环";
+        src.classList.toggle("x-hide", cur > 10);
+        document.getElementById("ovText").innerHTML = CH[cur].p.slice(0, 2).map(function (p) { return "<p>" + p + "</p>"; }).join("");
+        buildPanel();
+        highlight(-1);
+        if (ch2) ch2.show(cur === 1);
+        if (cur !== 2) stop3();
+        if (ch3) ch3.show(cur === 2);
+        if (ch4) ch4.show(cur === 3);
+        if (ch5) ch5.show(cur === 4);
+        if (ch6) ch6.show(cur === 5);
+        if (ch7) ch7.show(cur === 6);
+        if (ch8) ch8.show(cur === 7);
+        if (ch9) ch9.show(cur === 8);
+        if (ch10) ch10.show(cur === 9);
+        if (ch11) ch11.show(cur === 10);
+      }
+
+      document.getElementById("prev").onclick = function () { go(cur - 1); };
+      document.getElementById("next").onclick = function () { go(cur + 1); };
+      document.getElementById("theme").onclick = toggleTheme;
+      document.getElementById("reset").onclick = function () { resetView(); };
+      document.getElementById("full").onclick = function () {
+        var p = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+        if (p && p.catch) p.catch(function () {});
+      };
+      document.getElementById("fold").onclick = function () { document.getElementById("over").classList.toggle("min"); };
+      document.getElementById("drawer").onclick = function () { document.getElementById("panel").classList.toggle("down"); };
+      function toggleTheme() {
+        root.setAttribute("data-theme", root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+        skyColor(); if (donut) { donut.options.plugins.legend.display = false; donut.update(); }
+      }
+      addEventListener("keydown", function (e) {
+        if (/input|textarea/i.test(e.target.tagName)) return;
+        if (e.key === "ArrowLeft") go(cur - 1);
+        else if (e.key === "ArrowRight") go(cur + 1);
+        else if (e.key === "t" || e.key === "T") toggleTheme();
+        else if (e.key === "r" || e.key === "R") resetView();
+        else if (e.key === "f" || e.key === "F") document.getElementById("full").click();
+      });
+
+      /* ---------- right panel ---------- */
+      function buildPanel() {
+        var b = document.getElementById("panelBody");
+        if (cur === 1) { buildCh2(b); return; }
+        if (cur === 2) { buildCh3(b); return; }
+        if (cur === 3) { buildCh4(b); return; }
+        if (cur === 4) { buildCh5(b); return; }
+        if (cur === 5) { buildCh6(b); return; }
+        if (cur === 6) { buildCh7(b); return; }
+        if (cur === 7) { buildCh8(b); return; }
+        if (cur === 8) { buildCh9(b); return; }
+        if (cur === 9) { buildCh10(b); return; }
+        if (cur === 10) { buildCh11(b); return; }
+        if (cur !== 0) {
+          b.innerHTML = '<p class="x-h">本章讲解</p><div class="x-card">' +
+            CH[cur].p.map(function (p) { return "<p>" + p + "</p>"; }).join("") + "</div>" +
+            '<div class="x-soon">本章交互即将上线。<br />沙盘仍可旋转缩放观察地形与地下剖面。</div>';
+          return;
+        }
+        b.innerHTML =
+          '<p class="x-h">全球水体占比</p>' +
+          '<div class="x-card"><canvas id="donut" role="img" aria-label="全球水体占比：海洋水 96.5%，其余水体合计约 3.5%"></canvas></div>' +
+          '<p class="x-h">水体（点击在沙盘上高亮）</p>' +
+          '<div class="x-card"><ul class="x-list" id="wlist"></ul></div>' +
+          '<div class="x-read" id="read">选择一种水体，这里显示它在沙盘上的位置与更新周期。</div>' +
+          '<div class="x-card x-key"><h3>要点</h3>' +
+          '<p>海洋水 96.5%；淡水仅约 2.5%，其中近七成是冰川。</p>' +
+          '<p>陆地淡水主体是<b style="color:var(--acc-t)">冰川</b>；人类易利用的是河流水、淡水湖泊水和浅层地下水，不到淡水总量的 0.3%。</p>' +
+          '<p>更新周期：大气水约 8 天 &lt; 河流水约 16 天 &lt; 地下水约 1400 年 &lt; 海洋水约 2500 年 &lt; 冰川约 9700 年。周期越短，水资源更新越快。</p>' +
+          '<p class="x-gk">高考链接：水体更新周期与水资源可再生性常结合考查；<b>易错</b>：淡水最多的是冰川，不是河流或湖泊。</p></div>' +
+          '<p class="x-h">显示</p><div class="x-card">' +
+          '<label class="x-toggle">标注标签<input type="checkbox" id="swLabel" checked /></label>' +
+          '<label class="x-toggle">地下剖面辅助线<input type="checkbox" id="swSec" checked /></label></div>';
+        var ul = document.getElementById("wlist");
+        WATER.forEach(function (w, i) {
+          var li = document.createElement("li"), bt = document.createElement("button");
+          bt.innerHTML = '<span class="x-sw" style="background:' + w.color + '"></span><span class="x-nm">' + w.name +
+            '</span><span class="x-pc">' + w.pct + "%</span>";
+          bt.onclick = function () { highlight(i); };
+          li.appendChild(bt); ul.appendChild(li);
+        });
+        document.getElementById("swLabel").onchange = function () { labelGroup.visible = this.checked; };
+        document.getElementById("swSec").onchange = function () { sectionGroup.visible = this.checked; };
+        drawDonut();
+      }
+
+      /* ---------- chapter 2: 水的三态变化 ---------- */
+      var S2 = { season: "summer", warm: 0 };
+      var PHASE = [
+        ["汽化", "液 → 气", "吸热", "海面、湖面上升的水汽", "#9FD8F2"],
+        ["液化", "气 → 液", "放热", "云中的小水滴", "#4FA3E3"],
+        ["凝华", "气 → 固", "放热", "高空的冰晶", "#E6ECF5"],
+        ["熔化", "固 → 液", "吸热", "积雪、冰川融水汇入河流", "#2EC4B6"]
+      ];
+      function buildCh2(b) {
+        var bs = 'style="border-color:var(--line);justify-content:center"';
+        b.innerHTML =
+          '<p class="x-h">季节</p>' +
+          '<div class="x-card"><div class="x-list" style="display:flex;gap:6px">' +
+          '<button data-s="summer" ' + bs + '>夏季</button><button data-s="winter" ' + bs + '>冬季</button></div></div>' +
+          '<p class="x-h">全球变暖</p>' +
+          '<div class="x-card"><label class="x-toggle" for="warm">升温<span class="x-pc" id="warmV">+0.0°C</span></label>' +
+          '<input type="range" id="warm" min="0" max="3" step="0.1" value="' + S2.warm + '" aria-label="全球变暖升温幅度" style="width:100%;min-height:44px;accent-color:var(--acc)" /></div>' +
+          '<div class="x-read" id="read2"></div>' +
+          '<p class="x-h">四种状态变化</p>' +
+          '<div class="x-card"><ul class="x-list">' + PHASE.map(function (p) {
+            return '<li style="display:flex;align-items:center;gap:8px;min-height:44px;padding:4px 8px"><span class="x-sw" style="background:' + p[4] +
+              '"></span><span class="x-nm"><b style="font-family:var(--serif)">' + p[0] + '</b> ' + p[1] +
+              '<br /><span style="font-size:12px;color:var(--ink2)">' + p[3] + '</span></span><span class="x-pc" style="color:' +
+              (p[2] === "吸热" ? "var(--acc-t)" : "var(--gold-t)") + '">' + p[2] + "</span></li>";
+          }).join("") + "</ul></div>" +
+          '<p class="x-h">本章讲解</p><div class="x-card"><p>' + CH[1].p[2] + "</p></div>" +
+          '<div class="x-card x-key"><h3>要点</h3>' +
+          '<p>水在固、液、气三态间转化推动水循环：<b style="color:var(--acc-t)">汽化、熔化吸热</b>；<b style="color:var(--gold-t)">液化、凝华放热</b>。</p>' +
+          '<p>冬季雪线下移、积雪扩大，河流融水补给少；夏季雪线上移、融水增多，河流变宽。</p>' +
+          '<p>升温使冰川与积雪退缩、雪线上升、海平面微升。</p>' +
+          '<p class="x-gk">高考链接：冰川融水补给、雪线高度变化常结合气候变化考查；<b>易错</b>：汽化、熔化吸热，液化、凝华放热；全球变暖短期内冰川融水增多，长期会减少。</p></div>';
+        b.querySelectorAll("[data-s]").forEach(function (bt) {
+          bt.onclick = function () { S2.season = bt.getAttribute("data-s"); apply2(); };
+        });
+        document.getElementById("warm").oninput = function () { S2.warm = parseFloat(this.value); apply2(); };
+        apply2();
+      }
+      function geo2() {
+        var su = S2.season === "summer", w = S2.warm;
+        var line = Math.min(5.0, (su ? 3.9 : 2.2) + 0.35 * w);
+        var toe = Math.min(line - 0.1, 1.3 + 0.55 * w + (su ? 0.15 : 0));
+        var melt = Math.min(1, (su ? 0.6 : 0.1) * (1 + 0.35 * w));
+        return { line: line, toe: toe, melt: melt, river: su ? 1.6 * (1 + 0.12 * w) : 0.8, sea: 0.04 * w };
+      }
+      function apply2() {
+        var su = S2.season === "summer", g = geo2();
+        document.querySelectorAll("#panelBody [data-s]").forEach(function (bt) { bt.classList.toggle("on", bt.getAttribute("data-s") === S2.season); });
+        var wv = document.getElementById("warmV"); if (wv) wv.textContent = "+" + S2.warm.toFixed(1) + "°C";
+        var r = document.getElementById("read2");
+        if (r) r.innerHTML = "<b>" + (su ? "夏季" : "冬季") + "</b>　升温 <u>+" + S2.warm.toFixed(1) + "°C</u>" +
+          "<br />雪线：山高的 <u>" + Math.round((g.line + 0.1) / 5.4 * 100) + "%</u> 处" + (su ? "（上移）" : "（下移，积雪扩大）") +
+          "<br />冰川末端：山高的 <u>" + Math.round((g.toe + 0.1) / 5.4 * 100) + "%</u> 处" +
+          "<br />融水补给：<u>" + (g.melt > 0.7 ? "很多" : g.melt > 0.4 ? "多" : "少") + "</u>，河流" + (su ? "变宽" : "变窄") +
+          "<br />海平面：" + (S2.warm > 0 ? "<u>微升</u>" : "基准");
+        if (ch2 && cur === 1) ch2.apply(g);
+      }
+
+      /* ---------- chapter 3: 海陆间循环 ---------- */
+      var S3 = { on: -1, all: true, timer: 0 }, NUM3 = "①②③④⑤⑥";
+      var STEP3 = [
+        ["蒸发", "海面", "海面的水吸收太阳辐射的热量，汽化成水汽上升。", "#9FD8F2"],
+        ["水汽输送", "海洋 → 陆地", "水汽在海洋上空凝结成云，随风由海洋上空输送到陆地上空。看金色风向箭头：方向是海洋 → 陆地。", "#E6ECF5"],
+        ["降水", "迎风坡雨 · 山顶雪", "云团移到高山迎风坡，形成降雨；山顶气温低，降水以雪的形式落下、积存。", "#4FA3E3"],
+        ["地表径流", "陆地 → 海洋", "落到地面的雨水沿坡面汇入河流，经水库沿河道流回海洋。", "#2EC4B6"],
+        ["下渗", "看前侧剖面", "一部分雨水下渗，穿过土壤层到达潜水面，补给地下水。", "#5EE6FF"],
+        ["地下径流", "沿透水层", "地下水沿透水层缓慢流向海洋，回到海里。", "#B48CF2"]
+      ];
+      function buildCh3(b) {
+        var bs = 'style="border-color:var(--line);justify-content:center"';
+        b.innerHTML =
+          '<p class="x-h">六个环节（点击只看该环节）</p><div class="x-card"><ul class="x-list" id="steps3">' +
+          STEP3.map(function (s, i) {
+            return '<li><button data-k="' + i + '"><span class="x-sw" style="background:' + s[3] + '"></span><span class="x-nm">' +
+              NUM3[i] + " " + s[0] + '</span><span class="x-pc">' + s[1] + "</span></button></li>";
+          }).join("") +
+          '</ul><div class="x-list" style="display:flex;gap:6px;margin-top:8px"><button id="play3" ' + bs + '>▶ 分步演示</button>' +
+          '<button id="all3" ' + bs + '>全部</button></div></div>' +
+          '<div class="x-read" id="read3"></div>' +
+          '<p class="x-h">本章讲解</p><div class="x-card"><p>' + CH[2].p[2] + "</p></div>" +
+          '<div class="x-card x-key"><h3>要点</h3>' +
+          '<p>' + CH[2].p[1] + '</p>' +
+          '<p>海陆间循环是<b style="color:var(--acc-t)">最重要的水循环类型</b>：使陆地上的水不断得到补充，水资源得以再生。</p>' +
+          '<p class="x-gk">高考链接：海陆间循环使陆地水资源不断更新，人类影响最大的环节是地表径流（修水库、跨流域调水）；<b>易错</b>：水汽输送是海洋→陆地，地表径流是陆地→海洋，方向别画反。</p></div>';
+        b.querySelectorAll("#steps3 button").forEach(function (bt) {
+          bt.onclick = function () { set3(parseInt(bt.getAttribute("data-k"), 10)); };
+        });
+        document.getElementById("play3").onclick = play3;
+        document.getElementById("all3").onclick = function () { set3("all"); };
+        set3(S3.all ? "all" : S3.on);
+      }
+      function set3(k, keep) {
+        if (!keep) stop3();
+        S3.all = k === "all" || k < 0; S3.on = S3.all ? -1 : k;
+        document.querySelectorAll("#steps3 button").forEach(function (bt, i) { bt.classList.toggle("on", S3.all || i === S3.on); });
+        var a = document.getElementById("all3"); if (a) a.classList.toggle("on", S3.all);
+        var r = document.getElementById("read3");
+        if (r) r.innerHTML = S3.all
+          ? "<b>完整循环</b>　<u>①→⑥</u><br />海洋水蒸发，水汽输送到陆地上空形成降水，再经地表径流、下渗和地下径流回到海洋。"
+          : "<b>" + NUM3[k] + " " + STEP3[k][0] + "</b>　<u>" + STEP3[k][1] + "</u><br />" + STEP3[k][2];
+        if (k === 4 || k === 5) { rot.y = -0.12; rot.x = -0.3; }
+        if (ch3) ch3.sel(S3.on, S3.all);
+      }
+      function play3() {
+        if (S3.timer) { stop3(); return; }
+        set3(S3.all ? 0 : S3.on);
+        S3.timer = setInterval(function () { set3((S3.on + 1) % 6, true); }, 4000);
+        document.getElementById("play3").textContent = "❚❚ 暂停演示";
+      }
+      function stop3() {
+        clearInterval(S3.timer); S3.timer = 0;
+        var p = document.getElementById("play3"); if (p) p.textContent = "▶ 分步演示";
+      }
+
+      /* ---------- chapter 4: 三类水循环 ---------- */
+      var S4 = [true, true, true], N4 = [160, 90, 40];
+      var CYC4 = [
+        ["海上内循环", "#3D7BF0", "海洋与海洋上空", "海面蒸发 → 海洋上空凝结 → 降水回到海洋", "最大", 100, "海洋与大气之间的水分交换，参与全球水循环的水量最多"],
+        ["海陆间循环", "#5EE6FF", "海洋与陆地之间", "蒸发 → 水汽输送 → 降水 → 地表径流、下渗 → 地下径流 → 海洋", "居中", 55, "使陆地水不断得到补充、更新，水资源得以再生；最重要的类型"],
+        ["陆地内循环", "#6FCF97", "陆地与陆地上空（如内流区）", "湖面、地面蒸发与植物蒸腾 → 降水回到陆地", "最小", 18, "内流区的水在本区更新：内流河注入内陆湖，湖水只能靠蒸发离开"]
+      ];
+      function buildCh4(b) {
+        var g = 'style="color:var(--ink2)"';
+        b.innerHTML =
+          '<p class="x-h">三类循环（可单独显示 / 隐藏）</p><div class="x-card">' +
+          CYC4.map(function (c, i) {
+            return '<label class="x-toggle"><span style="display:flex;align-items:center;gap:8px"><span class="x-sw" style="background:' + c[1] +
+              '"></span>' + c[0] + ' <span class="x-pc">粒子 ' + N4[i] + '</span></span><input type="checkbox" data-c="' + i + '"' + (S4[i] ? " checked" : "") + " /></label>";
+          }).join("") + "</div>" +
+          '<p class="x-h">对比</p>' +
+          CYC4.map(function (c) {
+            return '<div class="x-card" style="border-left:3px solid ' + c[1] + '"><p><b style="font-family:var(--serif)">' + c[0] + "</b></p>" +
+              "<p><span " + g + ">范围</span>　" + c[2] + "</p><p><span " + g + ">主要环节</span>　" + c[3] + "</p>" +
+              '<p><span ' + g + '>参与水量</span>　<b style="color:' + c[1] + '">' + c[4] + '</b><span style="display:block;height:4px;border-radius:2px;margin-top:4px;width:' +
+              c[5] + "%;background:" + c[1] + '"></span></p><p><span ' + g + ">意义</span>　" + c[6] + "</p></div>";
+          }).join("") +
+          '<p class="x-fine" style="font-size:12px;color:var(--ink2);margin:-6px 0 14px">水量条为相对大小示意。</p>' +
+          '<p class="x-h">本章讲解</p><div class="x-card">' + CH[3].p.map(function (p) { return "<p>" + p + "</p>"; }).join("") + "</div>" +
+          '<div class="x-card x-key"><h3>要点</h3>' +
+          "<p>按发生的空间范围分为海上内循环、海陆间循环、陆地内循环。</p>" +
+          '<p>参与水量：<b style="color:var(--acc-t)">海上内循环最大</b>，陆地内循环最小。</p>' +
+          "<p>海陆间循环使陆地水不断得到补充、更新，是最重要的类型。</p>" +
+          "<p>内流区：内流河注入内陆湖，湖水只能靠蒸发离开。</p>" +
+          '<p class="x-gk">高考链接：判断水循环类型常结合内流区、外流区和河流注入地考查；<b>易错</b>：参与水量最大的是海上内循环，但对陆地最重要的是海陆间循环。</p></div>';
+        b.querySelectorAll("[data-c]").forEach(function (cb) {
+          cb.onchange = function () { S4[+cb.getAttribute("data-c")] = cb.checked; if (ch4) ch4.sel(); };
+        });
+        if (ch4) ch4.sel();
+      }
+
+      /* ---------- chapter 8: 人类活动的影响 ---------- */
+      var D8 = JSON.parse(document.getElementById("ch8-data").textContent), S8 = { k: 0, t0: 0 }, ch8 = null, h8c = null;
+      var STAGE8 = ["蒸发", "水汽输送", "降水", "地表径流", "下渗", "地下径流"];
+      function buildCh8(b) {
+        b.innerHTML =
+          '<p class="x-h">五项措施（点击在沙盘上演示）</p><div class="x-card"><ul class="x-list" id="m8">' +
+          D8.m.map(function (m, i) {
+            return '<li><button data-k="' + i + '"><span class="x-sw" style="background:' + m.c + '"></span><span class="x-nm">' + m.n + "</span></button></li>";
+          }).join("") + "</ul></div>" +
+          '<div class="x-read"><b>提示</b>　人类影响最大的环节是<u>地表径流</u>。</div>' +
+          '<div class="x-card" id="card8"></div>' +
+          '<p class="x-h">本章讲解</p><div class="x-card"><p>人类活动对水循环影响最大的是地表径流环节，也能影响下渗、蒸发和降水：</p>' +
+          '<ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.65">' + D8.m.map(function (m) { return "<li>" + m.t + "</li>"; }).join("") + "</ul></div>" +
+          '<div class="x-card x-key"><h3>要点</h3>' +
+          "<p>水库削峰补枯、库区蒸发增加；调水改变地表径流的空间分布；植树造林下渗、蒸腾增多，地表径流减少。</p>" +
+          "<p>地下水超采：降落漏斗 → 地面沉降，沿海海水入侵。人工增雨只作用于降水环节。</p>" +
+          '<p class="x-gk">高考链接：常考水库、南水北调、植树造林、地下水超采对水循环各环节的影响；<b>易错</b>：目前人类能施加影响最大的环节是地表径流，对水汽输送影响很小。</p></div>';
+        b.querySelectorAll("#m8 button").forEach(function (bt) {
+          bt.onclick = function () { set8(+bt.getAttribute("data-k")); };
+        });
+        set8(S8.k);
+      }
+      function set8(k) {
+        var m = D8.m[k];
+        S8.k = k; S8.t0 = performance.now();
+        document.querySelectorAll("#m8 button").forEach(function (bt, i) { bt.classList.toggle("on", i === k); });
+        if (h8c) { h8c.destroy(); h8c = null; }
+        document.getElementById("card8").innerHTML = '<p class="x-h" style="margin-bottom:6px">影响的环节</p><p>' +
+          STAGE8.map(function (s, i) { return '<span class="x-tag8' + (m.s.indexOf(i) >= 0 ? " on" : "") + '">' + s + "</span>"; }).join("") + "</p>" +
+          '<p><b style="color:var(--acc-t)">利</b>　' + m.y + '</p><p><b style="color:var(--red)">弊</b>　' + m.b + "</p>" +
+          (k === 0 ? '<div style="height:160px"><canvas id="q8" role="img" aria-label="建库后汛期流量由 80 降到 52，枯水期由 12 升到 30：削峰补枯"></canvas></div>' +
+            '<p style="font-size:12px;color:var(--ink2);margin-top:6px">汛期蓄水削峰，枯水期放水补枯（下游流量，示意）。</p>' : "");
+        if (k === 0) {
+          h8c = new Chart(document.getElementById("q8"), {
+            type: "bar",
+            data: { labels: D8.q.labels, datasets: [
+              { label: "建库前", data: D8.q.before, backgroundColor: "#8A97AD" },
+              { label: "建库后", data: D8.q.after, backgroundColor: "#2EC4B6" }] },
+            options: {
+              maintainAspectRatio: false, animation: false,
+              plugins: { legend: { labels: { color: "#8A97AD", boxWidth: 10 } } },
+              scales: { x: { ticks: { color: "#8A97AD" }, grid: { display: false } },
+                y: { beginAtZero: true, ticks: { color: "#8A97AD" }, grid: { color: "rgba(138,151,173,.15)" }, title: { display: true, text: "流量（示意）", color: "#8A97AD" } } }
+            }
+          });
+        }
+        if (ch8) ch8.sel(k);
+      }
+
+      /* ---------- chapter 9: 水量平衡 ---------- */
+      var D9 = JSON.parse(document.getElementById("ch9-data").textContent), ch9 = null;
+      var S9 = { focus: false, P: 800, E: 450, R: 300, inland: false };
+      function buildCh9(b) {
+        var q = D9.eq, st = 'style="width:100%;min-height:44px;accent-color:var(--acc)"';
+        var okO = q.oP + q.R === q.oE, okL = q.lP === q.lE + q.R;
+        function rg(id, label) {
+          return '<label class="x-toggle" for="' + id + '">' + label + '<span class="x-pc" id="' + id + 'V"></span></label>' +
+            '<input type="range" id="' + id + '" min="0" max="' + (id === "r9" ? 1200 : 1600) + '" step="10" aria-label="' + label + '" ' + st + " />";
+        }
+        function mk(id, c) { return '<marker id="' + id + '" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3" markerHeight="3" orient="auto"><path d="M0 0L10 5L0 10z" fill="' + c + '"/></marker>'; }
+        b.innerHTML =
+          '<p class="x-h">① 全球水量平衡（多年平均）</p><div class="x-card">' +
+          '<ul class="x-list">' + D9.f.map(function (f) {
+            return '<li style="display:flex;align-items:center;gap:8px;min-height:28px;padding:0 4px"><span class="x-sw" style="background:' + f.c +
+              '"></span><span class="x-nm">' + f.n + '</span><span class="x-pc">' + f.v + "</span></li>";
+          }).join("") + "</ul>" +
+          '<p style="font-size:12px;color:var(--ink2);margin-top:6px">单位：千立方千米/年（示意，教材常用量级）；沙盘上箭头越粗，水量越大。</p>' +
+          '<p class="x-eq9"><span>海洋 降水 + 径流入海 = 蒸发</span></p><p class="x-eq9"><b>' + q.oP + " + " + q.R + " = " + q.oE + "</b><span>" + (okO ? "✓ 成立" : "✗") + "</span></p>" +
+          '<p class="x-eq9"><span>陆地 降水 = 蒸发 + 径流</span></p><p class="x-eq9"><b>' + q.lP + " = " + q.lE + " + " + q.R + "</b><span>" + (okL ? "✓ 成立" : "✗") + "</span></p>" +
+          '<label class="x-toggle">只看水汽输送与径流<input type="checkbox" id="f9"' + (S9.focus ? " checked" : "") + " /></label></div>" +
+          '<div class="x-read"><b>点明</b>　水汽输送量 <u>' + q.V + "</u> = 陆地径流入海量 <u>" + q.R + "</u>：海洋多蒸发的 " + (q.oE - q.oP) + " 随水汽输送到陆地，再由径流还给海洋。</div>" +
+          '<p class="x-h">② 流域水量平衡计算器（mm，示意）</p><div class="x-card">' +
+          rg("p9", "P 降水") + rg("e9", "E 蒸发（含蒸腾）") + rg("r9", "R 径流") +
+          '<svg id="bk9" viewBox="0 0 300 150" role="img" aria-label="流域蓄水桶：水位随 ΔS 升降" style="width:100%;display:block;margin:6px 0">' +
+          "<defs>" + mk("m9p", "#4FA3E3") + mk("m9e", "#9FD8F2") + mk("m9r", "#2EC4B6") + "</defs>" +
+          '<line id="lp9" x1="128" y1="2" x2="128" y2="24" stroke="#4FA3E3" marker-end="url(#m9p)"/><text x="100" y="16">P</text>' +
+          '<line id="le9" x1="172" y1="26" x2="172" y2="4" stroke="#9FD8F2" marker-end="url(#m9e)"/><text x="188" y="16">E</text>' +
+          '<line id="lr9" x1="192" y1="118" x2="252" y2="118" stroke="#2EC4B6" marker-end="url(#m9r)"/><text x="262" y="122">R</text>' +
+          '<rect id="w9" x="112" y="32" width="76" height="96" fill="#2A7FA8" fill-opacity=".75"/>' +
+          '<line x1="108" y1="80" x2="196" y2="80" stroke="var(--ink2)" stroke-dasharray="3 4"/><text x="16" y="84">初始水位</text>' +
+          '<path d="M110 30V130H190V30" fill="none" stroke="var(--ink2)" stroke-width="2"/><text x="16" y="140">流域蓄水</text></svg>' +
+          '<p class="x-eq9"><span>ΔS = P − E − R</span><b id="ds9"></b></p><p id="ds9t" style="font-size:12.5px"></p>' +
+          '<div class="x-list" style="margin-top:6px"><button id="avg9" style="border-color:var(--acc);justify-content:center;color:var(--acc-t)">多年平均（ΔS ≈ 0）</button></div>' +
+          '<label class="x-toggle">内流区（R = 0）<input type="checkbox" id="in9"' + (S9.inland ? " checked" : "") + " /></label>" +
+          '<p id="in9t" style="font-size:12px;color:var(--ink2)"></p></div>' +
+          '<p class="x-h">本章讲解</p><div class="x-card">' + CH[8].p.map(function (p) { return "<p>" + p + "</p>"; }).join("") + "</div>" +
+          '<div class="x-card x-key"><h3>要点</h3>' +
+          "<p>全球多年平均：海洋 降水 + 径流入海 = 蒸发；陆地 降水 = 蒸发 + 径流。</p>" +
+          "<p>水汽输送量（海→陆）= 陆地径流入海量。流域：P = E + R + ΔS，多年平均 ΔS ≈ 0；内流区 P ≈ E。</p>" +
+          '<p class="x-gk">高考链接：常用 P = E + R + ΔS 分析植被、水库、城市化对径流与蓄水的影响，以及内流区 P≈E；<b>易错</b>：多年平均 ΔS≈0，但单个时段 ΔS 可正可负。</p></div>';
+        document.getElementById("f9").onchange = function () { S9.focus = this.checked; if (ch9) ch9.focus(); };
+        ["p9", "e9", "r9"].forEach(function (id) {
+          document.getElementById(id).oninput = function () { S9[id[0].toUpperCase()] = +this.value; calc9(); };
+        });
+        document.getElementById("avg9").onclick = function () {
+          if (S9.inland) S9.R = 0;
+          else S9.R = Math.max(0, Math.min(1200, S9.P - S9.E));
+          S9.E = S9.P - S9.R;
+          calc9();
+        };
+        document.getElementById("in9").onchange = function () { S9.inland = this.checked; if (S9.inland) S9.R = 0; calc9(); };
+        calc9();
+        if (ch9) ch9.focus();
+      }
+      function calc9() {
+        var d = S9.P - S9.E - S9.R, lv = Math.max(0.04, Math.min(1, 0.5 + d / 1200));
+        ["p9", "e9", "r9"].forEach(function (id) {
+          var el = document.getElementById(id), v = S9[id[0].toUpperCase()];
+          el.value = v; document.getElementById(id + "V").textContent = v + " mm";
+        });
+        document.getElementById("r9").disabled = S9.inland;
+        document.getElementById("lp9").setAttribute("stroke-width", 1 + S9.P / 100);
+        document.getElementById("le9").setAttribute("stroke-width", 1 + S9.E / 100);
+        document.getElementById("lr9").setAttribute("stroke-width", S9.R ? 1 + S9.R / 100 : 0);
+        document.getElementById("w9").style.transform = "scaleY(" + lv + ")";
+        document.getElementById("ds9").textContent = S9.P + " − " + S9.E + " − " + S9.R + " = " + (d > 0 ? "+" : "") + d;
+        document.getElementById("ds9t").textContent = Math.abs(d) <= 10 ? "ΔS ≈ 0：收支平衡，蓄水量基本不变（多年平均状态）。" :
+          d > 0 ? "ΔS > 0：流域蓄水增加，水位上升（如丰水期、水库蓄水）。" : "ΔS < 0：流域蓄水减少，水位下降（如枯水期、超采地下水）。";
+        document.getElementById("in9t").textContent = S9.inland ? "内流区没有径流流出，降水最终全部蒸发：多年平均 P ≈ E。" : "数值为示意（教材常用量级）。";
+      }
+
+      /* ---------- chapter 6: 水循环的地理意义 ---------- */
+      var S6 = { k: 0, t0: 0, ph: -1 }, ch6 = null, NUM6 = "①②③④";
+      var M6 = [
+        ["水量平衡", "#2EC4B6", [0, 1], "海洋蒸发（浅蓝箭头）与径流回海（青色箭头）同时进行；天平晃动后回到平衡：海洋蒸发量 = 降水回海 + 径流入海。"],
+        ["物质迁移与能量交换", "#C98A12", [0, 1, 2], "棕色泥沙粒子顺河流入海；红色热量箭头从低纬指向高纬：蒸发吸热、凝结放热，热量随水汽带到高纬。"],
+        ["塑造地表", "#B9A279", [1, 2], "上游流水下切侵蚀出 V 形谷；泥沙在河口堆积，三角洲扇形缓慢向海推进。"],
+        ["水资源更新", "#4FA3E3", [0, 1, 3], ""]
+      ];
+      var PH6 = ["<u>取水 · 蒸发</u><br />淡水湖被取用、蒸发，水位下降。", "<u>降水补给</u><br />水汽凝结成云，降水落入湖中，水位回升。", "<u>补满</u><br />淡水通过水循环得到补充，进入下一轮循环。"];
+      var SPH6 = [["大气圈", 150, 26], ["水圈", 52, 78], ["岩石圈", 150, 130], ["生物圈", 248, 78]], ED6 = [[0, 1], [1, 2], [1, 3], [0, 3], [2, 3]];
+      function svg6() {
+        var r = 25, s = '<svg id="sph6" viewBox="0 0 300 156" width="100%" role="img" aria-label="水循环把大气圈、水圈、岩石圈、生物圈联系在一起"><defs>' +
+          ['a6', 'a6on'].map(function (id, i) {
+            return '<marker id="' + id + '" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L8 4L0 8z" style="fill:var(' + (i ? "--acc" : "--ink2") + ')" /></marker>';
+          }).join("") + "</defs>";
+        ED6.forEach(function (e, i) {
+          var a = SPH6[e[0]], b = SPH6[e[1]], dx = b[1] - a[1], dy = b[2] - a[2], L = Math.hypot(dx, dy), ux = dx / L * (r + 3), uy = dy / L * (r + 3);
+          s += '<line class="x-e6" data-e="' + i + '" x1="' + (a[1] + ux) + '" y1="' + (a[2] + uy) + '" x2="' + (b[1] - ux) + '" y2="' + (b[2] - uy) + '" marker-start="url(#a6)" marker-end="url(#a6)" />';
+        });
+        SPH6.forEach(function (p) {
+          s += '<g class="x-s6"><circle cx="' + p[1] + '" cy="' + p[2] + '" r="' + r + '" /><text x="' + p[1] + '" y="' + (p[2] + 4) + '" text-anchor="middle">' + p[0] + "</text></g>";
+        });
+        return s + "</svg>";
+      }
+      function buildCh6(b) {
+        b.innerHTML =
+          '<p class="x-h">四大圈层（随所选意义点亮）</p><div class="x-card">' + svg6() + "</div>" +
+          '<p class="x-h">四条意义（点击在沙盘上演示）</p><div class="x-card"><ul class="x-list" id="m6">' +
+          M6.map(function (m, i) {
+            return '<li><button data-k="' + i + '"><span class="x-sw" style="background:' + m[1] + '"></span><span class="x-nm">' + NUM6[i] + " " + m[0] + "</span></button></li>";
+          }).join("") + "</ul></div>" +
+          '<div class="x-read" id="read6"></div>' +
+          '<p class="x-h">本章讲解</p><div class="x-card">' + CH[5].p.map(function (p) { return "<p>" + p + "</p>"; }).join("") + "</div>" +
+          '<div class="x-card x-key"><h3>要点</h3>' +
+          "<p>水循环联系大气圈、水圈、岩石圈和生物圈。</p>" +
+          '<p>四条意义：<b style="color:var(--acc-t)">水量动态平衡</b>、物质迁移与能量交换、塑造地表形态、水资源不断更新。</p>' +
+          "<p>热量：蒸发吸热、凝结放热，低纬热量随水汽输送到高纬。地表：上游侵蚀成 V 形谷，下游和河口堆积成冲积平原、三角洲。</p>" +
+          '<p class="x-gk">高考链接：常考水循环联系四大圈层、塑造地表（侵蚀与堆积地貌）、调节热量（低纬向高纬输送）；<b>易错</b>：水循环使水资源可再生，但不代表某地淡水取之不尽。</p></div>';
+        b.querySelectorAll("#m6 button").forEach(function (bt) {
+          bt.onclick = function () { set6(+bt.getAttribute("data-k")); };
+        });
+        set6(S6.k);
+      }
+      function set6(k) {
+        S6.k = k; S6.t0 = performance.now(); S6.ph = -1;
+        var on = M6[k][2];
+        document.querySelectorAll("#m6 button").forEach(function (bt, i) { bt.classList.toggle("on", i === k); });
+        document.querySelectorAll("#sph6 .x-s6").forEach(function (g, i) { g.classList.toggle("on", on.indexOf(i) >= 0); });
+        document.querySelectorAll("#sph6 .x-e6").forEach(function (l) {
+          var e = ED6[+l.getAttribute("data-e")], lit = on.indexOf(e[0]) >= 0 && on.indexOf(e[1]) >= 0, u = "url(#a6" + (lit ? "on" : "") + ")";
+          l.classList.toggle("on", lit); l.setAttribute("marker-start", u); l.setAttribute("marker-end", u);
+        });
+        if (k === 3) phase6(0);
+        else { var r = document.getElementById("read6"); if (r) r.innerHTML = "<b>" + NUM6[k] + " " + M6[k][0] + "</b>　" + sph6(k) + "<br />" + M6[k][3]; }
+        if (ch6) ch6.sel(k);
+      }
+      function sph6(k) { return "<u>" + M6[k][2].map(function (i) { return SPH6[i][0]; }).join(" · ") + "</u>"; }
+      function phase6(st) {
+        S6.ph = st;
+        var r = document.getElementById("read6");
+        if (r && S6.k === 3) r.innerHTML = "<b>④ 水资源更新</b>　" + PH6[st] + "<br />圈层：" + sph6(3);
+      }
+
+      function drawDonut() {
+        var c = document.getElementById("donut");
+        if (donut) donut.destroy();
+        var rest = WATER.slice(1);
+        donut = new Chart(c, {
+          type: "doughnut",
+          data: {
+            labels: ["海洋水 96.5%"].concat(rest.map(function (w) { return w.name + " " + w.pct + "%"; })),
+            datasets: [{ data: WATER.map(function (w) { return w.pct; }), backgroundColor: WATER.map(function (w) { return w.color; }), borderWidth: 0 }]
+          },
+          options: {
+            maintainAspectRatio: false, cutout: "62%",
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: function (x) { return " " + x.label; } } }
+            },
+            onClick: function (e, el) { if (el.length) highlight(el[0].index); }
+          }
+        });
+      }
+
+      function highlight(i) {
+        picked = i;
+        if (cur !== 0) { markers.forEach(function (m) { m.visible = false; }); return; }
+        var list = document.querySelectorAll("#wlist button");
+        list.forEach(function (b, k) { b.classList.toggle("on", k === i); });
+        markers.forEach(function (m, k) { m.visible = k === i; });
+        var r = document.getElementById("read");
+        if (!r) return;
+        if (i < 0) { r.innerHTML = "选择一种水体，这里显示它在沙盘上的位置与更新周期。"; return; }
+        var w = WATER[i];
+        r.innerHTML = "<b>" + w.name + "</b>　占比 <u>" + w.pct + "%</u><br />位置：" + w.where +
+          "<br />更新周期：<u>" + (w.cycle === "—" ? "教材未给出" : w.cycle) + "</u>";
+      }
+
+      /* ---------- chapter 10: 随堂检测 ---------- */
+      var LET10 = "abcdef", ABCD = "ABCD", S10 = { i: 0, a: [] }, ch10 = null;
+      var Q10 = [
+        { q: "读图，字母 b 代表的水循环环节是", o: ["蒸发", "水汽输送", "降水", "地下径流"], k: 1, s: [1], c: 2, n: "b 的环节",
+          e: "b 位于海洋上空，由海洋指向陆地，是<u>水汽输送</u>；a 蒸发、c 降水，f 在地下，是地下径流。",
+          p: function () { S3.all = false; S3.on = 1; } },
+        { q: "南水北调工程对水循环的影响，主要体现在图中的环节", o: ["a", "b", "d", "f"], k: 2, s: [3], c: 7, n: "南水北调",
+          e: "跨流域调水改变的是<u>地表径流（d）</u>的空间分布；人类目前对水汽输送（b）几乎无法施加影响。",
+          p: function () { S8.k = 1; } },
+        { q: "城市大面积硬化后，图中 e 与 d 的变化是", o: ["e 增加，d 减少", "e 减少，d 增加", "e、d 都增加", "e、d 都减少"], k: 1, s: [4, 3], c: 6, n: "城市硬化",
+          e: "水泥、沥青路面几乎不透水，<u>下渗（e）减少</u>，雨水更多转为<u>地表径流（d）增加</u>，城市易内涝。" },
+        { q: "某河流上游大规模植树造林后，该河流量过程线最可能的变化是", o: ["洪峰升高，峰现提前", "洪峰降低，峰现推迟", "洪峰升高，峰现推迟", "洪峰降低，峰现提前"], k: 1, s: [4, 3], c: 7, n: "植树造林",
+          e: "植被截留、下渗（e）增多，地表径流（d）减少且汇流变慢：<u>洪峰降低、峰现推迟</u>，枯水期流量增加。",
+          p: function () { S8.k = 2; } },
+        { q: "某内流区多年平均降水量 P 与蒸发量 E 的关系是", o: ["P 远大于 E", "P 远小于 E", "P ≈ E", "P = E + 径流入海量"], k: 2, s: [0, 2], c: 8, n: "内流区 P 与 E",
+          e: "由 P = E + R + ΔS，多年平均 ΔS ≈ 0；内流区没有径流流出，降水最终全部蒸发：<u>P ≈ E</u>。" },
+        { q: "参与水量最大的水循环类型是", o: ["海上内循环", "海陆间循环", "陆地内循环", "三类大致相当"], k: 0, s: [0], c: 3, n: "参与水量最大",
+          e: "海洋面积广、蒸发量大，大部分水汽在海洋上空凝结后直接降回海洋：<u>海上内循环</u>参与水量最大；海陆间循环最重要，陆地内循环最小。" }
+      ];
+      function buildCh10(b) {
+        var n = Q10.length, i = S10.i, h = "", bs = 'style="border-color:var(--line);justify-content:center"';
+        if (i >= n) {
+          var sc = Q10.filter(function (q, k) { return S10.a[k] === q.k; }).length;
+          h = '<p class="x-h">检测结果</p><div class="x-read"><b>得分</b>　<u>' + sc + " / " + n + "</u>　（每题 1 分）</div>" +
+            '<div class="x-card"><ul class="x-list">' + Q10.map(function (q, k) {
+              var ok = S10.a[k] === q.k;
+              return '<li><button class="' + (ok ? "x-ok" : "x-no") + '" data-r="' + k + '"><span class="x-nm">' + (k + 1) + ". " + q.n +
+                '</span><span class="x-pc">' + (ok ? "✓ 对" : "✗ 错（" + ABCD[q.k] + "）") + "</span></button></li>";
+            }).join("") + '</ul><div class="x-list" style="display:flex;margin-top:8px"><button id="redo10" ' + bs + ">↻ 重新作答</button></div></div>";
+        } else {
+          var q = Q10[i], a = S10.a[i], ans = a != null;
+          h = '<p class="x-h">第 ' + (i + 1) + " / " + n + ' 题 · 单选</p><div class="x-card"><p class="x-q10">' + q.q + '</p><ul class="x-list" id="opt10">' +
+            q.o.map(function (o, k) {
+              var c = ans ? (k === q.k ? "x-ok" : k === a ? "x-no" : "") : "";
+              return '<li><button data-k="' + k + '" class="' + c + '"' + (ans ? ' aria-disabled="true"' : "") + '><span class="x-nm">' + ABCD[k] + ". " + o +
+                '</span><span class="x-pc">' + (ans && k === q.k ? "✓" : ans && k === a ? "✗" : "") + "</span></button></li>";
+            }).join("") + "</ul></div>";
+          if (ans) h += '<div class="x-read"><b>' + (a === q.k ? "回答正确" : "回答错误") + "</b>　正确答案 <u>" + ABCD[q.k] + "</u><br />" + q.e + "</div>" +
+            '<div class="x-list" style="display:flex;gap:6px;margin-bottom:14px"><button id="demo10" ' + bs + ">▶ 第 " + (q.c + 1) + " 章演示</button>" +
+            '<button id="next10" ' + bs + ">" + (i < n - 1 ? "下一题 →" : "查看得分") + "</button></div>";
+          else h += '<div class="x-read"><b>读图</b>　沙盘上 <u>a–f</u> 是海陆间循环的六个环节，选完会显示解析，并在沙盘上标出相关环节。</div>';
+        }
+        h += '<div class="x-card x-key"><h3>要点</h3>' +
+          "<p>字母判读：a 蒸发、b 水汽输送、c 降水、d 地表径流、e 下渗、f 地下径流。</p>" +
+          "<p>人类活动影响最大的是 d：调水改变 d 的空间分布；硬化 e 减少、d 增加；植树造林 e 增加、d 减少，洪峰降低、峰现推迟。</p>" +
+          "<p>水量平衡 P = E + R + ΔS，内流区 P ≈ E；参与水量：海上内循环最大。</p>" +
+          '<p class="x-gk">高考链接：水循环环节判读、人类活动影响与水量平衡是浙江选考高频组合题。</p></div>';
+        b.innerHTML = h;
+        b.querySelectorAll("#opt10 button").forEach(function (bt) {
+          bt.onclick = function () {
+            if (S10.a[S10.i] != null) return;
+            S10.a[S10.i] = +bt.getAttribute("data-k");
+            var s = Q10[S10.i].s; if (s.indexOf(4) >= 0 || s.indexOf(5) >= 0) { rot.y = -0.12; rot.x = -0.3; }
+            buildCh10(b);
+          };
+        });
+        var d = document.getElementById("demo10");
+        if (d) d.onclick = function () { var q = Q10[S10.i]; if (q.p) q.p(); go(q.c); };
+        var nx = document.getElementById("next10");
+        if (nx) nx.onclick = function () { S10.i++; buildCh10(b); };
+        var r = document.getElementById("redo10");
+        if (r) r.onclick = function () { S10 = { i: 0, a: [] }; resetView(); buildCh10(b); };
+        b.querySelectorAll("[data-r]").forEach(function (bt) {
+          bt.onclick = function () { var q = Q10[+bt.getAttribute("data-r")]; if (q.p) q.p(); go(q.c); };
+        });
+        if (ch10) ch10.sel();
+      }
+
+      /* ---------- chapter 11: 自由探索 ---------- */
+      var S11 = { su: 1, wind: 50, veg: 50, hard: 20, warm: 0, storm: 0 }, B11 = null, M11 = null, h11c = null, ch11 = null;
+      var PRE11 = [
+        ["强向陆风 + 夏季", "迎风坡暴雨，河流水量大", { su: 1, wind: 90, veg: 50, hard: 20, warm: 0, storm: 1 }],
+        ["冬季", "山地积雪，河流靠地下水补给", { su: 0, wind: 40, veg: 50, hard: 20, warm: 0, storm: 0 }],
+        ["毁林 + 高硬化率 + 暴雨", "洪峰陡涨", { su: 1, wind: 50, veg: 0, hard: 90, warm: 0, storm: 1 }],
+        ["全球变暖", "雪线上升，冰川退缩", { su: 1, wind: 50, veg: 50, hard: 20, warm: 4, storm: 0 }]
+      ];
+      function model11(s) {
+        var v = s.veg / 100, h = s.hard / 100, w = s.warm;
+        var E = Math.min(1, (s.su ? 0.8 : 0.4) * (1 + 0.06 * w)), T = E * (0.15 + 0.85 * s.wind / 100);
+        var P = Math.min(1, T * (s.storm ? 1.5 : 0.7) * (s.su ? 1 : 0.7));
+        var sf = Math.max(0, (s.su ? 0.05 : 0.7) - 0.1 * w), melt = s.su ? 0.05 + 0.04 * w : 0.01;
+        var e0 = 0.05 + 0.15 * v, fi = (1 - e0) * Math.min(0.9, (0.2 + 0.6 * v) * (s.storm ? 0.5 : 1) * (1 - h)), fr = 1 - e0 - fi;
+        var liq = P * (1 - sf) + melt, R = liq * fr, I = liq * fi, G = Math.min(1, 0.15 + 0.9 * I);
+        var line = Math.min(5.0, (s.su ? 3.9 : 2.2) + 0.35 * w), toe = Math.min(line - 0.1, 1.3 + 0.55 * w + (s.su ? 0.15 : 0));
+        var H = hydro5({ I: s.storm ? 3 : 1, h: h, s: 0.5, v: v, r: fr, i: fi }), k = liq * 2;
+        var Q = H.Q.map(function (q) { return Math.round(((q - 4) * k + 2 + 8 * G) * 10) / 10; }), pk = Q.indexOf(Math.max.apply(null, Q));
+        return { su: s.su, f: [E, T, P, R, I, G], sf: sf, river: 0.5 + 1.5 * Math.min(1, R + G * 0.5), line: line, toe: toe,
+          snowM: Math.round((line + 0.1) * 20) * 50, sea: 0.04 * w, rain: H.R.map(function (x) { return Math.round(x * k * 10) / 10; }), Q: Q, peak: Q[pk], at: pk / 2 };
+      }
+      function buildCh11(b) {
+        var st = 'style="width:100%;min-height:44px;accent-color:var(--acc)"', bs = 'style="border-color:var(--line);justify-content:center"';
+        function rg(id, label, max, step, val) {
+          return '<label class="x-toggle" for="' + id + '">' + label + '<span class="x-pc" id="' + id + 'V"></span></label>' +
+            '<input type="range" id="' + id + '" min="0" max="' + max + '" step="' + step + '" value="' + val + '" aria-label="' + label + '" ' + st + " />";
+        }
+        function two(k, a, c) {
+          return '<div class="x-list" style="display:flex;gap:6px;margin-bottom:4px"><button data-' + k + '="1" ' + bs + ">" + a + "</button>" +
+            "<button data-" + k + '="0" ' + bs + ">" + c + "</button></div>";
+        }
+        b.innerHTML =
+          '<p class="x-h">试试这些</p><div class="x-card"><ul class="x-list" id="pre11">' + PRE11.map(function (p, i) {
+            return '<li><button data-k="' + i + '"><span class="x-nm">' + p[0] + '</span><span class="x-pc">' + p[1] + "</span></button></li>";
+          }).join("") + "</ul></div>" +
+          '<p class="x-h">参数</p><div class="x-card"><p style="margin:0 0 4px;font-size:13px">季节</p>' + two("su", "夏季", "冬季") +
+          rg("wd11", "向陆风强度", 100, 1, S11.wind) + rg("vg11", "植被覆盖", 100, 1, S11.veg) + rg("hd11", "地面硬化率", 90, 1, S11.hard) +
+          rg("wm11", "全球变暖", 4, 0.5, S11.warm) + '<p style="margin:6px 0 4px;font-size:13px">降水强度</p>' + two("rn", "暴雨", "小雨") + "</div>" +
+          '<p class="x-h">各环节强度</p><div class="x-card"><ul class="x-list" id="bar11"></ul></div>' +
+          '<p class="x-h">小流域流量过程线</p><div class="x-card"><div style="height:200px"><canvas id="hyd11" role="img" aria-label="小流域流量过程线：毁林、高硬化率加暴雨时洪峰陡涨"></canvas></div>' +
+          '<p style="font-size:12px;color:var(--ink2);margin-top:6px">柱：降雨强度（mm/h，右轴）；青线：当前组合；灰虚线：初始参数（m³/s）。示意模型，沿用第 5、7 章产流模型。</p></div>' +
+          '<div class="x-read" id="read11"></div>' +
+          '<p class="x-h">本章讲解</p><div class="x-card"><p>所有参数都已开放。试着组合不同的条件，观察水循环各环节怎样变化：</p>' +
+          '<ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.65">' + PRE11.map(function (p) { return "<li>" + p[0] + "：" + p[1] + "</li>"; }).join("") + "</ul></div>" +
+          '<div class="x-card x-key"><h3>要点</h3>' +
+          "<p>向陆风强、夏季：水汽输送多 → 迎风坡降水多 → 地表径流增加、河流变宽。</p>" +
+          "<p>冬季：蒸发弱、降水少且多以雪积存，河流以地下水补给为主。</p>" +
+          '<p>毁林、地面硬化：下渗<b style="color:var(--acc-t)">减少</b>、地表径流增加，洪峰更高、出现更早，地下水补给减少。</p>' +
+          "<p>全球变暖：雪线上升、冰川退缩；短期融水增多，长期减少。</p>" +
+          '<p class="x-gk">高考链接：综合题常给情境（季风、毁林、城市化、气候变暖），要求分析水循环各环节变化及其地理影响。</p></div>';
+        b.querySelectorAll("#pre11 button").forEach(function (bt) {
+          bt.onclick = function () { var p = PRE11[+bt.getAttribute("data-k")][2]; for (var k in p) S11[k] = p[k]; buildCh11(b); };
+        });
+        b.querySelectorAll("[data-su]").forEach(function (bt) { bt.onclick = function () { S11.su = +bt.getAttribute("data-su"); upd11(); }; });
+        b.querySelectorAll("[data-rn]").forEach(function (bt) { bt.onclick = function () { S11.storm = +bt.getAttribute("data-rn"); upd11(); }; });
+        [["wd11", "wind"], ["vg11", "veg"], ["hd11", "hard"], ["wm11", "warm"]].forEach(function (p) {
+          document.getElementById(p[0]).oninput = function () { S11[p[1]] = parseFloat(this.value); upd11(); };
+        });
+        if (h11c) { h11c.destroy(); h11c = null; }
+        upd11();
+      }
+      function upd11() {
+        var m = M11 = model11(S11), $ = function (id) { return document.getElementById(id); };
+        if (!B11) B11 = model11({ su: 1, wind: 50, veg: 50, hard: 20, warm: 0, storm: 0 });
+        if (!$("bar11")) return;
+        $("wd11V").textContent = S11.wind + "%";
+        $("vg11V").textContent = S11.veg < 15 ? "毁林" : S11.veg > 85 ? "茂密" : S11.veg + "%";
+        $("hd11V").textContent = S11.hard + "%";
+        $("wm11V").textContent = "+" + S11.warm.toFixed(1) + " °C";
+        document.querySelectorAll("[data-su]").forEach(function (bt) { bt.classList.toggle("on", +bt.getAttribute("data-su") === S11.su); });
+        document.querySelectorAll("[data-rn]").forEach(function (bt) { bt.classList.toggle("on", +bt.getAttribute("data-rn") === S11.storm); });
+        document.querySelectorAll("#pre11 button").forEach(function (bt) {
+          var p = PRE11[+bt.getAttribute("data-k")][2], same = true;
+          for (var k in p) if (p[k] !== S11[k]) same = false;
+          bt.classList.toggle("on", same);
+        });
+        $("bar11").innerHTML = STEP3.map(function (s, i) {
+          var x = Math.round(Math.min(1, m.f[i]) * 100);
+          return '<li style="display:flex;align-items:center;gap:8px;min-height:28px;padding:0 4px"><span class="x-nm" style="width:64px;flex:none">' + s[0] +
+            '</span><div class="x-bar" style="flex:1;margin:0"><i style="width:' + x + "%;background:" + s[3] + '"></i></div><span class="x-pc">' + x + "</span></li>";
+        }).join("");
+        var su = m.su, f = m.f;
+        $("read11").innerHTML = "<b>" + (su ? "夏季" : "冬季") + " · " + (S11.storm ? "暴雨" : "小雨") + "</b>　雪线 <u>" + m.snowM + " m</u>" +
+          (S11.warm > 0 ? "（升温 +" + S11.warm.toFixed(1) + " °C，雪线上升、冰川缩小）" : su ? "" : "（下移，山顶积雪扩大）") +
+          "<br />降水：" + (f[2] > 0.7 ? "迎风坡降水大增" : f[2] < 0.15 ? "降水少" + (m.sf > 0.3 ? "，多以雪积存" : "") : "中等") +
+          "；河流：" + (su ? (m.river > 1.5 ? "水量大，河面变宽" : "水量一般") : "以地下水补给为主") +
+          "<br />洪峰 <u>" + m.peak + " m³/s</u>，降雨开始后 <u>" + m.at + " h</u> 出现（初始参数 " + B11.peak + " m³/s）";
+        drawH11();
+        if (ch11 && cur === 10) ch11.apply(m);
+      }
+      function drawH11() {
+        var c = document.getElementById("hyd11");
+        if (!c || !M11) return;
+        if (!h11c) {
+          var tk = { color: "#8A97AD" };
+          h11c = new Chart(c, {
+            data: { labels: M11.Q.map(function (x, k) { return k / 2 + "h"; }), datasets: [
+              { type: "bar", label: "降雨", data: [], yAxisID: "y1", backgroundColor: "#4FA3E3", order: 3 },
+              { type: "line", label: "当前组合", data: [], borderColor: "#2EC4B6", borderWidth: 2, pointRadius: 0, tension: 0.35, order: 1 },
+              { type: "line", label: "初始参数", data: B11.Q, borderColor: "#8A97AD", borderDash: [4, 4], borderWidth: 1.5, pointRadius: 0, tension: 0.35, order: 2 }] },
+            options: {
+              maintainAspectRatio: false, animation: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ticks: { color: "#8A97AD", maxTicksLimit: 7 }, grid: { display: false } },
+                y: { beginAtZero: true, ticks: tk, grid: { color: "rgba(138,151,173,.15)" }, title: { display: true, text: "m³/s", color: "#8A97AD" } },
+                y1: { position: "right", reverse: true, min: 0, max: 120, ticks: tk, grid: { display: false }, title: { display: true, text: "mm/h", color: "#8A97AD" } }
+              }
+            }
+          });
+        }
+        var d = h11c.data.datasets;
+        d[0].data = M11.rain; d[1].data = M11.Q;
+        d[1].pointRadius = M11.Q.map(function (q, k) { return q === M11.peak ? 5 : 0; });
+        d[1].backgroundColor = "#2EC4B6";
+        h11c.options.scales.y.suggestedMax = Math.max(10, M11.peak, B11.peak) * 1.15;
+        h11c.update("none");
+      }
+
+      /* ---------- three.js sandbox ---------- */
+      var markers = [], labelGroup = {}, sectionGroup = {}, renderer = null, ch2 = null, ch3 = null, ch4 = null;
+      var rot = { x: -0.52, y: -0.42 }, dist = 30;
+      function resetView() { rot.x = -0.52; rot.y = -0.42; dist = 30; }
+      function skyColor() {
+        if (renderer) renderer.setClearColor(root.getAttribute("data-theme") === "dark" ? 0x0e1420 : 0xf6f3ec, 1);
+      }
+      try {
+      var canvas = document.getElementById("scene");
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
+      var pivot = new THREE.Group(); scene.add(pivot);
+      scene.add(new THREE.HemisphereLight(0xcfe8ff, 0x20304a, 1.1));
+      var sun = new THREE.DirectionalLight(0xffffff, 0.9); sun.position.set(6, 12, 8); scene.add(sun);
+
+      function box(w, h, d, color, x, y, z, op) {
+        var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d),
+          new THREE.MeshLambertMaterial({ color: color, transparent: op !== undefined, opacity: op === undefined ? 1 : op }));
+        m.position.set(x, y, z); pivot.add(m); return m;
+      }
+      // ground base (left -x ocean -> right +x inland)
+      box(26, 1.2, 10, 0x6b5b45, 0, -0.6, 0);
+      var sectionGroup = new THREE.Group(); pivot.add(sectionGroup);
+      // front cross-section layers (visible slab at z front)
+      function layer(w, h, color, x, y) {
+        var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.12), new THREE.MeshLambertMaterial({ color: color }));
+        m.position.set(x, y, 5.03); sectionGroup.add(m); return m;
+      }
+      layer(18, 0.5, 0x8a6f4e, 4, 0.25);   // 土壤层
+      layer(18, 0.8, 0xb9a279, 4, -0.3);   // 透水层上部
+      layer(18, 0.45, 0xf2b544, 4, -0.95); // 潜水面以下含水
+      // ocean
+      var ocean = box(9, 1.6, 10, 0x1a6f8c, -8.5, 0.1, 0, 0.78);
+      // coastal city
+      box(5, 0.5, 10, 0x4a5a63, -1.4, 0.25, 0);
+      for (var i = 0; i < 9; i++) {
+        var hh = 0.8 + (i % 4) * 0.6;
+        box(0.55, hh, 0.55, i % 3 ? 0x8d99a6 : 0xa9b4c0, -3.3 + (i % 5) * 0.95, 0.5 + hh / 2, -2.6 + Math.floor(i / 5) * 2.4);
+      }
+      // reservoir + river
+      box(2.6, 0.6, 4.2, 0x2a7fa8, 2.2, 0.35, 0, 0.85);
+      box(0.5, 0.95, 4.4, 0x9aa0a6, 0.85, 0.5, 0); // dam
+      var river = box(7.5, 0.18, 0.9, 0x4fa3e3, -0.8, 0.62, 2.8);
+      river.rotation.z = 0.02;
+      // mountain
+      var mt = new THREE.Mesh(new THREE.ConeGeometry(3.2, 5.4, 4), new THREE.MeshLambertMaterial({ color: 0x5e6b58 }));
+      mt.position.set(6.4, 2.6, 0); mt.rotation.y = Math.PI / 4; pivot.add(mt);
+      var snow = new THREE.Mesh(new THREE.ConeGeometry(1.35, 2.2, 4), new THREE.MeshLambertMaterial({ color: 0xeaf4fb }));
+      snow.position.set(6.4, 4.2, 0); snow.rotation.y = Math.PI / 4; pivot.add(snow);
+      // inland basin + lake
+      box(6, 0.4, 10, 0xa8956f, 11.5, 0.2, 0);
+      box(3, 0.3, 3.4, 0x3f6fa8, 11.6, 0.42, 0.4, 0.85);
+      // vegetation
+      for (var j = 0; j < 6; j++) {
+        var t = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.9, 6), new THREE.MeshLambertMaterial({ color: 0x4e8f5e }));
+        t.position.set(3.6 + (j % 3) * 0.7, 0.75, -3 + Math.floor(j / 3) * 5.6); pivot.add(t);
+      }
+      // clouds
+      var clouds = new THREE.Group(); pivot.add(clouds);
+      for (var c2 = 0; c2 < 5; c2++) {
+        var cl = new THREE.Mesh(new THREE.SphereGeometry(0.8 + (c2 % 2) * 0.35, 12, 10),
+          new THREE.MeshLambertMaterial({ color: 0xf2f6fb, transparent: true, opacity: 0.85 }));
+        cl.position.set(-9 + c2 * 4.2, 6.4 + (c2 % 3) * 0.5, -1 + (c2 % 2) * 2); clouds.add(cl);
+      }
+      // labels
+      var labelGroup = new THREE.Group(); pivot.add(labelGroup);
+      function label(text, x, y, z) {
+        var cv = document.createElement("canvas"); cv.width = 256; cv.height = 64;
+        var g = cv.getContext("2d");
+        g.fillStyle = "rgba(14,20,32,.72)"; g.fillRect(0, 0, 256, 64);
+        g.fillStyle = "#E6ECF5"; g.font = "28px 'PingFang SC',sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+        g.fillText(text, 128, 34);
+        var s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthTest: false }));
+        s.position.set(x, y, z); s.scale.set(2.6, 0.65, 1); labelGroup.add(s); return s;
+      }
+      label("海洋", -8.5, 1.8, 0); label("沿海城市", -1.6, 3.4, 0); label("水库 · 河流", 2.2, 1.9, 0);
+      label("高山积雪", 6.4, 6.0, 0); label("内陆湖", 11.6, 1.4, 0); label("地下剖面", 4, -1.9, 5.2);
+
+      // markers: one per water body
+      var SPOT = [[-8.5, 2.6, 0], [6.4, 5.6, 0], [4, -0.8, 5.4], [11.6, 1.1, 0.4], [4, 0.5, 5.4], [-2, 7.4, 0], [1.2, 1.2, 2.8], [4.3, 1.6, -3]];
+      var markers = SPOT.map(function (p, i) {
+        var g = new THREE.Group();
+        var ring = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.07, 8, 32),
+          new THREE.MeshBasicMaterial({ color: WATER[i].color }));
+        ring.rotation.x = Math.PI / 2; g.add(ring);
+        var pin = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.2, 6),
+          new THREE.MeshBasicMaterial({ color: WATER[i].color }));
+        pin.position.y = 1.1; g.add(pin);
+        var tip = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 10), new THREE.MeshBasicMaterial({ color: WATER[i].color }));
+        tip.position.y = 2.2; g.add(tip);
+        g.position.set(p[0], p[1], p[2]); g.visible = false; pivot.add(g);
+        return g;
+      });
+
+      /* chapter 2 layer: phase-change particles, glacier, meltwater */
+      var g2 = new THREE.Group(); g2.visible = false; pivot.add(g2);
+      function pts(n, color, size, parent) {
+        var geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+        var p = new THREE.Points(geo, new THREE.PointsMaterial({ color: color, size: size, transparent: true, opacity: 0.9, depthWrite: false }));
+        p.userData.seed = []; for (var q = 0; q < n; q++) p.userData.seed.push([Math.random(), Math.random(), Math.random()]);
+        (parent || g2).add(p); return p;
+      }
+      var vap = pts(90, 0x9fd8f2, 0.16), melt = pts(60, 0x7fc4f0, 0.2);
+      var drop = pts(60, 0x4fa3e3, 0.18, clouds), ice = pts(40, 0xffffff, 0.24, clouds);
+      drop.visible = ice.visible = false;
+      var glacier = box(1, 0.14, 0.9, 0xcfe9f7, 0, 0, 0); g2.add(glacier);
+      var ANG = Math.atan2(5.4, 2.26);
+      function faceX(y) { return 6.4 - 2.26 * (5.3 - y) / 5.4 - 0.08; }
+      function lab2(text, x, y, z) { var s = label(text, x, y, z); g2.add(s); return s; }
+      lab2("汽化·吸热", -8.5, 3.4, 0); lab2("汽化·吸热", 11.6, 3.2, 0.4);
+      lab2("液化·放热", -4.8, 8.2, 0.5); lab2("凝华·放热", 5.7, 9.4, 0);
+      var meltLab = lab2("熔化·吸热", 3.4, 2.6, 1.4), lineLab = lab2("雪线", 9.2, 3.9, 0);
+      var D = { snowP: snow.position.y, snowS: snow.scale.clone(), riverZ: river.scale.z, seaY: ocean.position.y };
+      var G = null, path = [];
+      ch2 = {
+        show: function (on) {
+          g2.visible = drop.visible = ice.visible = on;
+          if (on) { apply2(); return; }
+          snow.position.y = D.snowP; snow.scale.copy(D.snowS); river.scale.z = D.riverZ; ocean.position.y = D.seaY;
+        },
+        apply: function (g) {
+          G = g;
+          var h = 5.3 - g.line, rr = 3.2 * h / 5.4 * 1.03;
+          snow.scale.set(rr / 1.35, h / 2.2, rr / 1.35); snow.position.y = 5.3 - h / 2 + 0.02;
+          var len = Math.max(0.1, (g.line - g.toe) / Math.sin(ANG)), my = (g.line + g.toe) / 2;
+          glacier.scale.x = len; glacier.rotation.z = ANG; glacier.position.set(faceX(my), my, 0);
+          glacier.visible = g.line - g.toe > 0.15;
+          river.scale.z = g.river; ocean.position.y = D.seaY + g.sea;
+          lineLab.position.y = g.line; meltLab.position.y = g.toe + 0.9;
+          path = [[faceX(g.toe) - 0.1, g.toe, 0], [4.0, 0.76, 1.4], [3.0, 0.76, 2.8], [-4.4, 0.76, 2.8]];
+          melt.geometry.setDrawRange(0, Math.round(60 * g.melt));
+          vap.geometry.setDrawRange(0, S2.season === "summer" ? 90 : 50);
+        },
+        step: function (t) {
+          if (!G) return;
+          var a = vap.geometry.attributes.position, k, s, u;
+          vap.userData.seed.forEach(function (sd, k) {
+            var lake = k % 5 === 0, ph = (sd[2] + t * 0.00011) % 1;
+            var x = lake ? 10.3 + sd[0] * 2.6 : -12.5 + sd[0] * 8, z = lake ? -1.2 + sd[1] * 3.2 : -4 + sd[1] * 8;
+            a.setXYZ(k, x + Math.sin(t / 900 + k) * 0.15, (lake ? 0.6 : 0.95 + G.sea) + ph * 4.8, z);
+          });
+          a.needsUpdate = true;
+          [[drop, [0, 1, 2], -0.7, 0.4, 1.3], [ice, [3, 4], 1.0, 0.8, 1.0]].forEach(function (c) {
+            var p = c[0], at = p.geometry.attributes.position;
+            p.userData.seed.forEach(function (sd, k) {
+              var cc = clouds.children[c[1][k % c[1].length]].position, an = sd[0] * 6.28 + t * 0.0004 * (sd[1] - 0.5);
+              at.setXYZ(k, cc.x + Math.cos(an) * c[4] * sd[2], cc.y + c[2] + sd[1] * c[3] + Math.sin(t / 700 + k) * 0.06, cc.z + Math.sin(an) * c[4] * sd[2]);
+            });
+            at.needsUpdate = true;
+          });
+          var m = melt.geometry.attributes.position;
+          melt.userData.seed.forEach(function (sd, k) {
+            u = ((sd[0] + t * 0.00016) % 1) * 3; s = Math.min(2, Math.floor(u)); var f = u - s, p0 = path[s], p1 = path[s + 1];
+            m.setXYZ(k, p0[0] + (p1[0] - p0[0]) * f, p0[1] + (p1[1] - p0[1]) * f + 0.04, p0[2] + (p1[2] - p0[2]) * f + (sd[1] - 0.5) * 0.5 * G.river);
+          });
+          m.needsUpdate = true;
+        }
+      };
+
+      /* chapter 3 layer: six stages of the sea-land cycle */
+      var g3 = new THREE.Group(); g3.visible = false; pivot.add(g3);
+      function rnd(a, b, r) { return a + (b - a) * r; }
+      function poly(P) {
+        var L = [0];
+        for (var i = 1; i < P.length; i++) L.push(L[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1], P[i][2] - P[i - 1][2]));
+        return function (u) {
+          var d = u * L[L.length - 1], s = 1;
+          while (s < L.length - 1 && L[s] < d) s++;
+          var f = (d - L[s - 1]) / (L[s] - L[s - 1]), a = P[s - 1], b = P[s];
+          return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+        };
+      }
+      var cl3 = new THREE.Group(), rc3 = new THREE.Group();
+      [[0, 0, 0, 1], [0.9, 0.2, 0.4, 0.75], [-0.8, 0.1, -0.3, 0.7]].forEach(function (c) {
+        [[cl3, 0xeef3f8], [rc3, 0xaab6c4]].forEach(function (g) {
+          var m = new THREE.Mesh(new THREE.SphereGeometry(c[3], 12, 10), new THREE.MeshLambertMaterial({ color: g[1], transparent: true, opacity: 0.9 }));
+          m.position.set(c[0], c[1], c[2]); g[0].add(m);
+        });
+      });
+      rc3.position.set(4.9, 6.6, 0);
+      var ST3 = STEP3.map(function (s, i) {
+        var g = new THREE.Group(); g3.add(g);
+        return { g: g, p: pts(i === 2 ? 110 : 80, s[3], i > 3 ? 0.2 : 0.17, g) };
+      });
+      ST3[2].q = pts(50, 0xffffff, 0.24, ST3[2].g);
+      ST3[1].g.add(cl3); ST3[2].g.add(rc3);
+      [-2, 0, 2].forEach(function (z) {
+        ST3[1].g.add(new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(-9, 7.9, z), 9, 0xf2b544, 0.9, 0.5));
+      });
+      function lab3(text, x, y, z, i) { var s = label(text, x, y, z); ST3[i].g.add(s); }
+      lab3("① 蒸发", -8.5, 4.6, 0, 0); lab3("② 风向 海→陆", -4.5, 8.9, 0, 1);
+      lab3("③ 迎风坡降雨", 3.0, 4.4, 1.2, 2); lab3("山顶降雪", 7.8, 6.6, 0, 2);
+      lab3("④ 地表径流", -1, 1.7, 3.8, 3); lab3("⑤ 下渗", 7.5, 2.2, 5.6, 4); lab3("⑥ 地下径流", -1.5, -1.6, 5.9, 5);
+      var P4 = poly([[5.0, 2.4, 0.9], [4.0, 0.8, 1.6], [3.0, 0.76, 2.8], [-4.4, 0.76, 2.8], [-6.5, 0.95, 2.8]]);
+      var P6 = poly([[10.5, -0.95, 5.2], [-4.6, -0.95, 5.2], [-6.2, -0.3, 5.2]]);
+      var SP3 = [0.00012, 0.00008, 0.0003, 0.00012, 0.00012, 0.00004];
+      var FN3 = [
+        function (s, ph) { return [rnd(-12.5, -4.6, s[0]) + Math.sin(ph * 9 + s[1] * 6) * 0.12, 0.95 + ph * 4.8, rnd(-4, 4, s[1])]; },
+        function (s, ph) { return [-9 + ph * 13, 6.3 + s[1] * 1.3, rnd(-2.5, 2.5, s[0])]; },
+        function (s, ph) {
+          var y = rnd(0.9, 3.6, s[1]), w = 2.26 * (5.3 - y) / 5.4;
+          return [faceX(y) - 0.15 - ((s[0] * 7) % 1) * 0.5, 6.0 - ph * (6.0 - y), (s[0] - 0.5) * 1.8 * w];
+        },
+        function (s, ph) { var v = P4(ph); v[1] += 0.05; v[2] += (s[1] - 0.5) * 0.6; return v; },
+        function (s, ph) { return [rnd(1, 10, s[0]), ph < 0.4 ? 2.4 - ph / 0.4 * 1.9 : 0.5 - (ph - 0.4) / 0.6 * 1.25, 5.2]; },
+        function (s, ph) { var v = P6(ph); v[1] += (s[1] - 0.5) * 0.3; return v; }
+      ];
+      function snow3(s, ph) {
+        var y = rnd(4.3, 5.2, s[1]), w = 2.26 * (5.3 - y) / 5.4;
+        return [rnd(faceX(y) + 0.1, 6.4, s[0]), 6.3 - ph * (6.3 - y), (((s[0] * 5) % 1) - 0.5) * 1.6 * w];
+      }
+      ch3 = {
+        show: function (on) { g3.visible = on; if (on) this.sel(S3.on, S3.all); },
+        sel: function (on, all) { ST3.forEach(function (st, i) { st.g.visible = all || i === on; }); },
+        step: function (t) {
+          ST3.forEach(function (st, i) {
+            if (!st.g.visible) return;
+            [st.p, st.q].forEach(function (p, j) {
+              if (!p) return;
+              var a = p.geometry.attributes.position;
+              p.userData.seed.forEach(function (sd, k) {
+                var v = (j ? snow3 : FN3[i])(sd, (sd[2] + t * SP3[i] * (j ? 0.3 : 1)) % 1);
+                a.setXYZ(k, v[0], v[1], v[2]);
+              });
+              a.needsUpdate = true;
+            });
+          });
+          cl3.position.set(-9 + ((t * SP3[1]) % 1) * 13, 6.7, 0);
+        }
+      };
+
+      /* chapter 10 layer: the chapter 3 sandbox, stage names swapped for letters a–f */
+      var g10 = new THREE.Group(); g10.visible = false; pivot.add(g10);
+      var LT10 = [[-8.5, 4.6, 0], [-4.5, 8.9, 0], [3.0, 4.4, 1.2], [-1, 1.7, 3.8], [7.5, 2.2, 5.6], [-1.5, -1.6, 5.9]].map(function (p, i) {
+        var a = label(LET10[i], p[0], p[1], p[2]), f = label(LET10[i] + " " + STEP3[i][0], p[0], p[1], p[2]);
+        g10.add(a); g10.add(f); return [a, f];
+      });
+      ch10 = {
+        show: function (on) {
+          g10.visible = on;
+          ST3.forEach(function (st) { st.g.children.forEach(function (c) { if (c.isSprite) c.visible = !on; }); });
+          if (on) { g3.visible = true; this.sel(); }
+        },
+        sel: function () {
+          var done = S10.i >= Q10.length, q = !done && S10.a[S10.i] != null ? Q10[S10.i] : null;
+          ST3.forEach(function (st, i) {
+            var hi = !q || q.s.indexOf(i) >= 0;
+            st.g.visible = hi;
+            LT10[i][0].visible = hi && !q && !done;
+            LT10[i][1].visible = hi && !!(q || done);
+          });
+        }
+      };
+
+      /* chapter 11 layer: the chapter 3 sandbox and all its particles, driven by every parameter */
+      var g11 = new THREE.Group(); g11.visible = false; pivot.add(g11);
+      var gl11 = box(1, 0.14, 0.9, 0xcfe9f7, 0, 0, 0); g11.add(gl11);
+      var sl11 = label("雪线", 9.4, 3.9, 0), gw11 = label("以地下水补给为主", 0.6, 2.3, 2.8); g11.add(sl11); g11.add(gw11);
+      function rel11(s, t) {
+        var cv = s.material.map.image, g = cv.getContext("2d");
+        g.clearRect(0, 0, 256, 64); g.fillStyle = "rgba(14,20,32,.72)"; g.fillRect(0, 0, 256, 64);
+        g.fillStyle = "#E6ECF5"; g.font = "28px 'PingFang SC',sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+        g.fillText(t, 128, 34); s.material.map.needsUpdate = true;
+      }
+      var on11 = false;
+      ch11 = {
+        show: function (on) {
+          if (!on && on11) {
+            snow.position.y = D.snowP; snow.scale.copy(D.snowS); river.scale.z = D.riverZ; ocean.position.y = D.seaY;
+            ST3.forEach(function (st) { st.p.geometry.setDrawRange(0, Infinity); if (st.q) st.q.geometry.setDrawRange(0, Infinity); });
+            if (cur === 1) apply2();
+          }
+          on11 = on; g11.visible = on;
+          if (on) { g3.visible = true; ST3.forEach(function (st) { st.g.visible = true; }); if (M11) this.apply(M11); }
+        },
+        apply: function (m) {
+          var h = 5.3 - m.line, rr = 3.2 * h / 5.4 * 1.03;
+          snow.scale.set(rr / 1.35, h / 2.2, rr / 1.35); snow.position.y = 5.3 - h / 2 + 0.02;
+          var len = Math.max(0.1, (m.line - m.toe) / Math.sin(ANG)), my = (m.line + m.toe) / 2;
+          gl11.scale.x = len; gl11.rotation.z = ANG; gl11.position.set(faceX(my), my, 0); gl11.visible = m.line - m.toe > 0.15;
+          river.scale.z = D.riverZ * m.river; ocean.position.y = D.seaY + m.sea;
+          sl11.position.y = m.line; rel11(sl11, "雪线 " + m.snowM + " m"); gw11.visible = !m.su;
+          var f = m.f, fr = [0.25 + 0.75 * f[0], f[1], f[2] * (1 - m.sf), f[3] * 1.4, f[4] * 2, f[5]];
+          ST3.forEach(function (st, i) {
+            st.p.geometry.setDrawRange(0, Math.round(st.p.userData.seed.length * Math.min(1, Math.max(0.04, fr[i]))));
+          });
+          ST3[2].q.geometry.setDrawRange(0, Math.round(50 * Math.min(1, f[2] * m.sf * 2.5 + (m.su ? 0 : 0.3))));
+        }
+      };
+
+      /* chapter 4 layer: three cycle types in three colours */
+      var g4 = new THREE.Group(); g4.visible = false; pivot.add(g4);
+      var L4 = CYC4.map(function (c, i) {
+        var g = new THREE.Group(); g4.add(g);
+        return { g: g, p: pts(N4[i], parseInt(c[1].slice(1), 16), i === 0 ? 0.16 : 0.2, g) };
+      });
+      function puff4(x, y, z, parent) {
+        [[0, 0, 0, 1], [0.9, 0.2, 0.4, 0.75], [-0.8, 0.1, -0.3, 0.7]].forEach(function (c) {
+          var m = new THREE.Mesh(new THREE.SphereGeometry(c[3], 12, 10), new THREE.MeshLambertMaterial({ color: 0xdfe8f5, transparent: true, opacity: 0.85 }));
+          m.position.set(x + c[0], y + c[1], z + c[2]); parent.add(m);
+        });
+      }
+      puff4(-8.6, 5.9, -1.2, L4[0].g); puff4(11.6, 5.5, 0.4, L4[2].g);
+      // inland drainage: inland river into the lake, basin vegetation
+      g4.add(box(2.0, 0.12, 0.45, 0x4fa3e3, 9.2, 0.45, 0.4));
+      var T4 = [[9.2, -2.8], [13.8, -2.6], [13.9, 3.2], [9.4, 3.4]];
+      T4.forEach(function (p) {
+        var t = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.9, 6), new THREE.MeshLambertMaterial({ color: 0x4e8f5e }));
+        t.position.set(p[0], 0.85, p[1]); g4.add(t);
+      });
+      function lab4(text, x, y, z, parent) { var s = label(text, x, y, z); (parent || g4).add(s); }
+      lab4("内流区", 11.6, 3.1, -3.4); lab4("外流区", 1.2, 3.8, -3.6);
+      lab4("内流河注入内陆湖", 9.4, 1.5, 2.0); lab4("湖水只能蒸发离开", 12.6, 2.4, 2.6);
+      lab4("海上内循环", -8.6, 7.4, -1.2, L4[0].g); lab4("海陆间循环", -1.5, 8.4, 1.2, L4[1].g); lab4("陆地内循环", 11.6, 7.0, 0.4, L4[2].g);
+      // one path per particle
+      L4[0].f = L4[0].p.userData.seed.map(function (s) {
+        var x = rnd(-12.3, -5.2, s[0]), z = rnd(-4, 3.6, s[1]), cx = -8.6 + (s[0] - 0.5) * 2.4, cz = -1.2 + (s[1] - 0.5) * 1.6;
+        return poly([[x, 0.95, z], [cx, 5.6, cz], [cx + 0.8, 5.7, cz + 0.4], [x + 0.9, 0.95, z + 0.4]]);
+      });
+      L4[1].f = L4[1].p.userData.seed.map(function (s) {
+        var j = (s[0] - 0.5) * 1.6, k = (s[1] - 0.5) * 1.2, w = (((s[0] * 7) % 1) - 0.5) * 0.5;
+        return poly([[-9 + j * 2, 0.95, k * 2], [-7 + j, 5.6, k], [3.4 + j * 0.4, 6.1, 0.8 + k], [4.2 + j * 0.2, 1.3, 1.4 + k * 0.5],
+          [3.0, 0.8, 2.8 + w], [-4.4, 0.8, 2.8 + w], [-6.5, 0.95, 2.8 + w]]);
+      });
+      L4[2].f = L4[2].p.userData.seed.map(function (s, k) {
+        var j = (s[1] - 0.5) * 1.2;
+        if (k % 3 === 0) {
+          var tr = T4[k % 4], rx = tr[0] + (s[0] - 0.5) * 1.6, rz = tr[1] * 0.7;
+          return poly([[tr[0], 1.3, tr[1]], [11.6 + j, 5.0, 0.4], [rx, 5.0, rz], [rx, 0.5, rz]]);
+        }
+        var lx = rnd(10.4, 12.8, s[0]), lz = rnd(-0.9, 1.7, s[1]);
+        return poly([[lx, 0.6, lz], [lx, 4.9, lz], [11.6 + j, 5.2, 0.4], [8.7, 4.8, 0.4 + j], [8.4, 0.58, 0.4 + j * 0.3], [10.2, 0.58, 0.4], [lx, 0.6, lz]]);
+      });
+      var SP4 = [0.00011, 0.00005, 0.00007];
+      ch4 = {
+        show: function (on) { g4.visible = on; if (on) this.sel(); },
+        sel: function () { L4.forEach(function (l, i) { l.g.visible = S4[i]; }); },
+        step: function (t) {
+          L4.forEach(function (l, i) {
+            if (!l.g.visible) return;
+            var a = l.p.geometry.attributes.position;
+            l.p.userData.seed.forEach(function (sd, k) {
+              var v = l.f[k]((sd[2] + t * SP4[i]) % 1);
+              a.setXYZ(k, v[0], v[1], v[2]);
+            });
+            a.needsUpdate = true;
+          });
+        }
+      };
+
+      /* chapter 6 layer: four geographic meanings */
+      var g6 = new THREE.Group(); g6.visible = false; pivot.add(g6);
+      var K6 = [0, 1, 2, 3].map(function () { var g = new THREE.Group(); g6.add(g); return g; }), sedG = new THREE.Group(); g6.add(sedG);
+      function mk6(geo, color, x, y, z, parent, basic) {
+        var m = new THREE.Mesh(geo, new (basic ? THREE.MeshBasicMaterial : THREE.MeshLambertMaterial)({ color: color, side: THREE.DoubleSide }));
+        m.position.set(x, y, z); parent.add(m); return m;
+      }
+      function lab6(text, x, y, z, k) { var s = label(text, x, y, z); K6[k].add(s); return s; }
+      function arrow6(d, o, len, col, k) {
+        var a = new THREE.ArrowHelper(new THREE.Vector3(d[0], d[1], d[2]).normalize(), new THREE.Vector3(o[0], o[1], o[2]), len, col, 0.7, 0.4);
+        K6[k].add(a); return a;
+      }
+      // ① water balance: evaporation + runoff arrows, a balance scale
+      [-11, -8.5, -6].forEach(function (x) { arrow6([0, 1, 0], [x, 1.1, -1.5], 3.6, 0x9fd8f2, 0); });
+      [[2.6, 1.0, 2.8], [-1.2, 1.0, 2.8]].forEach(function (o) { arrow6([-1, 0, 0], o, 3.6, 0x2ec4b6, 0); });
+      lab6("海洋蒸发", -8.5, 5.4, -1.5, 0); lab6("径流回海", -1, 1.9, 3.9, 0);
+      var ev6 = pts(70, 0x9fd8f2, 0.16, K6[0]), ru6 = pts(60, 0x2ec4b6, 0.18, K6[0]);
+      var bal = new THREE.Group(); bal.position.set(-4, 3.2, -3.6); K6[0].add(bal);
+      mk6(new THREE.BoxGeometry(1, 0.12, 0.6), 0x9aa0a6, 0, 0, 0, bal); mk6(new THREE.BoxGeometry(0.12, 2, 0.12), 0x9aa0a6, 0, 1, 0, bal);
+      var beam = new THREE.Group(); beam.position.y = 2; bal.add(beam);
+      mk6(new THREE.BoxGeometry(3, 0.1, 0.1), 0xf2b544, 0, 0, 0, beam);
+      var pans6 = [-1.4, 1.4].map(function (x, i) {
+        var p = new THREE.Group(); p.position.x = x; beam.add(p);
+        mk6(new THREE.BoxGeometry(0.03, 0.8, 0.03), 0xcfd6de, 0, -0.4, 0, p);
+        mk6(new THREE.CylinderGeometry(0.55, 0.4, 0.1, 20), i ? 0x2ec4b6 : 0x9fd8f2, 0, -0.82, 0, p);
+        return p;
+      });
+      lab6("蒸发量", -5.4, 6.0, -3.6, 0); lab6("降水+径流回海", -2.6, 6.0, -3.6, 0);
+      // ② sediment to the sea, heat from low to high latitude
+      var PS6 = poly([[5.0, 2.4, 0.9], [4.0, 0.8, 1.6], [3.0, 0.76, 2.8], [-4.4, 0.76, 2.8], [-7.6, 0.95, 2.6]]);
+      var sed6 = pts(90, 0x8b5a2b, 0.24, sedG);
+      [-11, -8, -5].forEach(function (x) { arrow6([0, 0, -1], [x, 8.4, 4], 8, 0xef6461, 1); });
+      lab6("低纬", -8, 9.1, 4.6, 1); lab6("高纬", -8, 9.1, -4.6, 1); lab6("蒸发吸热、凝结放热", -8, 10.2, 0, 1); lab6("泥沙入海", -5.5, 1.9, 4.0, 1);
+      // ③ landforms: V-shaped valley upstream, growing delta at the mouth
+      var VA = 1.0;
+      [-1, 1].forEach(function (sg) {
+        var m = mk6(new THREE.BoxGeometry(1.4, 0.12, 0.12), 0xf2b544, 4.5 + sg * Math.cos(VA) * 0.7, 1.4 + Math.sin(VA) * 0.7, 2.2, K6[2], true);
+        m.rotation.z = sg * VA;
+      });
+      lab6("V 形谷（侵蚀）", 4.5, 3.0, 2.2, 2); lab6("河口三角洲（堆积）", -6.2, 2.2, 3.6, 2); lab6("冲积平原", 0.6, 1.6, 4.4, 2);
+      var fan = mk6(new THREE.CircleGeometry(2.4, 24, Math.PI - 0.75, 1.5), 0xc9a46a, -4.2, 0.93, 2.8, K6[2]);
+      fan.rotation.x = -Math.PI / 2;
+      // ④ freshwater lake drains, then rain refills it
+      mk6(new THREE.BoxGeometry(2.6, 0.02, 2.2), 0x7a6648, 11.6, 0.41, -3.4, K6[3]);
+      var lake6 = mk6(new THREE.BoxGeometry(2.6, 0.24, 2.2), 0x4fa3e3, 11.6, 0.48, -3.4, K6[3]);
+      lake6.material.transparent = true; lake6.material.opacity = 0.88;
+      puff4(11.6, 5.3, -3.4, K6[3]);
+      var rain6 = pts(80, 0x4fa3e3, 0.18, K6[3]), use6 = arrow6([-1, 0, 0], [10.1, 0.9, -3.4], 2.2, 0xf2b544, 3);
+      lab6("淡水湖", 11.6, 1.6, -3.4, 3); var useL6 = lab6("取水用水", 8.8, 1.7, -3.4, 3);
+      function run6(p, f, t, sp) {
+        var at = p.geometry.attributes.position;
+        p.userData.seed.forEach(function (sd, i) { var v = f(sd, (sd[2] + t * sp) % 1); at.setXYZ(i, v[0], v[1], v[2]); });
+        at.needsUpdate = true;
+      }
+      ch6 = {
+        show: function (on) { g6.visible = on; if (on) this.sel(S6.k); },
+        sel: function (k) { K6.forEach(function (g, i) { g.visible = i === k; }); sedG.visible = k === 1 || k === 2; },
+        step: function (t) {
+          var k = S6.k, e = t - S6.t0;
+          if (k === 0) {
+            run6(ev6, FN3[0], t, 0.00012); run6(ru6, FN3[3], t, 0.00012);
+            beam.rotation.z = 0.2 * Math.max(0, 1 - e / 3500) * Math.sin(e / 260);
+            pans6.forEach(function (p) { p.rotation.z = -beam.rotation.z; });
+          }
+          if (k === 1 || k === 2) run6(sed6, function (s, ph) { var v = PS6(ph); v[1] += 0.06; v[2] += (s[1] - 0.5) * 0.5; return v; }, t, 0.0001);
+          if (k === 2) { var gr = 0.2 + 0.8 * Math.min(1, (Math.max(0, e) % 12000) / 9000); fan.scale.set(gr, gr, 1); }
+          if (k === 3) {
+            var p = (Math.max(0, e) % 10000) / 10000, st = p < 0.4 ? 0 : p < 0.8 ? 1 : 2;
+            var lv = st === 0 ? 1 - 0.8 * p / 0.4 : st === 1 ? 0.2 + 0.8 * (p - 0.4) / 0.4 : 1;
+            lake6.scale.y = lv; lake6.position.y = 0.36 + 0.12 * lv;
+            use6.visible = useL6.visible = st === 0; rain6.visible = st === 1;
+            if (st === 1) run6(rain6, function (s, ph) { return [11.6 + (s[0] - 0.5) * 2.4, 5.0 - ph * 4.5, -3.4 + (s[1] - 0.5) * 2]; }, t, 0.0006);
+            if (st !== S6.ph) phase6(st);
+          }
+        }
+      };
+
+      /* chapter 8 layer: five human activities on the same sandbox */
+      var g8 = new THREE.Group(); g8.visible = false; pivot.add(g8);
+      var K8 = [0, 1, 2, 3, 4].map(function () { var g = new THREE.Group(); g8.add(g); return g; });
+      function add8(m, k) { K8[k].add(m); return m; }
+      function lab8(text, x, y, z, k) {
+        var cv = document.createElement("canvas"), w = 40 + text.length * 30; cv.width = w; cv.height = 64;
+        var g = cv.getContext("2d");
+        g.fillStyle = "rgba(14,20,32,.72)"; g.fillRect(0, 0, w, 64);
+        g.fillStyle = "#E6ECF5"; g.font = "28px 'PingFang SC',sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+        g.fillText(text, w / 2, 34);
+        var s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthTest: false }));
+        s.position.set(x, y, z); s.scale.set(w / 98, 0.65, 1); K8[k].add(s); return s;
+      }
+      function shape8(P, color, k) {
+        var sh = new THREE.Shape(); sh.moveTo(P[0][0], P[0][1]);
+        P.slice(1).forEach(function (p) { sh.lineTo(p[0], p[1]); });
+        return add8(new THREE.Mesh(new THREE.ShapeGeometry(sh), new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide })), k);
+      }
+      function n8(p, f) { p.geometry.setDrawRange(0, Math.round(p.userData.seed.length * f)); }
+      // 0 reservoir: dam across the river, reservoir water, evaporation, release downstream
+      add8(box(0.35, 0.8, 1.7, 0x9aa0a6, -1.4, 0.75, 2.8), 0);
+      var lake8 = add8(box(2.6, 0.3, 1.6, 0x2a7fa8, -0.05, 0.62, 2.8, 0.9), 0);
+      var ev8 = pts(70, 0x9fd8f2, 0.16, K8[0]), out8 = pts(50, 0x4fa3e3, 0.18, K8[0]);
+      var wet8 = lab8("汛期蓄水 · 削峰", -0.1, 2.0, 3.6, 0), dry8 = lab8("枯水期放水 · 补枯", -0.1, 2.0, 3.6, 0);
+      lab8("大坝", -1.4, 1.6, 1.6, 0); lab8("库区蒸发增加", -0.1, 4.0, 2.8, 0);
+      // 1 water transfer: a canal from south (+z) to north (-z)
+      add8(box(0.5, 0.12, 9.4, 0x4fa3e3, 9.0, 0.47, 0), 1);
+      var arr8 = add8(new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.1, 12), new THREE.MeshLambertMaterial({ color: 0x2ec4b6 })), 1);
+      arr8.rotation.x = -Math.PI / 2; arr8.position.set(9.0, 0.6, -5.2);
+      var can8 = pts(60, 0xbfe6ff, 0.2, K8[1]);
+      lab8("南", 9.0, 1.3, 5.6, 1); lab8("北", 9.0, 1.6, -6.2, 1); lab8("跨流域调水", 9.0, 3.4, 0, 1); lab8("改变地表径流的空间分布", 9.0, 2.5, 0, 1);
+      // 2 afforestation: trees grow on the slopes
+      var tr8 = [];
+      for (var q8 = 0; q8 < 16; q8++) {
+        var y8 = 0.45 + (q8 % 3) * 0.75, hw = 2.26 * (5.3 - y8) / 5.4, off = (((q8 * 37) % 10) / 10 - 0.45) * 1.6 * hw;
+        var tg = new THREE.ConeGeometry(0.28, 0.8, 6); tg.translate(0, 0.4, 0);
+        var tm = add8(new THREE.Mesh(tg, new THREE.MeshLambertMaterial({ color: 0x3f8a52 })), 2);
+        if (q8 < 9) tm.position.set(6.4 - hw - 0.05, y8, off); else tm.position.set(6.4 + off, y8, hw + 0.05);
+        tr8.push(tm);
+      }
+      var tsp8 = pts(70, 0x6fcf97, 0.16, K8[2]), inf8 = pts(70, 0x5ee6ff, 0.16, K8[2]), ru8 = pts(80, 0x2ec4b6, 0.18, K8[2]), sed8 = pts(60, 0xc98a12, 0.16, K8[2]);
+      lab8("下渗、蒸腾增多", 4.6, 4.6, 3.0, 2); lab8("地表径流、水土流失减少", -0.6, 2.2, 3.8, 2);
+      // 3 over-pumping: well, cone of depression, subsidence, seawater wedge (front section)
+      var pump8 = add8(box(0.5, 0.5, 0.5, 0x6e7a88, -2, 0.75, 5.15), 3);
+      var pipe8 = add8(new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.9, 8), new THREE.MeshLambertMaterial({ color: 0x9aa0a6 })), 3);
+      pipe8.position.set(-2, -0.45, 5.18);
+      var cone8 = shape8([[-3.8, 0], [-0.2, 0], [-2, -1]], 0xb9a279, 3); cone8.position.set(0, -0.725, 5.11);
+      var sea8 = shape8([[0, 0], [0, 0.6], [1, 0]], 0x1a6f8c, 3); sea8.position.set(-5, -1.17, 5.12);
+      var sub8 = add8(new THREE.Mesh(new THREE.RingGeometry(0.9, 1.3, 32), new THREE.MeshBasicMaterial({ color: 0xef6461, side: THREE.DoubleSide })), 3);
+      sub8.rotation.x = -Math.PI / 2; sub8.position.set(-2, 0.52, 3.6);
+      var pw8 = pts(30, 0x5ee6ff, 0.16, K8[3]);
+      lab8("地面沉降", -2, 2.4, 3.6, 3); lab8("降落漏斗", -0.9, -1.8, 5.6, 3); lab8("海水入侵", -4.4, -1.8, 5.6, 3); lab8("抽水井", -2, 1.6, 5.4, 3);
+      // 4 cloud seeding: a plane sprays catalyst into the clouds, which then rain
+      var pl8 = new THREE.Group(); K8[4].add(pl8);
+      pl8.add(new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.18, 0.22), new THREE.MeshLambertMaterial({ color: 0xe6ecf5 })));
+      pl8.add(new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.05, 1.3), new THREE.MeshLambertMaterial({ color: 0xe6ecf5 })));
+      var cat8 = pts(80, 0xffffff, 0.14, K8[4]), rn8 = pts(120, 0x4fa3e3, 0.18, K8[4]);
+      lab8("播撒催化剂", 2, 9.6, 0, 4); lab8("促使水汽凝结降水", 2, 3.4, 1.8, 4);
+      var CW8 = new THREE.Color(0xf2f6fb), CD8 = new THREE.Color(0x7d8896);
+      function dark8(v) { clouds.children.forEach(function (c) { c.material.color.copy(CW8).lerp(CD8, v); }); }
+      ch8 = {
+        show: function (on) { g8.visible = on; if (on) this.sel(S8.k); else dark8(0); },
+        sel: function (k) { K8.forEach(function (g, i) { g.visible = i === k; }); dark8(0); },
+        step: function (t) {
+          var k = S8.k, e = Math.max(0, t - S8.t0), g = Math.min(1, e / 3000);
+          if (k === 0) {
+            var p = (e % 8000) / 8000, wet = p < 0.5, L = wet ? 0.8 + 1.2 * p : 1.4 - 1.2 * (p - 0.5);
+            lake8.scale.y = L; lake8.position.y = 0.47 + 0.15 * L; wet8.visible = wet; dry8.visible = !wet;
+            n8(ev8, g); n8(out8, wet ? 0.25 : 1);
+            run6(ev8, function (s, ph) { return [-1.3 + s[0] * 2.5, 0.9 + ph * 3, 2.1 + s[1] * 1.4]; }, t, 0.0003);
+            run6(out8, function (s, ph) { return [-1.7 - ph * 2.8, 0.8, 2.8 + (s[1] - 0.5) * 0.6]; }, t, 0.0005);
+          }
+          if (k === 1) run6(can8, function (s, ph) { return [9.0 + (s[0] - 0.5) * 0.3, 0.58, 4.6 - ph * 9.4]; }, t, 0.00025);
+          if (k === 2) {
+            tr8.forEach(function (m, i) { var s = Math.max(0.01, Math.min(1, g * 1.6 - (i % 4) * 0.15)); m.scale.set(s, s, s); });
+            n8(tsp8, g); n8(inf8, 0.25 + 0.75 * g); n8(ru8, 1 - 0.65 * g); n8(sed8, 1 - 0.85 * g);
+            run6(tsp8, function (s, ph) { var m = tr8[Math.floor(s[0] * tr8.length)].position; return [m.x, m.y + 0.8 + ph * 2.4, m.z + (s[1] - 0.5) * 0.3]; }, t, 0.0003);
+            run6(inf8, function (s, ph) { return [3 + s[0] * 4, 0.6 - ph * 1.5, 5.2]; }, t, 0.0003);
+            run6(ru8, FN3[3], t, 0.00015);
+            run6(sed8, function (s, ph) { var v = FN3[3](s, ph); v[1] += 0.08; v[2] += (s[1] - 0.5) * 0.5; return v; }, t, 0.00012);
+          }
+          if (k === 3) {
+            cone8.scale.y = 0.05 + 0.4 * g; sea8.scale.x = 0.6 + 2.6 * g;
+            pump8.position.y = 0.75 - 0.15 * g; sub8.material.opacity = g; sub8.material.transparent = true;
+            run6(pw8, function (s, ph) { return [-2 + (s[0] - 0.5) * 0.08, -1.3 + ph * 1.9, 5.22]; }, t, 0.0006);
+          }
+          if (k === 4) {
+            var px = -6 + Math.min(1, e / 6000) * 14; pl8.position.set(px, 8.5, 0);
+            run6(cat8, function (s, ph) { var x = -4 + s[0] * 10; return x > px ? [0, -50, 0] : [x, 8.4 - ph * 1.4, (s[1] - 0.5) * 1.6]; }, t, 0.0005);
+            var r = Math.max(0, Math.min(1, (e - 2500) / 3000)); dark8(r); n8(rn8, r);
+            run6(rn8, function (s, ph) { return [-3 + s[0] * 9, 6.0 - ph * 5.3, (s[1] - 0.5) * 2.4]; }, t, 0.0009);
+          }
+        }
+      };
+
+      // chapter 9: global water balance arrows (thickness ∝ volume) and budget panels
+      var g9 = new THREE.Group(); g9.visible = false; pivot.add(g9);
+      var A9 = D9.f.map(function (f) {
+        var a = new THREE.Vector3(f.a[0], f.a[1], f.a[2]), b = new THREE.Vector3(f.b[0], f.b[1], f.b[2]);
+        var d = b.clone().sub(a), L = d.length(), r = 0.07 + 0.33 * f.v / 434, g = new THREE.Group(), hl = Math.min(L * 0.3, 0.5 + r * 2);
+        var mat = new THREE.MeshBasicMaterial({ color: f.c, transparent: true, opacity: 0.9 });
+        var sh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, L - hl, 16), mat); sh.position.y = (L - hl) / 2; g.add(sh);
+        var hd = new THREE.Mesh(new THREE.ConeGeometry(r * 2.2, hl, 16), mat); hd.position.y = L - hl / 2; g.add(hd);
+        g.position.copy(a); g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); g9.add(g);
+        var m = a.clone().lerp(b, 0.5), lb = label(f.n + " " + f.v, m.x + f.o[0], m.y + f.o[1], m.z + f.o[2]);
+        labelGroup.remove(lb); g9.add(lb);
+        var dot = new THREE.Mesh(new THREE.SphereGeometry(r * 1.3 + 0.05, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffffff })); g9.add(dot);
+        return { a: a, b: b, mat: mat, lb: lb, dot: dot, v: f.v, k: !!f.k };
+      });
+      function panel9(lines, x, y, z) {
+        var cv = document.createElement("canvas"); cv.width = 512; cv.height = 200;
+        var c = cv.getContext("2d");
+        c.fillStyle = "rgba(14,20,32,.8)"; c.fillRect(0, 0, 512, 200);
+        c.strokeStyle = "#2EC4B6"; c.lineWidth = 4; c.strokeRect(2, 2, 508, 196);
+        c.textAlign = "center"; c.textBaseline = "middle";
+        lines.forEach(function (t, i) { c.fillStyle = i === 2 ? "#F2B544" : "#E6ECF5"; c.font = (i ? "34px " : "bold 36px ") + "'PingFang SC',sans-serif"; c.fillText(t, 256, 40 + i * 60); });
+        var s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthTest: false }));
+        s.position.set(x, y, z); s.scale.set(5.6, 2.2, 1); g9.add(s);
+      }
+      var Q9 = D9.eq;
+      panel9(["海洋收支", "降水 + 径流入海 = 蒸发", Q9.oP + " + " + Q9.R + " = " + Q9.oE + (Q9.oP + Q9.R === Q9.oE ? "  ✓" : "")], -8.5, 11, -1);
+      panel9(["陆地收支", "降水 = 蒸发 + 径流", Q9.lP + " = " + Q9.lE + " + " + Q9.R + (Q9.lP === Q9.lE + Q9.R ? "  ✓" : "")], 5.5, 11, -2);
+      ch9 = {
+        show: function (on) { g9.visible = on; if (on) this.focus(); },
+        focus: function () { A9.forEach(function (x) { var dim = S9.focus && !x.k; x.mat.opacity = dim ? 0.12 : 0.9; x.lb.material.opacity = dim ? 0.2 : 1; x.dot.visible = !dim; }); },
+        step: function (t) {
+          A9.forEach(function (x, i) { x.dot.position.lerpVectors(x.a, x.b, (t * (0.00015 + 0.00025 * x.v / 434) + i * 0.3) % 1); });
+        }
+      };
+
+      skyColor();
+
+      /* orbit controls (minimal) */
+      var drag = null, pinch = 0;
+      function place() {
+        pivot.rotation.set(0, rot.y, 0);
+        camera.position.set(Math.sin(0) * dist, dist * -Math.sin(rot.x), dist * Math.cos(rot.x));
+        camera.lookAt(0, 1, 0);
+      }
+      canvas.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); });
+      canvas.addEventListener("pointermove", function (e) {
+        if (!drag) return;
+        rot.y += (e.clientX - drag.x) * 0.006;
+        rot.x = Math.max(-1.3, Math.min(-0.08, rot.x + (e.clientY - drag.y) * 0.004));
+        drag = { x: e.clientX, y: e.clientY };
+      });
+      addEventListener("pointerup", function () { drag = null; });
+      canvas.addEventListener("wheel", function (e) {
+        e.preventDefault(); dist = Math.max(12, Math.min(60, dist + e.deltaY * 0.03));
+      }, { passive: false });
+      canvas.addEventListener("touchmove", function (e) {
+        if (e.touches.length !== 2) return;
+        var d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        if (pinch) dist = Math.max(12, Math.min(60, dist + (pinch - d) * 0.06));
+        pinch = d;
+      }, { passive: true });
+      canvas.addEventListener("touchend", function () { pinch = 0; });
+
+      function resize() {
+        var w = canvas.clientWidth, h = canvas.clientHeight;
+        if (!w || !h) return;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h; camera.updateProjectionMatrix();
+      }
+      addEventListener("resize", resize);
+
+      var t0 = 0;
+      function tick(t) {
+        resize(); place();
+        clouds.position.x = Math.sin(t / 5200) * 0.8;
+        if (cur === 1) ch2.step(t);
+        if (cur === 2 || cur === 9 || cur === 10) ch3.step(t);
+        if (cur === 3) ch4.step(t);
+        if (cur === 5) ch6.step(t);
+        if (cur === 7) ch8.step(t);
+        if (cur === 8) ch9.step(t);
+        if (picked >= 0 && markers[picked].visible) {
+          var s = 1 + Math.sin(t / 240) * 0.12;
+          markers[picked].scale.set(s, 1, s);
+        }
+        renderer.render(scene, camera);
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      } catch (err) {
+        renderer = null; markers = [];
+        document.querySelector(".x-tip").textContent = "此设备暂不支持 WebGL，三维沙盘无法显示；右侧讲解与水体数据仍可使用。";
+      }
+
+      /* ---------- chapter 5: 下渗与地表径流 ---------- */
+      var S5 = { I: 3, slope: 15, veg: 40, soil: 1, hard: 20, last: null, prev: null, n: 0 }, h5c = null;
+      var INT5 = ["小雨", "中雨", "暴雨"], SOIL5 = ["砂土", "壤土", "黏土"];
+      var NAME5 = ["截留蒸发", "下渗", "地表径流"], COL5 = ["#B48CF2", "#5EE6FF", "#2EC4B6"];
+      var RS5 = [0, .3, .6, .9, 1, .9, .7, .5, .35, .25, .15, .1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      function model5() {
+        var v = S5.veg / 100, h = S5.hard / 100, s = S5.slope / 30, I = S5.I;
+        var e0 = (0.05 + 0.17 * v) * [1.3, 1, 0.7][I - 1];
+        var cap = [0.85, 0.6, 0.32][S5.soil] * [1, 0.75, 0.5][I - 1] * (1 - 0.45 * s) * (0.7 + 0.45 * v);
+        var i0 = (1 - e0) * Math.min(0.95, cap);
+        return { I: I, v: v, h: h, s: s, soil: S5.soil, e0: e0, i0: i0, e: e0 * (1 - h), i: i0 * (1 - h), r: 1 - (e0 + i0) * (1 - h) };
+      }
+      function uh5(lag, fall) {
+        var w = [], sum = 0;
+        for (var j = 0; j < 25; j++) { w.push(j <= lag ? j / lag : Math.max(0, 1 - (j - lag) / fall)); sum += w[j]; }
+        return w.map(function (x) { return x / sum; });
+      }
+      function hydro5(m) {
+        var P = [10, 25, 50][m.I - 1], R = RS5.map(function (x) { return x * P; });
+        var lag = Math.max(1, Math.round((2.6 - 1.1 * m.h - 0.8 * m.s - 0.5 * (1 - m.v)) * 2));
+        var wf = uh5(lag, 2 * lag), ws = uh5(10, 20), Q = [];
+        for (var k = 0; k < 25; k++) {
+          var q = 4;
+          for (var j = 0; j <= k; j++) q += R[j] * (0.8 * m.r * wf[k - j] + 0.12 * m.i * ws[k - j]);
+          Q.push(Math.round(q * 10) / 10);
+        }
+        var pk = Q.indexOf(Math.max.apply(null, Q));
+        return { R: R, Q: Q, peak: Q[pk], at: pk / 2 };
+      }
+      function buildCh5(b) {
+        var st = 'style="width:100%;min-height:44px;accent-color:var(--acc)"', bs = 'style="border-color:var(--line);justify-content:center"';
+        function rg(id, label, min, max, val) {
+          return '<label class="x-toggle" for="' + id + '">' + label + '<span class="x-pc" id="' + id + 'V"></span></label>' +
+            '<input type="range" id="' + id + '" min="' + min + '" max="' + max + '" step="1" value="' + val + '" aria-label="' + label + '" ' + st + " />";
+        }
+        b.innerHTML =
+          '<p class="x-h">参数</p><div class="x-card">' + rg("i5", "降水强度", 1, 3, S5.I) + rg("s5", "坡度", 0, 30, S5.slope) +
+          rg("v5", "植被覆盖率", 0, 100, S5.veg) +
+          '<p style="margin:6px 0 4px;font-size:13px">土壤质地</p><div class="x-list" style="display:flex;gap:6px">' +
+          SOIL5.map(function (n, i) { return '<button data-soil="' + i + '" ' + bs + ">" + n + "</button>"; }).join("") + "</div>" +
+          rg("h5", "地面硬化比例", 0, 100, S5.hard) +
+          '<div class="x-list" style="margin-top:8px"><button id="play5" style="border-color:var(--acc);justify-content:center;color:var(--acc-t)">☔ 来一场暴雨</button></div></div>' +
+          '<p class="x-h">雨水去向</p><div class="x-card"><div class="x-bar" id="bar5"><i></i><i></i><i></i></div><ul class="x-list" id="leg5"></ul></div>' +
+          '<p class="x-h">流量过程线</p><div class="x-card"><div style="height:210px"><canvas id="hyd5" role="img" aria-label="流量过程线：降雨柱状与河流流量曲线，下渗少时洪峰更高、出现更早"></canvas></div>' +
+          '<p style="font-size:12px;color:var(--ink2);margin-top:6px">柱：降雨强度（mm/h，右轴）；青线：本次流量；灰虚线：上一次流量（m³/s）。示意模型。</p></div>' +
+          '<div class="x-read" id="read5"></div>' +
+          '<p class="x-h">本章讲解</p><div class="x-card"><p>' + CH[4].p[0] + "</p><p>影响下渗的主要因素：</p><ul style=\"margin:0 0 8px;padding-left:18px;font-size:12.5px;line-height:1.65\">" +
+          "<li>降水强度：雨越急，来不及下渗的越多</li><li>坡度：坡越陡，水流越快，下渗越少</li><li>植被：根系和枯枝落叶层使土壤疏松，下渗增多</li>" +
+          "<li>土壤质地：砂土孔隙大、下渗快，黏土下渗慢</li><li>地面硬化：水泥、沥青路面几乎不透水</li></ul><p>调节参数后按「来一场暴雨」，比较右侧的分配比例和流量过程线。</p></div>" +
+          '<div class="x-card x-key"><h3>要点</h3>' +
+          "<p>雨水三条去路：截留蒸发、下渗、地表径流。下渗多 → 地表径流少、地下水补给多。</p>" +
+          '<p>下渗<b style="color:var(--acc-t)">减少</b>：降水强度大、坡度大、地面硬化、黏土；下渗<b style="color:var(--acc-t)">增多</b>：植被覆盖率高、砂土。</p>' +
+          "<p>下渗少时，流量过程线洪峰更高、出现更早，退水也更快。</p>" +
+          '<p class="x-gk">高考链接：常考植被破坏或城市硬化后下渗减少、地表径流增加、洪峰提前且变高、地下水补给减少；<b>易错</b>：植被增加下渗，但并不增加总降水量。</p></div>';
+        [["i5", "I"], ["s5", "slope"], ["v5", "veg"], ["h5", "hard"]].forEach(function (p) {
+          document.getElementById(p[0]).oninput = function () { S5[p[1]] = parseInt(this.value, 10); upd5(); };
+        });
+        b.querySelectorAll("[data-soil]").forEach(function (bt) { bt.onclick = function () { S5.soil = +bt.getAttribute("data-soil"); upd5(); }; });
+        document.getElementById("play5").onclick = play5;
+        if (h5c) { h5c.destroy(); h5c = null; }
+        upd5(); drawH5(); read5();
+      }
+      function upd5() {
+        var m = model5(), f = [m.e, m.i, m.r];
+        document.getElementById("i5V").textContent = INT5[S5.I - 1];
+        document.getElementById("s5V").textContent = S5.slope + "°";
+        document.getElementById("v5V").textContent = S5.veg + "%";
+        document.getElementById("h5V").textContent = S5.hard + "%";
+        document.querySelectorAll("[data-soil]").forEach(function (bt) { bt.classList.toggle("on", +bt.getAttribute("data-soil") === S5.soil); });
+        var bars = document.querySelectorAll("#bar5 i");
+        f.forEach(function (x, i) { bars[i].style.width = (x * 100).toFixed(1) + "%"; bars[i].style.background = COL5[i]; });
+        document.getElementById("leg5").innerHTML = f.map(function (x, i) {
+          return '<li style="display:flex;align-items:center;gap:8px;min-height:28px;padding:0 4px"><span class="x-sw" style="background:' + COL5[i] +
+            '"></span><span class="x-nm">' + NAME5[i] + '</span><span class="x-pc">' + Math.round(x * 100) + "%</span></li>";
+        }).join("");
+      }
+      function read5() {
+        var r = document.getElementById("read5"), L = S5.last, P = S5.prev;
+        if (!r) return;
+        if (!L) { r.innerHTML = "按「来一场暴雨」播放 6 秒降雨，这里比较洪峰流量与出现时间。"; return; }
+        if (run5) { r.innerHTML = "<b>降雨中…</b>　雨水正在分配为截留蒸发、下渗和地表径流。"; return; }
+        r.innerHTML = "<b>本次</b>　洪峰 <u>" + L.peak + " m³/s</u>，降雨开始后 <u>" + L.at + " h</u> 出现" +
+          (P ? "<br /><b>上次</b>　洪峰 <u>" + P.peak + " m³/s</u>，<u>" + P.at + " h</u> 出现<br />" +
+            (L.peak > P.peak ? "洪峰更高" : L.peak < P.peak ? "洪峰更低" : "洪峰相同") + "，" +
+            (L.at < P.at ? "出现更早" : L.at > P.at ? "出现更晚" : "出现时间相同") + "。" : "");
+      }
+      function drawH5() {
+        var c = document.getElementById("hyd5");
+        if (!c) return;
+        var L = S5.last, P = S5.prev, n = S5.n;
+        if (!h5c) {
+          var tk = { color: "#8A97AD" };
+          h5c = new Chart(c, {
+            data: { labels: RS5.map(function (x, k) { return k / 2 + "h"; }), datasets: [
+              { type: "bar", label: "降雨", data: [], yAxisID: "y1", backgroundColor: "#4FA3E3", order: 3 },
+              { type: "line", label: "本次流量", data: [], borderColor: "#2EC4B6", borderWidth: 2, pointRadius: 0, tension: 0.35, order: 1 },
+              { type: "line", label: "上次流量", data: [], borderColor: "#8A97AD", borderDash: [4, 4], borderWidth: 1.5, pointRadius: 0, tension: 0.35, order: 2 }] },
+            options: {
+              maintainAspectRatio: false, animation: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ticks: { color: "#8A97AD", maxTicksLimit: 7 }, grid: { display: false } },
+                y: { beginAtZero: true, ticks: tk, grid: { color: "rgba(138,151,173,.15)" }, title: { display: true, text: "m³/s", color: "#8A97AD" } },
+                y1: { position: "right", reverse: true, min: 0, max: 120, ticks: tk, grid: { display: false }, title: { display: true, text: "mm/h", color: "#8A97AD" } }
+              }
+            }
+          });
+        }
+        var d = h5c.data.datasets;
+        d[0].data = L ? L.R.slice(0, n) : []; d[1].data = L ? L.Q.slice(0, n) : []; d[2].data = P ? P.Q : [];
+        h5c.options.scales.y.suggestedMax = Math.max(10, L ? L.peak : 0, P ? P.peak : 0) * 1.15;
+        h5c.update("none");
+      }
+      var c5 = document.getElementById("c5"), x5 = c5.getContext("2d"), P5 = [], gw5 = 0, run5 = 0, M5 = null, lt5 = 0;
+      function play5() {
+        M5 = model5(); S5.prev = S5.last; S5.last = hydro5(M5); S5.n = 0;
+        gw5 = 0; P5 = []; run5 = performance.now();
+        drawH5(); read5();
+      }
+      var ch5 = { show: function (on) { c5.classList.toggle("x-hide", !on); document.querySelector(".x-tip").classList.toggle("x-hide", on); } };
+      function tick5(t) {
+        requestAnimationFrame(tick5);
+        var dt = Math.min(0.05, (t - lt5) / 1000); lt5 = t;
+        if (cur !== 4) return;
+        var dpr = Math.min(devicePixelRatio, 2), W = c5.clientWidth, H = c5.clientHeight, g = x5;
+        if (!W || !H) return;
+        if (c5.width !== Math.round(W * dpr) || c5.height !== Math.round(H * dpr)) { c5.width = Math.round(W * dpr); c5.height = Math.round(H * dpr); }
+        g.setTransform(dpr, 0, 0, dpr, 0, 0);
+        var cs = getComputedStyle(root), bg = cs.getPropertyValue("--bg1").trim(), ink2 = cs.getPropertyValue("--ink2").trim();
+        g.fillStyle = bg; g.fillRect(0, 0, W, H);
+        var th = S5.slope * Math.PI / 180, x0 = W * 0.06, x1 = W * 0.84, xr = W * 0.95, yR = H * 0.6, yB = H * 0.95;
+        var drop = Math.min(H * 0.3, (x1 - x0) * Math.tan(th)), ds = H * 0.09, chD = H * 0.07, yW = H * 0.8 - gw5;
+        var xh = x1 - S5.hard / 100 * (x1 - x0);
+        function sy(x) { return yR - (x1 - x) / (x1 - x0) * drop; }
+        function poly(p, c) { g.fillStyle = c; g.beginPath(); p.forEach(function (q, i) { g[i ? "lineTo" : "moveTo"](q[0], q[1]); }); g.closePath(); g.fill(); }
+        poly([[x0, sy(x0)], [x1, yR], [xr, yR], [xr, yB], [x0, yB]], "#9c8662");
+        g.fillStyle = "rgba(79,163,227,.55)"; g.fillRect(x0, yW, xr - x0, yB - yW);
+        g.fillStyle = bg; g.fillRect(x1, yR, xr - x1, chD);
+        var q = S5.last && S5.n ? S5.last.Q[S5.n - 1] / 60 : 0, lvl = chD * Math.min(1, 0.2 + 0.8 * q);
+        g.fillStyle = "#4FA3E3"; g.fillRect(x1, yR + chD - lvl, xr - x1, lvl);
+        poly([[x0, sy(x0)], [x1, yR], [x1, yR + ds], [x0, sy(x0) + ds]], ["#d9b97a", "#7d6347", "#9c5a3c"][S5.soil]);
+        g.lineWidth = 2; g.strokeStyle = "#6FCF97"; g.beginPath(); g.moveTo(x0, sy(x0)); g.lineTo(xh, sy(xh)); g.stroke();
+        if (xh < x1) { g.lineWidth = 6; g.strokeStyle = "#9aa3ad"; g.beginPath(); g.moveTo(xh, sy(xh)); g.lineTo(x1, yR); g.stroke(); }
+        var nT = Math.round(S5.veg / 100 * 14);
+        for (var k = 0; k < nT && xh - x0 > 20; k++) {
+          var xt = x0 + (k + 0.5) / nT * (xh - x0), yt = sy(xt);
+          g.fillStyle = "#6b4f33"; g.fillRect(xt - 1.5, yt - 10, 3, 10);
+          poly([[xt - 8, yt - 8], [xt + 8, yt - 8], [xt, yt - 32]], "#4e8f5e");
+        }
+        var el = run5 ? (t - run5) / 1000 : 99;
+        if (run5 && el < 6) {
+          g.fillStyle = "rgba(170,182,196,.75)";
+          for (var c = 0; c < 6; c++) { g.beginPath(); g.ellipse(x0 + (c + 0.5) * (xr - x0) / 6, H * 0.06, (xr - x0) / 9, H * 0.035, 0, 0, 7); g.fill(); }
+          var kk = Math.floor(el * 2), rate = (RS5[kk] || 0.1) * M5.I * 2.4, nn = Math.floor(rate) + (Math.random() < rate % 1 ? 1 : 0);
+          for (var a = 0; a < nn; a++) P5.push({ x: x0 + Math.random() * (xr - x0), y: H * 0.08, f: "", a: 1 });
+        }
+        if (run5) {
+          var n = Math.min(25, Math.floor((el < 6 ? el : 6 + (el - 6) * 2) * 2) + 1);
+          if (n !== S5.n) { S5.n = n; drawH5(); }
+          if (el >= 9) { run5 = 0; S5.n = 25; drawH5(); read5(); }
+        }
+        var sp = 70 + 300 * Math.sin(th), live = [];
+        P5.forEach(function (p) {
+          if (!p.f) {
+            p.y += 520 * dt;
+            var ys = p.x > x1 ? yR + chD - lvl : sy(p.x);
+            if (p.y >= ys) {
+              if (p.x > x1) return;
+              var r = Math.random(), pe = M5.e0, pi = M5.i0;
+              p.f = p.x >= xh ? "r" : r < pe ? "e" : r < pe + pi ? "i" : "r"; p.y = ys;
+            }
+            g.strokeStyle = "#4FA3E3"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(p.x, p.y - 7); g.lineTo(p.x, p.y); g.stroke();
+            live.push(p); return;
+          }
+          if (p.f === "e") { p.y -= 30 * dt; p.a -= 0.8 * dt; if (p.a <= 0) return; }
+          if (p.f === "i") { p.y += [55, 32, 16][M5.soil] * dt; if (p.y >= yW) { gw5 = Math.min(H * 0.1, gw5 + 0.12); return; } }
+          if (p.f === "r") { p.x += sp * dt; p.y = sy(p.x) - 2; if (p.x >= x1) return; }
+          g.globalAlpha = Math.max(0, p.a); g.fillStyle = COL5["eir".indexOf(p.f)]; g.fillRect(p.x - 1.5, p.y - 1.5, 3, 3); g.globalAlpha = 1;
+          live.push(p);
+        });
+        P5 = live;
+        g.fillStyle = ink2; g.font = "12px " + cs.getPropertyValue("--sans"); g.textAlign = "left";
+        var xl = W * 0.6;
+        g.fillText("地表", xl, sy(xl) - 38); g.fillText("土壤层", xl, sy(xl) + ds / 2 + 4); g.fillText("地下水", xl, yW + 20);
+        if (xh < x1 - 30) g.fillText("硬化地面", (xh + x1) / 2 - 24, sy((xh + x1) / 2) - 12);
+        g.textAlign = "center"; g.fillText("河流", (x1 + xr) / 2, yR - 10);
+        g.setLineDash([4, 4]); g.strokeStyle = "rgba(79,163,227,.9)"; g.lineWidth = 1; g.beginPath(); g.moveTo(x0, yW); g.lineTo(xr, yW); g.stroke(); g.setLineDash([]);
+      }
+      requestAnimationFrame(tick5);
+
+      /* ---------- chapter 7: 城市化与海绵城市 ---------- */
+      var S7 = { hard: 30, sponge: false, last: null, prev: null, n: 0 }, h7c = null;
+      var NAME7 = ["蒸发", "下渗", "蓄水缓释", "地表径流"], COL7 = ["#B48CF2", "#5EE6FF", "#F2B544", "#2EC4B6"], ORDER7 = [1, 3, 0, 2];
+      var ORD7 = [6, 5, 7, 4, 8, 3, 9, 2, 10, 1, 11, 0], RK7 = [];
+      ORD7.forEach(function (k, j) { RK7[k] = j; });
+      function model7() {
+        var h = S7.hard / 100, sp = S7.sponge, G = [0.2, 0.55, 0, 0.25], Hd = sp ? [0.07, 0.32, 0.15, 0.46] : [0.04, 0.02, 0, 0.94];
+        var f = G.map(function (x, i) { return x * (1 - h) + Hd[i] * h; });
+        return { h: h, sp: sp, G: G, Hd: Hd, f: f, e: f[0], i: f[1], s: f[2], r: f[3] };
+      }
+      function hydro7(m) {
+        var R = RS5.map(function (x) { return x * 50; });
+        var lag = Math.max(1, Math.round((3 - 2.6 * m.h + (m.sp ? 1.5 * m.h : 0)) * 2));
+        var wf = uh5(lag, 2 * lag), ws = uh5(10, 20), wl = uh5(6, 16), Q = [], base = 4 - 2 * m.h * (m.sp ? 0.3 : 1);
+        for (var k = 0; k < 25; k++) {
+          var q = base;
+          for (var j = 0; j <= k; j++) q += R[j] * (0.8 * m.r * wf[k - j] + 0.12 * m.i * ws[k - j] + 0.7 * m.s * wl[k - j]);
+          Q.push(Math.round(q * 10) / 10);
+        }
+        var pk = Q.indexOf(Math.max.apply(null, Q));
+        return { R: R, Q: Q, peak: Q[pk], pk: pk, at: pk / 2, hard: S7.hard, sp: m.sp, flood: !m.sp && m.h >= 0.6 };
+      }
+      function buildCh7(b) {
+        var st = 'style="width:100%;min-height:44px;accent-color:var(--acc)"';
+        b.innerHTML =
+          '<p class="x-h">参数</p><div class="x-card">' +
+          '<label class="x-toggle" for="h7">硬化率<span class="x-pc" id="h7V"></span></label>' +
+          '<input type="range" id="h7" min="0" max="90" step="1" value="' + S7.hard + '" aria-label="硬化率" ' + st + " />" +
+          '<label class="x-toggle">海绵城市<input type="checkbox" id="sp7"' + (S7.sponge ? " checked" : "") + " /></label>" +
+          '<div class="x-list" style="margin-top:8px"><button id="play7" style="border-color:var(--acc);justify-content:center;color:var(--acc-t)">☔ 来一场暴雨</button></div></div>' +
+          '<p class="x-h">雨水去向</p><div class="x-card"><div class="x-bar" id="bar7"><i></i><i></i><i></i><i></i></div><ul class="x-list" id="leg7"></ul></div>' +
+          '<p class="x-h">流量过程线</p><div class="x-card"><div style="height:210px"><canvas id="hyd7" role="img" aria-label="城市流量过程线：硬化率高时洪峰更高、出现更早；海绵城市削峰并推迟峰现"></canvas></div>' +
+          '<p style="font-size:12px;color:var(--ink2);margin-top:6px">柱：降雨强度（mm/h，右轴）；青线：本次流量，圆点为洪峰；灰虚线：上一次流量（m³/s）。示意模型。</p></div>' +
+          '<div class="x-read" id="read7"></div>' +
+          '<p class="x-h">本章讲解</p><div class="x-card"><p>' + CH[6].p[0].split("：")[0] + "：</p>" +
+          '<ul style="margin:0 0 8px;padding-left:18px;font-size:12.5px;line-height:1.65"><li>洪峰流量增大，峰现时间提前，城市更容易内涝</li>' +
+          "<li>地下水得不到补给，河流枯水期流量减少</li><li>蒸发、蒸腾减少，城市更干热</li></ul><p>" + CH[6].p[1] + "</p><p>" + CH[6].p[2] + "</p></div>" +
+          '<div class="x-card x-key"><h3>要点</h3>' +
+          "<p>城市化：绿地、农田 → 建筑、路面，下渗 ↓、地表径流 ↑，管网汇流快。</p>" +
+          "<p>海绵城市四件套：透水铺装、绿色屋顶、下沉式绿地、雨水花园 —— 吸水、蓄水、渗水、净水，需要时释放。</p>" +
+          '<p class="x-gk">高考链接：城市化使下渗减少、径流增加、汇流加快，洪峰高且提前；海绵城市增加下渗与调蓄，削峰、延迟峰现、补给地下水；<b>易错</b>：海绵城市不是不排水，而是先渗、蓄、净，需要时再释放。</p></div>';
+        document.getElementById("h7").oninput = function () { S7.hard = parseInt(this.value, 10); upd7(); };
+        document.getElementById("sp7").onchange = function () { S7.sponge = this.checked; upd7(); };
+        document.getElementById("play7").onclick = play7;
+        if (h7c) { h7c.destroy(); h7c = null; }
+        upd7(); drawH7(); read7();
+      }
+      function upd7() {
+        var m = model7(), bars = document.querySelectorAll("#bar7 i");
+        document.getElementById("h7V").textContent = S7.hard + "%";
+        ORDER7.forEach(function (k, i) { bars[i].style.width = (m.f[k] * 100).toFixed(1) + "%"; bars[i].style.background = COL7[k]; });
+        document.getElementById("leg7").innerHTML = ORDER7.filter(function (k) { return k !== 2 || m.sp; }).map(function (k) {
+          return '<li style="display:flex;align-items:center;gap:8px;min-height:28px;padding:0 4px"><span class="x-sw" style="background:' + COL7[k] +
+            '"></span><span class="x-nm">' + NAME7[k] + '</span><span class="x-pc">' + Math.round(m.f[k] * 100) + "%</span></li>";
+        }).join("");
+      }
+      function tag7(x) { return "（硬化率 " + x.hard + "%，海绵城市" + (x.sp ? "开" : "关") + "）"; }
+      function read7() {
+        var r = document.getElementById("read7"), L = S7.last, P = S7.prev;
+        if (!r) return;
+        if (!L) { r.innerHTML = "按「来一场暴雨」播放 6 秒降雨，这里标注洪峰流量与峰现时间。"; return; }
+        if (run7) { r.innerHTML = "<b>降雨中…</b>　雨水正在分配为下渗、地表径流、蒸发" + (L.sp ? "和蓄水" : "") + "。"; return; }
+        r.innerHTML = "<b>本次</b>" + tag7(L) + "<br />洪峰流量 <u>" + L.peak + " m³/s</u>，峰现时间：降雨开始后 <u>" + L.at + " h</u>" +
+          (L.flood ? '<br /><span style="color:var(--red)">⚠ 路面积水：硬化率高、排水跟不上，出现内涝。</span>' : "") +
+          (P ? "<br /><b>上次</b>" + tag7(P) + "<br />洪峰 <u>" + P.peak + " m³/s</u>，<u>" + P.at + " h</u> 出现<br />" +
+            (L.peak > P.peak ? "洪峰更高" : L.peak < P.peak ? "洪峰更低（削峰）" : "洪峰相同") + "，" +
+            (L.at < P.at ? "峰现提前" : L.at > P.at ? "峰现推迟" : "峰现时间相同") + "。" : "");
+      }
+      function drawH7() {
+        var c = document.getElementById("hyd7");
+        if (!c) return;
+        var L = S7.last, P = S7.prev, n = S7.n;
+        if (!h7c) {
+          var tk = { color: "#8A97AD" };
+          h7c = new Chart(c, {
+            data: { labels: RS5.map(function (x, k) { return k / 2 + "h"; }), datasets: [
+              { type: "bar", label: "降雨", data: [], yAxisID: "y1", backgroundColor: "#4FA3E3", order: 3 },
+              { type: "line", label: "本次流量", data: [], borderColor: "#2EC4B6", backgroundColor: "#2EC4B6", borderWidth: 2, pointRadius: 0, tension: 0.35, order: 1 },
+              { type: "line", label: "上次流量", data: [], borderColor: "#8A97AD", borderDash: [4, 4], borderWidth: 1.5, pointRadius: 0, tension: 0.35, order: 2 }] },
+            options: {
+              maintainAspectRatio: false, animation: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ticks: { color: "#8A97AD", maxTicksLimit: 7 }, grid: { display: false } },
+                y: { beginAtZero: true, ticks: tk, grid: { color: "rgba(138,151,173,.15)" }, title: { display: true, text: "m³/s", color: "#8A97AD" } },
+                y1: { position: "right", reverse: true, min: 0, max: 120, ticks: tk, grid: { display: false }, title: { display: true, text: "mm/h", color: "#8A97AD" } }
+              }
+            }
+          });
+        }
+        var d = h7c.data.datasets;
+        d[0].data = L ? L.R.slice(0, n) : []; d[1].data = L ? L.Q.slice(0, n) : []; d[2].data = P ? P.Q : [];
+        d[1].pointRadius = L ? L.Q.map(function (q, k) { return k === L.pk && n > k ? 5 : 0; }) : 0;
+        h7c.options.scales.y.suggestedMax = Math.max(10, L ? L.peak : 0, P ? P.peak : 0) * 1.15;
+        h7c.update("none");
+      }
+      var c7 = document.getElementById("c7"), x7 = c7.getContext("2d"), P7 = [], gw7 = 0, run7 = 0, M7 = null, lt7 = 0, pond7 = 0;
+      function play7() {
+        M7 = model7(); S7.prev = S7.last; S7.last = hydro7(M7); S7.n = 0;
+        gw7 = 0; P7 = []; pond7 = 0; run7 = performance.now();
+        drawH7(); read7();
+      }
+      var ch7 = { show: function (on) { c7.classList.toggle("x-hide", !on); if (on) document.querySelector(".x-tip").classList.add("x-hide"); } };
+      function tick7(t) {
+        requestAnimationFrame(tick7);
+        var dt = Math.min(0.05, (t - lt7) / 1000); lt7 = t;
+        if (cur !== 6) return;
+        var dpr = Math.min(devicePixelRatio, 2), W = c7.clientWidth, H = c7.clientHeight, g = x7;
+        if (!W || !H) return;
+        if (c7.width !== Math.round(W * dpr) || c7.height !== Math.round(H * dpr)) { c7.width = Math.round(W * dpr); c7.height = Math.round(H * dpr); }
+        g.setTransform(dpr, 0, 0, dpr, 0, 0);
+        var cs = getComputedStyle(root), bg = cs.getPropertyValue("--bg1").trim(), ink2 = cs.getPropertyValue("--ink2").trim(), acc = cs.getPropertyValue("--acc-t").trim();
+        g.fillStyle = bg; g.fillRect(0, 0, W, H);
+        var x0 = W * 0.04, x1 = W * 0.82, xr = W * 0.96, yG = H * 0.62, ds = H * 0.09, chD = H * 0.07, yB = H * 0.95, yW = H * 0.82 - gw7;
+        var N = 12, lw = (x1 - x0) / N, nh = Math.round(S7.hard / 100 * N), sp = S7.sponge, labs = {};
+        function lab(s, x, y) { if (!labs[s]) labs[s] = [x, y]; }
+        g.fillStyle = "#9c8662"; g.fillRect(x0, yG, xr - x0, yB - yG);
+        g.fillStyle = "rgba(79,163,227,.55)"; g.fillRect(x0, yW, xr - x0, yB - yW);
+        g.fillStyle = "#7d6347"; g.fillRect(x0, yG, x1 - x0, ds);
+        g.fillStyle = bg; g.fillRect(x1, yG, xr - x1, chD);
+        var q = S7.last && S7.n ? S7.last.Q[S7.n - 1] / 45 : 0, lvl = chD * Math.min(1, 0.2 + 0.8 * q);
+        g.fillStyle = "#4FA3E3"; g.fillRect(x1, yG + chD - lvl, xr - x1, lvl);
+        for (var k = 0; k < N; k++) {
+          var lx = x0 + k * lw, j = RK7[k];
+          if (j >= nh) {
+            g.fillStyle = "#8fbf5a"; g.fillRect(lx, yG - 3, lw, 3);
+            if (k % 2) {
+              for (var tr = 0; tr < 2; tr++) {
+                var xt = lx + lw * (0.3 + 0.4 * tr);
+                g.fillStyle = "#6b4f33"; g.fillRect(xt - 1.5, yG - 10, 3, 10);
+                g.fillStyle = "#4e8f5e"; g.beginPath(); g.moveTo(xt - 8, yG - 8); g.lineTo(xt + 8, yG - 8); g.lineTo(xt, yG - 30); g.closePath(); g.fill();
+              }
+            } else {
+              g.strokeStyle = "#c9b458"; g.lineWidth = 1.5; g.beginPath();
+              for (var cx = lx + 4; cx < lx + lw - 2; cx += 6) { g.moveTo(cx, yG - 3); g.lineTo(cx, yG - 11); }
+              g.stroke();
+            }
+            continue;
+          }
+          var ty = j % 4;
+          g.fillStyle = sp ? "#a89c88" : "#5b6470"; g.fillRect(lx, yG - 4, lw, 4);
+          if (sp) { g.fillStyle = "#7d6347"; for (var dx = lx + 3; dx < lx + lw - 2; dx += 6) g.fillRect(dx, yG - 3, 2, 2); }
+          if (ty % 2 === 0) {
+            var bh = H * (0.1 + 0.025 * ((k * 7) % 5)), bw = lw * 0.62, bx = lx + lw * 0.06;
+            g.fillStyle = "#6e7a88"; g.fillRect(bx, yG - bh, bw, bh);
+            g.fillStyle = "rgba(242,181,68,.55)";
+            for (var wy = yG - bh + 8; wy < yG - 10; wy += 14) for (var wx = bx + 5; wx < bx + bw - 6; wx += 10) g.fillRect(wx, wy, 4, 6);
+            if (sp) {
+              g.fillStyle = "#6FCF97"; g.fillRect(bx, yG - bh - 4, bw, 4); lab("绿色屋顶", bx + bw / 2, yG - bh - 10);
+              if (ty === 2) {
+                var gx = lx + lw * 0.72, gwd = lw * 0.26;
+                g.fillStyle = "#4e8f5e"; g.fillRect(gx, yG - 4, gwd, 10);
+                g.fillStyle = "#ef8fb0"; for (var fx = gx + 3; fx < gx + gwd - 2; fx += 5) g.fillRect(fx, yG - 7, 3, 3);
+                lab("雨水花园", gx + gwd / 2, yG - 16);
+              }
+            }
+          } else if (sp) {
+            if (ty === 1) lab("透水铺装", lx + lw / 2, yG - 16);
+            else { g.fillStyle = "#6FCF97"; g.fillRect(lx + lw * 0.2, yG - 4, lw * 0.6, 10); lab("下沉式绿地", lx + lw / 2, yG - 30); }
+          }
+          if (!sp && pond7 > 0.3) { g.fillStyle = "rgba(79,163,227,.85)"; g.fillRect(lx, yG - 4 - pond7, lw, pond7); }
+        }
+        var el = run7 ? (t - run7) / 1000 : 99, flood = !sp && S7.hard >= 60;
+        if (run7 && el < 6) {
+          g.fillStyle = "rgba(170,182,196,.75)";
+          for (var c = 0; c < 6; c++) { g.beginPath(); g.ellipse(x0 + (c + 0.5) * (xr - x0) / 6, H * 0.06, (xr - x0) / 9, H * 0.035, 0, 0, 7); g.fill(); }
+          var rate = (RS5[Math.floor(el * 2)] || 0.1) * 7.2, nn = Math.floor(rate) + (Math.random() < rate % 1 ? 1 : 0);
+          for (var a = 0; a < nn; a++) P7.push({ x: x0 + Math.random() * (xr - x0), y: H * 0.08, f: "", a: 1, w: 0, v: 0 });
+          if (flood) pond7 = Math.min(7, pond7 + dt * 1.6);
+        } else pond7 = Math.max(0, pond7 - dt * 0.4);
+        if (run7) {
+          var n = Math.min(25, Math.floor((el < 6 ? el : 6 + (el - 6) * 2) * 2) + 1);
+          if (n !== S7.n) { S7.n = n; drawH7(); }
+          if (el >= 9) { run7 = 0; S7.n = 25; drawH7(); read7(); }
+        }
+        var live = [];
+        P7.forEach(function (p) {
+          if (!p.f) {
+            p.y += 520 * dt;
+            var ys = p.x > x1 ? yG + chD - lvl : yG - 4;
+            if (p.y >= ys) {
+              if (p.x > x1) return;
+              var hd = RK7[Math.min(N - 1, Math.floor((p.x - x0) / lw))] < nh, fr = hd ? M7.Hd : M7.G, r = Math.random();
+              p.f = r < fr[0] ? "e" : r < fr[0] + fr[1] ? "i" : r < fr[0] + fr[1] + fr[2] ? "s" : "r";
+              p.v = hd ? 300 : 110; p.y = ys;
+            }
+            g.strokeStyle = "#4FA3E3"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(p.x, p.y - 7); g.lineTo(p.x, p.y); g.stroke();
+            live.push(p); return;
+          }
+          if (p.f === "e") { p.y -= 30 * dt; p.a -= 0.8 * dt; if (p.a <= 0) return; }
+          if (p.f === "i") { p.y += 30 * dt; if (p.y >= yW) { gw7 = Math.min(H * 0.08, gw7 + 0.12); return; } }
+          if (p.f === "s") { p.w += dt; if (p.w > 2.5) { p.f = "r"; p.v = 35; } }
+          if (p.f === "r") { p.x += p.v * dt; p.y = yG - 5; if (p.x >= x1) return; }
+          g.globalAlpha = Math.max(0, p.a); g.fillStyle = COL7["eisr".indexOf(p.f)]; g.fillRect(p.x - 1.5, p.y - 1.5, 3, 3); g.globalAlpha = 1;
+          live.push(p);
+        });
+        P7 = live;
+        g.font = "12px " + cs.getPropertyValue("--sans"); g.textAlign = "center"; g.fillStyle = acc;
+        Object.keys(labs).forEach(function (s) { g.fillText(s, labs[s][0], labs[s][1]); });
+        if (pond7 > 1) { g.fillStyle = "#ef6461"; g.fillText("⚠ 路面积水（内涝）", (x0 + x1) / 2, yG - H * 0.25); }
+        g.fillStyle = ink2; g.fillText("河流", (x1 + xr) / 2, yG - 10);
+        g.textAlign = "left"; g.fillText("土壤层", x0 + 6, yG + ds / 2 + 4); g.fillText("地下水", x0 + 6, yW + 20);
+        g.textAlign = "right"; g.fillText("示意模型", xr, H - 8);
+        g.setLineDash([4, 4]); g.strokeStyle = "rgba(79,163,227,.9)"; g.lineWidth = 1; g.beginPath(); g.moveTo(x0, yW); g.lineTo(xr, yW); g.stroke(); g.setLineDash([]);
+      }
+      requestAnimationFrame(tick7);
+
+      var h = parseInt((location.hash || "#1").slice(1), 10);
+      go(isNaN(h) ? 0 : h - 1);
+      addEventListener("hashchange", function () {
+        var n = parseInt(location.hash.slice(1), 10) - 1;
+        if (!isNaN(n) && n !== cur) go(n);
+      });
+    </script>
+  </body>
+</html>
