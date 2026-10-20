@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>格物实验室 · 战役沙盘</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
+    />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-hero.css" />
+    <link rel="stylesheet" href="hark-charts.css" />
+    <style>
+      :root, :root[data-theme="dark"] {
+        --x-bg1: #0e1420; --x-bg2: #121a2a; --x-panel: #151e30; --x-line: #283245; --x-wash: #1b2538;
+        --x-acc: #2ec4b6; --x-gold: #f2b544; --x-red: #ef6461; --x-text: #e6ecf5; --x-text2: #9aa6bb;
+        --x-qin: #ef6461; --x-zhao: #5b9bff;
+        --x-chu: #f5a03a; --x-qinj: #c8423c; --x-zhou: #8fa3bf;
+        --x-cao: #3fd0e0; --x-yuan: #b07cff;
+        --x-wu: #f0584c; --x-shu: #5fd068;
+        --x-jin: #f2b544; --x-fq: #a97cff;
+        --x-gr: #d6a35a; --x-pe: #d04a7e;
+        --x-mac: #f2c14e; --x-pr: #a77bff;
+        --x-ca: #f5953a; --x-ro: #e5484d;
+        --x-nor: #4f8cff; --x-eng: #ef5350;
+      }
+      :root[data-theme="light"] {
+        --x-bg1: #f6f3ec; --x-bg2: #efeadf; --x-panel: #ffffff; --x-line: #dcdfe4; --x-wash: #f3f1ec;
+        --x-acc: #0f7d73; --x-gold: #9a6a0a; --x-red: #b83d40; --x-text: #1d2433; --x-text2: #566074;
+        --x-qin: #b83d40; --x-zhao: #2f6fd0;
+        --x-chu: #b8620a; --x-qinj: #6e1c1f; --x-zhou: #56677e;
+        --x-cao: #0b8597; --x-yuan: #7a3fc4;
+        --x-wu: #b8322b; --x-shu: #2f8a3a;
+        --x-jin: #9a6a0a; --x-fq: #7140b8;
+        --x-gr: #8a5a14; --x-pe: #921f55;
+        --x-mac: #8f6400; --x-pr: #6a3bb5;
+        --x-ca: #b45f06; --x-ro: #b42328;
+        --x-nor: #2a62c9; --x-eng: #b8322f;
+      }
+      html, body { background-color: var(--x-bg1); }
+      :root {
+        --x-serif: "Noto Serif SC", "Songti SC", "STSong", serif;
+        --x-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", var(--sans);
+        --x-mono: "Geist Mono", ui-monospace, Menlo, monospace;
+        --x-r: 10px; --x-t: 200ms;
+      }
+      .x-app { position: fixed; inset: 0; display: grid; grid-template: "top top top" 56px "side stage panel" 1fr "side ctrl panel" auto / 220px minmax(0, 1fr) 340px;
+        background: var(--x-bg1) linear-gradient(160deg, var(--x-bg1), var(--x-bg2)); color: var(--x-text); font: 400 14px/1.5 var(--x-sans); }
+      .x-app button { font: inherit; color: inherit; cursor: pointer; }
+      .x-top { grid-area: top; display: flex; align-items: center; gap: 16px; padding: 0 14px; border-bottom: 1px solid var(--x-line); background: var(--x-panel); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+      .x-brand { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+      .x-brand small { font-size: 12px; color: var(--x-text2); letter-spacing: 0.08em; }
+      .x-brand b { font: 600 16px/1.2 var(--x-serif); white-space: nowrap; }
+      .x-prog { flex: 1; display: flex; align-items: center; gap: 10px; justify-content: center; min-width: 0; }
+      .x-segs { display: flex; gap: 4px; flex: 0 1 360px; }
+      .x-segs button { flex: 1; height: 24px; border: 0; padding: 0; background: none; display: grid; align-items: center; }
+      .x-segs button::before { content: ""; height: 4px; border-radius: 2px; background: var(--x-line); transition: background var(--x-t); }
+      .x-segs button[aria-current="true"]::before { background: var(--x-acc); }
+      .x-count { font: 12px var(--x-mono); color: var(--x-text2); white-space: nowrap; }
+      .x-tools { display: flex; gap: 6px; }
+      .x-ib { width: 36px; height: 36px; border-radius: var(--x-r); border: 1px solid var(--x-line); background: var(--x-wash); display: grid; place-items: center; font: 13px var(--x-mono) !important; transition: border-color var(--x-t), background var(--x-t); }
+      .x-ib:hover { border-color: var(--x-acc); }
+      .x-ib:disabled { opacity: 0.4; cursor: default; }
+      .x-side { grid-area: side; background: var(--x-bg1); overflow-y: auto; border-right: 1px solid var(--x-line); padding: 10px 0; margin: 0; list-style: none; }
+      .x-side button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 9px 16px 9px 18px; border-left: 3px solid transparent; transition: background var(--x-t); }
+      .x-side button:hover { background: var(--x-wash); }
+      .x-side button[aria-current="true"] { border-left-color: var(--x-acc); background: var(--x-wash); }
+      .x-side i { display: block; font: normal 12px var(--x-mono); color: var(--x-text2); }
+      .x-side span { font: 500 15px var(--x-serif); }
+      .x-side em { font-style: normal; font-size: 12px; color: var(--x-text2); margin-left: 6px; }
+      .x-stage { grid-area: stage; position: relative; overflow: hidden; touch-action: none; }
+      .x-stage canvas { display: block; width: 100%; height: 100%; outline: none; }
+      .x-ov { position: absolute; top: 14px; left: 14px; max-width: min(420px, calc(100% - 28px)); padding: 12px 14px; border-radius: var(--x-r); background: var(--x-panel); border: 1px solid var(--x-line); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .x-ov header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .x-ov h1 { font: 600 20px/1.3 var(--x-serif); }
+      .x-ov .x-meta { font: 12px var(--x-mono); color: var(--x-gold); margin-top: 2px; }
+      .x-ov p.x-txt { margin-top: 8px; color: var(--x-text2); font-size: 13px; }
+      .x-ov.is-folded p.x-txt { display: none; }
+      .x-hud { position: absolute; left: 14px; bottom: 64px; display: grid; gap: 4px; font: 12px var(--x-mono); pointer-events: none; }
+      .x-hud div { display: flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 6px; background: var(--x-panel); }
+      .x-hud b { width: 8px; height: 8px; border-radius: 50%; }
+      .x-sub { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); width: min(640px, calc(100% - 28px)); text-align: center; padding: 8px 14px; border-radius: var(--x-r); background: rgb(8 12 20 / 0.72); color: #e6ecf5; font: 500 15px/1.5 var(--x-serif); transition: opacity var(--x-t); }
+      .x-sub:empty { opacity: 0; }
+      .x-soon, .x-fail { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; text-align: center; }
+      .x-soon span, .x-fail span { padding: 10px 18px; border-radius: 999px; border: 1px solid var(--x-gold); color: var(--x-gold); background: var(--x-panel); font: 600 15px var(--x-serif); }
+      .x-fail span { border-color: var(--x-red); color: var(--x-red); }
+      .x-ctrl { grid-area: ctrl; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-top: 1px solid var(--x-line); background: var(--x-panel); }
+      .x-tl { flex: 1; display: flex; gap: 4px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+      .x-tl button { flex: 1 0 auto; min-width: 64px; position: relative; overflow: hidden; border: 1px solid var(--x-line); border-radius: 8px; background: var(--x-wash); padding: 6px 8px 8px; font-size: 12px !important; text-align: center; white-space: nowrap; }
+      .x-tl button i { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: var(--x-acc); }
+      .x-tl button.is-past i { width: 100%; opacity: 0.45; }
+      .x-tl button[aria-current="true"] { border-color: var(--x-acc); color: var(--x-acc); }
+      .x-tl button:disabled { cursor: default; opacity: 0.6; }
+      .x-panel { grid-area: panel; overflow-y: auto; border-left: 1px solid var(--x-line); background: var(--x-panel); padding: 14px 16px 24px; }
+      .x-grip { display: none; }
+      .x-card { border: 1px solid var(--x-line); border-radius: var(--x-r); padding: 12px 14px; margin-bottom: 12px; background: var(--x-wash); }
+      .x-card h2 { font: 600 15px var(--x-serif); margin-bottom: 8px; }
+      .x-card p, .x-card li { font-size: 13px; color: var(--x-text); }
+      .x-card ul, .x-card ol { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+      .x-book { font-size: 12px; color: var(--x-acc); margin-bottom: 12px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--x-line); }
+      .x-dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; font-size: 13px; }
+      .x-dl dt { color: var(--x-text2); } .x-dl dd { margin: 0; }
+      .x-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 36px; font-size: 13px; }
+      .x-row input[type="range"] { flex: 1; accent-color: var(--x-acc); }
+      .x-row output { font: 12px var(--x-mono); color: var(--x-gold); min-width: 40px; text-align: right; }
+      .x-sw { appearance: none; -webkit-appearance: none; width: 36px; height: 20px; border-radius: 10px; background: var(--x-line); position: relative; cursor: pointer; transition: background var(--x-t); flex: none; }
+      .x-sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--x-text); transition: transform var(--x-t); }
+      .x-sw:checked { background: var(--x-acc); } .x-sw:checked::after { transform: translateX(16px); }
+      .x-gk { margin-top: 10px; padding: 8px 10px; border-left: 3px solid var(--x-gold); background: var(--x-wash); border-radius: 0 8px 8px 0; font-size: 13px; }
+      .x-gk b { color: var(--x-gold); }
+      .x-tag { display: inline-block; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--x-gold); color: var(--x-gold); font-size: 12px; }
+      .x-panel .chart { padding: 12px 10px 8px; margin: 0; background: transparent; }
+      .x-qsc { display: flex; align-items: baseline; gap: 6px; font: 13px var(--x-mono); color: var(--x-text2) !important; }
+      .x-qsc b { font: 600 28px var(--x-mono); color: var(--x-gold); }
+      .x-qsc small { margin-left: auto; font-size: 12px; }
+      .x-card ol.x-marks { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; padding: 0; margin-top: 8px; list-style: none; }
+      .x-marks li { height: 26px; display: grid; place-items: center; border-radius: 6px; border: 1px solid var(--x-line); font: 12px var(--x-mono); color: var(--x-text2); }
+      .x-marks li[aria-current="true"] { border-color: var(--x-gold); color: var(--x-gold); }
+      .x-marks li.is-ok, .x-sum li.is-ok b { color: var(--x-acc); border-color: var(--x-acc); }
+      .x-marks li.is-no, .x-sum li.is-no b { color: var(--x-red); border-color: var(--x-red); }
+      .x-qst { line-height: 1.6; margin-bottom: 10px; }
+      .x-opts { display: grid; gap: 6px; }
+      .x-opt, .x-qbtn { min-height: var(--tap); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--x-line); background: var(--x-panel); text-align: left; font-size: 13px !important; transition: border-color var(--x-t); }
+      .x-opt:hover:not(:disabled), .x-qbtn:hover { border-color: var(--x-gold); }
+      .x-opt:disabled { cursor: default; opacity: 0.7; }
+      .x-opt.is-ok { border-color: var(--x-acc); color: var(--x-acc); opacity: 1; }
+      .x-opt.is-no { border-color: var(--x-red); color: var(--x-red); opacity: 1; }
+      .x-fb { margin-top: 10px; padding: 8px 10px; border-radius: 8px; border-left: 3px solid var(--x-acc); background: var(--x-panel); line-height: 1.6; }
+      .x-fb.is-no { border-left-color: var(--x-red); }
+      .x-fb b { display: block; }
+      .x-fb.is-ok b { color: var(--x-acc); } .x-fb.is-no b { color: var(--x-red); }
+      .x-qbtn { display: block; width: 100%; margin-top: 10px; text-align: center; border-color: var(--x-acc); color: var(--x-acc) !important; font-weight: 600 !important; }
+      .x-hint { margin-top: 10px; font-size: 12px !important; color: var(--x-text2) !important; }
+      .x-sum small { display: block; color: var(--x-text2); font-size: 12px; }
+      .x-qt { width: 100%; border-collapse: collapse; font-size: 12px; }
+      .x-qt th, .x-qt td { padding: 6px 4px; border-bottom: 1px solid var(--x-line); text-align: left; vertical-align: top; }
+      .x-qt thead th { color: var(--x-text2); font-weight: 500; }
+      .x-qt tbody th { font: 600 13px var(--x-serif); white-space: nowrap; }
+      .x-qt tbody th small { display: block; font: 12px var(--x-mono); color: var(--x-gold); }
+      @media (max-width: 1023px) { .x-app { grid-template-columns: 180px minmax(0, 1fr) 300px; } }
+      @media (max-width: 767px) {
+        .x-app { grid-template: "top" 56px "side" 48px "stage" 1fr "ctrl" auto / minmax(0, 1fr); padding-bottom: 52px; }
+        .x-top { gap: 8px; padding: 0 8px; }
+        .x-segs { display: none; }
+        .x-tools { gap: 2px; } .x-ib { width: var(--tap); height: var(--tap); border: 0; background: none; }
+        .x-side { display: flex; overflow-x: auto; overflow-y: hidden; padding: 0; border-right: 0; border-bottom: 1px solid var(--x-line); scrollbar-width: none; }
+        .x-side li { flex: none; }
+        .x-side button { height: 48px; padding: 4px 12px; border-left: 0; border-bottom: 3px solid transparent; display: flex; align-items: center; gap: 6px; }
+        .x-side button[aria-current="true"] { border-bottom-color: var(--x-acc); }
+        .x-side em { display: none; }
+        .x-tl button { min-height: var(--tap); }
+        .x-ctrl .x-ib { flex: none; }
+        .x-hud { bottom: auto; top: 14px; left: auto; right: 14px; }
+        .x-ov { max-width: calc(100% - 150px); }
+        .x-panel { position: fixed; left: 0; right: 0; bottom: 0; height: 74vh; z-index: 30; border: 1px solid var(--x-line); border-radius: 16px 16px 0 0; padding-top: 0; transform: translateY(calc(100% - 52px)); transition: transform 300ms var(--ease-out); box-shadow: 0 -8px 30px rgb(0 0 0 / 0.3); }
+        .x-panel.is-open { transform: none; }
+        .x-grip { display: flex; position: sticky; top: 0; z-index: 2; width: calc(100% + 32px); margin: 0 -16px 10px; height: 52px; align-items: center; justify-content: center; gap: 8px; border: 0; background: var(--x-panel); font: 600 14px var(--x-serif) !important; backdrop-filter: blur(16px); }
+        .x-grip::before { content: ""; width: 36px; height: 4px; border-radius: 2px; background: var(--x-text2); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page" id="top">
+      <div class="x-app" id="app">
+        <header class="x-top">
+          <div class="x-brand"><small>格物实验室</small><b>战役沙盘 · WarTable</b></div>
+          <div class="x-prog"><div class="x-segs" id="segs"></div><span class="x-count" id="count">01 / 10</span></div>
+          <div class="x-tools">
+            <button class="x-ib" id="bPrev" aria-label="上一章 (←)" title="上一章 (←)">←</button>
+            <button class="x-ib" id="bNext" aria-label="下一章 (→)" title="下一章 (→)">→</button>
+            <button class="x-ib" id="bTheme" aria-label="切换主题 (T)" title="青黛夜 / 宣纸 (T)">T</button>
+            <button class="x-ib" id="bReset" aria-label="重置视角 (R)" title="重置视角 (R)">R</button>
+            <button class="x-ib" id="bFull" aria-label="全屏 (F)" title="全屏 (F)">F</button>
+          </div>
+        </header>
+        <ul class="x-side" id="side" aria-label="章节"></ul>
+        <div class="x-stage" id="stage">
+          <div class="x-ov" id="ov">
+            <header><h1 id="ovTitle"></h1><button class="x-ib" id="bFold" aria-label="折叠讲解">–</button></header>
+            <p class="x-meta" id="ovMeta"></p>
+            <p class="x-txt" id="ovTxt"></p>
+          </div>
+          <div class="x-hud" id="hud"></div>
+          <p class="x-sub" id="sub" aria-live="polite"></p>
+          <div class="x-soon" id="soon" hidden><span>交互即将上线</span></div>
+          <div class="x-fail" id="fail" hidden><span>3D 引擎未能加载，请检查网络后刷新</span></div>
+        </div>
+        <div class="x-ctrl">
+          <button class="x-ib" id="bSPrev" aria-label="上一阶段">⏮</button>
+          <button class="x-ib" id="bPlay" aria-label="自动播放">▶</button>
+          <button class="x-ib" id="bSNext" aria-label="下一阶段">⏭</button>
+          <div class="x-tl" id="tl" aria-label="阶段时间轴"></div>
+        </div>
+        <aside class="x-panel" id="panel" aria-label="讲解面板"></aside>
+      </div>
+    </div>
+    <script type="application/json" id="force-data">
+      [{"stage":"上党","qin":100,"zhao":100},{"stage":"坚壁","qin":100,"zhao":100},{"stage":"换将","qin":100,"zhao":100},
+       {"stage":"出击","qin":96,"zhao":92},{"stage":"断后","qin":92,"zhao":82},{"stage":"围困","qin":88,"zhao":50},{"stage":"覆没","qin":82,"zhao":5}]
+    </script>
+    <script type="application/json" id="force-jl">
+      [{"stage":"围赵","chu":100,"qin":100},{"stage":"夺军","chu":100,"qin":100},{"stage":"渡河","chu":100,"qin":100},
+       {"stage":"九战","chu":94,"qin":75},{"stage":"壁观","chu":90,"qin":60},{"stage":"投降","chu":88,"qin":0}]
+    </script>
+    <script type="application/json" id="force-gd">
+      [{"stage":"相争","cao":30,"yuan":100},{"stage":"白马","cao":30,"yuan":97},{"stage":"延津","cao":29,"yuan":90},
+       {"stage":"相持","cao":27,"yuan":86},{"stage":"乌巢","cao":27,"yuan":80},{"stage":"溃败","cao":26,"yuan":10}]
+    </script>
+    <script type="application/json" id="force-cb">
+      [{"stage":"南下","cao":100,"sl":30},{"stage":"联盟","cao":100,"sl":32},{"stage":"对峙","cao":98,"sl":32},
+       {"stage":"火攻","cao":40,"sl":31},{"stage":"华容道","cao":22,"sl":30},{"stage":"三分","cao":22,"sl":30}]
+    </script>
+    <script type="application/json" id="force-fs">
+      [{"stage":"南下","fq":100,"jin":12},{"stage":"备战","fq":100,"jin":12},{"stage":"洛涧","fq":96,"jin":12},
+       {"stage":"草木","fq":96,"jin":12},{"stage":"后撤","fq":80,"jin":12},{"stage":"风声","fq":15,"jin":12}]
+    </script>
+    <script type="application/json" id="force-tm">
+      [{"stage":"西征","gr":100,"pe":100},{"stage":"血战","gr":96,"pe":85},{"stage":"迂回","gr":95,"pe":82},
+       {"stage":"殿后","gr":15,"pe":81},{"stage":"殉国","gr":0,"pe":80}]
+    </script>
+    <script type="application/json" id="force-gm">
+      [{"stage":"对峙","mac":40,"pe":100},{"stage":"斜进","mac":40,"pe":100},{"stage":"突击","mac":39,"pe":92},
+       {"stage":"苦战","mac":34,"pe":86},{"stage":"溃逃","mac":33,"pe":20}]
+    </script>
+    <script type="application/json" id="force-cn">
+      [{"stage":"入意","ca":60,"ro":100},{"stage":"新月","ca":60,"ro":100},{"stage":"诱敌","ca":57,"ro":95},
+       {"stage":"合围","ca":55,"ro":60},{"stage":"惨败","ca":54,"ro":10}]
+    </script>
+    <script type="application/json" id="force-hs">
+      [{"stage":"登陆","nor":100,"eng":100},{"stage":"南下","nor":100,"eng":100},{"stage":"盾墙","nor":85,"eng":85},
+       {"stage":"败退","nor":80,"eng":60},{"stage":"阵亡","nor":78,"eng":15}]
+    </script>
+    <script src="hark.js"></script>
+    <script src="chart.js"></script>
+    <script src="datalabels.js"></script>
+    <script src="hark-charts.js"></script>
+    <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+(function () {
+  "use strict";
+  const $ = (s) => document.querySelector(s), root = document.documentElement, PI = Math.PI;
+  /* ---------- 章节内容（取自 war.txt） ---------- */
+  const CH = [
+    { name: "长平之战", meta: "前 260 年 · 秦 对 赵", live: true,
+      bg: "秦国攻占韩国野王，上党郡与韩国本土的联系被切断。上党郡守冯亭不愿降秦，把上党献给赵国。赵国接受了上党，派廉颇率大军进驻长平；秦国派王龁领兵来攻。",
+      stages: ["争夺上党", "廉颇坚壁", "反间换将", "赵括出击", "奇兵断后", "断粮围困", "赵军覆没"],
+      sig: ["战国时期规模最大、最惨烈的战役之一。", "赵国从此一蹶不振，东方六国再也无力单独抗秦，为秦统一六国扫清了最大的障碍。"] },
+    { name: "巨鹿之战", meta: "前 207 年 · 楚军 对 秦军", live: true,
+      bg: "秦末农民起义席卷各地。秦将章邯击败项梁后北上攻赵，王离率大军把赵王歇围困在巨鹿；章邯驻军棘原，修筑两边有墙的甬道给王离运粮。各路诸侯援军赶到巨鹿北面，筑起营垒，却不敢进攻秦军。",
+      stages: ["秦军围赵", "项羽夺军", "破釜沉舟", "九战九捷", "作壁上观", "章邯投降"],
+      sig: ["秦末农民战争中具有决定意义的一战，消灭了秦军主力。", "奠定了推翻秦朝统治的基础，项羽由此成为反秦联军的统帅。"] },
+    { name: "官渡之战", meta: "200 年 · 曹操 对 袁绍",
+      bg: "袁绍占据河北四州，兵多粮足；曹操“挟天子以令诸侯”，控制黄河以南。200 年，袁绍率大军南下，进驻黎阳准备渡河。曹操兵少，把主力集中在官渡，扼守通往许都的要道。",
+      stages: ["两强相争", "白马解围", "延津诛文丑", "官渡相持", "夜袭乌巢", "袁军溃败"],
+      sig: ["中国历史上以少胜多的著名战役。", "袁绍势力从此衰落，奠定了曹操统一北方的基础。"] },
+    { name: "赤壁之战", meta: "208 年 · 孙刘联军 对 曹操",
+      bg: "曹操统一北方后，率大军南下荆州。刘表病死，其子刘琮投降，曹军占领江陵，得到荆州的水军和战船。刘备在当阳长坂被击败，退到夏口。",
+      stages: ["曹操南下", "孙刘联盟", "对峙赤壁", "黄盖火攻", "败走华容道", "三分天下"],
+      sig: ["中国历史上以少胜多的著名战役。", "曹操统一全国的进程受阻，奠定了三国鼎立的基础。"] },
+    { name: "淝水之战", meta: "383 年 · 东晋 对 前秦",
+      bg: "前秦皇帝苻坚统一北方后，不顾大臣劝阻，率八十多万大军南下，想一举灭掉东晋，夸口说“以吾之众旅，投鞭于江，足断其流”。前锋苻融渡过淮河，攻占寿阳；后续大军前后绵延千里。",
+      stages: ["前秦南下", "东晋备战", "洛涧之战", "草木皆兵", "秦军后撤", "风声鹤唳"],
+      sig: ["中国历史上以少胜多的著名战役。", "前秦瓦解，北方重新分裂；东晋政权得到稳定，南方经济继续得到开发。"] },
+    { name: "温泉关之战", meta: "前 480 年 · 希腊联军 对 波斯",
+      bg: "波斯帝国国王薛西斯率大军渡海进攻希腊，水陆并进。希腊各城邦组成联军，由斯巴达国王列奥尼达率领约七千人扼守温泉关。这里一侧是陡峭的山崖，一侧是大海，最窄处只能容一辆车通过。",
+      stages: ["波斯西征", "两日血战", "小道迂回", "列奥尼达殿后", "全军殉国"],
+      sig: ["殿后部队的牺牲为希腊海军和各城邦赢得了时间，同年希腊在萨拉米斯海战中大败波斯。", "成为希波战争中以少抗多、宁死不退的象征。"] },
+    { name: "高加米拉战役", meta: "前 331 年 · 马其顿 对 波斯",
+      bg: "前 334 年起，马其顿国王亚历山大率军东征波斯。前 331 年秋，他渡过底格里斯河，在高加米拉附近的平原上遇到大流士三世亲率的波斯大军。大流士事先把战场铲平，方便刀轮战车冲锋。",
+      stages: ["大军对峙", "斜线推进", "楔形突击", "左翼苦战", "大流士溃逃"],
+      sig: ["波斯帝国从此土崩瓦解，亚历山大建立起地跨欧、亚、非三洲的大帝国。", "东征客观上促进了东西方文化的交流，希腊文化向东传播。"] },
+    { name: "坎尼会战", meta: "前 216 年 · 迦太基 对 罗马",
+      bg: "第二次布匿战争爆发后，迦太基名将汉尼拔翻越阿尔卑斯山进入意大利，接连大败罗马军。前 216 年夏，他夺取了罗马人的粮仓坎尼。罗马派执政官保卢斯和瓦罗率领约八万大军前来决战。",
+      stages: ["汉尼拔入意", "新月阵型", "中路诱敌", "两翼合围", "罗马惨败"],
+      sig: ["军事史上两翼包围、歼灭敌军的经典战例，至今仍被各国军校研究。", "罗马虽遭惨败却没有屈服，最终赢得了第二次布匿战争，称霸西地中海。"] },
+    { name: "黑斯廷斯战役", meta: "1066 年 · 诺曼 对 英格兰",
+      bg: "1066 年初，英格兰国王爱德华去世，贵族们推举哈罗德为国王。法国的诺曼底公爵威廉声称自己才是合法继承人，率军渡过英吉利海峡，在佩文西登陆，随后在黑斯廷斯筑营。",
+      stages: ["诺曼登陆", "哈罗德南下", "盾墙鏖战", "佯装败退", "哈罗德阵亡"],
+      sig: ["诺曼征服后，英格兰建立起强有力的王权，封建制度进一步发展。", "大量法语词汇进入英语，深刻影响了英国的语言和文化。"] },
+    { name: "随堂检测", meta: "浙江选考风格 · 8 道单选", quiz: true,
+      bg: "以前九章战役为考点。每题先把舞台切到相关战役的关键阶段，作答后即时判分、给出解析，并播放该阶段演示。", stages: [], sig: [] },
+  ];
+  /* 长平：逐阶段字幕（据 war.txt 与战役阶段改写） */
+  const SUBS = [
+    ["秦国攻占韩国野王，上党郡与韩国本土的联系被切断。", "上党郡守冯亭不愿降秦，把上党献给赵国。", "赵国接受上党，派廉颇进驻长平；秦国派王龁领兵来攻。"],
+    ["廉颇命赵军沿丹河筑起营垒，坚壁固守。", "秦军在对岸扎营，两军隔丹河对峙。"],
+    ["两军相持之际，秦国施行反间计。", "赵国改派赵括接替廉颇为将。", "成语“纸上谈兵”即出自赵括。"],
+    ["赵括放弃坚守，率赵军渡过丹河主动出击。", "秦军佯装败退，把赵军引离营垒。"],
+    ["秦军两支奇兵从两翼迂回而出，", "切断了赵军的后路与粮道。"],
+    ["赵军被围，粮道断绝。", "包围圈越收越紧，赵军兵力不断减少。"],
+    ["赵军覆没。", "这是战国时期规模最大、最惨烈的战役之一。", "赵国从此一蹶不振，东方六国再也无力单独抗秦。"],
+  ];
+  /* ---------- 地形配置：山脊/山峰(pts,w,h)、谷地(pts,w,d)、河流(pts,w,d) ---------- */
+  const TERRAIN = {
+    changping: { base: 2, noise: 1.3,
+      mountains: [{ pts: [[-82, -62], [-62, 0], [-74, 66]], w: 16, h: 24 }, { pts: [[62, -66], [70, 0], [60, 66]], w: 18, h: 22 },
+        { pts: [[-45, -66], [5, -60], [50, -66]], w: 9, h: 14 }, { pts: [[-36, -16]], w: 10, h: 7 }, { pts: [[34, 36]], w: 9, h: 6 }],
+      valleys: [{ pts: [[-40, 0], [40, 0]], w: 28, d: 2 }],
+      rivers: [{ name: "丹河", pts: [[-6, -72], [2, -44], [-3, -14], [3, 14], [-2, 44], [4, 72]], w: 4, d: 4 }] },
+    generic: { base: 1, noise: 2.2,
+      mountains: [{ pts: [[-82, -50], [-30, -62]], w: 16, h: 14 }, { pts: [[40, 40], [86, 55]], w: 18, h: 16 }, { pts: [[-20, 28]], w: 14, h: 7 }],
+      rivers: [{ pts: [[-100, 10], [-40, 0], [20, -8], [100, 0]], w: 4, d: 3 }] },
+  };
+  const CP = {
+    labels: [["长平", 22, 8, "--x-text"], ["上党", 18, -50, "--x-text"], ["丹河", 4, -32, "--x-acc"], ["秦垒", -33, -4, "--x-qin"],
+      ["赵垒", 18, 22, "--x-zhao"], ["百里石长城（示意）", 5, -66, "--x-gold"], ["赵军粮道", 46, -12, "--x-zhao"]],
+    lines: [{ pts: [[-31, -32], [-33, 0], [-31, 32]], c: "--x-qin" }, { pts: [[13, -34], [15, 0], [13, 34]], c: "--x-zhao" },
+      { pts: [[-40, -64], [5, -59], [45, -64]], c: "--x-gold" }, { id: "supply", pts: [[96, -12], [60, -8], [36, -4], [18, 0]], c: "--x-zhao" }],
+    armies: [{ id: "qin", name: "秦军", n: 700, c: "--x-qin" }, { id: "zhao", name: "赵军", n: 800, c: "--x-zhao" },
+      { id: "qiA", name: "秦奇兵·北", n: 220, c: "--x-qin" }, { id: "qiB", name: "秦奇兵·南", n: 220, c: "--x-qin" }],
+    /* 关键帧：x,z 中心；w 宽(弧阵为直径)；d 纵深；a 朝向；r 人数比例；s 状态；shape line/blob/arc；span 弧角 */
+    K: [
+      { qin: { x: -68, z: 10, w: 8, d: 30, a: 0, s: "行军" }, zhao: { x: 45, z: -30, w: 8, d: 34, a: 2.36, s: "行军" },
+        qiA: { x: -62, z: -52, w: 6, d: 16, a: 0, r: 0, s: "行军" }, qiB: { x: -62, z: 52, w: 6, d: 16, a: 0, r: 0, s: "行军" } },
+      { qin: { x: -30, z: 0, w: 60, a: 0, s: "对峙" }, zhao: { x: 17, z: 0, w: 64, a: PI, s: "对峙" } },
+      { qin: { x: -30, z: 0, w: 60, a: 0, s: "对峙" }, zhao: { x: 17, z: 0, w: 64, a: PI, s: "对峙" } },
+      { qin: { x: -46, z: 0, w: 56, d: 7, a: 0, r: 0.96, s: "交战" }, zhao: { x: -16, z: 0, w: 50, d: 8, a: PI, r: 0.92, s: "交战" } },
+      { qin: { x: -48, z: 0, w: 54, d: 7, a: 0, r: 0.92, s: "交战" }, zhao: { x: -22, z: 0, w: 44, d: 10, a: PI, r: 0.82, s: "交战" },
+        qiA: { x: 6, z: -20, w: 30, d: 5, a: PI / 2, s: "行军" }, qiB: { x: 6, z: 20, w: 30, d: 5, a: -PI / 2, s: "行军" } },
+      { qin: { x: -20, z: 0, w: 64, d: 5, a: PI, span: 2.4, shape: "arc", r: 0.88, s: "包围" }, zhao: { x: -20, z: 0, w: 22, shape: "blob", r: 0.5, s: "包围" },
+        qiA: { x: -20, z: 0, w: 64, d: 5, a: 5.31, span: 1.9, shape: "arc", s: "包围" }, qiB: { x: -20, z: 0, w: 64, d: 5, a: 0.97, span: 1.9, shape: "arc", s: "包围" } },
+      { qin: { x: -20, z: 0, w: 42, d: 5, a: PI, span: 2.4, shape: "arc", r: 0.82, s: "包围" }, zhao: { x: -20, z: 0, w: 14, shape: "blob", r: 0.05, s: "溃逃" },
+        qiA: { x: -20, z: 0, w: 42, d: 5, a: 5.31, span: 1.9, shape: "arc", s: "包围" }, qiB: { x: -20, z: 0, w: 42, d: 5, a: 0.97, span: 1.9, shape: "arc", s: "包围" } },
+    ],
+  };
+  Object.assign(CP, { terrain: TERRAIN.changping, subs: SUBS, data: "force-data", cut: 4, supC: "--x-zhao",
+    series: [["秦军", "qin", "--x-qin"], ["赵军", "zhao", "--x-zhao"]] });
+  /* ---------- 巨鹿：地形、地物与关键帧（位置为示意） ---------- */
+  const sq = (x, z, r) => [[x - r, z - r], [x + r, z - r], [x + r, z + r], [x - r, z + r], [x - r, z - r]];
+  const ring = (x, z, r) => Array.from({ length: 33 }, (_, i) => [x + Math.cos((i / 16) * PI) * r, z + Math.sin((i / 16) * PI) * r]);
+  const YD = [[-50, -2], [-36, -6], [-22, -10], [-9, -14]];
+  TERRAIN.julu = { base: 1, noise: 1.1,
+    mountains: [{ pts: [[-96, -66], [-84, 6]], w: 14, h: 14 }, { pts: [[-50, -76], [70, -74]], w: 8, h: 8 }, { pts: [[80, 62], [96, 12]], w: 12, h: 10 }],
+    rivers: [{ name: "漳水", pts: [[-100, 34], [-50, 28], [0, 32], [50, 26], [100, 31]], w: 5, d: 4 }] };
+  const JL = { terrain: TERRAIN.julu, data: "force-jl", cut: 3, supC: "--x-gold",
+    series: [["楚军", "chu", "--x-chu"], ["秦军", "qin", "--x-qinj"]],
+    subs: [["秦将章邯击败项梁后北上攻赵，王离率大军把赵王歇围困在巨鹿。", "章邯驻军棘原，修筑两边有墙的甬道给王离运粮。"],
+      ["项羽杀宋义夺兵权。"],
+      ["楚军渡过漳水。", "沉船破釜，持三日粮。"],
+      ["楚军切断甬道，断绝王离军的粮道。", "与王离军反复交战，九战九捷。"],
+      ["各路诸侯援军在巨鹿北面筑起营垒，", "却不敢进攻秦军，作壁上观。"],
+      ["章邯投降。", "秦末农民战争中具有决定意义的一战，消灭了秦军主力。", "奠定了推翻秦朝统治的基础，项羽由此成为反秦联军的统帅。"]],
+    labels: [["巨鹿", 10, -15, "--x-text"], ["漳水", 62, 36, "--x-acc"], ["王离围城营", 36, -30, "--x-qinj"], ["章邯 · 棘原营", -56, -13, "--x-qinj"],
+      ["甬道（运粮道）", -32, 4, "--x-gold"], ["诸侯营垒", 10, -66, "--x-zhou"]],
+    lines: [{ pts: ring(10, -15, 22), c: "--x-qinj" }, { pts: sq(10, -15, 5), c: "--x-zhou" }, { pts: sq(-56, -2, 7), c: "--x-qinj" },
+      ...[-20, 10, 40].map((x) => ({ pts: sq(x, -55, 6), c: "--x-zhou" })), { id: "supply", pts: YD, c: "--x-gold", wall: 1.3 }],
+    icons: [["舟", -18, 31], ["舟", 0, 32], ["舟", 18, 30], ["釜", -12, 45], ["釜", 4, 46], ["釜", 18, 44]],
+    armies: [{ id: "chu", name: "楚军", n: 520, c: "--x-chu" }, { id: "wl", name: "王离军", n: 700, c: "--x-qinj" },
+      { id: "zh", name: "章邯军", n: 420, c: "--x-qinj" }, { id: "yun", name: "甬道运粮", n: 140, c: "--x-qinj" },
+      { id: "zhao", name: "赵军（巨鹿）", n: 160, c: "--x-zhou" }, { id: "hou", name: "诸侯军", n: 360, c: "--x-zhou" }],
+    K: [
+      { wl: { x: 10, z: -15, w: 34, d: 5, a: 0, span: 2 * PI, shape: "arc", s: "包围" }, zh: { x: -56, z: -2, w: 12, shape: "blob", s: "对峙" },
+        yun: { shape: "flow", pts: YD, d: 1.6, s: "运粮" }, zhao: { x: 10, z: -15, w: 8, shape: "blob", s: "对峙" },
+        hou: { x: 10, z: -55, w: 9, shape: "camps", n: 3, gap: 30, s: "观望" }, chu: { x: 0, z: 70, w: 40, d: 6, a: -PI / 2, r: 0, s: "行军" } },
+      { chu: { x: 0, z: 54, w: 44, d: 6, a: -PI / 2, r: 1, s: "行军" } },
+      { chu: { x: -4, z: 12, w: 40, d: 6, a: -PI / 2, s: "行军" } },
+      { chu: { x: -20, z: -6, w: 18, shape: "blob", r: 0.94, s: "交战" }, wl: { r: 0.6, s: "交战" }, yun: { r: 0 } },
+      { chu: { x: -6, z: -2, w: 20, shape: "blob", r: 0.9, s: "交战" }, wl: { r: 0.3, s: "交战" } },
+      { chu: { x: -6, z: 0, w: 22, shape: "blob", r: 0.88, s: "对峙" }, wl: { r: 0.03, s: "溃逃" }, zh: { r: 0.7, s: "投降" } },
+    ],
+  };
+  const tmpC = { a: null };
+  JL.frame = (s, l, ch, prev) => {
+    if (!R) return;
+    if (icons) icons.visible = s < 2 || (s === 2 && l < 0.5); // 渡河后舟、釜消失
+    const zh = armies.find((a) => a.id === "zh");
+    if (zh) { tmpC.a = tmpC.a || new THREE.Color(); zh.m.color.set(col("--x-qinj")).lerp(tmpC.a.set(col("--x-chu")), s === 5 ? ease(Math.min(1, l / 0.6)) : 0); }
+    if (s === 4 && l < 0.9) { const x = -45 + 90 * ease(Math.min(1, l / 0.85)); ctl.target.set(x, 0, -52); cam.position.set(x - 10, 50, 12); } // 镜头掠过诸侯营垒
+    else if (ch && prev === 4) resetView();
+  };
+  /* ---------- 官渡：地形、地物与关键帧（位置为示意） ---------- */
+  const HE = [[-100, -18], [-50, -23], [0, -19], [50, -24], [100, -20]];
+  TERRAIN.guandu = { base: 1, noise: 1, rivers: [{ name: "黄河", pts: HE, w: 7, d: 4 }],
+    mountains: [{ pts: [[-96, -72], [-56, -74]], w: 12, h: 12 }, { pts: [[-96, 44], [-82, 72]], w: 12, h: 9 }, { pts: [[84, 60], [98, 30]], w: 10, h: 7 }] };
+  const RAID = [[-4, 32], [12, 34], [28, 24], [36, 8]];
+  const GD = { terrain: TERRAIN.guandu, data: "force-gd", cut: 4, supC: "--x-yuan",
+    series: [["曹军", "cao", "--x-cao"], ["袁军", "yuan", "--x-yuan"]],
+    subs: [["袁绍占据河北四州，兵多粮足；曹操“挟天子以令诸侯”，控制黄河以南。", "200 年，袁绍率大军南下，进驻黎阳准备渡河。", "曹操兵少，把主力集中在官渡，扼守通往许都的要道。"],
+      ["曹军声东击西：一支西去延津，佯装渡河。", "袁军分兵追向延津。", "曹军主力趁机东奔白马，解白马之围。"],
+      ["袁军骑兵追击而来。", "曹军以辎重诱敌，再乘乱反击，诛文丑。", "袁军兵力减少。"],
+      ["双方在官渡筑起营垒，对峙相持。", "营前不断发生小规模接触。"],
+      ["夜色中，曹军小股精兵沿暗线奔袭乌巢。", "乌巢是袁军的粮仓，粮仓燃起大火。"],
+      ["袁军溃败，四散北逃，渡河而去。", "中国历史上以少胜多的著名战役。", "袁绍势力从此衰落，奠定了曹操统一北方的基础。"]],
+    labels: [["黄河", 70, -30, "--x-acc"], ["黎阳", 25, -50, "--x-text"], ["白马", 42, -10, "--x-text"], ["延津", -40, -10, "--x-text"],
+      ["官渡", 4, 42, "--x-cao"], ["许都", -22, 66, "--x-text"], ["乌巢（袁军粮仓）", 44, 0, "--x-gold"], ["袁营", -42, 8, "--x-yuan"], ["曹营", -40, 30, "--x-cao"]],
+    lines: [{ pts: [[-38, 15], [-8, 13], [24, 15]], c: "--x-yuan" }, { pts: [[-30, 25], [-8, 23], [14, 25]], c: "--x-cao" },
+      { pts: [[-8, 30], [-18, 48], [-22, 62]], c: "--x-cao" }, { id: "supply", pts: [[36, 6], [22, 9], [8, 12]], c: "--x-yuan" },
+      { pts: RAID, c: "--x-cao" }],
+    icons: [["粮", 36, 3]],
+    armies: [{ id: "yuan", name: "袁军", n: 1000, c: "--x-yuan" }, { id: "yq", name: "袁军分兵", n: 220, c: "--x-yuan" },
+      { id: "cao", name: "曹军主力", n: 300, c: "--x-cao" }, { id: "cx", name: "曹军偏师", n: 110, c: "--x-cao" },
+      { id: "fire", name: "乌巢火光", n: 240, c: "--x-red" }],
+    K: [
+      { yuan: { x: 25, z: -42, w: 34, shape: "blob", s: "对峙" }, yq: { x: 25, z: -42, w: 20, shape: "blob", r: 0, s: "对峙" },
+        cao: { x: -8, z: 32, w: 14, shape: "blob", s: "对峙" }, cx: { x: -8, z: 32, w: 10, shape: "blob", s: "对峙" },
+        fire: { x: 36, z: 6, w: 10, shape: "blob", r: 0, s: "火攻" } },
+      { yuan: { r: 0.97 }, yq: { x: -36, z: -32, w: 26, d: 6, a: PI / 2, shape: "line", r: 1, s: "行军" },
+        cx: { x: -36, z: -8, w: 18, d: 5, a: -PI / 2, shape: "line", s: "佯渡" }, cao: { x: 36, z: -8, w: 16, shape: "blob", s: "行军" } },
+      { yuan: { r: 0.9 }, yq: { x: -30, z: 2, w: 14, shape: "blob", r: 0.4, s: "交战" }, cx: { x: -38, z: 8, w: 9, shape: "blob", s: "诱敌" },
+        cao: { x: -22, z: 6, w: 22, d: 6, a: PI, shape: "line", r: 0.97, s: "交战" } },
+      { yuan: { x: -8, z: 12, w: 56, d: 7, a: PI / 2, shape: "line", r: 0.86, s: "相持" }, yq: { x: -8, z: 12, w: 10, shape: "blob", r: 0, s: "相持" },
+        cao: { x: -8, z: 25, w: 40, d: 5, a: -PI / 2, shape: "line", r: 0.92, s: "相持" }, cx: { x: -8, z: 34, w: 8, shape: "blob", s: "对峙" } },
+      { yuan: { r: 0.8, s: "对峙" }, cao: { s: "对峙" }, cx: { x: 36, z: 6, w: 8, shape: "blob", s: "交战" }, fire: { r: 1 } },
+      { yuan: { x: 10, z: -46, w: 96, shape: "blob", r: 0.12, s: "溃逃" }, cao: { x: -4, z: 4, w: 46, d: 5, a: -PI / 2, s: "行军" },
+        cx: { x: 22, z: -4, w: 10, shape: "blob", s: "行军" }, fire: { r: 0.35 } },
+    ],
+  };
+  GD.frame = (s, l) => {
+    if (!R) return;
+    const n = s === 4 ? ease(Math.min(1, l / 0.3)) : s === 5 ? 1 - ease(Math.min(1, l / 0.5)) : 0; // 夜色
+    amb.intensity = (isDark() ? 0.75 : 0.85) * (1 - 0.65 * n); sun.intensity = 0.9 * (1 - 0.75 * n); R.setClearColor(0x02050c, 0.6 * n);
+    if (icons) icons.visible = s < 4 || (s === 4 && l < 0.45); // 粮仓被焚
+    const raid = helpersG.children[GD.lines.length - 1]; if (raid) raid.visible = s === 4;
+    const F = armies.find((a) => a.id === "fire");
+    if (F && F.ratio > 0.01) {
+      const P = F.pos, cnt = Math.ceil(F.N * F.ratio);
+      for (let i = 0; i < cnt; i++) P[i * 3 + 1] = H(P[i * 3], P[i * 3 + 2]) + 0.9 + ((F.ph[i] * 3 + clock * 0.9) % 1) * 9; // 火光上升
+      F.g.attributes.position.needsUpdate = true;
+      tmpC.a = tmpC.a || new THREE.Color(); F.m.color.set(col("--x-red")).lerp(tmpC.a.set(col("--x-gold")), 0.5 + 0.5 * Math.sin(clock * 7));
+    }
+  };
+  // 未写出的部队沿用上一关键帧
+  [CP, JL, GD].forEach((S) => S.K.forEach((k, i) => S.armies.forEach((a) => { k[a.id] = Object.assign({ d: 6, r: 1, shape: "line", a: 0 }, i ? S.K[i - 1][a.id] : {}, k[a.id]); })));
+  CH[0].sc = CP; CH[1].sc = JL; CH[2].sc = GD; CH[2].live = true;
+  const SC = () => CH[cur].sc, NS = () => CH[cur].stages.length;
+  const JIT = { 行军: [0.5, 2], 对峙: [0.15, 1.5], 交战: [1.1, 7], 包围: [0.45, 3], 溃逃: [3, 1.2], 观望: [0.06, 0.8], 投降: [0.25, 1], 运粮: [0.12, 1] };
+  Object.assign(JIT, { 相持: [2.6, 1.4], 火攻: [1.2, 5], 佯渡: [0.6, 2], 诱敌: [0.8, 2] });
+  /* ---------- 赤壁：地形、地物与关键帧（位置为示意） ---------- */
+  Object.assign(JIT, { 水寨: [0.18, 0.8], 追击: [0.9, 2.4] });
+  const CJ = [[-100, 40], [-50, 24], [0, 8], [50, -10], [100, -28]], shz = (p, d) => p.map(([x, z]) => [x, z + d]);
+  TERRAIN.chibi = { base: 1.5, noise: 1,
+    rivers: [{ name: "长江", pts: CJ, w: 10, d: 3 }, { pts: shz(CJ, -3.5), w: 6, d: 1.5 }, { pts: shz(CJ, 3.5), w: 6, d: 1.5 }],
+    valleys: [{ pts: [[-12, -19], [-44, -15]], w: 10, d: 1.6 }], // 华容道一带沼泽
+    mountains: [{ pts: [[-96, -70], [-20, -74]], w: 12, h: 12 }, { pts: [[30, 62], [96, 50]], w: 14, h: 10 }, { pts: [[-96, 66], [-40, 72]], w: 12, h: 8 }] };
+  const HR = [[2, -10], [-18, -20], [-40, -17], [-58, 0], [-66, 16]], FA = 1.22; // FA：船阵朝向南岸
+  const rect = (x, z, hw, hd, a) => { const ux = -Math.sin(a), uz = Math.cos(a), vx = Math.cos(a), vz = Math.sin(a);
+    return [[1, 1], [-1, 1], [-1, -1], [1, -1], [1, 1]].map(([p, q]) => [x + ux * hw * p + vx * hd * q, z + uz * hw * p + vz * hd * q]); };
+  const FLEET = { x: 6, z: 1, w: 30, d: 10, a: FA, shape: "line" };
+  const CB = { terrain: TERRAIN.chibi, data: "force-cb", cut: 9, supC: "--x-cao",
+    series: [["曹军", "cao", "--x-cao"], ["孙刘联军", "sl", "--x-wu"]],
+    subs: [["曹操统一北方后，率大军南下荆州。", "刘表病死，其子刘琮投降，曹军占领江陵，得到荆州的水军和战船。", "刘备在当阳长坂被击败，退到夏口。"],
+      ["面对南下的曹军，孙权与刘备结成联盟。", "孙权军与刘备军在夏口一带汇合，组成孙刘联军。"],
+      ["曹军战船在乌林北岸结成水寨，船船相连，连成一片。", "孙刘联军在赤壁南岸列阵，两军隔江对峙。"],
+      ["夜色中，黄盖率船队顺东南风驶向北岸。", "船队接近曹军水寨时点起大火。", "火势在连成一片的曹军战船间蔓延，曹军兵力大减。"],
+      ["曹军大败，残部沿华容道向江陵方向撤退。", "孙刘联军乘势追击。"],
+      ["曹操统一全国的进程受阻。", "曹操、孙权、刘备三方势力格局初步形成。", "中国历史上以少胜多的著名战役，奠定了三国鼎立的基础。"]],
+    labels: [["长江", 62, -26, "--x-acc"], ["江陵", -70, 20, "--x-text"], ["当阳长坂", -55, -40, "--x-text"], ["夏口", 82, -32, "--x-text"],
+      ["赤壁（南岸）", 20, 26, "--x-wu"], ["乌林（北岸 · 曹军水寨）", -8, -24, "--x-cao"], ["华容道（沼泽小路）", -36, -28, "--x-cao"],
+      ["东南风（示意）↖", 44, 32, "--x-gold"], ["曹操 · 北方", -10, -68, "--x-cao"], ["孙权 · 江东", 82, 40, "--x-wu"], ["刘备 · 西南方向", -62, 62, "--x-shu"]],
+    lines: [{ pts: HR, c: "--x-cao" }, { pts: [[-55, -35], [10, -32], [76, -26]], c: "--x-shu" }, { pts: [[30, 20], [22, 12], [16, 5]], c: "--x-wu" },
+      { pts: rect(6, 1, 17, 6.5, FA), c: "--x-cao" }],
+    armies: [{ id: "cao", name: "曹军", n: 600, c: "--x-cao" }, { id: "cf", name: "曹军战船", n: 500, c: "--x-cao" },
+      { id: "wu", name: "孙权军", n: 240, c: "--x-wu" }, { id: "liu", name: "刘备军", n: 110, c: "--x-shu" },
+      { id: "hg", name: "黄盖船队", n: 70, c: "--x-wu" }, { id: "fire", name: "火光", n: 420, c: "--x-red" }],
+    K0: { cao: { x: -50, z: -72, w: 16, d: 22, a: PI / 2, s: "行军" }, liu: { x: -55, z: -35, w: 10, d: 4, a: 0, s: "行军" } },
+    K: [
+      { cao: { x: -68, z: 14, w: 18, shape: "blob", s: "对峙" }, cf: { x: -72, z: 30, w: 10, shape: "blob", s: "对峙" },
+        liu: { x: 76, z: -27, w: 8, shape: "blob", s: "行军" }, wu: { x: 98, z: -6, w: 12, shape: "blob", r: 0, s: "行军" },
+        hg: { x: 30, z: 20, w: 6, shape: "blob", r: 0, s: "对峙" }, fire: Object.assign({ r: 0, s: "火攻" }, FLEET) },
+      { cao: { x: -30, z: -10, w: 18, s: "行军" }, cf: { x: -35, z: 20, w: 20, d: 5, a: FA, shape: "line", s: "行军" },
+        wu: { x: 68, z: -15, w: 12, r: 1, s: "行军" }, liu: { x: 75, z: -24, s: "对峙" } },
+      { cao: { x: 2, z: -14, w: 18, s: "对峙" }, cf: Object.assign({ s: "水寨" }, FLEET),
+        wu: { x: 18, z: 16, w: 24, d: 5, a: FA - PI, shape: "line", s: "对峙" }, liu: { x: -6, z: 24, w: 12, d: 4, a: FA - PI, shape: "line", s: "对峙" },
+        hg: { x: 30, z: 20, r: 1, s: "对峙" } },
+      { hg: { x: 16, z: 6, w: 7, s: "火攻" }, fire: { r: 1 }, cf: { s: "火攻" }, cao: { s: "交战" } },
+      { cao: { shape: "flow", pts: HR, d: 2.5, r: 0.3, s: "溃逃" }, cf: { r: 0, s: "溃逃" }, hg: { r: 0 }, fire: { r: 0.3 },
+        wu: { x: -2, z: -10, w: 12, shape: "blob", s: "追击" }, liu: { x: -22, z: -16, w: 9, shape: "blob", s: "追击" } },
+      { cao: { x: -10, z: -56, w: 44, shape: "blob", s: "对峙" }, fire: { r: 0 }, wu: { x: 80, z: 26, w: 22, s: "对峙" }, liu: { x: -62, z: 48, w: 20, s: "对峙" } },
+    ],
+  };
+  CB.K.forEach((k, i) => CB.armies.forEach((a) => { k[a.id] = Object.assign({ d: 6, r: 1, shape: "line", a: 0 }, i ? CB.K[i - 1][a.id] : {}, k[a.id]); }));
+  CB.armies.forEach((a) => { CB.K0[a.id] = Object.assign({}, CB.K[0][a.id], CB.K0[a.id]); });
+  const cutTo = (A, r) => { if (A) { A.ratio = r; A.g.setDrawRange(0, Math.ceil(A.N * r)); } };
+  CB.frame = (s, l) => {
+    if (!R) return;
+    const n = s === 3 ? ease(Math.min(1, l / 0.3)) : s === 4 ? 1 - ease(Math.min(1, l / 0.5)) : 0; // 夜色
+    amb.intensity = (isDark() ? 0.75 : 0.85) * (1 - 0.65 * n); sun.intensity = 0.9 * (1 - 0.75 * n); R.setClearColor(0x02050c, 0.6 * n);
+    const L = labelsG.children; if (L[7]) L[7].visible = s === 3; for (let i = 8; i < 11; i++) if (L[i]) L[i].visible = s === 5;
+    const hc = helpersG.children; if (hc[0]) hc[0].visible = s >= 4; if (hc[1]) hc[1].visible = s === 0; if (hc[2]) hc[2].visible = s === 3; if (hc[3]) hc[3].visible = s >= 2 && s <= 3;
+    const by = (id) => armies.find((a) => a.id === id), F = by("fire"), hg = by("hg"), cf = by("cf"), cao = by("cao");
+    if (!F) return;
+    if (!F.sorted) { F.u.sort(); F.sorted = true; } // 火从东端（黄盖靠近处）向西蔓延
+    const p = (a, b) => Math.max(0, Math.min(1, (l - a) / b));
+    tmpC.a = tmpC.a || new THREE.Color();
+    if (hg) hg.m.color.set(col("--x-wu")).lerp(tmpC.a.set(col("--x-gold")), s === 3 ? p(0.4, 0.15) : 0); // 接近时点燃
+    if (s === 3) { cutTo(F, p(0.35, 0.4)); cutTo(cf, 1 - 0.75 * p(0.45, 0.5)); cutTo(cao, 1 - 0.45 * p(0.5, 0.45)); }
+    else if (s === 4) { const e = ease(Math.min(1, l / 0.6)); cutTo(cf, 0.25 * (1 - e)); cutTo(cao, 0.55 - 0.25 * e); }
+    if (F.ratio > 0.01) {
+      const P = F.pos, cnt = Math.ceil(F.N * F.ratio);
+      for (let i = 0; i < cnt; i++) P[i * 3 + 1] = H(P[i * 3], P[i * 3 + 2]) + 0.9 + ((F.ph[i] * 3 + clock * 0.9) % 1) * 9; // 火光上升
+      F.g.attributes.position.needsUpdate = true;
+      F.m.color.set(col("--x-red")).lerp(tmpC.a.set(col("--x-gold")), 0.5 + 0.5 * Math.sin(clock * 7));
+    }
+  };
+  CH[3].sc = CB; CH[3].live = true;
+  /* ---------- 淝水：地形、地物与关键帧（位置为示意；z 负为北） ---------- */
+  Object.assign(JIT, { 大乱: [2.4, 3.2], 幻影: [0.5, 1.2] });
+  TERRAIN.feishui = { base: 1.2, noise: 0.9,
+    rivers: [{ name: "淮河", pts: [[-100, -10], [-50, -15], [0, -9], [50, -15], [100, -11]], w: 7, d: 4 },
+      { name: "淝水", pts: [[-4, -9], [-1, 14], [-5, 40], [-1, 75]], w: 4, d: 3.5 },
+      { name: "洛涧", pts: [[50, -14], [54, 14], [47, 44], [52, 75]], w: 3, d: 2.5 }],
+    mountains: [{ pts: [[10, -2], [20, 14]], w: 8, h: 13 }, { pts: [[-96, -72], [-60, -76]], w: 12, h: 9 }, { pts: [[70, 66], [98, 50]], w: 12, h: 8 }] };
+  const QR = [[-56, -74], [-40, -52], [-26, -32], [-20, -16]];
+  const FS = { terrain: TERRAIN.feishui, data: "force-fs", cut: 9, supC: "--x-fq",
+    series: [["前秦", "fq", "--x-fq"], ["东晋", "jin", "--x-jin"]],
+    subs: [["前秦皇帝苻坚统一北方后，不顾大臣劝阻，率八十多万大军南下，想一举灭掉东晋。", "苻坚夸口：“以吾之众旅，投鞭于江，足断其流。”", "前锋苻融渡过淮河，攻占寿阳；后续大军前后绵延千里。"],
+      ["东晋派谢石、谢玄领兵迎战。", "晋军北府兵从东南方向赶来，人数远少于秦军。", "秦军一部驻在洛涧。"],
+      ["夜色中，晋军先锋刘牢之率兵渡过洛涧。", "击破驻守洛涧的秦军一部，秦军兵力减少。"],
+      ["苻坚登上寿阳城，远望淝水东侧的八公山。", "山上的草木，在他眼中都成了晋军。", "成语“草木皆兵”出自此战：把草木都当成敌兵，形容惊慌疑惧。"],
+      ["两军隔淝水对峙。", "秦军后撤，让晋军渡过淝水。", "后撤一开始，秦军阵脚大乱，晋军乘势渡河进攻。"],
+      ["秦军溃散北逃，听到风声和鹤叫，也以为是晋军追来。", "成语“风声鹤唳”形容惊慌失措；“投鞭断流”出自苻坚的夸口，形容兵多势众。", "中国历史上以少胜多的著名战役。前秦瓦解，北方重新分裂；东晋政权得到稳定。"]],
+    labels: [["淮河", -72, -22, "--x-acc"], ["淝水", -10, 56, "--x-acc"], ["洛涧", 60, 28, "--x-acc"], ["寿阳", -18, 4, "--x-text"],
+      ["八公山", 18, 2, "--x-text"], ["前秦 · 北方", -48, -66, "--x-fq"], ["东晋 · 东南", 78, 58, "--x-jin"], ["苻坚 · 寿阳城头", -22, -6, "--x-fq"]],
+    lines: [{ pts: QR, c: "--x-fq" }, { pts: [[34, 30], [44, 10], [50, -4]], c: "--x-jin" }, { pts: [[10, 24], [-12, 24]], c: "--x-jin" },
+      { pts: [[-22, 16], [-24, -20], [-26, -60]], c: "--x-fq" }],
+    armies: [{ id: "qin", name: "前秦大军", n: 1100, c: "--x-fq" }, { id: "fr", name: "苻融前锋", n: 240, c: "--x-fq" },
+      { id: "lj", name: "洛涧秦军", n: 200, c: "--x-fq" }, { id: "jin", name: "东晋北府兵", n: 240, c: "--x-jin" },
+      { id: "liu", name: "刘牢之先锋", n: 80, c: "--x-jin" }, { id: "gh", name: "草木“晋军”", n: 260, c: "--x-jin" }],
+    K0: { qin: { x: -54, z: -72, w: 8, d: 10, a: PI / 2, shape: "line", s: "行军" }, fr: { x: -22, z: -36, w: 8, d: 10, a: PI / 2, shape: "line", s: "行军" } },
+    K: [
+      { qin: { shape: "flow", pts: QR, d: 5, s: "行军" }, fr: { x: -18, z: 6, w: 11, shape: "blob", s: "对峙" },
+        lj: { x: -20, z: -18, w: 8, shape: "blob", r: 0, s: "行军" }, jin: { x: 86, z: 62, w: 12, shape: "blob", r: 0, s: "行军" },
+        liu: { x: 86, z: 62, w: 6, shape: "blob", r: 0, s: "行军" }, gh: { x: 15, z: 6, w: 22, shape: "blob", r: 0, s: "幻影" } },
+      { qin: { x: -30, z: -30, w: 34, shape: "blob", s: "对峙" }, lj: { x: 46, z: -4, w: 10, r: 1, s: "对峙" },
+        jin: { x: 44, z: 42, w: 14, r: 1, s: "行军" }, liu: { x: 38, z: 34, w: 7, r: 1, s: "行军" } },
+      { qin: { r: 0.96 }, lj: { x: 44, z: -22, w: 14, r: 0.3, s: "溃逃" }, liu: { x: 50, z: -4, w: 8, s: "交战" }, jin: { x: 32, z: 30, w: 14, s: "行军" } },
+      { qin: { x: -20, z: 26, w: 42, d: 7, a: 0, shape: "line", s: "对峙" }, fr: { x: -18, z: 4, w: 9, s: "对峙" }, lj: { r: 0 },
+        jin: { x: 9, z: 26, w: 30, d: 5, a: PI, shape: "line", s: "对峙" }, liu: { x: 10, z: 34, w: 6, s: "对峙" }, gh: { r: 1 } },
+      { qin: { x: -36, z: 22, w: 46, d: 14, s: "大乱", r: 0.8 }, fr: { x: -26, z: 8, w: 12, s: "大乱" }, gh: { r: 0 },
+        jin: { x: -12, z: 24, w: 28, d: 6, s: "交战" }, liu: { x: -10, z: 32, s: "交战" } },
+      { qin: { x: -24, z: -46, w: 110, shape: "blob", r: 0.15, s: "溃逃" }, fr: { x: -30, z: -30, w: 40, r: 0.2, s: "溃逃" },
+        jin: { x: -18, z: 8, w: 26, shape: "blob", s: "追击" }, liu: { x: -24, z: -6, w: 8, s: "追击" } },
+    ],
+  };
+  FS.K.forEach((k, i) => FS.armies.forEach((a) => { k[a.id] = Object.assign({ d: 6, r: 1, shape: "line", a: 0 }, i ? FS.K[i - 1][a.id] : {}, k[a.id]); }));
+  FS.armies.forEach((a) => { FS.K0[a.id] = Object.assign({}, FS.K[0][a.id], FS.K0[a.id]); });
+  FS.frame = (s, l, ch, prev) => {
+    if (!R) return;
+    const n = s === 2 ? ease(Math.min(1, l / 0.25)) * (1 - ease(Math.max(0, (l - 0.8) / 0.2))) : 0; // 夜渡洛涧
+    amb.intensity = (isDark() ? 0.75 : 0.85) * (1 - 0.6 * n); sun.intensity = 0.9 * (1 - 0.7 * n); R.setClearColor(0x02050c, 0.6 * n);
+    const L = labelsG.children; if (L[7]) L[7].visible = s === 3;
+    const hc = helpersG.children; [s <= 1, s === 2, s === 4, s === 5].forEach((v, i) => { if (hc[i]) hc[i].visible = v; });
+    const G = armies.find((a) => a.id === "gh");
+    if (G && G.ratio > 0.01) { // 草木由绿转为“晋军”金色，明灭不定
+      tmpC.a = tmpC.a || new THREE.Color(); G.m.color.set(col("--x-shu")).lerp(tmpC.a.set(col("--x-jin")), s === 3 ? ease(Math.min(1, l / 0.5)) : 1);
+      G.m.opacity = 0.45 + 0.4 * Math.abs(Math.sin(clock * 3));
+    }
+    if (s === 3 && l < 0.9) { const e = ease(Math.min(1, l / 0.4)); ctl.target.set(14, 0, 6); cam.position.set(-30 - 30 * (1 - e), 22 + 40 * (1 - e), 2 + 60 * (1 - e)); } // 从寿阳城头望八公山
+    else if (ch && prev === 3) resetView();
+  };
+  CH[4].sc = FS; CH[4].live = true;
+  /* ---------- 温泉关：地形、地物与关键帧（位置为示意；z 负为北，西侧山崖，东侧大海） ---------- */
+  TERRAIN.thermo = { base: 1, noise: 0.6,
+    mountains: [{ pts: [[-20, -75], [-12, -20], [-9, 0], [-12, 20], [-20, 75]], w: 7, h: 28 },
+      { pts: [[-52, -66], [-44, -6], [-52, 66]], w: 18, h: 22 }, { pts: [[-80, -40], [-78, 40]], w: 14, h: 16 }],
+    valleys: [{ pts: [[32, -75], [22, 0], [32, 75]], w: 18, d: 6 }] };
+  const IP = [[-6, -40], [-28, -38], [-38, -12], [-34, 12], [-18, 26], [-6, 18]]; // 山后迂回小道
+  const TM = { terrain: TERRAIN.thermo, data: "force-tm", cut: 9, supC: "--x-pe",
+    series: [["希腊联军", "gr", "--x-gr"], ["波斯", "pe", "--x-pe"]],
+    subs: [["波斯帝国国王薛西斯率大军渡海进攻希腊，水陆并进。", "波斯大军从北方沿海岸压来，海上舰队同行。", "希腊各城邦组成联军，由斯巴达国王列奥尼达率领约七千人扼守温泉关。"],
+      ["温泉关一侧是陡峭的山崖，一侧是大海，最窄处只能容一辆车通过。", "希腊方阵堵住隘口，波斯军一波波涌入狭窄通道。", "两日血战，波斯军不断减少，希腊方阵基本不动。"],
+      ["一支波斯部队沿山后小道迂回。", "小道绕过山崖，通到温泉关之后。"],
+      ["希腊联军大部撤离，向南退去。", "列奥尼达率斯巴达等少数部队留下殿后，仍守关口。"],
+      ["波斯军前后夹击，殿后部队全军殉国。", "殿后部队的牺牲为希腊海军和各城邦赢得了时间。", "同年，希腊在萨拉米斯海战中大败波斯。", "温泉关成为希波战争中以少抗多、宁死不退的象征。"]],
+    labels: [["温泉关", 9, 4, "--x-text"], ["最窄处 · 仅容一车", -2, -9, "--x-gold"], ["陡峭山崖", -30, -52, "--x-text"],
+      ["大海", 46, 10, "--x-acc"], ["山后小道", -46, 0, "--x-pe"], ["波斯 · 北方", 10, -66, "--x-pe"], ["希腊 · 南方", 14, 64, "--x-gr"]],
+    lines: IP.slice(1).map((p, i) => ({ pts: [IP[i], p], c: "--x-pe" })),
+    armies: [{ id: "per", name: "波斯大军", n: 1000, c: "--x-pe" }, { id: "fleet", name: "波斯舰队", n: 160, c: "--x-pe" },
+      { id: "atk", name: "波斯攻关部队", n: 360, c: "--x-pe" }, { id: "imm", name: "波斯迂回部队", n: 160, c: "--x-pe" },
+      { id: "gr", name: "希腊联军", n: 460, c: "--x-gr" }, { id: "sp", name: "斯巴达等殿后部队", n: 120, c: "--x-gr" }],
+    K0: { per: { x: 4, z: -74, w: 10, d: 30, a: PI / 2, s: "行军" }, fleet: { x: 40, z: -72, w: 16, shape: "blob", s: "行军" } },
+    K: [
+      { per: { x: 4, z: -46, w: 22, d: 18, a: PI / 2, s: "行军" }, fleet: { x: 36, z: -40, w: 18, shape: "blob", s: "行军" },
+        atk: { x: 2, z: -36, w: 8, shape: "blob", r: 0, s: "交战" }, imm: { x: -6, z: -40, w: 6, shape: "blob", r: 0, s: "行军" },
+        gr: { x: 0, z: 3, w: 12, d: 4, a: -PI / 2, s: "对峙" }, sp: { x: 0, z: -0.5, w: 12, d: 1.6, a: -PI / 2, s: "对峙" } },
+      { per: { z: -50, r: 0.85, s: "对峙" }, fleet: { x: 38, z: -24, s: "对峙" }, atk: { shape: "flow", pts: [[3, -38], [2, -20], [0, -4]], d: 8, r: 1, s: "交战" },
+        gr: { r: 0.96, s: "交战" }, sp: { r: 0.97, s: "交战" } },
+      { per: { r: 0.82 }, atk: { r: 0.4 }, imm: { x: -6, z: 18, w: 7, r: 1 }, gr: { s: "对峙" }, sp: { s: "对峙" } },
+      { atk: { s: "对峙" }, imm: { s: "对峙" }, gr: { x: 0, z: 64, w: 16, shape: "blob", s: "行军" }, sp: { w: 10, d: 2 } },
+      { per: { r: 0.8 }, atk: { x: 1, z: -7, w: 10, shape: "blob", r: 0.5, s: "交战" }, imm: { x: -1, z: 9, w: 9, s: "交战" }, sp: { r: 0, s: "交战" } },
+    ],
+  };
+  TM.K.forEach((k, i) => TM.armies.forEach((a) => { k[a.id] = Object.assign({ d: 6, r: 1, shape: "line", a: 0 }, i ? TM.K[i - 1][a.id] : {}, k[a.id]); }));
+  TM.armies.forEach((a) => { TM.K0[a.id] = Object.assign({}, TM.K[0][a.id], TM.K0[a.id]); });
+  TM.frame = (s, l) => {
+    if (!R) return;
+    if (!world.getObjectByName("x-sea")) { // 海面平面
+      const g = new THREE.PlaneGeometry(200, 150); g.rotateX(-PI / 2);
+      const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col("--x-acc"), transparent: true, opacity: 0.4, depthWrite: false }));
+      m.name = "x-sea"; m.position.y = -1.4; world.add(m);
+    }
+    const p = s === 2 ? ease(Math.min(1, l / 0.85)) : s > 2 ? 1 : 0, hc = helpersG.children, n = hc.length;
+    hc.forEach((L, k) => { L.material.opacity = p >= (k + 1) / n - 0.001 ? 0.95 : p > k / n ? 0.6 : 0.15; }); // 虚线逐段点亮
+    const by = (id) => armies.find((a) => a.id === id), atk = by("atk"), imm = by("imm");
+    if (s === 1 && atk) cutTo(atk, (1 - 0.6 * l) * (0.55 + 0.45 * Math.abs(Math.sin(clock * 1.6)))); // 一波波涌入
+    if (s === 2 && imm && imm.ratio > 0.01) { // 沿小道绕行
+      const P = imm.pos, cnt = Math.ceil(imm.N * imm.ratio), m = IP.length - 1;
+      for (let i = 0; i < cnt; i++) {
+        const t = Math.max(0, p - ((imm.u[i] + 1) / 2) * 0.14) * m, j = Math.min(m - 1, Math.floor(t)), f = t - j, a = IP[j], b = IP[j + 1];
+        const x = a[0] + (b[0] - a[0]) * f + imm.v[i] * 1.6, z = a[1] + (b[1] - a[1]) * f + Math.sin(imm.ph[i] * 6.283) * 1.6;
+        P[i * 3] = x; P[i * 3 + 1] = H(x, z) + 0.9; P[i * 3 + 2] = z;
+      }
+      imm.g.attributes.position.needsUpdate = true;
+    }
+  };
+  CH[5].sc = TM; CH[5].live = true;
+  /* ---------- 高加米拉：地形、地物与关键帧（位置为示意；z 负为北，马其顿在南、波斯在北） ---------- */
+  TERRAIN.gaugamela = { base: 1, noise: 0.12, mountains: [],
+    rivers: [{ name: "底格里斯河", pts: [[-100, -6], [-84, -36], [-66, -58], [-36, -70], [-4, -76]], w: 6, d: 2.5 }] };
+  const GAP = [...Array(25)].map((_, i) => [33 + Math.cos((i / 24) * 2 * PI) * 9, -18 + Math.sin((i / 24) * 2 * PI) * 5]);
+  const atn = (ax, az, bx, bz) => Math.atan2(bz - az, bx - ax);
+  const GM = { terrain: TERRAIN.gaugamela, data: "force-gm", cut: 9, supC: "--x-pr",
+    series: [["马其顿", "mac", "--x-mac"], ["波斯", "pe", "--x-pr"]],
+    subs: [["前 334 年起，马其顿国王亚历山大率军东征波斯。", "前 331 年秋，他渡过底格里斯河，在高加米拉附近的平原上遇到大流士三世亲率的波斯大军。",
+        "大流士事先把战场铲平，方便刀轮战车冲锋。", "波斯大军横向展开，正面远宽于马其顿；大流士居中。马其顿方阵居中，骑兵在右翼。"],
+      ["斜线推进：马其顿全军向右斜行。", "波斯阵线被拉向右侧，中央与左翼之间出现缺口。"],
+      ["楔形突击：亚历山大率骑兵组成楔形。", "楔形骑兵直插缺口，冲向中央的大流士。"],
+      ["左翼苦战：马其顿左翼被波斯右翼压迫。", "马其顿左翼兵力减少，仍在苦撑。"],
+      ["大流士溃逃：大流士所在的部队向东逃离。", "波斯阵线随之崩溃四散。", "波斯帝国从此土崩瓦解，亚历山大建立起地跨欧、亚、非三洲的大帝国。"]],
+    labels: [["高加米拉", 4, -54, "--x-text"], ["底格里斯河", -70, -34, "--x-acc"], ["开阔平原 · 战场已被铲平", -58, 52, "--x-text"],
+      ["大流士", 0, -32, "--x-pr"], ["缺口", 33, -30, "--x-gold"], ["波斯 · 正面远宽于马其顿", -62, -6, "--x-pr"], ["马其顿", 0, 38, "--x-mac"], ["向东 →", 82, -30, "--x-pr"]],
+    lines: [{ pts: GAP, c: "--x-gold" }, { pts: [[50, 12], [24, -14], [4, -22]], c: "--x-mac" }, { pts: [[0, -24], [40, -32], [88, -40]], c: "--x-pr" }],
+    armies: [{ id: "pL", name: "波斯左翼", n: 420, c: "--x-pr" }, { id: "pC", name: "波斯中央", n: 420, c: "--x-pr" },
+      { id: "pR", name: "波斯右翼", n: 420, c: "--x-pr" }, { id: "dar", name: "大流士亲卫", n: 130, c: "--x-pr" },
+      { id: "car", name: "刀轮战车", n: 110, c: "--x-pr" }, { id: "ph", name: "马其顿方阵", n: 380, c: "--x-mac" },
+      { id: "mL", name: "马其顿左翼", n: 200, c: "--x-mac" }, { id: "alx", name: "亚历山大骑兵", n: 170, c: "--x-mac" }],
+    K0: { ph: { z: 44, s: "行军" }, mL: { z: 44, s: "行军" }, alx: { z: 44, s: "行军" } },
+    K: [
+      { pL: { x: 50, z: -18, w: 52, d: 7, a: PI / 2, s: "对峙" }, pC: { x: 0, z: -18, w: 44, d: 7, a: PI / 2, s: "对峙" },
+        pR: { x: -52, z: -18, w: 56, d: 7, a: PI / 2, s: "对峙" }, dar: { x: 0, z: -24, w: 7, shape: "blob", s: "对峙" },
+        car: { x: 0, z: -7, w: 130, d: 1.5, a: PI / 2, s: "对峙" }, ph: { x: 0, z: 22, w: 34, d: 5, a: -PI / 2, s: "对峙" },
+        mL: { x: -25, z: 22, w: 16, d: 5, a: -PI / 2, s: "对峙" }, alx: { x: 26, z: 22, w: 14, d: 5, a: -PI / 2, s: "对峙" } },
+      { pL: { x: 76, w: 46, s: "行军" }, pC: { x: -4 }, pR: { x: -56 }, car: { x: 6, w: 120 },
+        ph: { x: 16, z: 16, a: -PI / 2 - 0.25, s: "行军" }, mL: { x: -12, z: 24, a: -PI / 2 - 0.25, s: "行军" }, alx: { x: 50, z: 12, a: -PI / 2 - 0.25, s: "行军" } },
+      { alx: { x: 24, z: -14, w: 12, d: 18, a: atn(50, 12, 24, -14), shape: "wedge", s: "交战" }, ph: { x: 10, z: 2, s: "交战" },
+        pC: { r: 0.94, s: "交战" }, pL: { r: 0.94 }, car: { r: 0.6, s: "交战" } },
+      { alx: { x: 5, z: -21, a: atn(24, -14, 5, -21) }, dar: { s: "交战" }, mL: { x: -24, z: 32, r: 0.6, s: "交战" },
+        pR: { x: -40, z: 14, w: 50, d: 9, a: PI / 2 + 0.2, s: "交战" }, car: { r: 0.4 } },
+      { dar: { x: 92, z: -42, w: 9, r: 0.8, s: "溃逃" }, alx: { x: 58, z: -34, a: atn(5, -21, 58, -34), s: "追击" },
+        pC: { x: 30, z: -46, w: 70, shape: "blob", r: 0.25, s: "溃逃" }, pL: { x: 84, z: -20, w: 50, shape: "blob", r: 0.2, s: "溃逃" },
+        pR: { x: -50, z: -40, w: 70, shape: "blob", r: 0.25, s: "溃逃" }, car: { r: 0 }, ph: { x: 6, z: -12, s: "追击" }, mL: { x: -24, z: 24, s: "对峙" } },
+    ],
+  };
+  GM.K.forEach((k, i) => GM.armies.forEach((a) => { k[a.id] = Object.assign({ d: 6, r: 1, shape: "line", a: 0 }, i ? GM.K[i - 1][a.id] : {}, k[a.id]); }));
+  GM.armies.forEach((a) => { GM.K0[a.id] = Object.assign({}, GM.K[0][a.id], GM.K0[a.id]); });
+  GM.frame = (s, l) => {
+    if (!R) return;
+    const L = labelsG.children; if (L[4]) L[4].visible = s === 1 || s === 2; if (L[7]) L[7].visible = s === 4;
+    const hc = helpersG.children, g = s === 1 ? ease(Math.min(1, l / 0.6)) : s === 2 ? 1 : 0;
+    if (hc[0]) { hc[0].visible = g > 0; hc[0].material.opacity = g * (0.55 + 0.45 * Math.abs(Math.sin(clock * 3))); } // 缺口闪烁高亮
+    if (hc[1]) hc[1].visible = s === 2 || s === 3; if (hc[2]) hc[2].visible = s === 4;
+  };
+  CH[6].sc = GM; CH[6].live = true;
+  /* ---------- 坎尼：地形、地物与关键帧（位置为示意；z 负为北，罗马在北、迦太基在南） ---------- */
+  TERRAIN.cannae = { base: 1, noise: 0.25, mountains: [],
+    rivers: [{ name: "奥菲杜斯河", pts: [[58, 75], [74, 44], [62, 14], [80, -16], [70, -46], [86, -75]], w: 6, d: 2.5 }] };
+  const CN = { terrain: TERRAIN.cannae, data: "force-cn", cut: 9, supC: "--x-ro",
+    series: [["迦太基", "ca", "--x-ca"], ["罗马", "ro", "--x-ro"]],
+    subs: [["第二次布匿战争爆发后，迦太基名将汉尼拔翻越阿尔卑斯山进入意大利。", "迦太基军从西北进入平原，接连大败罗马军。", "前 216 年夏，汉尼拔夺取了罗马人的粮仓坎尼。", "罗马派执政官保卢斯和瓦罗率领约八万大军前来决战。"],
+      ["新月阵型：迦太基中路排成向前凸出的新月形。", "两翼为精锐步兵，骑兵在最外侧。", "罗马约八万人排成纵深很大的密集阵。"],
+      ["中路诱敌：罗马重步兵猛推迦太基中路。", "迦太基中路逐步后退，新月由凸变凹。", "两翼骑兵同时交战。"],
+      ["两翼合围：迦太基两翼步兵向内包抄。", "迦太基骑兵击败罗马骑兵后，绕到罗马军背后。", "四面包围形成，罗马军被压缩成一团。"],
+      ["罗马惨败：被围的罗马军大量覆灭。", "这是军事史上两翼包围、歼灭敌军的经典战例，至今仍被各国军校研究。", "罗马虽遭惨败却没有屈服，最终赢得了第二次布匿战争，称霸西地中海。"]],
+    labels: [["坎尼（罗马粮仓）", 44, 56, "--x-text"], ["奥菲杜斯河", 82, 30, "--x-acc"], ["平原", -60, 40, "--x-text"],
+      ["迦太基 · 从西北进入", -70, -54, "--x-ca"], ["罗马 · 约八万", 0, -40, "--x-ro"], ["新月阵", 0, 6, "--x-ca"], ["四面包围", 0, -22, "--x-gold"]],
+    lines: [{ pts: [[-96, -66], [-60, -40], [-20, -10], [16, 22], [36, 40]], c: "--x-ca" },
+      { pts: [[-48, 16], [-54, -8], [-34, -20], [-12, -12]], c: "--x-ca" }, { pts: [[48, 16], [54, -8], [34, -20], [12, -12]], c: "--x-ca" }],
+    armies: [{ id: "caC", name: "迦太基中路", n: 360, c: "--x-ca" }, { id: "caL", name: "迦太基左翼精锐步兵", n: 160, c: "--x-ca" },
+      { id: "caR", name: "迦太基右翼精锐步兵", n: 160, c: "--x-ca" }, { id: "cvL", name: "迦太基骑兵·左", n: 110, c: "--x-ca" },
+      { id: "cvR", name: "迦太基骑兵·右", n: 110, c: "--x-ca" }, { id: "ro", name: "罗马重步兵", n: 900, c: "--x-ro" },
+      { id: "rcL", name: "罗马骑兵·左", n: 70, c: "--x-ro" }, { id: "rcR", name: "罗马骑兵·右", n: 70, c: "--x-ro" }],
+    K0: { caC: { x: -90, z: -62 }, caL: { x: -92, z: -66 }, caR: { x: -88, z: -58 }, cvL: { x: -94, z: -60 }, cvR: { x: -86, z: -64 },
+      ro: { z: -74, r: 0 }, rcL: { z: -74, r: 0 }, rcR: { z: -74, r: 0 } },
+    K: [
+      { caC: { x: 36, z: 40, w: 14, shape: "blob", s: "行军" }, caL: { x: 24, z: 46, w: 8, shape: "blob", s: "行军" },
+        caR: { x: 48, z: 36, w: 8, shape: "blob", s: "行军" }, cvL: { x: 22, z: 32, w: 8, shape: "blob", s: "行军" },
+        cvR: { x: 52, z: 50, w: 8, shape: "blob", s: "行军" }, ro: { x: 0, z: -60, w: 8, d: 24, a: PI / 2, s: "行军" },
+        rcL: { x: -8, z: -62, w: 3, d: 14, a: PI / 2, s: "行军" }, rcR: { x: 8, z: -62, w: 3, d: 14, a: PI / 2, s: "行军" } },
+      { caC: { x: 0, z: 48, w: 68, d: 5, a: -PI / 2, span: 1.4, shape: "arc", s: "对峙" },
+        caL: { x: -30, z: 20, w: 12, d: 6, a: -PI / 2, shape: "line", s: "对峙" }, caR: { x: 30, z: 20, w: 12, d: 6, a: -PI / 2, shape: "line", s: "对峙" },
+        cvL: { x: -48, z: 18, w: 10, d: 6, a: -PI / 2, shape: "line", s: "对峙" }, cvR: { x: 48, z: 18, w: 10, d: 6, a: -PI / 2, shape: "line", s: "对峙" },
+        ro: { z: -14, w: 46, d: 22, s: "对峙" }, rcL: { x: -40, z: -12, w: 10, d: 5, s: "对峙" }, rcR: { x: 40, z: -12, w: 10, d: 5, s: "对峙" } },
+      { caC: { z: -6, a: PI / 2, r: 0.95, s: "交战" }, ro: { z: 8, w: 40, r: 0.95, s: "交战" },
+        cvL: { x: -44, z: 4, w: 8, s: "交战" }, rcL: { x: -44, z: -4, w: 8, r: 0.7, s: "交战" },
+        cvR: { x: 44, z: 4, w: 8, s: "交战" }, rcR: { x: 44, z: -4, w: 8, r: 0.7, s: "交战" } },
+      { caC: { z: -2, w: 56, s: "包围" }, caL: { x: -18, z: 6, w: 20, d: 5, a: 0, s: "包围" }, caR: { x: 18, z: 6, w: 20, d: 5, a: PI, s: "包围" },
+        cvL: { x: -10, z: -9, w: 20, d: 4, a: PI / 2, s: "包围" }, cvR: { x: 10, z: -9, w: 20, d: 4, a: PI / 2, s: "包围" },
+        ro: { x: 0, z: 8, w: 26, shape: "blob", r: 0.6, s: "包围" },
+        rcL: { x: -56, z: -44, w: 10, shape: "blob", r: 0.15, s: "溃逃" }, rcR: { x: 56, z: -44, w: 10, shape: "blob", r: 0.15, s: "溃逃" } },
+      { caC: { z: -6, w: 48, r: 0.9 }, caL: { x: -13, w: 16 }, caR: { x: 13, w: 16 }, cvL: { x: -8, z: -4, w: 14 }, cvR: { x: 8, z: -4, w: 14 },
+        ro: { z: 7, w: 16, r: 0.1, s: "溃逃" }, rcL: { r: 0 }, rcR: { r: 0 } },
+    ],
+  };
+  CN.K.forEach((k, i) => CN.armies.forEach((a) => { k[a.id] = Object.assign({ d: 6, r: 1, shape: "line", a: 0 }, i ? CN.K[i - 1][a.id] : {}, k[a.id]); }));
+  CN.armies.forEach((a) => { CN.K0[a.id] = Object.assign({}, CN.K[0][a.id], { shape: "blob", w: 10 }, CN.K0[a.id]); });
+  ["ro", "rcL", "rcR"].forEach((id) => { CN.K0[id].shape = "line"; CN.K0[id].w = CN.K[0][id].w; });
+  CN.frame = (s, l) => {
+    if (!R) return;
+    const L = labelsG.children; if (L[3]) L[3].visible = s === 0; if (L[4]) L[4].visible = s >= 1;
+    if (L[5]) L[5].visible = s === 1 || s === 2; if (L[6]) L[6].visible = s >= 3;
+    const hc = helpersG.children; if (hc[0]) { hc[0].visible = s === 0; hc[0].material.opacity = 0.35 + 0.6 * ease(Math.min(1, l / 0.6)); }
+    const g = s === 3 ? 0.55 + 0.45 * Math.abs(Math.sin(clock * 3)) : 0.5;
+    for (const k of [1, 2]) if (hc[k]) { hc[k].visible = s >= 3; hc[k].material.opacity = g; } // 骑兵绕后路线
+  };
+  CH[7].sc = CN; CH[7].live = true;
+  /* ---------- 黑斯廷斯：地形、地物与关键帧（位置为示意；z 负为北，南侧为英吉利海峡） ---------- */
+  TERRAIN.hastings = { base: 1, noise: 0.7,
+    mountains: [{ pts: [[-34, -24], [34, -24]], w: 13, h: 10 }, { pts: [[-96, -72], [96, -74]], w: 10, h: 6 }],
+    valleys: [{ pts: [[-100, 76], [100, 74]], w: 16, d: 9 }, { pts: [[-70, 9], [70, 9]], w: 14, d: 1.5 }] };
+  Object.assign(JIT, { 盾墙: [0.1, 1] });
+  const HS = { terrain: TERRAIN.hastings, data: "force-hs", cut: 9, supC: "--x-nor",
+    series: [["诺曼", "nor", "--x-nor"], ["英格兰", "eng", "--x-eng"]],
+    subs: [["1066 年初，英格兰国王爱德华去世，贵族们推举哈罗德为国王。", "法国的诺曼底公爵威廉声称自己才是合法继承人，", "率军渡过英吉利海峡，在佩文西登陆，", "随后在黑斯廷斯筑营。"],
+      ["哈罗德南下：英格兰军从北方赶来。", "英格兰军在山岗顶部列成一条横向密集的阵线。"],
+      ["盾墙鏖战：英格兰军在坡顶组成盾墙。", "诺曼步兵与骑兵从谷地仰攻山岗，一次次被盾墙弹回。", "双方兵力都在减少。"],
+      ["佯装败退：诺曼军一部向后撤退。", "部分英格兰士兵冲下山坡追击，", "回身的诺曼骑兵把追兵包围消灭，盾墙随之变薄。"],
+      ["哈罗德阵亡，英格兰阵线崩溃，四散溃逃。", "诺曼征服后，英格兰建立起强有力的王权，封建制度进一步发展。", "大量法语词汇进入英语，深刻影响了英国的语言和文化。"]],
+    labels: [["英吉利海峡", 10, 66, "--x-acc"], ["佩文西 · 登陆点", -52, 44, "--x-text"], ["黑斯廷斯 · 诺曼营地", 34, 30, "--x-nor"],
+      ["山岗 · 英格兰军据守", 0, -36, "--x-eng"], ["开阔谷地", 46, 6, "--x-text"], ["英格兰 · 从北方赶来", 0, -64, "--x-eng"],
+      ["佯装败退", -6, 34, "--x-gold"], ["哈罗德阵亡", 0, -24, "--x-gold"]],
+    lines: [{ pts: [[-84, 74], [-66, 64], [-52, 54]], c: "--x-nor" }, { pts: [[-50, 48], [-12, 46], [28, 40]], c: "--x-nor" },
+      { pts: [[0, -74], [0, -50], [0, -30]], c: "--x-eng" }],
+    armies: [{ id: "fleet", name: "诺曼船队", n: 200, c: "--x-nor" }, { id: "nInf", name: "诺曼步兵", n: 520, c: "--x-nor" },
+      { id: "nCav", name: "诺曼骑兵", n: 260, c: "--x-nor" }, { id: "eng", name: "英格兰盾墙", n: 700, c: "--x-eng" },
+      { id: "engP", name: "英格兰前排（追兵）", n: 180, c: "--x-eng" }],
+    K0: { fleet: { x: -84, z: 74, w: 22, shape: "blob", s: "行军" }, nInf: { x: -50, z: 50, w: 8, shape: "blob", r: 0 },
+      nCav: { x: -50, z: 50, w: 6, shape: "blob", r: 0 } },
+    K: [
+      { fleet: { x: -52, z: 60, w: 16, shape: "blob", s: "行军" }, nInf: { x: 30, z: 40, w: 20, shape: "blob", s: "对峙" },
+        nCav: { x: 40, z: 46, w: 10, shape: "blob", s: "对峙" }, eng: { x: 0, z: -74, w: 10, d: 24, a: PI / 2, r: 0, s: "行军" },
+        engP: { x: 0, z: -74, w: 6, d: 12, a: PI / 2, r: 0, s: "行军" } },
+      { fleet: { r: 0.4, s: "观望" }, eng: { z: -24, w: 60, d: 4, r: 1, s: "对峙" }, engP: { z: -21, w: 60, d: 1.2, r: 1, s: "对峙" } },
+      { eng: { r: 0.85, s: "盾墙" }, engP: { r: 0.85, s: "盾墙" },
+        nInf: { x: 0, z: -9, w: 54, d: 5, a: -PI / 2, shape: "line", r: 0.85, s: "交战" }, nCav: { x: 0, z: -1, w: 46, d: 4, a: -PI / 2, shape: "line", r: 0.85, s: "交战" } },
+      { eng: { d: 2.5, r: 0.6, s: "对峙" }, engP: { x: -16, z: 12, w: 12, shape: "blob", r: 0.85, s: "追击" },
+        nInf: { x: -6, z: 26, w: 40, d: 6, r: 0.8, s: "诱敌" }, nCav: { x: -16, z: 12, w: 30, d: 4, a: 0, span: 2 * PI, shape: "arc", r: 0.82, s: "包围" } },
+      { eng: { x: 0, z: -52, w: 96, shape: "blob", r: 0.15, s: "溃逃" }, engP: { r: 0 },
+        nInf: { x: 0, z: -26, w: 56, d: 6, a: -PI / 2, shape: "line", r: 0.78, s: "追击" }, nCav: { x: 0, z: -40, w: 50, shape: "blob", r: 0.8, s: "追击" } },
+    ],
+  };
+  HS.K.forEach((k, i) => HS.armies.forEach((a) => { k[a.id] = Object.assign({ d: 6, r: 1, shape: "line", a: 0 }, i ? HS.K[i - 1][a.id] : {}, k[a.id]); }));
+  HS.armies.forEach((a) => { HS.K0[a.id] = Object.assign({}, HS.K[0][a.id], HS.K0[a.id]); });
+  HS.frame = (s, l) => {
+    if (!R) return;
+    if (!world.getObjectByName("x-sea")) { // 海面平面（英吉利海峡）
+      const g = new THREE.PlaneGeometry(200, 150); g.rotateX(-PI / 2);
+      const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col("--x-acc"), transparent: true, opacity: 0.4, depthWrite: false }));
+      m.name = "x-sea"; m.position.y = -1.4; world.add(m);
+    }
+    const L = labelsG.children; if (L[5]) L[5].visible = s === 1; if (L[6]) L[6].visible = s === 3; if (L[7]) L[7].visible = s === 4;
+    const hc = helpersG.children; if (hc[0]) hc[0].visible = s === 0; if (hc[1]) hc[1].visible = s === 0; if (hc[2]) hc[2].visible = s === 1;
+    const b = s === 2 && l > 0.3 ? Math.abs(Math.sin(clock * 1.4)) * 10 : 0; // 仰攻被盾墙反复弹回
+    HS.K[2].nInf.z = -9 + b; HS.K[2].nCav.z = -1 + b;
+    const by = (id) => armies.find((a) => a.id === id), P = by("engP");
+    if (s === 3 && P) cutTo(P, l < 0.55 ? 0.85 : Math.max(0.05, 0.85 - ((l - 0.55) / 0.35) * 0.8)); // 追兵被围歼
+    const F = by("fleet"); // 船队浮于海面
+    if (F) { for (let i = 0, n = Math.ceil(F.N * F.ratio); i < n; i++) F.pos[i * 3 + 1] = Math.max(F.pos[i * 3 + 1], -0.9); F.g.attributes.position.needsUpdate = true; }
+  };
+  CH[8].sc = HS; CH[8].live = true;
+  const DUR = 8;
+  /* ---------- 状态 ---------- */
+  let cur = 0, T = 0, auto = false, speed = 1, lastS = -1, lastSub = "", chart = null, clock = 0, last = performance.now();
+  const show = { labels: true, helpers: true };
+  let R = null, scene, cam, ctl, cfg = TERRAIN.changping, terrain = null, world, labelsG, helpersG, armiesG, armies = [], dotTex, sup = [], icons = null, amb, sun;
+  const probe = document.createElement("i"); probe.style.display = "none"; document.body.appendChild(probe);
+  function col(v) { probe.style.color = `var(${v})`; return getComputedStyle(probe).color; }
+  const isDark = () => root.getAttribute("data-theme") !== "light";
+  const pad = (n) => String(n).padStart(2, "0");
+  /* ---------- 高度场 ---------- */
+  function segD(px, pz, ax, az, bx, bz) {
+    const dx = bx - ax, dz = bz - az, l = dx * dx + dz * dz || 1; let t = ((px - ax) * dx + (pz - az) * dz) / l;
+    t = t < 0 ? 0 : t > 1 ? 1 : t; const x = ax + t * dx - px, z = az + t * dz - pz; return Math.sqrt(x * x + z * z);
+  }
+  function polyD(x, z, p) {
+    if (p.length === 1) return Math.hypot(x - p[0][0], z - p[0][1]);
+    let m = 1e9; for (let i = 1; i < p.length; i++) m = Math.min(m, segD(x, z, p[i - 1][0], p[i - 1][1], p[i][0], p[i][1])); return m;
+  }
+  function H(x, z) {
+    let h = cfg.base;
+    for (const m of cfg.mountains) h += m.h * Math.exp(-((polyD(x, z, m.pts) / m.w) ** 2));
+    for (const v of cfg.valleys || []) h -= v.d * Math.exp(-((polyD(x, z, v.pts) / v.w) ** 2));
+    h += cfg.noise * (Math.sin(x * 0.11 + 1.3) * Math.cos(z * 0.13 + 0.7) + 0.5 * Math.sin(x * 0.23 + z * 0.17) + 0.25 * Math.sin(x * 0.47 - z * 0.39 + 2));
+    for (const r of cfg.rivers || []) h -= r.d * Math.exp(-((polyD(x, z, r.pts) / r.w) ** 2));
+    return h;
+  }
+  const PAL = {
+    dark: [[0, "#0f2a3d"], [0.18, "#17343a"], [0.38, "#24423a"], [0.6, "#4a5440"], [0.8, "#7a7258"], [1, "#b8b4a0"]],
+    light: [[0, "#a9c9c4"], [0.18, "#c9d2b0"], [0.38, "#d6d0a8"], [0.6, "#c2ad82"], [0.8, "#a68e68"], [1, "#efe9da"]],
+  };
+  /* ---------- 3D 初始化（只一次） ---------- */
+  function initGL() {
+    try {
+      if (!window.THREE || !THREE.OrbitControls) throw new Error("three");
+      R = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (e) { R = null; $("#fail").hidden = false; return; }
+    const st = $("#stage");
+    R.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    st.prepend(R.domElement);
+    scene = new THREE.Scene();
+    cam = new THREE.PerspectiveCamera(45, 1, 1, 1200);
+    ctl = new THREE.OrbitControls(cam, R.domElement);
+    Object.assign(ctl, { enableDamping: true, dampingFactor: 0.08, maxPolarAngle: 1.38, minDistance: 50, maxDistance: 340 });
+    amb = new THREE.AmbientLight(0xffffff, 0.7); sun = new THREE.DirectionalLight(0xffffff, 0.9); sun.position.set(-60, 120, 40);
+    scene.add(amb, sun);
+    world = new THREE.Group(); labelsG = new THREE.Group(); helpersG = new THREE.Group(); armiesG = new THREE.Group();
+    scene.add(world, helpersG, labelsG, armiesG);
+    const c = document.createElement("canvas"); c.width = c.height = 64; const x = c.getContext("2d");
+    const g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(0.35, "rgba(255,255,255,.8)"); g.addColorStop(1, "rgba(255,255,255,0)");
+    x.fillStyle = g; x.fillRect(0, 0, 64, 64); dotTex = new THREE.CanvasTexture(c);
+    new ResizeObserver(resize).observe(st); resize();
+  }
+  function resize() {
+    if (!R) return; const st = $("#stage"), w = st.clientWidth, h = st.clientHeight || 1;
+    R.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix();
+  }
+  function resetView() {
+    if (!R) return; const k = Math.max(1, 1.5 / cam.aspect);
+    cam.position.set(0, 105 * k, 125 * k); ctl.target.set(0, 0, 0); ctl.update();
+  }
+  function clear(g) {
+    g.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) { if (o.material.map && o.material.map !== dotTex) o.material.map.dispose(); o.material.dispose(); } });
+    g.clear();
+  }
+  /* ---------- 地形与地物 ---------- */
+  function buildTerrain() {
+    clear(world); const W = 200, D = 150, geo = new THREE.PlaneGeometry(W, D, 160, 120); geo.rotateX(-PI / 2);
+    const p = geo.attributes.position, n = p.count, hs = new Float32Array(n); let lo = 1e9, hi = -1e9;
+    for (let i = 0; i < n; i++) { const h = H(p.getX(i), p.getZ(i)); hs[i] = h; p.setY(i, h); lo = Math.min(lo, h); hi = Math.max(hi, h); }
+    const pal = PAL[isDark() ? "dark" : "light"].map(([t, c]) => [t, new THREE.Color(c)]), cols = new Float32Array(n * 3), tmp = new THREE.Color();
+    for (let i = 0; i < n; i++) {
+      const t = (hs[i] - lo) / (hi - lo || 1); let j = 1; while (j < pal.length - 1 && t > pal[j][0]) j++;
+      tmp.copy(pal[j - 1][1]).lerp(pal[j][1], Math.min(1, Math.max(0, (t - pal[j - 1][0]) / (pal[j][0] - pal[j - 1][0])))); tmp.toArray(cols, i * 3);
+    }
+    geo.setAttribute("color", new THREE.BufferAttribute(cols, 3)); geo.computeVertexNormals();
+    terrain = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true })); world.add(terrain);
+    for (const r of cfg.rivers || []) {
+      const pts = sample(r.pts, 0.3); const tube = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 120, 1.1, 6, false);
+      world.add(new THREE.Mesh(tube, new THREE.MeshBasicMaterial({ color: col("--x-acc"), transparent: true, opacity: 0.75 })));
+    }
+    R.setClearColor(0x000000, 0); sun.intensity = 0.9; // 复位官渡夜色
+    const bg = new THREE.Color(isDark() ? "#101828" : "#f3efe6"); scene.fog = new THREE.Fog(bg, 260, 520);
+    amb.color.set(isDark() ? 0x7486aa : 0xffffff); amb.intensity = isDark() ? 0.75 : 0.85; sun.color.set(isDark() ? 0xbcd0ff : 0xfff2dd);
+  }
+  function sample(pts, lift) {
+    const v = []; for (let i = 1; i < pts.length; i++) for (let k = 0; k < 20; k++) {
+      const t = k / 20, x = pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t, z = pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t; v.push(new THREE.Vector3(x, H(x, z) + lift, z));
+    }
+    const e = pts[pts.length - 1]; v.push(new THREE.Vector3(e[0], H(e[0], e[1]) + lift, e[1])); return v;
+  }
+  function makeLabel(text, cvar) {
+    const c = document.createElement("canvas"), x = c.getContext("2d"), f = '600 40px "Noto Serif SC","Songti SC",serif';
+    x.font = f; const w = Math.ceil(x.measureText(text).width) + 36; c.width = w; c.height = 64; x.font = f;
+    x.fillStyle = isDark() ? "rgba(8,12,20,.72)" : "rgba(255,255,255,.88)";
+    if (x.roundRect) { x.beginPath(); x.roundRect(0, 4, w, 56, 14); x.fill(); } else x.fillRect(0, 4, w, 56);
+    x.fillStyle = col(cvar); x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(text, w / 2, 34);
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
+    s.scale.set((w / 64) * 4.2, 4.2, 1); s.renderOrder = 10; return s;
+  }
+  function buildFeatures() {
+    clear(labelsG); clear(helpersG); sup = []; icons = null;
+    const live = CH[cur].live; if (!live) return; const S = SC();
+    for (const [t, x, z, c] of S.labels) { const s = makeLabel(t, c); s.position.set(x, H(x, z) + 8, z); labelsG.add(s); }
+    const off = (p, w) => p.map((q, i) => { const a = p[Math.max(0, i - 1)], b = p[Math.min(p.length - 1, i + 1)], dx = b[0] - a[0], dz = b[1] - a[1], n = Math.hypot(dx, dz) || 1; return [q[0] - (dz / n) * w, q[1] + (dx / n) * w]; });
+    for (const l of S.lines) for (const pts of l.wall ? [off(l.pts, l.wall), off(l.pts, -l.wall)] : [l.pts]) { // 甬道：两边有墙的细长双线
+      const g = new THREE.BufferGeometry().setFromPoints(sample(pts, 1)), o = { color: col(l.c), transparent: true, opacity: 0.9 };
+      const L = new THREE.Line(g, l.wall ? new THREE.LineBasicMaterial(o) : new THREE.LineDashedMaterial(Object.assign(o, { dashSize: 2.4, gapSize: 1.4 })));
+      if (!l.wall) L.computeLineDistances(); helpersG.add(L); if (l.id === "supply") sup.push(L);
+    }
+    if (S.icons) {
+      icons = new THREE.Group(); labelsG.add(icons);
+      for (const [t, x, z] of S.icons) { const s = makeLabel(t, "--x-chu"); s.scale.multiplyScalar(0.8); s.position.set(x, H(x, z) + 4, z); icons.add(s); }
+    }
+    labelsG.visible = show.labels; helpersG.visible = show.helpers; lastS = -1;
+  }
+  /* ---------- 兵团粒子系统 ---------- */
+  function buildArmies() {
+    clear(armiesG); armies = []; if (!CH[cur].live) return;
+    for (const a of SC().armies) {
+      const N = a.n, g = new THREE.BufferGeometry(), pos = new Float32Array(N * 3); g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      const m = new THREE.PointsMaterial({ size: 1.8, map: dotTex, color: col(a.c), transparent: true, depthWrite: false, blending: isDark() ? THREE.AdditiveBlending : THREE.NormalBlending });
+      const p = new THREE.Points(g, m); p.frustumCulled = false; armiesG.add(p);
+      const u = new Float32Array(N), v = new Float32Array(N), ph = new Float32Array(N);
+      for (let i = 0; i < N; i++) { u[i] = Math.random() * 2 - 1; v[i] = Math.random() * 2 - 1; ph[i] = Math.random(); }
+      armies.push(Object.assign({}, a, { N, g, pos, m, u, v, ph, init: false, ratio: 0, st: "" }));
+    }
+  }
+  function form(k, A, i, o) {
+    const u = A.u[i], v = A.v[i];
+    if (k.shape === "arc") { const th = k.a + (u * (k.span || 2)) / 2, rr = k.w / 2 + (v * k.d) / 2; o[0] = k.x + Math.cos(th) * rr; o[1] = k.z + Math.sin(th) * rr; }
+    else if (k.shape === "flow") { // 沿路线循环流动（运粮）
+      const p = k.pts, t = (((u + 1) / 2 + clock * 0.06) % 1) * (p.length - 1), j = Math.floor(t), f = t - j, a = p[j], b = p[j + 1];
+      const dx = b[0] - a[0], dz = b[1] - a[1], n = Math.hypot(dx, dz) || 1; o[0] = a[0] + dx * f - (dz / n) * v * k.d / 2; o[1] = a[1] + dz * f + (dx / n) * v * k.d / 2;
+    } else if (k.shape === "camps") { const c = i % k.n, th = u * PI, rr = (Math.sqrt((v + 1) / 2) * k.w) / 2; o[0] = k.x + (c - (k.n - 1) / 2) * k.gap + Math.cos(th) * rr; o[1] = k.z + Math.sin(th) * rr; }
+    else if (k.shape === "wedge") { const t = (u + 1) / 2, fx = Math.cos(k.a), fz = Math.sin(k.a), s = (v * t * k.w) / 2; o[0] = k.x - fx * t * k.d - fz * s; o[1] = k.z - fz * t * k.d + fx * s; } // 楔形：尖端朝 a
+    else if (k.shape === "blob") { const th = u * PI, rr = (Math.sqrt((v + 1) / 2) * k.w) / 2; o[0] = k.x + Math.cos(th) * rr; o[1] = k.z + Math.sin(th) * rr; }
+    else { const fx = Math.cos(k.a), fz = Math.sin(k.a); o[0] = k.x - (fz * u * k.w) / 2 + (fx * v * k.d) / 2; o[1] = k.z + (fx * u * k.w) / 2 + (fz * v * k.d) / 2; }
+  }
+  const o1 = [0, 0], o2 = [0, 0], ease = (t) => t * t * (3 - 2 * t);
+  function updArmies(dt, s, l) {
+    const e = ease(Math.min(1, l / 0.6)), KA = s ? SC().K[s - 1] : SC().K0 || SC().K[0], KB = SC().K[s], f = Math.min(1, dt * 6);
+    for (const A of armies) {
+      const ka = KA[A.id], kb = KB[A.id]; A.ratio = ka.r + (kb.r - ka.r) * e; A.st = e < 0.5 ? ka.s : kb.s;
+      const cnt = Math.ceil(A.N * A.ratio), [j, sp] = JIT[A.st], P = A.pos; A.g.setDrawRange(0, cnt);
+      for (let i = 0; i < cnt; i++) {
+        form(ka, A, i, o1); form(kb, A, i, o2); const q = A.ph[i] * 6.283;
+        const x = o1[0] + (o2[0] - o1[0]) * e + Math.sin(clock * sp + q) * j, z = o1[1] + (o2[1] - o1[1]) * e + Math.cos(clock * sp * 1.13 + q * 1.7) * j;
+        const y = H(x, z) + 0.9, b = i * 3;
+        if (!A.init) { P[b] = x; P[b + 1] = y; P[b + 2] = z; } else { P[b] += (x - P[b]) * f; P[b + 1] += (y - P[b + 1]) * f; P[b + 2] += (z - P[b + 2]) * f; }
+      }
+      A.init = true; A.g.attributes.position.needsUpdate = true;
+      A.m.opacity = A.st === "溃逃" ? 0.6 : A.st === "交战" ? 0.75 + 0.25 * Math.sin(clock * 9) : 0.95;
+    }
+  }
+  /* ---------- 阶段播放 ---------- */
+  function stageOf() { if (!(T >= 0)) T = 0; return Math.min(NS() - 1, Math.floor(T / DUR)); }
+  function setAuto(v) { auto = v; const b = $("#bPlay"); b.textContent = v ? "⏸" : "▶"; b.setAttribute("aria-label", v ? "暂停" : "自动播放"); }
+  function goStage(i) { T = Math.max(0, Math.min(NS() - 1, i)) * DUR; }
+  function updStage() {
+    const s = stageOf(), l = Math.min(1, (T - s * DUR) / DUR), btns = $("#tl").children, S = SC(), ch = s !== lastS, prev = lastS;
+    if (ch) {
+      lastS = s; [...btns].forEach((b, i) => { b.setAttribute("aria-current", i === s); b.classList.toggle("is-past", i < s); b.firstChild.style.width = ""; });
+      if (chart) { chart.data.datasets.forEach((d) => { d.pointRadius = d.data.map((_, i) => (i === s ? 4 : 0)); }); chart.update("none"); }
+      sup.forEach((L) => { L.material.color.set(col(s >= S.cut ? "--x-red" : S.supC)); L.material.opacity = s >= S.cut ? 0.5 : 0.9; });
+    }
+    if (S.frame) S.frame(s, l, ch, prev);
+    if (btns[s]) btns[s].firstChild.style.width = l * 100 + "%";
+    const L = S.subs[s], line = L[Math.min(L.length - 1, Math.floor(l * L.length))];
+    if (line !== lastSub) { lastSub = line; $("#sub").textContent = line; }
+    $("#hud").innerHTML = armies.filter((a) => a.ratio > 0.01).map((a) => `<div><b style="background:${col(a.c)}"></b>${a.name} · ${a.st} · 约 ${Math.round(a.ratio * 100)}%</div>`).join("");
+  }
+  function tick(now) {
+    requestAnimationFrame(tick);
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000) || 0); last = now; clock += dt;
+    if (CH[cur].live) {
+      const s = stageOf(); let nt = T + (qHold && !auto ? 0 : dt * speed);
+      if (!auto) nt = Math.min(nt, (s + 1) * DUR - 0.001);
+      if (nt >= NS() * DUR) { nt = NS() * DUR - 0.001; if (auto) setAuto(false); }
+      T = nt; if (R) updArmies(dt, stageOf(), Math.min(1, (T - stageOf() * DUR) / DUR)); updStage();
+    }
+    if (R) { ctl.update(); R.render(scene, cam); }
+  }
+  /* ---------- 面板 ---------- */
+  function panelHTML(c) {
+    const grip = '<button class="x-grip" id="grip" aria-expanded="false">讲解面板</button>';
+    if (c.quiz) return grip + `
+      <p class="x-book">教材：统编版《中外历史纲要》上、下册 综合</p>
+      <section class="x-card" id="qScore" aria-label="得分卡"></section>
+      <section class="x-card" id="qBody" aria-live="polite"></section>
+      <section class="x-card"><h2>以少胜多战例对照</h2><table class="x-qt">
+        <thead><tr><th scope="col">战役</th><th scope="col">胜方</th><th scope="col">战法</th><th scope="col">影响</th></tr></thead>
+        <tbody><tr><th scope="row">官渡<small>200</small></th><td>曹操胜袁绍</td><td>夜袭乌巢，焚其粮草</td><td>奠定曹操统一北方基础</td></tr>
+          <tr><th scope="row">赤壁<small>208</small></th><td>孙刘联军胜曹操</td><td>结盟抗曹，火攻战船</td><td>奠定三国鼎立基础</td></tr>
+          <tr><th scope="row">淝水<small>383</small></th><td>东晋胜前秦</td><td>夜渡洛涧；秦军后撤自乱</td><td>北方重新分裂，东晋稳定</td></tr></tbody></table></section>
+      <section class="x-card"><h2>要点</h2><ul>
+        <li>成语：纸上谈兵（长平）；破釜沉舟、作壁上观（巨鹿）；草木皆兵、风声鹤唳（淝水）。</li>
+        <li>外国：温泉关为萨拉米斯赢得时间；坎尼两翼包围；黑斯廷斯后诺曼征服英格兰。</li></ul>
+        <p class="x-gk"><b>高考链接：</b>古代著名战役常以成语、地图情境考查其时间、交战双方与历史影响；中外战役可对比分析地形、战法与胜负原因。</p></section>`;
+    if (c.sc === JL) return grip + `
+      <p class="x-book">教材：统编版《中外历史纲要（上）》第 1 单元 第 3 课 秦统一多民族封建国家的建立（秦末农民起义）</p>
+      <section class="x-card"><h2>战役概况</h2><dl class="x-dl">
+        <dt>时间</dt><dd>前 207 年</dd><dt>地点</dt><dd>巨鹿（漳水、棘原一带）</dd>
+        <dt>双方</dt><dd><span style="color:var(--x-chu)">楚军</span>（项羽）对 <span style="color:var(--x-qinj)">秦军</span>（王离、章邯）</dd>
+        <dt>旁观</dt><dd><span style="color:var(--x-zhou)">赵军（困守巨鹿）、诸侯援军</span></dd>
+        <dt>结果</dt><dd>楚胜，章邯投降</dd></dl></section>
+      <section class="x-card"><h2>推演控制</h2>
+        <div class="x-row"><label for="spd">播放速度</label><input type="range" id="spd" min="0.5" max="2" step="0.25" value="${speed}" /><output id="spdOut">${speed}×</output></div>
+        <p class="x-row" style="color:var(--x-text2)">六个阶段，可在底部时间轴逐阶段点选，或按 ▶ 自动播放。</p></section>
+      <figure class="chart"><figcaption class="chart__cap">兵力变化：甬道被断后秦军不断减少<small>相对兵力（开战时 = 100），为约数示意，非史料统计</small></figcaption>
+        <div class="chart__canvas"><canvas id="force" role="img" aria-label="楚军略有减少；秦军在九战九捷后不断减少，章邯投降后归零"></canvas></div></figure>
+      <section class="x-card"><h2>胜负原因</h2><ul>
+        <li>楚：项羽杀宋义夺兵权。</li><li>楚：渡漳水后沉船破釜，持三日粮。</li>
+        <li>楚：切断章邯给王离运粮的甬道，九战九捷。</li><li>诸侯军作壁上观，不敢进攻秦军。</li></ul></section>
+      <section class="x-card"><h2>历史意义</h2><ul>${c.sig.map((s) => `<li>${s}</li>`).join("")}</ul></section>
+      <section class="x-card"><h2>要点</h2><ul>
+        <li>背景：章邯击败项梁后北上攻赵 → 王离围巨鹿 → 章邯驻棘原，筑甬道运粮。</li>
+        <li>阶段口诀：秦军围赵、项羽夺军、破釜沉舟、九战九捷、作壁上观、章邯投降。</li></ul>
+        <p class="x-gk"><b>高考链接：</b>巨鹿之战消灭秦军主力，奠定推翻秦朝统治的基础；成语“破釜沉舟”“作壁上观”出自此战。<br /><b>易错：</b>巨鹿之战（前 207）是秦末农民战争中的决定性战役，不是楚汉战争。</p></section>
+      <section class="x-card"><h2>显示</h2>
+        <div class="x-row"><label for="swL">地名标签</label><input class="x-sw" type="checkbox" id="swL" ${show.labels ? "checked" : ""} /></div>
+        <div class="x-row"><label for="swH">营垒 / 甬道辅助线</label><input class="x-sw" type="checkbox" id="swH" ${show.helpers ? "checked" : ""} /></div></section>`;
+    if (c.sc === GD) return grip + `
+      <p class="x-book">教材：统编版《中外历史纲要（上）》第 2 单元 第 5 课 三国两晋南北朝的政权更迭与民族交融</p>
+      <section class="x-card"><h2>战役概况</h2><dl class="x-dl">
+        <dt>时间</dt><dd>200 年</dd><dt>地点</dt><dd>官渡（黄河南岸，扼守通往许都的要道）</dd>
+        <dt>双方</dt><dd><span style="color:var(--x-cao)">曹操</span>（兵少）对 <span style="color:var(--x-yuan)">袁绍</span>（兵多粮足）</dd>
+        <dt>结果</dt><dd>曹胜，袁军溃败</dd></dl>
+        <p style="margin-top:8px;color:var(--x-text2)">${c.bg}</p></section>
+      <section class="x-card"><h2>推演控制</h2>
+        <div class="x-row"><label for="spd">播放速度</label><input type="range" id="spd" min="0.5" max="2" step="0.25" value="${speed}" /><output id="spdOut">${speed}×</output></div>
+        <p class="x-row" style="color:var(--x-text2)">六个阶段，可在底部时间轴逐阶段点选，或按 ▶ 自动播放。</p></section>
+      <figure class="chart"><figcaption class="chart__cap">兵力变化：曹军兵少，袁军在乌巢被焚后溃败<small>相对兵力（袁军开战时 = 100），为约数示意，非史料统计</small></figcaption>
+        <div class="chart__canvas"><canvas id="force" role="img" aria-label="曹军兵力约为袁军三成且基本稳定；袁军在夜袭乌巢后溃败，降至约 10"></canvas></div></figure>
+      <section class="x-card"><h2>胜负原因</h2><ul>
+        <li>曹：兵少，把主力集中在官渡，扼守通往许都的要道。</li><li>曹：声东击西解白马之围；以辎重诱敌，延津诛文丑。</li>
+        <li>曹：夜袭乌巢，焚毁袁军粮仓。</li><li>袁：兵多粮足却分兵追击；粮仓被焚后全军溃败。</li></ul></section>
+      <section class="x-card"><h2>历史意义</h2><ul>${c.sig.map((s) => `<li>${s}</li>`).join("")}</ul></section>
+      <section class="x-card"><h2>要点</h2><ul>
+        <li>背景：袁绍据河北四州 → 曹操“挟天子以令诸侯”控制黄河以南 → 袁军进驻黎阳准备渡河。</li>
+        <li>阶段口诀：两强相争、白马解围、延津诛文丑、官渡相持、夜袭乌巢、袁军溃败。</li></ul>
+        <p class="x-gk"><b>高考链接：</b>官渡之战是以少胜多的著名战役，奠定曹操统一北方的基础；常与赤壁之战对比（官渡统一北方，赤壁奠定三分）；<br /><b>易错：</b>官渡之战（200）在赤壁之战（208）之前。</p></section>
+      <section class="x-card"><h2>显示</h2>
+        <div class="x-row"><label for="swL">地名标签</label><input class="x-sw" type="checkbox" id="swL" ${show.labels ? "checked" : ""} /></div>
+        <div class="x-row"><label for="swH">营垒 / 粮道 / 奇袭路线辅助线</label><input class="x-sw" type="checkbox" id="swH" ${show.helpers ? "checked" : ""} /></div></section>`;
+    if (c.sc === CB) return grip + `
+      <p class="x-book">教材：统编版《中外历史纲要（上）》第 2 单元 第 5 课 三国两晋南北朝的政权更迭与民族交融</p>
+      <section class="x-card"><h2>战役概况</h2><dl class="x-dl">
+        <dt>时间</dt><dd>208 年</dd><dt>地点</dt><dd>长江赤壁（南岸）与乌林（北岸）</dd>
+        <dt>双方</dt><dd><span style="color:var(--x-wu)">孙权</span>、<span style="color:var(--x-shu)">刘备</span>联军 对 <span style="color:var(--x-cao)">曹操</span></dd>
+        <dt>结果</dt><dd>孙刘联军胜，曹军败走华容道</dd></dl>
+        <p style="margin-top:8px;color:var(--x-text2)">${c.bg}</p></section>
+      <section class="x-card"><h2>推演控制</h2>
+        <div class="x-row"><label for="spd">播放速度</label><input type="range" id="spd" min="0.5" max="2" step="0.25" value="${speed}" /><output id="spdOut">${speed}×</output></div>
+        <p class="x-row" style="color:var(--x-text2)">六个阶段，可在底部时间轴逐阶段点选，或按 ▶ 自动播放。</p></section>
+      <figure class="chart"><figcaption class="chart__cap">兵力变化：黄盖火攻后曹军大减<small>相对兵力（曹军开战时 = 100），为约数示意，非史料统计</small></figcaption>
+        <div class="chart__canvas"><canvas id="force" role="img" aria-label="孙刘联军兵力少于曹军且基本稳定；曹军在黄盖火攻后大减，败走华容道后更少"></canvas></div></figure>
+      <section class="x-card"><h2>胜负原因</h2><ul>
+        <li>孙刘：孙权与刘备结成联盟，合力抗曹。</li><li>孙刘：黄盖率船队顺东南风驶近北岸，点火进攻。</li>
+        <li>曹：战船连成一片，火势在船阵中蔓延，兵力大减。</li></ul></section>
+      <section class="x-card"><h2>历史意义</h2><ul>${c.sig.map((s) => `<li>${s}</li>`).join("")}</ul></section>
+      <section class="x-card"><h2>要点</h2><ul>
+        <li>背景：曹操统一北方 → 南下荆州，刘琮投降，曹军占江陵 → 刘备当阳长坂败退夏口。</li>
+        <li>阶段口诀：曹操南下、孙刘联盟、对峙赤壁、黄盖火攻、败走华容道、三分天下。</li></ul>
+        <p class="x-gk"><b>高考链接：</b>赤壁之战以少胜多，奠定三国鼎立基础，常与官渡、淝水并列考查；<br /><b>易错：</b>赤壁之战在 208 年，三国正式建立在 220–229 年。</p></section>
+      <section class="x-card"><h2>显示</h2>
+        <div class="x-row"><label for="swL">地名标签</label><input class="x-sw" type="checkbox" id="swL" ${show.labels ? "checked" : ""} /></div>
+        <div class="x-row"><label for="swH">水寨 / 行军 / 火攻路线辅助线</label><input class="x-sw" type="checkbox" id="swH" ${show.helpers ? "checked" : ""} /></div></section>`;
+    if (c.sc === FS) return grip + `
+      <p class="x-book">教材：统编版《中外历史纲要（上）》第 2 单元 第 5 课 三国两晋南北朝的政权更迭与民族交融</p>
+      <section class="x-card"><h2>战役概况</h2><dl class="x-dl">
+        <dt>时间</dt><dd>383 年</dd><dt>地点</dt><dd>淝水（寿阳附近入淮河）、洛涧、八公山一带</dd>
+        <dt>双方</dt><dd><span style="color:var(--x-jin)">东晋</span>（谢石、谢玄）对 <span style="color:var(--x-fq)">前秦</span>（苻坚、苻融）</dd>
+        <dt>结果</dt><dd>东晋胜，秦军溃散北逃</dd></dl>
+        <p style="margin-top:8px;color:var(--x-text2)">${c.bg}</p></section>
+      <section class="x-card"><h2>推演控制</h2>
+        <div class="x-row"><label for="spd">播放速度</label><input type="range" id="spd" min="0.5" max="2" step="0.25" value="${speed}" /><output id="spdOut">${speed}×</output></div>
+        <p class="x-row" style="color:var(--x-text2)">六个阶段，可在底部时间轴逐阶段点选，或按 ▶ 自动播放。</p></section>
+      <figure class="chart"><figcaption class="chart__cap">兵力变化：秦军后撤大乱后溃散<small>相对兵力（前秦开战时 = 100），为约数示意，非史料统计</small></figcaption>
+        <div class="chart__canvas"><canvas id="force" role="img" aria-label="东晋兵力远少于前秦且基本稳定；前秦在洛涧失利后略减，后撤大乱后溃散，降至约 15"></canvas></div></figure>
+      <section class="x-card"><h2>胜负原因</h2><ul>
+        <li>前秦：苻坚不顾大臣劝阻南下，夸口“投鞭断流”。</li><li>前秦：大军前后绵延千里，队伍拉成长列。</li>
+        <li>东晋：谢石、谢玄领北府兵迎战；刘牢之夜渡洛涧，击破秦军一部。</li>
+        <li>前秦：苻坚望八公山“草木皆兵”；隔淝水后撤让晋军渡河，引发阵脚大乱，溃散北逃。</li></ul></section>
+      <section class="x-card"><h2>历史意义</h2><ul>${c.sig.map((s) => `<li>${s}</li>`).join("")}</ul></section>
+      <section class="x-card"><h2>要点</h2><ul>
+        <li>背景：苻坚统一北方 → 率八十多万大军南下 → 前锋苻融渡淮占寿阳。</li>
+        <li>阶段口诀：前秦南下、东晋备战、洛涧之战、草木皆兵、秦军后撤、风声鹤唳。</li></ul>
+        <p class="x-gk"><b>高考链接：</b>淝水之战后前秦瓦解、北方重新分裂，东晋稳定、江南继续开发；成语投鞭断流、草木皆兵、风声鹤唳出自此战；<br /><b>易错：</b>淝水之战是东晋对前秦（383），不是对北魏。</p></section>
+      <section class="x-card"><h2>显示</h2>
+        <div class="x-row"><label for="swL">地名标签</label><input class="x-sw" type="checkbox" id="swL" ${show.labels ? "checked" : ""} /></div>
+        <div class="x-row"><label for="swH">行军 / 夜渡 / 渡河 / 北逃路线辅助线</label><input class="x-sw" type="checkbox" id="swH" ${show.helpers ? "checked" : ""} /></div></section>`;
+    if (c.sc === TM) return grip + `
+      <p class="x-book">教材：统编版《中外历史纲要（下）》第 1 单元 第 2 课 古代世界的帝国与文明的交流（希波战争）</p>
+      <section class="x-card"><h2>战役概况</h2><dl class="x-dl">
+        <dt>时间</dt><dd>前 480 年</dd><dt>地点</dt><dd>温泉关（山崖与大海之间的狭窄通道）</dd>
+        <dt>双方</dt><dd><span style="color:var(--x-gr)">希腊联军</span>（列奥尼达，约七千人）对 <span style="color:var(--x-pe)">波斯</span>（薛西斯）</dd>
+        <dt>结果</dt><dd>希腊战败，殿后部队全军殉国</dd></dl>
+        <p style="margin-top:8px;color:var(--x-text2)">${c.bg}</p></section>
+      <section class="x-card"><h2>推演控制</h2>
+        <div class="x-row"><label for="spd">播放速度</label><input type="range" id="spd" min="0.5" max="2" step="0.25" value="${speed}" /><output id="spdOut">${speed}×</output></div>
+        <p class="x-row" style="color:var(--x-text2)">五个阶段，可在底部时间轴逐阶段点选，或按 ▶ 自动播放。</p></section>
+      <figure class="chart"><figcaption class="chart__cap">兵力变化：联军大部南撤后，守关兵力骤减<small>守关相对兵力（各方开战时 = 100；希腊联军约七千人），为约数示意，非史料统计</small></figcaption>
+        <div class="chart__canvas"><canvas id="force" role="img" aria-label="两日血战中波斯兵力减少、希腊基本不变；联军大部撤离后守关兵力骤减，殿后部队最终殉国"></canvas></div></figure>
+      <section class="x-card"><h2>历史意义</h2><ul>${c.sig.map((s) => `<li>${s}</li>`).join("")}</ul></section>
+      <section class="x-card"><h2>要点</h2><ul>
+        <li>背景：薛西斯率大军渡海攻希腊，水陆并进 → 希腊各城邦组成联军 → 列奥尼达率约七千人扼守温泉关。</li>
+        <li>阶段口诀：波斯西征、两日血战、小道迂回、列奥尼达殿后、全军殉国。</li></ul>
+        <p class="x-gk"><b>高考链接：</b>希波战争中希腊城邦联合抵抗波斯，温泉关成为以少抗多的象征，常与雅典民主政治、萨拉米斯海战联系；<br /><b>易错：</b>温泉关之战希腊战败，但为萨拉米斯海战胜利赢得了时间。</p></section>
+      <section class="x-card"><h2>显示</h2>
+        <div class="x-row"><label for="swL">地名标签</label><input class="x-sw" type="checkbox" id="swL" ${show.labels ? "checked" : ""} /></div>
+        <div class="x-row"><label for="swH">迂回小道辅助线</label><input class="x-sw" type="checkbox" id="swH" ${show.helpers ? "checked" : ""} /></div></section>`;
+    if (c.sc === GM) return grip + `
+      <p class="x-book">教材：统编版《中外历史纲要（下）》第 1 单元 第 2 课 古代世界的帝国与文明的交流（亚历山大东征）</p>
+      <section class="x-card"><h2>战役概况</h2><dl class="x-dl">
+        <dt>时间</dt><dd>前 331 年秋</dd><dt>地点</dt><dd>高加米拉附近的平原（渡过底格里斯河后）</dd>
+        <dt>双方</dt><dd><span style="color:var(--x-mac)">马其顿</span>（亚历山大）对 <span style="color:var(--x-pr)">波斯</span>（大流士三世亲率）</dd>
+        <dt>结果</dt><dd>马其顿胜，大流士溃逃</dd></dl>
+        <p style="margin-top:8px;color:var(--x-text2)">${c.bg}</p></section>
+      <section class="x-card"><h2>推演控制</h2>
+        <div class="x-row"><label for="spd">播放速度</label><input type="range" id="spd" min="0.5" max="2" step="0.25" value="${speed}" /><output id="spdOut">${speed}×</output></div>
+        <p class="x-row" style="color:var(--x-text2)">五个阶段，可在底部时间轴逐阶段点选，或按 ▶ 自动播放。</p></section>
+      <figure class="chart"><figcaption class="chart__cap">兵力变化：大流士溃逃后波斯阵线崩溃<small>相对兵力（波斯开战时 = 100），为约数示意，非史料统计</small></figcaption>
+        <div class="chart__canvas"><canvas id="force" role="img" aria-label="马其顿兵力远少于波斯，左翼苦战时略减；大流士溃逃后波斯兵力骤降至约 20"></canvas></div></figure>
+      <section class="x-card"><h2>历史意义</h2><ul>${c.sig.map((s) => `<li>${s}</li>`).join("")}</ul></section>
+      <section class="x-card"><h2>要点</h2><ul>
+        <li>背景：前 334 年起亚历山大东征波斯 → 前 331 年秋渡底格里斯河 → 在高加米拉平原遇大流士三世。</li>
+        <li>阶段口诀：大军对峙、斜线推进、楔形突击、左翼苦战、大流士溃逃。</li></ul>
+        <p class="x-gk"><b>高考链接：</b>亚历山大东征建立地跨欧亚非的大帝国，客观上促进东西方文化交流、希腊文化东传（希腊化时代）；<br /><b>易错：</b>东征的影响要辩证看待，既有暴力征服，也有客观上的文化交流。</p></section>
+      <section class="x-card"><h2>显示</h2>
+        <div class="x-row"><label for="swL">地名标签</label><input class="x-sw" type="checkbox" id="swL" ${show.labels ? "checked" : ""} /></div>
+        <div class="x-row"><label for="swH">缺口 / 突击 / 溃逃路线辅助线</label><input class="x-sw" type="checkbox" id="swH" ${show.helpers ? "checked" : ""} /></div></section>`;
+    if (c.sc === CN) return grip + `
+      <p class="x-book">教材：统编版《中外历史纲要（下）》第 1 单元 第 2 课 古代世界的帝国与文明的交流（罗马的扩张）</p>
+      <section class="x-card"><h2>战役概况</h2><dl class="x-dl">
+        <dt>时间</dt><dd>前 216 年夏</dd><dt>地点</dt><dd>坎尼（罗马人的粮仓）附近的平原，奥菲杜斯河畔</dd>
+        <dt>双方</dt><dd><span style="color:var(--x-ca)">迦太基</span>（汉尼拔）对 <span style="color:var(--x-ro)">罗马</span>（执政官保卢斯、瓦罗，约八万）</dd>
+        <dt>结果</dt><dd>迦太基胜，罗马惨败</dd></dl>
+        <p style="margin-top:8px;color:var(--x-text2)">${c.bg}</p></section>
+      <section class="x-card"><h2>推演控制</h2>
+        <div class="x-row"><label for="spd">播放速度</label><input type="range" id="spd" min="0.5" max="2" step="0.25" value="${speed}" /><output id="spdOut">${speed}×</output></div>
+        <p class="x-row" style="color:var(--x-text2)">五个阶段，可在底部时间轴逐阶段点选，或按 ▶ 自动播放。</p></section>
+      <figure class="chart"><figcaption class="chart__cap">兵力变化：两翼合围后罗马军大量覆灭<small>相对兵力（罗马开战时约八万 = 100），为约数示意，非史料统计</small></figcaption>
+        <div class="chart__canvas"><canvas id="force" role="img" aria-label="迦太基兵力少于罗马且基本稳定；罗马在两翼合围后骤减，惨败时降至约 10"></canvas></div></figure>
+      <section class="x-card"><h2>历史意义</h2><ul>${c.sig.map((s) => `<li>${s}</li>`).join("")}</ul></section>
+      <section class="x-card"><h2>要点</h2><ul>
+        <li>背景：第二次布匿战争爆发 → 汉尼拔翻越阿尔卑斯山进入意大利 → 前 216 年夏夺取坎尼 → 罗马约八万大军前来决战。</li>
+        <li>阶段口诀：汉尼拔入意、新月阵型、中路诱敌、两翼合围、罗马惨败。</li></ul>
+        <p class="x-gk"><b>高考链接：</b>布匿战争是罗马称霸地中海的关键，罗马由共和国向帝国扩张，常与罗马法、罗马共和制度联系；<br /><b>易错：</b>坎尼会战罗马惨败，但罗马最终赢得第二次布匿战争。</p></section>
+      <section class="x-card"><h2>显示</h2>
+        <div class="x-row"><label for="swL">地名标签</label><input class="x-sw" type="checkbox" id="swL" ${show.labels ? "checked" : ""} /></div>
+        <div class="x-row"><label for="swH">入意 / 骑兵绕后路线辅助线</label><input class="x-sw" type="checkbox" id="swH" ${show.helpers ? "checked" : ""} /></div></section>`;
+    if (c.sc === HS) return grip + `
+      <p class="x-book">教材：统编版《中外历史纲要（下）》第 2 单元 第 3 课 中古时期的欧洲（西欧封建制度）</p>
+      <section class="x-card"><h2>战役概况</h2><dl class="x-dl">
+        <dt>时间</dt><dd>1066 年</dd><dt>地点</dt><dd>黑斯廷斯附近（佩文西登陆，北面山岗决战）</dd>
+        <dt>双方</dt><dd><span style="color:var(--x-nor)">诺曼</span>（诺曼底公爵威廉）对 <span style="color:var(--x-eng)">英格兰</span>（国王哈罗德）</dd>
+        <dt>结果</dt><dd>诺曼胜，哈罗德阵亡</dd></dl>
+        <p style="margin-top:8px;color:var(--x-text2)">${c.bg}</p></section>
+      <section class="x-card"><h2>推演控制</h2>
+        <div class="x-row"><label for="spd">播放速度</label><input type="range" id="spd" min="0.5" max="2" step="0.25" value="${speed}" /><output id="spdOut">${speed}×</output></div>
+        <p class="x-row" style="color:var(--x-text2)">五个阶段，可在底部时间轴逐阶段点选，或按 ▶ 自动播放。</p></section>
+      <figure class="chart"><figcaption class="chart__cap">兵力变化：佯装败退后盾墙变薄，哈罗德阵亡后阵线崩溃<small>相对兵力（开战时 = 100），为约数示意，非史料统计</small></figcaption>
+        <div class="chart__canvas"><canvas id="force" role="img" aria-label="盾墙鏖战中双方都减少；佯装败退后英格兰兵力降至约 60，哈罗德阵亡后降至约 15"></canvas></div></figure>
+      <section class="x-card"><h2>历史意义</h2><ul>${c.sig.map((s) => `<li>${s}</li>`).join("")}</ul></section>
+      <section class="x-card"><h2>要点</h2><ul>
+        <li>背景：爱德华去世，贵族推举哈罗德为王 → 诺曼底公爵威廉声称自己是合法继承人 → 渡海在佩文西登陆，于黑斯廷斯筑营。</li>
+        <li>阶段口诀：诺曼登陆、哈罗德南下、盾墙鏖战、佯装败退、哈罗德阵亡。</li></ul>
+        <p class="x-gk"><b>高考链接：</b>诺曼征服后英格兰建立起较强王权、封建制度进一步发展，为后来《大宪章》与议会制度的形成提供背景；<br /><b>易错：</b>诺曼征服是 1066 年，《大宪章》是 1215 年。</p></section>
+      <section class="x-card"><h2>显示</h2>
+        <div class="x-row"><label for="swL">地名标签</label><input class="x-sw" type="checkbox" id="swL" ${show.labels ? "checked" : ""} /></div>
+        <div class="x-row"><label for="swH">登陆 / 行军路线辅助线</label><input class="x-sw" type="checkbox" id="swH" ${show.helpers ? "checked" : ""} /></div></section>`;
+    if (c.live) return grip + `
+      <p class="x-book">教材：统编版《中外历史纲要（上）》第 1 单元 第 2 课 诸侯纷争与变法运动</p>
+      <section class="x-card"><h2>战役概况</h2><dl class="x-dl">
+        <dt>时间</dt><dd>前 260 年</dd><dt>地点</dt><dd>长平（丹河谷地）</dd>
+        <dt>双方</dt><dd><span style="color:var(--x-qin)">秦</span>（王龁领兵）对 <span style="color:var(--x-zhao)">赵</span>（廉颇，后换赵括）</dd>
+        <dt>结果</dt><dd>秦胜，赵军覆没</dd></dl></section>
+      <section class="x-card"><h2>推演控制</h2>
+        <div class="x-row"><label for="spd">播放速度</label><input type="range" id="spd" min="0.5" max="2" step="0.25" value="${speed}" /><output id="spdOut">${speed}×</output></div>
+        <p class="x-row" style="color:var(--x-text2)">七个阶段，可在底部时间轴逐阶段点选，或按 ▶ 自动播放。</p></section>
+      <figure class="chart"><figcaption class="chart__cap">兵力变化：赵军在被围断粮后急剧减少<small>相对兵力（开战时 = 100），为约数示意，非史料统计</small></figcaption>
+        <div class="chart__canvas"><canvas id="force" role="img" aria-label="秦军兵力缓慢下降，赵军在断粮围困后降至约 5"></canvas></div></figure>
+      <section class="x-card"><h2>胜负原因</h2><ul>
+        <li>赵：中秦反间计，以赵括替下坚壁固守的廉颇。</li><li>赵：赵括弃守出击，渡丹河远离营垒。</li>
+        <li>秦：佯退诱敌，两支奇兵从两翼切断赵军后路与粮道。</li><li>秦：断粮围困，赵军最终覆没。</li></ul></section>
+      <section class="x-card"><h2>历史意义</h2><ul>${c.sig.map((s) => `<li>${s}</li>`).join("")}</ul></section>
+      <section class="x-card"><h2>要点</h2><ul>
+        <li>起因：秦攻野王 → 上党与韩国本土隔断 → 冯亭献上党于赵。</li>
+        <li>阶段口诀：争上党、坚壁守、反间换将、赵括出击、奇兵断后、断粮围困、赵军覆没。</li></ul>
+        <p class="x-gk"><b>高考链接：</b>长平之战后赵国一蹶不振，为秦统一扫清最大障碍，常与商鞅变法增强秦国实力结合考查；成语“纸上谈兵”出自赵括。<br /><b>易错：</b>长平之战是前 260 年，秦统一是前 221 年。</p></section>
+      <section class="x-card"><h2>显示</h2>
+        <div class="x-row"><label for="swL">地名标签</label><input class="x-sw" type="checkbox" id="swL" ${show.labels ? "checked" : ""} /></div>
+        <div class="x-row"><label for="swH">营垒 / 长城 / 粮道辅助线</label><input class="x-sw" type="checkbox" id="swH" ${show.helpers ? "checked" : ""} /></div></section>`;
+    return grip + `
+      <p style="margin-bottom:12px"><span class="x-tag">交互即将上线</span></p>
+      <section class="x-card"><h2>${c.quiz ? "检测说明" : "战役概况"}</h2><p style="font:12px var(--x-mono);color:var(--x-gold);margin-bottom:6px">${c.meta}</p><p>${c.bg}</p></section>
+      ${c.stages.length ? `<section class="x-card"><h2>战役阶段</h2><ol>${c.stages.map((s) => `<li>${s}</li>`).join("")}</ol></section>` : ""}
+      ${c.sig.length ? `<section class="x-card"><h2>历史意义</h2><ul>${c.sig.map((s) => `<li>${s}</li>`).join("")}</ul></section>` : ""}`;
+  }
+  function makeChart() {
+    if (chart) { chart.destroy(); chart = null; }
+    const el = $("#force"); if (!el || !window.Chart || !window.Hark) return;
+    const S = SC(), F = Hark.data(S.data);
+    chart = new Chart(el, { type: "line",
+      data: { labels: F.map((d) => d.stage), datasets: S.series.map(([n, k, c]) => ({ label: n, data: F.map((d) => d[k]), borderColor: `var(${c})`, backgroundColor: `var(${c})`, pointRadius: 0 })) },
+      options: { scales: { y: { min: 0, max: 100 } }, plugins: { tooltip: { callbacks: { label: (c) => `${c.dataset.label} 约 ${c.raw}` } } } } });
+  }
+  /* ---------- 随堂检测：b = 战役章节，s = 关键阶段 ---------- */
+  const QZ = [
+    { b: 0, s: 2, k: "纸上谈兵", a: 0, o: ["长平之战", "巨鹿之战", "官渡之战", "淝水之战"],
+      t: "赵括“少时学兵法，言兵事，以天下莫能当”，代廉颇为将后却全军覆没，后人讥之为“纸上谈兵”。这一成语出自",
+      e: "秦施反间计，赵以赵括替下坚壁固守的廉颇；赵括弃守出击，被断粮围困而覆没。" },
+    { b: 1, s: 2, k: "破釜沉舟、作壁上观", a: 1, o: ["长平之战", "巨鹿之战", "官渡之战", "赤壁之战"],
+      t: "史载项羽“皆沉船，破釜甑，烧庐舍，持三日粮”；各路诸侯援军“皆从壁上观”。与之相关的战役是",
+      e: "前 207 年巨鹿之战，项羽破釜沉舟、九战九捷，诸侯军作壁上观；此战消灭了秦军主力。" },
+    { b: 2, s: 4, k: "统一北方的基础", a: 1, o: ["长平之战", "官渡之战", "赤壁之战", "淝水之战"],
+      t: "东汉末年，“挟天子以令诸侯”的曹操与据有河北四州的袁绍决战。奠定曹操统一北方基础的战役是",
+      e: "200 年官渡之战，曹操夜袭乌巢、焚毁袁军粮草，以少胜多，奠定统一北方的基础。" },
+    { b: 3, s: 3, k: "三国鼎立的基础", a: 1, o: ["官渡之战", "赤壁之战", "淝水之战", "巨鹿之战"],
+      t: "曹操统一北方后率军南下，统一全国的进程却在长江边受阻。下列战役中，奠定三国鼎立基础的是",
+      e: "208 年赤壁之战，孙刘联军火攻曹军战船，奠定三国鼎立基础；官渡之战奠定的是曹操统一北方的基础。" },
+    { b: 4, s: 3, k: "草木皆兵、风声鹤唳", a: 0, o: ["淝水之战；北方重新分裂", "淝水之战；前秦统一北方", "赤壁之战；北方重新分裂", "官渡之战；北方归于统一"],
+      t: "“草木皆兵”“风声鹤唳”两个成语出自的战役，以及此战后北方的局势分别是",
+      e: "383 年淝水之战，苻坚望八公山“草木皆兵”，溃逃时“风声鹤唳”；战后前秦瓦解，北方重新分裂，东晋得以稳定。" },
+    { b: 5, s: 3, k: "萨拉米斯海战", a: 0, o: ["温泉关之战", "马拉松战役", "高加米拉战役", "坎尼会战"],
+      t: "希波战争中，希腊联军扼守山崖与大海之间的狭道，殿后部队全军殉国，为萨拉米斯海战的胜利赢得了时间。这场战役是",
+      e: "前 480 年温泉关之战，列奥尼达率部殿后殉国；同年希腊在萨拉米斯海战中大败波斯。" },
+    { b: 7, s: 3, k: "两翼包围", a: 2, o: ["温泉关之战", "高加米拉战役", "坎尼会战", "黑斯廷斯战役"],
+      t: "第二次布匿战争中，一方以新月阵型中路诱敌、两翼合围，歼灭对手大军。军事史上这一两翼包围歼敌的经典战例是",
+      e: "前 216 年坎尼会战，汉尼拔两翼合围罗马约八万大军；罗马虽惨败，最终仍赢得第二次布匿战争。" },
+    { b: 8, s: 4, k: "诺曼征服", a: 0, o: ["建立起强有力的王权，封建制度进一步发展", "颁布《大宪章》，王权受到限制", "议会取得最高权力，确立君主立宪制", "封建制度瓦解，走向共和"],
+      t: "1066 年，诺曼底公爵威廉在黑斯廷斯战役中击败英格兰国王哈罗德。诺曼征服后，英格兰",
+      e: "诺曼征服后英格兰建立起强有力的王权，封建制度进一步发展；《大宪章》在 1215 年，君主立宪制确立于 17 世纪末。" },
+  ];
+  let qi = 0, qAns = [], qHold = false;
+  const AB = "ABCD";
+  function qStage(q) {
+    const Q = CH[cur], B = CH[q.b]; Q.sc = B.sc; Q.stages = B.stages; Q.live = true;
+    $("#soon").hidden = true; $("#ovMeta").textContent = `${B.name} · ${B.meta}`; $("#ovTxt").textContent = B.bg;
+    $("#tl").innerHTML = B.stages.map((s, k) => `<button data-s="${k}"><i></i>${s}</button>`).join("");
+    ["#bPlay", "#bSPrev", "#bSNext"].forEach((s) => ($(s).disabled = false));
+    lastS = -1; lastSub = ""; $("#sub").textContent = ""; setAuto(false); qHold = true; goStage(q.s);
+    if (R) { cfg = B.sc.terrain; buildTerrain(); buildFeatures(); buildArmies(); resetView(); }
+  }
+  function qShow() {
+    const ok = (i) => qAns[i] === QZ[i].a, done = qAns.length, n = QZ.filter((_, i) => ok(i)).length;
+    $("#qScore").innerHTML = `<h2>得分卡</h2><p class="x-qsc"><b>${n}</b>/ ${QZ.length}<small>已答 ${done} 题</small></p>
+      <ol class="x-marks">${QZ.map((_, i) => `<li class="${i < done ? (ok(i) ? "is-ok" : "is-no") : ""}" ${i === qi ? 'aria-current="true"' : ""} aria-label="第 ${i + 1} 题${i < done ? (ok(i) ? " 正确" : " 错误") : ""}">${i < done ? (ok(i) ? "✓" : "✗") : i + 1}</li>`).join("")}</ol>`;
+    const body = $("#qBody");
+    if (qi >= QZ.length) {
+      body.innerHTML = `<h2>检测结果：${n} / ${QZ.length}</h2><ol class="x-sum">${QZ.map((q, i) => `<li class="${ok(i) ? "is-ok" : "is-no"}"><b>${ok(i) ? "✓" : "✗"}</b> ${q.k}
+        <small>你选 ${AB[qAns[i]]}，正确 ${AB[q.a]}. ${q.o[q.a]}</small></li>`).join("")}</ol><button class="x-qbtn" data-act="redo">重新作答</button>`;
+      return;
+    }
+    const q = QZ[qi], a = qAns[qi], ans = a !== undefined, B = CH[q.b];
+    body.innerHTML = `<h2>第 ${qi + 1} 题 / ${QZ.length}</h2><p class="x-qst">${q.t}（　　）</p>
+      <div class="x-opts">${q.o.map((o, k) => `<button class="x-opt${ans && k === q.a ? " is-ok" : ""}${ans && k === a && a !== q.a ? " is-no" : ""}" data-k="${k}" ${ans ? "disabled" : ""}>${AB[k]}. ${o}</button>`).join("")}</div>` +
+      (ans ? `<p class="x-fb ${a === q.a ? "is-ok" : "is-no"}"><b>${a === q.a ? "回答正确" : `回答错误，正确答案 ${AB[q.a]}`}</b>${q.e}</p>
+        <button class="x-qbtn" data-act="next">${qi + 1 < QZ.length ? "下一题" : "查看得分"}</button>`
+        : `<p class="x-hint">舞台已切到「${B.name} · ${B.stages[q.s]}」，作答后播放该阶段演示。</p>`);
+  }
+  function qClick(e) {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.k !== undefined) { qAns[qi] = +b.dataset.k; qHold = false; setAuto(false); goStage(QZ[qi].s); }
+    else if (b.dataset.act === "next") { qi++; if (qi < QZ.length) qStage(QZ[qi]); }
+    else if (b.dataset.act === "redo") { qi = 0; qAns = []; qStage(QZ[0]); }
+    qShow(); const f = $("#qBody").querySelector("button:not([disabled])"); if (f) f.focus({ preventScroll: true });
+  }
+  /* ---------- 切章 ---------- */
+  function setChapter(i, fromHash) {
+    cur = (i + CH.length) % CH.length; const c = CH[cur];
+    qHold = false; if (c.quiz) c.live = false;
+    if (!fromHash) history.replaceState(null, "", "#" + (cur + 1));
+    document.querySelectorAll("#side button, #segs button").forEach((b) => b.setAttribute("aria-current", +b.dataset.i === cur));
+    const sb = document.querySelector(`#side button[data-i="${cur}"]`); if (sb) sb.scrollIntoView({ block: "nearest", inline: "nearest" });
+    $("#count").textContent = `${pad(cur + 1)} / ${pad(CH.length)}`;
+    $("#ovTitle").textContent = `第 ${cur + 1} 章 · ${c.name}`; $("#ovMeta").textContent = c.meta; $("#ovTxt").textContent = c.bg;
+    $("#soon").hidden = !!c.live; $("#sub").textContent = ""; $("#hud").innerHTML = ""; lastSub = ""; lastS = -1; T = 0; setAuto(false);
+    $("#tl").innerHTML = (c.stages.length ? c.stages : ["交互即将上线"]).map((s, k) => `<button data-s="${k}" ${c.live ? "" : "disabled"}><i></i>${s}</button>`).join("");
+    ["#bPlay", "#bSPrev", "#bSNext"].forEach((s) => ($(s).disabled = !c.live));
+    const panel = $("#panel"); panel.innerHTML = panelHTML(c); panel.scrollTop = 0; panel.classList.remove("is-open");
+    $("#grip").addEventListener("click", () => { const o = panel.classList.toggle("is-open"); $("#grip").setAttribute("aria-expanded", o); });
+    if (c.live) {
+      $("#spd").addEventListener("input", (e) => { speed = +e.target.value; $("#spdOut").textContent = speed + "×"; });
+      $("#swL").addEventListener("change", (e) => { show.labels = e.target.checked; if (labelsG) labelsG.visible = show.labels; });
+      $("#swH").addEventListener("change", (e) => { show.helpers = e.target.checked; if (helpersG) helpersG.visible = show.helpers; });
+    }
+    makeChart();
+    if (R) { cfg = c.live ? c.sc.terrain : TERRAIN.generic; buildTerrain(); buildFeatures(); buildArmies(); resetView(); }
+    if (c.quiz) { $("#qBody").addEventListener("click", qClick); qStage(QZ[Math.min(qi, QZ.length - 1)]); if (qAns[qi] !== undefined || qi >= QZ.length) qHold = false; qShow(); }
+  }
+  function toggleTheme() {
+    const t = isDark() ? "light" : "dark"; root.setAttribute("data-theme", t);
+    try { localStorage.setItem("hark-theme", t); } catch (e) { /* 存储不可用：本次有效 */ }
+    if (R) { buildTerrain(); buildFeatures(); armies.forEach((a) => { a.m.color.set(col(a.c)); a.m.blending = isDark() ? THREE.AdditiveBlending : THREE.NormalBlending; a.m.needsUpdate = true; }); }
+  }
+  function toggleFull() {
+    const d = document; if (d.fullscreenElement) d.exitFullscreen && d.exitFullscreen();
+    else if (root.requestFullscreen) root.requestFullscreen().catch(() => {});
+  }
+  /* ---------- 绑定 ---------- */
+  $("#side").innerHTML = CH.map((c, i) => `<li><button data-i="${i}"><i>${pad(i + 1)}</i><span>${c.name}</span>${c.live || c.quiz ? "" : "<em>即将上线</em>"}</button></li>`).join("");
+  $("#segs").innerHTML = CH.map((c, i) => `<button data-i="${i}" aria-label="第 ${i + 1} 章 ${c.name}"></button>`).join("");
+  document.querySelectorAll("#side button, #segs button").forEach((b) => b.addEventListener("click", () => setChapter(+b.dataset.i)));
+  $("#tl").addEventListener("click", (e) => { const b = e.target.closest("button[data-s]"); if (b && !b.disabled) { setAuto(false); goStage(+b.dataset.s); } });
+  $("#bPlay").addEventListener("click", () => { if (!auto && T >= NS() * DUR - 0.01) T = 0; setAuto(!auto); });
+  $("#bSPrev").addEventListener("click", () => { setAuto(false); goStage(stageOf() - 1); });
+  $("#bSNext").addEventListener("click", () => { setAuto(false); goStage(stageOf() + 1); });
+  $("#bPrev").addEventListener("click", () => setChapter(cur - 1));
+  $("#bNext").addEventListener("click", () => setChapter(cur + 1));
+  $("#bTheme").addEventListener("click", toggleTheme);
+  $("#bReset").addEventListener("click", resetView);
+  $("#bFull").addEventListener("click", toggleFull);
+  $("#bFold").addEventListener("click", () => { const f = $("#ov").classList.toggle("is-folded"); $("#bFold").textContent = f ? "+" : "–"; $("#bFold").setAttribute("aria-label", f ? "展开讲解" : "折叠讲解"); });
+  document.addEventListener("keydown", (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    const k = e.key.toLowerCase();
+    if (k === "arrowleft") setChapter(cur - 1); else if (k === "arrowright") setChapter(cur + 1);
+    else if (k === "t") toggleTheme(); else if (k === "r") resetView(); else if (k === "f") toggleFull();
+  });
+  const fromHash = () => { const n = parseInt(location.hash.slice(1), 10); return n >= 1 && n <= CH.length ? n - 1 : 0; };
+  window.addEventListener("hashchange", () => { if (fromHash() !== cur) setChapter(fromHash(), true); });
+  initGL();
+  setChapter(fromHash(), true);
+  requestAnimationFrame(tick);
+})();
+    </script>
+  </body>
+</html>
