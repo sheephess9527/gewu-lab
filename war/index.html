@@ -144,26 +144,6 @@
       .x-qt thead th { color: var(--x-text2); font-weight: 500; }
       .x-qt tbody th { font: 600 13px var(--x-serif); white-space: nowrap; }
       .x-qt tbody th small { display: block; font: 12px var(--x-mono); color: var(--x-gold); }
-      @media (max-width: 1023px) { .x-app { grid-template-columns: 180px minmax(0, 1fr) 300px; } }
-      @media (max-width: 767px) {
-        .x-app { grid-template: "top" 56px "side" 48px "stage" 1fr "ctrl" auto / minmax(0, 1fr); padding-bottom: 52px; }
-        .x-top { gap: 8px; padding: 0 8px; }
-        .x-segs { display: none; }
-        .x-tools { gap: 2px; } .x-ib { width: var(--tap); height: var(--tap); border: 0; background: none; }
-        .x-side { display: flex; overflow-x: auto; overflow-y: hidden; padding: 0; border-right: 0; border-bottom: 1px solid var(--x-line); scrollbar-width: none; }
-        .x-side li { flex: none; }
-        .x-side button { height: 48px; padding: 4px 12px; border-left: 0; border-bottom: 3px solid transparent; display: flex; align-items: center; gap: 6px; }
-        .x-side button[aria-current="true"] { border-bottom-color: var(--x-acc); }
-        .x-side em { display: none; }
-        .x-tl button { min-height: var(--tap); }
-        .x-ctrl .x-ib { flex: none; }
-        .x-hud { bottom: auto; top: 14px; left: auto; right: 14px; }
-        .x-ov { max-width: calc(100% - 150px); }
-        .x-panel { position: fixed; left: 0; right: 0; bottom: 0; height: 74vh; z-index: 30; border: 1px solid var(--x-line); border-radius: 16px 16px 0 0; padding-top: 0; transform: translateY(calc(100% - 52px)); transition: transform 300ms var(--ease-out); box-shadow: 0 -8px 30px rgb(0 0 0 / 0.3); }
-        .x-panel.is-open { transform: none; }
-        .x-grip { display: flex; position: sticky; top: 0; z-index: 2; width: calc(100% + 32px); margin: 0 -16px 10px; height: 52px; align-items: center; justify-content: center; gap: 8px; border: 0; background: var(--x-panel); font: 600 14px var(--x-serif) !important; backdrop-filter: blur(16px); }
-        .x-grip::before { content: ""; width: 36px; height: 4px; border-radius: 2px; background: var(--x-text2); }
-      }
     </style>
     <style>
       /* ===== 视觉改版：门户同款极简风格（只改样式） ===== */
@@ -285,50 +265,99 @@
       .x-qt th, .x-qt td { padding: 8px 4px; }
       .x-qt tbody th { font-size: 14px; }
 
-      @media (max-width: 767px) {
-        .x-app { grid-template-rows: 52px 52px minmax(0, 1fr) auto; transition: grid-template-rows var(--x-t); }
-        .x-app.x-toc-closed { grid-template-rows: 52px 0 minmax(0, 1fr) auto; }
-        .x-top { gap: 4px; padding: 0 4px; }
-        .x-back { padding: 0; }
-        .x-back-t, .x-en, .x-count { display: none; }
-        .x-chev { font-size: 30px; }
-        .x-brand b { padding-left: 8px; font-size: 16px; }
-        .x-tools { gap: 0; }
-        .x-top .x-ib { background: transparent; }
-        .x-top .x-ib:hover { background: var(--x-btn2); }
-        .x-side { align-items: center; gap: 4px; padding: 0 56px 0 8px; background: var(--x-glass); border-bottom: 0.5px solid var(--x-hair); }
-        .x-side li + li { margin-top: 0; }
-        .x-side button { height: 44px; padding: 0 14px; border: 0; border-radius: 980px; }
-        .x-side button[aria-current="true"] { border: 0; }
-        .x-app.x-toc-closed .x-side { visibility: hidden; border: 0; }
-        .x-toc { display: grid; place-items: center; position: absolute; top: 52px; right: 0; z-index: 6; width: 52px; height: 52px; padding: 0; border: 0;
-          background: linear-gradient(to right, transparent, var(--x-bg1) 35%); color: var(--x-text); cursor: pointer; }
-        .x-toc span { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 980px; background: var(--x-btn2); transition: transform var(--x-t); }
-        .x-app.x-toc-closed .x-toc { background: none; }
-        .x-app.x-toc-closed .x-toc span { transform: rotate(180deg); background: var(--x-card-glass); box-shadow: var(--x-shadow); }
-        .x-ov { top: 12px; left: 12px; max-width: calc(100% - 150px); padding: 12px 14px; border-radius: 18px; }
-        .x-ov h1 { font-size: 18px; }
-        .x-ov p.x-txt { font-size: 14px; }
-        .x-hud { top: 12px; right: 12px; left: auto; bottom: auto; transition: top var(--x-t); }
-        .x-app.x-toc-closed .x-hud { top: 56px; }
-        .x-hud div { padding: 3px 10px; }
-        .x-sub { bottom: 12px; font-size: 14px; padding: 8px 14px; }
-        .x-ctrl { padding: 8px 10px; gap: 6px; }
-        .x-tl button { min-height: 44px; }
-        .x-panel { border: 0; border-radius: 24px 24px 0 0; background: var(--x-bg1); box-shadow: 0 -4px 24px rgba(0,0,0,.08); transition: transform var(--x-t) var(--x-ease); }
-        .x-grip { background: var(--x-glass); font-size: 15px !important; backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
-        .x-grip::before { border-radius: 980px; background: var(--x-grip-c); }
-      }
       @media (prefers-reduced-motion: reduce) {
         .x-app *, .x-app *::before, .x-app *::after, .x-app { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
       }
     </style>
-  </head>
+    <style>
+      /* ===== 手机 / 平板（≤1023px）：顶栏 → 沙盘 → 播放控制 → 内容，底部章节栏；桌面不受影响 ===== */
+      [hidden] { display: none !important; }
+      .x-chbtn, .x-mc, .x-mnav { display: none; }
+      .x-sheet { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(0,0,0,.4);
+        color: var(--x-text); font: 400 15px/1.5 var(--x-sans); animation: x-fade .2s ease-out; }
+      .x-sheet__panel { max-height: 70vh; max-height: 70dvh; overflow-y: auto; overscroll-behavior: contain; background: var(--x-panel); border-radius: 20px 20px 0 0;
+        padding: 0 max(12px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); box-shadow: 0 -8px 32px rgba(0,0,0,.18);
+        animation: x-up .3s var(--x-ease); }
+      .x-sheet__head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; padding: 10px 0 6px 12px; background: var(--x-panel); }
+      .x-sheet__head h2 { font: 600 17px/1.3 var(--x-sans); letter-spacing: -0.02em; }
+      .x-sheet__close { width: 44px; height: 44px; border: 0; border-radius: 980px; background: transparent; color: var(--x-blue-t); font: 500 15px/1 var(--x-sans); cursor: pointer; }
+      .x-sheet ol { list-style: none; margin: 0; padding: 0; }
+      .x-sheet ol button { display: grid; grid-template-columns: 34px 1fr; align-items: center; column-gap: 8px; width: 100%; min-height: 56px; padding: 8px 12px; border: 0; border-radius: 14px;
+        background: none; color: var(--x-text); font: inherit; text-align: left; cursor: pointer; }
+      .x-sheet ol button i { grid-row: span 2; font: normal 13px var(--x-mono); color: var(--x-text2); }
+      .x-sheet ol button span { font-size: 16px; font-weight: 500; line-height: 1.35; }
+      .x-sheet ol button small { font-size: 13px; line-height: 1.4; color: var(--x-text2); }
+      .x-sheet ol button[aria-current="true"] { background: var(--x-sel); }
+      .x-sheet ol button[aria-current="true"] i, .x-sheet ol button[aria-current="true"] span, .x-sheet ol button[aria-current="true"] small { color: var(--x-blue-t); }
+      @keyframes x-up { from { transform: translateY(100%); } to { transform: none; } }
+      @keyframes x-fade { from { opacity: 0; } to { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { .x-sheet, .x-sheet__panel { animation: none; } }
+
+      @media (max-width: 1023px) {
+        .x-app { display: block; overflow-x: hidden; overflow-y: auto; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;
+          padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+        .x-prog, .x-tools, .x-side, .x-toc, .x-grip, #bFold, .x-back-t, .x-en { display: none !important; }
+
+        /* 顶栏 */
+        .x-top { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; gap: 8px; height: calc(52px + env(safe-area-inset-top));
+          padding: env(safe-area-inset-top) max(4px, env(safe-area-inset-right)) 0 max(4px, env(safe-area-inset-left)); }
+        .x-back { width: 44px; height: 44px; padding: 0; }
+        .x-chev { font-size: 34px; margin-top: -4px; }
+        .x-brand b { position: absolute; left: 50%; bottom: 0; height: 52px; display: flex; align-items: center; transform: translateX(-50%);
+          padding: 0; border: 0; font-size: 17px; white-space: nowrap; pointer-events: none; }
+        .x-app .x-chbtn { display: inline-flex; align-items: center; gap: 6px; min-width: 44px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 980px;
+          background: var(--x-btn2); color: var(--x-blue-t); font: 500 15px/1 var(--x-sans); }
+        .x-chbtn span { font: 13px/1 var(--x-mono); color: var(--x-text2); }
+
+        /* 沙盘 */
+        .x-stage { height: 50vh; height: 50svh; min-height: 260px; max-height: 560px; touch-action: auto; }
+        .x-stage canvas { touch-action: none; }
+        .x-sub { left: 0; right: 0; bottom: 0; width: auto; transform: none; padding: 5px 14px; border: 0; border-radius: 0; box-shadow: none; background: var(--x-glass);
+          font: 500 13px/1.45 var(--x-sans); text-align: center; pointer-events: none; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+
+        /* 播放控制 */
+        .x-ctrl { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; padding: 10px 0 12px; border-top: 0; border-bottom: 0.5px solid var(--x-line); }
+        .x-app .x-ctrl > .x-ib { width: 44px; height: 44px; flex: none; font-size: 16px !important; }
+        .x-tl { flex: 1 0 100%; gap: 8px; padding: 0 max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left)); overscroll-behavior-x: contain; }
+        .x-tl button { flex: 0 0 auto; min-width: 0; min-height: 44px; padding: 8px 16px 10px; font-size: 14px !important; }
+        .x-tl button:first-child { margin-left: auto; } .x-tl button:last-child { margin-right: auto; }
+
+        /* 内容区 */
+        .x-mc { display: block; max-width: 720px; margin: 0 auto; padding: 18px max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); }
+        .x-mc .x-ov { position: static; max-width: none; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+        .x-mc .x-ov h1 { font-size: 20px; font-weight: 600; line-height: 1.35; }
+        .x-mc .x-ov .x-meta { margin-top: 4px; font: 14px/1.5 var(--x-sans); color: var(--x-text2); }
+        .x-mc .x-ov p.x-txt { display: block; margin-top: 12px; font-size: 16px; line-height: 1.7; }
+        .x-mc .x-hud { position: static; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; font: 13px/1.4 var(--x-sans); }
+        .x-mc .x-hud:empty { display: none; }
+        .x-mc .x-hud div { padding: 6px 12px; background: var(--x-wash); box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+        .x-mtools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+        .x-app .x-mtools button { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border: 0; border-radius: 980px;
+          background: var(--x-btn2); color: var(--x-text); font: 500 14px/1 var(--x-sans); }
+        .x-panel { position: static; height: auto; overflow: visible; transform: none; max-width: 720px; margin: 0 auto; border: 0; border-radius: 0; box-shadow: none;
+          background: transparent; padding: 20px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left)); }
+        .x-panel .chart__cap small, .x-qsc small, .x-qt tbody th small, .x-marks li, .x-hud, .x-book { font-size: 13px !important; }
+        .x-panel p[style*="12px"] { font-size: 13px !important; }
+        .x-row input[type="range"] { height: 44px; }
+
+        /* 底部章节栏 */
+        .x-mnav { display: flex; gap: 10px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; color: var(--x-text);
+          padding: 10px max(16px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+          background: var(--x-glass); border-top: 0.5px solid var(--x-hair); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
+        .x-mnav button { flex: 1; min-height: 44px; border: 0; border-radius: 980px; background: var(--x-btn2); color: var(--x-text); font: 600 15px/1 var(--x-sans); cursor: pointer; }
+        .x-mnav button.x-mnav__next { background: var(--x-btn); color: #fff; }
+      }
+      @media (min-width: 768px) and (max-width: 1023px) {
+        .x-stage { height: 55vh; max-height: none; }
+      }
+    </style>
+  <style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
   <body>
     <div class="page" id="top">
       <div class="x-app" id="app">
         <header class="x-top">
           <div class="x-brand"><a class="x-back" href="../" aria-label="返回格物实验室"><span class="x-chev" aria-hidden="true">‹</span><span class="x-back-t">格物实验室</span></a><b>战役沙盘<span class="x-en"> · WarTable</span></b></div>
+          <button class="x-chbtn" id="xCh" aria-haspopup="dialog" aria-controls="xSheet" aria-expanded="false">章节 <span id="xChN">01/10</span></button>
           <div class="x-prog"><div class="x-segs" id="segs"></div><span class="x-count" id="count">01 / 10</span></div>
           <div class="x-tools">
             <button class="x-ib" id="bPrev" aria-label="上一章 (←)" title="上一章 (←)">←</button>
@@ -357,7 +386,24 @@
           <button class="x-ib" id="bSNext" aria-label="下一阶段">⏭</button>
           <div class="x-tl" id="tl" aria-label="阶段时间轴"></div>
         </div>
+        <section class="x-mc" id="xMc" aria-label="本章">
+          <div id="xMcHead"></div>
+          <div class="x-mtools">
+            <button type="button" id="xReset"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9M2.5 2.5v3h3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>重置视角</button>
+            <button type="button" id="xTheme"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 9.6A5.8 5.8 0 0 1 6.4 2.5a5.8 5.8 0 1 0 7.1 7.1Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span id="xThemeT">深色</span></button>
+          </div>
+        </section>
         <aside class="x-panel" id="panel" aria-label="讲解面板"></aside>
+      </div>
+      <nav class="x-mnav" aria-label="切换章节">
+        <button type="button" id="xPrev">‹ 上一章</button>
+        <button type="button" class="x-mnav__next" id="xNext">下一章 ›</button>
+      </nav>
+      <div class="x-sheet" id="xSheet" role="dialog" aria-modal="true" aria-labelledby="xSheetT" hidden>
+        <div class="x-sheet__panel">
+          <div class="x-sheet__head"><h2 id="xSheetT">全部章节</h2><button type="button" class="x-sheet__close" id="xSheetX" aria-label="关闭章节列表">完成</button></div>
+          <ol id="xChList"></ol>
+        </div>
       </div>
     </div>
     <script type="application/json" id="force-data">
@@ -400,8 +446,8 @@
     <script src="chart.js"></script>
     <script src="datalabels.js"></script>
     <script src="hark-charts.js"></script>
-    <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="../vendor/three@0.147.0/three.min.js"></script>
+    <script src="../vendor/three@0.147.0/OrbitControls.js"></script>
     <script>
 (function () {
   "use strict";
@@ -1397,7 +1443,8 @@
     cur = (i + CH.length) % CH.length; const c = CH[cur];
     qHold = false; if (c.quiz) c.live = false;
     if (!fromHash) history.replaceState(null, "", "#" + (cur + 1));
-    document.querySelectorAll("#side button, #segs button").forEach((b) => b.setAttribute("aria-current", +b.dataset.i === cur));
+    document.querySelectorAll("#side button, #segs button, #xChList button").forEach((b) => b.setAttribute("aria-current", +b.dataset.i === cur));
+    $("#xChN").textContent = `${pad(cur + 1)}/${pad(CH.length)}`;
     const sb = document.querySelector(`#side button[data-i="${cur}"]`); if (sb) sb.scrollIntoView({ block: "nearest", inline: "nearest" });
     $("#count").textContent = `${pad(cur + 1)} / ${pad(CH.length)}`;
     $("#ovTitle").textContent = `第 ${cur + 1} 章 · ${c.name}`; $("#ovMeta").textContent = c.meta; $("#ovTxt").textContent = c.bg;
@@ -1427,7 +1474,8 @@
   /* ---------- 绑定 ---------- */
   $("#side").innerHTML = CH.map((c, i) => `<li><button data-i="${i}"><i>${pad(i + 1)}</i><span>${c.name}</span>${c.live || c.quiz ? "" : "<em>即将上线</em>"}</button></li>`).join("");
   $("#segs").innerHTML = CH.map((c, i) => `<button data-i="${i}" aria-label="第 ${i + 1} 章 ${c.name}"></button>`).join("");
-  document.querySelectorAll("#side button, #segs button").forEach((b) => b.addEventListener("click", () => setChapter(+b.dataset.i)));
+  $("#xChList").innerHTML = CH.map((c, i) => `<li><button type="button" data-i="${i}"><i>${pad(i + 1)}</i><span>${c.name}</span><small>${c.meta}</small></button></li>`).join("");
+  document.querySelectorAll("#side button, #segs button, #xChList button").forEach((b) => b.addEventListener("click", () => setChapter(+b.dataset.i)));
   $("#tl").addEventListener("click", (e) => { const b = e.target.closest("button[data-s]"); if (b && !b.disabled) { setAuto(false); goStage(+b.dataset.s); } });
   $("#bPlay").addEventListener("click", () => { if (!auto && T >= NS() * DUR - 0.01) T = 0; setAuto(!auto); });
   $("#bSPrev").addEventListener("click", () => { setAuto(false); goStage(stageOf() - 1); });
@@ -1465,6 +1513,50 @@
         document.addEventListener("input", function (e) { if (e.target.matches && e.target.matches('input[type="range"]')) fill(e.target); });
         new MutationObserver(fillAll).observe(panel, { childList: true, subtree: true });
         fillAll();
+      })();
+      /* 手机 / 平板：讲解与图例排进内容区、章节列表 sheet、底部章节栏、工具按钮 */
+      (function () {
+        var $ = function (id) { return document.getElementById(id); };
+        var mq = window.matchMedia("(max-width: 1023px)"), app = $("app"), stage = $("stage"), ov = $("ov"), hud = $("hud"), sub = $("sub"), head = $("xMcHead");
+        function place() {
+          if (mq.matches) { head.appendChild(ov); head.appendChild(hud); ov.classList.remove("is-folded"); }
+          else if (ov.parentNode !== stage) { stage.insertBefore(hud, sub); stage.insertBefore(ov, hud); }
+        }
+        if (mq.addEventListener) mq.addEventListener("change", place); else mq.addListener(place);
+        place();
+
+        var sheet = $("xSheet"), chBtn = $("xCh"), lastFocus = null;
+        function openSheet() {
+          lastFocus = document.activeElement; sheet.hidden = false; chBtn.setAttribute("aria-expanded", "true");
+          var c = sheet.querySelector('button[aria-current="true"]');
+          if (c) { c.scrollIntoView({ block: "center" }); c.focus({ preventScroll: true }); }
+        }
+        function closeSheet() {
+          if (sheet.hidden) return; sheet.hidden = true; chBtn.setAttribute("aria-expanded", "false");
+          if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+        }
+        function toTop() { app.scrollTo({ top: 0, behavior: "auto" }); }
+        chBtn.addEventListener("click", openSheet);
+        $("xSheetX").addEventListener("click", closeSheet);
+        sheet.addEventListener("click", function (e) { if (e.target === sheet) closeSheet(); });
+        $("xChList").addEventListener("click", function (e) { if (e.target.closest("button[data-i]")) { closeSheet(); toTop(); } });
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); }, true);
+
+        $("xPrev").addEventListener("click", function () { $("bPrev").click(); toTop(); });
+        $("xNext").addEventListener("click", function () { $("bNext").click(); toTop(); });
+        $("xReset").addEventListener("click", function () { $("bReset").click(); });
+        $("xTheme").addEventListener("click", function () { $("bTheme").click(); });
+        function themeLabel() { $("xThemeT").textContent = document.documentElement.getAttribute("data-theme") === "dark" ? "浅色" : "深色"; }
+        new MutationObserver(themeLabel).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+        themeLabel();
+
+        var tl = $("tl");
+        new MutationObserver(function () {
+          if (!mq.matches || tl.scrollWidth <= tl.clientWidth) return;
+          var b = tl.querySelector('button[aria-current="true"]'); if (!b) return;
+          var br = b.getBoundingClientRect(), tr = tl.getBoundingClientRect();
+          tl.scrollTo({ left: tl.scrollLeft + (br.left - tr.left) - (tl.clientWidth - br.width) / 2, behavior: "smooth" });
+        }).observe(tl, { attributes: true, subtree: true, attributeFilter: ["aria-current"] });
       })();
     </script>
   </body>
