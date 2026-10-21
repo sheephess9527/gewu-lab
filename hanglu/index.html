@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>新航路与全球联系 · 格物实验室</title>
+<script src="../lib/three-0.147.0/three.min.js"></script>
+<script src="../lib/three-0.147.0/OrbitControls.js"></script>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--sel:#e8f1fc;--selfg:#0058b0;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--sel:rgba(41,151,255,.18);--selfg:#6cb6ff;--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--shadow:0 0 0 1px rgba(255,255,255,.08)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.back b{font-size:22px;font-weight:400;margin-right:4px}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);font-size:14px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}
+html.dark .pill.primary,html.dark .chips button.on{color:#000}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc button,.sheet button.it{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px;align-items:center}
+.toc button:hover{background:var(--btn2)}
+.toc button.on,.sheet button.it.on{background:var(--sel);color:var(--selfg);font-weight:600}
+.toc .mono,.sheet .mono{font-size:13px;color:var(--sub)}.on .mono{color:var(--selfg)!important}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 20px}
+.explain{flex:none}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.etext{margin:8px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.explain.collapsed .etext,.explain.collapsed .book{display:none}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;color:var(--sub);min-height:32px}
+.cwrap{flex:1;min-height:0;position:relative;border-radius:22px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.cwrap canvas{position:absolute;inset:0}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:none}
+.sec h3{font-size:13px;color:var(--sub);font-weight:600;letter-spacing:0;margin:0 0 8px}
+.ctrls{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;font-size:14px}.sl output{font-family:var(--mono);color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}.chips button.on{background:var(--blue);color:#fff}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;min-height:36px;border:0;background:none;padding:0;width:100%}
+.tg i{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.tg.on i{background:#34c759}.tg.on i::after{left:20px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+.points ul{margin:0;padding-left:18px}.points li{margin:4px 0}
+.gk a{color:var(--blue);text-decoration:none;font-size:14px}
+.mdark{display:none}
+.soon{color:var(--sub);font-size:14px;margin:0}
+/* sheet */
+.mask{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;max-height:70vh;overflow:auto;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .prog{display:none}.app{display:block;height:auto}.toc{display:none}
+ .stage{padding:12px}.cwrap{order:-1;flex:none;height:56vh}
+ .explain .fold{display:none}.explain.collapsed .etext,.explain.collapsed .book{display:block}.etext{max-height:none;overflow:visible}
+ .panel{border:0;padding:0 12px 24px}
+}
+@media (min-width:1024px){.chbtn{display:none}}
+/* phone */
+@media (max-width:767px){
+ .top{height:calc(52px + env(safe-area-inset-top));gap:6px;padding-left:4px;padding-right:8px}
+ .back{width:44px;justify-content:center}.back span{display:none}.back b{margin:0}
+ .tname{flex:1;font-size:16px}.tbtns{display:none}.chbtn{margin-left:0;padding:0 12px}
+ .stage{padding:0;gap:0}.cwrap{height:52vh;border-radius:0;box-shadow:none;border-bottom:1px solid var(--line)}
+ .explain{background:none;box-shadow:none;padding:16px 16px 4px}.ehead h2{font-size:20px}.etext{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(84px + env(safe-area-inset-bottom))}
+ input[type=range]{height:44px}.chips button,.tg{min-height:44px}
+ .mdark{display:block;align-self:flex-start;min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
+  <div class="tname">新航路与全球联系 · VoyageLab</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 09</span></div>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button><button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chnum">01/09</span></button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h2 id="ctitle"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="etext" id="ctext"></p>
+    </section>
+    <div class="cwrap" id="cwrap"><canvas id="gl" hidden></canvas><canvas id="cv"></canvas></div>
+  </main>
+  <aside class="panel">
+    <section class="card sec" id="ctrlSec"><h3>控件</h3><div class="ctrls" id="ctrl"></div></section>
+    <section class="card sec" id="readSec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec points" id="ptSec"><h3>要点</h3><div id="pts"></div></section>
+    <section class="card sec gk" id="gkSec"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mask" id="mask" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><div id="slist"></div></div>
+<div class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></div>
+<script>
+const CH=[
+{n:"为什么要出海：香料的价格链",book:"《中外历史纲要（下）》第 6 课",ready:false},
+{n:"绕过非洲：迪亚士与达·伽马",book:"第 6 课",ready:false},
+{n:"向西寻找东方：哥伦布",book:"第 6 课",ready:false},
+{n:"第一次环球航行：麦哲伦",book:"第 6 课",ready:false},
+{n:"物种大交换",book:"第 7 课 · 选择性必修2 第 2 课",ready:false},
+{n:"三角贸易",book:"第 7 课",ready:false},
+{n:"价格革命与商业革命",book:"第 7 课",ready:false},
+{n:"殖民霸权的更替：西、葡、荷、英",book:"第 7、12 课",ready:false},
+{n:"随堂检测",book:"浙江选考 全球航路的开辟与全球联系",ready:false}];
+/* ---------- 3D stage (three r147)：GL3() 返回 {THREE,renderer,scene,camera,controls,root} ---------- */
+let G3=null,G3fail=false;
+function GL3(){if(G3)return G3;if(G3fail||!window.THREE)return null;
+ const T=window.THREE,cvs=document.getElementById("gl");let renderer;
+ try{renderer=new T.WebGLRenderer({canvas:cvs,antialias:true,alpha:true})}catch(e){console.error(e);G3fail=true;return null}
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setClearColor(0x000000,0);
+ renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+ const scene=new T.Scene(),camera=new T.PerspectiveCamera(45,1,0.1,2000);camera.position.set(0,8,14);
+ let controls=null;if(T.OrbitControls){controls=new T.OrbitControls(camera,cvs);controls.enableDamping=true;controls.dampingFactor=.08}
+ const hemi=new T.HemisphereLight(0xffffff,0x8899aa,.75),sun=new T.DirectionalLight(0xffffff,.8);
+ sun.position.set(6,12,8);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
+ Object.assign(sun.shadow.camera,{left:-15,right:15,top:15,bottom:-15,near:.5,far:60});sun.shadow.camera.updateProjectionMatrix();
+ const root=new T.Group();scene.add(hemi,sun,root);
+ G3={THREE:T,renderer,scene,camera,controls,root};gl3Size();return G3}
+function gl3Size(){if(!G3)return;G3.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));G3.renderer.setSize(W,H,false);
+ G3.camera.aspect=W/H;G3.camera.updateProjectionMatrix()}
+function gl3Clear(){if(!G3)return;const r=G3.root;
+ r.traverse(o=>{o.geometry&&o.geometry.dispose();[].concat(o.material||[]).forEach(m=>{for(const k in m){const v=m[k];v&&v.isTexture&&v.dispose()}m.dispose()})});
+ r.clear();G3.camera.position.set(0,8,14);if(G3.controls){G3.controls.target.set(0,0,0);G3.controls.update()}}
+function gl3Mode(on){$("gl").hidden=!on;cv.style.pointerEvents=on&&!!GL3()?"none":""}
+function gl3Render(){if(!G3)return;G3.controls&&G3.controls.update();G3.renderer.render(G3.scene,G3.camera)}
+function project(v){if(!G3)return{x:0,y:0,visible:false};const p=new G3.THREE.Vector3(v.x,v.y,v.z).project(G3.camera);
+ return{x:(p.x+1)/2*W,y:(1-p.y)/2*H,visible:p.z>-1&&p.z<1&&Math.abs(p.x)<=1&&Math.abs(p.y)<=1}}
+function drawNo3D(c,w,h){const T=theme(),cw=Math.min(340,w-32),ch=140,x=(w-cw)/2,y=(h-ch)/2,F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ c.save();c.shadowColor="rgba(0,0,0,.08)";c.shadowBlur=24;c.shadowOffsetY=4;c.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(c,x,y,cw,ch,22);c.fill();c.restore();
+ c.textAlign="center";c.textBaseline="middle";c.fillStyle=T.redText;c.font="13px ui-monospace,Menlo,monospace";c.fillText("WEBGL",w/2,y+36);
+ c.fillStyle=T.fg;c.font="600 16px "+F;wrapText(c,"3D 引擎未能加载，请检查网络后刷新",w/2,y+72,cw-40,24);
+ c.fillStyle=T.sub;c.font="14px "+F;c.fillText(CH[cur].n,w/2,y+ch-26)}
+/* ---------- 三维地球工具：globe / routeArc / shipMarker / flyTo / portPin / geoLabel ---------- */
+const WORLD=[[[-68,-54],[-65,-55],[-69,-55],[-75,-53],[-68,-54]],[[173,-41],[174,-41],[173,-44],[169,-47],[167,-46],[173,-41]],[[175,-36],[179,-38],[175,-42],[173,-35],[175,-36]],[[50,-14],[47,-25],[44,-25],[44,-16],[49,-12],[50,-14]],[[144,-14],[153,-26],[153,-32],[150,-37],[146,-39],[141,-38],[138,-34],[137,-35],[138,-33],[136,-35],[131,-31],[118,-35],[115,-34],[114,-22],[121,-20],[126,-14],[130,-15],[132,-11],[136,-12],[136,-15],[140,-18],[142,-11],[144,-14]],[[134,-1],[135,-3],[138,-2],[145,-4],[151,-11],[145,-8],[143,-9],[138,-8],[138,-5],[133,-4],[132,-3],[134,-2],[131,-1],[134,-1]],[[125,1],[120,0],[121,-1],[123,-1],[122,-2],[123,-5],[121,-3],[119,-5],[120,1],[125,1]],[[106,-6],[103,-4],[95,5],[104,0],[106,-6]],[[118,2],[119,1],[116,-4],[110,-3],[109,0],[110,2],[117,7],[119,5],[118,2]],[[126,8],[125,6],[124,8],[122,7],[125,10],[126,8]],[[121,19],[122,14],[124,13],[120,15],[121,19]],[[-73,20],[-68,19],[-74,18],[-73,20]],[[-80,23],[-74,20],[-78,20],[-82,23],[-85,22],[-80,23]],[[141,37],[140,35],[136,33],[131,34],[130,31],[129,33],[139,38],[140,41],[142,40],[141,37]],[[144,44],[146,43],[140,42],[142,46],[144,44]],[[-56,51],[-53,49],[-53,47],[-59,48],[-56,51]],[[144,51],[145,49],[143,49],[144,46],[142,46],[142,53],[143,54],[144,51]],[[-7,52],[-10,52],[-10,54],[-7,55],[-7,52]],[[-3,59],[-3,56],[1,51],[-5,50],[-3,54],[-6,57],[-3,59]],[[-85,66],[-80,64],[-87,64],[-85,66]],[[-15,66],[-14,65],[-19,63],[-24,66],[-15,66]],[[-175,67],[-170,66],[-173,64],[-179,66],[-180,65],[-180,69],[-175,67]],[[-91,69],[-87,67],[-86,70],[-83,70],[-81,68],[-93,62],[-95,59],[-92,57],[-82,55],[-80,51],[-79,53],[-80,55],[-77,57],[-79,59],[-78,62],[-74,62],[-70,61],[-68,58],[-65,60],[-56,52],[-66,50],[-71,47],[-65,49],[-64,46],[-60,46],[-65,44],[-64,45],[-67,45],[-71,43],[-70,42],[-76,39],[-76,37],[-76,39],[-76,36],[-81,31],[-80,25],[-84,30],[-97,28],[-98,22],[-96,19],[-92,19],[-87,22],[-89,16],[-83,15],[-84,11],[-81,9],[-77,9],[-72,12],[-72,9],[-70,12],[-68,11],[-62,11],[-57,6],[-51,4],[-50,0],[-40,-3],[-35,-7],[-39,-13],[-41,-22],[-48,-25],[-54,-34],[-58,-34],[-57,-37],[-65,-41],[-63,-43],[-67,-46],[-66,-48],[-71,-54],[-75,-52],[-74,-47],[-76,-47],[-73,-42],[-74,-43],[-70,-20],[-76,-15],[-81,-6],[-80,-3],[-81,-1],[-77,4],[-78,8],[-81,7],[-86,10],[-87,13],[-104,18],[-114,32],[-115,30],[-109,23],[-112,25],[-124,40],[-125,48],[-123,47],[-123,49],[-127,51],[-134,58],[-147,61],[-152,59],[-151,61],[-158,56],[-165,54],[-157,59],[-162,59],[-166,62],[-161,65],[-168,66],[-162,66],[-167,68],[-157,71],[-137,69],[-128,70],[-109,67],[-106,69],[-96,67],[-94,69],[-96,70],[-95,72],[-91,69]],[[-114,73],[-108,72],[-108,73],[-107,73],[-101,70],[-116,69],[-112,70],[-119,72],[-114,73]],[[-87,73],[-72,72],[-62,67],[-64,65],[-68,66],[-65,63],[-69,64],[-66,62],[-78,64],[-74,65],[-73,68],[-79,70],[-89,70],[-90,72],[-87,73]],[[-100,74],[-97,74],[-97,72],[-102,73],[-100,74]],[[-120,71],[-126,72],[-125,74],[-118,74],[-116,73],[-120,71]],[[-108,76],[-106,75],[-118,75],[-108,76]],[[58,71],[52,71],[56,75],[69,77],[58,74],[55,72],[58,71]],[[-95,77],[-80,75],[-92,75],[-97,77],[-95,77]],[[107,77],[114,76],[109,74],[127,74],[131,71],[140,73],[161,69],[179,69],[180,69],[180,65],[177,65],[179,63],[164,60],[162,55],[157,51],[156,57],[164,63],[160,61],[157,61],[155,59],[142,59],[135,55],[140,54],[141,52],[138,46],[128,40],[129,35],[126,34],[125,40],[121,39],[122,41],[118,39],[119,37],[122,37],[119,35],[122,32],[122,28],[116,23],[106,20],[109,13],[105,9],[100,13],[99,9],[104,1],[98,8],[97,17],[94,16],[91,23],[87,21],[80,16],[80,10],[78,8],[73,21],[70,21],[66,25],[57,26],[48,30],[52,24],[56,26],[60,22],[55,17],[43,13],[35,30],[34,28],[32,30],[43,12],[45,10],[51,12],[51,11],[48,4],[39,-5],[41,-15],[35,-20],[36,-24],[33,-26],[32,-29],[26,-34],[18,-34],[12,-18],[14,-11],[9,-1],[9,4],[4,6],[-9,5],[-17,12],[-17,22],[-6,36],[10,37],[11,37],[10,34],[19,30],[22,33],[34,31],[36,37],[28,37],[26,39],[34,42],[42,42],[37,45],[39,47],[34,44],[31,47],[28,43],[29,41],[23,40],[24,38],[22,36],[20,42],[13,46],[13,44],[18,40],[17,40],[16,38],[9,44],[3,43],[-2,37],[-9,37],[-9,43],[-1,44],[-1,46],[-5,49],[8,54],[9,57],[11,58],[11,54],[20,54],[22,57],[24,57],[23,59],[29,60],[21,61],[22,63],[25,65],[22,66],[18,63],[19,60],[16,56],[13,55],[10,59],[6,59],[5,62],[25,71],[40,68],[40,66],[33,67],[37,64],[44,66],[43,69],[46,68],[46,67],[54,69],[60,68],[61,70],[69,68],[67,71],[73,73],[72,66],[75,68],[73,71],[75,73],[76,71],[82,72],[81,74],[87,75],[107,77]],[[18,80],[22,79],[16,77],[10,80],[18,80]],[[100,79],[91,80],[96,81],[100,79]],[[-87,80],[-91,78],[-97,80],[-92,81],[-87,80]],[[-68,83],[-62,82],[-77,79],[-75,79],[-81,76],[-89,76],[-85,78],[-88,78],[-85,79],[-87,80],[-82,80],[-92,82],[-68,83]],[[-27,84],[-21,83],[-31,82],[-12,81],[-20,80],[-18,80],[-20,79],[-18,77],[-22,77],[-19,74],[-25,72],[-22,71],[-26,70],[-22,70],[-40,65],[-43,60],[-48,61],[-52,64],[-54,67],[-51,70],[-55,70],[-51,71],[-56,72],[-55,73],[-59,76],[-73,78],[-66,79],[-68,80],[-63,82],[-27,84]]];
+// 经纬度 → 球面坐标（与 SphereGeometry 的 UV 一致：lon −180 在贴图左边缘）
+function ll2v(lon,lat,r=5.02){const T=window.THREE,ph=(90-lat)*Math.PI/180,th=(lon+180)*Math.PI/180;
+ return new T.Vector3(-r*Math.sin(ph)*Math.cos(th),r*Math.cos(ph),r*Math.sin(ph)*Math.sin(th))}
+function globeTexture(cv,grid){const c=cv.getContext("2d"),d=isDark(),X=l=>(l+180)/360*2048,Y=a=>(90-a)/180*1024;
+ c.fillStyle=d?"#1b2a3a":"#cfe3f3";c.fillRect(0,0,2048,1024);
+ c.fillStyle=d?"#3a3a3c":"#f3efe6";c.strokeStyle=d?"#6e604c":"#bfa883";c.lineWidth=2;c.lineJoin="round";
+ WORLD.forEach(P=>{c.beginPath();P.forEach(([l,a],i)=>i?c.lineTo(X(l),Y(a)):c.moveTo(X(l),Y(a)));c.closePath();c.fill();c.stroke()});
+ if(grid){c.strokeStyle=d?"rgba(255,255,255,.14)":"rgba(0,60,120,.16)";c.lineWidth=1.5;c.beginPath();
+  for(let l=-180;l<=180;l+=30){c.moveTo(X(l),0);c.lineTo(X(l),1024)}for(let a=-60;a<=60;a+=30){c.moveTo(0,Y(a));c.lineTo(2048,Y(a))}c.stroke()}}
+function globe(G,o){o=o||{};const T=G.THREE,cv=document.createElement("canvas");cv.width=2048;cv.height=1024;globeTexture(cv,o.grid);
+ const tex=new T.CanvasTexture(cv);tex.anisotropy=Math.min(8,G.renderer.capabilities.getMaxAnisotropy());
+ const mesh=new T.Mesh(new T.SphereGeometry(5,96,64),new T.MeshLambertMaterial({map:tex,color:0x444444,emissive:0xffffff,emissiveMap:tex,emissiveIntensity:.6}));// 自发光托底：背光面最多暗约 30%
+ const air=new T.Mesh(new T.SphereGeometry(5.35,64,48),new T.MeshBasicMaterial({color:isDark()?0x4f8fd8:0x8cc4ff,transparent:true,opacity:.12,side:T.BackSide,depthWrite:false}));
+ mesh.add(air);G.root.add(mesh);
+ return{mesh,ll2v,repaint(){globeTexture(cv,o.grid);tex.needsUpdate=true;air.material.color.set(isDark()?0x4f8fd8:0x8cc4ff)}}}
+// 航线：相邻拐点按大圆插值（每段 24 点），抬离球面 0.06
+function routeArc(G,pts,color,o){o=o||{};const T=G.THREE,R=5+(o.lift!=null?o.lift:.06),P=[];
+ for(let i=0;i<pts.length-1;i++){const a=ll2v(pts[i][0],pts[i][1],1),b=ll2v(pts[i+1][0],pts[i+1][1],1);
+  for(let k=i?1:0;k<=24;k++)P.push(new T.Vector3().lerpVectors(a,b,k/24).normalize().multiplyScalar(R))}
+ const Q=P.filter((p,i)=>!i||p.distanceTo(P[i-1])>1e-4),curve=new T.CatmullRomCurve3(Q,false,"centripetal");
+ const seg=Math.max(8,Q.length*2),rad=8,geo=new T.TubeGeometry(curve,seg,o.radius||.035,rad,false);
+ const mesh=new T.Mesh(geo,new T.MeshBasicMaterial({color:color||"#0071e3"}));G.root.add(mesh);
+ const total=geo.index?geo.index.count:seg*rad*6;
+ function setProgress(p){p=Math.max(0,Math.min(1,p));geo.setDrawRange(0,Math.floor(p*total/(rad*6))*rad*6)}
+ return{mesh,curve,setProgress,pointAt:p=>curve.getPointAt(Math.max(0,Math.min(1,p)))}}
+// 小船：圆锥（尖端朝外）+ 发光小球；place(v) 放到球面点并朝外
+function shipMarker(G,color){const T=G.THREE,g=new T.Group(),col=color||"#c0362c";
+ const cg=new T.ConeGeometry(.09,.26,14);cg.rotateX(-Math.PI/2);cg.translate(0,0,-.13);
+ const glow=new T.Mesh(new T.SphereGeometry(.16,16,12),new T.MeshBasicMaterial({color:col,transparent:true,opacity:.28,depthWrite:false}));
+ g.add(new T.Mesh(cg,new T.MeshStandardMaterial({color:col,roughness:.5})),new T.Mesh(new T.SphereGeometry(.07,16,12),new T.MeshBasicMaterial({color:col})),glow);
+ g.place=v=>{g.position.copy(v);g.lookAt(0,0,0);return g};G.root.add(g);return g}
+// 相机平滑转向某经纬度（target 保持球心）
+let flyTok=0;
+function flyTo(G,lon,lat,dist=14,ms=900){const tok=++flyTok,cam=G.camera,a=cam.position.clone(),d0=a.length(),A=a.clone().normalize(),B=ll2v(lon,lat,1),t0=performance.now();
+ G.controls&&G.controls.target.set(0,0,0);
+ (function step(t){if(tok!==flyTok)return;const k=Math.min(1,(t-t0)/ms),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+  const ang=A.angleTo(B),dir=ang<1e-4?B.clone():A.clone().multiplyScalar(Math.sin((1-e)*ang)).add(B.clone().multiplyScalar(Math.sin(e*ang))).divideScalar(Math.sin(ang));
+  cam.position.copy(dir.normalize().multiplyScalar(d0+(dist-d0)*e));cam.lookAt(0,0,0);G.controls&&G.controls.update();
+  if(k<1)requestAnimationFrame(step)})(t0)}
+// 港口立柱；top 为柱顶坐标（各章用 project() 在 2D 叠加层写标签）
+function portPin(G,lon,lat,color){const T=G.THREE,g=new T.Group(),col=color||"#9a6a00",n=ll2v(lon,lat,1),h=.35;
+ const stick=new T.Mesh(new T.CylinderGeometry(.022,.022,h,10),new T.MeshStandardMaterial({color:col,roughness:.6}));stick.position.y=h/2;
+ const head=new T.Mesh(new T.SphereGeometry(.065,16,12),new T.MeshBasicMaterial({color:col}));head.position.y=h;
+ g.add(stick,head);g.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),n);g.position.copy(n.clone().multiplyScalar(5));
+ g.top=n.clone().multiplyScalar(5+h+.08);G.root.add(g);return g}
+// 2D 叠加层标签：只用正文色 / 蓝 / 深金 / 深红，带描边
+function geoLabel(c,txt,v,col,size){const p=project(v);if(!p.visible)return p;const cam=G3&&G3.camera;
+ if(cam&&v.x*cam.position.x+v.y*cam.position.y+v.z*cam.position.z<25)return Object.assign(p,{visible:false});// 背面不写
+ const d=isDark();c.save();c.font="600 "+(size||13)+"px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";c.textAlign="center";c.textBaseline="bottom";
+ c.lineJoin="round";c.lineWidth=3.5;c.strokeStyle=d?"rgba(0,0,0,.75)":"rgba(255,255,255,.92)";c.strokeText(txt,p.x,p.y-4);
+ c.fillStyle=col||theme().fg;c.fillText(txt,p.x,p.y-4);c.restore();return p}
+const MODS=[];// MODS[i]={text,points,gk,use3d,mount(ctrlEl,readEl),draw(ctx,w,h,t),pointer(e,type,x,y),unmount()}
+/* ---------- 第 1 章：为什么要出海：香料的价格链 ---------- */
+CH[0].ready=true;
+MODS[0]=(()=>{
+ const GOLD="#9a6a00",RED="#c0362c",BLUE="#0071e3",K=.06,
+  NODES=[["马鲁古群岛",127.5,-0.8,1],["马六甲",102.2,2.2,2],["卡利卡特",75.8,11.25,4],["霍尔木兹",56.3,27.1,8],["君士坦丁堡",29,41,15],["威尼斯",12.3,45.4,25],["里斯本",-9.1,38.7,30]],
+  ALT=[["亚丁",45,12.8],["亚历山大",29.9,31.2]],
+  CONDS=[["✦","寻金热","《马可·波罗行纪》描绘东方富庶，欧洲人争相寻金"],["¤","货币需求","商品经济发展，对黄金货币的需求增加"],["◐","地圆学说","地球是圆的，向西航行也能到达东方"],["⊕","造船与罗盘","远洋帆船改进，中国指南针传入欧洲"],["♛","王室支持","葡萄牙、西班牙王室出资支持远航"],["✝","宗教热情","渴望向海外传播天主教"]];
+ let S=null;
+ const price=i=>NODES[i][3]*(S.blocked&&i===NODES.length-1?1.5:1);
+ const nv=(lon,lat,r)=>ll2v(lon,lat,1).multiplyScalar(r);
+ function updRO(){if(!S.ro)return;const T=theme(),n=S.lit.filter(Boolean).length,i=S.passed;
+  const rows=[["当前节点",i>=0?NODES[i][0]:"未出发"],["累计价格倍数",i>=0?"×"+price(i)+"（示意）":"—",S.blocked&&i===NODES.length-1?T.redText:T.goldText],["条件点亮",n+" / 6",T.blue]];
+  if(S.blocked)rows.push(["商路","传统商路受阻，欧洲急需新航路",T.redText]);
+  if(n===6)rows.push(["根源","经济根源：商品经济发展与资本主义萌芽",T.goldText]);
+  S.ro.update(rows)}
+ function sail(){if(!S)return;cancelAnimationFrame(S.raf);S.passed=-1;S.tgt.fill(0);S.pops=[];updRO();
+  if(!S.fr.length)S.fr=NODES.map((n,i)=>i/(NODES.length-1));
+  const t0=performance.now();
+  (function step(now){if(!S)return;const p=Math.min(1,Math.max(0,now-t0)/6000);if(S.G){S.ship.visible=true;S.ship.place(S.arc.pointAt(p))}
+   while(S.passed+1<NODES.length&&p>=S.fr[S.passed+1]-1e-6){const i=++S.passed;S.tgt[i]=price(i);
+    S.pops.push({i,t0:now,txt:i===0?"产地收购":(i===4&&S.blocked)?"+重税":i%2?"+中间商":"+关税",red:i===4&&S.blocked});updRO()}
+   if(p<1)S.raf=requestAnimationFrame(step)})(t0)}
+ function setBlocked(v){S.blocked=v;if(S.G){S.redArc.mesh.visible=S.tax.visible=v;S.cols[4].material.color.set(v?RED:GOLD);S.cols[6].material.color.set(v?RED:GOLD)}
+  if(S.passed===NODES.length-1)S.tgt[NODES.length-1]=price(NODES.length-1);updRO()}
+ return{use3d:true,
+  text:"15 世纪，欧洲对黄金和东方香料需求旺盛，但传统商路要经过阿拉伯、奥斯曼商人层层转手，价格高昂；加上地理知识、造船航海技术进步和王室支持，葡萄牙、西班牙率先开辟新航路。",
+  points:["<b>根本原因</b>：西欧商品经济发展和资本主义萌芽，对货币需求增加","<b>直接原因</b>：奥斯曼土耳其控制东西方商路，香料贸易受阻（教材常表述为“商路阻塞”）","<b>条件</b>：地圆学说、造船航海技术、王室支持","<b>精神动力</b>：寻金热与宗教热情"],
+  gk:"统编版《中外历史纲要（下）》第 6 课「全球航路的开辟」；浙江选考常考新航路开辟的原因与条件。",
+  mount(ctrl,read){
+   S={G:null,cols:[],pins:[],tgt:NODES.map(()=>0),h:NODES.map(()=>0),fr:[],pops:[],passed:-1,raf:0,blocked:false,lit:CONDS.map(()=>false),ro:null,lastD:isDark()};
+   const sb=button("沿路运一船香料",sail,true);sb.style.minHeight="44px";
+   ctrl.append(sb,toggle("1453 年奥斯曼土耳其攻占君士坦丁堡",false,setBlocked));
+   const hd=el("p",null,"出海的条件（逐个点亮）");hd.style.cssText="margin:12px 0 6px;font-size:13px;font-weight:600";
+   const box=el("div","chips");
+   CONDS.forEach((c,k)=>{const b=el("button",null,(k+1)+" "+c[1]);b.setAttribute("aria-pressed","false");
+    b.onclick=()=>{S.lit[k]=!S.lit[k];b.classList.toggle("on",S.lit[k]);b.setAttribute("aria-pressed",S.lit[k]);updRO()};box.append(b)});
+   ctrl.append(hd,box);
+   S.ro=readout();read.append(S.ro);updRO();
+   const G=GL3();if(!G)return;S.G=G;const T=G.THREE;
+   S.gl=globe(G);
+   const pts=NODES.map(n=>[n[1],n[2]]);
+   S.arc=routeArc(G,pts,GOLD);
+   routeArc(G,[pts[2],[ALT[0][1],ALT[0][2]],[ALT[1][1],ALT[1][2]],pts[5]],GOLD,{radius:.018,lift:.05});
+   S.redArc=routeArc(G,[pts[3],pts[4],pts[5]],RED,{radius:.05,lift:.08});S.redArc.mesh.visible=false;
+   let cum=[0];for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+ll2v(pts[i-1][0],pts[i-1][1],1).angleTo(ll2v(pts[i][0],pts[i][1],1)));
+   S.fr=cum.map(a=>a/cum[cum.length-1]);
+   const up=new T.Vector3(0,1,0);
+   NODES.forEach(n=>{S.pins.push(portPin(G,n[1],n[2],GOLD));
+    const geo=new T.CylinderGeometry(.075,.075,1,18);geo.translate(0,.5,0);
+    const m=new T.Mesh(geo,new T.MeshStandardMaterial({color:GOLD,roughness:.55,transparent:true,opacity:.88}));
+    const d=ll2v(n[1],n[2],1);m.quaternion.setFromUnitVectors(up,d);m.position.copy(d.multiplyScalar(5));m.scale.y=.001;G.root.add(m);S.cols.push(m)});
+   ALT.forEach(a=>portPin(G,a[1],a[2],GOLD));
+   S.tax=new T.Mesh(new T.SphereGeometry(.2,20,14),new T.MeshBasicMaterial({color:RED,transparent:true,opacity:.35,depthWrite:false}));
+   S.tax.position.copy(nv(29,41,5.02));S.tax.visible=false;G.root.add(S.tax);
+   S.ship=shipMarker(G,BLUE);S.ship.place(S.arc.pointAt(0));
+   flyTo(G,60,25,15,1100)},
+  draw(c,w,h,t){if(!S||!S.G)return;const T=theme(),d=isDark(),now=performance.now();
+   if(d!==S.lastD){S.lastD=d;S.gl.repaint();updRO()}
+   S.cols.forEach((m,i)=>{S.h[i]+=(S.tgt[i]*K-S.h[i])*.12;m.scale.y=Math.max(.001,S.h[i])});
+   if(S.tax.visible)S.tax.scale.setScalar(1+.25*Math.sin(t*4));
+   NODES.forEach((n,i)=>{const top=nv(n[1],n[2],5+Math.max(S.h[i],.35)+.1),on=S.tgt[i]>0;
+    const red=S.blocked&&(i===4||i===NODES.length-1);
+    geoLabel(c,n[0]+(on?" ×"+price(i):""),top,on?(red?T.redText:T.goldText):T.fg,on?13:12)});
+   ALT.forEach(a=>geoLabel(c,a[0],nv(a[1],a[2],5.45),T.fg,12));
+   if(S.blocked)geoLabel(c,"⚠ 重税",nv(35,36,5.3),T.redText,14);
+   S.pops=S.pops.filter(p=>now-p.t0<1800);
+   S.pops.forEach(p=>{const n=NODES[p.i],age=(now-p.t0)/1800;c.save();c.globalAlpha=1-age*age;
+    geoLabel(c,p.txt,nv(n[1],n[2],5+Math.max(S.h[p.i],.35)+.55+age*.5),p.red?T.redText:T.goldText,13);c.restore()});
+   const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+   c.save();c.font="12px "+F;c.textAlign="left";c.textBaseline="top";c.fillStyle=T.fg;c.fillText("立柱高度 = 胡椒相对价格（示意倍数）",14,14);
+   let y=h-12;const bg=d?"rgba(44,44,46,.92)":"rgba(255,255,255,.92)";c.textBaseline="middle";
+   for(let k=CONDS.length-1;k>=0;k--){if(!S.lit[k])continue;const cd=CONDS[k];
+    c.font="600 13px "+F;const tw=c.measureText(cd[1]+"  ").width;c.font="12px "+F;const sw=c.measureText(cd[2]).width;
+    const bw=Math.min(w-28,30+tw+sw+12);y-=26;
+    c.fillStyle=bg;rrect(c,14,y,bw,22,11);c.fill();
+    c.save();rrect(c,14,y,bw,22,11);c.clip();
+    c.fillStyle=T.blue;c.font="14px "+F;c.fillText(cd[0],24,y+11);
+    c.fillStyle=T.fg;c.font="600 13px "+F;c.fillText(cd[1],42,y+11);
+    c.font="12px "+F;c.fillText(cd[2],42+tw,y+11);c.restore();y-=4}
+   c.restore()},
+  unmount(){if(S){cancelAnimationFrame(S.raf);S.raf=0;S.pops=[]}flyTok++;gl3Clear();S=null}}})();
+/* ---------- 第 2 章：绕过非洲：迪亚士与达·伽马 ---------- */
+CH[1].ready=true;
+MODS[1]=(()=>{
+ const BLUE="#0071e3",GOLD="#9a6a00",RED="#c0362c",RE=6371,
+  R={dias:{name:"迪亚士",year:"1487 年",color:BLUE,tk:"blue",ms:9000,end:"返航",
+    pts:[["里斯本",-9.1,38.7,1],["佛得角",-23.6,15,1],["几内亚湾外",5,0,0],["纳米比亚沿岸",12,-20,1],["好望角",18.5,-34.4,1],["大鱼河口",27,-33.5,1]],
+    mean:"到达非洲南端，打开通往印度洋的门户",
+    ev:[[4,"1488 年 迪亚士到达非洲南端，称“风暴角”，葡王改名“好望角”","blue"]]},
+   gama:{name:"达·伽马",year:"1497 年",color:GOLD,tk:"goldText",ms:14000,end:"",
+    pts:[["里斯本",-9.1,38.7,1],["佛得角",-23.6,15,1],["南大西洋",-20,-20,0],["好望角",18.5,-34.4,1],["莫桑比克",40.7,-15,1],["马林迪",40.1,-3.2,1],["卡利卡特",75.8,11.25,1]],
+    mean:"开辟欧洲经大西洋、印度洋直达印度的新航路，葡萄牙控制东方香料贸易",
+    ev:[[5,"在阿拉伯领航员帮助下横渡印度洋","fg"],[6,"1498 年到达印度，满载香料返航，获利约 60 倍","goldText"]]}},
+  TRADE=[["卡利卡特",75.8,11.25],["霍尔木兹",56.3,27.1],["亚历山大",29.9,31.2],["威尼斯",12.3,45.4]],
+  F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const gc=(a,b)=>{const r=Math.PI/180,p1=a[2]*r,p2=b[2]*r;return Math.acos(Math.min(1,Math.sin(p1)*Math.sin(p2)+Math.cos(p1)*Math.cos(p2)*Math.cos((b[1]-a[1])*r)))};
+ Object.values(R).forEach(r=>{const c=[0];for(let i=1;i<r.pts.length;i++)c.push(c[i-1]+gc(r.pts[i-1],r.pts[i]));r.km=c.map(a=>a*RE/1000);r.fr=c.map(a=>a/c[c.length-1])});
+ const v2ll=v=>{const n=v.clone().normalize();let lon=Math.atan2(n.z,-n.x)*180/Math.PI-180;if(lon<-180)lon+=360;return[lon,Math.asin(n.y)*180/Math.PI]};
+ const nv=(lon,lat,r)=>ll2v(lon,lat,1).multiplyScalar(r);
+ let S=null;
+ const keys=()=>S.mode==="both"?["dias","gama"]:[S.mode];
+ function seg(r,p){let i=0;while(i<r.fr.length-2&&p>=r.fr[i+1])i++;const f=(p-r.fr[i])/(r.fr[i+1]-r.fr[i]||1);
+  const km=r.km[i]+Math.max(0,Math.min(1,f))*(r.km[i+1]-r.km[i]),N=r.pts.length;
+  const pos=p>=1?r.pts[N-1][0]+(r.end?"（"+r.end+"）":""):p<=0?"里斯本（待出发）":r.pts[i][0]+" → "+r.pts[i+1][0];return{km,pos}}
+ function updRO(){if(!S.ro)return;const T=theme(),rows=[];
+  keys().forEach(k=>{const r=R[k],s=seg(r,S.p);
+   rows.push(["航海家",r.name,T[r.tk]],["出发年份",r.year],["当前位置",s.pos],["已航行距离",s.km.toFixed(1)+" 千公里（大圆累计）",T[r.tk]],["意义",r.mean])});
+  if(S.trade)rows.push(["传统商路","卡利卡特→霍尔木兹→亚历山大→威尼斯，层层经阿拉伯、意大利中间商",T.redText]);
+  S.ro.update(rows)}
+ function apply(force){if(!S)return;S.sl&&S.sl.set(Math.round(S.p*100));
+  if(S.G){const on=keys();
+   ["dias","gama"].forEach(k=>{const vis=on.includes(k);S.arcs[k].mesh.visible=S.ships[k].visible=vis;
+    if(vis){S.arcs[k].setProgress(S.p);S.ships[k].place(S.arcs[k].pointAt(S.p))}});
+   const now=performance.now();
+   if(force||now-S.lastFly>550){S.lastFly=now;const[lon,lat]=v2ll(S.arcs[on[on.length-1]].pointAt(S.p));flyTo(S.G,lon,lat,13,600)}}
+  updRO()}
+ function setMode(m){S.mode=m;S.btns.forEach(b=>b.classList.toggle("primary",b.dataset.m===m))}
+ function play(m){if(!S)return;cancelAnimationFrame(S.raf);setMode(m);S.p=0;apply(true);
+  const t0=performance.now(),dur=R[m==="both"?"gama":m].ms;
+  (function step(now){if(!S)return;S.p=Math.min(1,Math.max(0,now-t0)/dur);apply();if(S.p<1)S.raf=requestAnimationFrame(step)})(t0)}
+ function setTrade(v){S.trade=v;if(S.G)S.tradeM.forEach(m=>m.visible=v);updRO()}
+ function dashArc(G,pts,color){const out=[];
+  for(let i=0;i<pts.length-1;i++){const a=ll2v(pts[i][1],pts[i][2],1),b=ll2v(pts[i+1][1],pts[i+1][2],1),n=Math.max(2,Math.ceil(a.angleTo(b)*180/Math.PI/2.2)),q=[];
+   for(let k=0;k<=n;k++)q.push(v2ll(a.clone().lerp(b,k/n)));
+   for(let k=0;k<n;k+=2)out.push(routeArc(G,[q[k],q[k+1]],color,{radius:.024,lift:.05}).mesh)}
+  return out}
+ function card(c,w,y,txt,col,head){const T=theme(),cw=Math.min(340,w-28);c.font="13px "+F;
+  const lines=Math.max(1,Math.ceil(c.measureText(txt).width/(cw-28))),ch=38+lines*19;y-=ch;
+  c.save();c.shadowColor="rgba(0,0,0,.1)";c.shadowBlur=18;c.shadowOffsetY=3;c.fillStyle=isDark()?"rgba(44,44,46,.95)":"rgba(255,255,255,.95)";rrect(c,14,y,cw,ch,14);c.fill();c.restore();
+  c.textAlign="left";c.textBaseline="top";c.fillStyle=col;c.font="600 12px "+F;c.fillText(head,28,y+10);
+  c.fillStyle=col===T.blue?T.fg:col;c.font="13px "+F;wrapText(c,txt,28,y+28,cw-28,19);return y-8}
+ return{use3d:true,
+  text:"葡萄牙沿非洲西海岸南下：迪亚士到达好望角，达·伽马绕过好望角、横渡印度洋到达印度，开辟了从欧洲经大西洋、印度洋到东方的新航路，葡萄牙由此控制东方香料贸易。",
+  points:["<b>1487–1488 年</b>：迪亚士到达好望角","<b>1497–1498 年</b>：达·伽马到达印度卡利卡特","葡萄牙绕开阿拉伯、意大利中间商，直接获取香料，建立海上贸易据点","新航路开辟打破了世界相对孤立的状态"],
+  gk:"统编版《中外历史纲要（下）》第 6 课；浙江选考常考航海家—路线—国家对应及新航路开辟的影响。",
+  mount(ctrl,read){
+   S={G:null,mode:"both",p:0,raf:0,trade:false,lastFly:0,arcs:{},ships:{},tradeM:[],pins:{},btns:[],ro:null,sl:null,lastD:isDark()};
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px";
+   [["dias","迪亚士 1487"],["gama","达·伽马 1497"],["both","两条都播"]].forEach(([m,l])=>{const b=button(l,()=>play(m));b.dataset.m=m;b.style.minHeight="44px";S.btns.push(b);row.append(b)});
+   S.sl=slider("航程进度",0,100,1,0,v=>Math.round(v)+"%",v=>{if(!S)return;cancelAnimationFrame(S.raf);S.raf=0;S.p=v/100;apply()});
+   ctrl.append(row,S.sl,toggle("显示传统商路（对比：绕开中间商）",false,setTrade));setMode("both");
+   S.ro=readout();read.append(S.ro);
+   const G=GL3();if(G){S.G=G;S.gl=globe(G,{grid:true});
+    ["dias","gama"].forEach(k=>{const r=R[k];S.arcs[k]=routeArc(G,r.pts.map(p=>[p[1],p[2]]),r.color);S.arcs[k].setProgress(0);
+     r.pts.forEach(p=>{if(p[3]&&!S.pins[p[0]])S.pins[p[0]]={pin:portPin(G,p[1],p[2],k==="dias"?BLUE:GOLD),k}})});
+    S.ships.gama=shipMarker(G,GOLD);S.ships.dias=shipMarker(G,BLUE);
+    S.tradeM=dashArc(G,TRADE,RED);S.tradeM.forEach(m=>m.visible=false);
+    TRADE.slice(1).forEach(t=>{const g=portPin(G,t[1],t[2],RED);S.tradeM.push(g);g.visible=false;S.pins[t[0]]={pin:g,k:"trade"}})}
+   apply(true)},
+  draw(c,w,h,t){if(!S||!S.G)return;const T=theme(),d=isDark();
+   if(d!==S.lastD){S.lastD=d;S.gl.repaint();updRO()}
+   const on=keys();
+   Object.entries(S.pins).forEach(([n,o])=>{if(o.k==="trade"&&!S.trade)return;
+    const used=on.some(k=>R[k].pts.some(p=>p[0]===n));if(o.k!=="trade"&&!used&&!(S.trade&&n==="卡利卡特"))return;
+    geoLabel(c,n,o.pin.top,o.k==="trade"?T.redText:T.fg,12)});
+   on.forEach(k=>R[k].pts.forEach(p=>{if(!p[3])geoLabel(c,p[0],nv(p[1],p[2],5.1),T[R[k].tk],12)}));
+   if(S.trade)geoLabel(c,"中间商层层加价",nv(42,30,5.3),T.redText,13);
+   c.save();c.font="12px "+F;c.textAlign="left";c.textBaseline="top";c.fillStyle=T.fg;c.fillText("拖动地球可旋转 · 船所在处相机自动跟随",14,14);c.restore();
+   let y=h-12;
+   on.forEach(k=>{const r=R[k];let e=null;r.ev.forEach(x=>{if(S.p>=r.fr[x[0]]-1e-6)e=x});
+    if(e)y=card(c,w,y,e[1],T[e[2]],r.name+" · "+r.pts[e[0]][0])})},
+  unmount(){if(S){cancelAnimationFrame(S.raf);S.raf=0}flyTok++;gl3Clear();S=null}}})();
+/* ---------- 第 3 章：向西寻找东方：哥伦布 ---------- */
+CH[2].ready=true;
+MODS[2]=(()=>{
+ const BLUE="#0071e3",GOLD="#9a6a00",RED="#c0362c",F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",D=Math.PI/180,
+  PTS=[["帕洛斯港",-6.9,37.2],["加那利群岛",-15.4,28.1],["圣萨尔瓦多岛",-74.5,24.1],["古巴",-77,21.5],["伊斯帕尼奥拉岛",-71,19]],
+  WEST=[[-15.4,28.1],[-50,30],[-90,32],[-130,34],[-170,36],[139.7,35.7]],
+  LATE=[["亚美利哥 · 1499–1502","亚美利哥·韦斯普奇意识到这是一块“新大陆”，美洲以他的名字命名","blue"],
+   ["1494 · 教皇子午线","《托尔德西里亚斯条约》以 46.5°W 为界：以西归西班牙，以东归葡萄牙，巴西因此属葡萄牙","goldText"]];
+ const gc=(a,b)=>Math.acos(Math.min(1,Math.sin(a[2]*D)*Math.sin(b[2]*D)+Math.cos(a[2]*D)*Math.cos(b[2]*D)*Math.cos((b[1]-a[1])*D)));
+ const cum=[0];for(let i=1;i<PTS.length;i++)cum.push(cum[i-1]+gc(PTS[i-1],PTS[i]));
+ const FR=cum.map(a=>a/cum[cum.length-1]);
+ const v2ll=v=>{const n=v.clone().normalize();let lon=Math.atan2(n.z,-n.x)*180/Math.PI-180;if(lon<-180)lon+=360;return[lon,Math.asin(n.y)*180/Math.PI]};
+ let S=null;
+ const P=(lon,lat,r)=>ll2v(lon,lat,1).multiplyScalar(r*(S?S.sc:1));
+ function dash(G,pts,color){const out=[];
+  for(let i=0;i<pts.length-1;i++){const a=ll2v(pts[i][0],pts[i][1],1),b=ll2v(pts[i+1][0],pts[i+1][1],1),n=Math.max(2,Math.ceil(a.angleTo(b)/D/2.2)),q=[];
+   for(let k=0;k<=n;k++)q.push(v2ll(a.clone().lerp(b,k/n)));
+   for(let k=0;k<n;k+=2)out.push(routeArc(G,[q[k],q[k+1]],color,{radius:.026,lift:.05}).mesh)}
+  return out}
+ function card(c,w,y,txt,col,head,down){const T=theme(),cw=Math.min(360,w-28);c.font="13px "+F;
+  const lines=Math.max(1,Math.ceil(c.measureText(txt).width/(cw-28))),ch=38+lines*19;if(!down)y-=ch;
+  c.save();c.shadowColor="rgba(0,0,0,.1)";c.shadowBlur=18;c.shadowOffsetY=3;c.fillStyle=isDark()?"rgba(44,44,46,.95)":"rgba(255,255,255,.95)";rrect(c,14,y,cw,ch,14);c.fill();c.restore();
+  c.textAlign="left";c.textBaseline="top";c.fillStyle=col;c.font="600 12px "+F;c.fillText(head,28,y+10);
+  c.fillStyle=col===T.blue?T.fg:col;c.font="13px "+F;wrapText(c,txt,28,y+28,cw-28,19);return down?y+ch+8:y-8}
+ function idx(){let i=0;while(i<FR.length-1&&S.p>=FR[i+1]-1e-6)i++;return i}
+ function updRO(){if(!S.ro)return;const T=theme(),i=idx(),p=S.p;
+  const days=p<=0?"未出发":p<FR[2]?"第 "+Math.round(p/FR[2]*70)+" 天":"约 70 天横渡大西洋（8 月 3 日—10 月 12 日）";
+  const pos=p<=0?"帕洛斯港（待出发）":i>=2?PTS[i][0]+(i===2?"（1492 年 10 月 12 日）":""):PTS[i][0]+" → "+PTS[i+1][0];
+  S.ro.update([["模式",S.mind?"哥伦布心中的地球（周长被低估）":"真实的地球",S.mind?T.redText:T.goldText],["航行天数",days],["到达地点",pos],
+   ["哥伦布以为","向西约 4400 km 就到亚洲；登陆处是“印度”",T.redText],["真实情况","到达美洲；加那利到日本约 19600 km（示意），中间隔着美洲与太平洋",T.blue],
+   ["距离对比","心中 约 4400 km / 真实 约 19600 km（示意）",S.mind?T.redText:T.goldText]])}
+ function vis(){if(!S.G)return;const m=S.mind;S.real.forEach(o=>o.visible=!m);
+  S.vesp.visible=!m&&S.late>=1;S.mer.forEach(o=>o.visible=!m&&S.late>=2)}
+ function apply(force){if(S.G){S.arc.setProgress(S.p);S.ship.place(S.arc.pointAt(S.p));const now=performance.now();
+   if(force||now-S.lastFly>550){S.lastFly=now;const[lon,lat]=v2ll(S.arc.pointAt(S.p));flyTo(S.G,lon,lat,13,600)}}
+  updRO()}
+ function scaleTo(){cancelAnimationFrame(S.sraf);const from=S.sc,to=S.mind?.72:1,o0=S.G?S.patch.material.opacity:0,o1=S.mind?.9:0,t0=performance.now();
+  (function st(now){if(!S)return;const k=Math.min(1,Math.max(0,now-t0)/800),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;S.sc=from+(to-from)*e;
+   if(S.G){S.gl.mesh.scale.setScalar(S.sc);S.patch.material.opacity=o0+(o1-o0)*e;S.patch.visible=S.patch.material.opacity>.01}
+   if(k<1)S.sraf=requestAnimationFrame(st)})(t0)}
+ function setMind(v){S.mind=v;scaleTo();vis();if(S.G)flyTo(S.G,v?-60:-50,v?30:22,v?12:15,800);updRO()}
+ function toReal(){if(S.mind)S.tg.click()}
+ function voyage(){if(!S)return;toReal();cancelAnimationFrame(S.raf);S.p=0;apply(true);const t0=performance.now();
+  (function step(now){if(!S)return;S.p=Math.min(1,Math.max(0,now-t0)/11000);apply();if(S.p<1)S.raf=requestAnimationFrame(step)})(t0)}
+ function later(){if(!S)return;toReal();S.tm.forEach(clearTimeout);cancelAnimationFrame(S.raf);S.raf=0;S.late=1;vis();
+  if(S.G)flyTo(S.G,-50,0,15,900);S.tm=[setTimeout(()=>{if(S){S.late=2;vis()}},1600)]}
+ return{use3d:true,
+  text:"意大利航海家哥伦布在西班牙王室资助下向西航行，1492 年到达美洲。他至死认为自己到达的是亚洲。这次航行开辟了横渡大西洋到美洲的新航路，使欧洲与美洲之间建立起直接联系。",
+  points:["<b>1492 年</b>：哥伦布在西班牙支持下到达美洲","<b>地圆学说</b>是向西航行的理论依据，但哥伦布低估了地球大小","美洲以<b>亚美利哥</b>的名字命名","<b>1494 年</b>西葡瓜分世界的“教皇子午线”体现早期殖民扩张"],
+  gk:"统编版《中外历史纲要（下）》第 6 课；浙江选考常考地圆学说与新航路、哥伦布航行的影响（“哥伦布交换”见第 5 章）。",
+  mount(ctrl,read){
+   S={G:null,mind:false,sc:1,p:0,raf:0,sraf:0,tm:[],late:0,lastFly:0,real:[],mer:[],ro:null,lastD:isDark()};
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px";
+   const b1=button("1492 首航",voyage,true),b2=button("后来者",later);b1.style.minHeight=b2.style.minHeight="44px";row.append(b1,b2);
+   S.tg=toggle("哥伦布心中的地球（关 = 真实的地球）",false,setMind);
+   ctrl.append(row,S.tg);
+   S.ro=readout();read.append(S.ro);
+   const G=GL3();if(G){S.G=G;const T=G.THREE;S.gl=globe(G,{grid:true});const M=S.gl.mesh,own=o=>{M.attach(o);return o};
+    S.arc=routeArc(G,PTS.map(p=>[p[1],p[2]]),GOLD);own(S.arc.mesh);S.arc.setProgress(0);
+    S.ship=own(shipMarker(G,GOLD));
+    S.pins=PTS.map(p=>own(portPin(G,p[1],p[2],GOLD)));
+    S.real.push(S.arc.mesh,S.ship,...S.pins);
+    dash(G,WEST,RED).forEach(own);own(portPin(G,139.7,35.7,RED));
+    S.vesp=own(portPin(G,-38.5,-13,BLUE));
+    S.mer=[own(routeArc(G,[[-46.5,89],[-46.5,0],[-46.5,-89]],GOLD,{radius:.03,lift:.05}).mesh)];
+    S.patch=own(new T.Mesh(new T.SphereGeometry(5.035,48,32,10*D,140*D,18*D,128*D),new T.MeshBasicMaterial({color:isDark()?0x24405e:0x9cc8ec,transparent:true,opacity:0,depthWrite:false})));S.patch.visible=false;
+    vis();flyTo(G,-50,22,15,1000)}
+   apply(false)},
+  draw(c,w,h,t){if(!S||!S.G)return;const T=theme(),d=isDark();
+   if(d!==S.lastD){S.lastD=d;S.gl.repaint();S.patch.material.color.set(d?0x24405e:0x9cc8ec);updRO()}
+   if(!S.mind){PTS.forEach(p=>geoLabel(c,p[0],P(p[1],p[2],5.45),T.fg,12));
+    geoLabel(c,"实际距离约 2 万公里，中间隔着美洲与太平洋",P(-110,40,5.15),T.redText,13);
+    if(S.late>=1)geoLabel(c,"亚美利哥 · “新大陆”",P(-38.5,-13,5.45),T.blue,13);
+    if(S.late>=2){geoLabel(c,"教皇子午线 46.5°W",P(-46.5,48,5.1),T.goldText,13);geoLabel(c,"西属",P(-60,-4,5.1),T.goldText,14);geoLabel(c,"葡属",P(-33,-4,5.1),T.goldText,14)}}
+   else{geoLabel(c,"未知海洋",P(-85,8,5.1),T.blue,14);geoLabel(c,"心中：向西约 4400 km 即达日本",P(-80,38,5.1),T.redText,13)}
+   geoLabel(c,"日本（哥伦布的目标）",P(139.7,35.7,5.45),T.redText,12);
+   c.save();c.font="12px "+F;c.textAlign="left";c.textBaseline="top";c.fillStyle=T.fg;
+   c.fillText(S.mind?"哥伦布心中的地球（缩小示意）":"拖动地球可旋转 · 深红虚线 = 他以为的终点：日本",14,14);c.restore();
+   if(S.mind)card(c,w,36,"哥伦布采用托勒密、托斯卡内利偏小的地球周长估计，以为向西约 4400 公里就能到达日本",T.redText,"哥伦布的误算",true);
+   let y=h-12;
+   if(!S.mind){if(S.late>=2)y=card(c,w,y,LATE[1][1],T[LATE[1][2]],LATE[1][0]);
+    if(S.late>=1)y=card(c,w,y,LATE[0][1],T[LATE[0][2]],LATE[0][0]);
+    if(S.p>=FR[2]-1e-6)card(c,w,y,"1492 年 哥伦布到达美洲，误以为是印度，称当地人为‘印第安人’",T.goldText,"哥伦布 · 圣萨尔瓦多岛")}},
+  unmount(){if(S){cancelAnimationFrame(S.raf);cancelAnimationFrame(S.sraf);S.tm.forEach(clearTimeout);if(S.gl)S.gl.mesh.scale.setScalar(1)}flyTok++;gl3Clear();S=null}}})();
+/* ---------- 第 4 章：第一次环球航行：麦哲伦 ---------- */
+CH[3].ready=true;
+MODS[3]=(()=>{
+ const BLUE="#0071e3",GOLD="#9a6a00",F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",D=Math.PI/180,RE=6371,MS=16000,
+  // 名称, 经度, 纬度, 日期, 人数（示意插值）, 是否立柱
+  N=[["桑卢卡尔",-6.35,36.8,"1519 年 9 月",260,1],["加那利群岛",-15.4,28.1,"1519 年 10 月",258,1],["里约热内卢",-43.2,-22.9,"1519 年 12 月",255,1],["拉普拉塔河口",-57,-35,"1520 年 1 月",250,1],
+   ["圣胡利安港",-67.7,-49.3,"1520 年 3—8 月",235,1],["麦哲伦海峡",-70.9,-53.2,"1520 年 10—11 月",200,1],["太平洋东部",-100,-30,"1520 年 12 月",190,0],["太平洋中部",-160,-10,"1521 年 2 月",170,0],
+   ["关岛",144.8,13.4,"1521 年 3 月",150,1],["宿务/马克坦岛",123.9,10.3,"1521 年 4 月",110,1],["马鲁古群岛",127.5,0.8,"1521 年 11 月",60,1],["印度洋",80,-20,"1522 年 3 月",45,0],
+   ["好望角",18.5,-34.4,"1522 年 5 月",34,1],["佛得角",-23.6,15,"1522 年 7 月",22,1],["桑卢卡尔",-6.35,36.8,"1522 年 9 月",18,0]],
+  SHIPS=[[4,4],[5,3],[9,2],[10,1]],// 驶离该节点后剩余船只
+  EV=[[0,"5 艘船、约 260 人在西班牙王室支持下出发，向西航行","fg","1519 年 9 月 · 桑卢卡尔"],[4,"在此过冬，平息船员叛乱","fg","圣胡利安港"],
+   [5,"驶出海峡后风平浪静，命名‘太平洋’","goldText","1520 年 10—11 月 · 麦哲伦海峡"],[8,"横渡太平洋后缺水断粮，以皮革、木屑充饥","fg","1521 年 3 月 · 关岛"],
+   [9,"1521 年 4 月，麦哲伦在冲突中被杀","redText","宿务/马克坦岛"],[10,"抵达香料产地，装载香料","goldText","1521 年 11 月 · 马鲁古群岛"],
+   [14,"仅“维多利亚号”1 艘、18 人返回，由埃尔卡诺率领","goldText","1522 年 9 月 · 桑卢卡尔"]];
+ const gc=(a,b)=>Math.acos(Math.min(1,Math.sin(a[2]*D)*Math.sin(b[2]*D)+Math.cos(a[2]*D)*Math.cos(b[2]*D)*Math.cos((b[1]-a[1])*D)));
+ const cum=[0];for(let i=1;i<N.length;i++)cum.push(cum[i-1]+gc(N[i-1],N[i]));
+ const FR=cum.map(a=>a/cum[cum.length-1]),KM=cum.map(a=>a*RE/1000);
+ const v2ll=v=>{const n=v.clone().normalize();let lon=Math.atan2(n.z,-n.x)*180/Math.PI-180;if(lon<-180)lon+=360;return[lon,Math.asin(n.y)*180/Math.PI]};
+ const P=(lon,lat,r)=>ll2v(lon,lat,1).multiplyScalar(r);
+ let S=null;
+ function dash(G,pts,color){const out=[];
+  for(let i=0;i<pts.length-1;i++){const a=ll2v(pts[i][0],pts[i][1],1),b=ll2v(pts[i+1][0],pts[i+1][1],1),n=Math.max(2,Math.ceil(a.angleTo(b)/D/2.2)),q=[];
+   for(let k=0;k<=n;k++)q.push(v2ll(a.clone().lerp(b,k/n)));
+   for(let k=0;k<n;k+=2)out.push(routeArc(G,[q[k],q[k+1]],color,{radius:.026,lift:.05}).mesh)}
+  return out}
+ function card(c,w,y,txt,col,head,down){const T=theme(),cw=Math.min(360,w-28);c.font="13px "+F;
+  const lines=Math.max(1,Math.ceil(c.measureText(txt).width/(cw-28))),ch=38+lines*19;if(!down)y-=ch;
+  c.save();c.shadowColor="rgba(0,0,0,.1)";c.shadowBlur=18;c.shadowOffsetY=3;c.fillStyle=isDark()?"rgba(44,44,46,.95)":"rgba(255,255,255,.95)";rrect(c,14,y,cw,ch,14);c.fill();c.restore();
+  c.textAlign="left";c.textBaseline="top";c.fillStyle=col;c.font="600 12px "+F;c.fillText(head,28,y+10);
+  c.fillStyle=col===T.blue?T.fg:col;c.font="13px "+F;wrapText(c,txt,28,y+28,cw-28,19);return down?y+ch+8:y-8}
+ function st(){const p=S.p;let i=0;while(i<N.length-2&&p>=FR[i+1]-1e-6)i++;
+  const f=Math.max(0,Math.min(1,(p-FR[i])/(FR[i+1]-FR[i]||1))),k=p>=FR[i+1]-1e-6?i+1:i;return{i,f,k}}
+ function updRO(){if(!S.ro)return;const T=theme(),p=S.p,{i,f,k}=st();
+  let ships=5;SHIPS.forEach(s=>{if(p>FR[s[0]]+1e-6)ships=s[1]});
+  const men=Math.round(N[i][4]+(N[i+1][4]-N[i][4])*f),km=KM[i]+(KM[i+1]-KM[i])*f;
+  const pos=p<=0?"桑卢卡尔（待出发）":p>=1-1e-6?"桑卢卡尔（返回）":Math.abs(p-FR[k])<.004?N[k][0]:N[i][0]+" → "+N[i+1][0];
+  const rows=[["日期",p<=0?"1519 年 9 月（待出发）":N[k][3],T.goldText],["所在位置",pos],
+   ["剩余船只",ships+" 艘"+(ships===1?"（维多利亚号）":""),ships<5?T.redText:T.fg],["剩余人数","约 "+men+" 人（示意插值）",men<100?T.redText:T.fg],
+   ["累计航程",km.toFixed(1)+" 千公里（大圆累计）",T.blue]];
+  if(S.myst)rows.push(["日期之谜","船上日志：星期三 / 当地日期：星期四",T.blue]);
+  if(S.proof)rows.push(["意义","第一次以航行实践证明了地圆学说",T.goldText]);
+  S.ro.update(rows)}
+ function apply(force){if(!S)return;S.sl&&S.sl.set(Math.round(S.p*100));
+  if(S.G){S.arc.setProgress(S.p);S.ship.place(S.arc.pointAt(S.p));const now=performance.now();
+   if(force||now-S.lastFly>550){S.lastFly=now;const[lon,lat]=v2ll(S.arc.pointAt(S.p));flyTo(S.G,lon,lat,13,600)}}
+  updRO()}
+ function setMyst(v){S.myst=v;if(S.G)S.line.forEach(m=>m.visible=v)}
+ function stop(){cancelAnimationFrame(S.raf);S.raf=0;S.tm.forEach(clearTimeout);S.tm=[]}
+ function play(){if(!S)return;stop();setMyst(false);S.p=0;apply(true);const t0=performance.now();
+  (function step(now){if(!S)return;S.p=Math.min(1,Math.max(0,now-t0)/MS);apply();if(S.p<1)S.raf=requestAnimationFrame(step)})(t0)}
+ function mystery(){if(!S)return;stop();S.p=FR[13];setMyst(true);apply(true);
+  S.tm=[setTimeout(()=>{if(S&&S.myst&&S.G)flyTo(S.G,180,10,15,1100)},1800)]}
+ function setProof(v){S.proof=v;if(v)S.flash=performance.now();updRO()}
+ return{use3d:true,
+  text:"1519—1522 年，麦哲伦船队在西班牙王室支持下向西航行，穿过南美洲南端的海峡，横渡太平洋，经菲律宾、马鲁古群岛，绕过好望角返回西班牙，完成了人类第一次环球航行。",
+  points:["麦哲伦船队完成<b>第一次环球航行</b>（麦哲伦本人死于菲律宾）","首次以实践证明<b>地圆学说</b>","证明海洋连成一片，<b>世界各地区开始连成一个整体</b>","为后来西班牙殖民菲律宾埋下伏笔"],
+  gk:"统编版《中外历史纲要（下）》第 6 课；浙江选考常考新航路开辟的影响（世界开始连成一个整体）。",
+  mount(ctrl,read){
+   S={G:null,p:0,raf:0,tm:[],myst:false,proof:false,flash:0,lastFly:0,line:[],pins:[],ro:null,sl:null,lastD:isDark()};
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px";
+   const b1=button("开始环球航行",play,true),b2=button("日期之谜",mystery);b1.style.minHeight=b2.style.minHeight="44px";row.append(b1,b2);
+   S.sl=slider("航程",0,100,1,0,v=>Math.round(v)+"%",v=>{if(!S)return;stop();setMyst(false);S.p=v/100;apply()});
+   ctrl.append(row,S.sl,toggle("地圆学说实证",false,setProof));
+   S.ro=readout();read.append(S.ro);
+   const G=GL3();if(G){S.G=G;S.gl=globe(G,{grid:true});const pts=N.map(n=>[n[1],n[2]]);
+    S.glow=routeArc(G,pts,GOLD,{radius:.11,lift:.06});Object.assign(S.glow.mesh.material,{transparent:true,opacity:0,depthWrite:false});S.glow.mesh.visible=false;
+    S.arc=routeArc(G,pts,GOLD);S.arc.setProgress(0);
+    S.pins=N.map(n=>n[5]?portPin(G,n[1],n[2],GOLD):null);
+    S.ship=shipMarker(G,GOLD);
+    S.line=dash(G,[[180,78],[180,40],[180,0],[180,-40],[180,-78]],BLUE);setMyst(false)}
+   apply(true)},
+  draw(c,w,h,t){if(!S||!S.G)return;const T=theme(),d=isDark(),now=performance.now();
+   if(d!==S.lastD){S.lastD=d;S.gl.repaint();updRO()}
+   if(S.flash){const a=(now-S.flash)/1400;if(a<1){S.glow.mesh.visible=true;S.glow.mesh.material.opacity=.6*Math.sin(a*Math.PI)}else{S.glow.mesh.visible=false;S.flash=0}}
+   N.forEach((n,j)=>{if(S.pins[j])geoLabel(c,n[0],S.pins[j].top,T.fg,12)});
+   geoLabel(c,"太平洋",P(-130,-18,5.1),T.blue,14);geoLabel(c,"印度洋",P(80,-20,5.1),T.blue,14);
+   if(S.myst)geoLabel(c,"180° 经线 · 后来的国际日期变更线",P(180,30,5.15),T.blue,13);
+   c.save();c.font="12px "+F;c.textAlign="left";c.textBaseline="top";c.fillStyle=T.fg;c.fillText("拖动地球可旋转 · 船所在处相机自动跟随",14,14);c.restore();
+   if(S.proof)card(c,w,36,"第一次以航行实践证明了地圆学说",T.goldText,"地圆学说实证",true);
+   let y=h-12;
+   if(S.myst)y=card(c,w,y,"向西绕地球一周，少了一天——这是后来设立国际日期变更线的原因之一",T.blue,"日期之谜 · 佛得角");
+   let e=null;EV.forEach(x=>{if(S.p>=FR[x[0]]-1e-6)e=x});
+   if(e&&!S.myst)card(c,w,y,e[1],T[e[2]],e[3])},
+  unmount(){if(S){stop();S.flash=0}flyTok++;gl3Clear();S=null}}})();
+/* ---------- 第 5 章：物种大交换（哥伦布交换） ---------- */
+CH[4].ready=true;
+MODS[4]=(()=>{
+ const BLUE="#0071e3",GOLD="#9a6a00",RED="#c0362c",F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",EF="18px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif",
+  NEW=[-75,10],OLD=[20,30],CN=["玉米","番薯","马铃薯","花生","辣椒"],
+  // 名称, 图标, 方向 a=美洲→旧大陆 o=旧大陆→美洲 d=疾病→美洲
+  SP=[["玉米","🌽","a"],["马铃薯","🥔","a"],["番薯","🍠","a"],["番茄","🍅","a"],["辣椒","🌶️","a"],["花生","🥜","a"],["烟草","🍂","a"],["可可","🍫","a"],["向日葵","🌻","a"],
+   ["小麦","🌾","o"],["甘蔗","🎋","o"],["咖啡","☕","o"],["马","🐎","o"],["牛","🐄","o"],["羊","🐑","o"],["猪","🐖","o"],["疾病（天花、麻疹、流感）","🦠","d"]],
+  DIR={a:["美洲 → 旧大陆",BLUE,"blue"],o:["旧大陆 → 美洲",GOLD,"goldText"],d:["疾病 → 美洲",RED,"redText"]},
+  POP_CN=[[1500,100],[1600,130],[1650,120],[1700,150],[1750,210],[1790,300],[1800,310]],POP_AM=[[1492,50],[1520,38],[1550,22],[1600,11],[1650,6]];
+ const P=(lon,lat,r)=>ll2v(lon,lat,1).multiplyScalar(r);
+ let S=null;
+ function vis(v){const p=project(v),c=G3&&G3.camera;if(c&&v.x*c.position.x+v.y*c.position.y+v.z*c.position.z<25)p.visible=false;return p}
+ // 大圆弧 + 正弦拱起：先用 routeArc 生成贴球弧，再按沿程比例把顶点径向抬高
+ function arch(G,a,b,color,h){const r=routeArc(G,[a,b],color,{lift:.06}),A=ll2v(a[0],a[1],1),B=ll2v(b[0],b[1],1),ang=A.angleTo(B),pos=r.mesh.geometry.attributes.position,v=new G.THREE.Vector3();
+  const R=u=>{const t=Math.max(0,Math.min(1,u.clone().normalize().angleTo(A)/ang));return 5.06+h*Math.sin(Math.PI*t)};
+  for(let i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i);v.multiplyScalar(R(v)/v.length());pos.setXYZ(i,v.x,v.y,v.z)}pos.needsUpdate=true;
+  r.at=p=>{const u=r.pointAt(p);return u.multiplyScalar(R(u)/u.length())};r.setProgress(0);return r}
+ function drop(o){if(!o)return;S.G.root.remove(o.mesh);o.mesh.geometry.dispose();o.mesh.material.dispose()}
+ function light(i){if(!S||!S.G||S.lit.has(i))return;const s=SP[i],k=i%9-4,j=[k*1.6,k*1.2],
+   a=s[2]==="a"?[NEW[0]+j[0],NEW[1]+j[1]]:[OLD[0]+j[0],OLD[1]+j[1]],b=s[2]==="a"?[OLD[0]-j[0],OLD[1]+j[1]]:[NEW[0]-j[0],NEW[1]+j[1]];
+  S.lit.set(i,{arc:arch(S.G,a,b,DIR[s[2]][1],.9+(i%4)*.18),t0:performance.now(),dir:s[2]});S.last=s[2];S.btn[i].classList.add("on");
+  if(!S.cnOn||!CN.includes(s[0]))flyTo(S.G,-30,15,17,700);syncCN();upd()}
+ function unlight(i){const o=S.lit.get(i);if(!o)return;drop(o.arc);S.lit.delete(i);S.btn[i].classList.remove("on");syncCN();upd()}
+ function anyCN(){return[...S.lit.keys()].some(i=>CN.includes(SP[i][0]))}
+ function syncCN(){if(!S.G)return;const want=S.cnOn&&anyCN();
+  if(want&&!S.cn){const r=routeArc(S.G,[[121,14.6],[118,24.5],[112,28.5]],BLUE,{lift:.12,radius:.04});r.setProgress(0);S.cn={arc:r,t0:performance.now()+900};
+   S.tm.push(setTimeout(()=>{if(S&&S.cn)flyTo(S.G,105,20,15,900)},900))}
+  if(!want&&S.cn){drop(S.cn.arc);S.cn=null}}
+ function stopAll(){S.tm.forEach(clearTimeout);S.tm=[]}
+ function reset(){if(!S)return;stopAll();[...S.lit.keys()].forEach(unlight);S.last=null;S.G&&flyTo(S.G,-30,15,17,700);upd()}
+ function all(){if(!S)return;reset();SP.forEach((s,i)=>S.tm.push(setTimeout(()=>light(i),400+i*520)))}
+ function upd(){if(!S||!S.ro)return;const T=theme(),L=[...S.lit.keys()].map(i=>SP[i]),has=n=>L.some(s=>n.includes(s[0])),A=L.some(s=>s[2]==="a"),O=L.some(s=>s[2]==="o"),D=L.some(s=>s[2]==="d");
+  const rows=[["已交换物种",L.length+" / "+SP.length],["方向",S.last?DIR[S.last][0]:"—",S.last?T[DIR[S.last][2]]:T.fg],
+   ["粮食结构",A?"美洲高产作物进入旧大陆":(has(["小麦"])?"小麦进入美洲":"—"),A?T.blue:T.fg],["人口",A?"旧大陆人口增长":"—",A?T.blue:T.fg],
+   ["美洲原住民",D?"天花等疾病致人口锐减":"—",D?T.redText:T.fg],["种植园经济",has(["甘蔗","咖啡"])?"甘蔗、咖啡种植园在美洲兴起":(O?"牲畜改变美洲生产生活":"—"),O?T.goldText:T.fg]];
+  if(S.cnOn)rows.push(["传入中国",anyCN()?"明朝后期传入中国 → 山地丘陵得到开发 → 清代人口突破 3 亿（1790 年前后）":"点亮玉米、番薯、马铃薯、花生或辣椒",anyCN()?T.blue:T.fg]);
+  S.ro.update(rows)}
+ function stack(c,v,items,head,col){const p=vis(v);if(!p.visible)return;const T=theme(),n=items.length,cols=6,rows=Math.ceil(n/cols),bw=Math.min(n,cols)*24+12,bh=rows*24+8;
+  geoLabel(c,head,v,col,13);if(!n)return;const x=p.x-bw/2,y=p.y-28-bh;
+  c.save();c.fillStyle=isDark()?"rgba(44,44,46,.88)":"rgba(255,255,255,.88)";rrect(c,x,y,bw,bh,10);c.fill();c.font=EF;c.textAlign="center";c.textBaseline="middle";
+  items.forEach((s,k)=>c.fillText(s[1],x+18+(k%cols)*24,y+16+Math.floor(k/cols)*24));c.restore()}
+ function popChart(c,w){const T=theme(),bw=Math.min(240,w*.46),bh=150,x=w-bw-14,y=14,px=x+30,pw=bw-42,py=y+30,ph=bh-62;
+  c.save();c.shadowColor="rgba(0,0,0,.1)";c.shadowBlur=18;c.shadowOffsetY=3;c.fillStyle=isDark()?"rgba(44,44,46,.95)":"rgba(255,255,255,.95)";rrect(c,x,y,bw,bh,14);c.fill();c.restore();
+  const X=yr=>px+(yr-1480)/(1820-1480)*pw,Y=m=>py+ph-m/320*ph;c.save();
+  c.fillStyle=T.fg;c.font="600 12px "+F;c.textAlign="left";c.textBaseline="top";c.fillText("人口曲线（百万）",x+12,y+10);
+  c.strokeStyle=T.axis;c.lineWidth=1;c.beginPath();c.moveTo(px,py);c.lineTo(px,py+ph);c.lineTo(px+pw,py+ph);c.stroke();
+  c.fillStyle=T.fg;c.font="12px ui-monospace,Menlo,monospace";c.textAlign="center";[1500,1650,1800].forEach(yr=>c.fillText(yr,X(yr),py+ph+3));
+  c.textAlign="right";c.textBaseline="middle";[0,300].forEach(m=>c.fillText(m,px-4,Y(m)));
+  [[POP_CN,T.blue],[POP_AM,T.redText]].forEach(([d,col])=>{c.strokeStyle=col;c.lineWidth=2;c.beginPath();d.forEach(([a,b],i)=>i?c.lineTo(X(a),Y(b)):c.moveTo(X(a),Y(b)));c.stroke()});
+  c.font="12px "+F;c.textAlign="left";c.textBaseline="bottom";c.fillStyle=T.blue;c.fillText("中国 1→3 亿",X(1640),Y(205));
+  c.fillStyle=T.redText;c.textBaseline="top";c.fillText("美洲原住民",X(1515),Y(78));c.fillText("天花等疾病与殖民屠杀",x+12,y+bh-30);
+  c.fillStyle=T.fg;c.fillText("示意，数据有争议",x+12,y+bh-16);c.restore()}
+ return{use3d:true,
+  text:"新航路开辟后，美洲与欧亚非之间发生了大规模的物种交流，史称“哥伦布交换”。美洲高产作物传入旧大陆，促进了人口增长；欧洲的牲畜、作物进入美洲，但天花等疾病也使美洲原住民人口锐减。",
+  points:["<b>玉米、马铃薯、番薯</b>等美洲作物传入旧大陆，改变饮食结构、促进人口增长","<b>马、牛、羊</b>等牲畜及<b>小麦、甘蔗</b>传入美洲，改变美洲生产生活","<b>天花</b>等疾病导致美洲原住民人口锐减","<b>明朝后期</b>美洲作物传入中国，清代人口激增与此相关"],
+  gk:"统编版《中外历史纲要（下）》第 7 课「全球联系的初步建立与世界格局的演变」；选择性必修2 第 2 课；浙江选考高频：美洲作物传入中国的影响。",
+  mount(ctrl,read){
+   S={G:null,lit:new Map(),btn:[],tm:[],last:null,cnOn:false,cn:null,ro:null,lastD:isDark()};
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px";
+   const b1=button("全部交换",all,true),b2=button("重置",reset);b1.style.minHeight=b2.style.minHeight="44px";row.append(b1,b2);ctrl.append(row);
+   ["a","o","d"].forEach(d=>{const hd=el("p",null,DIR[d][0]);hd.style.cssText="margin:8px 0 6px;font-size:13px;font-weight:600;color:"+DIR[d][1];
+    const box=el("div","chips");SP.forEach((s,i)=>{if(s[2]!==d)return;const b=el("button",null,s[1]+" "+s[0]);b.setAttribute("aria-pressed","false");
+     b.onclick=()=>{S.lit.has(i)?unlight(i):light(i);b.setAttribute("aria-pressed",S.lit.has(i))};S.btn[i]=b;box.append(b)});ctrl.append(hd,box)});
+   const tg=toggle("传入中国",false,v=>{S.cnOn=v;syncCN();if(!v)S.G&&flyTo(S.G,-30,15,17,700);upd()});tg.style.marginTop="12px";ctrl.append(tg);
+   S.ro=readout();read.append(S.ro);
+   const G=GL3();if(G){S.G=G;S.gl=globe(G,{grid:true});
+    S.base=[routeArc(G,[OLD,[115,30]],GOLD,{radius:.02,lift:.04})];S.base[0].mesh.material.transparent=true;S.base[0].mesh.material.opacity=.45;
+    flyTo(G,-30,15,17,900)}
+   upd()},
+  draw(c,w,h,t){if(!S||!S.G)return;const T=theme(),d=isDark(),now=performance.now();
+   if(d!==S.lastD){S.lastD=d;S.gl.repaint();upd()}
+   geoLabel(c,"大西洋",P(-35,25,5.1),T.blue,14);geoLabel(c,"中国",P(115,30,5.1),T.fg,13);
+   const land={a:[],o:[]};
+   S.lit.forEach((o,i)=>{const s=SP[i],p=Math.max(0,Math.min(1,(now-o.t0)/1100));o.arc.setProgress(p);
+    if(p<1){const q=vis(o.arc.at(p));if(q.visible){c.save();c.font="22px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";c.textAlign="center";c.textBaseline="middle";c.fillText(s[1],q.x,q.y);c.restore()}}
+    else{(s[2]==="a"?land.o:land.a).push(s);
+     c.save();c.fillStyle=o.dir==="a"?T.blue:o.dir==="o"?T.goldText:T.redText;
+     for(let k=0;k<2;k++){const q=vis(o.arc.at((now/1800+k/2+i*.07)%1));if(q.visible){c.beginPath();c.arc(q.x,q.y,2.6,0,Math.PI*2);c.fill()}}c.restore()}});
+   stack(c,P(NEW[0],NEW[1],5.05),land.a,"新大陆（美洲）",T.fg);stack(c,P(OLD[0],OLD[1],5.05),land.o,"旧大陆（欧亚非）",T.fg);
+   if(S.cn){const p=Math.max(0,Math.min(1,(now-S.cn.t0)/1200));S.cn.arc.setProgress(p);
+    geoLabel(c,"马尼拉",P(121,14.6,5.08),T.blue,12);geoLabel(c,"泉州/漳州",P(118,24.5,5.08),T.blue,12);}
+   c.save();c.font="12px "+F;c.textAlign="left";c.textBaseline="top";c.fillStyle=T.fg;c.fillText("拖动地球可旋转 · 点亮物种查看交换",14,14);c.restore();
+   popChart(c,w);
+   if(S.cn&&now>S.cn.t0){const cw=Math.min(380,w-28),txt="明朝后期传入中国 → 山地丘陵得到开发 → 清代人口突破 3 亿（1790 年前后）";c.font="13px "+F;
+    const lines=Math.max(1,Math.ceil(c.measureText(txt).width/(cw-28))),ch=38+lines*19,y=h-12-ch;
+    c.save();c.shadowColor="rgba(0,0,0,.1)";c.shadowBlur=18;c.shadowOffsetY=3;c.fillStyle=d?"rgba(44,44,46,.95)":"rgba(255,255,255,.95)";rrect(c,14,y,cw,ch,14);c.fill();c.restore();
+    c.textAlign="left";c.textBaseline="top";c.fillStyle=T.blue;c.font="600 12px "+F;c.fillText("美洲作物传入中国",28,y+10);c.fillStyle=T.fg;c.font="13px "+F;wrapText(c,txt,28,y+28,cw-28,19)}},
+  unmount(){if(S)stopAll();flyTok++;gl3Clear();S=null}}})();
+/* ---------- 第 6 章：三角贸易 ---------- */
+CH[5].ready=true;
+MODS[5]=(()=>{
+ const BLUE="#0071e3",GOLD="#9a6a00",RED="#c0362c",F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",MS=4000,
+  PORTS=[["利物浦（欧洲）",-3,53.4,BLUE],["几内亚湾·黄金海岸（西非）",0,5.5,RED],["加勒比·牙买加（美洲）",-77,18,GOLD]],
+  LEGS=[{n:"①出程 欧洲→非洲",col:BLUE,tk:"blue",pts:[[-3,53.4],[-6,51.5],[-11,46],[-18,24],[-14,10],[-5,4],[0,5.5]],goods:"枪支、酒、廉价纺织品、小饰物",ic:"🔫🍷🧵📿",to:1,gain:40},
+   {n:"②中程 非洲→美洲（中间航道）",col:RED,tk:"redText",pts:[[0,5.5],[-20,6],[-45,11],[-65,15],[-77,18]],goods:"被掳掠的黑人奴隶",ic:"⛓️",to:2,gain:150},
+   {n:"③归程 美洲→欧洲",col:GOLD,tk:"goldText",pts:[[-77,18],[-76,26],[-60,38],[-35,46],[-12,50],[-6,52],[-3,53.4]],goods:"蔗糖、烟草、棉花、咖啡等种植园产品",ic:"🎋🍂☁️☕",to:0,gain:60}],
+  IMP=[["欧洲","积累资本、推动工业革命（利物浦、布里斯托尔兴起）","blue",1],["非洲","人口锐减、社会经济发展长期受阻","redText",1],["美洲","种植园经济、黑人奴隶制、人口与种族结构改变","goldText",-1]];
+ // 中间航道强度（示意）：1700–1800 最高，1807 后衰减
+ const inten=y=>y<1500?0:y<1700?.12+.88*Math.pow((y-1500)/200,1.5):y<=1800?1:y<1807?1-.2*(y-1800)/7:Math.max(.05,.8-.75*(y-1807)/60);
+ const P=(lon,lat,r)=>ll2v(lon,lat,1).multiplyScalar(r);
+ let S=null;
+ function vis(v){const p=project(v),c=G3&&G3.camera;if(c&&v.x*c.position.x+v.y*c.position.y+v.z*c.position.z<25)p.visible=false;return p}
+ function buildMid(){if(!S.G)return;if(S.mid){S.G.root.remove(S.mid.mesh);S.mid.mesh.geometry.dispose();S.mid.mesh.material.dispose()}
+  S.mid=routeArc(S.G,LEGS[1].pts,RED,{radius:.04+.065*inten(S.year),lift:.07});S.arcs[1]=S.mid}
+ function updRO(){if(!S.ro)return;const T=theme(),y=S.year,f=inten(y),L=S.leg>=0&&S.leg<3?LEGS[S.leg]:null;
+  const rows=[["年份",y+" 年"],["当前航段",L?L.n:S.leg===3?"返抵利物浦，准备下一航次":"停泊利物浦（待出发）",L?T[L.tk]:T.fg],["货物",L?L.goods:"—",L?T[L.tk]:T.fg],
+   ["累计利润","+"+S.tgt+"%（示意）",T.goldText],["航行周期","一次三角航行约 6 个月，可获利 100%–300%（示意）"],
+   ["中间航道强度",f>=1?"贩奴高峰（1700–1800）":f<.01?"尚未开始":Math.round(f*100)+"%（相对高峰，示意）",T.redText],
+   ["贩卖规模","约 1200 万非洲人被贩卖到美洲（另有大量死于途中，学界估计数字不一）",T.redText]];
+  if(y>=1807)rows.push(["1807 年","英国禁止奴隶贸易",T.blue]);if(y>=1833)rows.push(["1833 年","英国废除奴隶制",T.blue]);
+  S.ro.update(rows)}
+ function placeShip(p){if(!S.G)return;const on=S.leg>=0&&S.leg<3,k=on?S.leg:0;
+  S.ships.forEach((s,i)=>s.visible=i===k);S.ships[k].place(S.arcs[k].pointAt(on?p:0))}
+ function stop(){cancelAnimationFrame(S.raf);S.raf=0}
+ function voyage(loop){if(!S)return;stop();S.loop=loop;S.tgt=0;S.leg=0;S.pops=[];S.lt0=performance.now();updRO();
+  const step=now=>{if(!S)return;let p=Math.max(0,now-S.lt0)/MS;
+   if(S.leg===3){if(now-S.lt0>1500){S.tgt=0;S.leg=0;S.lt0=now;p=0;updRO()}else{S.raf=requestAnimationFrame(step);return}}
+   if(p>=1){const L=LEGS[S.leg];S.tgt+=L.gain;S.pops.push({port:L.to,ic:L.ic,g:L.gain,tk:L.tk,t0:now});
+    if(S.leg<2){S.leg++;S.lt0=now;p=0}else if(S.loop){S.leg=3;S.lt0=now;placeShip(0);updRO();S.raf=requestAnimationFrame(step);return}
+    else{S.leg=-1;placeShip(0);updRO();return}updRO()}
+   placeShip(p);S.raf=requestAnimationFrame(step)};
+  S.raf=requestAnimationFrame(step)}
+ function card(c,w,h,x,y,m,dir){const T=theme(),cw=Math.min(180,w*.42);c.font="12px "+F;
+  const lines=Math.max(1,Math.ceil(c.measureText(m[1]).width/(cw-20))),ch=32+lines*17;
+  x=Math.max(8,Math.min(w-cw-8,dir>0?x:x-cw));y=Math.max(8,Math.min(h-ch-8,y-ch/2));
+  c.save();c.shadowColor="rgba(0,0,0,.1)";c.shadowBlur=16;c.shadowOffsetY=3;c.fillStyle=isDark()?"rgba(44,44,46,.95)":"rgba(255,255,255,.95)";rrect(c,x,y,cw,ch,12);c.fill();c.restore();
+  c.save();c.textAlign="left";c.textBaseline="top";c.fillStyle=T[m[2]];c.font="600 12px "+F;c.fillText("对"+m[0]+"的影响",x+10,y+9);
+  c.fillStyle=T.fg;c.font="12px "+F;wrapText(c,m[1],x+10,y+26,cw-20,17);c.restore()}
+ function hold(c,w){const T=theme(),bw=Math.min(232,w*.48),bh=132,x=w-bw-14,y=14,hx=x+12,hy=y+32,hw=bw-24,hh=54;
+  c.save();c.shadowColor="rgba(0,0,0,.1)";c.shadowBlur=18;c.shadowOffsetY=3;c.fillStyle=isDark()?"rgba(44,44,46,.95)":"rgba(255,255,255,.95)";rrect(c,x,y,bw,bh,14);c.fill();c.restore();
+  c.save();c.textAlign="left";c.textBaseline="top";c.fillStyle=T.redText;c.font="600 12px "+F;c.fillText("中间航道 · 船舱剖面（示意）",x+12,y+10);
+  c.strokeStyle=T.fg;c.lineWidth=1.2;c.beginPath();c.moveTo(hx,hy);c.lineTo(hx+hw,hy);c.lineTo(hx+hw-12,hy+hh);c.lineTo(hx+12,hy+hh);c.closePath();c.stroke();
+  c.lineWidth=.8;c.beginPath();for(let d=1;d<3;d++){c.moveTo(hx+4*d,hy+d*hh/3);c.lineTo(hx+hw-4*d,hy+d*hh/3)}c.stroke();
+  c.fillStyle=T.redText;for(let d=0;d<3;d++){const yc=hy+(d+.5)*hh/3,inset=6+d*4;
+   for(let fx=hx+inset+4;fx<=hx+hw-inset-6;fx+=8){c.beginPath();c.arc(fx,yc,1.7,0,Math.PI*2);c.fill();c.fillRect(fx+1.5,yc-1.2,4.5,2.4)}}
+  c.font="12px "+F;wrapText(c,"每船数百人，死亡率约 15%–20%（示意）",x+12,hy+hh+8,bw-24,17);c.restore()}
+ function bar(c,w,h){const T=theme(),bw=Math.min(300,w-28),bh=66,x=14,y=h-14-bh;
+  c.save();c.shadowColor="rgba(0,0,0,.1)";c.shadowBlur=18;c.shadowOffsetY=3;c.fillStyle=isDark()?"rgba(44,44,46,.95)":"rgba(255,255,255,.95)";rrect(c,x,y,bw,bh,14);c.fill();c.restore();
+  c.save();c.textBaseline="top";c.textAlign="left";c.fillStyle=T.fg;c.font="600 12px "+F;c.fillText("累计利润（示意）",x+12,y+10);
+  c.textAlign="right";c.fillStyle=T.goldText;c.fillText("+"+Math.round(S.bar)+"%",x+bw-12,y+10);
+  c.fillStyle=T.grid;rrect(c,x+12,y+30,bw-24,8,4);c.fill();c.fillStyle=T.gold;const bwid=(bw-24)*Math.min(1,S.bar/300);if(bwid>1){rrect(c,x+12,y+30,bwid,8,4);c.fill()}
+  c.textAlign="left";c.fillStyle=T.fg;c.font="12px "+F;c.fillText("一次三角航行约 6 个月，可获利 100%–300%（示意）",x+12,y+46);c.restore()}
+ return{use3d:true,
+  text:"16—19 世纪，欧洲殖民者从事“三角贸易”：从欧洲运商品到非洲换取奴隶，再把奴隶运往美洲卖给种植园主，然后把美洲的种植园产品运回欧洲。三角贸易为欧洲积累了大量资本，却给非洲带来深重灾难。",
+  points:["三角贸易三段航程：<b>出程、中程（中间航道）、归程</b>","为欧洲<b>资本原始积累</b>提供了条件，推动工业革命","使非洲丧失大量青壮年劳动力，<b>发展长期受阻</b>","美洲形成<b>种植园经济与黑人奴隶制</b>","全球联系的初步建立伴随着<b>殖民掠夺</b>"],
+  gk:"统编版《中外历史纲要（下）》第 7 课；浙江选考高频：三角贸易的路线、商品与影响，资本原始积累。",
+  mount(ctrl,read){
+   S={G:null,year:1750,leg:-1,lt0:0,raf:0,loop:false,tgt:0,bar:0,pops:[],imp:false,dirty:false,arcs:[],ships:[],pins:[],ro:null,lastD:isDark()};
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px";
+   const b1=button("开始一次航行",()=>voyage(false),true),b2=button("循环航行",()=>voyage(true));b1.style.minHeight=b2.style.minHeight="44px";row.append(b1,b2);
+   ctrl.append(row,slider("16—19 世纪 年份",1500,1867,1,1750,v=>Math.round(v)+" 年",v=>{if(!S)return;S.year=Math.round(v);S.dirty=true;updRO()}),
+    toggle("对三方的影响",false,v=>{if(S)S.imp=v}));
+   S.ro=readout();read.append(S.ro);
+   const G=GL3();if(G){S.G=G;S.gl=globe(G,{grid:true});
+    LEGS.forEach((L,i)=>{if(i!==1)S.arcs[i]=routeArc(G,L.pts,L.col,{radius:.035})});buildMid();
+    S.pins=PORTS.map(p=>portPin(G,p[1],p[2],p[3]));S.salv=portPin(G,-38.5,-13,GOLD);
+    const alt=routeArc(G,[[0,5.5],[-20,-5],[-38.5,-13]],RED,{radius:.016,lift:.05});Object.assign(alt.mesh.material,{transparent:true,opacity:.5});
+    S.ships=LEGS.map(L=>shipMarker(G,L.col));placeShip(0);flyTo(G,-25,15,16,1000)}
+   updRO()},
+  draw(c,w,h,t){if(!S||!S.G)return;const T=theme(),d=isDark(),now=performance.now();
+   if(d!==S.lastD){S.lastD=d;S.gl.repaint();updRO()}
+   if(S.dirty){S.dirty=false;buildMid()}
+   S.bar+=(S.tgt-S.bar)*.08;
+   PORTS.forEach((p,i)=>geoLabel(c,p[0],S.pins[i].top,T.fg,12));geoLabel(c,"巴西萨尔瓦多（另一目的地）",S.salv.top,T.goldText,12);
+   geoLabel(c,"出程",P(-17,30,5.12),T.blue,13);geoLabel(c,"中间航道",P(-36,13,5.15),T.redText,14);geoLabel(c,"归程",P(-48,44,5.12),T.goldText,13);
+   const n=Math.round(3+22*inten(S.year));c.save();c.fillStyle=T.redText;
+   for(let k=0;k<n;k++){const q=vis(S.mid.pointAt((now/MS+k/n)%1));if(q.visible){c.beginPath();c.arc(q.x,q.y,2.4,0,Math.PI*2);c.fill()}}c.restore();
+   S.pops=S.pops.filter(o=>now-o.t0<2200);
+   S.pops.forEach(o=>{const pt=PORTS[o.port],age=(now-o.t0)/2200;c.save();c.globalAlpha=1-age*age;
+    geoLabel(c,o.ic+" 利润 +"+o.g+"%（示意）",P(pt[1],pt[2],5.6+age*.5),T[o.tk],13);c.restore()});
+   if(S.year>=1807)geoLabel(c,"1807 英国禁止奴隶贸易",P(-16,60,5.1),T.blue,12);
+   if(S.year>=1833)geoLabel(c,"1833 英国废除奴隶制",P(-16,64,5.1),T.blue,12);
+   c.save();c.font="12px "+F;c.textAlign="left";c.textBaseline="top";c.fillStyle=T.fg;c.fillText("拖动地球可旋转 · 线越粗、粒子越密 = 贩奴规模越大（示意）",14,14);c.restore();
+   if(S.leg===1||S.leg<0)hold(c,w);
+   bar(c,w,h);
+   if(S.imp)IMP.forEach((m,i)=>{const p=vis(S.pins[i].top);if(p.visible)card(c,w,h,p.x+m[3]*14,p.y,m,m[3])})},
+  unmount(){if(S)stop();flyTok++;gl3Clear();S=null}}})();
+/* ---------- 第 7 章：价格革命与商业革命 ---------- */
+CH[6].ready=true;
+MODS[6]=(()=>{
+ const BLUE="#0071e3",GOLD="#9a6a00",RED="#c0362c",SIL="#a9aeb6",GREY="#8e8e93",F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",
+  PL=[["波托西（今玻利维亚）",-65.75,-19.6,"mine"],["萨卡特卡斯（墨西哥）",-102.6,22.8,"mine"],["阿卡普尔科",-99.9,16.85,"port"],["马尼拉",121,14.6,"port"],["月港/泉州",118,24.5,"port"],
+   ["威尼斯",12.3,45.4,"med"],["热那亚",8.9,44.4,"med"],["里斯本",-9.1,38.7,"atl"],["塞维利亚",-6,37.4,"atl"],["安特卫普",4.4,51.2,"atl"],["阿姆斯特丹",4.9,52.4,"atl"],["伦敦",-0.1,51.5,"atl"]],
+  RT=[[[-65.75,-19.6],[-72,-5],[-79.5,9.3],[-70,20],[-45,30],[-20,36],[-6,37.4]],
+   [[-102.6,22.8],[-96.1,19.2],[-85,24],[-60,30],[-25,36],[-6,37.4]],
+   [[-6,37.4],[-9.8,43],[-5,48.3],[1.5,50.5],[4.4,51.2]],
+   [[-6,37.4],[-9.8,43],[-5.5,49],[-1.5,50.5],[-0.1,51.5]],
+   [[-102.6,22.8],[-99.9,16.85]],
+   [[-99.9,16.85],[-140,14],[-179,13],[150,13.5],[124,13],[121,14.6]],
+   [[121,14.6],[118,24.5]]];
+ const pi=y=>100+330*(1-Math.exp(-Math.pow((y-1500)/70,2))),
+  ag=y=>Math.round(16000*Math.pow(Math.min(1,Math.max(0,(y-1500)/150)),1.8)/100)*100,
+  P=(lon,lat,r)=>ll2v(lon,lat,1).multiplyScalar(r);
+ let S=null;
+ function vis(v){const p=project(v),c=G3&&G3.camera;if(c&&v.x*c.position.x+v.y*c.position.y+v.z*c.position.z<25)p.visible=false;return p}
+ function updRO(){if(!S.ro)return;const T=theme(),y=S.year;
+  S.ro.update([["年份",y+" 年"],["欧洲物价指数",Math.round(pi(y))+"（1500=100，示意）",T.blue],["白银流入欧洲（累计）","约 "+ag(y).toLocaleString()+" 吨（示意）",T.fg],
+   ["谁受益","新兴资产阶级（商人、工场主）",T.goldText],["谁受损","封建地主（固定货币地租）衰落；雇佣工人（固定工资）实际收入下降",T.redText],
+   ["马尼拉大帆船",y>=1565?"阿卡普尔科—马尼拉航线运行（1565 年起），美洲白银流入中国":"尚未开通（1565 年起）",y>=1565?T.goldText:T.fg],
+   ["商业中心",S.shift?"大西洋沿岸：里斯本、塞维利亚、安特卫普、阿姆斯特丹、伦敦":"地中海：威尼斯、热那亚",S.shift?T.goldText:T.fg]])}
+ function setYear(v){if(!S)return;S.year=Math.round(v);updRO()}
+ function play(){if(!S)return;cancelAnimationFrame(S.raf);const t0=performance.now();
+  (function step(now){if(!S)return;const p=Math.min(1,(now-t0)/7000),y=1500+150*p;setYear(y);S.sl.set(S.year);if(p<1)S.raf=requestAnimationFrame(step)})(t0)}
+ function box(c,x,y,w,h){c.save();c.shadowColor="rgba(0,0,0,.1)";c.shadowBlur=18;c.shadowOffsetY=3;c.fillStyle=isDark()?"rgba(44,44,46,.95)":"rgba(255,255,255,.95)";rrect(c,x,y,w,h,14);c.fill();c.restore()}
+ function chart(c,w){const T=theme(),bw=Math.min(300,w*.46),bh=282,x=w-bw-14,y=14,px=x+42,py=y+34,pw=bw-56,ph=110,X=v=>px+(v-1500)/150*pw,Y=v=>py+ph-v/450*ph;
+  box(c,x,y,bw,bh);c.save();c.textAlign="left";c.textBaseline="top";c.fillStyle=T.fg;c.font="600 12px "+F;c.fillText("欧洲物价指数（1500=100，示意）",x+12,y+10);
+  c.font="12px ui-monospace,Menlo,monospace";c.textAlign="right";c.textBaseline="middle";c.strokeStyle=T.grid;c.lineWidth=1;
+  for(let v=100;v<=400;v+=100){c.beginPath();c.moveTo(px,Y(v));c.lineTo(px+pw,Y(v));c.stroke();c.fillText(v,px-6,Y(v))}
+  c.textAlign="center";c.textBaseline="top";[1500,1550,1600,1650].forEach(v=>c.fillText(v,X(v),py+ph+6));
+  c.strokeStyle=T.blue;c.lineWidth=2;c.beginPath();for(let v=1500;v<=S.year;v+=2)v===1500?c.moveTo(X(v),Y(pi(v))):c.lineTo(X(v),Y(pi(v)));c.lineTo(X(S.year),Y(pi(S.year)));c.stroke();
+  c.fillStyle=T.blue;c.beginPath();c.arc(X(S.year),Y(pi(S.year)),3.5,0,7);c.fill();
+  c.font="600 12px "+F;c.textAlign=S.year>1590?"right":"left";c.textBaseline="bottom";c.fillText(S.year+" 年 · "+Math.round(pi(S.year)),X(S.year)+(S.year>1590?-6:6),Y(pi(S.year))-4);
+  const v=pi(S.year),vals=[1e4/v,v,1e4/v],cols=[T.redText,T.goldText,T.redText],st=["衰落","受益","受损"],nm=["封建地主","资产阶级","雇佣工人"],base=y+186;
+  vals.forEach((val,i)=>{const cx=x+bw*(i+.5)/3,r=Math.min(22,Math.max(4,11*Math.sqrt(val/100))),bx=cx+12,by=base+34-r;
+   c.fillStyle=T.fg;c.beginPath();c.arc(cx-16,base+10,5,0,7);c.fill();c.beginPath();c.arc(cx-16,base+34,11,Math.PI,0);c.fill();
+   c.fillStyle=cols[i];c.beginPath();c.arc(bx,by,r,0,7);c.fill();c.fillRect(bx-r*.3,by-r-r*.35,r*.6,r*.45);
+   c.textAlign="center";c.textBaseline="top";c.fillStyle=T.fg;c.font="600 12px "+F;c.fillText(nm[i],cx,base+42);
+   c.fillStyle=cols[i];c.font="12px "+F;c.fillText(st[i]+" "+Math.round(val)+"%",cx,base+59)});
+  c.textAlign="left";c.fillStyle=T.fg;c.fillText("钱袋 = 实际购买力（1500=100%，示意）",x+12,base+78);c.restore()}
+ function note(c,x,yb,cw,title,tcol,txt){c.font="12px "+F;const lines=Math.max(1,Math.ceil(c.measureText(txt).width/(cw-24))),ch=34+lines*18,y=yb-ch;
+  box(c,x,y,cw,ch);c.save();c.textAlign="left";c.textBaseline="top";c.fillStyle=tcol;c.font="600 12px "+F;c.fillText(title,x+12,y+10);
+  c.fillStyle=theme().fg;c.font="12px "+F;wrapText(c,txt,x+12,y+28,cw-24,18);c.restore();return y}
+ return{use3d:true,
+  text:"新航路开辟后，美洲金银大量流入欧洲，引起物价上涨，史称“价格革命”：封建地主衰落，新兴资产阶级获利。同时世界市场雏形出现，欧洲商业中心由地中海转移到大西洋沿岸，经营方式发生变革，史称“商业革命”。美洲白银还经马尼拉流入中国。",
+  points:["<b>价格革命</b>：金银流入、物价上涨，有利于资产阶级，不利于封建地主","<b>商业革命</b>：商品种类增加、贸易范围扩大、商业中心转移到大西洋沿岸，出现股份公司和证券交易所","<b>世界市场</b>开始形成","美洲白银<b>流入中国</b>，推动明代白银货币化"],
+  gk:"统编版《中外历史纲要（下）》第 7 课；浙江选考高频：价格革命与商业革命的影响、白银流入中国。",
+  mount(ctrl,read){
+   S={G:null,year:1500,shift:false,k:0,raf:0,arcs:[],cols:[],cp:[],ro:null,lastD:isDark()};
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px";
+   const b1=button("播放 1500→1650",play,true),b2=button("看大西洋",()=>S&&S.G&&flyTo(S.G,-30,20,16,900)),b3=button("看马尼拉航线",()=>S&&S.G&&flyTo(S.G,165,20,16,1100));
+   [b1,b2,b3].forEach(b=>b.style.minHeight="44px");row.append(b1,b2,b3);
+   S.sl=slider("年份",1500,1650,1,1500,v=>Math.round(v)+" 年",v=>{if(S){cancelAnimationFrame(S.raf);setYear(v)}});
+   ctrl.append(row,S.sl,toggle("商业中心转移",false,v=>{if(S){S.shift=v;updRO()}}));
+   S.ro=readout();read.append(S.ro);updRO();
+   const G=GL3();if(!G)return;S.G=G;const T=G.THREE,up=new T.Vector3(0,1,0);S.cG=new T.Color(GOLD);S.cY=new T.Color(GREY);
+   S.gl=globe(G,{grid:true});
+   S.arcs=RT.map((r,i)=>{const a=routeArc(G,r,SIL,{radius:i<2||i===5?.032:.024});a.L=a.curve.getLength();return a});
+   PL.forEach(p=>{if(p[3]==="mine"||p[3]==="port"){portPin(G,p[1],p[2],p[3]==="mine"?SIL:GOLD);return}
+    const geo=new T.CylinderGeometry(.075,.075,1,18);geo.translate(0,.5,0);
+    const m=new T.Mesh(geo,new T.MeshStandardMaterial({color:GOLD,roughness:.55,transparent:true,opacity:.9}));
+    const d=ll2v(p[1],p[2],1);m.quaternion.setFromUnitVectors(up,d);m.position.copy(d.multiplyScalar(5));G.root.add(m);S.cols.push(m);S.cp.push(p)});
+   flyTo(G,-30,20,16,1000)},
+  draw(c,w,h,t){if(!S||!S.G)return;const T=theme(),d=isDark(),now=performance.now();
+   if(d!==S.lastD){S.lastD=d;S.gl.repaint();updRO()}
+   S.k+=((S.shift?1:0)-S.k)*.06;const k=S.k;
+   S.cols.forEach((m,i)=>{if(S.cp[i][3]==="med"){m.scale.y=1.1-.8*k;m.material.color.copy(S.cG).lerp(S.cY,k)}else m.scale.y=.3+k});
+   const f=Math.min(1,Math.max(.15,(S.year-1500)/60));c.save();c.fillStyle="#f2f3f5";c.strokeStyle="#6e6e73";c.lineWidth=1;
+   S.arcs.forEach((a,i)=>{if(i>=4&&S.year<1565)return;const n=Math.max(2,Math.round(a.L*3*f));
+    for(let j=0;j<n;j++){const q=vis(a.pointAt((now/1000*.7/a.L+j/n)%1));if(q.visible){c.beginPath();c.arc(q.x,q.y,2.6,0,7);c.fill();c.stroke()}}});c.restore();
+   PL.forEach(p=>{let col=T.fg,txt=p[0],r=5.5;
+    if(p[3]==="mine")txt+=" · 银矿";
+    if(p[3]==="med"){r=5+(1.1-.8*k)+.12;if(k>.5){col=T.redText;txt+=" 衰落"}}
+    if(p[3]==="atl"){r=5+.3+k+.12+(p[0]==="阿姆斯特丹"?.3:0);if(k>.5){col=T.goldText;txt+=" 兴起"}}
+    geoLabel(c,txt,P(p[1],p[2],r),col,12)});
+   geoLabel(c,"美洲白银 → 塞维利亚",P(-42,29,5.15),T.fg,13);geoLabel(c,"马尼拉大帆船",P(-160,18,5.15),T.blue,13);
+   geoLabel(c,"大量白银流入中国：明代白银货币化、一条鞭法",P(118,31,5.3),T.goldText,13);
+   c.save();c.font="12px "+F;c.textAlign="left";c.textBaseline="top";c.fillStyle=T.fg;c.fillText("拖动地球可旋转 · 银白粒子 = 白银流向（示意）",14,14);c.restore();
+   chart(c,w);
+   const cw=Math.min(320,w-28);let yb=h-14;
+   yb=note(c,14,yb,cw,"白银的两条去路",T.blue,"①美洲→塞维利亚→安特卫普、伦敦；②阿卡普尔科→马尼拉→月港/泉州，大量白银流入中国")-8;
+   if(k>.5)note(c,14,yb,cw,"商业中心从地中海转移到大西洋沿岸",T.goldText,"新事物：股份公司 · 证券交易所（安特卫普 1531、阿姆斯特丹 1602）· 银行 · 世界市场雏形")},
+  unmount(){if(S)cancelAnimationFrame(S.raf);flyTok++;gl3Clear();S=null}}})();
+/* ---------- 第 8 章：殖民霸权的更替：西、葡、荷、英 ---------- */
+CH[7].ready=true;
+MODS[7]=(()=>{
+ const GREY="#8e8e93",F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",
+  NA={pt:["葡萄牙","#2f8a4e"],es:["西班牙","#c9a24a"],nl:["荷兰","#e07b2a"],gb:["英国","#c0362c"],fr:["法国","#0071e3"]},NK=["pt","es","nl","gb","fr"],
+  // [名称, 经度, 纬度, 国家, 起, 止]；止=1901 表示延续到 1900 年以后
+  PS=[["果阿",73.8,15.5,"pt",1510,1901],["马六甲",102.2,2.2,"pt",1511,1641],["澳门",113.5,22.2,"pt",1557,1901],["萨尔瓦多（巴西）",-38.5,-13,"pt",1549,1822],["罗安达",13.2,-8.8,"pt",1576,1901],
+   ["墨西哥城",-99.1,19.4,"es",1521,1821],["利马",-77,-12,"es",1535,1824],["哈瓦那",-82.4,23.1,"es",1519,1898],["马尼拉",121,14.6,"es",1571,1898],
+   ["巴达维亚（雅加达）",106.8,-6.2,"nl",1619,1901],["开普敦",18.4,-33.9,"nl",1652,1806],["新阿姆斯特丹",-74,40.7,"nl",1626,1664],["热兰遮城（台湾）",120.2,23,"nl",1624,1662],["长崎出岛",129.9,32.7,"nl",1641,1859],
+   ["弗吉尼亚（北美十三州）",-77,37.5,"gb",1607,1783],["纽约（英属）",-73,41.6,"gb",1664,1783],["加尔各答",88.4,22.6,"gb",1690,1901],["孟买",72.9,19,"gb",1661,1901],["悉尼",151.2,-33.9,"gb",1788,1901],["香港",114.2,22.3,"gb",1842,1901],["开普敦（英属）",19.6,-34.6,"gb",1806,1901],
+   ["魁北克",-71.2,46.8,"fr",1608,1763],["本地治里",79.8,11.9,"fr",1674,1901]],
+  HEG=["葡萄牙、西班牙","荷兰（海上马车夫）","英国、法国争霸","英国（日不落帝国）"],
+  MODE=[["掠夺型：掠夺金银、奴隶贸易","redText"],["商业型：商业贸易、控制海上商路","blue"],["工业资本输出型：商品倾销、资本输出","goldText"]],
+  PH=[["16 世纪 西葡",1550,[-40,5],"掠夺金银、贩卖奴隶","1494 年西、葡划分势力范围，瓜分世界"],
+   ["17 世纪 荷兰 · 海上马车夫",1650,[90,0],"商业贸易，控制海上贸易","1602 年成立荷兰东印度公司；17 世纪中期称霸海上，被称为“海上马车夫”"],
+   ["18 世纪 英法争霸",1763,[-30,30],"以商业战争打击对手，争夺殖民地","1588 年英国击败西班牙“无敌舰队”；三次英荷战争（17 世纪后期）；七年战争（1756–1763）英国夺取加拿大和印度大部"],
+   ["19 世纪 英国 · 日不落帝国",1870,[100,10],"工业革命后成为“世界工厂”，倾销商品、输出资本","殖民地遍布全球，号称“日不落帝国”"]],
+  EV=[[1588,"1588 年英国击败西班牙“无敌舰队”","redText"],[1602,"1602 年荷兰东印度公司成立","blue"],[1641,"1641 年荷兰夺取马六甲","blue"],[1662,"1662 年郑成功收复台湾","goldText"],
+   [1664,"1664 年新阿姆斯特丹转为英属，改名纽约","blue"],[1756,"七年战争（1756–1763）爆发","redText"],[1763,"七年战争结束：英国夺取加拿大和印度大部","redText"],[1783,"北美十三州独立","blue"],[1842,"1842 年后英国侵占香港","redText"]];
+ let S=null;
+ const phaseOf=y=>y<1600?0:y<1688?1:y<1763?2:3,st=(p,y)=>y<p[4]?0:y<p[5]?1:y<p[5]+20?2:0,P=(lon,lat,r)=>ll2v(lon,lat,1).multiplyScalar(r);
+ function counts(y){const n={};NK.forEach(k=>n[k]=0);PS.forEach(p=>{if(st(p,y)===1)n[p[3]]++});return n}
+ function updRO(){if(!S.ro)return;const T=theme(),y=S.year,n=counts(y),tot=NK.reduce((a,k)=>a+n[k],0),m=y<1600?0:y<1800?1:2;
+  S.ro.update([["年份",y+" 年"],["当前霸主",HEG[phaseOf(y)],T.goldText],["在场据点数","共 "+tot+" 个（"+NK.filter(k=>n[k]).map(k=>NA[k][0].slice(0,1)+" "+n[k]).join(" · ")+"）",T.blue],["殖民方式",MODE[m][0],T[MODE[m][1]]]])}
+ function setYear(v){if(!S)return;S.year=Math.round(v);updRO()}
+ function play(){if(!S)return;cancelAnimationFrame(S.raf);const y0=S.year>=1900?1500:S.year,dur=(1900-y0)/400*20000,t0=performance.now();
+  (function step(now){if(!S)return;const p=Math.min(1,(now-t0)/dur);setYear(y0+(1900-y0)*p);S.sl.set(S.year);if(p<1)S.raf=requestAnimationFrame(step)})(t0)}
+ function phase(i){if(!S)return;cancelAnimationFrame(S.raf);S.card=true;setYear(PH[i][1]);S.sl.set(S.year);
+  S.pb.forEach((b,k)=>{b.classList.toggle("on",k===i);b.setAttribute("aria-pressed",k===i)});S.G&&flyTo(S.G,PH[i][2][0],PH[i][2][1],16,1000)}
+ function box(c,x,y,w,h){c.save();c.shadowColor="rgba(0,0,0,.1)";c.shadowBlur=18;c.shadowOffsetY=3;c.fillStyle=isDark()?"rgba(44,44,46,.95)":"rgba(255,255,255,.95)";rrect(c,x,y,w,h,14);c.fill();c.restore()}
+ function bars(c,w){const T=theme(),n=counts(S.year),bw=Math.min(250,w*.42),x=w-bw-14,y=14,bh=46+NK.length*24,bx=x+72,bl=bw-72-34;
+  box(c,x,y,bw,bh);c.save();c.textAlign="left";c.textBaseline="top";c.fillStyle=T.fg;c.font="600 12px "+F;c.fillText("各国在场据点数 · "+S.year,x+12,y+10);c.textBaseline="middle";
+  NK.forEach((k,i)=>{const yy=y+44+i*24;S.bh[k]+=(n[k]-S.bh[k])*.12;
+   c.fillStyle=NA[k][1];c.fillRect(x+12,yy-5,10,10);c.fillStyle=T.fg;c.font="12px "+F;c.textAlign="left";c.fillText(NA[k][0],x+28,yy);
+   c.fillStyle=T.grid;c.fillRect(bx,yy-4,bl,8);c.fillStyle=NA[k][1];c.fillRect(bx,yy-4,bl*Math.min(1,S.bh[k]/7),8);
+   c.fillStyle=T.fg;c.font="12px ui-monospace,Menlo,monospace";c.textAlign="right";c.fillText(n[k],x+bw-12,yy)});c.restore()}
+ function card(c,w,h){const T=theme(),i=phaseOf(S.year),ph=PH[i],cw=Math.min(340,w-28),iw=cw-24;c.font="12px "+F;
+  const l1=Math.ceil(c.measureText(ph[3]).width/(iw-12)),l2=Math.ceil(c.measureText(ph[4]).width/(iw-12)),ch=88+(l1+l2)*18,x=14,y=h-14-ch;let yy=y+12;
+  box(c,x,y,cw,ch);c.save();c.textAlign="left";c.textBaseline="top";
+  c.fillStyle=T.blue;c.font="600 13px "+F;c.fillText(ph[0],x+12,yy);yy+=24;
+  c.fillStyle=T.goldText;c.font="600 12px "+F;c.fillText("主要手段",x+12,yy);yy+=18;c.fillStyle=T.fg;c.font="12px "+F;wrapText(c,ph[3],x+12,yy,iw,18);yy+=l1*18+6;
+  c.fillStyle=T.redText;c.font="600 12px "+F;c.fillText("关键战役 / 事件",x+12,yy);yy+=18;c.fillStyle=T.fg;c.font="12px "+F;wrapText(c,ph[4],x+12,yy,iw,18);c.restore()}
+ return{use3d:true,
+  text:"新航路开辟后，西方国家相继进行殖民扩张：16 世纪葡萄牙、西班牙最早建立殖民帝国；17 世纪荷兰凭借商业优势称霸海上；18 世纪英国通过战争击败对手；19 世纪英国成为“日不落帝国”。殖民扩张使全球联系加强，也给亚非拉人民带来深重灾难。",
+  points:["<b>殖民霸权的更替</b>：西葡 → 荷兰 → 英国","<b>殖民方式</b>由掠夺金银、奴隶贸易转向商业贸易、资本输出","殖民扩张推动<b>世界市场形成</b>，世界开始连成一个整体","殖民扩张伴随着对亚非拉的<b>掠夺和侵略</b>","<b>1662 年郑成功收复台湾</b>"],
+  gk:"统编版《中外历史纲要（下）》第 7、12 课；浙江选考常考殖民扩张的阶段特征与影响、荷兰“海上马车夫”、七年战争。",
+  mount(ctrl,read){
+   S={G:null,year:1500,raf:0,card:false,pins:[],pb:[],bh:{pt:0,es:0,nl:0,gb:0,fr:0},ro:null,lastD:isDark()};
+   const pl=button("自动播放 1500→1900",play,true);pl.style.minHeight="44px";pl.style.marginBottom="10px";
+   S.sl=slider("年份",1500,1900,1,1500,v=>Math.round(v)+" 年",v=>{if(S){cancelAnimationFrame(S.raf);setYear(v)}});
+   const hd=el("p",null,"霸权阶段");hd.style.cssText="margin:12px 0 6px;font-size:13px;font-weight:600";
+   const chips=el("div","chips");
+   PH.forEach((p,i)=>{const b=el("button",null,p[0]);b.setAttribute("aria-pressed","false");b.onclick=()=>phase(i);S.pb.push(b);chips.append(b)});
+   ctrl.append(pl,S.sl,hd,chips);
+   S.ro=readout();read.append(S.ro);updRO();
+   const G=GL3();if(!G)return;S.G=G;
+   S.gl=globe(G,{grid:true});
+   S.pins=PS.map(d=>{const g=portPin(G,d[1],d[2],NA[d[3]][1]);g.visible=false;g.scale.set(1.3,.001,1.3);return{d,g,h:0,s:-1}});
+   flyTo(G,-20,15,16,1000)},
+  draw(c,w,h,t){if(!S||!S.G)return;const T=theme(),d=isDark(),y=S.year;
+   if(d!==S.lastD){S.lastD=d;S.gl.repaint();updRO()}
+   S.pins.forEach(p=>{const s=st(p.d,y),q=p.d;
+    if(s!==p.s){p.s=s;const col=s===2?GREY:NA[q[3]][1];p.g.children.forEach(m=>m.material.color.set(col))}
+    p.h+=((s===1?1:s===2?.35:0)-p.h)*.1;const hh=Math.max(.001,p.h);p.g.visible=p.h>.01;p.g.scale.set(1.3,1.3*hh,1.3);p.g.children[1].scale.y=1/hh;
+    if(!p.g.visible||s===0)return;let txt=q[0],col=T.fg;
+    if(s===2){if(q[0].startsWith("热兰遮")){txt="热兰遮城 · 郑成功收复";col=T.goldText}else if(q[0]==="新阿姆斯特丹"){txt="新阿姆斯特丹 → 英属纽约";col=T.blue}else{txt+=" · 失去";col=T.redText}}
+    geoLabel(c,txt,P(q[1],q[2],5+.56*hh+.04),col,12)});
+   c.save();c.font="12px "+F;c.textAlign="left";c.textBaseline="top";c.fillStyle=T.fg;c.fillText("拖动地球可旋转 · 立柱颜色 = 国家 · 灰色下沉 = 失去据点",14,14);
+   let ny=38;EV.filter(e=>y>=e[0]&&y<e[0]+15).slice(-2).forEach(e=>{c.font="600 14px "+F;const tw=c.measureText(e[1]).width;
+    box(c,14,ny,Math.min(tw+24,w-28),28);c.fillStyle=T[e[2]];c.textBaseline="middle";c.fillText(e[1],26,ny+14);ny+=34});c.restore();
+   bars(c,w);
+   if(S.card)card(c,w,h)},
+  unmount(){if(S)cancelAnimationFrame(S.raf);flyTok++;gl3Clear();S=null}}})();
+
+CH[8].ready=true;
+MODS[8]=(()=>{
+ const L="ABCD",Q=[
+  ["15 世纪欧洲人热衷于开辟新航路，其根本原因是（ ）",null,["奥斯曼土耳其控制商路","西欧商品经济发展，对货币需求增加","《马可·波罗行纪》的影响","王室支持"],1,"根本原因是经济根源；商路受阻是直接原因。",1],
+  ["1497—1498 年绕过好望角到达印度的航海家是（ ）",null,["迪亚士","哥伦布","达·伽马","麦哲伦"],2,"迪亚士到达好望角，达·伽马到达印度。",2],
+  ["哥伦布向西航行寻找东方的理论依据是（ ）",null,["日心说","地圆学说","进化论","万有引力"],1,"他相信地球是圆的，但低估了地球大小。",3],
+  ["麦哲伦船队环球航行最重要的意义是（ ）",null,["发现了美洲","以实践证明了地圆学说","建立了西班牙殖民帝国","开辟了到印度的航线"],1,"第一次环球航行以实践证明地圆学说。",4],
+  ["材料：","明朝后期，玉米、番薯传入中国，“山地瘠土，皆可种植”。",["使中国出现资本主义萌芽","促进了山区开发和人口增长","改变了中国的土地制度","导致中国白银外流"],1,"高产耐旱作物适宜山地，推动垦殖与人口增长。",5,"这主要说明美洲作物的传入（ ）"],
+  ["三角贸易中的“中程”是指（ ）",null,["欧洲→非洲，运输工业品","非洲→美洲，贩运黑人奴隶","美洲→欧洲，运输种植园产品","亚洲→欧洲，运输香料"],1,"中程即“中间航道”，贩运黑奴。",6],
+  ["新航路开辟后欧洲出现“价格革命”，受益最大的是（ ）",null,["收取固定地租的封建地主","领取固定工资的雇佣工人","新兴资产阶级","天主教会"],2,"物价上涨使收取固定货币的地主、工人受损，资产阶级获利。",7],
+  ["17 世纪被称为“海上马车夫”、凭借商业贸易称霸海上的国家是（ ）",null,["葡萄牙","西班牙","荷兰","英国"],2,"荷兰以商业贸易和东印度公司称霸海上。",8]];
+ let S=null;
+ function css(){if($("xq-css"))return;const s=el("style");s.id="xq-css";s.textContent=`
+.x-q{position:absolute;inset:0;z-index:1;overflow:auto;padding:20px;color:var(--fg);font-size:15px;line-height:1.65;background:var(--card)}
+.x-q>div{max-width:720px;margin:0 auto}
+.x-dots{display:flex;gap:8px;margin-bottom:12px}.x-dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.x-dots i.ok{background:var(--blue)}.x-dots i.no{background:var(--xr)}.x-dots i.cur{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--blue)}
+.x-k{margin:0 0 4px;font-size:13px;color:var(--blue);font-family:var(--mono)}.x-stem{margin:0 0 8px;font-weight:600}
+.x-q blockquote{margin:8px 0 12px;padding:10px 14px;border-left:3px solid var(--xg);background:var(--btn2);border-radius:0 10px 10px 0}
+.x-op{display:block;width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere;min-height:44px;padding:10px 14px;margin:8px 0;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--fg);font:inherit;cursor:pointer}
+.x-op:disabled{opacity:1;cursor:default}.x-op.ok{background:var(--sel);border-color:var(--blue);color:var(--blue)}.x-op.no{background:var(--xrb);border-color:var(--xr);color:var(--xr)}
+.x-ex{margin:14px 0 10px;padding:12px 14px;border-radius:12px;background:var(--btn2)}.x-ex b{color:var(--xg);margin-right:6px}
+.x-act{display:flex;flex-wrap:wrap;gap:8px}.x-act .pill{min-height:44px}
+.x-big{font-size:44px;font-weight:600;color:var(--blue);margin:4px 0;font-family:var(--mono)}
+.x-q{--xr:#c0362c;--xrb:#fdecea;--xg:#9a6a00}html.dark .x-q{--xr:#ff7b72;--xrb:rgba(255,99,105,.16);--xg:#f0b847}`;document.head.append(s)}
+ function upd(){const T=theme(),n=S.ans.filter(a=>a!=null).length,c=S.ans.filter((a,i)=>a===Q[i][3]).length;
+  S.ro.update([["已答",n+" / 8"],["正确",String(c),T.blue],["正确率",n?Math.round(c/n*100)+"%":"—"]])}
+ function dots(){return `<div class="x-dots" aria-label="进度">`+Q.map((q,i)=>{const a=S.ans[i];return `<i class="${a==null?"":a===q[3]?"ok":"no"}${i===S.i&&!S.done?" cur":""}"></i>`}).join("")+"</div>"}
+ function show(top){const q=Q[S.i],a=S.ans[S.i];
+  let h=dots()+`<p class="x-k">第 ${S.i+1} / 8 题</p><p class="x-stem">${q[0]}</p>`+(q[1]?`<blockquote>“${q[1]}”</blockquote><p class="x-stem">${q[6]}</p>`:"");
+  h+=q[2].map((o,k)=>{let c="",m="";if(a!=null){if(k===q[3]){c=" ok";m=" ✓"}else if(k===a){c=" no";m=" ✗"}}
+   return `<button class="x-op${c}" data-k="${k}"${a!=null?" disabled":""}>${L[k]}. ${o}${m}</button>`}).join("");
+  if(a!=null)h+=`<div class="x-ex"><b>解析</b>答案 ${L[q[3]]}。${q[4]}</div><div class="x-act"><button class="pill" data-go="${q[5]}">回到第 ${q[5]} 章</button><button class="pill primary" data-nx>${S.i<7?"下一题":"查看结果"}</button></div>`;
+  S.in.innerHTML=h;if(top)S.box.scrollTop=0;else{const x=S.in.querySelector(".x-act");x&&x.scrollIntoView({block:"nearest"})}}
+ function result(){const c=S.ans.filter((a,i)=>a===Q[i][3]).length,s=Math.round((S.t1-S.t0)/1000),w=Q.filter((q,i)=>S.ans[i]!==q[3]);
+  S.in.innerHTML=dots()+`<p class="x-k">检测完成</p><p class="x-big">${c}/8</p><p style="margin:0 0 14px">用时 <span style="font-family:var(--mono)">${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span></p>`+
+   (w.length?`<p class="x-stem">错题对应章节</p><div class="x-act" style="margin-bottom:16px">${w.map(q=>`<button class="pill" data-go="${q[5]}">第 ${q[5]} 章 · ${CH[q[5]-1].n}</button>`).join("")}</div>`:`<p class="x-stem" style="color:var(--blue)">全部答对 ✓</p>`)+
+   `<div class="x-act"><button class="pill primary" data-redo>重做</button></div>`;S.box.scrollTop=0}
+ function reset(){S.i=0;S.ans=Array(8).fill(null);S.t0=Date.now();S.done=false;upd();show(true)}
+ return{use3d:false,
+  text:"8 道选考风格单选，覆盖本实验 1–8 章，答完可跳回对应章节复习。",
+  gk:"浙江选考 全球航路的开辟与全球联系的初步建立。",
+  mount(ctrl,read){css();gl3Clear();S={i:0,ans:Array(8).fill(null),t0:Date.now(),done:false};
+   S.box=el("div","x-q");S.in=el("div");S.box.append(S.in);$("cwrap").append(S.box);
+   S.box.onclick=e=>{const b=e.target.closest("button");if(!b||!S)return;
+    if(b.dataset.k!=null){if(S.ans[S.i]==null){S.ans[S.i]=+b.dataset.k;upd();show(false)}}
+    else if(b.dataset.go)location.hash="#"+b.dataset.go;
+    else if(b.hasAttribute("data-nx")){if(S.i<7){S.i++;show(true)}else{S.done=true;S.t1=Date.now();result()}}
+    else if(b.hasAttribute("data-redo"))reset()};
+   S.ro=readout();read.append(S.ro);upd();show(true)},
+  draw(){},
+  unmount(){if(S){S.box.remove();S=null}}}})();
+/* ---------- 章节：全部即将上线 ---------- */
+const $=id=>document.getElementById(id),pad=i=>String(i+1).padStart(2,"0");
+let cur=0,mod=null,W=0,H=0,DPR=1;
+const cv=$("cv"),ctx=cv.getContext("2d");
+/* ---------- theme ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function isDark(){return document.documentElement.classList.contains("dark")}
+function theme(){return isDark()
+ ?{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e2a336",teal:"#2ec4b6",purple:"#b197fc",goldText:"#f0b847",redText:"#ff7b72"}
+ :{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.05)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"}}
+function setDark(d){document.documentElement.classList.toggle("dark",d);store.set("hanglu-dark",d?"1":"0");$("dark").textContent=$("mdark").textContent=d?"浅色":"深色"}
+setDark(store.get("hanglu-dark")==="1");
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||fmtNum;const w=el("div","sl"),l=el("label"),o=el("output"),i=el("input");
+ l.append(document.createTextNode(label),o);i.type="range";Object.assign(i,{min,max,step,value:val});i.setAttribute("aria-label",label);o.textContent=fmt(+val);
+ i.oninput=()=>{o.textContent=fmt(+i.value);onchange&&onchange(+i.value)};w.append(l,i);
+ w.set=v=>{i.value=v;o.textContent=fmt(+v)};return w}
+function chips(options,val,onchange){const w=el("div","chips");const bs=options.map(op=>{const o=typeof op==="object"?op:{label:op,value:op};const b=el("button",o.value===val?"on":"",o.label);
+ b.onclick=()=>{bs.forEach(x=>x.classList.remove("on"));b.classList.add("on");onchange&&onchange(o.value)};w.append(b);return b});return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" primary":""),label);b.onclick=onclick;return b}
+function toggle(label,val,onchange){const b=el("button","tg"+(val?" on":""),"<span>"+label+"</span><i></i>");b.setAttribute("role","switch");b.setAttribute("aria-checked",!!val);
+ b.onclick=()=>{val=!val;b.classList.toggle("on",val);b.setAttribute("aria-checked",val);onchange&&onchange(val)};return b}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML=rs.map(r=>`<dt>${r[0]}</dt><dd style="${r[2]?"color:"+r[2]:""}">${r[1]}</dd>`).join("")};d.update(rows||[]);return d}
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){if(!isFinite(v))return v>0?"∞":v<0?"−∞":"—";const e=1e-6,s=v<0?"−":"",a=Math.abs(v);
+ if(Math.abs(a-Math.round(a))<e)return(Math.round(a)===0?"":s)+Math.round(a);
+ for(let d=2;d<=12;d++){const n=a*d;if(Math.abs(n-Math.round(n))<e)return s+Math.round(n)+"/"+d}
+ for(const r of[2,3,5,6,7,10,11,13,14,15]){const q=Math.sqrt(r);for(let d=1;d<=6;d++){const k=a*d/q;if(Math.abs(k-Math.round(k))<e&&Math.round(k)>0){const K=Math.round(k);return s+(K===1?"":K)+"√"+r+(d>1?"/"+d:"")}}}
+ return s+a.toFixed(2)}
+function drawAxes(ctx,box,xr,yr,opts){opts=Object.assign({equal:true,grid:true,ticks:true,step:1,labels:true},opts);const T=theme();
+ let[x0,x1]=xr,[y0,y1]=yr,sx=box.w/(x1-x0),sy=box.h/(y1-y0);
+ if(opts.equal){const s=Math.min(sx,sy),cx=(x0+x1)/2,cy=(y0+y1)/2;sx=sy=s;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)*sx,Y=y=>box.y+box.h-(y-y0)*sy,invX=p=>x0+(p-box.x)/sx,invY=p=>y0+(box.y+box.h-p)/sy;
+ let st=opts.step;while(st*sx<22)st*=2;
+ ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();ctx.lineWidth=1;
+ if(opts.grid){ctx.strokeStyle=T.grid;ctx.beginPath();for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st){ctx.moveTo(X(x),box.y);ctx.lineTo(X(x),box.y+box.h)}for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st){ctx.moveTo(box.x,Y(y));ctx.lineTo(box.x+box.w,Y(y))}ctx.stroke()}
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,Y(0));ctx.lineTo(box.x+box.w,Y(0));ctx.moveTo(X(0),box.y);ctx.lineTo(X(0),box.y+box.h);ctx.stroke();
+ if(opts.labels){ctx.fillStyle=T.sub;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";
+  for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st)if(Math.abs(x)>1e-9)ctx.fillText(fmtNum(x),X(x),Y(0)+4);
+  ctx.textAlign="right";ctx.textBaseline="middle";for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st)if(Math.abs(y)>1e-9)ctx.fillText(fmtNum(y),X(0)-5,Y(y));
+  ctx.textBaseline="top";ctx.fillText("O",X(0)-4,Y(0)+4);ctx.font="italic 13px "+getComputedStyle(document.body).fontFamily;ctx.fillStyle=T.fg;
+  ctx.fillText("x",box.x+box.w-4,Y(0)+4);ctx.textAlign="left";ctx.fillText("y",X(0)+6,box.y+4)}
+ ctx.restore();return{X,Y,invX,invY,s:sx,box,xr:[x0,x1],yr:[y0,y1]}}
+function drawLine(ctx,map,A,B,C,color,width,dashed){if(Math.abs(A)<1e-12&&Math.abs(B)<1e-12)return;const[x0,x1]=map.xr,[y0,y1]=map.yr,b=map.box;let p,q;
+ if(Math.abs(B)>=Math.abs(A)){p=[x0,-(A*x0+C)/B];q=[x1,-(A*x1+C)/B]}else{p=[-(B*y0+C)/A,y0];q=[-(B*y1+C)/A,y1]}
+ ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.setLineDash(dashed?[6,5]:[]);
+ ctx.beginPath();ctx.moveTo(map.X(p[0]),map.Y(p[1]));ctx.lineTo(map.X(q[0]),map.Y(q[1]));ctx.stroke();ctx.restore()}
+function drawCircle(ctx,map,cx,cy,r,color,width,fill){const b=map.box;ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.beginPath();ctx.arc(map.X(cx),map.Y(cy),Math.max(0,r*map.s),0,Math.PI*2);
+ if(fill){ctx.fillStyle=fill;ctx.fill()}if(width!==0){ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.stroke()}ctx.restore()}
+function dragPoints(points,map,snap){const M=()=>typeof map==="function"?map():map;const h=function(e,type,x,y){const m=M();if(!m)return false;
+ if(type==="down"){const R=e&&e.pointerType==="touch"?22:12;let best=-1,bd=R;points.forEach((p,i)=>{if(p.fixed)return;const d=Math.hypot(m.X(p.x)-x,m.Y(p.y)-y);if(d<=bd){bd=d;best=i}});h.active=best;return best>=0}
+ if(type==="move"&&h.active>=0){const p=points[h.active];let nx=m.invX(x),ny=m.invY(y);if(snap){nx=Math.round(nx/snap)*snap;ny=Math.round(ny/snap)*snap}
+  nx=Math.min(m.xr[1],Math.max(m.xr[0],nx));ny=Math.min(m.yr[1],Math.max(m.yr[0],ny));p.x=+nx.toFixed(6);p.y=+ny.toFixed(6);p.onmove&&p.onmove(p);h.onmove&&h.onmove(p,h.active);return true}
+ if(type==="up"){const was=h.active>=0;h.active=-1;return was}return false};h.active=-1;return h}
+function wrapText(ctx,text,x,y,maxW,lh){let line="";for(const ch of String(text)){if(ch==="\n"){ctx.fillText(line,x,y);line="";y+=lh;continue}
+ const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);line=ch;y+=lh}else line=t}if(line)ctx.fillText(line,x,y);return y+lh}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+/* ---------- placeholder ---------- */
+function drawSoon(ctx,w,h){const T=theme(),cw=Math.min(320,w-40),ch=150,x=(w-cw)/2,y=(h-ch)/2;
+ ctx.save();ctx.shadowColor="rgba(0,0,0,.08)";ctx.shadowBlur=24;ctx.shadowOffsetY=4;ctx.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(ctx,x,y,cw,ch,22);ctx.fill();ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.blue;ctx.font="13px ui-monospace,Menlo,monospace";ctx.fillText("CHAPTER "+pad(cur),w/2,y+38);
+ ctx.fillStyle=T.fg;ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText("即将上线",w/2,y+72);
+ ctx.fillStyle=T.sub;ctx.font="14px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText(CH[cur].n,w/2,y+108)}
+/* ---------- canvas loop ---------- */
+function resize(){const r=$("cwrap").getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);gl3Size();frame(performance.now())}
+function frame(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);const d3=!!(mod&&mod.use3d);
+ if(d3&&!GL3()){ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H);drawNo3D(ctx,W,H);return}
+ if(d3)gl3Render();else{ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H)}
+ try{mod&&mod.draw?mod.draw(ctx,W,H,t/1000):(!d3&&drawSoon(ctx,W,H))}catch(err){console.error(err)}}
+function loop(t){frame(t);requestAnimationFrame(loop)}
+new ResizeObserver(resize).observe($("cwrap"));window.addEventListener("resize",resize);
+function ptr(type){return e=>{if(!mod||!mod.pointer)return;const r=cv.getBoundingClientRect();
+ if(type==="down")try{cv.setPointerCapture(e.pointerId)}catch(_){}mod.pointer(e,type,e.clientX-r.left,e.clientY-r.top)}}
+cv.addEventListener("pointerdown",ptr("down"));cv.addEventListener("pointermove",ptr("move"));cv.addEventListener("pointerup",ptr("up"));cv.addEventListener("pointercancel",ptr("up"));
+/* ---------- chapters ---------- */
+function list(host,cls){host.innerHTML="";CH.forEach((c,i)=>{const b=el("button",cls,`<span class="mono">${pad(i)}</span><span>${c.n}</span>`);b.onclick=()=>{go(i);closeSheet()};host.append(b)})}
+list($("toc"),"");list($("slist"),"it");
+$("segs").innerHTML=CH.map(()=>"<i></i>").join("");
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod.unmount()}catch(e){console.error(e)}
+ gl3Clear();
+ cur=i;const c=CH[i],m=c.ready&&MODS[i]?MODS[i]:null;mod=m;
+ $("ctitle").textContent=pad(i)+"  "+c.n;$("cbook").textContent=c.book;$("ctext").innerHTML=m?m.text||"":"本章交互实验即将上线，敬请期待。";
+ const ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";$("pts").innerHTML="";$("gk").innerHTML="";
+ if(m){m.mount&&m.mount(ctrl,read);$("pts").innerHTML=m.points?"<ul>"+[].concat(m.points).map(p=>"<li>"+p+"</li>").join("")+"</ul>":"";$("gk").innerHTML=m.gk||""}
+ gl3Mode(!!(m&&m.use3d));
+ $("ctrlSec").hidden=!ctrl.children.length;$("readSec").hidden=!read.children.length;$("ptSec").hidden=!$("pts").innerHTML;$("gkSec").hidden=!$("gk").innerHTML;
+ if(!m){$("ctrlSec").hidden=false;ctrl.innerHTML='<p class="soon">本章控件即将上线。</p>'}
+ document.querySelectorAll("#toc button,#slist button").forEach(b=>{const on=+b.querySelector(".mono").textContent-1===i;b.classList.toggle("on",on);on?b.setAttribute("aria-current","true"):b.removeAttribute("aria-current")});
+ document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
+ $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+/* ---------- controls ---------- */
+$("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
+$("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("explain").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+function openSheet(){$("mask").hidden=$("sheet").hidden=false;const on=$("slist").querySelector(".on");on&&on.scrollIntoView({block:"nearest"})}
+function closeSheet(){$("mask").hidden=$("sheet").hidden=true}
+$("chbtn").onclick=openSheet;$("mask").onclick=closeSheet;
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"&&t.type!=="range"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable))return;
+ if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+go(fromHash());requestAnimationFrame(loop);
+</script>
+</body>
+</html>
