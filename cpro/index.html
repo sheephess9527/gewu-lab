@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><script src="../lib/labfix-2d.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>解析几何进阶 · 格物实验室</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--sel:#e8f1fc;--selfg:#0058b0;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--sel:rgba(41,151,255,.18);--selfg:#6cb6ff;--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--shadow:0 0 0 1px rgba(255,255,255,.08)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.back b{font-size:22px;font-weight:400;margin-right:4px}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);font-size:14px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}
+html.dark .pill.primary,html.dark .chips button.on{color:#000}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc button,.sheet button.it{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px;align-items:center}
+.toc button:hover{background:var(--btn2)}
+.toc button.on,.sheet button.it.on{background:var(--sel);color:var(--selfg);font-weight:600}
+.toc .mono,.sheet .mono{font-size:13px;color:var(--sub)}.on .mono{color:var(--selfg)!important}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 20px}
+.explain{flex:none}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.etext{margin:8px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.explain.collapsed .etext,.explain.collapsed .book{display:none}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;color:var(--sub);min-height:32px}
+.cwrap{flex:1;min-height:0;position:relative;border-radius:22px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:none}
+.sec h3{font-size:13px;color:var(--sub);font-weight:600;letter-spacing:0;margin:0 0 8px}
+.ctrls{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;font-size:14px}.sl output{font-family:var(--mono);color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}.chips button.on{background:var(--blue);color:#fff}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;min-height:36px;border:0;background:none;padding:0;width:100%}
+.tg i{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.tg.on i{background:#34c759}.tg.on i::after{left:20px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+.points ul{margin:0;padding-left:18px}.points li{margin:4px 0}
+.gk a{color:var(--blue);text-decoration:none;font-size:14px}
+.mdark{display:none}
+.soon{color:var(--sub);font-size:14px;margin:0}
+/* sheet */
+.mask{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;max-height:70vh;overflow:auto;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .prog{display:none}.app{display:block;height:auto}.toc{display:none}
+ .stage{padding:12px}.cwrap{order:-1;flex:none;height:56vh}
+ .explain .fold{display:none}.explain.collapsed .etext,.explain.collapsed .book{display:block}.etext{max-height:none;overflow:visible}
+ .panel{border:0;padding:0 12px 24px}
+}
+@media (min-width:1024px){.chbtn{display:none}}
+/* phone */
+@media (max-width:767px){
+ .top{height:calc(52px + env(safe-area-inset-top));gap:6px;padding-left:4px;padding-right:8px}
+ .back{width:44px;justify-content:center}.back span{display:none}.back b{margin:0}
+ .tname{flex:1;font-size:16px}.tbtns{display:none}.chbtn{margin-left:0;padding:0 12px}
+ .stage{padding:0;gap:0}.cwrap{height:52vh;border-radius:0;box-shadow:none;border-bottom:1px solid var(--line)}
+ .explain{background:none;box-shadow:none;padding:16px 16px 4px}.ehead h2{font-size:20px}.etext{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(84px + env(safe-area-inset-bottom))}
+ input[type=range]{height:44px}.chips button,.tg{min-height:44px}
+ .mdark{display:block;align-self:flex-start;min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
+  <div class="tname">解析几何进阶 · ConicPro</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 09</span></div>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button><button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chnum">01/09</span></button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h2 id="ctitle"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="etext" id="ctext"></p>
+    </section>
+    <div class="cwrap" id="cwrap"><canvas id="cv"></canvas></div>
+  </main>
+  <aside class="panel">
+    <section class="card sec" id="ctrlSec"><h3>控件</h3><div class="ctrls" id="ctrl"></div></section>
+    <section class="card sec" id="readSec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec points" id="ptSec"><h3>要点</h3><div id="pts"></div></section>
+    <section class="card sec gk" id="gkSec"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mask" id="mask" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><div id="slist"></div></div>
+<div class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></div>
+<script>
+const CH=[
+{n:"设而不求：联立与韦达",book:"人教A版 选择性必修第一册 · 3.1–3.3 · 直线与圆锥曲线",ready:false},
+{n:"弦长与面积",book:"高考解答题 · 弦长公式与三角形面积",ready:false},
+{n:"中点弦与点差法",book:"高考拓展 · 中点弦",ready:false},
+{n:"定点问题",book:"高考解答题 · 定点",ready:false},
+{n:"定值问题",book:"高考解答题 · 定值",ready:false},
+{n:"最值与范围",book:"高考解答题 · 最值与范围",ready:false},
+{n:"抛物线焦点弦",book:"人教A版 选择性必修第一册 · 3.3 抛物线",ready:false},
+{n:"非对称韦达与定比",book:"高考拓展 · 非对称韦达",ready:false},
+{n:"随堂检测",book:"选择性必修第一册 · 第三章 圆锥曲线的方程",ready:false}];
+const MODS=[];// MODS[i]={text,points,gk,mount(ctrlEl,readEl),draw(ctx,w,h,t),pointer(e,type,x,y),unmount()}
+CH[0].ready=true;
+MODS[0]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",R7=Math.sqrt(7),EPS=1e-7,MODES=["gen","foc","tan"];
+ let k=0.5,m=1,mode="gen",map=null,ro=null,sk=null,sm=null,ch=null,drag=false,last="";
+ const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+ const fs=v=>Math.abs(v-R7)<1e-9?"√7":Math.abs(v+R7)<1e-9?"−√7":(Math.abs(v)<0.005?"0.00":v.toFixed(2).replace("-","−"));
+ const N=v=>fmtNum(Math.abs(v)<1e-9?0:v);
+ function poly(a,b,c){const t=(v,s)=>Math.abs(v)<1e-9?"":(v<0?" − ":" + ")+fmtNum(Math.abs(v))+s;return fmtNum(a)+"x²"+t(b,"x")+t(c,"")+" = 0"}
+ function calc(){const a=3+4*k*k,b=8*k*m,c=4*m*m-12,D=48*(4*k*k+3-m*m),pts=[];
+  if(D>EPS){const r=Math.sqrt(D);[(-b-r)/(2*a),(-b+r)/(2*a)].forEach(x=>pts.push({x,y:k*x+m}))}
+  else if(Math.abs(D)<=EPS){const x=-b/(2*a);pts.push({x,y:k*x+m})}
+  const S=-b/a;return{a,b,c,D:Math.abs(D)<=EPS?0:D,S,P:c/a,Sy:k*S+2*m,pts}}
+ function setMode(v){mode=v;if(ch)ch.querySelectorAll("button").forEach((b,i)=>b.classList.toggle("on",MODES[i]===v));last=""}
+ function preset(v){setMode(v);if(v==="gen"){k=0.5;m=1}else if(v==="foc"){k=1;m=-1}else{k=1;m=R7}sk&&sk.set(k);sm&&sm.set(m)}
+ function setK(v){k=v;if(mode==="foc"){m=-k;sm.set(m)}else if(mode==="tan")setMode("gen")}
+ function setM(v){if(mode==="foc"){v=cl(v,-3,3);k=-v;sk.set(k)}else if(mode==="tan")setMode("gen");m=v;sm.set(m)}
+ function lab(c,s,x,y,col,al){c.font="13px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ function dot(c,p,col,r){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),r||6,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function clip(c){const b=map.box;c.beginPath();c.rect(b.x,b.y,b.w,b.h);c.clip()}
+ function rows(T,R){const st=R.D>0?["相交 · 两个交点",T.blue]:R.D<0?["相离 · 无交点",T.redText]:["相切 · 一个公共点",T.goldText];
+  return[["l",`y = ${fs(k)}x ${m<0?"−":"+"} ${fs(Math.abs(m))}`],["联立方程",poly(R.a,R.b,R.c)],
+   ["Δ = 48(4k² + 3 − m²)",N(R.D),R.D>0?T.blue:R.D<0?T.redText:T.fg],["位置关系",st[0],st[1]],
+   ["x₁ + x₂ = −8km/(3+4k²)",N(R.S),T.goldText],["x₁x₂ = (4m²−12)/(3+4k²)",N(R.P),T.goldText],
+   ["y₁ + y₂ = k(x₁+x₂) + 2m",N(R.Sy),T.goldText]]}
+ return{
+  text:"圆锥曲线大题的第一步永远是<b>「设线 → 联立 → 判别式 → 韦达」</b>。不必求出 x₁、x₂ 本身，只用它们的<b>和与积</b>表示目标量，这就是「设而不求」。注意：设 y = kx + m 会漏掉竖直线，必要时设 x = ty + n；<b>Δ &gt; 0 是后续所有范围问题的约束来源</b>。拖动直线上的把手改 m 试试。",
+  points:["四步：设线、联立消元、Δ &gt; 0、写韦达","设 x = ty + n 可避免讨论斜率不存在，适合过 x 轴上定点的直线","目标量必须化成 x₁ + x₂、x₁x₂ 的对称式才能代入","Δ &gt; 0 ⇔ m² &lt; 4k² + 3，是 k、m 的取值约束"],
+  gk:"新高考 I 卷解答题第 20/21 题几乎每年都考直线与圆锥曲线。<br>计算量大，「联立—韦达」写对就有步骤分。",
+  mount(ctrl,read){ch=chips([{label:"一般位置",value:"gen"},{label:"过焦点 F(1,0)",value:"foc"},{label:"相切",value:"tan"}],mode,preset);
+   sk=slider("斜率 k",-3,3,0.01,k,fs,setK);sm=slider("截距 m",-4,4,0.01,m,fs,v=>{if(mode==="foc"&&Math.abs(v)>3){v=cl(v,-3,3)}setM(v)});
+   ctrl.append(ch,sk,sm);ro=readout([]);read.append(ro);last=""},
+  draw(c,w,h){const T=theme(),R=calc();map=drawAxes(c,{x:0,y:0,w,h},[-4.6,4.6],[-4.6,4.6]);const X=map.X,Y=map.Y,b=map.box;
+   c.save();clip(c);c.beginPath();c.ellipse(X(0),Y(0),2*map.s,Math.sqrt(3)*map.s,0,0,7);c.strokeStyle=T.blue;c.lineWidth=1.5;c.stroke();c.restore();
+   lab(c,"x²/4 + y²/3 = 1",X(1.45)+6,Y(1.6)-10,T.blue);
+   drawLine(c,map,k,-1,m,T.fg,1.5);
+   dot(c,{x:1,y:0},mode==="foc"?T.fg:T.sub,4);lab(c,"F(1, 0)",X(1)+6,Y(0)-12,mode==="foc"?T.fg:T.sub);
+   if(R.pts.length===2){const[A,B]=R.pts;
+    c.save();clip(c);c.strokeStyle=T.red;c.lineWidth=4;c.lineCap="round";c.beginPath();c.moveTo(X(A.x),Y(A.y));c.lineTo(X(B.x),Y(B.y));c.stroke();
+    [[A,T.gold],[B,T.red]].forEach(([p,col])=>{c.strokeStyle=T.sub;c.lineWidth=1;c.lineCap="butt";c.setLineDash([4,4]);c.beginPath();c.moveTo(X(p.x),Y(p.y));c.lineTo(X(p.x),Y(0));c.stroke();c.setLineDash([]);
+     c.strokeStyle=col;c.lineWidth=2.5;c.beginPath();c.moveTo(X(p.x),Y(0)-7);c.lineTo(X(p.x),Y(0)+7);c.stroke()});c.restore();
+    const close=Math.abs(X(A.x)-X(B.x))<26;
+    lab(c,"x₁",X(A.x)-(close?6:0),Y(0)+(A.y>0?18:-18),T.goldText,close?"right":"center");lab(c,"x₂",X(B.x)+(close?6:0),Y(0)+(B.y>0?18:-18),T.redText,close?"left":"center");
+    dot(c,A,T.gold);dot(c,B,T.red);
+    lab(c,"A(x₁, y₁)",X(A.x)-10,Y(A.y)-16,T.goldText,"right");lab(c,"B(x₂, y₂)",X(B.x)+10,Y(B.y)-16,T.redText)}
+   else if(R.pts.length===1){const P=R.pts[0];dot(c,P,T.gold);lab(c,"相切",X(P.x)+10,Y(P.y)-16,T.goldText)}
+   c.beginPath();c.arc(X(0),Y(m),drag?10:8,0,7);c.fillStyle=T.bg;c.fill();c.strokeStyle=T.blue;c.lineWidth=2.5;c.stroke();
+   c.beginPath();c.arc(X(0),Y(m),3,0,7);c.fillStyle=T.blue;c.fill();lab(c,"m",X(0)-14,Y(m),T.blue,"right");
+   const st=R.D>0?["Δ > 0 · 相交于 A、B",T.blue]:R.D<0?["Δ < 0 · 相离",T.redText]:["Δ = 0 · 相切",T.goldText];
+   c.font="600 15px "+SANS;c.fillStyle=st[1];c.textAlign="left";c.textBaseline="middle";c.fillText(st[0],b.x+16,b.y+22);
+   lab(c,"l: y = kx + m · 拖动把手改 m",b.x+16,b.y+44,T.sub);
+   if(ro){const rs=rows(T,R),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(!map)return false;
+   if(type==="down"){const r=e&&e.pointerType==="touch"?24:14;drag=Math.hypot(map.X(0)-x,map.Y(m)-y)<=r;return drag}
+   if(type==="move"&&drag){setM(cl(Math.round(map.invY(y)*20)/20,-4,4));return true}
+   if(type==="up"){const was=drag;drag=false;return was}return false},
+  unmount(){ro=sk=sm=ch=null;map=null;drag=false}}})();
+CH[1].ready=true;
+MODS[1]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",R3=Math.sqrt(3),EPS=1e-7,MODES=["gen","foc","max"];
+ let k=0.5,m=1,mode="gen",map=null,ro=null,sk=null,sm=null,ch=null,der=false,drag=false,last="";
+ const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+ const fs=v=>Math.abs(v)<0.005?"0.00":v.toFixed(2).replace("-","−");
+ const N=v=>fmtNum(Math.abs(v)<1e-9?0:v);
+ const mOpt=()=>Math.sqrt((4*k*k+3)/2);
+ function Sof(mm){const a=3+4*k*k,q=4*k*k+3-mm*mm;return q>0?2*R3*Math.abs(mm)*Math.sqrt(q)/a:0}
+ function calc(){const a=3+4*k*k,D=48*(4*k*k+3-m*m),pts=[],d=Math.abs(m)/Math.sqrt(1+k*k);let dx=0,AB=0,S=0;
+  if(D>EPS){const r=Math.sqrt(D),b=8*k*m;[(-b-r)/(2*a),(-b+r)/(2*a)].forEach(x=>pts.push({x,y:k*x+m}));dx=r/a;AB=Math.sqrt(1+k*k)*dx;S=0.5*Math.abs(m)*dx}
+  return{a,D,dx,AB,d,S,Sx:-8*k*m/a,P:(4*m*m-12)/a,pts,top:pts.length===2&&Math.abs(S-R3)<5e-4}}
+ function setMode(v){mode=v;if(ch)ch.querySelectorAll("button").forEach((b,i)=>b.classList.toggle("on",MODES[i]===v));last=""}
+ function preset(v){setMode(v);if(v==="gen"){k=0.5;m=1}else if(v==="foc")m=-k;else m=mOpt();sk&&sk.set(k);sm&&sm.set(m)}
+ function setK(v){k=v;if(mode==="foc")m=-k;else if(mode==="max")m=(m<0?-1:1)*mOpt();sm&&sm.set(m)}
+ function setM(v){if(mode==="foc"){v=cl(v,-2,2);k=-v;sk.set(k)}else if(mode==="max")setMode("gen");m=v;sm.set(m)}
+ function lab(c,s,x,y,col,al,f){c.font=(f||"13px ")+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ function dot(c,p,col,r){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),r||6,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function clip(c){const b=map.box;c.beginPath();c.rect(b.x,b.y,b.w,b.h);c.clip()}
+ function layout(w,h){const s=Math.min(w,h)/9.2,ex=w/2+2.35*s,ey=h/2+2*s;
+  if(w-ex-12>=170){const iw=Math.min(260,w-ex-12),ih=Math.min(170,Math.max(120,h*0.42));return{main:{x:0,y:0,w,h},ins:{x:w-iw-12,y:h-ih-12,w:iw,h:ih}}}
+  if(h-ey-12>=110){const iw=Math.min(260,w-24),ih=Math.min(170,h-ey-12);return{main:{x:0,y:0,w,h},ins:{x:w-iw-12,y:h-ih-12,w:iw,h:ih}}}
+  const sh=Math.min(180,Math.max(140,h*0.32));return{main:{x:0,y:0,w,h:h-sh},ins:{x:12,y:h-sh+4,w:w-24,h:sh-16}}}
+ function inset(c,T,B){const M0=Math.sqrt(4*k*k+3),mo=mOpt(),px=B.x+30,py=B.y+34,pw=B.w-46,ph=B.h-60,ym=2.1;
+  const X=v=>px+(v+M0)/(2*M0)*pw,Y=v=>py+ph-v/ym*ph;
+  c.save();c.fillStyle=T.bg;c.strokeStyle=isDark()?"rgba(255,255,255,.16)":"rgba(0,0,0,.12)";c.lineWidth=1;rrect(c,B.x,B.y,B.w,B.h,14);c.fill();c.stroke();
+  lab(c,`S(m) · k = ${fs(k)} 固定`,B.x+12,B.y+16,T.sub,"left","12px ");
+  c.strokeStyle=T.axis;c.beginPath();c.moveTo(px-6,Y(0));c.lineTo(px+pw+6,Y(0));c.moveTo(X(0),Y(0));c.lineTo(X(0),py-6);c.stroke();
+  lab(c,fs(-M0),X(-M0),Y(0)+11,T.sub,"center","12px ");lab(c,fs(M0),X(M0),Y(0)+11,T.sub,"center","12px ");lab(c,"m",px+pw+8,Y(0)-9,T.fg,"left","italic 12px ");lab(c,"S",X(0)+5,py-4,T.fg,"left","italic 12px ");
+  c.setLineDash([3,4]);c.strokeStyle=T.gold;c.beginPath();c.moveTo(px,Y(R3));c.lineTo(px+pw,Y(R3));c.stroke();c.setLineDash([]);
+  c.strokeStyle=T.blue;c.lineWidth=2;c.beginPath();for(let i=0;i<=120;i++){const v=-M0+2*M0*i/120,x=X(v),y=Y(Sof(v));i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();
+  [-mo,mo].forEach(v=>{c.beginPath();c.arc(X(v),Y(R3),4,0,7);c.fillStyle=T.gold;c.fill()});
+  lab(c,"S_max = √3",X(0),Y(R3)-11,T.goldText,"center","600 12px ");
+  if(Math.abs(m)<M0){c.beginPath();c.arc(X(m),Y(Sof(m)),5.5,0,7);c.fillStyle=T.blue;c.fill();c.strokeStyle=T.bg;c.lineWidth=2;c.stroke()}
+  else{const x=X(cl(m,-M0,M0));c.beginPath();c.arc(x,Y(0),5,0,7);c.strokeStyle=T.red;c.lineWidth=2;c.stroke();lab(c,"Δ ≤ 0",x,Y(0)-14,T.redText,"center","12px ")}
+  c.restore()}
+ function rows(T,R){const ok=R.pts.length===2,no="—",cb=ok?T.blue:T.fg;
+  const rs=[["l",`y = ${fs(k)}x ${m<0?"−":"+"} ${fs(Math.abs(m))}`],["判别式",ok?"Δ > 0 · 有弦 AB":"Δ ≤ 0 · 无弦",ok?T.blue:T.redText],
+   ["|x₁ − x₂| = √Δ/(3+4k²)",ok?N(R.dx):no,cb],["|AB| = √(1+k²)·|x₁ − x₂|",ok?N(R.AB):no,cb],["d = |m|/√(1+k²)",N(R.d),T.blue],
+   ["S△OAB = ½·|m|·|x₁ − x₂|",ok?N(R.S):no,cb],["是否最大",R.top?"已取最大 √3":ok?`否 · m = ±${fmtNum(mOpt())} 时取 √3`:no,R.top?T.goldText:T.fg]];
+  if(der)rs.push(["Δ = 48(4k² + 3 − m²)",N(R.D),R.D>EPS?T.blue:T.redText],["x₁+x₂ = −8km/(3+4k²) · x₁x₂ = (4m²−12)/(3+4k²)",N(R.Sx)+" · "+N(R.P)],
+   ["S = 2√3·|m|·√(4k²+3−m²)/(3+4k²)",ok?N(R.S):no,cb]);
+  return rs}
+ return{
+  text:"弦长和面积是圆锥曲线大题最常见的<b>目标量</b>。弦长用 <b>√(1+k²)|x₁ − x₂|</b>，|x₁ − x₂| 直接写成 <b>√Δ/|A|</b>（A 是二次项系数），不必展开平方；以原点为顶点的三角形面积最省事的写法是 <b>½·|m|·|x₁ − x₂|</b>（m 为直线在 y 轴上截距）。",
+  points:["弦长 |AB| = √(1+k²)|x₁ − x₂| = √(1+k²)·√Δ/|A|","若设 x = ty + n，则 |AB| = √(1+t²)|y₁ − y₂|","S△OAB = ½|m||x₁ − x₂|，或 ½·|AB|·d","求最值时换元 t = √(4k²+3−m²)，常用基本不等式 ab ≤ (a²+b²)/2"],
+  gk:"面积最值是新高考 I 卷解析几何解答题的高频设问（如 2023 I 卷第 22 题、2022 I 卷第 21 题求面积）。<br>易错：忘记 Δ &gt; 0 对 m 的限制、斜率不存在情形漏讨论。",
+  mount(ctrl,read){ch=chips([{label:"一般",value:"gen"},{label:"过焦点 F(1,0)",value:"foc"},{label:"面积最大",value:"max"}],mode,preset);
+   sk=slider("斜率 k",-2,2,0.01,k,fs,setK);sm=slider("截距 m",-4,4,0.01,m,fs,setM);
+   ctrl.append(ch,sk,sm,toggle("显示推导",der,v=>{der=v;last=""}));ro=readout([]);read.append(ro);last=""},
+  draw(c,w,h){const T=theme(),R=calc(),L=layout(w,h);map=drawAxes(c,L.main,[-4.6,4.6],[-4.6,4.6]);const X=map.X,Y=map.Y,b=map.box;
+   c.save();clip(c);c.beginPath();c.ellipse(X(0),Y(0),2*map.s,R3*map.s,0,0,7);c.strokeStyle=T.blue;c.lineWidth=1.5;c.stroke();c.restore();
+   lab(c,"x²/4 + y²/3 = 1",X(1.45)+6,Y(1.6)-10,T.blue);
+   drawLine(c,map,k,-1,m,T.fg,1.5);
+   dot(c,{x:1,y:0},mode==="foc"?T.fg:T.sub,4);lab(c,"F(1, 0)",X(1)+6,Y(0)-12,mode==="foc"?T.fg:T.sub);
+   if(R.pts.length===2){const[A,B]=R.pts,q=1+k*k,Hx=-k*m/q,Hy=m/q,ul=Math.sqrt(q),ux=1/ul,uy=k/ul;
+    c.save();clip(c);c.beginPath();c.moveTo(X(0),Y(0));c.lineTo(X(A.x),Y(A.y));c.lineTo(X(B.x),Y(B.y));c.closePath();
+    c.fillStyle=isDark()?"rgba(41,151,255,.18)":"rgba(0,113,227,.12)";c.fill();
+    c.strokeStyle=T.blue;c.lineWidth=4;c.lineCap="round";c.beginPath();c.moveTo(X(A.x),Y(A.y));c.lineTo(X(B.x),Y(B.y));c.stroke();
+    if(R.d>0.05){c.lineCap="butt";c.strokeStyle=T.sub;c.lineWidth=1.5;c.setLineDash([5,4]);c.beginPath();c.moveTo(X(0),Y(0));c.lineTo(X(Hx),Y(Hy));c.stroke();c.setLineDash([]);
+     const e=Math.min(8/map.s,R.d/2),nx=-Hx/R.d,ny=-Hy/R.d;c.lineWidth=1;c.beginPath();c.moveTo(X(Hx+ux*e),Y(Hy+uy*e));c.lineTo(X(Hx+(ux+nx)*e),Y(Hy+(uy+ny)*e));c.lineTo(X(Hx+nx*e),Y(Hy+ny*e));c.stroke()}
+    c.restore();
+    if(R.d>0.05)lab(c,"d",X(Hx/2)+ux*13,Y(Hy/2)-uy*13,T.fg,"center","italic 14px ");
+    dot(c,A,T.blue);dot(c,B,T.blue);lab(c,"A",X(A.x)-10,Y(A.y)-14,T.blue,"right","600 13px ");lab(c,"B",X(B.x)+10,Y(B.y)-14,T.blue,"left","600 13px ")}
+   c.beginPath();c.arc(X(0),Y(m),drag?10:8,0,7);c.fillStyle=T.bg;c.fill();c.strokeStyle=T.blue;c.lineWidth=2.5;c.stroke();
+   c.beginPath();c.arc(X(0),Y(m),3,0,7);c.fillStyle=T.blue;c.fill();lab(c,"m",X(0)-14,Y(m),T.blue,"right");
+   const st=R.pts.length===2?[R.top?"S△OAB = √3 · 已取最大":"Δ > 0 · S△OAB = "+N(R.S),R.top?T.goldText:T.blue]:["Δ ≤ 0 · 无弦",T.redText];
+   lab(c,st[0],b.x+16,b.y+22,st[1],"left","600 15px ");lab(c,"l: y = kx + m · 拖动把手改 m",b.x+16,b.y+44,T.sub);
+   inset(c,T,L.ins);
+   if(ro){const rs=rows(T,R),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(!map)return false;
+   if(type==="down"){const r=e&&e.pointerType==="touch"?24:14;drag=Math.hypot(map.X(0)-x,map.Y(m)-y)<=r;return drag}
+   if(type==="move"&&drag){setM(cl(Math.round(map.invY(y)*20)/20,-4,4));return true}
+   if(type==="up"){const was=drag;drag=false;return was}return false},
+  unmount(){ro=sk=sm=ch=null;map=null;drag=false}}})();
+CH[2].ready=true;
+MODS[2]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",R3=Math.sqrt(3),EPS=1e-9;
+ let x0=1,y0=0.5,hyp=false,map=null,ro=null,cc=null,nb=null,stepOn=false,step=1,drag=false,last="";
+ const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+ const N=v=>fmtNum(Math.abs(v)<1e-9?0:v),P=v=>v<-1e-9?"("+N(v)+")":N(v);
+ const orange=()=>isDark()?"#ff9f0a":"#e8590c";
+ function calc(){const sg=hyp?-1:1,O=Math.abs(x0)<EPS&&Math.abs(y0)<EPS;let dx,dy,k;
+  if(Math.abs(y0)<EPS&&!O){dx=0;dy=1;k=Infinity}else{k=O?0:-sg*3*x0/(4*y0);if(Math.abs(k)<EPS)k=0;const l=Math.hypot(1,k);dx=1/l;dy=k/l}
+  const A=dx*dx/4+sg*dy*dy/3,C=x0*x0/4+sg*y0*y0/3-1,q=Math.abs(A)<EPS?-1:-C/A,ok=q>EPS,t=ok?Math.sqrt(q):0;
+  const kom=Math.abs(x0)<EPS?Infinity:y0/x0;
+  return{O,dx,dy,k,ok,t,AB:2*t,kom,A:ok?{x:x0-t*dx,y:y0-t*dy}:null,B:ok?{x:x0+t*dx,y:y0+t*dy}:null,out:!hyp&&C>=-EPS}}
+ function setCurve(v){hyp=v;if(cc)cc.querySelectorAll("button").forEach((b,i)=>b.classList.toggle("on",(i===1)===hyp))}
+ function preset(v){if(v==="a"){x0=1;y0=0.5}else if(v==="b"){x0=2;y0=1;setCurve(true)}else{x0=0;y0=0}}
+ function lab(c,s,x,y,col,al,f){c.font=(f||"13px ")+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ function dot(c,p,col,r){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),r||6,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function clip(c){const b=map.box;c.beginPath();c.rect(b.x,b.y,b.w,b.h);c.clip()}
+ function status(T,R){if(R.out)return["M 在椭圆外，以 M 为中点的弦不存在",T.redText];
+  if(!R.ok)return["弦不存在——点差法求出的直线必须回代检验 Δ>0",T.redText];
+  if(R.O)return["M 为原点：过原点的弦都以 O 为中点，取水平弦",T.fg];return["Δ > 0 · 以 M 为中点的弦 AB 存在",T.blue]}
+ function rows(T,R){const sgn=hyp?"":"−",p=hyp?"−":"+",kS=isFinite(R.k)?N(R.k):"不存在（竖直弦）",kmS=R.O?"—":isFinite(R.kom)?N(R.kom):"不存在";
+  const both=isFinite(R.k)&&isFinite(R.kom)&&!R.O&&R.k!==0&&Math.abs(R.kom)>EPS,prod=both?N(R.k*R.kom):"—";
+  const sub=(v,s)=>Math.abs(v)<EPS?s:"("+s+(v<0?" + "+N(-v):" − "+N(v))+")";
+  const eq=R.out?"—":isFinite(R.k)?(Math.abs(y0)<EPS?"y":sub(y0,"y").replace(/^\(|\)$/g,""))+" = "+N(R.k)+(Math.abs(x0)<EPS?"x":sub(x0,"x")):"x = "+N(x0);
+  const st=status(T,R);
+  const rs=[["M(x₀, y₀)",`(${N(x0)}, ${N(y0)})`],["曲线",hyp?"x²/4 − y²/3 = 1":"x²/4 + y²/3 = 1"],
+   ["k_AB = "+sgn+"3x₀/(4y₀)",R.out?"—":kS,T.blue],["k_OM = y₀/x₀",kmS],
+   ["k_AB · k_OM",both?prod+(hyp?"（= +b²/a² = 3/4）":"（= −b²/a² = −3/4）"):"—（有斜率不存在或为 0）",T.goldText],
+   ["弦方程 y − y₀ = k(x − x₀)",eq+(!R.out&&!R.ok?"（回代 Δ ≤ 0，不是弦）":""),R.ok?T.blue:R.out?T.fg:T.redText],
+   ["|AB|",R.ok?N(R.AB):"—",R.ok?T.blue:T.fg],["状态",st[0],st[1]]];
+  if(stepOn){const S=[["① 设点代入",`设 A(x₁,y₁)、B(x₂,y₂)，x₁²/4 ${p} y₁²/3 = 1，x₂²/4 ${p} y₂²/3 = 1`],
+    ["② 两式相减",`(x₁+x₂)(x₁−x₂)/4 ${p} (y₁+y₂)(y₁−y₂)/3 = 0`],
+    ["③ 代入 x₁+x₂ = 2x₀, y₁+y₂ = 2y₀",Math.abs(y0)<EPS?(R.O?"x₀ = y₀ = 0：上式恒成立，过 O 的任意弦都满足":"y₀ = 0：x₁ = x₂，弦竖直 x = "+N(x0)):`k_AB = (y₁−y₂)/(x₁−x₂) = ${sgn}3x₀/(4y₀) = ${sgn}3·${P(x0)}/(4·${P(y0)}) = ${N(R.k)}`,T.blue],
+    ["④ 结论",`k_AB · k_OM = ${hyp?"+":"−"}b²/a² = ${hyp?"3/4":"−3/4"} · 当前 ${isFinite(R.k)?N(R.k):"—"} × ${kmS} = ${prod}`,T.goldText]];
+   rs.push(...S.slice(0,step))}
+  return rs}
+ return{
+  text:"已知弦的中点求弦所在直线，用<b>「点差法」</b>最快：把两端点代入曲线方程相减，平方差分解后出现 <b>x₁+x₂</b>、<b>y₁+y₂</b> 和斜率。椭圆中 <b>k_AB·k_OM = −b²/a²</b>；双曲线中为 <b>+b²/a²</b>。但点差法不保证弦真的存在，双曲线一定要<b>回代检验 Δ&gt;0</b>。",
+  points:["设点代入、两式相减、平方差分解","k_AB = −b²x₀/(a²y₀)（椭圆）","k_AB·k_OM = −b²/a²（椭圆）/ +b²/a²（双曲线）","双曲线中点弦必须检验 Δ&gt;0，椭圆内部的点总有中点弦"],
+  gk:"中点弦常在选填出现（求弦所在直线方程、求离心率），也是大题第一问的常用切入。<br>易错：双曲线中点弦不检验 Δ。经典反例：双曲线 x² − y²/2 = 1 中「以 (1,1) 为中点的弦」不存在；本图双曲线 x²/4 − y²/3 = 1 中可试 M(2, 1)。",
+  mount(ctrl,read){cc=chips([{label:"椭圆",value:false},{label:"双曲线",value:true}],hyp,setCurve);
+   const pc=chips([{label:"M(1, 1/2)",value:"a"},{label:"M(2, 1)（双曲线下无解示例）",value:"b"},{label:"原点",value:"o"}],"",preset);
+   nb=button("下一步",()=>{step=step<4?step+1:1;nb.textContent=step===4?"从头再来":"下一步"},true);nb.style.display=stepOn?"":"none";
+   const tg=toggle("点差法步骤",stepOn,v=>{stepOn=v;step=1;nb.textContent="下一步";nb.style.display=v?"":"none"});
+   ctrl.append(cc,pc,tg,nb);ro=readout([]);read.append(ro);last=""},
+  draw(c,w,h){const T=theme(),R=calc();map=drawAxes(c,{x:0,y:0,w,h},[-4.6,4.6],[-4.6,4.6]);const X=map.X,Y=map.Y,b=map.box,s=map.s;
+   c.save();clip(c);c.strokeStyle=T.fg;c.lineWidth=1.5;
+   if(!hyp){c.beginPath();c.ellipse(X(0),Y(0),2*s,R3*s,0,0,7);c.stroke()}
+   else[1,-1].forEach(sx=>{c.beginPath();for(let i=0;i<=160;i++){const u=-3+6*i/160,x=sx*2*Math.cosh(u),y=R3*Math.sinh(u);i?c.lineTo(X(x),Y(y)):c.moveTo(X(x),Y(y))}c.stroke()});
+   c.restore();
+   if(hyp){c.save();c.globalAlpha=.5;drawLine(c,map,R3/2,-1,0,T.sub,1,true);drawLine(c,map,-R3/2,-1,0,T.sub,1,true);c.restore();
+    lab(c,"y = ±(√3/2)x",X(3.4)+4,Y(R3/2*3.4)-10,T.sub,"right","12px ")}
+   lab(c,hyp?"x²/4 − y²/3 = 1":"x²/4 + y²/3 = 1",hyp?X(2.6)+8:X(1.45)+6,hyp?Y(-1.9):Y(1.6)-10,T.fg);
+   if(!R.O)drawLine(c,map,y0,-x0,0,T.sub,1.5,true);
+   if(R.ok){c.save();clip(c);c.strokeStyle=T.blue;c.lineWidth=4;c.lineCap="round";c.beginPath();c.moveTo(X(R.A.x),Y(R.A.y));c.lineTo(X(R.B.x),Y(R.B.y));c.stroke();c.restore();
+    dot(c,R.A,T.blue);dot(c,R.B,T.blue);lab(c,"A",X(R.A.x)-10,Y(R.A.y)-14,T.blue,"right","600 13px ");lab(c,"B",X(R.B.x)+10,Y(R.B.y)-14,T.blue,"left","600 13px ")}
+   else if(hyp)drawLine(c,map,R.dy,-R.dx,R.dx*y0-R.dy*x0,T.red,2,true);
+   const M={x:x0,y:y0};dot(c,M,orange(),drag?9:7);lab(c,"M",X(x0)+11,Y(y0)+13,T.fg,"left","600 13px ");
+   const st=status(T,R);lab(c,st[0],b.x+16,b.y+22,st[1],"left","600 15px ");lab(c,"拖动橙色点 M · 灰虚线为 OM",b.x+16,b.y+44,T.sub);
+   if(ro){const rs=rows(T,R),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(!map)return false;
+   if(type==="down"){const r=e&&e.pointerType==="touch"?24:14;drag=Math.hypot(map.X(x0)-x,map.Y(y0)-y)<=r;return drag}
+   if(type==="move"&&drag){x0=cl(Math.round(map.invX(x)*20)/20,-4.4,4.4);y0=cl(Math.round(map.invY(y)*20)/20,-4.4,4.4);return true}
+   if(type==="up"){const was=drag;drag=false;return was}return false},
+  unmount(){ro=cc=nb=null;map=null;drag=false}}})();
+CH[3].ready=true;
+MODS[3]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",R3=Math.sqrt(3),TAU=Math.PI*2;
+ let mode="ell",th=2.2,s=2,lam=-1,trail=false,der=false,tr=[],lastP=null,anim=null,map=null,ro=null,ch=null,sl=null,drag=false,last="";
+ const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+ const N=v=>fmtNum(Math.abs(v)<1e-9?0:v),pt=p=>`(${N(p.x)}, ${N(p.y)})`;
+ const orange=()=>isDark()?"#ff9f0a":"#e8590c";
+ function lab(c,t,x,y,col,al,f){c.font=(f||"13px ")+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(t,x,y)}
+ function dot(c,p,col,r){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),r||6,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function clip(c){const b=map.box;c.beginPath();c.rect(b.x,b.y,b.w,b.h);c.clip()}
+ function calc(){const L=mode==="lam"?lam:-1;let A,M,Q=null,k1=NaN,k2=NaN,ok=true;
+  if(mode==="par"){A={x:0,y:0};M={x:s*s/4,y:s};k1=4/s;k2=-s/4;Q={x:64/(s*s),y:-16/s}}
+  else{A={x:2,y:0};M={x:2*Math.cos(th),y:R3*Math.sin(th)};
+   if(Math.hypot(M.x-2,M.y)<1e-3||Math.abs(M.y)<1e-6)ok=false;
+   else{k1=M.y/(M.x-2);k2=L/k1;const q=3+4*k2*k2;Q={x:(8*k2*k2-6)/q,y:-12*k2/q}}}
+  const R={A,M,N:Q,k1,k2,ok,par:false,vert:false,x0:NaN,k:NaN,m:NaN,same:false};
+  if(ok&&Math.hypot(Q.x-M.x,Q.y-M.y)<1e-6){R.ok=false;R.same=true}
+  if(R.ok){const dx=Q.x-M.x,dy=Q.y-M.y;R.line=[dy,-dx,dx*M.y-dy*M.x];
+   if(Math.abs(dy)<1e-9)R.par=true;else R.x0=M.x-M.y*dx/dy;
+   if(Math.abs(dx)<1e-9)R.vert=true;else{R.k=dy/dx;R.m=M.y-R.k*M.x}}
+  R.fp=mode==="par"?4:mode==="ell"?2/7:(Math.abs(4*lam-3)<1e-9?NaN:2*(4*lam+3)/(4*lam-3));
+  return R}
+ function setMode(v){mode=v;anim=null;tr=[];lastP=null;last="";if(sl)sl.style.display=v==="lam"?"":"none"}
+ function setLam(v){if(Math.abs(v)<0.1)v=v<0?-0.1:0.1;lam=v;sl.set(v);tr=[];lastP=null}
+ function eq(R){if(R.vert)return`x = ${N(R.M.x)}`;const mm=Math.abs(R.m)<1e-9?"":(R.m<0?" − ":" + ")+N(Math.abs(R.m));
+  return Math.abs(R.k)<1e-9?`y = ${N(R.m)}`:`y = ${N(R.k)}x${mm}`}
+ function rows(T,R){const o=mode==="par"?"O":"A",no="—",has=!!R.N;
+  const fpS=mode==="par"?"(4, 0)":mode==="ell"?"(2/7, 0)":isNaN(R.fp)?"":`x₀ = 2(4λ+3)/(4λ−3) = ${N(R.fp)}`;
+  const rs=[["M",pt(R.M)],["N",has?pt(R.N):no],[`k_${o}M · k_${o}N`,has?`${N(R.k1)} · ${N(R.k2)}`:no],
+   [`k_${o}M × k_${o}N`,has?N(R.k1*R.k2):no,T.blue],["直线 MN",R.ok?eq(R):no,T.blue],
+   ["MN 与 x 轴交点",!R.ok?no:R.par?"无（MN ∥ x 轴）":`(${N(R.x0)}, 0)`,T.goldText],
+   ["理论定点",isNaN(R.fp)?"直线 MN 的斜率恒为定值，不过定点":fpS,isNaN(R.fp)?T.redText:T.goldText]];
+  if(!R.ok)rs.push(["状态",R.same?"M、N 重合，直线 MN 不确定":"M 与 A 重合或 AM 水平，N 不存在（退化）",T.redText]);
+  if(der){if(mode==="par")rs.push(["① 设 MN","x = ty + n（避免斜率不存在）"],["② 与抛物线联立","y² − 4ty − 4n = 0，y₁ + y₂ = 4t，y₁y₂ = −4n"],
+    ["③ OM ⊥ ON ⇔ x₁x₂ + y₁y₂ = 0","(y₁y₂)²/16 + y₁y₂ = n² − 4n = 0",T.blue],["④ 结论","n = 0 舍去（过 O），n = 4，所以 MN 恒过 (4, 0)",T.goldText]);
+   else{rs.push(["① 设 MN","x = ty + n（避免斜率不存在）"],["② 与椭圆联立，写韦达","(3t²+4)y² + 6tny + 3n² − 12 = 0，y₁ + y₂ = −6tn/(3t²+4)，y₁y₂ = (3n²−12)/(3t²+4)"]);
+    if(mode==="ell")rs.push(["③ AM ⊥ AN ⇔ (x₁−2)(x₂−2) + y₁y₂ = 0","代入韦达整理得 (n−2)(7n−2) = 0",T.blue],["④ 结论","n = 2 舍去（过 A），n = 2/7，所以 MN 恒过 (2/7, 0)",T.goldText]);
+    else rs.push(["③ k₁k₂ = y₁y₂/[(x₁−2)(x₂−2)]","= 3(n+2)/[4(n−2)] = λ（n ≠ 2）",T.blue],["④ 结论",isNaN(R.fp)?"λ = 3/4 时无解：MN 斜率恒为 0，不过定点":`n = 2(4λ+3)/(4λ−3) = ${N(R.fp)}，MN 恒过 (${N(R.fp)}, 0)`,isNaN(R.fp)?T.redText:T.goldText])}}
+  return rs}
+ return{
+  text:"定点问题的套路是<b>「设直线含两个参数 → 用条件找出参数间关系 → 消成只剩一个参数 → 看直线恒过哪点」</b>。先用特殊位置（如 MN 竖直）<b>猜出定点</b>，再一般证明，方向就不会错。直线过 x 轴上定点时，设 <b>x = ty + n</b> 最省事。经典题：椭圆 x²/4 + y²/3 = 1，过右顶点 A(2,0) 作两条互相垂直的直线交椭圆于 M、N，证明 MN 过定点。",
+  points:["先猜：取特殊位置（MN ⊥ x 轴）求出候选定点","设 x = ty + n，联立写韦达","把条件（垂直、斜率积）化成韦达式，得 n 与 t 的关系","n 为常数 ⇒ 过定点 (n, 0)；舍去使直线过已知点的解"],
+  gk:"定点问题是新高考解析几何大题第二问高频设问（如 2020 新高考 I 卷第 22 题、2023 新课标 II 卷）。<br>易错：忘记舍去 n = 2（直线过 A 点、退化）以及斜率不存在的情形。",
+  mount(ctrl,read){ch=chips([{label:"椭圆 · 直角弦",value:"ell"},{label:"抛物线 · 直角弦",value:"par"},{label:"椭圆 · k₁k₂ = λ",value:"lam"}],mode,setMode);
+   sl=slider("λ = k₁k₂",-3,3,0.05,lam,v=>v.toFixed(2).replace("-","−"),setLam);sl.style.display=mode==="lam"?"":"none";
+   const ab=button("自动转一圈",()=>{anim={t0:null,p0:mode==="par"?0:th}},true);
+   ctrl.append(ch,sl,toggle("留下轨迹",trail,v=>{trail=v;tr=[];lastP=null}),toggle("推导",der,v=>{der=v;last=""}),ab);
+   ro=readout([]);read.append(ro);last=""},
+  draw(c,w,h,t){const T=theme();
+   if(anim){if(anim.t0==null)anim.t0=t;const p=Math.min(1,(t-anim.t0)/6),a=anim.p0+TAU*p;
+    if(mode==="par"){const f=a%TAU;s=(f<Math.PI?1:-1)*(1.2+3.4*Math.sin(f%Math.PI))}else th=a%TAU;if(p>=1)anim=null}
+   const R=calc();
+   if(trail&&R.ok&&(drag||anim)){const p=mode==="par"?s:th;if(lastP==null||Math.abs(p-lastP)>0.08){tr.push(R.line);if(tr.length>40)tr.shift();lastP=p}}
+   map=mode==="par"?drawAxes(c,{x:0,y:0,w,h},[-3,7],[-5,5]):drawAxes(c,{x:0,y:0,w,h},[-4.6,4.6],[-4.6,4.6]);const X=map.X,Y=map.Y,b=map.box;
+   c.save();clip(c);c.strokeStyle=T.blue;c.lineWidth=1.2;c.beginPath();
+   if(mode==="par"){const[y0,y1]=map.yr;for(let i=0;i<=160;i++){const y=y0+(y1-y0)*i/160;i?c.lineTo(X(y*y/4),Y(y)):c.moveTo(X(y*y/4),Y(y))}}
+   else c.ellipse(X(0),Y(0),2*map.s,R3*map.s,0,0,7);c.stroke();c.restore();
+   lab(c,mode==="par"?"y² = 4x":"x²/4 + y²/3 = 1",mode==="par"?X(4)+8:X(1.45)+6,mode==="par"?Y(4)+14:Y(1.6)-10,T.blue);
+   const tc=isDark()?"rgba(41,151,255,.3)":"rgba(0,113,227,.22)";tr.forEach(l=>drawLine(c,map,l[0],l[1],l[2],tc,1));
+   if(R.ok)drawLine(c,map,R.line[0],R.line[1],R.line[2],T.blue,3);
+   const A=R.A;c.save();clip(c);c.strokeStyle=T.sub;c.lineWidth=1;c.beginPath();c.moveTo(X(A.x),Y(A.y));c.lineTo(X(R.M.x),Y(R.M.y));
+   if(R.N){c.moveTo(X(A.x),Y(A.y));c.lineTo(X(R.N.x),Y(R.N.y))}c.stroke();
+   if(R.N&&(mode!=="lam"||Math.abs(lam+1)<1e-9)){const lu=Math.hypot(R.M.x-A.x,R.M.y-A.y),lv=Math.hypot(R.N.x-A.x,R.N.y-A.y);
+    if(lu>1e-6&&lv>1e-6){const ux=(R.M.x-A.x)/lu,uy=(R.M.y-A.y)/lu,vx=(R.N.x-A.x)/lv,vy=(R.N.y-A.y)/lv,e=11/map.s;
+     c.beginPath();c.moveTo(X(A.x+ux*e),Y(A.y+uy*e));c.lineTo(X(A.x+(ux+vx)*e),Y(A.y+(uy+vy)*e));c.lineTo(X(A.x+vx*e),Y(A.y+vy*e));c.stroke()}}
+   c.restore();
+   const fpS=mode==="par"?"4":mode==="ell"?"2/7":N(R.fp);
+   if(!isNaN(R.fp)){dot(c,{x:R.fp,y:0},T.gold,6);lab(c,`定点 (${fpS}, 0)`,X(R.fp)+9,Y(0)+(mode==="par"?16:-16),T.goldText,"left","600 13px ")}
+   dot(c,A,T.fg,5);lab(c,mode==="par"?"O":"A(2, 0)",X(A.x)+(mode==="par"?-8:9),Y(A.y)+16,T.fg,mode==="par"?"right":"left","600 13px ");
+   if(R.N){dot(c,R.N,T.purple,6);lab(c,"N",X(R.N.x)+10,Y(R.N.y)-14,T.purple,"left","600 13px ")}
+   dot(c,R.M,orange(),drag?9:7);lab(c,"M",X(R.M.x)+11,Y(R.M.y)-14,orange(),"left","600 13px ");
+   const st=!R.ok?["退化位置 · 直线 MN 不存在",T.redText]:isNaN(R.fp)?["λ = 3/4 · MN 恒平行于 x 轴，不过定点",T.redText]:[`MN 恒过定点 (${fpS}, 0)`,T.goldText];
+   lab(c,st[0],b.x+16,b.y+22,st[1],"left","600 15px ");lab(c,"拖动橙色点 M · 紫色 N 由条件求出",b.x+16,b.y+44,T.sub);
+   if(ro){const rs=rows(T,R),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(!map)return false;const M=mode==="par"?{x:s*s/4,y:s}:{x:2*Math.cos(th),y:R3*Math.sin(th)};
+   if(type==="down"){const r=e&&e.pointerType==="touch"?24:14;drag=Math.hypot(map.X(M.x)-x,map.Y(M.y)-y)<=r;if(drag)anim=null;return drag}
+   if(type==="move"&&drag){if(mode==="par"){let v=cl(map.invY(y),-4.8,4.8);if(Math.abs(v)<0.3)v=v<0?-0.3:0.3;s=v}
+    else th=Math.atan2(map.invY(y)/R3,map.invX(x)/2);return true}
+   if(type==="up"){const was=drag;drag=false;return was}return false},
+  unmount(){ro=ch=sl=null;map=null;drag=false;anim=null}}})();
+CH[4].ready=true;
+MODS[4]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",R3=Math.sqrt(3),TAU=Math.PI*2,D2R=Math.PI/180;
+ let mode="slope",th=2.1,rth=-0.7,chord=false,al=60,mth=0.6,der=false,anim=null,flash=-1,now=0,map=null,ro=null,sl=null,tg=null,drag=null,last="";
+ const cl=(v,a,b)=>Math.max(a,Math.min(b,v)),N=v=>fmtNum(Math.abs(v)<1e-9?0:v),pt=p=>`(${N(p.x)}, ${N(p.y)})`,E=t=>({x:2*Math.cos(t),y:R3*Math.sin(t)});
+ const orange=()=>isDark()?"#ff9f0a":"#e8590c";
+ function lab(c,t,x,y,col,al_,f){c.font=(f||"13px ")+SANS;c.fillStyle=col;c.textAlign=al_||"left";c.textBaseline="middle";c.fillText(t,x,y)}
+ function dot(c,p,col,r){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),r||6,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function clip(c){const b=map.box;c.beginPath();c.rect(b.x,b.y,b.w,b.h);c.clip()}
+ function L(c,p,q,col,w,dash){const dx=q.x-p.x,dy=q.y-p.y;drawLine(c,map,dy,-dx,dx*p.y-dy*p.x,col,w,dash)}
+ function seg(c,p,q,col,w){c.save();c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(map.X(p.x),map.Y(p.y));c.lineTo(map.X(q.x),map.Y(q.y));c.stroke();c.restore()}
+ function avoid(t,ref){const d=t-ref,s=Math.sin(d);return Math.abs(s)>=0.06?t:ref+(Math.cos(d)>0?0:Math.PI)+(s<0?-0.06:0.06)}
+ function slope(a,b){const dx=b.x-a.x;return Math.abs(dx)<1e-9?NaN:(b.y-a.y)/dx}
+ function hl(s){return flash>=0&&now-flash<1.4?`<span style="background:${isDark()?"rgba(226,163,54,.24)":"rgba(201,138,18,.18)"};border-radius:4px;padding:0 4px">${s}</span>`:s}
+ function calc(){const R={};
+  if(mode==="slope"){const P=E(chord?th:avoid(th,0));R.P=P;
+   if(!chord){R.A1={x:-2,y:0};R.A2={x:2,y:0};R.k1=slope(R.A1,P);R.k2=slope(R.A2,P)}
+   else{R.Q={x:-P.x,y:-P.y};R.R=E(avoid(rth,th));R.k1=slope(R.R,P);R.k2=slope(R.R,R.Q)}}
+  else if(mode==="focal"){const a=al*D2R,c=Math.cos(a),s=Math.sin(a);R.r1=3/(2-c);R.r2=3/(2+c);
+   R.A={x:1-R.r1*c,y:-R.r1*s};R.B={x:1+R.r2*c,y:R.r2*s};R.H={x:1+3.3*c,y:3.3*s};R.F={x:1,y:0}}
+  else{const O={x:0,y:0};R.M=E(mth);R.N={x:-2*Math.sin(mth),y:R3*Math.cos(mth)};R.k1=slope(O,R.M);R.k2=slope(O,R.N);
+   R.S=Math.abs(R.M.x*R.N.y-R.N.x*R.M.y)/2;R.sq=R.M.x**2+R.M.y**2+R.N.x**2+R.N.y**2}
+  return R}
+ function rows(T,R){let rs;const ks=v=>isNaN(v)?"不存在（竖直）":N(v);
+  if(mode==="slope"){const ok=!isNaN(R.k1)&&!isNaN(R.k2);
+   if(!chord)rs=[["P",pt(R.P)],["k_PA₁",ks(R.k1),T.blue],["k_PA₂",ks(R.k2),T.blue],["k_PA₁ · k_PA₂",hl(N(R.k1*R.k2)+"（= −b²/a²）"),T.goldText]];
+   else rs=[["P / Q（关于原点对称）",pt(R.P)+" / "+pt(R.Q)],["R",pt(R.R)],["k_RP",ks(R.k1),T.blue],["k_RQ",ks(R.k2),T.blue],
+    ["k_RP · k_RQ",ok?hl(N(R.k1*R.k2)+"（= −b²/a²）"):"RP 或 RQ 竖直，斜率不存在",ok?T.goldText:T.redText]];
+   if(der){if(!chord)rs.push(["① 设点","P(x₀, y₀)，x₀ ≠ ±2"],["② 斜率积","k₁k₂ = y₀/(x₀ + 2) · y₀/(x₀ − 2) = y₀²/(x₀² − 4)"],
+     ["③ 代入椭圆","y₀² = 3(1 − x₀²/4) = −(3/4)(x₀² − 4)",T.blue],["④ 结论","k₁k₂ = −3/4 = −b²/a²",T.goldText]);
+    else rs.push(["① 设点","R(x, y)，P(x₀, y₀)，Q(−x₀, −y₀)"],["② 斜率积","k_RP · k_RQ = (y² − y₀²)/(x² − x₀²)"],
+     ["③ 两点都代入椭圆","y² − y₀² = −(3/4)(x² − x₀²)",T.blue],["④ 结论","k_RP · k_RQ = −3/4 = −b²/a²",T.goldText])}}
+  else if(mode==="focal"){rs=[["倾斜角 α",Math.round(al)+"°"],["|AF| = 3/(2 − cosα)",N(R.r1),T.blue],["|BF| = 3/(2 + cosα)",N(R.r2),T.blue],
+    ["1/|AF| + 1/|BF|",hl(N(1/R.r1+1/R.r2)+"（= 2a/b²）"),T.goldText],["焦半径极坐标形式","|AF| = b²/(a − c·cosα)，|BF| = b²/(a + c·cosα)"]];
+   if(der)rs.push(["① 极坐标","ρ = ep/(1 − e cosα)"],["② 参数","e = c/a = 1/2，p = a²/c − c = 3"],
+    ["③ 两条焦半径","ρ₁ = 3/(2 − cosα)，ρ₂ = 3/(2 + cosα)",T.blue],["④ 结论","1/ρ₁ + 1/ρ₂ = [(2 − cosα) + (2 + cosα)]/3 = 4/3",T.goldText])}
+  else{const ok=!isNaN(R.k1)&&!isNaN(R.k2)&&Math.abs(R.M.y)>1e-9&&Math.abs(R.N.y)>1e-9;
+   rs=[["M",pt(R.M)],["N",pt(R.N)],["k_OM · k_ON",ok?N(R.k1*R.k2):"M 或 N 在坐标轴上，斜率积不定义",ok?T.blue:T.redText],
+    ["S△OMN",hl(N(R.S)+"（= ab/2）"),T.goldText],["|OM|² + |ON|²",hl(N(R.sq)+"（= a² + b²）"),T.goldText]];
+   if(der)rs.push(["① 参数式","M(2cosθ, √3 sinθ)，N(−2sinθ, √3 cosθ)"],["② 面积公式","S = ½|x_M y_N − x_N y_M|"],
+    ["③ 代入","= ½·|2cosθ·√3cosθ + 2sinθ·√3 sinθ|",T.blue],["④ 结论","= √3 = ab/2",T.goldText])}
+  return rs}
+ function setMode(v){mode=v;anim=null;flash=-1;last="";if(sl)sl.style.display=v==="focal"?"":"none";if(tg)tg.style.display=v==="slope"?"":"none"}
+ return{
+  text:"定值问题和定点问题思路相同：<b>先用特殊位置算出这个「定值」是多少，再一般证明</b>。证明时把目标量写成参数（斜率 k、坐标、角度）的式子，代入曲线方程或韦达后，<b>参数被消掉，剩下的常数就是定值</b>。很多椭圆定值本质是 a、b 的组合：−b²/a²、2a/b²、ab/2、a² + b²。本章椭圆 x²/4 + y²/3 = 1（a = 2，b = √3，c = 1）。",
+  points:["先特殊后一般：特殊位置先求出定值","斜率积：k_PA₁ · k_PA₂ = −b²/a²","过焦点弦：1/|AF| + 1/|BF| = 2a/b²","k_OM · k_ON = −b²/a² 时 S△OMN = ab/2，|OM|² + |ON|² = a² + b²"],
+  gk:"定值问题与定点问题交替出现在新高考解析几何大题第二问；斜率积 −b²/a² 也常用来秒杀选填求离心率。<br>易错：计算中途没有及时代入曲线方程消元，导致式子越写越长。",
+  mount(ctrl,read){const ch=chips([{label:"斜率积定值",value:"slope"},{label:"焦半径倒数和",value:"focal"},{label:"面积定值",value:"area"}],mode,setMode);
+   sl=slider("倾斜角 α",1,179,1,al,v=>Math.round(v)+"°",v=>{al=v;anim=null});
+   tg=toggle("换成过原点的弦 PQ",chord,v=>{chord=v;anim=null;flash=-1;last=""});
+   const ab=button("自动运动",()=>{anim={t0:null,p0:mode==="slope"?(chord?rth:th):mth};flash=-1},true);
+   ctrl.append(ch,sl,tg,toggle("推导",der,v=>{der=v;last=""}),ab);setMode(mode);ro=readout([]);read.append(ro);last=""},
+  draw(c,w,h,t){now=t;const T=theme();
+   if(anim){if(anim.t0==null)anim.t0=t;const p=Math.min(1,(t-anim.t0)/6),a=anim.p0+TAU*p;
+    if(mode==="slope"){if(chord)rth=a%TAU;else th=a%TAU}else if(mode==="focal"){al=Math.round(1+178*p);sl&&sl.set(al)}else mth=a%TAU;
+    if(p>=1){anim=null;flash=t}}
+   map=drawAxes(c,{x:0,y:0,w,h},[-4.6,4.6],[-4.6,4.6]);const X=map.X,Y=map.Y,b=map.box,R=calc();
+   if(mode==="area"){c.save();clip(c);c.beginPath();c.moveTo(X(0),Y(0));c.lineTo(X(R.M.x),Y(R.M.y));c.lineTo(X(R.N.x),Y(R.N.y));c.closePath();
+    c.fillStyle=isDark()?"rgba(41,151,255,.2)":"rgba(0,113,227,.12)";c.fill();c.restore()}
+   c.save();clip(c);c.strokeStyle=T.blue;c.lineWidth=1.2;c.beginPath();c.ellipse(X(0),Y(0),2*map.s,R3*map.s,0,0,7);c.stroke();c.restore();
+   lab(c,"x²/4 + y²/3 = 1",X(1.45)+6,Y(1.6)-10,T.blue);let st,hint;
+   if(mode==="slope"){if(!chord){L(c,R.A1,R.P,T.blue,2);L(c,R.A2,R.P,T.purple,2);
+     dot(c,R.A1,T.fg,5);dot(c,R.A2,T.fg,5);lab(c,"A₁(−2, 0)",X(-2)-8,Y(0)+16,T.fg,"right","600 13px ");lab(c,"A₂(2, 0)",X(2)+8,Y(0)+16,T.fg,"left","600 13px ");
+     dot(c,R.P,orange(),drag?9:7);lab(c,"P",X(R.P.x)+11,Y(R.P.y)-14,orange(),"left","600 13px ");st="k_PA₁ · k_PA₂ 恒为 −3/4";hint="拖动橙色点 P · 蓝 PA₁、紫 PA₂"}
+    else{L(c,R.P,R.Q,T.sub,1,true);L(c,R.R,R.P,T.blue,2);L(c,R.R,R.Q,T.purple,2);dot(c,R.Q,T.fg,6);lab(c,"Q",X(R.Q.x)+10,Y(R.Q.y)-14,T.fg,"left","600 13px ");
+     dot(c,R.P,orange(),drag==="P"?9:7);lab(c,"P",X(R.P.x)+11,Y(R.P.y)-14,orange(),"left","600 13px ");
+     dot(c,R.R,orange(),drag==="R"?9:7);lab(c,"R",X(R.R.x)+11,Y(R.R.y)-14,orange(),"left","600 13px ");st="k_RP · k_RQ 恒为 −3/4";hint="拖动橙色点 P、R · Q 为 P 关于原点的对称点"}}
+   else if(mode==="focal"){const a=al*D2R;L(c,R.A,R.B,T.sub,1.2);seg(c,R.A,R.F,T.blue,3);seg(c,R.B,R.F,T.purple,3);
+    c.save();c.strokeStyle=T.sub;c.lineWidth=1;c.beginPath();c.arc(X(1),Y(0),22,0,-a,true);c.stroke();c.restore();
+    lab(c,"α",X(1)+28*Math.cos(a/2),Y(0)-28*Math.sin(a/2),T.sub);dot(c,{x:-1,y:0},T.sub,4);
+    dot(c,R.F,T.fg,5);lab(c,"F(1, 0)",X(1)+8,Y(0)+16,T.fg,"left","600 13px ");
+    dot(c,R.A,T.blue,6);lab(c,"A",X(R.A.x)-10,Y(R.A.y)+14,T.blue,"right","600 13px ");dot(c,R.B,T.purple,6);lab(c,"B",X(R.B.x)+10,Y(R.B.y)-14,T.purple,"left","600 13px ");
+    dot(c,R.H,orange(),drag?9:7);st="1/|AF| + 1/|BF| 恒为 4/3";hint="拖动橙色把手或滑块改变倾斜角 α"}
+   else{seg(c,{x:0,y:0},R.M,T.blue,2);seg(c,{x:0,y:0},R.N,T.blue,2);seg(c,R.M,R.N,T.sub,1);
+    dot(c,R.N,T.purple,6);lab(c,"N",X(R.N.x)+10,Y(R.N.y)-14,T.purple,"left","600 13px ");
+    dot(c,R.M,orange(),drag?9:7);lab(c,"M",X(R.M.x)+11,Y(R.M.y)-14,orange(),"left","600 13px ");st="S△OMN 恒为 √3，|OM|² + |ON|² 恒为 7";hint="拖动橙色点 M · N 的参数角为 θ + 90°"}
+   lab(c,st,b.x+16,b.y+22,T.goldText,"left","600 15px ");lab(c,hint,b.x+16,b.y+44,T.sub);
+   if(ro){const rs=rows(T,R),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(!map)return false;
+   if(type==="down"){const R=calc(),r=e&&e.pointerType==="touch"?24:14,cand=mode==="slope"?(chord?[["P",R.P],["R",R.R]]:[["P",R.P]]):mode==="focal"?[["H",R.H]]:[["M",R.M]];
+    let bd=r;drag=null;cand.forEach(([k,p])=>{const d=Math.hypot(map.X(p.x)-x,map.Y(p.y)-y);if(d<=bd){bd=d;drag=k}});if(drag)anim=null;return!!drag}
+   if(type==="move"&&drag){const ang=Math.atan2(map.invY(y)/R3,map.invX(x)/2);
+    if(drag==="P")th=ang;else if(drag==="R")rth=ang;else if(drag==="M")mth=ang;
+    else{let a=Math.atan2(map.invY(y),map.invX(x)-1);if(a<0)a+=Math.PI;al=Math.round(cl(a/D2R,1,179));sl&&sl.set(al)}return true}
+   if(type==="up"){const was=!!drag;drag=null;return was}return false},
+  unmount(){ro=sl=tg=null;map=null;drag=null;anim=null}}})();
+CH[5].ready=true;
+MODS[5]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",R3=Math.sqrt(3);
+ let goal="area",t=1,der=false,anim=null,map=null,ro=null,sl=null,drag=false,last="";
+ const cl=(v,a,b)=>Math.max(a,Math.min(b,v)),fs=v=>Math.abs(v)<0.005?"0.00":v.toFixed(2).replace("-","−"),N=v=>fmtNum(Math.abs(v)<1e-9?0:v),pt=p=>`(${N(p.x)}, ${N(p.y)})`;
+ const D=t=>3*t*t+4;
+ const G={
+  area:{name:"S△F₁AB",f:t=>12*Math.sqrt(t*t+1)/D(t),y0:-0.6,y1:3.5,ext:{v:3,lab:"S_max = 3",up:true},asym:{v:0,up:true},range:"S_max = 3（t = 0）· S ∈ (0, 3]"},
+  len:{name:"|AB|",f:t=>12*(t*t+1)/D(t),y0:2.4,y1:4.4,ext:{v:3,lab:"最短 3（通径）",up:false},asym:{v:4,up:true},range:"最短 3（t = 0）· |AB| ∈ [3, 4)"},
+  dot:{name:"OA·OB",f:t=>-4+11/D(t),y0:-4.7,y1:-0.6,ext:{v:-1.25,lab:"最大 −5/4",up:true},asym:{v:-4,up:false},range:"最大 −5/4（t = 0）· OA·OB ∈ (−4, −5/4]"}};
+ function lab(c,s,x,y,col,al,f){c.font=(f||"13px ")+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ function dot(c,p,col,r){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),r||6,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function clip(c){const b=map.box;c.beginPath();c.rect(b.x,b.y,b.w,b.h);c.clip()}
+ function seg(c,p,q,col,w){c.save();clip(c);c.strokeStyle=col;c.lineWidth=w;c.lineCap="round";c.beginPath();c.moveTo(map.X(p.x),map.Y(p.y));c.lineTo(map.X(q.x),map.Y(q.y));c.stroke();c.restore()}
+ function layout(w,h){const s=Math.min(w,h)/9.2,ex=w/2+2.35*s,ey=h/2+2*s;
+  if(w-ex-12>=170){const iw=Math.min(260,w-ex-12),ih=Math.min(170,Math.max(120,h*0.42));return{main:{x:0,y:0,w,h},ins:{x:w-iw-12,y:h-ih-12,w:iw,h:ih}}}
+  if(h-ey-12>=110){const iw=Math.min(260,w-24),ih=Math.min(170,h-ey-12);return{main:{x:0,y:0,w,h},ins:{x:w-iw-12,y:h-ih-12,w:iw,h:ih}}}
+  const sh=Math.min(180,Math.max(140,h*0.32));return{main:{x:0,y:0,w,h:h-sh},ins:{x:12,y:h-sh+4,w:w-24,h:sh-16}}}
+ function calc(){const d=D(t),s=Math.sqrt(t*t+1),y1=(-6*t+12*s)/(2*d),y2=(-6*t-12*s)/(2*d);
+  const A={x:t*y1+1,y:y1},B={x:t*y2+1,y:y2},dy=y1-y2;
+  return{A,B,s,sum:y1+y2,prod:y1*y2,dy,dyF:12*s/d,S:0.5*2*Math.abs(dy),AB:Math.hypot(A.x-B.x,A.y-B.y),dot:A.x*B.x+A.y*B.y,dotF:-4+11/d}}
+ function cur(R){return goal==="area"?R.S:goal==="len"?R.AB:R.dot}
+ function inset(c,T,B,R){const g=G[goal],px=B.x+30,py=B.y+34,pw=B.w-46,ph=B.h-58;
+  const X=v=>px+(v+6)/12*pw,Y=v=>py+ph-(v-g.y0)/(g.y1-g.y0)*ph;
+  c.save();c.fillStyle=T.bg;c.strokeStyle=isDark()?"rgba(255,255,255,.16)":"rgba(0,0,0,.12)";c.lineWidth=1;rrect(c,B.x,B.y,B.w,B.h,14);c.fill();c.stroke();
+  lab(c,`${g.name} 随 t 变化`,B.x+12,B.y+16,T.sub,"left","12px ");
+  c.strokeStyle=T.axis;c.beginPath();c.moveTo(px-6,py+ph);c.lineTo(px+pw+6,py+ph);c.moveTo(X(0),py+ph);c.lineTo(X(0),py-6);c.stroke();
+  [-6,0,6].forEach(v=>lab(c,v<0?"−6":String(v),X(v),py+ph+11,T.sub,"center","12px "));lab(c,"t",px+pw+8,py+ph-9,T.fg,"left","italic 12px ");
+  c.setLineDash([4,4]);c.strokeStyle=T.gold;c.lineWidth=1.2;c.beginPath();c.moveTo(px,Y(g.asym.v));c.lineTo(px+pw,Y(g.asym.v));c.stroke();c.setLineDash([]);
+  lab(c,`→ ${N(g.asym.v)} 取不到`,px+pw,Y(g.asym.v)+(g.asym.up?-9:9),T.goldText,"right","12px ");
+  c.strokeStyle=T.blue;c.lineWidth=2;c.beginPath();for(let i=0;i<=160;i++){const v=-6+12*i/160,x=X(v),y=Y(g.f(v));i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();
+  c.beginPath();c.arc(X(0),Y(g.ext.v),4.5,0,7);c.fillStyle=T.gold;c.fill();
+  lab(c,g.ext.lab,X(0)+8,Y(g.ext.v)+(g.ext.up?-11:12),T.goldText,"left","600 12px ");
+  c.beginPath();c.arc(X(t),Y(g.f(t)),5.5,0,7);c.fillStyle=T.blue;c.fill();c.strokeStyle=T.bg;c.lineWidth=2;c.stroke();
+  c.restore()}
+ function rows(T,R){const g=G[goal],v=cur(R);
+  const rs=[["t",fs(t)+(Math.abs(t)<0.005?"（竖直线 x = 1）":"")],["A",pt(R.A)],["B",pt(R.B)],
+   ["y₁+y₂ = −6t/(3t²+4) · y₁y₂ = −9/(3t²+4)",N(R.sum)+" · "+N(R.prod)],["|y₁ − y₂| = 12√(t²+1)/(3t²+4)",N(R.dyF)]];
+  if(goal==="area")rs.push(["S = ½·|F₁F₂|·|y₁ − y₂|",N(v),T.blue]);
+  else if(goal==="len")rs.push(["|AB| = √(1+t²)·|y₁ − y₂| = 12(t²+1)/(3t²+4)",N(v),T.blue]);
+  else{const ok=Math.abs(R.dot-R.dotF)<1e-9;rs.push(["OA·OB = x₁x₂ + y₁y₂（按坐标计算）",N(R.dot),T.blue],
+   ["化简式 −4 + 11/(3t²+4)",N(R.dotF)+(ok?" · 与数值一致":" · 与数值不符"),ok?T.fg:T.redText])}
+  rs.push(["最值与范围",g.range,T.goldText]);
+  if(goal==="dot")rs.push(["注","直线 x = ty + 1 不含 x 轴，故 −4 取不到；题设 [−4, −5/4) 开闭应为 (−4, −5/4]",T.goldText]);
+  if(der){if(goal==="area")rs.push(["① 换元","令 u = √(t²+1) ≥ 1，则 3t² + 4 = 3u² + 1"],["② 化简","S = 12u/(3u² + 1) = 12/(3u + 1/u)"],
+    ["③ 单调性","3u + 1/u 为对勾函数，拐点 u = 1/√3 < 1，在 u ≥ 1 上递增",T.blue],["④ 结论","u = 1 即 t = 0 时 S 最大 = 3；u → ∞ 时 S → 0，S ∈ (0, 3]",T.goldText]);
+   else if(goal==="len")rs.push(["① 弦长","|AB| = √(1+t²)·12√(t²+1)/(3t²+4) = 12(t²+1)/(3t²+4)"],["② 分离常数","|AB| = 4 − 4/(3t²+4)"],
+    ["③ 范围","3t² + 4 ≥ 4 ⇒ 4/(3t²+4) ∈ (0, 1]",T.blue],["④ 结论","t = 0（通径）最短 3；t → ∞ 趋近长轴 4 但取不到，|AB| ∈ [3, 4)",T.goldText]);
+   else rs.push(["① 韦达","x₁x₂ = t²y₁y₂ + t(y₁+y₂) + 1 = (4 − 12t²)/(3t²+4)"],["② 合并","OA·OB = x₁x₂ + y₁y₂ = (−12t² − 5)/(3t²+4)"],
+    ["③ 分离常数","= −4 + 11/(3t²+4)，11/(3t²+4) ∈ (0, 11/4]",T.blue],["④ 结论","t = 0 时最大 −5/4；t → ∞ 趋近 −4 取不到，OA·OB ∈ (−4, −5/4]",T.goldText])}
+  return rs}
+ function setT(v){t=cl(Math.round(v*100)/100,-4,4);sl&&sl.set(t)}
+ function handle(){const s=Math.sqrt(t*t+1);return{x:1+2.4*t/s,y:2.4/s}}
+ return{
+  text:"范围最值题的路线是：<b>把目标量用一个参数表示</b>（这里用 t），<b>再求这个函数的值域</b>。常见化简手段是<b>「换元 + 对勾函数」</b>或<b>「分离常数」</b>。特别注意参数自身的范围（Δ &gt; 0、斜率存在与否）和<b>边界能不能取到</b>。本章椭圆 x²/4 + y²/3 = 1，F₁(−1, 0)、F₂(1, 0)，过 F₂ 的直线 l: x = ty + 1。",
+  points:["过焦点设 x = ty + c，竖直线也包含在内","S△F₁AB = ½·2c·|y₁ − y₂|，不用求弦长和距离","令 u = √(t²+1)，化成对勾函数 3u + 1/u 后看单调性","范围写开闭：取不到的极限位置（如直线趋于 x 轴）用开区间"],
+  gk:"面积范围、弦长范围、数量积范围是新高考解析几何压轴最后一问的主力（如 2021 新高考 II 卷、2022 新高考 II 卷）。<br>易错：对勾函数直接用基本不等式而忽略取等条件（u = 1/√3 不在定义域内）。",
+  mount(ctrl,read){const ch=chips([{label:"△F₁AB 面积",value:"area"},{label:"弦长 |AB|",value:"len"},{label:"OA·OB 数量积",value:"dot"}],goal,v=>{goal=v;last=""});
+   sl=slider("参数 t",-4,4,0.01,t,fs,v=>{t=v;anim=null});
+   const ab=button("扫描 t",()=>{anim={t0:null}},true);
+   ctrl.append(ch,sl,toggle("换元求最值",der,v=>{der=v;last=""}),ab);ro=readout([]);read.append(ro);last=""},
+  draw(c,w,h,now){const T=theme(),L=layout(w,h);
+   if(anim){if(anim.t0==null)anim.t0=now;const p=Math.min(1,(now-anim.t0)/6);setT(-4+8*p);if(p>=1)anim=null}
+   const R=calc();map=drawAxes(c,L.main,[-4.6,4.6],[-4.6,4.6]);const X=map.X,Y=map.Y,b=map.box,F1={x:-1,y:0},F2={x:1,y:0},O={x:0,y:0};
+   if(goal==="area"){c.save();clip(c);c.beginPath();c.moveTo(X(-1),Y(0));c.lineTo(X(R.A.x),Y(R.A.y));c.lineTo(X(R.B.x),Y(R.B.y));c.closePath();
+    c.fillStyle=isDark()?"rgba(41,151,255,.2)":"rgba(0,113,227,.12)";c.fill();c.strokeStyle=T.blue;c.lineWidth=1.2;c.stroke();c.restore()}
+   c.save();clip(c);c.beginPath();c.ellipse(X(0),Y(0),2*map.s,R3*map.s,0,0,7);c.strokeStyle=T.blue;c.lineWidth=1.5;c.stroke();c.restore();
+   lab(c,"x²/4 + y²/3 = 1",X(1.45)+6,Y(1.6)-10,T.blue);
+   drawLine(c,map,1,-t,-1,T.fg,1.5);
+   if(goal==="len")seg(c,R.A,R.B,T.blue,4);
+   if(goal==="dot"){seg(c,O,R.A,T.blue,2);seg(c,O,R.B,T.blue,2);dot(c,O,T.fg,4);lab(c,"O",X(0)-8,Y(0)+13,T.fg,"right")}
+   dot(c,F1,goal==="area"?T.fg:T.sub,5);lab(c,"F₁(−1, 0)",X(-1)-8,Y(0)+16,goal==="area"?T.fg:T.sub,"right");
+   dot(c,F2,T.fg,5);lab(c,"F₂(1, 0)",X(1)+8,Y(0)+16,T.fg);
+   dot(c,R.A,T.blue);dot(c,R.B,T.blue);lab(c,"A",X(R.A.x)+10,Y(R.A.y)-14,T.blue,"left","600 13px ");lab(c,"B",X(R.B.x)+10,Y(R.B.y)+14,T.blue,"left","600 13px ");
+   const H=handle();c.beginPath();c.arc(X(H.x),Y(H.y),drag?10:8,0,7);c.fillStyle=T.bg;c.fill();c.strokeStyle=T.blue;c.lineWidth=2.5;c.stroke();
+   c.beginPath();c.arc(X(H.x),Y(H.y),3,0,7);c.fillStyle=T.blue;c.fill();
+   lab(c,`${G[goal].name} = ${N(cur(R))}`,b.x+16,b.y+22,T.blue,"left","600 15px ");lab(c,"l: x = ty + 1 · 拖动把手旋转 l",b.x+16,b.y+44,T.sub);
+   inset(c,T,L.ins,R);
+   if(ro){const rs=rows(T,R),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(!map)return false;
+   if(type==="down"){const H=handle(),r=e&&e.pointerType==="touch"?24:14;drag=Math.hypot(map.X(H.x)-x,map.Y(H.y)-y)<=r;if(drag)anim=null;return drag}
+   if(type==="move"&&drag){const my=map.invY(y),mx=map.invX(x);if(Math.abs(my)>0.05)setT((mx-1)/my);return true}
+   if(type==="up"){const was=drag;drag=false;return was}return false},
+  unmount(){ro=sl=null;map=null;drag=false;anim=null}}})();
+CH[6].ready=true;
+MODS[6]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",D2R=Math.PI/180,PRE=[90,60,30];
+ let p=2,deg=60,cAB=false,cAp=false,lAO=false,anim=null,map=null,ro=null,sp=null,st=null,ch=null,drag=false,last="";
+ const cl=(v,a,b)=>Math.max(a,Math.min(b,v)),N=v=>fmtNum(Math.abs(v)<1e-9?0:v),pt=q=>`(${N(q.x)}, ${N(q.y)})`;
+ const orange=a=>isDark()?`rgba(255,159,10,${a})`:`rgba(232,89,12,${a})`;
+ function lab(c,s,x,y,col,al,f){c.font=(f||"13px ")+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ function dot(c,q,col,r){c.beginPath();c.arc(map.X(q.x),map.Y(q.y),r||6,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function clip(c){const b=map.box;c.beginPath();c.rect(b.x,b.y,b.w,b.h);c.clip()}
+ function seg(c,a,b,col,w,dash){c.save();clip(c);c.strokeStyle=col;c.lineWidth=w;c.lineCap="round";c.setLineDash(dash?[5,4]:[]);c.beginPath();c.moveTo(map.X(a.x),map.Y(a.y));c.lineTo(map.X(b.x),map.Y(b.y));c.stroke();c.restore()}
+ function calc(){const a=deg*D2R,co=Math.cos(a),si=Math.sin(a),f=p/2,rA=p/(1-co),rB=p/(1+co);
+  const A={x:f+rA*co,y:rA*si},B={x:f-rB*co,y:-rB*si},M={x:(A.x+B.x)/2,y:(A.y+B.y)/2};
+  return{co,si,f,F:{x:f,y:0},rA,rB,A,B,M,Ap:{x:-f,y:A.y},Bp:{x:-f,y:B.y},Mp:{x:-f,y:M.y},AB:rA+rB,S:p*p/(2*si),qY:-f*A.y/A.x}}
+ function setDeg(v){deg=cl(Math.round(v),5,175);st&&st.set(deg);if(ch)ch.querySelectorAll("button").forEach((b,i)=>b.classList.toggle("on",PRE[i]===deg));last=""}
+ function rows(T,R){const tong=deg===90;
+  const rs=[["抛物线 · 焦点 · 准线",`y² = ${N(2*p)}x · F(${N(R.f)}, 0) · x = ${N(-R.f)}`],["θ",deg+"°"],["A(x₁, y₁) / B(x₂, y₂)",pt(R.A)+" / "+pt(R.B)],
+   ["x₁x₂ = p²/4",N(R.A.x*R.B.x),T.goldText],["y₁y₂ = −p²",N(R.A.y*R.B.y),T.goldText],
+   ["|AF| = x₁ + p/2 = p/(1 − cosθ)",N(R.A.x+R.f)+" = "+N(R.rA),T.blue],
+   ["|BF| = x₂ + p/2 = p/(1 + cosθ)",N(R.B.x+R.f)+" = "+N(R.rB),T.blue],
+   ["|AB| = x₁ + x₂ + p = 2p/sin²θ",N(R.A.x+R.B.x+p)+" = "+N(2*p/(R.si*R.si))+(tong?"（通径 2p，最短）":""),tong?T.goldText:T.blue],
+   ["1/|AF| + 1/|BF| = 2/p",N(1/R.rA+1/R.rB),T.goldText],["S△OAB = p²/(2 sinθ)",N(R.S),T.blue],
+   ["k_OA · k_OB = −4（与 p 无关）",N((R.A.y/R.A.x)*(R.B.y/R.B.x)),T.goldText]];
+  if(cAB)rs.push(["以 AB 为直径的圆",`半径 ${N(R.AB/2)} = M 到准线距离 ${N(R.M.x+R.f)} · 切点 M′${pt(R.Mp)}`,T.goldText]);
+  if(cAp)rs.push(["以 A′B′ 为直径的圆",`∠A′FB′ = 90° · 半径 ${N(Math.abs(R.A.y-R.B.y)/2)} = |M′F| ${N(Math.hypot(R.Mp.x-R.f,R.Mp.y))} · 切 AB 于 F`,T.goldText]);
+  if(lAO)rs.push(["直线 AO 与准线交点",`(${N(-R.f)}, ${N(R.qY)}) = B′ · A、O、B′ 共线`,T.goldText]);
+  return rs}
+ function handle(R){return{x:R.f+3*R.co,y:3*R.si}}
+ return{
+  text:"抛物线焦点弦有一组<b>「二级结论」</b>，选填题直接用可以省下大量计算：两端点横坐标之积 <b>p²/4</b>、纵坐标之积 <b>−p²</b>；焦半径用倾斜角写成 <b>p/(1 ∓ cosθ)</b>；弦长 <b>2p/sin²θ</b>，通径最短。它们都来自抛物线定义：<b>到焦点距离 = 到准线距离</b>。",
+  points:["焦半径 |AF| = x₁ + p/2（定义转化）","x₁x₂ = p²/4，y₁y₂ = −p²","|AB| = x₁ + x₂ + p = 2p/sin²θ，通径 2p 最短","1/|AF| + 1/|BF| = 2/p；以 AB 为直径的圆与准线相切"],
+  gk:"抛物线焦点弦几乎年年在新高考选填出现（如 2023 新课标 II 卷第 10 题、2022 新高考 I 卷第 11 题多选判断各结论）。<br>易错：焦半径公式里 θ 是直线倾斜角，A、B 对应 1 − cosθ 还是 1 + cosθ 要看点在焦点哪一侧。",
+  mount(ctrl,read){ch=chips([{label:"通径 θ = 90°",value:90},{label:"θ = 60°",value:60},{label:"θ = 30°",value:30}],deg,v=>{anim=null;setDeg(v)});
+   sp=slider("p",1,4,0.1,p,v=>v.toFixed(1),v=>{p=v;last=""});
+   st=slider("倾斜角 θ",5,175,1,deg,v=>Math.round(v)+"°",v=>{anim=null;setDeg(v)});
+   const ab=button("扫描 θ",()=>{anim={t0:null}},true);
+   ctrl.append(ch,sp,st,toggle("以 AB 为直径的圆",cAB,v=>{cAB=v;last=""}),toggle("以 A′B′ 为直径的圆",cAp,v=>{cAp=v;last=""}),toggle("过 A、O 的直线",lAO,v=>{lAO=v;last=""}),ab);
+   ro=readout([]);read.append(ro);last=""},
+  draw(c,w,h,t){const T=theme();
+   if(anim){if(anim.t0==null)anim.t0=t;const q=Math.min(1,(t-anim.t0)/6);setDeg(5+170*q);if(q>=1)anim=null}
+   map=drawAxes(c,{x:0,y:0,w,h},[-3.5,8.5],[-6,6]);const X=map.X,Y=map.Y,b=map.box,R=calc(),f=R.f;
+   c.save();clip(c);c.strokeStyle=T.blue;c.lineWidth=1.8;c.beginPath();const[y0,y1]=map.yr;
+   for(let i=0;i<=240;i++){const y=y0+(y1-y0)*i/240;i?c.lineTo(X(y*y/(2*p)),Y(y)):c.moveTo(X(y*y/(2*p)),Y(y))}c.stroke();c.restore();
+   lab(c,`y² = ${N(2*p)}x`,X(9/(2*p))+8,Y(-3)+12,T.blue);
+   drawLine(c,map,1,0,f,T.sub,1.2,true);lab(c,`准线 x = ${N(-f)}`,X(-f)-6,b.y+b.h-16,T.sub,"right");
+   drawLine(c,map,R.si,-R.co,-R.si*f,T.sub,1);
+   if(cAp){drawCircle(c,map,R.Mp.x,R.Mp.y,Math.abs(R.A.y-R.B.y)/2,T.purple,1.8);seg(c,R.F,R.Ap,T.purple,1.2);seg(c,R.F,R.Bp,T.purple,1.2);
+    const u=[R.Ap.x-f,R.Ap.y],v=[R.Bp.x-f,R.Bp.y],lu=Math.hypot(...u),lv=Math.hypot(...v),e=10/map.s;
+    c.save();c.strokeStyle=T.purple;c.lineWidth=1.2;c.beginPath();c.moveTo(X(f+u[0]/lu*e),Y(u[1]/lu*e));c.lineTo(X(f+(u[0]/lu+v[0]/lv)*e),Y((u[1]/lu+v[1]/lv)*e));c.lineTo(X(f+v[0]/lv*e),Y(v[1]/lv*e));c.stroke();c.restore()}
+   if(cAB){drawCircle(c,map,R.M.x,R.M.y,R.AB/2,T.teal,1.8);seg(c,R.M,R.Mp,T.teal,1,true);dot(c,R.M,T.teal,4);
+    dot(c,R.Mp,T.teal,5);lab(c,"M′ 切点",X(-f)-10,Y(R.Mp.y),T.teal,"right","600 13px ")}
+   if(lAO){drawLine(c,map,R.A.y,-R.A.x,0,T.gold,1.5,true);dot(c,{x:-f,y:R.qY},T.gold,7);lab(c,"AO ∩ 准线 = B′",X(-f)+10,Y(R.qY)+16,T.goldText,"left","600 13px ")}
+   seg(c,R.A,R.Ap,orange(.6),1.5,true);seg(c,R.B,R.Bp,orange(.6),1.5,true);
+   seg(c,R.A,R.B,T.fg,3.5);
+   dot(c,R.Ap,orange(1),5);dot(c,R.Bp,orange(1),5);
+   lab(c,"A′",X(-f)-10,Y(R.Ap.y)-12,orange(1),"right","600 13px ");lab(c,"B′",X(-f)-10,Y(R.Bp.y)+12,orange(1),"right","600 13px ");
+   dot(c,R.F,T.fg,5);lab(c,`F(${N(f)}, 0)`,X(f)+8,Y(0)+16,T.fg,"left","600 13px ");
+   dot(c,R.A,T.fg,6);dot(c,R.B,T.fg,6);lab(c,"A",X(R.A.x)+10,Y(R.A.y)-14,T.fg,"left","600 13px ");lab(c,"B",X(R.B.x)+10,Y(R.B.y)+14,T.fg,"left","600 13px ");
+   const H=handle(R);c.beginPath();c.arc(X(H.x),Y(H.y),drag?10:8,0,7);c.fillStyle=T.bg;c.fill();c.strokeStyle=T.blue;c.lineWidth=2.5;c.stroke();
+   c.beginPath();c.arc(X(H.x),Y(H.y),3,0,7);c.fillStyle=T.blue;c.fill();
+   lab(c,`x₁x₂ = ${N(p*p/4)} · y₁y₂ = ${N(-p*p)} · k_OA·k_OB = −4`,b.x+16,b.y+22,T.goldText,"left","600 15px ");
+   lab(c,`θ = ${deg}° · 拖动把手绕 F 旋转`,b.x+16,b.y+44,T.sub);
+   if(ro){const rs=rows(T,R),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(!map)return false;
+   if(type==="down"){const H=handle(calc()),r=e&&e.pointerType==="touch"?24:14;drag=Math.hypot(map.X(H.x)-x,map.Y(H.y)-y)<=r;if(drag)anim=null;return drag}
+   if(type==="move"&&drag){let a=Math.atan2(map.invY(y),map.invX(x)-p/2);if(a<0)a+=Math.PI;setDeg(a/D2R);return true}
+   if(type==="up"){const was=drag;drag=false;return was}return false},
+  unmount(){ro=sp=st=ch=null;map=null;drag=false;anim=null}}})();
+CH[7].ready=true;
+MODS[7]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",R3=Math.sqrt(3);
+ let mode="ratio",m=1,t=1,lam=2,der=false,trail=false,tr=[],map=null,ro=null,sm=null,st1=null,st2=null,sL=null,bL=null,tgQ=null,drag=false,last="";
+ const cl=(v,a,b)=>Math.max(a,Math.min(b,v)),fs=v=>Math.abs(v)<0.005?"0.00":v.toFixed(2).replace("-","−"),N=v=>fmtNum(Math.abs(v)<1e-9?0:v),pt=p=>`(${N(p.x)}, ${N(p.y)})`;
+ const D=t=>3*t*t+4,lamT=t=>{const s=Math.sqrt(t*t+1);return(2*s-t)/(2*s+t)};
+ function lab(c,s,x,y,col,al,f){c.font=(f||"13px ")+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ function dot(c,p,col,r){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),r||6,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function clip(c){const b=map.box;c.beginPath();c.rect(b.x,b.y,b.w,b.h);c.clip()}
+ function Ln(c,p,q,col,w,dash){const dx=q.x-p.x,dy=q.y-p.y;drawLine(c,map,dy,-dx,dx*p.y-dy*p.x,col,w,dash)}
+ function arrow(c,p,q,col){const x0=map.X(p.x),y0=map.Y(p.y),a=Math.atan2(map.Y(q.y)-y0,map.X(q.x)-x0),x1=map.X(q.x)-7*Math.cos(a),y1=map.Y(q.y)-7*Math.sin(a);
+  if(Math.hypot(x1-x0,y1-y0)<14)return;c.save();clip(c);c.strokeStyle=c.fillStyle=col;c.lineWidth=2.5;c.beginPath();c.moveTo(x0,y0);c.lineTo(x1-8*Math.cos(a),y1-8*Math.sin(a));c.stroke();
+  c.beginPath();c.moveTo(x1,y1);c.lineTo(x1-12*Math.cos(a-0.4),y1-12*Math.sin(a-0.4));c.lineTo(x1-12*Math.cos(a+0.4),y1-12*Math.sin(a+0.4));c.closePath();c.fill();c.restore()}
+ function layout(w,h){const s=Math.min(w,h)/9.2,ex=w/2+2.35*s,ey=h/2+2*s;
+  if(w-ex-12>=170){const iw=Math.min(260,w-ex-12),ih=Math.min(170,Math.max(120,h*0.42));return{main:{x:0,y:0,w,h},ins:{x:w-iw-12,y:h-ih-12,w:iw,h:ih}}}
+  if(h-ey-12>=110){const iw=Math.min(260,w-24),ih=Math.min(170,h-ey-12);return{main:{x:0,y:0,w,h},ins:{x:w-iw-12,y:h-ih-12,w:iw,h:ih}}}
+  const sh=Math.min(180,Math.max(140,h*0.32));return{main:{x:0,y:0,w,h:h-sh},ins:{x:12,y:h-sh+4,w:w-24,h:sh-16}}}
+ function calc(){const mm=mode==="ratio"?m:1,d=D(t),q=Math.sqrt(48*(3*t*t+4-mm*mm)),y1=(-6*t*mm+q)/(2*d),y2=(-6*t*mm-q)/(2*d);
+  const R={mm,d,y1,y2,P:{x:t*y1+mm,y:y1},Q:{x:t*y2+mm,y:y2},sum:y1+y2,prod:y1*y2,sumF:-6*t*mm/d,prodF:(3*mm*mm-12)/d};
+  if(mode==="ratio"){R.k1=y1/(R.P.x+2);R.k2=y2/(R.Q.x-2);R.r=R.k1/R.k2;R.rF=(2-mm)/(2+mm);const qx=2*(R.k1+R.k2)/(R.k2-R.k1);R.X={x:qx,y:R.k1*(qx+2)};R.kk=(4-mm*mm)/(2*mm)}
+  else{R.lam=-y1/y2;R.u=R.lam+1/R.lam-2;R.uF=4*t*t/d;R.sym=R.sum*R.sum/R.prod}
+  return R}
+ function tOf(l){const u=l+1/l-2,v=Math.sqrt(Math.max(0,4*u/(4-3*u)));return l<1?v:-v}
+ function setT(v,exact){const L=mode==="ratio"?3:6;t=cl(exact?v:Math.round(v*100)/100,-L,L);const s=mode==="ratio"?st1:st2;s&&s.set(t);last=""}
+ function setM(v){m=Math.abs(v)<0.05?(m>0?-0.1:0.1):v;sm&&sm.set(m);tr=[];last=""}
+ function setMode(v){mode=v;tr=[];last="";const r=v==="ratio";if(!sm)return;sm.style.display=st1.style.display=tgQ.style.display=r?"":"none";st2.style.display=sL.style.display=bL.style.display=r?"none":"";setT(t)}
+ function inset(c,T,B){const px=B.x+30,py=B.y+34,pw=B.w-46,ph=B.h-58,X=v=>px+(v+6)/12*pw,Y=v=>py+ph-v/3.4*ph;
+  c.save();c.fillStyle=T.bg;c.strokeStyle=isDark()?"rgba(255,255,255,.16)":"rgba(0,0,0,.12)";c.lineWidth=1;rrect(c,B.x,B.y,B.w,B.h,14);c.fill();c.stroke();
+  lab(c,"λ 随 t 变化（A 在上方）",B.x+12,B.y+16,T.sub,"left","12px ");
+  c.strokeStyle=T.axis;c.beginPath();c.moveTo(px-6,py+ph);c.lineTo(px+pw+6,py+ph);c.moveTo(X(0),py+ph);c.lineTo(X(0),py-6);c.stroke();
+  [-6,0,6].forEach(v=>lab(c,v<0?"−6":String(v),X(v),py+ph+11,T.sub,"center","12px "));lab(c,"t",px+pw+8,py+ph-9,T.fg,"left","italic 12px ");lab(c,"λ",X(0)+6,py-4,T.fg,"left","italic 12px ");
+  c.setLineDash([4,4]);c.strokeStyle=T.gold;c.lineWidth=1.2;[1/3,3].forEach(v=>{c.beginPath();c.moveTo(px,Y(v));c.lineTo(px+pw,Y(v));c.stroke()});c.setLineDash([]);
+  lab(c,"→ 3 取不到",px+2,Y(3)-9,T.goldText,"left","12px ");lab(c,"→ 1/3 取不到",px+pw,Y(1/3)-9,T.goldText,"right","12px ");
+  c.strokeStyle=T.blue;c.lineWidth=2;c.beginPath();for(let i=0;i<=160;i++){const v=-6+12*i/160,x=X(v),y=Y(lamT(v));i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();
+  c.beginPath();c.arc(X(t),Y(lamT(t)),5.5,0,7);c.fillStyle=T.blue;c.fill();c.strokeStyle=T.bg;c.lineWidth=2;c.stroke();c.restore()}
+ function rows(T,R){let rs;
+  if(mode==="ratio"){const ok=Math.abs(R.r-R.rF)<1e-7&&Math.abs(R.X.x-4/R.mm)<1e-7;
+   rs=[["直线 l（过 D）",`x = ${fs(t)}y ${R.mm<0?"−":"+"} ${N(Math.abs(R.mm))}`],["M(x₁, y₁) / N(x₂, y₂)",pt(R.P)+" / "+pt(R.Q)],
+    ["y₁+y₂ = −6tm/(3t²+4)",N(R.sum)+" = "+N(R.sumF)],["y₁y₂ = (3m²−12)/(3t²+4)",N(R.prod)+" = "+N(R.prodF)],
+    ["k_A₁M / k_A₂N（数值）",`${N(R.k1)} / ${N(R.k2)} = ${N(R.r)}`,T.blue],["交点 Q（数值）",pt(R.X),T.blue],
+    ["理论常数 (2 − m)/(2 + m)",N(R.rF)+(Math.abs(R.mm-1)<1e-9?"（m = 1 时恒为 1/3）":""),T.goldText],["Q 所在定直线",`x = 4/m = ${N(4/R.mm)}`,T.goldText],
+    ["核对",ok?"比值与 Q 的横坐标均与数值一致":"与数值不符",ok?T.fg:T.redText]];
+   if(der)rs.push(["① 联立","(3t²+4)y² + 6tmy + 3m² − 12 = 0，y₁+y₂ = −6tm/(3t²+4)，y₁y₂ = (3m²−12)/(3t²+4)"],
+    ["② 不对称","k₁/k₂ = y₁(x₂−2)/[y₂(x₁+2)] = (ty₁y₂ + (m−2)y₁)/(ty₁y₂ + (m+2)y₂)，不能直接代入韦达"],
+    ["③ 和积转换",`t·y₁y₂ = ((3m²−12)/(−6m))(y₁+y₂) = ((4 − m²)/(2m))(y₁+y₂)（m = 1：ty₁y₂ = (3/2)(y₁+y₂)）· 当前 ${N(t*R.prod)} = ${N(R.kk*R.sum)}`,T.blue],
+    ["④ 约分","分子 = ((2−m)/(2m))[(2−m)y₁ + (2+m)y₂]，分母 = ((2+m)/(2m))[(2−m)y₁ + (2+m)y₂]，比值 = (2−m)/(2+m)",T.goldText])}
+  else{const ok=Math.abs(R.u-R.uF)<1e-7&&Math.abs(R.sym-(2-R.lam-1/R.lam))<1e-7;
+   rs=[["直线 l（过 F）",`x = ${fs(t)}y + 1`],["A(x₁, y₁) / B(x₂, y₂)",pt(R.P)+" / "+pt(R.Q)],
+    ["y₁+y₂ = −6t/(3t²+4)",N(R.sum)+" = "+N(R.sumF)],["y₁y₂ = −9/(3t²+4)",N(R.prod)+" = "+N(R.prodF)],
+    ["λ = −y₁/y₂（AF = λ·FB）",N(R.lam),T.blue],["(y₁+y₂)²/(y₁y₂) 与 2 − λ − 1/λ",N(R.sym)+" · "+N(2-R.lam-1/R.lam),T.blue],
+    ["λ + 1/λ − 2 与 4t²/(3t²+4)",N(R.u)+" · "+N(R.uF),T.blue],["理论范围","4t²/(3t²+4) ∈ [0, 4/3) ⇒ λ ∈ (1/3, 3)",T.goldText],
+    ["核对",ok?"与数值一致":"与数值不符",ok?T.fg:T.redText]];
+   if(der)rs.push(["① 定比","AF = λ·FB ⇒ −y₁ = λy₂ ⇒ y₁ = −λy₂"],["② 对称式","(y₁+y₂)²/(y₁y₂) = −(1−λ)²/λ = 2 − λ − 1/λ"],
+    ["③ 代入韦达","36t²/(−9(3t²+4)) = −4t²/(3t²+4) = 2 − λ − 1/λ",T.blue],["④ 范围","λ + 1/λ − 2 = 4t²/(3t²+4) ∈ [0, 4/3) ⇒ λ ∈ (1/3, 3)，t = 0 时 λ = 1",T.goldText])}
+  return rs}
+ function handle(R){const s=Math.sqrt(t*t+1);return{x:R.mm+2.4*t/s,y:2.4/s}}
+ return{
+  text:"如果目标式里 x₁、x₂（或 y₁、y₂）的<b>系数不一样</b>，韦达定理就不能直接代入，这叫<b>「非对称韦达」</b>。两种常用处理：①<b>和积转换</b>——用韦达找出 y₁y₂ 与 y₁+y₂ 的比例关系，把积换成和，再约分；②<b>定比型</b>——由 y₁ = −λy₂ 构造对称式 (y₁+y₂)²/(y₁y₂) = 2 − λ − 1/λ，转化成 λ 的方程。本章椭圆 x²/4 + y²/3 = 1，A₁(−2, 0)、A₂(2, 0)。",
+  points:["识别：目标式中两根地位不对称","和积转换：t·y₁y₂ = k(y₁+y₂)，用和替换积","定比：AF = λFB ⇒ y₁ = −λy₂ ⇒ (y₁+y₂)²/(y₁y₂) = 2 − λ − 1/λ","也可以直接求出一个根（如已知一个交点）再代入，适合有顶点的题"],
+  gk:"非对称韦达是近年新高考压轴的新热点（如 2020 新高考 I 卷第 22 题、2023 新课标 II 卷第 21 题的斜率比与交点在定直线上）。<br>易错：硬套韦达代入不对称式导致无法化简，或定比题忽略 λ 的取值范围。",
+  mount(ctrl,read){const ch=chips([{label:"斜率之比",value:"ratio"},{label:"定比分点",value:"lam"}],mode,setMode);
+   sm=slider("D(m, 0) 的 m",-1.5,1.5,0.1,m,v=>N(v),setM);
+   st1=slider("参数 t",-3,3,0.01,cl(t,-3,3),fs,v=>setT(v));st2=slider("参数 t",-6,6,0.01,t,fs,v=>setT(v));
+   sL=slider("λ",0.34,2.9,0.01,lam,v=>v.toFixed(2),v=>{lam=v});bL=button("按 λ 求直线",()=>setT(tOf(lam),true),true);
+   tgQ=toggle("留下 Q 的轨迹",trail,v=>{trail=v;tr=[]});
+   ctrl.append(ch,sm,st1,st2,sL,bL,tgQ,toggle("推导",der,v=>{der=v;last=""}));ro=readout([]);read.append(ro);setMode(mode)},
+  draw(c,w,h){const T=theme(),r=mode==="ratio",L=r?{main:{x:0,y:0,w,h}}:layout(w,h),R=calc();
+   map=drawAxes(c,L.main,r?[-4.6,5.4]:[-4.6,4.6],[-4.6,4.6]);const X=map.X,Y=map.Y,b=map.box,mm=R.mm;
+   c.save();clip(c);c.beginPath();c.ellipse(X(0),Y(0),2*map.s,R3*map.s,0,0,7);c.strokeStyle=T.fg;c.lineWidth=1.5;c.stroke();c.restore();
+   lab(c,"x²/4 + y²/3 = 1",X(1.45)+6,Y(1.6)-10,T.sub);
+   drawLine(c,map,1,-t,-mm,T.fg,1.5);
+   if(r){const A1={x:-2,y:0},A2={x:2,y:0},qx=4/mm;
+    Ln(c,A1,R.P,T.blue,2);Ln(c,A2,R.Q,T.purple,2);drawLine(c,map,1,0,-qx,T.gold,1.5,true);
+    lab(c,`x = 4/m = ${N(qx)}`,X(qx)+(qx>0?-6:6),b.y+b.h-18,T.goldText,qx>0?"right":"left","600 13px ");
+    if(trail){const p=tr[tr.length-1];if(!p||Math.hypot(p.x-R.X.x,p.y-R.X.y)>0.03){tr.push(R.X);if(tr.length>500)tr.shift()}
+     c.save();clip(c);c.fillStyle=T.gold;tr.forEach(p=>{c.beginPath();c.arc(X(p.x),Y(p.y),2.5,0,7);c.fill()});c.restore()}
+    dot(c,A1,T.blue,5);dot(c,A2,T.purple,5);lab(c,"A₁",X(-2)-8,Y(0)+16,T.blue,"right","600 13px ");lab(c,"A₂",X(2)+8,Y(0)+16,T.purple,"left","600 13px ");
+    dot(c,{x:mm,y:0},T.fg,5);lab(c,`D(${N(mm)}, 0)`,X(mm)+8,Y(0)-14,T.fg);
+    dot(c,R.P,T.blue);dot(c,R.Q,T.purple);lab(c,"M",X(R.P.x)+10,Y(R.P.y)-14,T.blue,"left","600 13px ");lab(c,"N",X(R.Q.x)+10,Y(R.Q.y)+14,T.purple,"left","600 13px ");
+    c.save();clip(c);dot(c,R.X,T.gold,7);lab(c,"Q",X(R.X.x)+10,Y(R.X.y)-12,T.goldText,"left","600 14px ");c.restore();
+    lab(c,`k_A₁M / k_A₂N = ${N(R.r)} · (2 − m)/(2 + m) = ${N(R.rF)}`,b.x+16,b.y+22,T.blue,"left","600 15px ")}
+   else{const F={x:1,y:0};arrow(c,R.P,F,T.blue);arrow(c,F,R.Q,T.purple);
+    dot(c,F,T.fg,5);lab(c,"F(1, 0)",X(1)+8,Y(0)+16,T.fg);
+    dot(c,R.P,T.blue);dot(c,R.Q,T.purple);lab(c,"A",X(R.P.x)+10,Y(R.P.y)-14,T.blue,"left","600 13px ");lab(c,"B",X(R.Q.x)+10,Y(R.Q.y)+14,T.purple,"left","600 13px ");
+    lab(c,`AF = λ·FB · λ = ${N(R.lam)}`,b.x+16,b.y+22,T.blue,"left","600 15px ");inset(c,T,L.ins)}
+   const Hd=handle(R);c.beginPath();c.arc(X(Hd.x),Y(Hd.y),drag?10:8,0,7);c.fillStyle=T.bg;c.fill();c.strokeStyle=T.blue;c.lineWidth=2.5;c.stroke();
+   c.beginPath();c.arc(X(Hd.x),Y(Hd.y),3,0,7);c.fillStyle=T.blue;c.fill();
+   lab(c,r?"拖动把手绕 D 旋转 l":"拖动把手绕 F 旋转 l",b.x+16,b.y+44,T.sub);
+   if(ro){const rs=rows(T,R),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(!map)return false;
+   if(type==="down"){const Hd=handle(calc()),r=e&&e.pointerType==="touch"?24:14;drag=Math.hypot(map.X(Hd.x)-x,map.Y(Hd.y)-y)<=r;return drag}
+   if(type==="move"&&drag){const my=map.invY(y),mx=map.invX(x),mm=mode==="ratio"?m:1;if(Math.abs(my)>0.05)setT((mx-mm)/my);return true}
+   if(type==="up"){const was=drag;drag=false;return was}return false},
+  unmount(){ro=sm=st1=st2=sL=bL=tgQ=null;map=null;drag=false}}})();
+CH[8].ready=true;
+MODS[8]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",R3=Math.sqrt(3),L="ABCD";
+ const Q=[
+  {q:"直线 y = kx + 1 与椭圆 x²/4 + y²/3 = 1 的位置关系是",o:["相交","相切","相离","不确定"],a:0,e:"直线恒过 (0, 1)，该点在椭圆内部（0 + 1/3 < 1），所以总相交。",ch:1},
+  {q:"过椭圆 x²/4 + y²/3 = 1 右焦点且垂直于 x 轴的弦长为",o:["1","2","3","4"],a:2,e:"通径 2b²/a = 2·3/2 = 3。",ch:2},
+  {q:"椭圆 x²/4 + y²/3 = 1 中，以 M(1, 1) 为中点的弦所在直线的斜率为",o:["−3/4","3/4","−4/3","4/3"],a:0,e:"点差法 k = −b²x₀/(a²y₀) = −3·1/(4·1) = −3/4。",ch:3},
+  {q:"抛物线 y² = 4x 上两点 A、B 满足 OA ⊥ OB（O 为原点），则直线 AB 恒过定点",o:["(1, 0)","(2, 0)","(4, 0)","(0, 4)"],a:2,e:"设 AB: x = ty + n，联立得 y² − 4ty − 4n = 0，x₁x₂ + y₁y₂ = n² − 4n = 0 ⇒ n = 4。",ch:4},
+  {q:"P 是椭圆 x²/4 + y²/3 = 1 上异于左右顶点 A₁、A₂ 的点，则 k_PA₁·k_PA₂ =",o:["−4/3","−3/4","3/4","−1/2"],a:1,e:"斜率积定值 −b²/a² = −3/4。",ch:5},
+  {q:"过抛物线 y² = 4x 焦点 F 的直线交抛物线于 A、B，若 |AF| = 3，则 |BF| =",o:["1","3/2","2","3"],a:1,e:"1/|AF| + 1/|BF| = 2/p = 1，所以 1/|BF| = 1 − 1/3 = 2/3，|BF| = 3/2。",ch:7}];
+ const CSS=`.cq-wrap{--cq-red:#c0362c;--cq-gold:#9a6a00;display:flex;flex-direction:column;gap:12px}
+html.dark .cq-wrap{--cq-red:#ff7b72;--cq-gold:#f0b847}
+.cq-q{padding:12px 0 0;border-top:1px solid var(--line)}.cq-q:first-child{border-top:0;padding-top:0}
+.cq-t{margin:0 0 8px;font-size:14px;line-height:1.6}.cq-on .cq-t b{color:var(--blue)}
+.cq-opts{display:flex;flex-wrap:wrap;gap:6px}
+.cq-opt{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}
+.cq-opt.on{background:var(--blue);color:#fff}html.dark .cq-opt.on{color:#000}
+.cq-opt:disabled{cursor:default}.cq-opt.cq-right{box-shadow:inset 0 0 0 2px var(--blue)}.cq-opt.cq-wrong{box-shadow:inset 0 0 0 2px var(--cq-red)}
+.cq-r{margin:8px 0 0;font-size:14px;color:var(--sub);line-height:1.6}
+.cq-ok{color:var(--blue);font-weight:600}.cq-bad{color:var(--cq-red);font-weight:600}
+.cq-link{color:var(--blue);text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;min-height:32px;margin-left:4px}
+.cq-hint{margin:0;font-size:13px;color:var(--cq-gold)}
+.cq-btns{display:flex;gap:8px}.cq-btns .pill{flex:1;min-height:44px}
+@media (max-width:767px){.cq-opt{flex:1 1 100%;min-height:44px;text-align:left;border-radius:12px}.cq-link{min-height:44px}}`;
+ let ans=[],done=false,qi=0,subT=null,map=null,ro=null,st=null,host=null,hint=null,last="";
+ const nAns=()=>ans.filter(v=>v!=null).length,score=()=>Q.reduce((s,q,i)=>s+(ans[i]===q.a?1:0),0);
+ function lab(c,s,x,y,col,al,f){c.font=(f||"13px ")+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ function dot(c,p,col,r){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),r||5,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function seg(c,p,q,col,w,dash){c.save();c.strokeStyle=col;c.lineWidth=w||2;c.setLineDash(dash?[6,5]:[]);c.beginPath();c.moveTo(map.X(p.x),map.Y(p.y));c.lineTo(map.X(q.x),map.Y(q.y));c.stroke();c.restore()}
+ function thru(c,p,q,col,w){const dx=q.x-p.x,dy=q.y-p.y;drawLine(c,map,dy,-dx,dx*p.y-dy*p.x,col,w)}
+ function ell(c,T){c.save();c.beginPath();c.ellipse(map.X(0),map.Y(0),2*map.s,R3*map.s,0,0,7);c.strokeStyle=T.fg;c.lineWidth=1.5;c.stroke();c.restore();lab(c,"x²/4 + y²/3 = 1",map.X(1.5)+6,map.Y(1.6)-10,T.sub)}
+ function par(c,T){const b=map.box;c.save();c.beginPath();c.rect(b.x,b.y,b.w,b.h);c.clip();c.beginPath();for(let i=0;i<=200;i++){const y=-7+14*i/200,X=map.X(y*y/4),Y=map.Y(y);i?c.lineTo(X,Y):c.moveTo(X,Y)}
+  c.strokeStyle=T.fg;c.lineWidth=1.5;c.stroke();c.restore();lab(c,"y² = 4x",map.X(4)+8,map.Y(4)-6,T.sub)}
+ function fig(c,w,h,T){const P=qi===3||qi===5,B={x:0,y:0,w,h};
+  map=P?drawAxes(c,B,[-1.5,8],[-6.2,6.2]):drawAxes(c,B,[-3.2,3.2],[-2.6,2.6]);P?par(c,T):ell(c,T);
+  if(qi===0){drawLine(c,map,-1.2,-1,1,T.sub,1.5,true);drawLine(c,map,0.6,-1,1,T.blue,2);dot(c,{x:0,y:1},T.gold,6);lab(c,"(0, 1)",map.X(0)+10,map.Y(1)-12,T.goldText,"left","600 13px ")}
+  if(qi===1){drawLine(c,map,1,0,-1,T.sub,1,true);const A={x:1,y:1.5},Bp={x:1,y:-1.5};seg(c,A,Bp,T.blue,3);dot(c,{x:1,y:0},T.fg);dot(c,A,T.blue);dot(c,Bp,T.blue);
+   lab(c,"F(1, 0)",map.X(1)+8,map.Y(0)+14,T.fg);lab(c,"弦长 = ?",map.X(1)+10,map.Y(0.75),T.blue,"left","600 13px ")}
+  if(qi===2){const k=done?-0.75:0,m=1-k,a=3+4*k*k,b=8*k*m,d=Math.sqrt(b*b-4*a*(4*m*m-12)),x1=(-b-d)/(2*a),x2=(-b+d)/(2*a),A={x:x1,y:k*x1+m},Bp={x:x2,y:k*x2+m};
+   seg(c,A,Bp,T.blue,2.5);dot(c,A,T.blue);dot(c,Bp,T.blue);dot(c,{x:1,y:1},T.gold,6);lab(c,"M(1, 1)",map.X(1)+10,map.Y(1)-14,T.goldText,"left","600 13px ");lab(c,"k = ?",map.X(x1)+8,map.Y(A.y)-14,T.blue,"left","600 13px ")}
+  if(qi===3){const O={x:0,y:0},A={x:9/4,y:3},Bp={x:64/9,y:-16/3},la=Math.hypot(A.x,A.y),lb=Math.hypot(Bp.x,Bp.y),u={x:A.x/la*.45,y:A.y/la*.45},v={x:Bp.x/lb*.45,y:Bp.y/lb*.45};
+   thru(c,A,Bp,T.blue,2);seg(c,O,A,T.fg,1.5);seg(c,O,Bp,T.fg,1.5);
+   c.save();c.strokeStyle=T.sub;c.lineWidth=1.2;c.beginPath();c.moveTo(map.X(u.x),map.Y(u.y));c.lineTo(map.X(u.x+v.x),map.Y(u.y+v.y));c.lineTo(map.X(v.x),map.Y(v.y));c.stroke();c.restore();
+   dot(c,A,T.blue);dot(c,Bp,T.blue);lab(c,"A",map.X(A.x)+10,map.Y(A.y)-10,T.blue,"left","600 13px ");lab(c,"B",map.X(Bp.x)+10,map.Y(Bp.y),T.blue,"left","600 13px ");
+   dot(c,{x:4,y:0},T.gold,6);lab(c,"定点 ?",map.X(4)+10,map.Y(0)-14,T.goldText,"left","600 13px ")}
+  if(qi===4){const A1={x:-2,y:0},A2={x:2,y:0},Pp={x:1,y:1.5};seg(c,Pp,A1,T.blue,2);seg(c,Pp,A2,T.purple,2);dot(c,A1,T.blue);dot(c,A2,T.purple);dot(c,Pp,T.fg,6);
+   lab(c,"A₁",map.X(-2)-8,map.Y(0)+14,T.blue,"right","600 13px ");lab(c,"A₂",map.X(2)+8,map.Y(0)+14,T.purple,"left","600 13px ");lab(c,"P",map.X(1)+8,map.Y(1.5)-12,T.fg,"left","600 13px ")}
+  if(qi===5){drawLine(c,map,1,0,1,T.sub,1,true);const F={x:1,y:0},A={x:2,y:2*Math.SQRT2},Bp={x:.5,y:-Math.SQRT2};thru(c,A,Bp,T.blue,2);dot(c,F,T.fg);dot(c,A,T.blue);dot(c,Bp,T.blue);
+   lab(c,"F(1, 0)",map.X(1)+10,map.Y(0)+12,T.fg);lab(c,"A · |AF| = 3",map.X(2)+10,map.Y(A.y)-6,T.blue,"left","600 13px ");lab(c,"B · |BF| = ?",map.X(.5)+12,map.Y(Bp.y)+10,T.blue,"left","600 13px ");lab(c,"x = −1",map.X(-1)+6,map.box.y+map.box.h-18,T.sub)}
+  lab(c,`第 ${qi+1} 题 · 示意图`,16,22,T.fg,"left","600 15px ");lab(c,"点题卡切换配图",16,44,T.sub)}
+ function grade(T,s){return s>=5?["优秀",T.blue]:s>=3?["良好",T.goldText]:["再练练",T.redText]}
+ function ring(c,w,h,T,t){if(subT==null)subT=t;const s=score(),p=Math.min(1,(t-subT)/0.8),e=1-Math.pow(1-p,3),[g,col]=grade(T,s),R=Math.max(40,Math.min(w,h)*0.3),cx=w/2,cy=h/2-10;
+  c.save();c.lineCap="round";c.lineWidth=14;c.strokeStyle=isDark()?"rgba(255,255,255,.12)":"rgba(0,0,0,.08)";c.beginPath();c.arc(cx,cy,R,0,7);c.stroke();
+  if(s>0){c.strokeStyle=col;c.beginPath();c.arc(cx,cy,R,-Math.PI/2,-Math.PI/2+2*Math.PI*s/6*e);c.stroke()}c.restore();
+  lab(c,`${s} / 6`,cx,cy-8,col,"center","600 36px ");lab(c,Math.round(s/6*100*e)+"%",cx,cy+24,T.sub,"center","15px ");
+  lab(c,g,cx,cy+R+34,col,"center","600 18px ");lab(c,"成绩",16,22,T.fg,"left","600 15px ");lab(c,"按「重做」再来一次",16,44,T.sub)}
+ function upd(){if(!hint)return;const n=Q.length-nAns();hint.textContent=!done&&n>0?`还有 ${n} 题未作答`:"";hint.hidden=!hint.textContent;last=""}
+ function build(){host.innerHTML="";Q.forEach((q,i)=>{const d=el("div","cq-q"+(i===qi?" cq-on":""));d.onclick=()=>{if(!done){qi=i;host.querySelectorAll(".cq-q").forEach((x,k)=>x.classList.toggle("cq-on",k===i))}};
+  d.append(el("p","cq-t",`<b>${i+1}.</b> ${q.q}`));const os=el("div","cq-opts");os.setAttribute("role","group");os.setAttribute("aria-label",`第 ${i+1} 题选项`);
+  q.o.forEach((o,k)=>{const sel=ans[i]===k,b=el("button","cq-opt"+(sel?" on":"")+(done&&k===q.a?" cq-right":"")+(done&&sel&&k!==q.a?" cq-wrong":""),`${L[k]}　${o}`);
+   b.setAttribute("aria-pressed",sel);b.disabled=done;b.onclick=()=>{ans[i]=k;qi=i;build();upd()};os.append(b)});d.append(os);
+  if(done){const ok=ans[i]===q.a,r=el("p","cq-r",`<span class="${ok?"cq-ok":"cq-bad"}">${ok?"✓ 正确":"✗ "+(ans[i]==null?"未作答":"错误")}</span>　正确答案 ${L[q.a]}（${q.o[q.a]}）。${q.e}`),a=el("a","cq-link",`回到第 ${q.ch} 章 →`);
+   a.href="#"+q.ch;a.onclick=ev=>{ev.preventDefault();location.hash="#"+q.ch};r.append(a);d.append(r)}host.append(d)})}
+ return{
+  text:"六道题覆盖本实验前 8 章的核心结论：<b>联立判别、通径与弦长、点差法、定点、斜率积定值、焦点弦</b>。先独立做，再提交看解析，错题点链接回到对应章节复习。",
+  points:["先判断直线是否过定点，再谈位置关系","选填优先用二级结论：通径、点差、斜率积、焦半径","大题按「设线—联立—韦达—化目标」四步走","做完对照解析，回到对应章节动手验证"],
+  gk:"新高考 I 卷解析几何一般是 1–2 道选填 + 1 道解答题，约 22–27 分；选填用结论秒杀，解答题按步骤拿分。",
+  mount(ctrl,read){st=el("style");st.textContent=CSS;document.head.append(st);
+   const w=el("div","cq-wrap");host=el("div");hint=el("p","cq-hint");const bs=el("div","cq-btns");
+   bs.append(button("提交",()=>{done=true;subT=null;build();upd()},true),button("重做",()=>{ans=[];done=false;subT=null;qi=0;build();upd()}));
+   w.append(host,hint,bs);ctrl.append(w);ro=readout([]);read.append(ro);build();upd()},
+  draw(c,w,h,t){const T=theme();done?ring(c,w,h,T,t):fig(c,w,h,T);
+   if(ro){const n=nAns(),s=score(),rs=[["已答题数",`${n} / 6`,n===6?T.blue:T.fg],["得分",done?`${s} / 6 · ${Math.round(s/6*100)}%`:"提交后显示",done?grade(T,s)[1]:T.fg]];
+    const key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  unmount(){st&&st.remove();st=ro=host=hint=null;map=null;last=""}}})();
+const $=id=>document.getElementById(id),pad=i=>String(i+1).padStart(2,"0");
+let cur=0,mod=null,W=0,H=0,DPR=1;
+const cv=$("cv"),ctx=cv.getContext("2d");
+/* ---------- theme ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function isDark(){return document.documentElement.classList.contains("dark")}
+function theme(){return isDark()
+ ?{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e2a336",teal:"#2ec4b6",purple:"#b197fc",goldText:"#f0b847",redText:"#ff7b72"}
+ :{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.05)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"}}
+function setDark(d){document.documentElement.classList.toggle("dark",d);store.set("cpro-dark",d?"1":"0");$("dark").textContent=$("mdark").textContent=d?"浅色":"深色"}
+setDark(store.get("cpro-dark")==="1");
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||fmtNum;const w=el("div","sl"),l=el("label"),o=el("output"),i=el("input");
+ l.append(document.createTextNode(label),o);i.type="range";Object.assign(i,{min,max,step,value:val});i.setAttribute("aria-label",label);o.textContent=fmt(+val);
+ i.oninput=()=>{o.textContent=fmt(+i.value);onchange&&onchange(+i.value)};w.append(l,i);
+ w.set=v=>{i.value=v;o.textContent=fmt(+v)};return w}
+function chips(options,val,onchange){const w=el("div","chips");const bs=options.map(op=>{const o=typeof op==="object"?op:{label:op,value:op};const b=el("button",o.value===val?"on":"",o.label);
+ b.onclick=()=>{bs.forEach(x=>x.classList.remove("on"));b.classList.add("on");onchange&&onchange(o.value)};w.append(b);return b});return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" primary":""),label);b.onclick=onclick;return b}
+function toggle(label,val,onchange){const b=el("button","tg"+(val?" on":""),"<span>"+label+"</span><i></i>");b.setAttribute("role","switch");b.setAttribute("aria-checked",!!val);
+ b.onclick=()=>{val=!val;b.classList.toggle("on",val);b.setAttribute("aria-checked",val);onchange&&onchange(val)};return b}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML=rs.map(r=>`<dt>${r[0]}</dt><dd style="${r[2]?"color:"+r[2]:""}">${r[1]}</dd>`).join("")};d.update(rows||[]);return d}
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){if(!isFinite(v))return v>0?"∞":v<0?"−∞":"—";const e=1e-6,s=v<0?"−":"",a=Math.abs(v);
+ if(Math.abs(a-Math.round(a))<e)return(Math.round(a)===0?"":s)+Math.round(a);
+ for(let d=2;d<=12;d++){const n=a*d;if(Math.abs(n-Math.round(n))<e)return s+Math.round(n)+"/"+d}
+ for(const r of[2,3,5,6,7,10,11,13,14,15]){const q=Math.sqrt(r);for(let d=1;d<=6;d++){const k=a*d/q;if(Math.abs(k-Math.round(k))<e&&Math.round(k)>0){const K=Math.round(k);return s+(K===1?"":K)+"√"+r+(d>1?"/"+d:"")}}}
+ return s+a.toFixed(2)}
+function drawAxes(ctx,box,xr,yr,opts){opts=Object.assign({equal:true,grid:true,ticks:true,step:1,labels:true},opts);const T=theme();
+ let[x0,x1]=xr,[y0,y1]=yr,sx=box.w/(x1-x0),sy=box.h/(y1-y0);
+ if(opts.equal){const s=Math.min(sx,sy),cx=(x0+x1)/2,cy=(y0+y1)/2;sx=sy=s;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)*sx,Y=y=>box.y+box.h-(y-y0)*sy,invX=p=>x0+(p-box.x)/sx,invY=p=>y0+(box.y+box.h-p)/sy;
+ let st=opts.step;while(st*sx<22)st*=2;
+ ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();ctx.lineWidth=1;
+ if(opts.grid){ctx.strokeStyle=T.grid;ctx.beginPath();for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st){ctx.moveTo(X(x),box.y);ctx.lineTo(X(x),box.y+box.h)}for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st){ctx.moveTo(box.x,Y(y));ctx.lineTo(box.x+box.w,Y(y))}ctx.stroke()}
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,Y(0));ctx.lineTo(box.x+box.w,Y(0));ctx.moveTo(X(0),box.y);ctx.lineTo(X(0),box.y+box.h);ctx.stroke();
+ if(opts.labels){ctx.fillStyle=T.sub;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";
+  for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st)if(Math.abs(x)>1e-9)ctx.fillText(fmtNum(x),X(x),Y(0)+4);
+  ctx.textAlign="right";ctx.textBaseline="middle";for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st)if(Math.abs(y)>1e-9)ctx.fillText(fmtNum(y),X(0)-5,Y(y));
+  ctx.textBaseline="top";ctx.fillText("O",X(0)-4,Y(0)+4);ctx.font="italic 13px "+getComputedStyle(document.body).fontFamily;ctx.fillStyle=T.fg;
+  ctx.fillText("x",box.x+box.w-4,Y(0)+4);ctx.textAlign="left";ctx.fillText("y",X(0)+6,box.y+4)}
+ ctx.restore();return{X,Y,invX,invY,s:sx,box,xr:[x0,x1],yr:[y0,y1]}}
+function drawLine(ctx,map,A,B,C,color,width,dashed){if(Math.abs(A)<1e-12&&Math.abs(B)<1e-12)return;const[x0,x1]=map.xr,[y0,y1]=map.yr,b=map.box;let p,q;
+ if(Math.abs(B)>=Math.abs(A)){p=[x0,-(A*x0+C)/B];q=[x1,-(A*x1+C)/B]}else{p=[-(B*y0+C)/A,y0];q=[-(B*y1+C)/A,y1]}
+ ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.setLineDash(dashed?[6,5]:[]);
+ ctx.beginPath();ctx.moveTo(map.X(p[0]),map.Y(p[1]));ctx.lineTo(map.X(q[0]),map.Y(q[1]));ctx.stroke();ctx.restore()}
+function drawCircle(ctx,map,cx,cy,r,color,width,fill){const b=map.box;ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.beginPath();ctx.arc(map.X(cx),map.Y(cy),Math.max(0,r*map.s),0,Math.PI*2);
+ if(fill){ctx.fillStyle=fill;ctx.fill()}if(width!==0){ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.stroke()}ctx.restore()}
+function dragPoints(points,map,snap){const M=()=>typeof map==="function"?map():map;const h=function(e,type,x,y){const m=M();if(!m)return false;
+ if(type==="down"){const R=e&&e.pointerType==="touch"?22:12;let best=-1,bd=R;points.forEach((p,i)=>{if(p.fixed)return;const d=Math.hypot(m.X(p.x)-x,m.Y(p.y)-y);if(d<=bd){bd=d;best=i}});h.active=best;return best>=0}
+ if(type==="move"&&h.active>=0){const p=points[h.active];let nx=m.invX(x),ny=m.invY(y);if(snap){nx=Math.round(nx/snap)*snap;ny=Math.round(ny/snap)*snap}
+  nx=Math.min(m.xr[1],Math.max(m.xr[0],nx));ny=Math.min(m.yr[1],Math.max(m.yr[0],ny));p.x=+nx.toFixed(6);p.y=+ny.toFixed(6);p.onmove&&p.onmove(p);h.onmove&&h.onmove(p,h.active);return true}
+ if(type==="up"){const was=h.active>=0;h.active=-1;return was}return false};h.active=-1;return h}
+function wrapText(ctx,text,x,y,maxW,lh){let line="";for(const ch of String(text)){if(ch==="\n"){ctx.fillText(line,x,y);line="";y+=lh;continue}
+ const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);line=ch;y+=lh}else line=t}if(line)ctx.fillText(line,x,y);return y+lh}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+/* ---------- placeholder ---------- */
+function drawSoon(ctx,w,h){const T=theme(),cw=Math.min(320,w-40),ch=150,x=(w-cw)/2,y=(h-ch)/2;
+ ctx.save();ctx.shadowColor="rgba(0,0,0,.08)";ctx.shadowBlur=24;ctx.shadowOffsetY=4;ctx.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(ctx,x,y,cw,ch,22);ctx.fill();ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.blue;ctx.font="13px ui-monospace,Menlo,monospace";ctx.fillText("CHAPTER "+pad(cur),w/2,y+38);
+ ctx.fillStyle=T.fg;ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText("即将上线",w/2,y+72);
+ ctx.fillStyle=T.sub;ctx.font="14px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText(CH[cur].n,w/2,y+108)}
+/* ---------- canvas loop ---------- */
+function resize(){const r=$("cwrap").getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);frame(performance.now())}
+function frame(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H);
+ try{mod&&mod.draw?mod.draw(ctx,W,H,t/1000):drawSoon(ctx,W,H)}catch(err){console.error(err)}}
+function loop(t){frame(t);requestAnimationFrame(loop)}
+new ResizeObserver(resize).observe($("cwrap"));window.addEventListener("resize",resize);
+function ptr(type){return e=>{if(!mod||!mod.pointer)return;const r=cv.getBoundingClientRect();
+ if(type==="down")try{cv.setPointerCapture(e.pointerId)}catch(_){}mod.pointer(e,type,e.clientX-r.left,e.clientY-r.top)}}
+cv.addEventListener("pointerdown",ptr("down"));cv.addEventListener("pointermove",ptr("move"));cv.addEventListener("pointerup",ptr("up"));cv.addEventListener("pointercancel",ptr("up"));
+/* ---------- chapters ---------- */
+function list(host,cls){host.innerHTML="";CH.forEach((c,i)=>{const b=el("button",cls,`<span class="mono">${pad(i)}</span><span>${c.n}</span>`);b.onclick=()=>{go(i);closeSheet()};host.append(b)})}
+list($("toc"),"");list($("slist"),"it");
+$("segs").innerHTML=CH.map(()=>"<i></i>").join("");
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod.unmount()}catch(e){console.error(e)}
+ cur=i;const c=CH[i],m=c.ready&&MODS[i]?MODS[i]:null;mod=m;
+ $("ctitle").textContent=pad(i)+"  "+c.n;$("cbook").textContent=c.book;$("ctext").innerHTML=m?m.text||"":"本章交互实验即将上线，敬请期待。";
+ const ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";$("pts").innerHTML="";$("gk").innerHTML="";
+ if(m){m.mount&&m.mount(ctrl,read);$("pts").innerHTML=m.points?"<ul>"+[].concat(m.points).map(p=>"<li>"+p+"</li>").join("")+"</ul>":"";$("gk").innerHTML=m.gk||""}
+ $("ctrlSec").hidden=!ctrl.children.length;$("readSec").hidden=!read.children.length;$("ptSec").hidden=!$("pts").innerHTML;$("gkSec").hidden=!$("gk").innerHTML;
+ if(!m){$("ctrlSec").hidden=false;ctrl.innerHTML='<p class="soon">本章控件即将上线。</p>'}
+ document.querySelectorAll("#toc button,#slist button").forEach(b=>{const on=+b.querySelector(".mono").textContent-1===i;b.classList.toggle("on",on);on?b.setAttribute("aria-current","true"):b.removeAttribute("aria-current")});
+ document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
+ $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+/* ---------- controls ---------- */
+$("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
+$("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("explain").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+function openSheet(){$("mask").hidden=$("sheet").hidden=false;const on=$("slist").querySelector(".on");on&&on.scrollIntoView({block:"nearest"})}
+function closeSheet(){$("mask").hidden=$("sheet").hidden=true}
+$("chbtn").onclick=openSheet;$("mask").onclick=closeSheet;
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"&&t.type!=="range"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable))return;
+ if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+go(fromHash());requestAnimationFrame(loop);
+</script>
+</body>
+</html>
