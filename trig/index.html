@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>格物实验室 三角与解三角形</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--acc:#0071e3;--accDeep:#0058b0;--accSoft:#e8f1fc;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--track:#e5e5ea;--shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);
+--sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+[data-theme=dark]{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--acc:#2997ff;--accDeep:#6cb6ff;--accSoft:rgba(41,151,255,.18);--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--track:#3a3a3c;--shadow:0 1px 2px rgba(0,0,0,.4)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);overflow-x:hidden;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit}
+a{color:var(--acc)}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{display:inline-flex;align-items:center;min-height:44px;text-decoration:none;color:var(--acc);font-weight:500;white-space:nowrap}
+.back .full{margin-left:4px}
+.ttl{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:4px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--track)}
+.segs i.on{background:var(--acc);opacity:.4}.segs i.cur{background:var(--acc);opacity:1}
+.cnt{font:13px var(--mono);color:var(--sub)}
+.acts{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);cursor:pointer;font-size:14px;white-space:nowrap}
+.pill.pri{background:#0066cc;color:#fff}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{display:none;margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px);height:calc(100dvh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc ol,.sheet ol{list-style:none;margin:0;padding:0}
+.toc li button,.sheet li button{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:9px 12px;cursor:pointer;font-size:14px;align-items:baseline}
+.toc li button:hover{background:var(--btn2)}
+.toc li button b,.sheet li button b{font:13px var(--mono);color:var(--sub);font-weight:400}
+.toc li button.cur,.sheet li button.cur{background:var(--accSoft);color:var(--accDeep);font-weight:600}
+.toc li button.cur b,.sheet li button.cur b{color:var(--accDeep)}
+.center{display:flex;flex-direction:column;gap:12px;padding:12px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.lec{padding:14px 20px;flex:none}
+.lec-h{display:flex;align-items:center;gap:10px}
+.lec-h h2{font-size:20px;flex:1;min-width:0}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;cursor:pointer;min-height:30px}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.txt{margin:6px 0 0;max-height:4.8em;overflow:auto;line-height:1.6}
+.lec.collapsed .book,.lec.collapsed .txt{display:none}
+.stage{flex:1;min-height:0;position:relative;overflow:hidden}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:12px;display:flex;flex-direction:column;gap:12px}
+.box{padding:14px 16px}
+.box h3{font-size:13px;color:var(--sub);font-weight:600;margin-bottom:8px;letter-spacing:0}
+.box ul{margin:0;padding-left:1.1em}.box li{margin:4px 0}
+.mdark{display:none}
+.empty{color:var(--sub);font-size:14px;margin:0}
+/* controls */
+.ctl{margin:0 0 12px}.ctl:last-child{margin-bottom:0}
+.ctl-h{display:flex;justify-content:space-between;align-items:baseline;font-size:14px}
+.ctl-h span{font:13px var(--mono);color:var(--acc)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:32px;background:none;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(var(--acc),var(--acc)) 0/var(--p,50%) 100% no-repeat,var(--track)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-10px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25),0 0 0 .5px rgba(0,0,0,.08)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--track)}
+input[type=range]::-moz-range-progress{height:4px;border-radius:2px;background:var(--acc)}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line);background:var(--btn2);border-radius:980px;padding:4px 12px;min-height:34px;font-size:14px;cursor:pointer}
+.chips button.on{background:#0066cc;color:#fff;border-color:transparent}
+.tog{display:flex;justify-content:space-between;align-items:center;min-height:40px;font-size:14px;cursor:pointer}
+.tog input{-webkit-appearance:none;appearance:none;width:44px;height:26px;border-radius:13px;background:var(--track);position:relative;cursor:pointer;transition:background .2s;margin:0}
+.tog input::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.tog input:checked{background:#34c759}.tog input:checked::after{transform:translateX(18px)}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+/* sheet + bottom bar */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:40}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:70vh;overflow:auto;background:var(--card);border-radius:20px 20px 0 0;padding:10px 12px calc(16px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--track);margin:0 auto 10px}
+.sheet li button{min-height:48px;font-size:15px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .app{display:block;height:auto}
+ .toc,.prog{display:none}
+ .chbtn{display:inline-flex;align-items:center}
+ .center{padding:12px}
+ .stage{order:-1;flex:none;height:52vh}
+ .fold{display:none}
+ .lec.collapsed .book,.lec.collapsed .txt{display:block}
+ .txt{max-height:none}
+ .panel{border:0;padding:0 12px 24px}
+ .mdark{display:block}
+}
+/* phone */
+@media (max-width:767px){
+ .top{height:52px;padding:0 4px 0 0;gap:4px}
+ .back{width:44px;height:44px;justify-content:center;font-size:24px}.back .full{display:none}
+ .ttl{flex:1;font-size:15px}
+ .acts{display:none}
+ .chbtn{margin-left:0}
+ .center{padding:0;gap:0}
+ .stage{border-radius:0;border-left:0;border-right:0;box-shadow:none}
+ .lec{border:0;box-shadow:none;background:none;padding:16px}
+ .lec-h h2{font-size:20px}
+ .txt{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(88px + env(safe-area-inset-bottom))}
+ .ctl-h{min-height:28px}.chips button{min-height:44px}.tog{min-height:44px}
+ .mdark .pill{min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px;font-size:15px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../" aria-label="返回格物实验室">‹<span class="full">格物实验室</span></a>
+  <div class="ttl">三角与解三角形 · TrigLab</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="cnt" id="cnt">01 / 09</span></div>
+  <div class="acts">
+    <button class="pill" id="prev">上一章</button>
+    <button class="pill pri" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button>
+    <button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chcnt">01/09</span></button>
+</header>
+<div class="app">
+  <nav class="toc" aria-label="章节目录"><ol id="toc"></ol></nav>
+  <main class="center">
+    <section class="card lec" id="lec">
+      <div class="lec-h"><h2 id="lt"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="lb"></p>
+      <div class="txt" id="lx"></div>
+    </section>
+    <div class="card stage" id="stage"><canvas id="cv" aria-label="实验画布"></canvas></div>
+  </main>
+  <aside class="panel">
+    <div class="card box"><h3>控件</h3><div id="ctrl"></div></div>
+    <div class="card box"><h3>读数</h3><div id="read"></div></div>
+    <div class="card box" id="ptsBox"><h3>要点</h3><ul id="pts"></ul></div>
+    <div class="card box" id="gkBox"><h3>高考链接</h3><div id="gk"></div></div>
+    <div class="mdark"><button class="pill" id="dark2">深色</button></div>
+  </aside>
+</div>
+<div class="backdrop" id="bd" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><ol id="slist"></ol></div>
+<div class="bbar"><button class="pill" id="prev2">上一章</button><button class="pill pri" id="next2">下一章</button></div>
+<script>
+const CH=[
+ {n:"两角和与差",book:"人教A版 必修第一册 · 5.5.1 两角和与差的正弦、余弦和正切公式",ready:true},
+ {n:"二倍角与降幂",book:"人教A版 必修第一册 · 5.5.1 二倍角公式 · 5.5.2 简单的三角恒等变换",ready:false},
+ {n:"辅助角公式",book:"人教A版 必修第一册 · 5.5.2 · 高考拓展",ready:false},
+ {n:"正弦定理",book:"人教A版 必修第二册 · 6.4.3 余弦定理、正弦定理",ready:false},
+ {n:"余弦定理",book:"人教A版 必修第二册 · 6.4.3",ready:false},
+ {n:"解的个数",book:"人教A版 必修第二册 · 6.4.3 · 已知两边及一边对角",ready:false},
+ {n:"面积与最值",book:"人教A版 必修第二册 · 6.4.3 · 高考拓展",ready:false},
+ {n:"测量应用",book:"人教A版 必修第二册 · 6.4.3 · 余弦定理、正弦定理应用举例",ready:false},
+ {n:"随堂检测",book:"三角恒等变换与解三角形",ready:false}];
+const MODS=[];
+/* ---------- 01 两角和与差 ---------- */
+MODS[0]=(()=>{
+ const S={mode:"vec",a:60,b:20,fn:"sin",sg:1,sp:0,map:null,dk:null},R=d=>d*Math.PI/180;
+ const F=v=>(Math.abs(v)<5e-10?0:v).toFixed(4),N=v=>v<-5e-10?"("+F(v)+")":F(v);
+ const tri={sin:Math.sin,cos:Math.cos,tan:Math.tan};
+ const SP={15:{a:45,b:30,sg:-1},75:{a:45,b:30,sg:1},105:{a:60,b:45,sg:1}};
+ const EX={15:{sin:"(√6−√2)/4",cos:"(√6+√2)/4",tan:"2−√3"},75:{sin:"(√6+√2)/4",cos:"(√6−√2)/4",tan:"2+√3"},105:{sin:"(√6+√2)/4",cos:"(√2−√6)/4",tan:"−2−√3"}};
+ const V={30:{sin:"1/2",cos:"√3/2",tan:"√3/3"},45:{sin:"√2/2",cos:"√2/2",tan:"1"},60:{sin:"√3/2",cos:"1/2",tan:"√3"}};
+ const sc=()=>S.sg>0?"+":"−";
+ // right side of the identity, built from term function s(f,angle) and product joiner j
+ function exp(fn,sg,s,j){const p=sg>0?" + ":" − ",q=sg>0?" − ":" + ";
+  if(fn==="sin")return s("sin","a")+j+s("cos","b")+p+s("cos","a")+j+s("sin","b");
+  if(fn==="cos")return s("cos","a")+j+s("cos","b")+q+s("sin","a")+j+s("sin","b");
+  return "("+s("tan","a")+p+s("tan","b")+")/(1"+q+s("tan","a")+"·"+s("tan","b")+")"}
+ function vals(){const a=R(S.a),b=R(S.b),c=a+S.sg*b,sa=Math.sin(a),ca=Math.cos(a),sb=Math.sin(b),cb=Math.cos(b),ta=sa/ca,tb=sb/cb;
+  const ok=S.fn!=="tan"||(Math.abs(ca)>1e-9&&Math.abs(cb)>1e-9&&Math.abs(Math.cos(c))>1e-9);
+  const rhs=S.fn==="sin"?sa*cb+S.sg*ca*sb:S.fn==="cos"?ca*cb-S.sg*sa*sb:(ta+S.sg*tb)/(1-S.sg*ta*tb);
+  return{a,b,c,lhs:tri[S.fn](c),rhs,ok}}
+ const P1={k:"a",x:1,y:0,onmove:()=>upd()},P2={k:"b",x:1,y:0,onmove:()=>upd()};
+ const dp=dragPoints([P1,P2],()=>S.map,(nx,ny,p)=>{const d=((Math.round(Math.atan2(ny,nx)*180/Math.PI/5)*5)%360+360)%360;S[p.k]=d;return{x:Math.cos(R(d)),y:Math.sin(R(d))}});
+ let ro=null,box=null;
+ function sliders(b){S.sa=slider("α",0,360,5,S.a,v=>v+"°",v=>{S.a=v;S.sp=0;S.spc&&S.spc.set(0);upd()});
+  S.sb=slider("β",0,360,5,S.b,v=>v+"°",v=>{S.b=v;S.sp=0;S.spc&&S.spc.set(0);upd()});b.append(S.sa,S.sb)}
+ function circle(top){const t=theme(),m=S.map=drawAxes(ctx,{x:16,y:top,w:W-32,h:H-top-16},[-1.35,1.35],[-1.35,1.35],{equal:true,xStep:.5,yStep:.5});
+  const ox=m.X(0),oy=m.Y(0),r=m.X(1)-ox;ctx.save();ctx.strokeStyle=t.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(ox,oy,r,0,2*Math.PI);ctx.stroke();ctx.restore();
+  return{m,ox,oy,r,t,P:th=>[m.X(Math.cos(th)),m.Y(Math.sin(th))]}}
+ function dash(x1,y1,x2,y2,c){ctx.save();ctx.strokeStyle=c;ctx.lineWidth=1.2;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore()}
+ function dot(x,y,c,big){ctx.save();ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,big?8:6,0,2*Math.PI);ctx.fill();ctx.restore()}
+ const SUM_MODES=[
+  {id:"vec",l:"向量证明",
+   ctl(b){sliders(b);b.append(el("p","empty","也可直接拖动圆上的 P₁、P₂"))},
+   ro(){const t=theme(),a=R(S.a),b=R(S.b),ca=Math.cos(a),cb=Math.cos(b),sa=Math.sin(a),sb=Math.sin(b);
+    return[["α, β, α−β",S.a+"°, "+S.b+"°, "+(S.a-S.b)+"°"],
+     ["|OP₁||OP₂|cos(α−β)","1×1×cos("+(S.a-S.b)+"°) = "+F(Math.cos(a-b)),t.blue],
+     ["cos α cos β + sin α sin β",N(ca)+"×"+N(cb)+" + "+N(sa)+"×"+N(sb)+" = "+F(ca*cb+sa*sb),t.goldText]]},
+   draw(){const g=circle(16),{ox,oy,r,t}=g,A=R(S.a),B=R(S.b);
+    P1.x=Math.cos(A);P1.y=Math.sin(A);P2.x=Math.cos(B);P2.y=Math.sin(B);
+    [[A,P1,t.blue,"P₁",t.blue],[B,P2,t.red,"P₂",t.redText]].forEach(([th,p,c,n,tc])=>{const[x,y]=g.P(th);
+     dash(x,y,x,oy,t.sub);dash(x,y,ox,y,t.sub);arrow(ctx,ox,oy,x,y,c);dot(x,y,c,dp.active===p||dp.hover===p);
+     label(ctx,n,ox+Math.cos(th)*(r+20),oy-Math.sin(th)*(r+20),tc)});
+    if(S.a!==S.b)angleArc(ctx,ox,oy,Math.max(18,r*.3),B,A,t.gold,"α−β");
+    label(ctx,"OP₁·OP₂ = cos(α−β) = "+F(Math.cos(A-B)),16,26,t.fg,"left")},
+   pointer:(e,type,x,y)=>dp.pointer(e,type,x,y)},
+  {id:"fml",l:"公式验证",
+   ctl(b){b.append(chips([{v:"sin",l:"sin(α±β)"},{v:"cos",l:"cos(α±β)"},{v:"tan",l:"tan(α±β)"}],S.fn,v=>{S.fn=v;upd()}));
+    S.sgc=chips([{v:1,l:"α + β"},{v:-1,l:"α − β"}],S.sg,v=>{S.sg=v;S.sp=0;S.spc.set(0);upd()});b.append(S.sgc);sliders(b);
+    b.append(el("p","empty","特殊角"));
+    S.spc=chips([{v:0,l:"自定"},{v:15,l:"15°"},{v:75,l:"75°"},{v:105,l:"105°"}],S.sp,v=>{S.sp=v;if(v){const e=SP[v];S.a=e.a;S.b=e.b;S.sg=e.sg;S.sgc.set(e.sg)}upd()});b.append(S.spc)},
+   ro(){const t=theme(),v=vals(),nm=S.fn+"(α"+sc()+"β)",rows=[["α, β",S.a+"°, "+S.b+"°"]];
+    if(!v.ok)return rows.concat([[nm,"无意义：tan α、tan β 或 tan(α"+sc()+"β) 不存在",t.redText]]);
+    rows.push(["左边 "+nm,S.fn+"("+(S.a+S.sg*S.b)+"°) = "+F(v.lhs),t.blue]);
+    rows.push(["右边 代入",exp(S.fn,S.sg,(f,k)=>N(tri[f](k==="a"?v.a:v.b)),"×")+" = "+F(v.rhs),t.goldText]);
+    if(S.sp){const e=SP[S.sp];rows.push(["精确值",S.fn+" "+S.sp+"° = "+S.fn+"("+e.a+"°"+(e.sg>0?"+":"−")+e.b+"°) = "+
+     exp(S.fn,e.sg,(f,k)=>V[k==="a"?e.a:e.b][f],"·")+" = "+EX[S.sp][S.fn]])}
+    return rows},
+   draw(){const t=theme(),v=vals(),nm=S.fn+"(α"+sc()+"β)",g=circle(84),{m,ox,oy,r}=g,[ax,ay]=g.P(v.a),[cx,cy]=g.P(v.c);
+    label(ctx,nm+" = "+exp(S.fn,S.sg,(f,k)=>f+" "+(k==="a"?"α":"β")," "),16,22,t.fg,"left");
+    if(v.ok){label(ctx,"左边 = "+F(v.lhs),16,46,t.blue,"left");label(ctx,"右边 = "+F(v.rhs),16,68,t.goldText,"left")}
+    else label(ctx,"正切无意义",16,46,t.redText,"left");
+    if(S.sp)label(ctx,S.fn+" "+S.sp+"° = "+EX[S.sp][S.fn],W-16,22,t.fg,"right");
+    angleArc(ctx,ox,oy,Math.max(14,r*.18),0,v.a,t.gold);
+    if(S.b%360)angleArc(ctx,ox,oy,Math.max(22,r*.36),v.a,v.c,t.gold,(S.sg>0?"+":"−")+"β");
+    arrow(ctx,ox,oy,ax,ay,t.blue);label(ctx,"α",ox+Math.cos(v.a)*(r+18),oy-Math.sin(v.a)*(r+18),t.blue);
+    arrow(ctx,ox,oy,cx,cy,t.fg,null,2.5);label(ctx,"α"+sc()+"β",ox+Math.cos(v.c)*(r+22),oy-Math.sin(v.c)*(r+22),t.fg);
+    if(S.fn==="sin"){dash(cx,cy,cx,oy,t.red);label(ctx,"sin",cx+(cx>ox?-18:18),(cy+oy)/2,t.redText)}
+    else if(S.fn==="cos"){dash(cx,cy,ox,cy,t.red);label(ctx,"cos",(cx+ox)/2,cy+(cy<oy?-12:12),t.redText)}
+    else if(v.ok&&Math.abs(Math.tan(v.c))<1.3){const ty=m.Y(Math.tan(v.c));dash(m.X(1),m.Y(-1.3),m.X(1),m.Y(1.3),t.sub);dash(ox,oy,m.X(1),ty,t.red);dot(m.X(1),ty,t.red);label(ctx,"tan",m.X(1)+20,ty,t.redText)}
+    dot(cx,cy,t.fg)}},
+  {id:"rect",l:"矩形拼图",
+   ctl(b){if(!S.ra){S.ra=30;S.rb=25}
+    const lim=(k,o,v)=>{S[k]=v;if(S.ra+S.rb>85){S[o]=85-v;(o==="ra"?ra:rb).set(S[o])}upd()};
+    const ra=slider("α",5,80,5,S.ra,v=>v+"°",v=>lim("ra","rb",v)),rb=slider("β",5,80,5,S.rb,v=>v+"°",v=>lim("rb","ra",v));
+    b.append(ra,rb,el("p","empty","α + β 不超过 85°"))},
+   ro(){const t=theme(),a=R(S.ra),b=R(S.rb),ca=Math.cos(a),sa=Math.sin(a),cb=Math.cos(b),sb=Math.sin(b),s1=sa*cb,s2=ca*sb;
+    return[["α, β, α+β",S.ra+"°, "+S.rb+"°, "+(S.ra+S.rb)+"°"],
+     ["下段 sin α cos β",F(s1),t.blue],
+     ["上段 cos α sin β",F(s2),t.redText],
+     ["两段之和",F(s1)+" + "+F(s2)+" = "+F(s1+s2),t.goldText],
+     ["sin(α+β)","sin("+(S.ra+S.rb)+"°) = "+F(Math.sin(a+b)),t.goldText],
+     ["cos α cos β − sin α sin β",F(ca*cb)+" − "+F(sa*sb)+" = "+F(ca*cb-sa*sb),t.fg],
+     ["cos(α+β)","cos("+(S.ra+S.rb)+"°) = "+F(Math.cos(a+b)),t.fg]]},
+   draw(){if(!S.ra){S.ra=30;S.rb=25}
+    const t=theme(),a=R(S.ra),b=R(S.rb),ca=Math.cos(a),sa=Math.sin(a),cb=Math.cos(b),sb=Math.sin(b),w=ca*cb,h=Math.sin(a+b);
+    const k=Math.max(40,Math.min((W-230)/w,(H-150)/h)),x0=110+Math.max(0,(W-230-w*k)/2),y0=80+(H-120+h*k)/2;
+    const X=u=>x0+u*k,Y=v=>y0-v*k,pt=(u,v)=>[X(u),Y(v)];
+    const O=pt(0,0),A=pt(w,0),Q=pt(w,sa*cb),TR=pt(w,h),P=pt(Math.cos(a+b),h),TL=pt(0,h),L=pt(0,sa*cb);
+    const seg=(p,q,c,lw,d)=>{ctx.save();ctx.strokeStyle=c;ctx.lineWidth=lw;ctx.lineCap="round";if(d)ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.stroke();ctx.restore()};
+    const lab=(p,q,txt,c,ref,off)=>{const mx=(p[0]+q[0])/2,my=(p[1]+q[1])/2;let nx=-(q[1]-p[1]),ny=q[0]-p[0];const l=Math.hypot(nx,ny)||1;nx/=l;ny/=l;
+     if((ref[0]-mx)*nx+(ref[1]-my)*ny>0){nx=-nx;ny=-ny}const o=off||14;label(ctx,txt,mx+nx*o,my+ny*o,c)};
+    label(ctx,"sin(α+β) = sin α cos β + cos α sin β",16,22,t.goldText,"left");
+    label(ctx,"cos(α+β) = cos α cos β − sin α sin β",16,46,t.fg,"left");
+    // rectangle
+    ctx.save();ctx.strokeStyle=t.axis;ctx.lineWidth=1;ctx.strokeRect(O[0],TL[1],A[0]-O[0],O[1]-TL[1]);ctx.restore();
+    // left edge split by the dashed level of Q
+    seg(L,Q,t.sub,1.2,true);
+    seg(O,L,t.blue,4);seg(L,TL,t.red,4);
+    // right edge: the same two segments
+    seg(A,Q,t.blue,3);seg(Q,TR,t.red,3);
+    // top edge: cos(α+β) then sin α sin β
+    seg(TL,P,t.fg,3);seg(P,TR,t.fg,1.5,true);
+    // the two triangles
+    seg(O,Q,t.fg,2);seg(Q,P,t.fg,2);seg(O,P,t.fg,2.5);
+    // gold brace on the left edge
+    const bx=O[0]-10,y1=TL[1],y2=O[1],ym=(y1+y2)/2,d=Math.min(8,(y2-y1)/4);
+    ctx.save();ctx.strokeStyle=t.gold;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(bx,y1);ctx.quadraticCurveTo(bx-6,y1,bx-6,y1+d);ctx.lineTo(bx-6,ym-d);
+    ctx.quadraticCurveTo(bx-6,ym,bx-12,ym);ctx.quadraticCurveTo(bx-6,ym,bx-6,ym+d);ctx.lineTo(bx-6,y2-d);ctx.quadraticCurveTo(bx-6,y2,bx,y2);ctx.stroke();ctx.restore();
+    label(ctx,"sin(α+β)",bx-16,ym,t.goldText,"right");
+    // segment labels
+    label(ctx,"sin α cos β",A[0]+8,(A[1]+Q[1])/2,t.blue,"left");
+    label(ctx,"cos α sin β",A[0]+8,(Q[1]+TR[1])/2,t.redText,"left");
+    label(ctx,"cos α cos β",(O[0]+A[0])/2,O[1]+16,t.fg);
+    label(ctx,"cos(α+β)",(TL[0]+P[0])/2,TL[1]-14,t.fg);
+    label(ctx,"sin α sin β",(P[0]+TR[0])/2,TR[1]-14,t.fg);
+    lab(O,P,"1",t.fg,Q);lab(O,Q,"cos β",t.fg,P);lab(Q,P,"sin β",t.fg,O,22);
+    // angle arcs at O
+    angleArc(ctx,O[0],O[1],26,0,a,t.blue,"α");
+    angleArc(ctx,O[0],O[1],46,a,a+b,t.red,"β");
+    angleArc(ctx,O[0],O[1],Math.min(78,(O[1]-TL[1])*.7),0,a+b,t.gold,"α+β");
+    [[O,"O",-12,12],[P,"P",0,-30],[Q,"Q",-12,0]].forEach(([p,n,dx,dy])=>{dot(p[0],p[1],t.fg);label(ctx,n,p[0]+dx,p[1]+dy,t.fg)})}}];
+ const md=()=>SUM_MODES.find(x=>x.id===S.mode);
+ function upd(){if(S.sa){S.sa.set(S.a);S.sb.set(S.b)}ro&&ro.update(md().ro())}
+ function build(){box.innerHTML="";S.spc=S.sgc=null;md().ctl(box);upd()}
+ return{
+  text:"<p>在单位圆上取 P₁(cos α, sin α)、P₂(cos β, sin β)，OP₁ 与 OP₂ 的夹角就是 α−β。数量积 OP₁·OP₂ 一边等于 cos(α−β)，一边按坐标等于 cos α cos β + sin α sin β——公式就这样得出。β 换成 −β 得 cos(α+β)，再用诱导公式得到正弦。</p>",
+  points:["cos(α∓β) = cos α cos β ± sin α sin β","sin(α±β) = sin α cos β ± cos α sin β","tan(α±β) = (tan α ± tan β)/(1 ∓ tan α tan β)"],
+  gk:"<p>选填常考给值求值、拆角（α = (α+β) − β）。</p><p><b>易错：</b>cos(α+β) 中间是减号；tan 公式要求各角正切有意义。</p>",
+  mount(ctrl,read){ctrl.append(chips(SUM_MODES.map(x=>({v:x.id,l:x.l})),S.mode,v=>{S.mode=v;build()}));box=el("div");ctrl.append(box);ro=readout();read.append(ro);build()},
+  unmount(){ro=box=null;S.sa=S.sb=null;dp.active=null},
+  draw(){if(S.dk!==dark){S.dk=dark;upd()}md().draw()},
+  pointer(e,type,x,y){const p=md().pointer;return p?p(e,type,x,y):false}}
+})();
+/* ---------- 02 二倍角与降幂 ---------- */
+MODS[1]=(()=>{
+ const P=Math.PI,R=d=>d*P/180,F=v=>(Math.abs(v)<5e-10?0:v).toFixed(4),N=v=>v<-5e-10?"("+F(v)+")":F(v),sn=Math.sin,cs=Math.cos;
+ const S={mode:"dbl",k:4,fm:"s",lw:"sin",a:30,an:0,st:-1,dk:null,map:null,drag:false,sk:null,sa:null};
+ const x0=()=>S.k*P/12,fx=()=>fmtRad(x0())+" ≈ "+F(x0());
+ const DF={s:{l:"2sin x cos x",f:x=>2*sn(x)*cs(x),sub:x=>"2×"+N(sn(x))+"×"+N(cs(x))},
+  c1:{l:"cos²x − sin²x",f:x=>cs(x)**2-sn(x)**2,sub:x=>N(cs(x))+"² − "+N(sn(x))+"²"},
+  c2:{l:"2cos²x − 1",f:x=>2*cs(x)**2-1,sub:x=>"2×"+N(cs(x))+"² − 1"},
+  c3:{l:"1 − 2sin²x",f:x=>1-2*sn(x)**2,sub:x=>"1 − 2×"+N(sn(x))+"²"}};
+ const isS=()=>S.fm==="s",lhs=x=>isS()?sn(2*x):cs(2*x),ln=()=>isS()?"sin 2x":"cos 2x";
+ const LW={sin:{n:"sin²x",f:x=>sn(x)**2,r:"(1 − cos 2x)/2",sg:-1,mx:P/2,mn:-P,
+   steps:[["×(−1)","−cos 2x",(c,s)=>c*(1-2*s)],["+1","1 − cos 2x",(c,s)=>-c+s],["÷2","(1 − cos 2x)/2",(c,s)=>(1-c)*(1-s/2)]]},
+  cos:{n:"cos²x",f:x=>cs(x)**2,r:"(1 + cos 2x)/2",sg:1,mx:0,mn:-P/2,
+   steps:[["+1","1 + cos 2x",(c,s)=>c+s],["÷2","(1 + cos 2x)/2",(c,s)=>(1+c)*(1-s/2)]]}};
+ function dot(x,y,c,big){ctx.save();ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,big?8:5,0,2*P);ctx.fill();ctx.restore()}
+ function seg(x1,y1,x2,y2,c,lw,d){ctx.save();ctx.strokeStyle=c;ctx.lineWidth=lw||1.2;ctx.lineCap="round";if(d)ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore()}
+ function graph(yr){return S.map=drawAxes(ctx,{x:16,y:60,w:W-32,h:H-76},[-2*P,2*P],yr,{piTicks:true})}
+ function marker(m,f,c){const t=theme(),X=m.X(x0());seg(X,m.box.y,X,m.box.y+m.box.h,t.sub,1.2,true);dot(X,m.Y(f(x0())),c,S.drag);
+  label(ctx,"x₀",X,m.box.y+m.box.h-10,t.fg)}
+ function xs(b){S.sk=slider("x₀",-24,24,1,S.k,v=>fmtRad(v*P/12),v=>{S.k=v;upd()});b.append(S.sk,el("p","empty","也可在图上左右拖动 x₀ 竖线"))}
+ function gp(e,type,x,y){const m=S.map;if(!m)return false;
+  if(type==="down"){S.drag=Math.abs(x-m.X(x0()))<(e&&e.pointerType==="touch"?22:14);return S.drag}
+  if(type==="move"&&S.drag){S.k=Math.max(-24,Math.min(24,Math.round(m.invX(x)/(P/12))));S.sk&&S.sk.set(S.k);upd();return true}
+  if(type==="up"){const w=S.drag;S.drag=false;return w}return false}
+ const PA={x:1,y:0},PC={x:1,y:0};
+ const dp=dragPoints([PA,PC],()=>S.map,(nx,ny,p)=>{let g=Math.atan2(ny,nx)*180/P;if(p===PC)g/=2;
+  S.a=Math.max(0,Math.min(90,Math.round(g)));S.sa&&S.sa.set(S.a);upd();const r=R(p===PC?2*S.a:S.a);return{x:cs(r),y:sn(r)}});
+ const MODES=[
+  {id:"dbl",l:"二倍角",
+   ctl(b){b.append(chips([{v:"s",l:"sin 2x"},{v:"c1",l:"cos²x − sin²x"},{v:"c2",l:"2cos²x − 1"},{v:"c3",l:"1 − 2sin²x"}],S.fm,v=>{S.fm=v;upd()}));xs(b)},
+   ro(){const t=theme(),x=x0(),d=DF[S.fm];
+    return[["x₀",fx()],[isS()?"sin x₀, cos x₀":"cos x₀, sin x₀",isS()?F(sn(x))+", "+F(cs(x)):F(cs(x))+", "+F(sn(x))],
+     [ln().replace("x","x₀"),ln().replace("x","·"+fmtRad(x))+" = "+F(lhs(x)),t.blue],[d.l.replace(/x/g,"x₀")+" 代入",d.sub(x)+" = "+F(d.f(x)),t.goldText]]},
+   draw(){const t=theme(),m=graph([-1.6,1.6]),d=DF[S.fm],x=x0();
+    plotFn(ctx,m,isS()?sn:cs,null,t.sub,1.2);plotFn(ctx,m,lhs,null,t.blue,3);plotFn(ctx,m,d.f,null,t.gold,2,true);marker(m,lhs,t.blue);
+    label(ctx,"蓝线 "+ln()+" = "+F(lhs(x)),16,20,t.blue,"left");label(ctx,"金虚线 "+d.l+" = "+F(d.f(x)),16,42,t.goldText,"left");
+    label(ctx,"淡线 "+(isS()?"sin x":"cos x"),W-16,20,t.fg,"right")},
+   pointer:gp},
+  {id:"pw",l:"降幂",
+   ctl(b){b.append(chips([{v:"sin",l:"sin²x"},{v:"cos",l:"cos²x"}],S.lw,v=>{S.lw=v;S.an=0;upd()}),button("变换动画",()=>{S.an=performance.now();upd()},true));xs(b)},
+   ro(){const t=theme(),x=x0(),L=LW[S.lw],c=cs(2*x),v=L.f(x),st=S.st;
+    return[["x₀",fx()],["cos 2x₀",F(c)],[L.n.replace("x","x₀"),N(S.lw==="sin"?sn(x):cs(x))+"² = "+F(v),t.blue],
+     [L.r.replace("x","x₀"),"(1 "+(L.sg<0?"− ":"+ ")+N(c)+")/2 = "+F((1+L.sg*c)/2),t.goldText],
+     ["变换",st<0?"cos 2x → "+L.steps.map(s=>s[0]).join(" → ")+" → "+L.r:"第 "+(st+1)+" 步 "+L.steps[st][0]+" → "+L.steps[st][1],st<0?t.fg:t.goldText],
+     ["周期 · 最值","T = π，最大值 1，最小值 0",t.redText]]},
+   draw(){const t=theme(),L=LW[S.lw],m=graph([-1.2,2.2]),c2=x=>cs(2*x),n=L.steps.length;
+    plotFn(ctx,m,()=>1,null,t.sub,1,true);plotFn(ctx,m,L.f,null,t.blue,3);
+    let e=S.an?(performance.now()-S.an)/1000:-1;if(e>=n){S.an=0;e=-1}const st=e<0?-1:Math.floor(e);if(st!==S.st){S.st=st;upd()}
+    if(e>=0){const s=Math.min(1,(e-st)/.8),sm=s*s*(3-2*s),p=L.steps[st];plotFn(ctx,m,c2,null,t.sub,1.2,true);plotFn(ctx,m,x=>p[2](c2(x),sm),null,t.gold,2.5);
+     label(ctx,"第 "+(st+1)+" 步 "+p[0]+"："+(st?L.steps[st-1][1]:"cos 2x")+" → "+p[1],16,42,t.goldText,"left")}
+    else{plotFn(ctx,m,x=>L.steps[n-1][2](c2(x),1),null,t.gold,2.5,true);label(ctx,"金虚线 "+L.r+"，与蓝线重合",16,42,t.goldText,"left")}
+    label(ctx,"蓝线 "+L.n,16,20,t.blue,"left");
+    const a=m.X(L.mn+P),b=m.X(L.mn+2*P),y=m.Y(1.75);seg(a,y,b,y,t.red,2);seg(a,y-6,a,y+6,t.red,2);seg(b,y-6,b,y+6,t.red,2);label(ctx,"周期 π",(a+b)/2,y-14,t.redText);
+    dot(m.X(L.mx),m.Y(1),t.red);label(ctx,"最大值 1",m.X(L.mx),m.Y(1)-16,t.redText);dot(m.X(L.mn),m.Y(0),t.red);label(ctx,"最小值 0",m.X(L.mn),m.Y(0)+30,t.redText);
+    marker(m,L.f,t.blue)},
+   pointer:gp},
+  {id:"circ",l:"单位圆",
+   ctl(b){S.sa=slider("α",0,90,1,S.a,v=>v+"°",v=>{S.a=v;upd()});b.append(S.sa,el("p","empty","也可拖动圆上的 α 点或 C 点"))},
+   ro(){const t=theme(),a=R(S.a),s=sn(a),c=cs(a);
+    return[["α, 2α",S.a+"°, "+2*S.a+"°"],["AC = 2cos α",F(2*c)],["BC = 2sin α",F(2*s)],
+     ["面积 ½·AC·BC","½×"+F(2*c)+"×"+F(2*s)+" = 2 sin α cos α = "+F(2*s*c),t.goldText],["高 h = sin 2α","sin "+2*S.a+"° = "+F(sn(2*a)),t.blue]]},
+   draw(){const t=theme(),m=S.map=drawAxes(ctx,{x:16,y:84,w:W-32,h:H-100},[-1.4,1.4],[-1.25,1.25],{equal:true,xStep:.5,yStep:.5}),a=R(S.a);
+    const ox=m.X(0),oy=m.Y(0),r=m.X(1)-ox,A=[m.X(-1),oy],B=[m.X(1),oy],C=[m.X(cs(2*a)),m.Y(sn(2*a))],Pa=[m.X(cs(a)),m.Y(sn(a))],H0=[C[0],oy];
+    PA.x=cs(a);PA.y=sn(a);PC.x=cs(2*a);PC.y=sn(2*a);
+    ctx.save();ctx.strokeStyle=t.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(ox,oy,r,0,2*P);ctx.stroke();
+    ctx.globalAlpha=.1;ctx.fillStyle=t.blue;ctx.beginPath();ctx.moveTo(...A);ctx.lineTo(...C);ctx.lineTo(...B);ctx.closePath();ctx.fill();ctx.restore();
+    seg(...A,...B,t.fg,2.5);seg(...A,...C,t.blue,2.5);seg(...C,...B,t.fg,2.5);seg(...C,...H0,t.red,2,true);seg(ox,oy,...C,t.sub,1.2);
+    if(S.a>3&&S.a<87){const u=(p,q)=>{const l=Math.hypot(q[0]-p[0],q[1]-p[1]);return[(q[0]-p[0])/l*10,(q[1]-p[1])/l*10]},ua=u(C,A),ub=u(C,B);
+     ctx.save();ctx.strokeStyle=t.fg;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(C[0]+ua[0],C[1]+ua[1]);ctx.lineTo(C[0]+ua[0]+ub[0],C[1]+ua[1]+ub[1]);ctx.lineTo(C[0]+ub[0],C[1]+ub[1]);ctx.stroke();ctx.restore()}
+    arrow(ctx,ox,oy,...Pa,t.blue);if(S.a)angleArc(ctx,...A,Math.max(24,r*.28),0,a,t.gold,"α");if(S.a)angleArc(ctx,ox,oy,Math.max(16,r*.16),0,2*a,t.gold,"2α");
+    label(ctx,"2cos α",(A[0]+C[0])/2-14*sn(a),(A[1]+C[1])/2-14*cs(a),t.blue);label(ctx,"2sin α",(C[0]+B[0])/2+18*cs(a),(C[1]+B[1])/2-18*sn(a),t.fg);
+    if(S.a)label(ctx,"h",C[0]+(C[0]>ox?10:-10),(C[1]+oy)/2,t.redText);
+    [[A,"A",-14,14],[B,"B",14,14],[ [ox,oy],"O",-10,14]].forEach(([p,n,dx,dy])=>label(ctx,n,p[0]+dx,p[1]+dy,t.fg));
+    dot(...Pa,t.blue,dp.active===PA||dp.hover===PA);label(ctx,"α",ox+cs(a)*(r+18),oy-sn(a)*(r+18),t.blue);
+    dot(...C,t.fg,dp.active===PC||dp.hover===PC);label(ctx,"C（2α）",ox+cs(2*a)*(r+30),oy-sn(2*a)*(r+22),t.fg);
+    label(ctx,"S = ½·AC·BC = ½·2cos α·2sin α = 2 sin α cos α = "+F(2*sn(a)*cs(a)),16,20,t.goldText,"left");
+    label(ctx,"S = ½·AB·h = h = sin 2α = "+F(sn(2*a)),16,44,t.blue,"left");label(ctx,"AB = 2 是直径，∠ACB = 90°",16,68,t.fg,"left")},
+   pointer:(e,type,x,y)=>dp.pointer(e,type,x,y)}];
+ let ro=null,box=null;
+ const md=()=>MODES.find(x=>x.id===S.mode);
+ function upd(){ro&&ro.update(md().ro())}
+ function build(){box.innerHTML="";S.sk=S.sa=null;S.an=0;S.st=-1;md().ctl(box);upd()}
+ return{
+  text:"<p>令两角和公式里的 β = α，就得到二倍角公式。反过来读 cos 2α = 1 − 2sin²α，得 sin²α = (1 − cos 2α)/2——平方被「降」成了一次，频率却翻了倍，这就是降幂。图像上看，sin²x 和 (1 − cos 2x)/2 完全重合：振幅减半、上移 1/2、周期变成 π。</p>",
+  points:["sin 2α = 2 sin α cos α","cos 2α = cos²α − sin²α = 2cos²α − 1 = 1 − 2sin²α","tan 2α = 2tan α/(1 − tan²α)","降幂：sin²α = (1 − cos 2α)/2，cos²α = (1 + cos 2α)/2","升幂：1 + cos 2α = 2cos²α"],
+  gk:"<p>化简 f(x) = sin²x + √3 sin x cos x 一类函数时，先降幂再用辅助角，是三角解答题的标准第一步。</p><p><b>易错：</b>降幂后频率变为 2 倍，周期减半。</p>",
+  mount(ctrl,read){ctrl.append(chips(MODES.map(x=>({v:x.id,l:x.l})),S.mode,v=>{S.mode=v;build()}));box=el("div");ctrl.append(box);ro=readout();read.append(ro);build()},
+  unmount(){ro=box=null;S.sk=S.sa=null;S.an=0;S.drag=false;dp.active=null},
+  draw(){if(S.dk!==dark){S.dk=dark;upd()}md().draw()},
+  pointer(e,type,x,y){const p=md().pointer;return p?p(e,type,x,y):false}}
+})();
+CH[1].ready=true;
+/* ---------- 03 辅助角公式 ---------- */
+MODS[2]=(()=>{
+ const P=Math.PI,r3=Math.sqrt(3),hy=Math.hypot,at=Math.atan2;
+ const PR=[[1,r3,"sin x + √3 cos x"],[r3,-1,"√3 sin x − cos x"],[1,1,"sin x + cos x"],[3,4,"3 sin x + 4 cos x"]];
+ const S={a:1,b:r3,pi:0,app:false,rot:0,a0:1,b0:r3,dk:null,vm:null,pc:null};
+ const fs=v=>{if(Math.abs(v)<1e-9)return"0";const N=4*v*v,n=Math.round(N);if(!n||Math.abs(N-n)>1e-6)return v.toFixed(3).replace("-","−");
+  let k=1,m=n;for(let i=2;i*i<=m;i++)while(m%(i*i)===0){m/=i*i;k*=i}const s=v<0?"−":"";
+  if(m===1)return s+(k/2);return s+(k%2===0?(k/2===1?"":k/2)+"√"+m:(k===1?"":k)+"√"+m+"/2")};
+ const fa=v=>{const s=fs(v);return s.includes("√")?s+" ≈ "+v.toFixed(3):s},pr=r=>fmtRad(r).replace("-","−");
+ const tm=(c,f,first)=>{if(Math.abs(c)<1e-9)return"";const s=fs(Math.abs(c)),co=s==="1"?"":s+" ";return(first?(c<0?"−":""):(c<0?" − ":" + "))+co+f};
+ const expr=()=>{const p=tm(S.a,"sin x",true);return(p+tm(S.b,"cos x",!p))||"0"};
+ const RR=()=>hy(S.a,S.b),PH=()=>at(S.b,S.a);
+ const form=()=>{const R=RR(),ph=PH(),c=fs(R)==="1"?"":fs(R);return c+" sin(x"+(Math.abs(ph)<1e-9?"":(ph<0?" − ":" + ")+pr(Math.abs(ph)))+")"};
+ const xmax=()=>{let x=P/2-PH();while(x>P+1e-9)x-=2*P;while(x<=-P+1e-9)x+=2*P;return x};
+ const cl=v=>Math.max(-5,Math.min(5,v)),E={x:1,y:r3};
+ function dot(x,y,c,big){ctx.save();ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,big?8:5,0,2*P);ctx.fill();ctx.restore()}
+ function seg(x1,y1,x2,y2,c,lw,d){ctx.save();ctx.strokeStyle=c;ctx.lineWidth=lw||1.2;ctx.lineCap="round";if(d)ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore()}
+ function faint(m,f,c){ctx.save();ctx.globalAlpha=.4;plotFn(ctx,m,f,null,c,1.5);ctx.restore()}
+ const dp=dragPoints([E],()=>S.vm,(nx,ny)=>{let x=cl(Math.round(nx*2)/2),y=cl(Math.round(ny*2)/2);if(!x&&!y){x=S.a;y=S.b}
+  if(x!==S.a||y!==S.b){S.a=x;S.b=y;S.pi=-1;S.pc&&S.pc.set(-1);upd()}return{x,y}});
+ function lay(){const ph=W<640,h=H-76;if(ph){const vh=Math.max(110,h*.34);return{v:{x:16,y:60,w:W-32,h:vh},g:{x:16,y:74+vh,w:W-32,h:h-vh-14},ph}}
+  const L=Math.min(W*.34,h);return{v:{x:16,y:60,w:L,h},g:{x:40+L,y:60,w:W-56-L,h},ph}}
+ function vec(L,a,b,lab){const t=theme(),m=S.vm=drawAxes(ctx,L.v,[-5.5,5.5],[-5.5,5.5],{equal:true,xStep:1,yStep:1,labels:!L.ph});
+  const O=[m.X(0),m.Y(0)],Q=[m.X(a),m.Y(b)],R=hy(a,b),ph=at(b,a),len=m.X(R)-O[0];
+  seg(...Q,Q[0],O[1],t.sub,1,true);seg(...Q,O[0],Q[1],t.sub,1,true);
+  if(Math.abs(ph)>1e-9)angleArc(ctx,...O,Math.max(12,Math.min(30,len*.5)),0,ph,t.gold,"φ");
+  arrow(ctx,...O,...Q,t.blue,null,2.5);E.x=a;E.y=b;dot(...Q,t.blue,!S.app&&(dp.active===E||dp.hover===E));
+  label(ctx,"√(a²+b²) = "+fs(R),(O[0]+Q[0])/2-Math.sin(ph)*18,(O[1]+Q[1])/2-Math.cos(ph)*18,t.blue);
+  label(ctx,lab,Q[0]+(a>=0?10:-10),Q[1]+(b>=0?-14:14),t.fg,a>=0?"left":"right")}
+ function bracket(m,x0,x1,txt){const t=theme(),y=m.box.y+12,A=m.X(x0),B=m.X(x1);seg(A,y,B,y,t.red,2);seg(A,y-5,A,y+5,t.red,2);seg(B,y-5,B,y+5,t.red,2);label(ctx,txt,(A+B)/2,y+14,t.redText)}
+ function drawMain(L){const t=theme(),a=S.a,b=S.b,R=RR(),ph=PH(),M=Math.max(R,1)*1.25+.3,m=drawAxes(ctx,L.g,[-2*P,2*P],[-M,M],{piTicks:true});
+  faint(m,x=>a*Math.sin(x),t.blue);faint(m,x=>b*Math.cos(x),t.red);
+  plotFn(ctx,m,x=>a*Math.sin(x)+b*Math.cos(x),null,t.blue,3);plotFn(ctx,m,x=>R*Math.sin(x+ph),null,t.gold,2,true);
+  let xm=P/2-ph;while(xm>1e-9)xm-=2*P;while(xm<-2*P-1e-9)xm+=2*P;
+  [xm,xm+2*P].forEach(x=>dot(m.X(x),m.Y(R),t.red));[xm+P,xm-P].forEach(x=>{if(x>=-2*P-1e-9)dot(m.X(x),m.Y(-R),t.red)});
+  label(ctx,"最大值 "+fs(R),m.X(xm+2*P)+(xm+2*P>P?-10:10),m.Y(R)+16,t.redText,xm+2*P>P?"right":"left");
+  label(ctx,"最小值 −"+fs(R),m.X(xm+P)+10,m.Y(-R)-16,t.redText,"left");bracket(m,xm,xm+2*P,"一个周期 2π");
+  label(ctx,"蓝线 "+expr(),16,20,t.blue,"left");
+  label(ctx,"金虚线 "+form()+(S.rot?"：旋转中，曲线平移，振幅不变":"，与蓝线重合"),16,42,t.goldText,"left");
+  if(!L.ph)label(ctx,"淡蓝 a sin x · 淡红 b cos x",W-16,20,t.fg,"right")}
+ function drawApp(L){const t=theme(),m=drawAxes(ctx,L.g,[-2*P,2*P],[-1.2,2.1],{piTicks:true}),b=m.box,f=x=>Math.sin(x)**2+r3*Math.sin(x)*Math.cos(x);
+  ctx.save();ctx.globalAlpha=.12;ctx.fillStyle=t.gold;for(let k=-2;k<=2;k++){const x0=Math.max(-2*P,k*P-P/6),x1=Math.min(2*P,k*P+P/3);if(x1>x0)ctx.fillRect(m.X(x0),b.y,m.X(x1)-m.X(x0),b.h)}ctx.restore();
+  plotFn(ctx,m,()=>.5,null,t.sub,1,true);plotFn(ctx,m,f,null,t.blue,3);plotFn(ctx,m,x=>Math.sin(2*x-P/6)+.5,null,t.gold,2,true);
+  for(let k=-3;k<=3;k++){const u=k*P+P/3,v=k*P-P/6;if(Math.abs(u)<=2*P)dot(m.X(u),m.Y(1.5),t.red);if(Math.abs(v)<=2*P)dot(m.X(v),m.Y(-.5),t.red)}
+  label(ctx,"最大值 3/2",m.X(P/3)+10,m.Y(1.5)-14,t.redText,"left");label(ctx,"最小值 −1/2",m.X(5*P/6)+10,m.Y(-.5)+16,t.redText,"left");
+  label(ctx,"增区间 [−π/6, π/3]",m.X(P/12),b.y+b.h-12,t.goldText);label(ctx,"y = 1/2",m.X(-2*P)+4,m.Y(.5)-12,t.fg,"left");
+  label(ctx,"蓝线 f(x) = sin²x + √3 sin x cos x",16,20,t.blue,"left");label(ctx,"金虚线 sin(2x − π/6) + 1/2，金色带为单调递增区间",16,42,t.goldText,"left")}
+ function stopRot(){if(S.rot){S.a=S.a0;S.b=S.b0;S.rot=0}}
+ function ros(){const t=theme();
+  if(S.app)return[["f(x)","sin²x + √3 sin x cos x"],["① 降幂","(1 − cos 2x)/2 + (√3/2) sin 2x"],["② 整理","1/2 − (1/2) cos 2x + (√3/2) sin 2x"],
+   ["③ 辅助角","a = √3/2，b = −1/2 → √(a²+b²) = 1，φ = −π/6 · −30°",t.goldText],["结果","f(x) = sin(2x − π/6) + 1/2",t.blue],["周期","T = π"],
+   ["最大值","3/2，x = kπ + π/3",t.redText],["最小值","−1/2，x = kπ − π/6",t.redText],["单调递增区间","[kπ − π/6, kπ + π/3]，k ∈ Z",t.goldText]];
+  const R=RR(),ph=PH(),xm=xmax();
+  return[["a",fa(S.a)],["b",fa(S.b)],["√(a²+b²)",fa(R),t.blue],["φ",pr(ph)+" · "+fmtDeg(ph).replace("-","−"),t.goldText],
+   ["合成",expr()+" = "+form(),t.blue],["最大值",fa(R),t.redText],["最小值","−"+fa(R).replace(" ≈ "," ≈ −"),t.redText],
+   ["最大值点 x",pr(xm)+(fmtRad(xm).includes("π")?" ≈ "+xm.toFixed(3):"")+" + 2kπ"]]}
+ let ro=null;
+ function upd(){ro&&ro.update(ros())}
+ return{
+  text:"<p>a sin x + b cos x 看起来是两个波叠加，其实合成后还是一个正弦波：a sin x + b cos x = √(a²+b²)·sin(x+φ)，其中 tan φ = b/a（φ 所在象限由点 (a, b) 决定）。</p><p>几何上，把 (a, b) 看成一个向量：它的长度就是振幅，它的方向角就是初相 φ。</p>",
+  points:["a sin x + b cos x = √(a²+b²) sin(x+φ)","cos φ = a/√(a²+b²)，sin φ = b/√(a²+b²)","最值 ±√(a²+b²)","常用：sin x ± cos x = √2 sin(x ± π/4)","sin x + √3 cos x = 2 sin(x + π/3)"],
+  gk:"<p>三角解答题第一问常要求化成 A sin(ωx+φ)+B 后求周期、单调区间、最值。</p><p><b>易错：</b>φ 的象限要看 (a, b) 的符号，不能只看 tan φ。</p>",
+  mount(ctrl,read){S.pc=chips(PR.map((p,i)=>({v:i,l:p[2]})),S.pi,v=>{S.rot=0;S.pi=v;S.a=PR[v][0];S.b=PR[v][1];upd()});
+   ctrl.append(S.pc,button("旋转相位",()=>{if(S.app)return;if(!S.rot){S.a0=S.a;S.b0=S.b}S.rot=performance.now()},true),
+    toggle("经典应用",S.app,v=>{stopRot();S.app=v;upd()}),el("p","empty","拖动向量终点 (a, b)，吸附 0.5"));ro=readout();read.append(ro);upd()},
+  unmount(){stopRot();ro=null;S.pc=null;dp.active=null},
+  draw(){if(S.dk!==dark){S.dk=dark;upd()}const L=lay();
+   if(S.rot){const e=(performance.now()-S.rot)/6000;if(e>=1)stopRot();else{const R=hy(S.a0,S.b0),th=at(S.b0,S.a0)+2*P*e;S.a=R*Math.cos(th);S.b=R*Math.sin(th)}upd()}
+   if(S.app){vec(L,r3/2,-.5,"(√3/2, −1/2)");drawApp(L)}else{vec(L,S.a,S.b,"("+fs(S.a)+", "+fs(S.b)+")");drawMain(L)}},
+  pointer(e,type,x,y){if(S.app||S.rot)return false;return dp.pointer(e,type,x,y)}}
+})();
+CH[2].book="人教A版 必修第一册 · 5.5.2 简单的三角恒等变换 · 高考拓展";CH[2].ready=true;
+
+MODS[3]=(()=>{
+ const P=Math.PI,hy=Math.hypot,D2=v=>v*180/P,f2=v=>v.toFixed(2),f3=v=>v.toFixed(3),dg=v=>v.toFixed(1)+"°";
+ const S={proof:false,fix:null,big:false,dk:null,map:null,fb:null,bc:null};
+ const pt=(n,th)=>({n,x:2.2*Math.cos(th*P/180),y:2.2*Math.sin(th*P/180)-.1,onmove:()=>upd()});
+ const PA=pt("A",100),PB=pt("B",215),PC=pt("C",325),PS=[PA,PB,PC];
+ function cc(A,B,C){const d=2*(A.x*(B.y-C.y)+B.x*(C.y-A.y)+C.x*(A.y-B.y));if(Math.abs(d)<1e-9)return null;
+  const a2=A.x*A.x+A.y*A.y,b2=B.x*B.x+B.y*B.y,c2=C.x*C.x+C.y*C.y;
+  return{x:(a2*(B.y-C.y)+b2*(C.y-A.y)+c2*(A.y-B.y))/d,y:(a2*(C.x-B.x)+b2*(A.x-C.x)+c2*(B.x-A.x))/d}}
+ const ac=v=>Math.acos(Math.max(-1,Math.min(1,v)));
+ function geo(A=PA,B=PB,C=PC){const a=hy(B.x-C.x,B.y-C.y),b=hy(C.x-A.x,C.y-A.y),c=hy(A.x-B.x,A.y-B.y),O=cc(A,B,C);
+  return{a,b,c,A:D2(ac((b*b+c*c-a*a)/(2*b*c))),B:D2(ac((a*a+c*c-b*b)/(2*a*c))),C:D2(ac((a*a+b*b-c*c)/(2*a*b))),O,R:O?hy(A.x-O.x,A.y-O.y):Infinity}}
+ const half=()=>{const m=S.map;return m?{hx:m.invX(W-16),hy:m.invY(56)}:{hx:3,hy:3}};
+ function ok(g){const h=half();return g.O&&Math.min(g.a,g.b,g.c)>.35&&Math.min(g.A,g.B,g.C)>3&&Math.abs(g.O.x)+g.R<h.hx&&Math.abs(g.O.y)+g.R<h.hy}
+ const dp=dragPoints(PS,()=>S.map,(nx,ny,p)=>{let q={x:nx,y:ny};
+  if(S.fix){const th=Math.atan2(ny-S.fix.O.y,nx-S.fix.O.x);q={x:S.fix.O.x+S.fix.R*Math.cos(th),y:S.fix.O.y+S.fix.R*Math.sin(th)}}
+  const T=PS.map(r=>r===p?q:r),g=geo(...T);if(!ok(g)&&!(S.fix&&Math.min(g.a,g.b,g.c)>.35))return{x:p.x,y:p.y};return q});
+ function ros(){const t=theme(),g=geo(),sA=Math.sin(g.A*P/180),sB=Math.sin(g.B*P/180),sC=Math.sin(g.C*P/180);
+  const r=[["a",f2(g.a),t.blue],["b",f2(g.b),t.redText],["c",f2(g.c),t.goldText],["A",dg(g.A),t.blue],["B",dg(g.B),t.redText],["C",dg(g.C),t.goldText],["R",f2(g.R)],
+   ["a / sin A",f3(g.a/sA),t.blue],["b / sin B",f3(g.b/sB),t.redText],["c / sin C",f3(g.c/sC),t.goldText],["2R",f3(2*g.R)],
+   ["边角互化 a : b : c",f2(g.a)+" : "+f2(g.b)+" : "+f2(g.c)],["sin A : sin B : sin C",f3(sA)+" : "+f3(sB)+" : "+f3(sC)],
+   ["化简比","1 : "+f3(g.b/g.a)+" : "+f3(g.c/g.a)]];
+  if(S.proof){r.push(["a = 2R sin A",f2(g.a)+" = "+f2(2*g.R)+" × "+f3(sA),t.blue]);
+   r.push(["∠D",g.A>90?"180° − A = "+dg(180-g.A)+"，sin(180°−A) = sin A":"∠D = A = "+dg(g.A)+"（同弧 BC）",g.A>90?t.redText:t.blue])}
+  if(S.big){const i=[g.a,g.b,g.c].indexOf(Math.max(g.a,g.b,g.c));r.push(["大边对大角","最长边 "+"abc"[i]+" → 最大角 "+"ABC"[i]+" = "+dg([g.A,g.B,g.C][i]),[t.blue,t.redText,t.goldText][i]])}
+  if(S.fix)r.push(["固定外接圆","2R = "+f2(2*S.fix.R)+" 不变，边长随对角正弦变化",t.goldText]);
+  return r}
+ let ro=null;
+ function upd(){ro&&ro.update(ros())}
+ function seg(p,q,c,lw,d){ctx.save();ctx.strokeStyle=c;ctx.lineWidth=lw;ctx.lineCap="round";if(d)ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.stroke();ctx.restore()}
+ function dot(p,c,big){ctx.save();ctx.fillStyle=c;ctx.beginPath();ctx.arc(p[0],p[1],big?8:5,0,2*P);ctx.fill();ctx.restore()}
+ const un=(p,q)=>{const l=hy(q[0]-p[0],q[1]-p[1])||1;return[(q[0]-p[0])/l,(q[1]-p[1])/l]};
+ const ma=(V,Q)=>Math.atan2(-(Q[1]-V[1]),Q[0]-V[0]);
+ // arc at V between rays to P and Q, label along the bisector
+ function arc(V,Pp,Q,c,tc,txt,r,fill){let a0=ma(V,Pp),d=ma(V,Q)-a0;while(d>P)d-=2*P;while(d<=-P)d+=2*P;
+  if(fill){ctx.save();ctx.globalAlpha=.18;ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(V[0],V[1]);ctx.arc(V[0],V[1],r+6,-a0,-(a0+d),d>0);ctx.closePath();ctx.fill();ctx.restore()}
+  angleArc(ctx,V[0],V[1],r,a0,a0+d,c,null);const m=a0+d/2;label(ctx,txt,V[0]+Math.cos(m)*(r+20),V[1]-Math.sin(m)*(r+20),tc)}
+ return{
+  text:"<p>在任意三角形中，边与对角的正弦之比都相等，而且等于外接圆的直径：a/sin A = b/sin B = c/sin C = 2R。</p><p>几何原因：过 B 作直径 BD，同弧所对的圆周角相等，∠D = ∠A；在直角三角形 BCD 中 a = 2R·sin A。</p>",
+  points:["a/sin A = b/sin B = c/sin C = 2R","边化角：a = 2R sin A","角化边：sin A = a/(2R)","a > b ⇔ A > B ⇔ sin A > sin B（三角形内）"],
+  gk:"<p>解三角形大题第一问常用正弦定理「边角互化」，把条件化成纯角或纯边。</p><p><b>易错：</b>已知两边一对角，用正弦定理求角时可能两解，要结合「大边对大角」取舍。</p>",
+  mount(ctrl,read){const fb=S.fb=button(S.fix?"解除固定":"固定外接圆",()=>{const g=geo();S.fix=S.fix?null:{O:g.O,R:g.R};fb.textContent=S.fix?"解除固定":"固定外接圆";upd()},true);
+   S.bc=chips([{v:1,l:"大边对大角"}],S.big?1:0,()=>{S.big=!S.big;S.bc.set(S.big?1:0);upd()});
+   ctrl.append(toggle("直径证明",S.proof,v=>{S.proof=v;upd()}),fb,S.bc,el("p","empty","拖动 A、B、C 三点；固定外接圆后只能沿圆周移动"));ro=readout();read.append(ro);upd()},
+  unmount(){ro=null;S.fb=S.bc=null;dp.active=null},
+  draw(){const t=theme(),k=Math.min(W-32,H-72)/6.4,cx=W/2,cy=56+(H-72)/2;
+   S.map={X:x=>cx+x*k,Y:y=>cy-y*k,invX:p=>(p-cx)/k,invY:p=>(cy-p)/k};if(S.dk!==dark){S.dk=dark;upd()}
+   const g=geo(),m=S.map,s=p=>[m.X(p.x),m.Y(p.y)],A=s(PA),B=s(PB),C=s(PC);if(!g.O)return;const O=s(g.O),Rp=g.R*k;
+   ctx.save();ctx.strokeStyle=t.blue;ctx.globalAlpha=.3;ctx.lineWidth=S.fix?2.5:1.5;ctx.beginPath();ctx.arc(O[0],O[1],Rp,0,2*P);ctx.stroke();ctx.globalAlpha=.05;ctx.fillStyle=t.blue;ctx.fill();ctx.restore();
+   dot(O,t.fg);label(ctx,"O",O[0]+12,O[1]+12,t.fg);
+   const big=S.big?[g.a,g.b,g.c].indexOf(Math.max(g.a,g.b,g.c)):-1,sides=[[B,C,t.blue,t.blue,"a",g.a,A],[C,A,t.red,t.redText,"b",g.b,B],[A,B,t.gold,t.goldText,"c",g.c,C]];
+   if(S.proof){const Dw={x:2*g.O.x-PB.x,y:2*g.O.y-PB.y},D=s(Dw);seg(B,D,t.blue,1.5,true);
+    if(hy(C[0]-D[0],C[1]-D[1])>4){seg(C,D,t.fg,1.2,true);const u=un(C,B),v=un(C,D),q=10;
+     ctx.save();ctx.strokeStyle=t.fg;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(C[0]+u[0]*q,C[1]+u[1]*q);ctx.lineTo(C[0]+(u[0]+v[0])*q,C[1]+(u[1]+v[1])*q);ctx.lineTo(C[0]+v[0]*q,C[1]+v[1]*q);ctx.stroke();ctx.restore();
+     arc(D,B,C,t.blue,t.blue,g.A>90?"∠D = 180° − A":"∠D = A",20)}
+    dot(D,t.fg);const ou=un(O,D);label(ctx,"D",D[0]+ou[0]*16,D[1]+ou[1]*16,t.fg);
+    const y2=wrapLabel(ctx,"直径 BD = 2R，∠BCD = 90°，a = 2R sin D = 2R sin A",16,40,t.blue,W-32);
+    if(g.A>90)wrapLabel(ctx,"A 为钝角：D 与 A 在 BC 异侧，∠D = 180° − A，sin(180°−A) = sin A",16,y2+3,t.redText,W-32)}
+   sides.forEach(([p,q,c,tc,n,v,opp],i)=>{seg(p,q,c,i===big?6:3);const mid=[(p[0]+q[0])/2,(p[1]+q[1])/2],u=un(opp,mid);label(ctx,n+" = "+f2(v),mid[0]+u[0]*18,mid[1]+u[1]*18,tc)});
+   const ar=V=>Math.max(12,Math.min(26,Math.min(...[A,B,C].filter(X=>X!==V).map(X=>hy(X[0]-V[0],X[1]-V[1])))*.3));
+   arc(A,B,C,t.blue,t.blue,dg(g.A),ar(A),big===0);arc(B,C,A,t.red,t.redText,dg(g.B),ar(B),big===1);arc(C,A,B,t.gold,t.goldText,dg(g.C),ar(C),big===2);
+   [[A,PA],[B,PB],[C,PC]].forEach(([V,p])=>{const u=un(O,V);dot(V,t.fg,dp.active===p||dp.hover===p);label(ctx,p.n,V[0]+u[0]*18,V[1]+u[1]*18,t.fg)});
+   label(ctx,"a/sin A = b/sin B = c/sin C = 2R = "+f2(2*g.R),16,20,t.fg,"left");
+   if(S.fix)label(ctx,"外接圆已固定：三点沿圆周移动",16,H-14,t.goldText,"left")},
+  pointer:(e,type,x,y)=>dp.pointer(e,type,x,y)}
+})();
+CH[3].ready=true;
+
+MODS[4]=(()=>{
+ const P=Math.PI,hy=Math.hypot,R=d=>d*P/180,D=r=>r*180/P,f1=v=>v.toFixed(1),f2=v=>v.toFixed(2),f3=v=>v.toFixed(3),dg=v=>v.toFixed(1)+"°";
+ const ac=v=>D(Math.acos(Math.max(-1,Math.min(1,v)))),K=d=>Math.abs(d)<1e-6?0:d>0?1:-1,NM=["钝角","直角","锐角"],fm=v=>v<0?"("+f2(v)+")":f2(v);
+ const S={mode:"pz",use:"sas",big:false,a:3,b:4,C:60,sa:3,sb:4,sc:5,map:null,dk:null,box:null};
+ const PA={n:"A",x:4,y:0,onmove:()=>upd()},PB={n:"B",x:1.5,y:3*Math.sin(R(60)),onmove:()=>upd()};
+ const dp=dragPoints([PA,PB],()=>S.map,(nx,ny,p)=>{if(p===PA)return{x:Math.max(1,Math.min(5,nx)),y:0};
+  const r=Math.max(1,Math.min(5,hy(nx,ny)));let th=D(Math.atan2(ny,nx));if(th<0)th=th<-90?165:12;th=Math.max(12,Math.min(165,th));if(Math.abs(th-90)<2)th=90;
+  return{x:r*Math.cos(R(th)),y:r*Math.sin(R(th))}});
+ function mk(a,b,C){const cr=Math.abs(C-90)<1e-9?0:Math.cos(R(C)),c=Math.sqrt(Math.max(0,a*a+b*b-2*a*b*cr));
+  return{a,b,c,C,cos:cr,A:ac((b*b+c*c-a*a)/(2*b*c)),B:ac((a*a+c*c-b*b)/(2*a*c)),Cp:[0,0],Ap:[b,0],Bp:[a*cr,a*Math.sin(R(C))]}}
+ function tri(){if(S.mode==="use"){if(S.use==="sas")return mk(S.a,S.b,S.C);const a=S.sa,b=S.sb,c=S.sc;
+   if(a+b<=c||a+c<=b||b+c<=a)return{bad:true,a,b,c};const k=K(a*a+b*b-c*c);return mk(a,b,k?ac((a*a+b*b-c*c)/(2*a*b)):90)}
+  return mk(hy(PB.x,PB.y),PA.x,D(Math.atan2(PB.y,PB.x)))}
+ const fail=g=>g.a+g.b<=g.c?"a + b ≤ c":g.a+g.c<=g.b?"a + c ≤ b":"b + c ≤ a";
+ const big=g=>{const s=[g.a,g.b,g.c];return s.indexOf(Math.max(...s))};
+ function shape(g){const s=[g.a,g.b,g.c],i=big(g),o=s.filter((_,j)=>j!==i),k=K(o[0]*o[0]+o[1]*o[1]-s[i]*s[i]);return{i,k,cos:Math.cos(R([g.A,g.B,g.C][i])),n:NM[k+1]+"三角形"}}
+ const kc=k=>{const t=theme();return k>0?t.blue:k<0?t.redText:t.goldText};
+ function ros(){const t=theme(),g=tri(),r=[["a",f2(g.a),t.blue],["b",f2(g.b),t.redText],["c",f2(g.c),t.goldText]];
+  if(g.bad){r.push(["三角不等式",fail(g)+"，构不成三角形",t.redText]);return r}
+  r.push(["A",dg(g.A),t.blue],["B",dg(g.B),t.redText],["C",dg(g.C),t.goldText]);
+  const a2=g.a*g.a,b2=g.b*g.b,c2=g.c*g.c,m=2*g.a*g.b*g.cos;
+  if(S.mode==="pz"){r.push(["a² + b²",f2(a2+b2)],["2ab cos C",f2(m),m<0?t.redText:t.fg],
+    ["代入式","a² + b² − 2ab cos C = "+f2(a2)+" + "+f2(b2)+" − "+fm(m)+" = "+f2(a2+b2-m),t.blue],["c²",f2(c2),t.goldText]);
+   if(g.cos<-1e-9)r.push(["C 为钝角","cos C < 0，修正项为负，两块矩形在外侧，相当于加上",t.redText])}
+  else if(S.mode==="judge"){const k=K(a2+b2-c2);
+   r.push(["代入式","a² + b² = "+f2(a2+b2)+(k>0?" > ":k<0?" < ":" = ")+"c² = "+f2(c2),t.blue],["cos C",f3(g.cos)],["结论","C 为"+NM[k+1],kc(k)]);
+   if(S.big){const h=shape(g);r.push(["最大边","abc"[h.i]+" → 最大角 "+"ABC"[h.i]],["cos "+"ABC"[h.i],f3(h.cos)+(h.k>0?" > 0":h.k<0?" < 0":" = 0")],["形状",h.n,kc(h.k)])}}
+  else if(S.use==="sas")r.push(["代入式","c² = "+f2(g.a)+"² + "+f2(g.b)+"² − 2×"+f2(g.a)+"×"+f2(g.b)+"×cos "+S.C+"°",t.blue],["计算","c² = "+f2(c2)+"，c = "+f2(g.c),t.goldText]);
+  else{const cA=(b2+c2-a2)/(2*g.b*g.c),cB=(a2+c2-b2)/(2*g.a*g.c),cC=(a2+b2-c2)/(2*g.a*g.b);
+   r.push(["cos A",f3(cA),t.blue],["cos B",f3(cB),t.redText],["cos C",f3(cC),t.goldText],["代入式","cos C = ("+f2(a2)+" + "+f2(b2)+" − "+f2(c2)+") / "+f2(2*g.a*g.b)+" = "+f3(cC),t.blue])}
+  return r}
+ let ro=null;
+ function upd(){ro&&ro.update(ros())}
+ const sub=(p,q)=>[p[0]-q[0],p[1]-q[1]],add=(p,q,k)=>[p[0]+q[0]*k,p[1]+q[1]*k],nrm=v=>{const l=hy(v[0],v[1])||1;return[v[0]/l,v[1]/l]};
+ function out(Pp,Q,Rr){const u=nrm(sub(Q,Pp)),w=sub(Rr,Pp);let n=[-u[1],u[0]];if(n[0]*w[0]+n[1]*w[1]>0)n=[-n[0],-n[1]];return{u,n}}
+ function sq(Pp,Q,Rr){const{n}=out(Pp,Q,Rr),L=hy(...sub(Q,Pp));return[Pp,Q,add(Q,n,L),add(Pp,n,L)]}
+ function fit(ps,top){let x0=1/0,x1=-1/0,y0=1/0,y1=-1/0;ps.forEach(p=>{x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1])});
+  const pd=32,k=Math.min((W-2*pd)/(x1-x0||1),(H-top-pd-12)/(y1-y0||1)),cx=(x0+x1)/2,cy=(y0+y1)/2,mx=W/2,my=top+(H-top-12)/2;
+  return{X:x=>mx+(x-cx)*k,Y:y=>my-(y-cy)*k,invX:p=>cx+(p-mx)/k,invY:p=>cy-(my-p)/k*-1}}
+ function seg(p,q,c,lw,d){ctx.save();ctx.strokeStyle=c;ctx.lineWidth=lw;ctx.lineCap="round";if(d)ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.stroke();ctx.restore()}
+ function dot(p,c,b){ctx.save();ctx.fillStyle=c;ctx.beginPath();ctx.arc(p[0],p[1],b?8:5,0,2*P);ctx.fill();ctx.restore()}
+ function poly(ps,c,fa,sc,d){ctx.save();ctx.beginPath();ps.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.globalAlpha=fa;ctx.fillStyle=c;ctx.fill();
+  ctx.globalAlpha=.7;ctx.strokeStyle=sc||c;ctx.lineWidth=1.5;if(d)ctx.setLineDash([5,4]);ctx.stroke();ctx.restore()}
+ const ma=(V,Q)=>Math.atan2(-(Q[1]-V[1]),Q[0]-V[0]);
+ function arc(V,P1,Q,c,tc,txt,r){let a0=ma(V,P1),d=ma(V,Q)-a0;while(d>P)d-=2*P;while(d<=-P)d+=2*P;angleArc(ctx,V[0],V[1],r,a0,a0+d,c,null);const m=a0+d/2;label(ctx,txt,V[0]+Math.cos(m)*(r+22),V[1]-Math.sin(m)*(r+22),tc)}
+ function bigText(txt,y,c){ctx.save();ctx.font="600 26px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillStyle=c;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(txt,W/2,y);ctx.restore()}
+ function drawTri(g,m,o){const t=theme(),s=p=>[m.X(p[0]),m.Y(p[1])],A=s(g.Ap),B=s(g.Bp),C=s(g.Cp),G=[(A[0]+B[0]+C[0])/3,(A[1]+B[1]+C[1])/3],bi=o.big?big(g):-1;
+  [[B,C,t.blue,t.blue,"a",g.a],[C,A,t.red,t.redText,"b",g.b],[A,B,t.gold,t.goldText,"c",g.c]].forEach(([p,q,c,tc,n,v],i)=>{seg(p,q,c,i===bi?7:3);
+   if(o.side){const mid=[(p[0]+q[0])/2,(p[1]+q[1])/2],u=nrm(sub(mid,G));label(ctx,n+" = "+f2(v),mid[0]+u[0]*20,mid[1]+u[1]*20,tc)}});
+  if(o.ang){arc(A,B,C,t.blue,t.blue,dg(g.A),16);arc(B,C,A,t.red,t.redText,dg(g.B),16)}
+  if(Math.abs(g.C-90)<1e-6){const u=nrm(sub(A,C)),v=nrm(sub(B,C)),q=12;ctx.save();ctx.strokeStyle=t.gold;ctx.lineWidth=1.5;ctx.beginPath();
+   ctx.moveTo(C[0]+u[0]*q,C[1]+u[1]*q);ctx.lineTo(C[0]+(u[0]+v[0])*q,C[1]+(u[1]+v[1])*q);ctx.lineTo(C[0]+v[0]*q,C[1]+v[1]*q);ctx.stroke();ctx.restore();
+   const w=nrm([u[0]+v[0],u[1]+v[1]]);label(ctx,"90°",C[0]+w[0]*34,C[1]+w[1]*34,t.goldText)}else arc(C,A,B,t.gold,t.goldText,dg(g.C),20);
+  [[A,"A",PA],[B,"B",PB],[C,"C",null]].forEach(([V,n,p])=>{const u=nrm(sub(V,G));dot(V,t.fg,o.drag&&p&&(dp.active===p||dp.hover===p));label(ctx,n,V[0]+u[0]*18,V[1]+u[1]*18,t.fg)})}
+ function drawPz(){const t=theme(),g=tri(),C=g.Cp,A=g.Ap,B=g.Bp,Qa=sq(C,B,A),Qb=sq(A,C,B),Qc=sq(B,A,C),ra=out(C,B,A),rb=out(C,A,B);
+  const ea=add(C,ra.u,g.b*g.cos),eb=add(C,rb.u,g.a*g.cos),Ra=[C,ea,add(ea,ra.n,g.a),add(C,ra.n,g.a)],Rb=[C,eb,add(eb,rb.n,g.b),add(C,rb.n,g.b)];
+  const top=W<560?96:72;if(!dp.active||!S.map)S.map=fit([...Qa,...Qb,...Qc,...Ra,...Rb],top);const m=S.map,s=p=>[m.X(p[0]),m.Y(p[1])],L=ps=>ps.map(s);
+  poly(L(Qa),t.blue,.12);poly(L(Qb),t.red,.12);poly(L(Qc),t.gold,.14);
+  const has=Math.abs(g.cos)>.03;
+  if(has){poly(L(Ra),t.blue,.3,t.fg,true);poly(L(Rb),t.red,.3,t.fg,true);
+   seg(s(A),s(ea),t.fg,1.2,true);seg(s(ea),s(Ra[2]),t.fg,1.2,true);seg(s(B),s(eb),t.fg,1.2,true);seg(s(eb),s(Rb[2]),t.fg,1.2,true);
+   if(g.cos<0){seg(s(C),s(ea),t.blue,1.2,true);seg(s(C),s(eb),t.red,1.2,true)}
+   [Ra,Rb].forEach(Rr=>{const c=s([(Rr[0][0]+Rr[2][0])/2,(Rr[0][1]+Rr[2][1])/2]);label(ctx,"ab cos C",c[0],c[1],g.cos<0?t.redText:t.fg)})}
+  const ctr=(Q,u,n,len,cut)=>s(add(add(Q,u,(Math.max(0,cut)+len)/2),n,len/2));
+  let p=ctr(C,ra.u,ra.n,g.a,g.b*g.cos);label(ctx,"a²",p[0],p[1],t.blue);p=ctr(C,rb.u,rb.n,g.b,g.a*g.cos);label(ctx,"b²",p[0],p[1],t.redText);
+  p=s([(Qc[0][0]+Qc[2][0])/2,(Qc[0][1]+Qc[2][1])/2]);label(ctx,"c²",p[0],p[1],t.goldText);
+  drawTri(g,m,{drag:true});
+  const lhs=g.a*g.a+g.b*g.b-2*g.a*g.b*g.cos,y=wrapLabel(ctx,"a² + b² − 2ab cos C = "+f2(lhs)+" = c² = "+f2(g.c*g.c),16,20,t.fg,W-32);
+  if(!has&&Math.abs(g.C-90)<1e-6)wrapLabel(ctx,"C = 90°：矩形面积为 0，就是勾股定理 a² + b² = c²",16,y+3,t.goldText,W-32);
+  else if(g.cos<0)wrapLabel(ctx,"C 为钝角：cos C < 0，修正项为负，矩形画在正方形外侧，c² = a² + b² + 2ab|cos C|",16,y+3,t.redText,W-32);
+  else wrapLabel(ctx,"从 A、B 作高，a²、b² 各切出一块 ab cos C 的矩形，剩下两块拼成 c²",16,y+3,t.blue,W-32)}
+ function drawJudge(){const g=tri(),a2=g.a*g.a,b2=g.b*g.b,c2=g.c*g.c,k=K(a2+b2-c2),top=S.big?(W<560?128:108):88;
+  if(!dp.active||!S.map)S.map=fit([g.Ap,g.Bp,g.Cp],top);bigText("C 为"+NM[k+1],28,kc(k));
+  const y=wrapLabel(ctx,"a² + b² = "+f2(a2+b2)+(k>0?" > ":k<0?" < ":" = ")+"c² = "+f2(c2),16,60,theme().fg,W-32);
+  if(S.big){const h=shape(g);wrapLabel(ctx,"最大边 "+"abc"[h.i]+" → 最大角 "+"ABC"[h.i]+"，cos "+"ABC"[h.i]+" = "+f3(h.cos)+"，"+h.n,16,y+3,kc(h.k),W-32)}
+  drawTri(g,S.map,{drag:true,side:true,ang:true,big:S.big})}
+ function drawUse(){const t=theme(),g=tri();
+  if(g.bad){const Bw=[0,0],Aw=[g.c,0],e1=add(Bw,[Math.cos(R(40)),Math.sin(R(40))],g.a),e2=add(Aw,[Math.cos(R(140)),Math.sin(R(140))],g.b),m=fit([Bw,Aw,e1,e2],64),s=p=>[m.X(p[0]),m.Y(p[1])];
+   seg(s(Bw),s(Aw),t.gold,3);seg(s(Bw),s(e1),t.blue,3);seg(s(Aw),s(e2),t.red,3);[e1,e2].forEach(e=>{const q=s(e);ctx.save();ctx.strokeStyle=t.fg;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(q[0],q[1],5,0,2*P);ctx.stroke();ctx.restore()});
+   label(ctx,"B",s(Bw)[0]-14,s(Bw)[1]+12,t.fg);label(ctx,"A",s(Aw)[0]+14,s(Aw)[1]+12,t.fg);
+   const mid=s([g.c/2,0]);label(ctx,"c = "+f2(g.c),mid[0],mid[1]+16,t.goldText);
+   wrapLabel(ctx,"构不成三角形："+fail(g)+"，两边接不上",16,24,t.redText,W-32);return}
+  const m=fit([g.Ap,g.Bp,g.Cp],64);drawTri(g,m,{side:true,ang:true});
+  wrapLabel(ctx,S.use==="sas"?"c² = a² + b² − 2ab cos C ⇒ c = "+f2(g.c):"cos C = (a² + b² − c²)/(2ab) = "+f3(g.cos)+" ⇒ C = "+dg(g.C),16,24,t.blue,W-32)}
+ function build(){const b=S.box;if(!b)return;b.innerHTML="";
+  if(S.mode==="pz")b.append(el("p","empty","拖动 A（沿 CA）和 B；C 固定在原点，接近 90° 时自动吸附"));
+  else if(S.mode==="judge"){const bc=chips([{v:1,l:"最大边对应最大角"}],S.big?1:0,()=>{S.big=!S.big;bc.set(S.big?1:0);upd()});b.append(bc,el("p","empty","拖动 A、B 改变三角形，接近 90° 时自动吸附"))}
+  else{b.append(chips([{v:"sas",l:"已知两边及夹角求第三边"},{v:"sss",l:"已知三边求角"}],S.use,v=>{S.use=v;build()}));
+   if(S.use==="sas")b.append(slider("a",1,6,.1,S.a,f1,v=>{S.a=v;upd()}),slider("b",1,6,.1,S.b,f1,v=>{S.b=v;upd()}),slider("C",5,175,1,S.C,v=>v+"°",v=>{S.C=v;upd()}));
+   else b.append(slider("a",1,8,.5,S.sa,f1,v=>{S.sa=v;upd()}),slider("b",1,8,.5,S.sb,f1,v=>{S.sb=v;upd()}),slider("c",1,8,.5,S.sc,f1,v=>{S.sc=v;upd()}))}
+  upd()}
+ return{
+  text:"<p>余弦定理是勾股定理的推广：c² = a² + b² − 2ab cos C。C = 90° 时修正项为 0，就是勾股定理；C 为锐角时 c² 比 a² + b² 小，钝角时更大。</p><p>向量推导一行就够：c = a − b（向量），两边平方得 c² = a² + b² − 2a·b = a² + b² − 2ab cos C。</p>",
+  points:["c² = a² + b² − 2ab cos C","cos C = (a² + b² − c²)/(2ab)","a² + b² > c² ⇔ C 为锐角（等号直角，小于钝角）","判断形状只需看最大边"],
+  gk:"<p>解三角形大题常把余弦定理与面积公式、基本不等式结合求范围。</p><p><b>易错：</b>用余弦定理求边时可能出现一元二次方程有两个正根，都要检验。</p>",
+  mount(ctrl,read){ro=readout();S.box=el("div");S.map=null;
+   ctrl.append(chips([{v:"pz",l:"面积拼图"},{v:"judge",l:"判断角的类型"},{v:"use",l:"两种用法"}],S.mode,v=>{S.mode=v;S.map=null;build()}),S.box);read.append(ro);build()},
+  unmount(){ro=null;S.box=null;dp.active=null},
+  draw(){if(S.dk!==dark){S.dk=dark;upd()}if(S.mode==="pz")drawPz();else if(S.mode==="judge")drawJudge();else drawUse()},
+  pointer:(e,type,x,y)=>S.mode==="use"?false:dp.pointer(e,type,x,y)}
+})();
+CH[4].book="人教A版 必修第二册 · 6.4.3 余弦定理、正弦定理";CH[4].ready=true;
+
+/* ---------- 06 解的个数 ---------- */
+MODS[5]=(()=>{
+ const P=Math.PI,R=d=>d*P/180,D=r=>r*180/P,f2=v=>v.toFixed(2),f3=v=>v.toFixed(3),dg=v=>v.toFixed(1)+"°",PH=matchMedia("(max-width:767px)");
+ const NAME=["无解","一解","两解"],SUB=["₁","₂"];
+ const S={A:40,b:4,a:3,scan:0,dk:null,sa:null,mini:null};
+ const NC=n=>{const t=theme();return n===2?t.goldText:n===1?t.blue:t.redText};
+ // B on the ray y = 0 (x > 0) with |CB| = a, C = (b cos A, b sin A)
+ function sol(){const A=R(S.A),b=S.b,a=S.a,cx=b*Math.cos(A),h=b*Math.sin(A),xs=[];
+  if(S.A<90&&Math.abs(a-h)<.025)xs.push(cx);
+  else if(a>h){const d=Math.sqrt(a*a-h*h);[cx+d,cx-d].forEach(x=>{if(x>1e-6)xs.push(x)})}
+  return{b,a,cx,h,xs:xs.map(x=>{const B=Math.abs(x-cx)<1e-9?90:D(Math.acos(Math.max(-1,Math.min(1,(x-cx)/a))));return{x,B,C:180-S.A-B,c:x}})}}
+ function why(g){const n=g.xs.length;
+  if(S.A>=90)return n?"A ≥ 90°，a > b：圆弧与射线只交于一点，一解":"A ≥ 90°，a ≤ b：大边对大角不成立，圆弧碰不到 A 右侧的射线，无解";
+  if(!n)return"a < h = b sin A：圆弧够不着射线，无解";
+  if(S.a<g.h+.025)return"a = h：圆弧与射线相切，B 为直角，一解";
+  return n===2?"h < a < b：圆弧与射线交于两点，两解":"a ≥ b：另一个交点落在 A 左侧或与 A 重合，舍去，一解"}
+ function ros(){const t=theme(),g=sol(),n=g.xs.length,sB=g.h/S.a;
+  const r=[["A",S.A+"°",t.blue],["b",f2(g.b)],["a",f2(g.a),t.blue],["h = b sin A",f2(g.h),t.redText],
+   ["sin B = b sin A / a",f3(sB)+(sB>1.0001?" > 1":""),sB>1.0001?t.redText:t.fg],["解的个数",NAME[n],NC(n)]];
+  g.xs.forEach((s,i)=>{const k=n===2?SUB[i]:"";r.push(["B"+k,dg(s.B),t.goldText],["C"+k,dg(s.C)],["c"+k,f2(s.c)])});
+  return r}
+ let ro=null;
+ function upd(){ro&&ro.update(ros())}
+ function seg(p,q,c,lw,d){ctx.save();ctx.strokeStyle=c;ctx.lineWidth=lw;ctx.lineCap="round";if(d)ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.stroke();ctx.restore()}
+ function dot(p,c){ctx.save();ctx.fillStyle=c;ctx.beginPath();ctx.arc(p[0],p[1],5,0,2*P);ctx.fill();ctx.restore()}
+ function poly(ps,c){ctx.save();ctx.beginPath();ps.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
+  ctx.globalAlpha=.16;ctx.fillStyle=c;ctx.fill();ctx.globalAlpha=.8;ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.stroke();ctx.restore()}
+ function bigText(txt,x,y,c){ctx.save();ctx.font="600 26px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillStyle=c;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(txt,x,y);ctx.restore()}
+ // horizontal a-axis band from 0 to 8, coloured by number of solutions
+ function band(c,x,y,w){const t=theme(),X=v=>x+Math.max(0,Math.min(8,v))/8*w,cl=p=>Math.max(x+26,Math.min(x+w-26,p)),b=S.b,h=b*Math.sin(R(S.A)),ac=S.A<90;
+  const segs=ac?[[0,h,0],[h,b,2],[b,8,1]]:[[0,b,0],[b,8,1]],col=[t.sub,t.teal,t.gold];
+  label(c,"a 轴：灰无解 · 青一解 · 金两解",x,y-34,t.fg,"left");
+  segs.forEach(([u,v,k])=>{c.save();c.globalAlpha=k?.75:.3;c.fillStyle=col[k];c.fillRect(X(u),y,Math.max(0,X(v)-X(u)),14);c.restore()});
+  c.save();c.lineWidth=1.5;c.strokeStyle=t.fg;c.beginPath();c.moveTo(X(b),y-3);c.lineTo(X(b),y+17);c.stroke();
+  if(ac){c.strokeStyle=t.redText;c.beginPath();c.moveTo(X(h),y-3);c.lineTo(X(h),y+17);c.stroke()}
+  c.strokeStyle=t.blue;c.lineWidth=2.5;c.beginPath();c.moveTo(X(S.a),y-6);c.lineTo(X(S.a),y+20);c.stroke();c.restore();
+  if(ac)label(c,"h = "+f2(h),cl(X(h)),y-13,t.redText);
+  label(c,"b = "+f2(b),cl(X(b)),y+29,t.fg);label(c,"a = "+f2(S.a),cl(X(S.a)),y+47,t.blue);
+  label(c,"0",x-5,y+7,t.fg,"right");label(c,"8",x+w+5,y+7,t.fg,"left")}
+ function mini(){const m=S.mini;if(!m)return;const ph=PH.matches;m.hidden=!ph;if(!ph)return;
+  const r=m.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=Math.round(r.width*dpr),h=Math.round(r.height*dpr);if(!w)return;
+  if(m.width!==w||m.height!==h){m.width=w;m.height=h}const c=m.getContext("2d");c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,r.width,r.height);band(c,22,42,r.width-44)}
+ return{
+  text:"<p>已知 a、b 和角 A，三角形可能有两个、一个，也可能一个都没有。画法：先画角 A，在一条边上取 AC = b，再以 C 为圆心、a 为半径画弧，看它和角 A 的另一条边交几次。</p><p>高 h = b sin A 是关键：a < h 无解，a = h 一解（直角），h < a < b 两解，a ≥ b 一解。A 为钝角或直角时，只有 a > b 才有一解。</p>",
+  points:["A 为锐角：a < b sin A 无解；a = b sin A 一解；b sin A < a < b 两解；a ≥ b 一解","A 为直角或钝角：a ≤ b 无解，a > b 一解","也可用正弦定理 sin B = b sin A / a 判断：sin B > 1 无解，再按「大边对大角」取舍"],
+  gk:"<p>选填常考「三角形有两解，求 a 的取值范围」，答案形如 b sin A < a < b。</p><p><b>易错：</b>用正弦定理求出 sin B 后，忘了检验 B 的钝角解是否成立。</p>",
+  mount(ctrl,read){S.sa=slider("a",.2,8,.05,S.a,f2,v=>{S.scan=0;S.a=v;upd()});
+   ctrl.append(slider("角 A",10,170,1,S.A,v=>v+"°",v=>{S.A=v;upd()}),slider("b",1,6,.1,S.b,v=>v.toFixed(1),v=>{S.b=v;upd()}),S.sa,
+    button("扫描 a",()=>{S.scan=performance.now();S.a=.2;upd()},true),el("p","empty","扫描：a 从 0.2 匀速增到 8，约 5 秒"));
+   ro=readout();S.mini=el("canvas");S.mini.style.height="110px";S.mini.style.marginTop="12px";S.mini.setAttribute("aria-label","a 轴色带");
+   read.append(ro,S.mini);upd()},
+  unmount(){ro=null;S.scan=0;S.sa=S.mini=null},
+  draw(){const t=theme();if(S.dk!==dark){S.dk=dark;upd()}
+   if(S.scan){const u=(performance.now()-S.scan)/5000;S.a=Math.min(8,.2+7.8*u);if(u>=1)S.scan=0;S.sa&&S.sa.set(+S.a.toFixed(2));upd()}
+   const g=sol(),n=g.xs.length,ph=PH.matches,bw=ph?0:Math.min(260,W*.3),gx=16,gw=W-32-(ph?0:bw+28);
+   bigText(NAME[n],gx+gw/2,28,NC(n));const top=Math.max(84,wrapLabel(ctx,why(g),gx,60,t.fg,gw)+10),gh=H-top-16;
+   const cx=g.cx,hh=g.h,x0=Math.min(0,cx)-.6,x1=Math.max(0,cx)+8.4,y0=-.9,y1=Math.max(hh,1)+.9,k=Math.min(gw/(x1-x0),gh/(y1-y0));
+   const X=x=>gx+(gw-(x1-x0)*k)/2+(x-x0)*k,Y=y=>top+(gh-(y1-y0)*k)/2+(y1-y)*k,A=[X(0),Y(0)],C=[X(cx),Y(hh)],Hf=[X(cx),Y(0)];
+   ctx.save();ctx.beginPath();ctx.rect(gx-8,top-8,gw+16,gh+16);ctx.clip();
+   g.xs.forEach((s,i)=>poly([A,C,[X(s.x),Y(0)]],i?t.gold:t.blue));
+   seg(A,[gx+gw+8,A[1]],t.fg,2);seg(A,[X(cx*1.18),Y(hh*1.18)],t.fg,2);
+   ctx.save();ctx.strokeStyle=t.blue;ctx.lineWidth=2;ctx.beginPath();ctx.arc(C[0],C[1],S.a*k,0,2*P);ctx.stroke();ctx.restore();
+   if(cx<0)seg(Hf,A,t.sub,1.2,true);
+   seg(C,Hf,t.redText,1.5,true);label(ctx,"h = "+f2(hh),C[0]+8,(C[1]+Hf[1])/2,t.redText,"left");
+   const q=9,sx=cx>=0?-1:1;ctx.save();ctx.strokeStyle=t.redText;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(Hf[0]+sx*q,Hf[1]);ctx.lineTo(Hf[0]+sx*q,Hf[1]-q);ctx.lineTo(Hf[0],Hf[1]-q);ctx.stroke();ctx.restore();
+   angleArc(ctx,A[0],A[1],22,0,R(S.A),t.blue,null);label(ctx,S.A+"°",A[0]+Math.cos(R(S.A/2))*42,A[1]-Math.sin(R(S.A/2))*42,t.blue);
+   const sn=Math.sin(R(S.A)),cs=Math.cos(R(S.A)),mid=[(A[0]+C[0])/2,(A[1]+C[1])/2];label(ctx,"b = "+f2(g.b),mid[0]-sn*22,mid[1]-cs*22,t.fg);
+   label(ctx,"a = "+f2(S.a),C[0]+(cx<0?-12:12),C[1]-16,t.blue,cx<0?"right":"left");
+   dot(A,t.fg);label(ctx,"A",A[0]-8,A[1]+14,t.fg);dot(C,t.fg);label(ctx,"C",C[0]-(cx<0?-12:12),C[1]-12,t.fg);
+   g.xs.forEach((s,i)=>{const B=[X(s.x),Y(0)];dot(B,t.gold);label(ctx,"B"+(n===2?SUB[i]:""),B[0],B[1]+16,t.goldText)});
+   ctx.restore();
+   if(!ph)band(ctx,W-16-bw+14,H/2,bw-30);mini()}}
+})();
+CH[5].ready=true;
+
+/* ---------- 07 面积与最值 ---------- */
+MODS[6]=(()=>{
+ const P=Math.PI,R=d=>d*P/180,D=r=>r*180/P,f2=v=>v.toFixed(2),f3=v=>v.toFixed(3),dg=v=>v.toFixed(1)+"°",sn=Math.sin,hy=Math.hypot,r3=Math.sqrt(3);
+ const S={mode:"area",c:2,C:60,u:.3,play:0,dk:null,box:null,pb:null,map:null};
+ const PC={n:"C",x:0,y:1,onmove:()=>upd()};
+ const ac=()=>S.mode==="acute",cL=()=>ac()?r3:S.c,cA=()=>ac()?60:S.C;
+ // A = (−c/2, 0), B = (c/2, 0); u ∈ (0,1) is the position of C on the arc, angle A = u(180° − C)
+ function geo(u=S.u){const c=cL(),C=cA(),M=180-C,A=u*M,B=M-A,Rr=c/(2*sn(R(C))),a=2*Rr*sn(R(A)),b=2*Rr*sn(R(B));
+  return{c,C,M,A,B,R:Rr,a,b,Oy:c/(2*Math.tan(R(C))),x:-c/2+b*Math.cos(R(A)),y:b*sn(R(A)),S:.5*a*b*sn(R(C))}}
+ const val=g=>S.mode==="area"?g.S:S.mode==="perim"?g.a+g.b+g.c:g.a+g.b,fu=u=>val(geo(u));
+ const stop=()=>{S.play=0;if(S.pb)S.pb.textContent="播放"};
+ const dp=dragPoints([PC],()=>S.map,(nx,ny)=>{const M=180-cA();let A=D(Math.atan2(ny,nx+cL()/2));if(A<0)A=nx>0?0:M;
+  S.u=Math.max(.01,Math.min(.99,A/M));stop();const g=geo();return{x:g.x,y:g.y}});
+ function ros(){const t=theme(),g=geo(),th=Math.tan(R(g.C/2)),sh=sn(R(g.C/2)),sm=g.c*g.c/(4*th),e=g.c/(2*sh),mx=g.c/sh;
+  if(ac()){const ok=g.A<90&&g.B<90;
+   return[["C","60°"],["c","√3 ≈ 1.732"],["A",dg(g.A),ok?t.blue:t.redText],["B",dg(g.B),ok?t.blue:t.redText],["a + b = 2√3 sin(A + 30°)",f3(g.a+g.b),t.blue],
+    ["三角形",ok?"锐角三角形":"非锐角（"+(g.A>=90?"A":"B")+" ≥ 90°）",ok?t.blue:t.redText],["锐角时 a + b 范围","(3, 2√3] ≈ (3, 3.464]",t.goldText]]}
+  const r=[["c",f2(g.c)],["C",g.C+"°",t.blue],["a",f2(g.a),t.blue],["b",f2(g.b),t.blue]];
+  if(S.mode==="area")r.push(["高 h",f2(g.y),t.redText],["S = ½ab sin C",f3(g.S)],["S_max = c²/(4 tan(C/2))",f3(sm),t.goldText],["取最大时","a = b = "+f2(e),t.goldText]);
+  else r.push(["a + b",f3(g.a+g.b),t.blue],["周长 a + b + c",f3(g.a+g.b+g.c)],["(a+b)_max = c / sin(C/2)",f3(mx),t.goldText],["周长最大值",f3(mx+g.c),t.goldText]);
+  return r}
+ let ro=null;
+ function upd(){ro&&ro.update(ros())}
+ function seg(p,q,c,lw,d){ctx.save();ctx.strokeStyle=c;ctx.lineWidth=lw;ctx.lineCap="round";if(d)ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.stroke();ctx.restore()}
+ function dot(p,c,big,open){ctx.save();ctx.fillStyle=ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p[0],p[1],big?8:open?4:5,0,2*P);open?(ctx.fillStyle=theme().bg,ctx.fill(),ctx.stroke()):ctx.fill();ctx.restore()}
+ const un=(p,q)=>{const l=hy(q[0]-p[0],q[1]-p[1])||1;return[(q[0]-p[0])/l,(q[1]-p[1])/l]},ma=(V,Q)=>Math.atan2(-(Q[1]-V[1]),Q[0]-V[0]);
+ function mini(g,bx,by,mw,mh){const t=theme(),M=g.M,fm=fu(.5),lo=S.mode==="area"?0:fu(0)*.9;
+  ctx.save();ctx.fillStyle=dark?"#2c2c2e":"#f5f5f7";ctx.beginPath();ctx.roundRect?ctx.roundRect(bx,by,mw,mh,16):ctx.rect(bx,by,mw,mh);ctx.fill();ctx.restore();
+  label(ctx,{area:"S 随 C 的位置变化",perim:"周长随 C 的位置变化",acute:"a + b 随 C 的位置变化"}[S.mode],bx+14,by+16,t.fg,"left");
+  const m=drawAxes(ctx,{x:bx+16,y:by+34,w:mw-40,h:mh-52},[0,M],[lo,fm*1.15],{labels:false,grid:false}),f=A=>fu(A/M);
+  label(ctx,"A",bx+mw-14,m.box.y+m.box.h,t.fg);
+  if(ac()){ctx.save();ctx.globalAlpha=.35;plotFn(ctx,m,f,[0,M],t.blue,2);ctx.restore();
+   [3,2*r3].forEach(v=>seg([m.box.x,m.Y(v)],[m.box.x+m.box.w,m.Y(v)],t.goldText,1,true));plotFn(ctx,m,f,[30,90],t.blue,3);
+   dot([m.X(30),m.Y(3)],t.goldText,0,1);dot([m.X(90),m.Y(3)],t.goldText,0,1);label(ctx,"(3, 2√3]",m.X(60),m.Y(3)+12,t.goldText)}
+  else plotFn(ctx,m,f,[0,M],t.blue,2);
+  const pk=[m.X(M/2),m.Y(fm)];dot(pk,t.goldText);label(ctx,"max "+f3(fm),pk[0],pk[1]-12,t.goldText);
+  const X=m.X(g.A);seg([X,m.box.y+m.box.h],[X,m.Y(val(g))],t.sub,1,true);dot([X,m.Y(val(g))],t.blue)}
+ function build(){const b=S.box;if(!b)return;b.innerHTML="";
+  if(!ac())b.append(slider("c",1,6,.1,S.c,v=>v.toFixed(1),v=>{S.c=v;upd()}),slider("角 C",20,160,1,S.C,v=>v+"°",v=>{S.C=v;upd()}));
+  S.pb=button(S.play?"暂停":"播放",()=>{if(S.play)return stop();const th=Math.acos(Math.max(-1,Math.min(1,(.5-S.u)/.47)));S.play=performance.now()-th*3000/P;S.pb.textContent="暂停"},true);
+  b.append(S.pb,el("p","empty",ac()?"C = 60°、c = √3 固定；拖动 C 沿弧移动，高亮段为锐角三角形":"拖动 C 沿圆弧移动，或按播放让 C 往返"));upd()}
+ return{
+  text:"<p>S = ½ab sin C。若一边 c 和它的对角 C 固定，顶点 C 就在一段圆弧上运动（同弧所对圆周角相等）：C 走到弧的最高点时高最大，面积最大，此时 a = b，三角形是等腰的。</p><p>代数上，由余弦定理 c² = a² + b² − 2ab cos C ≥ 2ab − 2ab cos C，得 ab ≤ c²/(2 − 2cos C)，等号同样在 a = b 时取到。</p>",
+  points:["S = ½ab sin C = ½bc sin A = ½ac sin B","定边定角 ⇒ 顶点在圆弧上","面积、周长最大都在等腰（a = b）时取得","求范围注意锐角三角形对角的限制"],
+  gk:"<p>解三角形大题第二问高频「求面积/周长的最大值或取值范围」。两种方法：余弦定理 + 基本不等式，或正弦定理化为三角函数。</p><p><b>易错：</b>锐角三角形要同时限制三个角都小于 90°。</p>",
+  mount(ctrl,read){ro=readout();S.box=el("div");
+   ctrl.append(chips([{v:"area",l:"定边定角求面积最大"},{v:"perim",l:"周长最值"},{v:"acute",l:"锐角三角形的范围"}],S.mode,v=>{S.mode=v;stop();build()}),S.box);read.append(ro);build()},
+  unmount(){ro=null;S.play=0;S.box=S.pb=null;dp.active=null},
+  draw(){const t=theme();if(S.dk!==dark){S.dk=dark;upd()}
+   if(S.play){S.u=.5-.47*Math.cos((performance.now()-S.play)/3000*P);upd()}
+   const g=geo(),ph=W<640,mw=ph?W-32:Math.min(270,W*.36),mh=ph?Math.min(130,H*.28):150,top=ph?78:64;
+   const gx=16,gw=W-32-(ph?0:mw+16),gh=H-top-16-(ph?mh+12:0),k=Math.min(gw,gh)/(2*g.R)*.9,ox=gx+gw/2,oy=top+gh/2;
+   const m=S.map={X:x=>ox+x*k,Y:y=>oy-(y-g.Oy)*k,invX:p=>(p-ox)/k,invY:p=>(oy-p)/k+g.Oy},s=(x,y)=>[m.X(x),m.Y(y)];
+   PC.x=g.x;PC.y=g.y;const A=s(-g.c/2,0),B=s(g.c/2,0),C=s(g.x,g.y),F=s(g.x,0),O=s(0,g.Oy);
+   label(ctx,{area:"S = ½ab sin C = "+f3(g.S),perim:"a + b + c = "+f3(g.a+g.b+g.c),acute:"锐角 △ABC：C = 60°，c = √3，求 a + b 的范围"}[S.mode],16,22,t.fg,"left");
+   wrapLabel(ctx,ac()?"高亮弧段两端：B = 90° 与 A = 90°，三角形为锐角只在两者之间":S.mode==="area"?"C 到弧的最高点 ⇒ 高最大 ⇒ 面积最大，此时 a = b":"同样在 a = b（弧的最高点）时周长最大",16,44,t.blue,W-32);
+   const path=(u0,u1,c,lw,al)=>{ctx.save();ctx.strokeStyle=c;ctx.lineWidth=lw;ctx.globalAlpha=al;ctx.lineCap="round";ctx.beginPath();
+    for(let i=0;i<=90;i++){const q=geo(u0+(u1-u0)*i/90),p=s(q.x,q.y);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])}ctx.stroke();ctx.restore()};
+   ctx.save();ctx.strokeStyle=t.blue;ctx.globalAlpha=.3;ctx.setLineDash([5,5]);ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(O[0],O[1],g.R*k,0,2*P);ctx.stroke();ctx.restore();
+   path(0,1,t.blue,6,.22);
+   if(ac()){path(.25,.75,t.blue,6,.8);
+    [[.25,"B = 90°",1],[.75,"A = 90°",-1]].forEach(([u,txt,d])=>{const q=geo(u),Q=s(q.x,q.y);seg(A,Q,t.goldText,1.2,true);seg(B,Q,t.goldText,1.2,true);dot(Q,t.goldText,0,1);label(ctx,txt,Q[0]+d*12,Q[1]-10,t.goldText,d>0?"left":"right")})}
+   seg([Math.min(A[0],F[0])-20,A[1]],[Math.max(B[0],F[0])+20,B[1]],t.sub,1,true);
+   ctx.save();ctx.beginPath();[A,B,C].forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.globalAlpha=.1;ctx.fillStyle=t.blue;ctx.fill();ctx.restore();
+   seg(A,B,t.fg,3);seg(B,C,t.fg,2.5);seg(C,A,t.fg,2.5);
+   if(S.mode==="area"&&C[1]<F[1]-6){seg(C,F,t.redText,1.5,true);const q=8,sx=F[0]>B[0]-q?-1:1;ctx.save();ctx.strokeStyle=t.redText;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(F[0]+sx*q,F[1]);ctx.lineTo(F[0]+sx*q,F[1]-q);ctx.lineTo(F[0],F[1]-q);ctx.stroke();ctx.restore();
+    label(ctx,"h = "+f2(g.y),F[0]+8,(C[1]+F[1])/2,t.redText,"left")}
+   const G=[(A[0]+B[0]+C[0])/3,(A[1]+B[1]+C[1])/3];
+   [[B,C,"a = "+f2(g.a)],[C,A,"b = "+f2(g.b)]].forEach(([p,q,txt])=>{const mid=[(p[0]+q[0])/2,(p[1]+q[1])/2],u=un(G,mid);label(ctx,txt,mid[0]+u[0]*30,mid[1]+u[1]*18,t.fg)});
+   label(ctx,"c = "+(ac()?"√3":f2(g.c)),(A[0]+B[0])/2,A[1]+18,t.fg);
+   const r=Math.max(10,Math.min(24,hy(C[0]-A[0],C[1]-A[1])*.3,hy(C[0]-B[0],C[1]-B[1])*.3)),a0=ma(C,A),a1=ma(C,B);angleArc(ctx,C[0],C[1],r,a0,a1,t.goldText,null);
+   const uo=un(O,C);label(ctx,"C",C[0]+uo[0]*18,C[1]+uo[1]*18-4,t.fg);label(ctx,g.C+"°",C[0]+Math.cos((a0+a1)/2)*(r+16),C[1]-Math.sin((a0+a1)/2)*(r+16),t.goldText);
+   dot(A,t.fg);dot(B,t.fg);dot(C,t.blue,dp.active===PC||dp.hover===PC);label(ctx,"A",A[0]-12,A[1]+14,t.fg);label(ctx,"B",B[0]+12,B[1]+14,t.fg);
+   mini(g,ph?16:W-16-mw,ph?H-16-mh:top,mw,mh)},
+  pointer:(e,type,x,y)=>dp.pointer(e,type,x,y)}
+})();
+CH[6].ready=true;
+
+/* ---------- 08 测量应用 ---------- */
+MODS[7]=(()=>{
+ const P=Math.PI,R=d=>d*P/180,D=r=>r*180/P,f2=v=>v.toFixed(2),sn=d=>Math.sin(R(d)),cs=d=>Math.cos(R(d)),hy=Math.hypot;
+ const S={mode:"tower",d:40,a:60,b:30,rd:60,acd:75,bcd:30,adc:30,bdc:75,t1:30,s1:40,t2:90,s2:30,box:null,sl:{},dk:null};
+ let ro=null;
+ const brg=(p,f=f2)=>{p=(p%360+360)%360;return p<=90?"北偏东 "+f(p)+"°":p<=180?"南偏东 "+f(180-p)+"°":p<=270?"南偏西 "+f(p-180)+"°":"北偏西 "+f(360-p)+"°"};
+ function tower(){const g=S.a-S.b,AC=S.d*sn(S.b)/sn(g);return{g,AC,AB:AC*sn(S.a),BC:AC*cs(S.a)}}
+ function river(){const ca=180-S.acd-S.adc,cb=180-S.bcd-S.bdc,AC=S.rd*sn(S.adc)/sn(ca),BC=S.rd*sn(S.bdc)/sn(cb),c=Math.abs(S.acd-S.bcd);
+  return{ca,cb,AC,BC,c,AB:Math.sqrt(Math.max(0,AC*AC+BC*BC-2*AC*BC*cs(c))),A:[AC*cs(S.acd),AC*sn(S.acd)],B:[BC*cs(S.bcd),BC*sn(S.bcd)]}}
+ function nav(){const B=[S.s1*sn(S.t1),S.s1*cs(S.t1)],C=[B[0]+S.s2*sn(S.t2),B[1]+S.s2*cs(S.t2)],b=180-Math.abs(S.t2-S.t1),
+  AC=Math.sqrt(Math.max(0,S.s1*S.s1+S.s2*S.s2-2*S.s1*S.s2*cs(b))),sA=AC?S.s2*sn(b)/AC:0,phi=(D(Math.atan2(C[0],C[1]))+360)%360;
+  let A=Math.abs(phi-S.t1);if(A>180)A=360-A;return{B,C,b,AC,sA,A,phi,cw:S.t2>=S.t1}}
+ function ros(){const t=theme(),K=t.blue,Rd=t.redText;
+  if(S.mode==="tower"){const g=tower();return[["CD = d",S.d+" m",K],["仰角 α（C）/ β（D）",S.a+"° / "+S.b+"°",K],
+   ["① △ACD：∠CAD = α − β",g.g+"°"],["② 正弦定理 AC = d·sin β / sin(α − β)",f2(g.AC)+" m"],["③ Rt△ABC：AB = AC·sin α",f2(g.AB)+" m",Rd]]}
+  if(S.mode==="river"){const g=river();return[["CD = d",S.rd+" m",K],["∠ACD，∠BCD",S.acd+"°，"+S.bcd+"°",K],["∠ADC，∠BDC",S.adc+"°，"+S.bdc+"°",K],
+   ["① △ACD：AC = d·sin∠ADC / sin∠CAD","∠CAD = "+g.ca+"°，AC = "+f2(g.AC)+" m"],["② △BCD：BC = d·sin∠BDC / sin∠CBD","∠CBD = "+g.cb+"°，BC = "+f2(g.BC)+" m"],
+   ["③ △ABC：∠ACB = |∠ACD − ∠BCD|",g.c+"°"],["④ AB² = AC² + BC² − 2·AC·BC·cos∠ACB","AB = "+f2(g.AB)+" m",Rd]]}
+  const g=nav();return[["第一段","北偏东 "+S.t1+"°，s₁ = "+S.s1+" 海里",K],["第二段",brg(S.t2,v=>v)+"（θ₂ = "+S.t2+"°），s₂ = "+S.s2+" 海里",K],
+   ["① ∠ABC = 180° − |θ₂ − θ₁|",f2(g.b)+"°"],["② AC² = s₁² + s₂² − 2s₁s₂·cos∠ABC","AC = "+f2(g.AC)+" 海里",Rd],
+   ["③ sin∠BAC = s₂·sin∠ABC / AC",f2(g.sA)+" → ∠BAC = "+f2(g.A)+"°"+(g.A>90?"（钝角）":"")],
+   ["④ 方位角 = θ₁ "+(g.cw?"+":"−")+" ∠BAC = "+f2(g.phi)+"°",brg(g.phi),Rd]]}
+ function upd(){ro&&ro.update(ros())}
+ function sl(k,lab,min,max,unit,fix){const s=slider(lab,min,max,1,S[k],v=>v+unit,v=>{S[k]=v;fix&&fix(k);upd()});S.sl[k]=s;return s}
+ const fixT=k=>{if(S.b>S.a-2){if(k==="a"){S.b=S.a-2;S.sl.b.set(S.b)}else{S.a=S.b+2;S.sl.a.set(S.a)}}};
+ const pr={acd:"adc",adc:"acd",bcd:"bdc",bdc:"bcd"},fixR=k=>{const q=pr[k];if(S[k]+S[q]>165){S[q]=165-S[k];S.sl[q].set(S[q])}};
+ function build(){const b=S.box;if(!b)return;b.innerHTML="";S.sl={};
+  if(S.mode==="tower")b.append(sl("d","CD = d",10,100," m"),sl("a","仰角 α（在 C 测）",12,85,"°",fixT),sl("b","仰角 β（在 D 测）",5,80,"°",fixT),el("p","empty","α 必须大于 β：C 离塔更近"));
+  else if(S.mode==="river")b.append(sl("rd","CD = d",10,100," m"),sl("acd","∠ACD",15,150,"°",fixR),sl("bcd","∠BCD",15,150,"°",fixR),sl("adc","∠ADC",15,150,"°",fixR),sl("bdc","∠BDC",15,150,"°",fixR),el("p","empty","同一三角形两角和保持小于 180°"));
+  else b.append(sl("t1","θ₁（北偏东）",0,90,"°"),sl("s1","s₁",10,100," 海里"),sl("t2","θ₂（从正北顺时针）",0,180,"°"),sl("s2","s₂",10,100," 海里"),el("p","empty","θ₂ > 90° 时即「南偏东 180° − θ₂」"));
+  upd()}
+ function seg(p,q,c,lw,d){ctx.save();ctx.strokeStyle=c;ctx.lineWidth=lw;ctx.lineCap="round";if(d)ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.stroke();ctx.restore()}
+ function dot(p,c){ctx.save();ctx.fillStyle=c;ctx.beginPath();ctx.arc(p[0],p[1],5,0,2*P);ctx.fill();ctx.restore()}
+ const ma=(V,Q)=>Math.atan2(-(Q[1]-V[1]),Q[0]-V[0]);
+ function arc(V,P1,Q,r,c,txt){let a0=ma(V,P1),d=ma(V,Q)-a0;while(d>P)d-=2*P;while(d<=-P)d+=2*P;angleArc(ctx,V[0],V[1],r,a0,a0+d,c,null);
+  if(txt){const m=a0+d/2;label(ctx,txt,V[0]+Math.cos(m)*(r+22),V[1]-Math.sin(m)*(r+22),c)}}
+ function ml(p,q,txt,c,o){const dx=q[0]-p[0],dy=q[1]-p[1],l=hy(dx,dy)||1;label(ctx,txt,(p[0]+q[0])/2-dy/l*o,(p[1]+q[1])/2+dx/l*o,c)}
+ function fit(ps,top){let x0=1/0,x1=-1/0,y0=1/0,y1=-1/0;ps.forEach(p=>{x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1])});
+  const bw=W-32,bh=Math.max(60,H-top-28),k=Math.min(bw/((x1-x0)||1),bh/((y1-y0)||1))*.8,cx=(x0+x1)/2,cy=(y0+y1)/2,ox=16+bw/2,oy=top+bh/2;
+  return p=>[ox+(p[0]-cx)*k,oy-(p[1]-cy)*k]}
+ const HD={tower:["测塔高（塔底 B 不可到达）","已知（蓝）d、α、β，所求（红）AB：先在 △ACD 中用正弦定理求 AC，再在 Rt△ABC 中求 AB"],
+  river:["隔河测距：A、B 在对岸","△ACD、△BCD 中用正弦定理求 AC、BC（金），再在 △ABC 中用余弦定理求 AB（红）"],
+  nav:["航行方位：A → B → C","方位角从正北顺时针量：余弦定理求 AC，正弦定理求 ∠BAC，再换成「北偏东 x°」"]};
+ function drawTower(top){const t=theme(),g=tower(),s=fit([[0,0],[-g.BC-S.d,0],[0,g.AB]],top),A=s([0,g.AB]),B=s([0,0]),C=s([-g.BC,0]),Dp=s([-g.BC-S.d,0]);
+  seg([16,B[1]],[W-16,B[1]],t.fg,1,true);seg(Dp,A,t.blue,1.5,true);seg(C,A,t.blue,1.5,true);seg(C,B,t.fg,1.5);seg(Dp,C,t.blue,3);seg(B,A,t.redText,3);
+  seg([B[0]-9,B[1]],[B[0]-9,B[1]-9],t.fg,1.2);seg([B[0]-9,B[1]-9],[B[0],B[1]-9],t.fg,1.2);
+  arc(C,B,A,24,t.blue,"α = "+S.a+"°");arc(Dp,C,A,40,t.blue,"β = "+S.b+"°");arc(A,Dp,C,34,t.goldText,"α − β");
+  label(ctx,"d = "+S.d+" m",(Dp[0]+C[0])/2,B[1]+18,t.blue);label(ctx,"AB = "+f2(g.AB)+" m",B[0]+12,(A[1]+B[1])/2,t.redText,"left");
+  [[A,"A",0,-14],[B,"B",12,14],[C,"C",0,16],[Dp,"D",0,16]].forEach(([p,n,dx,dy])=>{dot(p,t.fg);label(ctx,n,p[0]+dx,p[1]+dy,t.fg)})}
+ function drawRiver(top){const t=theme(),g=river(),s=fit([[0,0],[S.rd,0],g.A,g.B],top),C=s([0,0]),Dp=s([S.rd,0]),A=s(g.A),B=s(g.B),y0=Math.max(A[1],B[1])+16,y1=C[1]-16;
+  if(y1>y0){ctx.save();ctx.globalAlpha=.1;ctx.fillStyle=t.blue;ctx.fillRect(0,y0,W,y1-y0);ctx.restore();label(ctx,"河",24,(y0+y1)/2,t.blue,"left")}
+  [[C,A],[Dp,A],[C,B],[Dp,B]].forEach(([p,q])=>seg(p,q,t.fg,1,true));seg(C,A,t.goldText,2);seg(C,B,t.goldText,2);seg(C,Dp,t.blue,3);seg(A,B,t.redText,3);
+  arc(C,Dp,B,26,t.blue,S.bcd+"°");arc(C,Dp,A,48,t.blue,S.acd+"°");arc(Dp,C,A,26,t.blue,S.adc+"°");arc(Dp,C,B,48,t.blue,S.bdc+"°");
+  label(ctx,"d = "+S.rd+" m",(C[0]+Dp[0])/2,C[1]+18,t.blue);ml(A,B,"AB = "+f2(g.AB)+" m",t.redText,-16);
+  [[A,"A",0,-14],[B,"B",0,-14],[C,"C",0,16],[Dp,"D",0,16]].forEach(([p,n,dx,dy])=>{dot(p,t.fg);label(ctx,n,p[0]+dx,p[1]+dy,t.fg)})}
+ function drawNav(top){const t=theme(),g=nav(),s=fit([[0,0],g.B,g.C],top+44),A=s([0,0]),B=s(g.B),C=s(g.C),NA=[A[0],A[1]-44],NB=[B[0],B[1]-44];
+  arrow(ctx,A[0],A[1],NA[0],NA[1],t.fg,"N",1.5);arrow(ctx,B[0],B[1],NB[0],NB[1],t.fg,"N",1.5);
+  seg(A,B,t.blue,3);seg(B,C,t.blue,3);seg(A,C,t.redText,3);
+  arc(A,NA,B,22,t.blue,"θ₁ = "+S.t1+"°");arc(B,NB,C,22,t.blue,"θ₂ = "+S.t2+"°");if(g.phi>.5)arc(A,NA,C,52,t.redText,f2(g.phi)+"°");if(g.b>1&&g.b<179)arc(B,A,C,16,t.goldText,null);
+  ml(A,B,"s₁ = "+S.s1,t.blue,-16);ml(B,C,"s₂ = "+S.s2,t.blue,-16);ml(A,C,"AC = "+f2(g.AC),t.redText,16);
+  [[A,"A",-12,12],[B,"B",-14,0],[C,"C",12,12]].forEach(([p,n,dx,dy])=>{dot(p,t.fg);label(ctx,n,p[0]+dx,p[1]+dy,t.fg)})}
+ return{
+  text:"<p>测量问题的本质，是把「量不到的距离」放进一个能解的三角形里。量得到的是一段基线长度和几个角（仰角、俯角、方位角）。</p><p>先确定在哪个三角形里、已知哪三个元素，再选正弦定理或余弦定理。</p>",
+  points:["仰角、俯角是视线与水平线的夹角","方位角从正北方向顺时针量","解题四步：画图 → 找三角形 → 选定理 → 回答实际问题"],
+  gk:"<p>浙江卷常以实际情境考解三角形，关键是从立体或平面图中抽出三角形。</p><p><b>易错：</b>方位角与「北偏东」的换算；仰角在竖直平面内，与水平面内的角不在同一个三角形里。</p>",
+  mount(ctrl,read){ro=readout();S.box=el("div");
+   ctrl.append(chips([{v:"tower",l:"测塔高"},{v:"river",l:"隔河测距"},{v:"nav",l:"航行方位"}],S.mode,v=>{S.mode=v;build()}),S.box);read.append(ro);build()},
+  unmount(){ro=null;S.box=null},
+  draw(){const t=theme();if(S.dk!==dark){S.dk=dark;upd()}
+   label(ctx,HD[S.mode][0],16,22,t.fg,"left");const top=wrapLabel(ctx,HD[S.mode][1],16,44,t.blue,W-32)+12;
+   ({tower:drawTower,river:drawRiver,nav:drawNav})[S.mode](top)}}
+})();
+CH[7].book="人教A版 必修第二册 · 6.4.3 余弦定理、正弦定理应用举例";CH[7].ready=true;
+
+/* ---------- 09 随堂检测 ---------- */
+MODS[8]=(()=>{
+ // 每题的画布演示：键 0–5，值为 (ctx,w,h,map,answered)=>{}；没有对应项时画布显示题号与题型
+ const qB=()=>({x:16,y:56,w:W-32,h:H-72}),R3=Math.sqrt(3);
+ const qL=(a,b,c,w,d)=>{ctx.save();ctx.strokeStyle=c;ctx.lineWidth=w||1.5;ctx.lineCap="round";if(d)ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();ctx.restore()};
+ const qD=(p,c,r)=>{ctx.save();ctx.fillStyle=c;ctx.beginPath();ctx.arc(p[0],p[1],r||4,0,2*Math.PI);ctx.fill();ctx.restore()};
+ const qC=(o,r,c,w,al)=>{ctx.save();ctx.strokeStyle=c;ctx.lineWidth=w||1.5;ctx.globalAlpha=al||1;ctx.beginPath();ctx.arc(o[0],o[1],r,0,2*Math.PI);ctx.stroke();ctx.restore()};
+ const qH=s=>label(ctx,s,16,22,theme().fg,"left"),qA=s=>label(ctx,s,16,42,theme().redText,"left");
+ const qF=pts=>{const b=qB(),xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),x0=Math.min(...xs),y0=Math.min(...ys),dx=Math.max(...xs)-x0,dy=Math.max(...ys)-y0,
+  k=Math.min(b.w/dx,b.h/dy),ox=b.x+(b.w-dx*k)/2-x0*k,oy=b.y+(b.h+dy*k)/2+y0*k;return p=>[ox+p[0]*k,oy-p[1]*k]};
+ const QUIZ_DRAW={
+  0:(c,w,h,m,ans)=>{const t=theme(),M=drawAxes(c,qB(),[-1.35,1.35],[-1.35,1.35],{equal:true,labels:false}),O=[M.X(0),M.Y(0)],r=M.X(1)-O[0],
+    P=d=>[M.X(Math.cos(d*PI/180)),M.Y(Math.sin(d*PI/180))],p15=P(15),p30=P(30);
+   qH("第 1 题 · 单位圆上的 15° 与 30° 角");qC(O,r,t.fg,1.2,.4);label(c,"1",M.X(1)+8,O[1]+12,t.fg);
+   qL(O,p15,t.blue,2.5);qL(O,p30,t.gold,2.5);qD(p15,t.blue);qD(p30,t.gold);
+   angleArc(c,O[0],O[1],r*.35,0,PI/12,t.blue,"15°");angleArc(c,O[0],O[1],r*.62,0,PI/6,t.gold,"30°");
+   if(ans){qL(p30,[p30[0],O[1]],t.redText,3);label(c,"½",p30[0]+10,(p30[1]+O[1])/2,t.redText,"left");qD(p30,t.redText,5);
+    label(c,"sin30° = ½",p30[0]+10,p30[1]-12,t.redText,"left");qA("sin15°cos15° = ½ sin30° = 1/4")}},
+  1:(c,w,h,m,ans)=>{const t=theme(),M=drawAxes(c,qB(),[-2.4,2.4],[-1.2,2.4],{equal:true,labels:false}),O=[M.X(0),M.Y(0)],u=M.X(1)-O[0],
+    R=(x,y,k)=>[M.X(x*k),M.Y(y*k)],a2=Math.atan2(4,-3);
+   qH("第 2 题 · 终边过 (1, 2) 的角 α 与 2α");qC(O,u,t.fg,1,.35);
+   qL(O,R(1,2,1.1),t.blue,2.5);qD(R(1,2,1),t.blue);label(c,"(1, 2)",M.X(1)+10,M.Y(2),t.blue,"left");
+   angleArc(c,O[0],O[1],u*.3,0,Math.atan2(2,1),t.blue,"α");
+   const e=R(-.6,.8,2.2);qL(O,e,t.gold,2.5);label(c,"2α 终边",e[0]-6,e[1]-12,t.goldText,"right");angleArc(c,O[0],O[1],u*.55,0,a2,t.gold,"2α");
+   if(ans){const q=R(-.6,.8,1),f=[q[0],O[1]];qL(q,f,t.redText,1.5,true);qL(O,f,t.redText,3.5);qD(q,t.redText,5);
+    label(c,"−3/5",f[0],O[1]+14,t.redText);label(c,"(−3/5, 4/5)",q[0]-8,q[1]-12,t.redText,"right");qA("cos 2α = (1 − tan²α)/(1 + tan²α) = −3/5")}},
+  2:(c,w,h,m,ans)=>{const t=theme(),M=drawAxes(c,qB(),[-2*PI,2*PI],[-2.8,2.8],{piTicks:true,labels:false});
+   qH("第 3 题 · y = sin x + √3 cos x，x ∈ [−2π, 2π]");
+   [-2,-1,1,2].forEach(k=>label(c,(k<0?"−":"")+(Math.abs(k)>1?"2":"")+"π",M.X(k*PI),M.Y(0)+14,t.fg));
+   plotFn(c,M,x=>Math.sin(x)+R3*Math.cos(x),null,t.blue,2.5);
+   if(ans){qL([M.X(-2*PI),M.Y(2)],[M.X(2*PI),M.Y(2)],t.redText,1,true);label(c,"y = 2",M.X(2*PI)-4,M.Y(2)-12,t.redText,"right");
+    [PI/6,PI/6-2*PI].forEach(x=>qD([M.X(x),M.Y(2)],t.redText,5));label(c,"(π/6, 2)",M.X(PI/6),M.Y(2)-14,t.redText);
+    const o=[W-90,H-30],s=24,e=[o[0]+s,o[1]-s*R3];qL([o[0]-8,o[1]],[o[0]+s+16,o[1]],t.fg,1);qL([o[0],o[1]+6],[o[0],e[1]-10],t.fg,1);
+    arrow(c,o[0],o[1],e[0],e[1],t.gold,null,2);label(c,"(1, √3)",e[0]+8,e[1],t.goldText,"left");label(c,"长度 2",o[0]+s/2+10,o[1]-s,t.goldText,"left");
+    qA("y = 2 sin(x + π/3)，最大值 2，在 x = π/6 + 2kπ 取到")}},
+  3:(c,w,h,m,ans)=>{const t=theme(),f=qF([[-2.9,-.4],[3.4,4.8]]),A=f([-2.5,2.5*R3]),B=f([3,0]),C=f([0,0]);
+   qH("第 4 题 · a = 3，b = 5，c = 7（等比例）");
+   qL(A,B,t.fg,2);qL(B,C,t.fg,2);qL(C,A,t.fg,2);
+   label(c,"a = 3",(B[0]+C[0])/2,C[1]+16,t.blue);label(c,"b = 5",(A[0]+C[0])/2-10,(A[1]+C[1])/2,t.blue,"right");
+   label(c,"c = 7",(A[0]+B[0])/2+12,(A[1]+B[1])/2-8,t.blue,"left");
+   [[A,"A",0,-14],[B,"B",12,8],[C,"C",-10,12]].forEach(([p,n,dx,dy])=>{qD(p,t.fg,3);label(c,n,p[0]+dx,p[1]+dy,t.fg)});
+   if(ans){angleArc(c,C[0],C[1],22,0,2*PI/3,t.redText,null);label(c,"120°",C[0]+Math.cos(PI/3)*40,C[1]-Math.sin(PI/3)*40,t.redText);
+    qA("cos C = (9 + 25 − 49)/30 = −½，C = 120°")}},
+  4:(c,w,h,m,ans)=>{const t=theme(),f=qF([[-1.7,-3.1],[8.6,7.1]]),k=f([1,0])[0]-f([0,0])[0],A=f([0,0]),cx=2*R3,Cp=f([cx,2]);
+   qH("第 5 题 · A = 30°，AC = 4，a 取 2、3、3.5、5");
+   qL(A,f([8.6,0]),t.fg,2);qL(A,Cp,t.blue,2.5);label(c,"AC = 4",(A[0]+Cp[0])/2-8,(A[1]+Cp[1])/2-12,t.blue,"right");
+   angleArc(c,A[0],A[1],30,0,PI/6,t.gold,"30°");
+   [2,3,3.5,5].forEach((a,i)=>{const hi=ans&&(a===3||a===3.5),col=a===3?t.blue:t.gold,an=(70-i*16)*PI/180;
+    qC(Cp,a*k,hi?col:t.fg,hi?2.5:1.2,hi?1:.3);
+    label(c,"a = "+a,Cp[0]+Math.cos(an)*a*k+6,Cp[1]-Math.sin(an)*a*k-8,hi?(a===3?t.blue:t.goldText):t.fg,"left")});
+   [[A,"A",-10,12],[Cp,"C",-10,-10]].forEach(([p,n,dx,dy])=>{qD(p,t.fg,3);label(c,n,p[0]+dx,p[1]+dy,t.fg)});
+   if(ans){[3,3.5].forEach(a=>{const d=Math.sqrt(a*a-4);[cx-d,cx+d].forEach(x=>qD(f([x,0]),t.redText,5))});
+    const F=f([cx,0]);qL(Cp,F,t.redText,2,true);label(c,"h = 2",F[0]+8,(Cp[1]+F[1])/2,t.redText,"left");
+    qA("h = b sin A = 2，2 < a < 4 时两解：a = 3、3.5")}},
+  5:(c,w,h,m,ans)=>{const t=theme(),f=qF([[-1.5,-.35],[1.5,1.95]]),r=2/R3,P=d=>[r*Math.cos(d*PI/180),1/R3+r*Math.sin(d*PI/180)],
+    A=f([-1,0]),B=f([1,0]);
+   qH("第 6 题 · AB = 2，C = 60° 的点 C 在圆弧上");
+   ctx.save();ctx.strokeStyle=t.gold;ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();
+   for(let d=-30;d<=210;d+=3){const p=f(P(d));d===-30?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1])}ctx.stroke();ctx.restore();
+   label(c,"C = 60° 所对的圆弧",f(P(185))[0]-8,f(P(185))[1],t.goldText,"right");
+   if(!ans)[25,60,150].forEach(d=>{const C=f(P(d));qL(A,C,t.blue,1.2);qL(B,C,t.blue,1.2);qD(C,t.blue,3.5)});
+   else{const C=f([0,R3]);ctx.save();ctx.globalAlpha=.12;ctx.fillStyle=t.blue;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.lineTo(C[0],C[1]);ctx.fill();ctx.restore();
+    qL(A,C,t.blue,2.5);qL(B,C,t.blue,2.5);qD(C,t.redText,5);label(c,"C",C[0],C[1]-14,t.fg);
+    angleArc(c,C[0],C[1],22,-2*PI/3,-PI/3,t.gold,"60°");label(c,"S = √3",C[0],(C[1]+A[1])/2+18,t.redText);
+    label(c,"2",(A[0]+C[0])/2-10,(A[1]+C[1])/2,t.blue,"right");label(c,"2",(B[0]+C[0])/2+10,(B[1]+C[1])/2,t.blue,"left");
+    qA("C 在弧最高点时 a = b = 2，等边三角形，S = ½·2·2·sin60° = √3")}
+   qL(A,B,t.fg,2.5);label(c,"AB = 2",(A[0]+B[0])/2,A[1]+16,t.fg);
+   [[A,"A",-12,8],[B,"B",12,8]].forEach(([p,n,dx,dy])=>{qD(p,t.fg,3);label(c,n,p[0]+dx,p[1]+dy,t.fg)})}};
+ const RED="#c0362c",TY={s:"单选题",m:"多选题",f:"填空题"},LT="ABCD",TOTAL=31;
+ const Q=[
+  {t:"s",pt:5,q:"sin 15° cos 15° =",o:["1/4","1/2","√3/4","√3/2"],a:[0],e:"sin 15° cos 15° = ½ · 2 sin 15° cos 15° = ½ sin 30° = 1/4。这是二倍角公式 sin 2α = 2 sin α cos α 的逆用。对应第 02 章「二倍角与降幂」。"},
+  {t:"s",pt:5,q:"已知 tan α = 2，则 cos 2α =",o:["−3/5","3/5","−4/5","4/5"],a:[0],e:"cos 2α = (cos²α − sin²α)/(cos²α + sin²α)，分子分母同除 cos²α 得 (1 − tan²α)/(1 + tan²α) = (1 − 4)/(1 + 4) = −3/5。化成只含 tan α 的齐次式是这类题的通法。对应第 02 章「二倍角与降幂」。"},
+  {t:"s",pt:5,q:"函数 f(x) = sin x + √3 cos x 的最大值为",o:["1","√3","2","1 + √3"],a:[2],e:"f(x) = 2(½ sin x + (√3/2) cos x) = 2 sin(x + π/3)，最大值为 2。振幅是 √(1² + (√3)²) = 2，而不是系数相加 1 + √3。对应第 03 章「辅助角公式」。"},
+  {t:"s",pt:5,q:"在 △ABC 中，a = 3，b = 5，c = 7，则角 C =",o:["60°","90°","120°","150°"],a:[2],e:"cos C = (a² + b² − c²)/(2ab) = (9 + 25 − 49)/30 = −1/2，所以 C = 120°。已知三边求角，直接用余弦定理。对应第 05 章「余弦定理」。"},
+  {t:"m",pt:5,q:"在 △ABC 中，A = 30°，b = 4，下列 a 的取值能使三角形恰有两解的是",o:["a = 2","a = 3","a = 3.5","a = 5"],a:[1,2],e:"高 h = b sin A = 2，恰有两解 ⇔ b sin A &lt; a &lt; b，即 2 &lt; a &lt; 4，选 B、C。a = 2 时恰为直角三角形，只有一解；a = 5 ≥ b 也只有一解。对应第 06 章「解的个数」。"},
+  {t:"f",pt:6,q:"在 △ABC 中，c = 2，C = 60°，则 △ABC 面积的最大值为 ____。",a:"√3",e:"由余弦定理 4 = a² + b² − ab ≥ 2ab − ab = ab，得 ab ≤ 4，所以 S = ½ab sin 60° ≤ √3。等号在 a = b = 2（等腰，此时等边）时取到。对应第 07 章「面积与最值」。"}];
+ const fresh=()=>({q:0,sel:Q.map(x=>x.t==="f"?"":[]),got:Q.map(()=>null),maps:Q.map(()=>({}))});
+ let S=Object.assign(fresh(),{box:null,btn:null,h3:null,dk:null}),ro=null;
+ if(!document.getElementById("x-quiz-css")){const st=el("style",null,
+  ".x-nums button{min-width:44px;font-family:var(--mono)}.x-nums button.ok{color:var(--acc);border-color:var(--acc)}.x-nums button.bad{color:"+RED+";border-color:"+RED+"}"+
+  ".x-hd{font:13px var(--mono);color:var(--sub);margin:2px 0}.x-stem{margin:0 0 10px;font-size:15px;line-height:1.6}"+
+  ".x-opt{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;border:1px solid var(--line);background:var(--btn2);border-radius:14px;padding:10px 14px;min-height:44px;margin:0 0 8px;cursor:pointer;font-size:15px}"+
+  ".x-opt b{font-family:var(--mono);font-weight:600}.x-opt.on{border-color:var(--acc);background:var(--accSoft);color:var(--accDeep)}"+
+  ".x-opt.ok{border-color:var(--acc);color:var(--acc)}.x-opt.bad{border-color:"+RED+";color:"+RED+"}.x-opt:disabled{cursor:default}"+
+  ".x-in{width:100%;min-height:44px;border:1px solid var(--line);border-radius:14px;padding:0 14px;font:16px var(--sans);background:var(--btn2);color:var(--fg);margin:0 0 10px}"+
+  ".x-in:focus{outline:2px solid var(--acc);outline-offset:1px}.x-res{font-weight:600;margin:12px 0 4px}.x-exp{font-size:14px;line-height:1.7;margin:0 0 10px}");
+  st.id="x-quiz-css";document.head.append(st)}
+ const sum=()=>S.got.reduce((s,g)=>s+(g||0),0),nDone=()=>S.got.filter(g=>g!=null).length,all=()=>nDone()===Q.length;
+ const key=x=>x.t==="f"?x.a:x.a.map(k=>LT[k]).join("");
+ function grade(i){const x=Q[i],v=S.sel[i];
+  if(x.t==="f"){const s=v.replace(/\s/g,"").toLowerCase(),n=Number(s);return["√3","根号3","sqrt(3)"].includes(s)||(s!==""&&isFinite(n)&&Math.abs(n-1.732)<=.01)?x.pt:0}
+  if(x.t==="s")return v[0]===x.a[0]?x.pt:0;
+  if(!v.length||v.some(k=>!x.a.includes(k)))return 0;return v.length===x.a.length?x.pt:2}
+ function upd(){if(!ro)return;const t=theme(),i=S.q,g=S.got[i];
+  ro.update([["得分",sum()+" / "+TOTAL,t.blue],["已完成",nDone()+" / "+Q.length],["第 "+(i+1)+" 题",g==null?"未提交":g+" / "+Q[i].pt+" 分",g==null?null:t.blue]])}
+ function reset(){Object.assign(S,fresh());render()}
+ function render(){const b=S.box;if(!b)return;b.innerHTML="";const i=S.q,x=Q[i],g=S.got[i],dn=g!=null;
+  const sub=()=>{if(S.got[i]!=null)return;S.got[i]=grade(i);render()};
+  const nums=el("div","chips ctl x-nums");
+  Q.forEach((q,k)=>{const n=el("button",k===i?"on":S.got[k]==null?"":S.got[k]===q.pt?"ok":"bad",String(k+1));n.type="button";
+   n.setAttribute("aria-label","第 "+(k+1)+" 题"+(S.got[k]==null?"":"，已提交"));n.onclick=()=>{S.q=k;render()};nums.append(n)});
+  b.append(nums,el("p","x-hd","第 "+(i+1)+" 题 · "+TY[x.t]+" · "+x.pt+" 分"),el("p","x-stem",x.q));
+  if(x.t==="m")b.append(el("p","empty","可多选：全对 5 分，部分选对 2 分，有错选 0 分"));
+  const sb=button(dn?"已提交":"提交",sub,true);
+  if(x.t==="f"){const inp=el("input","x-in");inp.type="text";inp.value=S.sel[i];inp.placeholder="如 √3、根号3 或 1.732";inp.disabled=dn;inp.setAttribute("aria-label","填写答案");
+   inp.oninput=()=>{S.sel[i]=inp.value;sb.disabled=!inp.value.trim()};inp.onkeydown=e=>{if(e.key==="Enter"&&inp.value.trim())sub()};b.append(inp)}
+  else x.o.forEach((o,k)=>{const on=S.sel[i].includes(k),ok=x.a.includes(k);
+   const ob=el("button","x-opt"+(dn?(ok?" ok":on?" bad":""):on?" on":""),"<b>"+LT[k]+"</b><span>"+o+"</span>");ob.type="button";ob.disabled=dn;ob.setAttribute("aria-pressed",on);
+   ob.onclick=()=>{const s=S.sel[i];S.sel[i]=x.t==="s"?[k]:on?s.filter(v=>v!==k):[...s,k].sort();render()};b.append(ob)});
+  sb.disabled=dn||!(x.t==="f"?S.sel[i].trim():S.sel[i].length);b.append(sb);
+  if(dn){const full=g===x.pt,r=el("p","x-res",(full?"回答正确":g?"部分选对":"回答错误")+" · +"+g+" 分"+(full?"":" · 正确答案 "+key(x)));
+   r.style.color=full?"var(--acc)":RED;b.append(r,el("p","x-exp",x.e))}
+  const nx=Q.findIndex((_,k)=>k>i&&S.got[k]==null),ny=nx>=0?nx:S.got.findIndex(v=>v==null);
+  if(dn&&ny>=0)b.append(button("下一题",()=>{S.q=ny;render()}));
+  if(all())b.append(el("p","x-res","全部完成：得分 "+sum()+" / "+TOTAL),button("再做一遍",reset,true));
+  upd()}
+ function big(txt,x,y,c,f){ctx.save();ctx.font=f+" -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillStyle=c;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(txt,x,y);ctx.restore()}
+ return{
+  text:"<p>6 道题，满分 31 分，覆盖二倍角、辅助角、余弦定理、解的个数与面积最值。单选点一个选项，多选可点多个，填空在输入框作答。</p><p>点「提交」即时判分并给出解析，已提交的题会锁定；顶部题号可随时切换。</p>",
+  points:["单选、填空每题只看最终结果","多选：全对 5 分，部分选对 2 分，有错选 0 分","每题解析都注明对应章节，答错可回去重做实验"],
+  mount(ctrl,read){S.h3=ctrl.parentElement.querySelector("h3");if(S.h3)S.h3.textContent="题卡";ro=readout();S.box=el("div");ctrl.append(S.box);read.append(ro);render()},
+  unmount(){if(S.h3)S.h3.textContent="控件";ro=null;S.box=S.btn=S.h3=null;cv.style.cursor=""},
+  draw(){const t=theme();if(S.dk!==dark){S.dk=dark;upd()}S.btn=null;
+   if(!all()){const x=Q[S.q],D=QUIZ_DRAW[S.q];if(D)return D(ctx,W,H,S.maps[S.q],S.got[S.q]!=null);
+    big("第 "+(S.q+1)+" 题",W/2,H/2-18,t.fg,"600 44px");big(TY[x.t]+" · "+x.pt+" 分",W/2,H/2+28,t.blue,"500 18px");return}
+   const sc=sum(),r=Math.max(36,Math.min(W*.3,H*.24)),cx=W/2,cy=H/2-30;
+   ctx.save();ctx.lineWidth=14;ctx.lineCap="round";ctx.strokeStyle=dark?"#3a3a3c":"#e5e5ea";ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);ctx.stroke();
+   if(sc>0){ctx.strokeStyle=t.blue;ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+2*Math.PI*sc/TOTAL);ctx.stroke()}ctx.restore();
+   big(sc+" / "+TOTAL,cx,cy-6,t.fg,"600 32px");big("得分",cx,cy+24,t.blue,"500 14px");
+   const bw=140,bh=44,bx=cx-bw/2,by=cy+r+26;S.btn=[bx,by,bw,bh];
+   ctx.save();ctx.fillStyle="#0066cc";ctx.beginPath();ctx.roundRect?ctx.roundRect(bx,by,bw,bh,22):ctx.rect(bx,by,bw,bh);ctx.fill();ctx.restore();
+   big("再做一遍",cx,by+bh/2,"#fff","500 15px")},
+  pointer(e,type,x,y){const b=S.btn,hit=!!b&&x>=b[0]&&x<=b[0]+b[2]&&y>=b[1]&&y<=b[1]+b[3];
+   if(type==="move")cv.style.cursor=hit?"pointer":"";if(type==="down"&&hit){reset();return true}return false}}
+})();
+CH[8].ready=true;
+const $=id=>document.getElementById(id), PI=Math.PI, pad=i=>String(i+1).padStart(2,"0");
+/* ---------- theme ---------- */
+const PAL={light:{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.06)",axis:"rgba(0,0,0,.35)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"},
+ dark:{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.08)",axis:"rgba(255,255,255,.4)",blue:"#2997ff",red:"#ff6369",gold:"#e0a83a",teal:"#2cb5b8",purple:"#a88bf0",goldText:"#e0a83a",redText:"#ff7a70"}};
+let dark=false;
+function theme(){return PAL[dark?"dark":"light"]}
+function setDark(v){dark=v;document.documentElement.dataset.theme=v?"dark":"light";["dark","dark2"].forEach(id=>$(id).textContent=v?"浅色":"深色");try{localStorage.setItem("triglab-theme",v?"dark":"light")}catch(e){}}
+try{dark=localStorage.getItem("triglab-theme")==="dark"}catch(e){}
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||(v=>v);const w=el("div","ctl"),h=el("div","ctl-h"),l=el("label",null,label),s=el("span"),r=el("input");
+ r.type="range";r.min=min;r.max=max;r.step=step;r.value=val;r.setAttribute("aria-label",label);
+ const up=()=>{const v=+r.value;s.textContent=fmt(v);r.style.setProperty("--p",((v-min)/(max-min)*100)+"%")};
+ r.addEventListener("input",()=>{up();onchange&&onchange(+r.value)});up();h.append(l,s);w.append(h,r);
+ w.set=v=>{r.value=v;up()};Object.defineProperty(w,"value",{get:()=>+r.value});return w}
+function chips(options,val,onchange){const w=el("div","chips ctl");const opts=options.map(o=>typeof o==="object"?o:{v:o,l:o});
+ const bs=opts.map(o=>{const b=el("button",null,o.l);b.type="button";b.onclick=()=>{w.set(o.v);onchange&&onchange(o.v)};w.append(b);return b});
+ w.set=v=>{val=v;bs.forEach((b,i)=>{b.classList.toggle("on",opts[i].v===v);b.setAttribute("aria-pressed",opts[i].v===v)})};w.set(val);return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" pri":""),label);b.type="button";b.onclick=onclick;b.style.marginRight="6px";b.style.marginBottom="6px";return b}
+function toggle(label,val,onchange){const w=el("label","tog ctl"),i=el("input");i.type="checkbox";i.checked=!!val;i.onchange=()=>onchange&&onchange(i.checked);
+ w.append(el("span",null,label),i);w.set=v=>i.checked=!!v;return w}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML="";rs.forEach(r=>{const t=el("dt",null,r[0]),v=el("dd",null,r[1]);if(r[2])v.style.color=r[2];d.append(t,v)})};d.update(rows||[]);return d}
+/* ---------- canvas tools ---------- */
+function niceStep(r){const raw=r/8,m=Math.pow(10,Math.floor(Math.log10(raw))),n=raw/m;return(n<1.5?1:n<3.5?2:n<7.5?5:10)*m}
+function drawAxes(ctx,box,xr,yr,o={}){const T=theme();let[x0,x1]=xr,[y0,y1]=yr;
+ if(o.equal){const s=Math.min(box.w/(x1-x0),box.h/(y1-y0)),cx=(x0+x1)/2,cy=(y0+y1)/2;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)/(x1-x0)*box.w,Y=y=>box.y+box.h-(y-y0)/(y1-y0)*box.h,invX=p=>x0+(p-box.x)/box.w*(x1-x0),invY=p=>y0+(box.y+box.h-p)/box.h*(y1-y0);
+ const sx=o.piTicks?PI/2:(o.xStep||niceStep(x1-x0)),sy=o.yStep||niceStep(y1-y0),ax=Math.min(Math.max(Y(0),box.y),box.y+box.h),ay=Math.min(Math.max(X(0),box.x),box.x+box.w);
+ ctx.save();ctx.lineWidth=1;ctx.strokeStyle=T.grid;ctx.beginPath();
+ for(let v=Math.ceil(x0/sx)*sx;v<=x1+1e-9;v+=sx){ctx.moveTo(Math.round(X(v))+.5,box.y);ctx.lineTo(Math.round(X(v))+.5,box.y+box.h)}
+ for(let v=Math.ceil(y0/sy)*sy;v<=y1+1e-9;v+=sy){ctx.moveTo(box.x,Math.round(Y(v))+.5);ctx.lineTo(box.x+box.w,Math.round(Y(v))+.5)}
+ if(o.grid!==false)ctx.stroke();
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,ax);ctx.lineTo(box.x+box.w,ax);ctx.moveTo(ay,box.y);ctx.lineTo(ay,box.y+box.h);ctx.stroke();
+ if(o.labels!==false){ctx.fillStyle=T.sub;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";
+  for(let v=Math.ceil(x0/sx)*sx;v<=x1+1e-9;v+=sx){if(Math.abs(v)<1e-9)continue;ctx.fillText(o.piTicks?fmtRad(v):+v.toFixed(6),X(v),ax+4)}
+  ctx.textAlign="right";ctx.textBaseline="middle";
+  for(let v=Math.ceil(y0/sy)*sy;v<=y1+1e-9;v+=sy){if(Math.abs(v)<1e-9)continue;ctx.fillText(+v.toFixed(6),ay-5,Y(v))}
+  ctx.textAlign="right";ctx.textBaseline="top";ctx.fillText("O",ay-4,ax+4)}
+ ctx.restore();return{X,Y,invX,invY,xr:[x0,x1],yr:[y0,y1],box}}
+function plotFn(ctx,map,f,xr,color,width,dashed){const[a,b]=xr||map.xr,n=Math.max(2,Math.ceil(Math.abs(map.X(b)-map.X(a))));
+ ctx.save();ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.lineJoin=ctx.lineCap="round";if(dashed)ctx.setLineDash([6,5]);ctx.beginPath();let pen=false;
+ for(let i=0;i<=n;i++){const x=a+(b-a)*i/n,y=f(x),py=map.Y(y);if(!isFinite(y)||Math.abs(py)>1e5){pen=false;continue}pen?ctx.lineTo(map.X(x),py):ctx.moveTo(map.X(x),py);pen=true}
+ ctx.stroke();ctx.restore()}
+function label(ctx,txt,x,y,color,align){ctx.save();ctx.font="13px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillStyle=color||theme().fg;ctx.textAlign=align||"center";ctx.textBaseline="middle";ctx.fillText(txt,x,y);ctx.restore()}
+function wrapLabel(ctx,txt,x,y,color,maxW,lh){lh=lh||17;ctx.save();ctx.font="13px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const parts=txt.match(/[^，；。：\s]+[，；。：\s]*/g)||[txt],lines=[];let cur="";
+ parts.forEach(p=>{if(cur&&ctx.measureText(cur+p).width>maxW){lines.push(cur);cur=p}else cur+=p});if(cur)lines.push(cur);ctx.restore();
+ lines.forEach((l,i)=>label(ctx,l.trim(),x,y+i*lh,color,"left"));return y+lines.length*lh}
+function arrow(ctx,x1,y1,x2,y2,color,lab,width){const c=color||theme().fg,a=Math.atan2(y2-y1,x2-x1),h=9;ctx.save();ctx.strokeStyle=ctx.fillStyle=c;ctx.lineWidth=width||2;ctx.lineCap="round";
+ ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2-Math.cos(a)*h*.6,y2-Math.sin(a)*h*.6);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-h*Math.cos(a-.4),y2-h*Math.sin(a-.4));ctx.lineTo(x2-h*Math.cos(a+.4),y2-h*Math.sin(a+.4));ctx.closePath();ctx.fill();ctx.restore();
+ if(lab)label(ctx,lab,x2+Math.cos(a)*14,y2+Math.sin(a)*14,theme().fg)}
+function angleArc(ctx,cx,cy,r,a0,a1,color,lab){const c=color||theme().gold;ctx.save();ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,r,-a0,-a1,a1>a0);ctx.stroke();ctx.restore();
+ if(lab){const m=(a0+a1)/2;label(ctx,lab,cx+Math.cos(m)*(r+13),cy-Math.sin(m)*(r+13),theme().goldText)}}
+function dragPoints(points,map,snap){const M=()=>typeof map==="function"?map():map,d={active:null,hover:null};
+ const pick=(x,y,rad)=>{let best=null,bd=rad;const m=M();points.forEach(p=>{if(p.fixed)return;const px=m?m.X(p.x):p.x,py=m?m.Y(p.y):p.y,dd=Math.hypot(px-x,py-y);if(dd<=bd){bd=dd;best=p}});return best};
+ d.pointer=(e,type,x,y)=>{const rad=e&&e.pointerType==="touch"?22:12,m=M();
+  if(type==="down"){d.active=pick(x,y,rad);return!!d.active}
+  if(type==="move"){if(!d.active){d.hover=pick(x,y,rad);return false}
+   let nx=m?m.invX(x):x,ny=m?m.invY(y):y;if(typeof snap==="number"){nx=Math.round(nx/snap)*snap;ny=Math.round(ny/snap)*snap}else if(typeof snap==="function"){const s=snap(nx,ny,d.active);if(s){nx=s.x;ny=s.y}}
+   d.active.x=nx;d.active.y=ny;d.active.onmove&&d.active.onmove(d.active);return true}
+  if(type==="up"){const was=!!d.active;d.active=null;return was}};return d}
+function fmtDeg(rad){return(+(rad*180/PI).toFixed(1))+"°"}
+function gcd(a,b){return b?gcd(b,a%b):a}
+function fmtRad(rad){const k=rad/(PI/12),r=Math.round(k);if(Math.abs(k-r)>1e-6)return(+rad.toFixed(3))+"";if(r===0)return"0";
+ const g=gcd(Math.abs(r),12),p=r/g,q=12/g,s=p<0?"-":"",a=Math.abs(p);return s+(a===1?"":a)+"π"+(q===1?"":"/"+q)}
+/* ---------- shell ---------- */
+const cv=$("cv"),ctx=cv.getContext("2d");let W=0,H=0,cur=-1,t0=performance.now();
+function resize(){const r=$("stage").getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,r.width);H=Math.max(1,r.height);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);frame()}
+function mod(){const m=MODS[cur];return CH[cur]&&CH[cur].ready&&m?m:null}
+function soon(){const T=theme(),w=Math.min(300,W-40),h=128,x=(W-w)/2,y=(H-h)/2;ctx.save();ctx.fillStyle=dark?"#2c2c2e":"#f5f5f7";ctx.beginPath();
+ ctx.roundRect?ctx.roundRect(x,y,w,h,22):ctx.rect(x,y,w,h);ctx.fill();ctx.restore();
+ label(ctx,pad(cur)+" · "+CH[cur].n,W/2,y+42,T.fg);ctx.save();ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillStyle=T.blue;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("即将上线",W/2,y+80);ctx.restore()}
+function frame(){const T=theme();ctx.clearRect(0,0,W,H);ctx.fillStyle=T.bg;ctx.fillRect(0,0,W,H);const m=mod();
+ if(m&&m.draw){try{m.draw(ctx,W,H,(performance.now()-t0)/1000)}catch(e){console.error(e)}}else if(cur>=0)soon()}
+(function loop(){frame();requestAnimationFrame(loop)})();
+new ResizeObserver(resize).observe($("stage"));addEventListener("resize",resize);
+let capId=null;
+function fwd(type,e){const m=mod();if(!m||!m.pointer)return;const r=cv.getBoundingClientRect();try{if(m.pointer(e,type,e.clientX-r.left,e.clientY-r.top))e.preventDefault()}catch(err){console.error(err)}}
+cv.addEventListener("pointerdown",e=>{try{cv.setPointerCapture(e.pointerId)}catch(_){}fwd("down",e)});
+cv.addEventListener("pointermove",e=>fwd("move",e));
+["pointerup","pointercancel"].forEach(n=>cv.addEventListener(n,e=>fwd("up",e)));
+function list(ol,close){ol.innerHTML="";CH.forEach((c,i)=>{const li=el("li"),b=el("button",null,"<b>"+pad(i)+"</b><span>"+c.n+"</span>");b.type="button";b.onclick=()=>{go(i);close&&sheet(false)};li.append(b);ol.append(li)})}
+list($("toc"));list($("slist"),true);
+CH.forEach(()=>$("segs").append(el("i")));
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(i===cur)return;const old=mod();if(old&&old.unmount){try{old.unmount()}catch(e){console.error(e)}}
+ cur=i;const c=CH[i],m=mod(),ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";
+ $("lt").textContent=pad(i)+" "+c.n;$("lb").textContent=c.book;$("lx").innerHTML=m&&m.text?m.text:"本章交互正在制作中，即将上线。";
+ if(m&&m.mount){try{m.mount(ctrl,read)}catch(e){console.error(e)}}
+ if(!ctrl.children.length)ctrl.append(el("p","empty","暂无控件"));if(!read.children.length)read.append(el("p","empty","—"));
+ const pts=m&&m.points||[];$("ptsBox").hidden=!pts.length;$("pts").innerHTML=pts.map(p=>"<li>"+p+"</li>").join("");
+ $("gkBox").hidden=!(m&&m.gk);$("gk").innerHTML=m&&m.gk||"";
+ document.querySelectorAll("#toc button,#slist button").forEach((b,k)=>b.classList.toggle("cur",k%CH.length===i));
+ [...$("segs").children].forEach((s,k)=>{s.className=k<i?"on":k===i?"cur":""});
+ $("cnt").textContent=pad(i)+" / "+pad(CH.length-1);$("chcnt").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","prev2"].forEach(id=>$(id).disabled=i===0);["next","next2"].forEach(id=>$(id).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));document.title="格物实验室 三角与解三角形 · "+c.n;frame()}
+function sheet(open){$("sheet").hidden=$("bd").hidden=!open;if(open){const b=$("slist").querySelector(".cur");b&&b.scrollIntoView({block:"nearest"})}}
+$("chbtn").onclick=()=>sheet(true);$("bd").onclick=()=>sheet(false);
+["prev","prev2"].forEach(id=>$(id).onclick=()=>go(cur-1));["next","next2"].forEach(id=>$(id).onclick=()=>go(cur+1));
+["dark","dark2"].forEach(id=>$(id).onclick=()=>setDark(!dark));
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("lec").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+addEventListener("keydown",e=>{const t=e.target,tag=t&&t.tagName;if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||(t&&t.isContentEditable))return;
+ if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")sheet(false)});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+addEventListener("hashchange",()=>go(fromHash()));
+setDark(dark);go(fromHash());resize();
+</script>
+</body>
+</html>
