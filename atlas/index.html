@@ -2072,7 +2072,7 @@
             ctx.stroke(); ctx.setLineDash([]); ctx.lineDashOffset = 0;
             arrowHead(ar.pts[n - 2], ar.pts[n - 1], col);
             if (!RM.matches) { var mq = proj(along(ar.pts, ((now || 0) / 5000) % 1)); ctx.beginPath(); ctx.arc(mq[0], mq[1], 4, 0, 7); ctx.fillStyle = col; ctx.fill(); }
-            if (state.show.note) label(ar.t, ar.at, { color: col, font: "600 13px system-ui, sans-serif" });
+            if (state.show.note && ar.t && ar.at) label(ar.t, ar.at, { color: col, font: "600 13px system-ui, sans-serif" });
           });
           if (L.migs && state.show.mig) L.migs.forEach(function (m) {
             ctx.strokeStyle = c.halo; ctx.lineWidth = 4; ctx.lineJoin = "round"; path(m.pts); ctx.stroke();
