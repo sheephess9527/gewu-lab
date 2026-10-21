@@ -1748,7 +1748,7 @@ MODS[8] = (() => {
   function spot(ctx, F, W, H, m, box, labs) {
     const iw = Math.min(210, W * 0.36), ih = Math.min(110, H * 0.24);
     const R = W - iw - 24, Lx = box.x + 18, Bt = box.y + box.h - ih - 14;
-    const cand = (S.i < 2 ? [[R, 44]] : [[R, 44], [Lx, 44], [R, Bt], [Lx, Bt]]).map(([x, y]) => ({ x, y, w: iw, h: ih }));
+    const cand = [[R, 44], [Lx, 44], [R, Bt], [Lx, Bt]].map(([x, y]) => ({ x, y, w: iw, h: ih }));
     const fns = [F.f]; if (S.mir) fns.push((x) => F.f(2 * F.x0 - x));
     const pts = []; for (const fn of fns) for (let i = 0; i <= 600; i++) { const x = F.xr[0] + ((F.xr[1] - F.xr[0]) * i) / 600, y = fn(x); if (isFinite(y)) pts.push([m.X(x), m.Y(y)]); }
     let best = cand[0], bs = Infinity;
