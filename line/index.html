@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>格物实验室 直线与圆</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--sel:#e8f1fc;--selfg:#0058b0;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--sel:rgba(41,151,255,.18);--selfg:#6cb6ff;--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--shadow:0 0 0 1px rgba(255,255,255,.08)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.back b{font-size:22px;font-weight:400;margin-right:4px}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);font-size:14px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}
+html.dark .pill.primary,html.dark .chips button.on{color:#000}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc button,.sheet button.it{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px;align-items:center}
+.toc button:hover{background:var(--btn2)}
+.toc button.on,.sheet button.it.on{background:var(--sel);color:var(--selfg);font-weight:600}
+.toc .mono,.sheet .mono{font-size:13px;color:var(--sub)}.on .mono{color:var(--selfg)!important}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 20px}
+.explain{flex:none}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.etext{margin:8px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.explain.collapsed .etext,.explain.collapsed .book{display:none}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;color:var(--sub);min-height:32px}
+.cwrap{flex:1;min-height:0;position:relative;border-radius:22px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:none}
+.sec h3{font-size:13px;color:var(--sub);font-weight:600;letter-spacing:0;margin:0 0 8px}
+.ctrls{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;font-size:14px}.sl output{font-family:var(--mono);color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}.chips button.on{background:var(--blue);color:#fff}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;min-height:36px;border:0;background:none;padding:0;width:100%}
+.tg i{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.tg.on i{background:#34c759}.tg.on i::after{left:20px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+.points ul{margin:0;padding-left:18px}.points li{margin:4px 0}
+.gk a{color:var(--blue);text-decoration:none;font-size:14px}
+.mdark{display:none}
+.soon{color:var(--sub);font-size:14px;margin:0}
+/* sheet */
+.mask{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;max-height:70vh;overflow:auto;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .prog{display:none}.app{display:block;height:auto}.toc{display:none}
+ .stage{padding:12px}.cwrap{order:-1;flex:none;height:56vh}
+ .explain .fold{display:none}.explain.collapsed .etext,.explain.collapsed .book{display:block}.etext{max-height:none;overflow:visible}
+ .panel{border:0;padding:0 12px 24px}
+}
+@media (min-width:1024px){.chbtn{display:none}}
+/* phone */
+@media (max-width:767px){
+ .top{height:calc(52px + env(safe-area-inset-top));gap:6px;padding-left:4px;padding-right:8px}
+ .back{width:44px;justify-content:center}.back span{display:none}.back b{margin:0}
+ .tname{flex:1;font-size:16px}.tbtns{display:none}.chbtn{margin-left:0;padding:0 12px}
+ .stage{padding:0;gap:0}.cwrap{height:52vh;border-radius:0;box-shadow:none;border-bottom:1px solid var(--line)}
+ .explain{background:none;box-shadow:none;padding:16px 16px 4px}.ehead h2{font-size:20px}.etext{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(84px + env(safe-area-inset-bottom))}
+ input[type=range]{height:44px}.chips button,.tg{min-height:44px}
+ .mdark{display:block;align-self:flex-start;min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
+  <div class="tname">直线与圆 · LineLab</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 09</span></div>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button><button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chnum">01/09</span></button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h2 id="ctitle"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="etext" id="ctext"></p>
+    </section>
+    <div class="cwrap" id="cwrap"><canvas id="cv"></canvas></div>
+  </main>
+  <aside class="panel">
+    <section class="card sec" id="ctrlSec"><h3>控件</h3><div class="ctrls" id="ctrl"></div></section>
+    <section class="card sec" id="readSec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec points" id="ptSec"><h3>要点</h3><div id="pts"></div></section>
+    <section class="card sec gk" id="gkSec"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mask" id="mask" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><div id="slist"></div></div>
+<div class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></div>
+<script>
+const CH=[
+{n:"倾斜角与斜率",book:"人教A版 选择性必修第一册 · 2.1 直线的倾斜角与斜率",ready:false},
+{n:"直线的方程",book:"人教A版 选择性必修第一册 · 2.2 直线的方程",ready:false},
+{n:"位置关系与距离",book:"人教A版 选择性必修第一册 · 2.3 直线的交点坐标与距离公式",ready:false},
+{n:"圆的方程",book:"人教A版 选择性必修第一册 · 2.4 圆的方程",ready:false},
+{n:"直线与圆",book:"人教A版 选择性必修第一册 · 2.5.1 直线与圆的位置关系",ready:false},
+{n:"圆与圆",book:"人教A版 选择性必修第一册 · 2.5.2 圆与圆的位置关系",ready:false},
+{n:"阿波罗尼斯圆与轨迹",book:"高考拓展",ready:false},
+{n:"切线与最值",book:"高考拓展",ready:false},
+{n:"随堂检测",book:"人教A版 选择性必修第一册 · 第二章 直线和圆的方程",ready:false}];
+const MODS=[];// MODS[i]={text,points,gk,mount(ctrlEl,readEl),draw(ctx,w,h,t),pointer(e,type,x,y),unmount()}
+CH[0].ready=true;
+MODS[0]=(()=>{
+ const P1={x:-2,y:-1},P2={x:2,y:2},P={x:0,y:-1,fixed:true},A={x:-2,y:2},B={x:3,y:1};
+ let mode="line",rot=false,r0=3,t0=null,map=null,ro=null,kc=null,tg=null,last="";
+ const d1=dragPoints([P1,P2],()=>map,0.5),d2=dragPoints([P,A,B],()=>map,0.5);
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const fa=a=>(Math.abs(a-Math.round(a))<0.05?Math.round(a):a.toFixed(1))+"°";
+ const pt=p=>`(${fmtNum(p.x)}, ${fmtNum(p.y)})`;
+ const ang=(dx,dy)=>{let a=Math.atan2(dy,dx)*180/Math.PI;if(a<0)a+=180;if(a>=180-1e-9)a-=180;return Math.abs(a)<1e-9?0:a};
+ const slope=(p,q)=>Math.abs(q.x-p.x)<1e-9?null:(q.y-p.y)/(q.x-p.x);
+ const ks=k=>k===null?"斜率不存在":fmtNum(k);
+ function lab(c,s,x,y,col,al){c.font="13px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ function dot(c,p,col){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),p.fixed&&p!==P?4:6,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function lineThrough(c,p,q,col,w,dash){const dx=q.x-p.x,dy=q.y-p.y;drawLine(c,map,dy,-dx,-(dy*p.x-dx*p.y),col,w,dash)}
+ function range(){const kA=slope(P,A),kB=slope(P,B),ux=A.x-P.x,uy=A.y-P.y,vx=B.x-P.x,vy=B.y-P.y,cr=ux*vy-uy*vx;
+  if(Math.abs(cr)<1e-9){if(ux*vx+uy*vy<=1e-9)return{txt:"任意直线（P 在线段 AB 上）",cross:true};return{txt:kA===null?"只有竖直线，斜率不存在":"k = "+fmtNum(kA),cross:kA===null}}
+  if(kA===null||kB===null){const k0=kA===null?kB:kA,Q=kA===null?B:A,V=kA===null?A:B,km=slope(P,{x:V.x*0.99+Q.x*0.01,y:V.y*0.99+Q.y*0.01});
+   return{txt:(km>k0?"k ≥ ":"k ≤ ")+fmtNum(k0)+"，或斜率不存在",cross:true}}
+  const lo=Math.min(kA,kB),hi=Math.max(kA,kB);
+  if(ux*vx<0)return{txt:`k ≤ ${fmtNum(lo)} 或 k ≥ ${fmtNum(hi)}`,cross:true};
+  return{txt:`${fmtNum(lo)} ≤ k ≤ ${fmtNum(hi)}`,cross:false}}
+ function drawK(c,b,a,T){const top=b.y+24,ph=b.h-80,X=v=>b.x+v/180*b.w,Y=k=>top+ph/2-k/4*(ph/2);
+  c.save();lab(c,"k = tan α",b.x,b.y+10,T.fg);
+  c.save();c.beginPath();c.rect(b.x,top,b.w,ph);c.clip();c.lineWidth=1;c.strokeStyle=T.grid;c.beginPath();
+  [45,135].forEach(v=>{c.moveTo(X(v),top);c.lineTo(X(v),top+ph)});[-2,2].forEach(k=>{c.moveTo(b.x,Y(k));c.lineTo(b.x+b.w,Y(k))});c.stroke();
+  c.strokeStyle=T.axis;c.beginPath();c.moveTo(b.x,Y(0));c.lineTo(b.x+b.w,Y(0));c.moveTo(b.x+.5,top);c.lineTo(b.x+.5,top+ph);c.stroke();
+  c.strokeStyle=T.red;c.setLineDash([5,4]);c.beginPath();c.moveTo(X(90),top);c.lineTo(X(90),top+ph);c.stroke();c.setLineDash([]);
+  c.strokeStyle=T.blue;c.lineWidth=2;[[0,89.6],[90.4,179.6]].forEach(([s,e])=>{c.beginPath();for(let i=0;i<=224;i++){const v=s+(e-s)*i/224,y=Y(Math.max(-9,Math.min(9,Math.tan(v*Math.PI/180))));i?c.lineTo(X(v),y):c.moveTo(X(v),y)}c.stroke()});
+  if(Math.abs(a-90)>0.3){c.fillStyle=T.gold;c.beginPath();c.arc(X(a),Math.max(top+5,Math.min(top+ph-5,Y(Math.tan(a*Math.PI/180)))),5,0,7);c.fill()}
+  c.restore();c.font="12px ui-monospace,Menlo,monospace";c.fillStyle=T.fg;c.textAlign="center";c.textBaseline="middle";
+  [0,90,180].forEach(v=>c.fillText(v+"°",X(v),top+ph+10));lab(c,"",0,0,T.redText);c.textBaseline="top";
+  wrapText(c,a>90?"已越过 90°：k 从 +∞ 跳到 −∞，再增回 0":"α→90° 时 k→+∞，越过 90° 跳到 −∞",b.x,top+ph+24,b.w,17);c.restore()}
+ function drawLineMode(c,T){const dx=P2.x-P1.x,dy=P2.y-P1.y,X=map.X,Y=map.Y,b=map.box;if(Math.hypot(dx,dy)<1e-9){dot(c,P1,T.blue);return}
+  lineThrough(c,P1,P2,T.blue,2.5);c.save();c.beginPath();c.rect(b.x,b.y,b.w,b.h);c.clip();
+  if(Math.abs(dy)>1e-9){const xi=P1.x-P1.y*dx/dy,ar=ang(dx,dy)*Math.PI/180,cx=X(xi),cy=Y(0);
+   c.strokeStyle=T.gold;c.lineWidth=2;c.beginPath();c.arc(cx,cy,24,0,-ar,true);c.stroke();lab(c,"α",cx+40*Math.cos(ar/2),cy-40*Math.sin(ar/2),T.goldText,"center")}
+  c.lineWidth=2;c.setLineDash([6,5]);
+  if(Math.abs(dx)>1e-9){c.strokeStyle=T.teal;c.beginPath();c.moveTo(X(P1.x),Y(P1.y));c.lineTo(X(P2.x),Y(P1.y));c.stroke();
+   lab(c,"Δx = "+fmtNum(dx),(X(P1.x)+X(P2.x))/2,Y(P1.y)+(dy>=0?16:-16),T.fg,"center")}
+  if(Math.abs(dy)>1e-9){c.strokeStyle=T.red;c.beginPath();c.moveTo(X(P2.x),Y(P1.y));c.lineTo(X(P2.x),Y(P2.y));c.stroke();
+   lab(c,"Δy = "+fmtNum(dy),X(P2.x)+(dx>=0?8:-8),(Y(P1.y)+Y(P2.y))/2,T.redText,dx>=0?"left":"right")}
+  c.restore();dot(c,P1,T.blue);dot(c,P2,T.blue);lab(c,"P₁",X(P1.x)-10,Y(P1.y)-14,T.fg,"right");lab(c,"P₂",X(P2.x)+10,Y(P2.y)-14,T.fg)}
+ function drawRangeMode(c,T,R){const X=map.X,Y=map.Y,b=map.box,u=[A.x-P.x,A.y-P.y],v=[B.x-P.x,B.y-P.y],nu=Math.hypot(...u)||1,nv=Math.hypot(...v)||1,L=40;
+  c.save();c.beginPath();c.rect(b.x,b.y,b.w,b.h);c.clip();c.fillStyle=T.blue;
+  [[1,.18],[-1,.08]].forEach(([s,al])=>{c.globalAlpha=al;c.beginPath();c.moveTo(X(P.x),Y(P.y));c.lineTo(X(P.x+s*u[0]/nu*L),Y(P.y+s*u[1]/nu*L));c.lineTo(X(P.x+s*v[0]/nv*L),Y(P.y+s*v[1]/nv*L));c.closePath();c.fill()});
+  c.globalAlpha=1;c.restore();
+  lineThrough(c,P,A,T.blue,2);lineThrough(c,P,B,T.blue,2);
+  if(R.cross){drawLine(c,map,1,0,-P.x,T.red,1.5,true);lab(c,"竖直方向",X(P.x)+8,b.y+18,T.redText)}
+  c.strokeStyle=T.fg;c.lineWidth=3;c.beginPath();c.moveTo(X(A.x),Y(A.y));c.lineTo(X(B.x),Y(B.y));c.stroke();
+  dot(c,P,T.fg);dot(c,A,T.blue);dot(c,B,T.blue);lab(c,"P(0, −1)",X(P.x)+10,Y(P.y)+16,T.fg);
+  const kA=slope(P,A),kB=slope(P,B);lab(c,"A  k_PA = "+ks(kA),X(A.x)+10,Y(A.y)-16,T.blue);lab(c,"B  k_PB = "+ks(kB),X(B.x)+10,Y(B.y)-16,T.blue)}
+ function rows(T,R){if(mode==="range"){const kA=slope(P,A),kB=slope(P,B);
+   return[["P","(0, −1)"],["A",pt(A)],["B",pt(B)],["k_PA",ks(kA),T.blue],["k_PB",ks(kB),T.blue],["跨竖直方向",R.cross?"是 · 两段并集":"否 · 一段区间",R.cross?T.redText:T.fg],["k 的范围",R.txt,T.blue]]}
+  const dx=P2.x-P1.x,dy=P2.y-P1.y,same=Math.hypot(dx,dy)<1e-9,vert=!same&&Math.abs(dx)<1e-9;
+  return[["P₁",pt(P1)],["P₂",pt(P2)],["Δx",fmtNum(dx)],["Δy",fmtNum(dy),T.redText],["k",same?"两点重合":vert?"斜率不存在":fmtNum(dy/dx),vert||same?T.redText:T.blue],["α",same?"—":fa(ang(dx,dy)),T.goldText]]}
+ return{
+  text:"直线向上的方向与 x 轴正方向所成的角叫<b>倾斜角 α</b>，范围 [0°, 180°)。斜率 k = tan α = (y₂ − y₁)/(x₂ − x₁)，就是「走一步升多少」。α 从 0° 增到 90°，k 从 0 增到 +∞；过了 90° 跳到 −∞ 再增回 0。竖直线 α = 90°，斜率不存在。拖动 P₁、P₂ 试试。",
+  points:["倾斜角 α∈[0°, 180°)","k = tan α（α ≠ 90°）","k = (y₂ − y₁)/(x₂ − x₁)（x₁ ≠ x₂）","三点共线 ⇔ 斜率相等"],
+  gk:"选填常考：由斜率范围求倾斜角范围（或反过来），以及「过定点与线段相交」求斜率范围。<br>易错：α = 90° 时斜率不存在；跨过竖直方向时范围是两段。",
+  mount(ctrl,read){ctrl.append(chips([{label:"两点定直线",value:"line"},{label:"k 与 α 的范围",value:"range"}],mode,v=>{mode=v;tg.hidden=v!=="line";last=""}));
+   tg=toggle("旋转直线",rot,v=>{rot=v;P2.fixed=v;t0=null;if(v)r0=Math.min(4,Math.max(2,Math.hypot(P2.x-P1.x,P2.y-P1.y)));else{P2.x=Math.round(P2.x*2)/2;P2.y=Math.round(P2.y*2)/2}});
+   tg.hidden=mode!=="line";ctrl.append(tg);ro=readout([]);kc=el("canvas");kc.style.cssText="height:190px;margin-top:12px";kc.hidden=true;read.append(ro,kc);last=""},
+  draw(c,w,h,t){const T=theme(),wide=window.innerWidth>=768,on=mode==="line"&&rot,bw=on&&wide?Math.round(w*0.6):w;
+   map=drawAxes(c,{x:0,y:0,w:bw,h},[-6.5,6.5],[-6.5,6.5]);let R=null;
+   if(mode==="line"){if(rot){if(t0===null)t0=t;const a=((t-t0)%6)/6*Math.PI;P2.x=+(P1.x+r0*Math.cos(a)).toFixed(6);P2.y=+(P1.y+r0*Math.sin(a)).toFixed(6)}drawLineMode(c,T)}
+   else{R=range();drawRangeMode(c,T,R)}
+   const a=ang(P2.x-P1.x,P2.y-P1.y);
+   if(on&&wide){c.strokeStyle=T.grid;c.lineWidth=1;c.beginPath();c.moveTo(bw+.5,0);c.lineTo(bw+.5,h);c.stroke();drawK(c,{x:bw+16,y:h*0.12,w:w-bw-32,h:h*0.76},a,T)}
+   if(kc){const show=on&&!wide;kc.hidden=!show;if(show){const cw=Math.round(kc.getBoundingClientRect().width);if(cw>0){
+    if(kc.width!==cw*DPR||kc.height!==190*DPR){kc.width=cw*DPR;kc.height=190*DPR}const k2=kc.getContext("2d");k2.setTransform(DPR,0,0,DPR,0,0);k2.fillStyle=T.bg;k2.fillRect(0,0,cw,190);drawK(k2,{x:4,y:2,w:cw-8,h:186},a,T)}}}
+   if(ro){const rs=rows(T,R),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){return(mode==="line"?d1:d2)(e,type,x,y)},
+  unmount(){t0=null;ro=kc=tg=null}}})();
+CH[1].ready=true;
+MODS[1]=(()=>{
+ const P1={x:-1,y:2},P2={x:3,y:0};
+ let mode="forms",fam="point",m=1,bb=1,map=null,ro=null,cc=null,sub=null,sm=null,sb=null,last="";
+ const drag=dragPoints([P1,P2],()=>map,0.5);
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const F=fmtNum,pt=p=>`(${F(p.x)}, ${F(p.y)})`,Z=v=>Math.abs(v)<1e-9;
+ const par=v=>{const s=F(v);return/[\/−√]/.test(s)?"("+s+")":s};
+ const wrap=s=>/ /.test(s)?"("+s+")":s;
+ function poly(ts){let s="";ts.forEach(([c,v])=>{if(Z(c))return;const a=Math.abs(c),fa=F(a),mm=v?(Z(a-1)?"":/\//.test(fa)?"("+fa+")":fa):fa;
+  s+=(s?(c<0?" − ":" + "):(c<0?"−":""))+mm+v});return s||"0"}
+ const sh=(v,n)=>poly([[1,n],[-v,""]]);
+ function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a}
+ function info(){const dx=P2.x-P1.x,dy=P2.y-P1.y,same=Z(dx)&&Z(dy);
+  let A=Math.round(dy*4),B=Math.round(-dx*4),C=Math.round((dx*P1.y-dy*P1.x)*4);const g=gcd(gcd(A,B),C)||1;A/=g;B/=g;C/=g;
+  if(A<0||(A===0&&B<0)){A=-A;B=-B;C=-C}A+=0;B+=0;C+=0;
+  const vert=!same&&Z(dx),hor=!same&&Z(dy);
+  return{dx,dy,same,vert,hor,A,B,C,k:same||vert?null:dy/dx,a:same||A===0?null:-C/A,b:same||B===0?null:-C/B}}
+ function forms(I){const{same,vert,hor,k,a,b,A,B,C,dx,dy}=I,x1=P1.x,y1=P1.y,no=same?"两点重合，不能确定直线":null;
+  let kc="";if(k!==null){const s=F(k);kc=Z(k-1)?"":Z(k+1)?"−":/\//.test(s)?"("+s+")":s}
+  const rx=Z(x1)?"x":"("+sh(x1,"x")+")";
+  return[
+   ["点斜式  y − y₁ = k(x − x₁)",no||(vert?"竖直线没有斜率":null),k!==null&&(sh(y1,"y")+" = "+(Z(k)?"0":kc+rx))],
+   ["斜截式  y = kx + b",no||(vert?"竖直线没有斜率":null),k!==null&&("y = "+poly([[k,"x"],[b,""]]))],
+   ["两点式  (y − y₁)/(y₂ − y₁) = (x − x₁)/(x₂ − x₁)",no||(vert?"与 y 轴平行：x₁ = x₂":hor?"与 x 轴平行：y₁ = y₂":null),!same&&!vert&&!hor&&(wrap(sh(y1,"y"))+"/"+par(dy)+" = "+wrap(sh(x1,"x"))+"/"+par(dx))],
+   ["截距式  x/a + y/b = 1",no||(hor?"水平线与 x 轴无交点，没有横截距":vert?"竖直线与 y 轴无交点，没有纵截距":C===0?"过原点，截距为 0":null),a!==null&&b!==null&&C!==0&&("x/"+par(a)+" + y/"+par(b)+" = 1")],
+   ["一般式  Ax + By + C = 0",no,!same&&(poly([[A,"x"],[B,"y"],[C,""]])+" = 0")]]}
+ function cards(c,bx,T,L){const g=8,ch=(bx.h-g*4)/5;L.forEach(([t,why,eq],i)=>{const y=bx.y+i*(ch+g),off=!!why;
+  c.save();rrect(c,bx.x,y,bx.w,ch,12);if(off){c.fillStyle=isDark()?"#2c2c2e":"#f0f0f2";c.fill()}else{c.strokeStyle=isDark()?"rgba(255,255,255,.18)":"rgba(0,0,0,.14)";c.lineWidth=1;c.stroke()}
+  c.textAlign="left";c.textBaseline="top";c.font="12px "+SANS;c.fillStyle=T.fg;wrapText(c,t,bx.x+12,y+9,bx.w-24,15);
+  c.font=(off?"13px ":"500 15px ")+SANS;c.fillStyle=off?T.redText:T.blue;wrapText(c,off?"✕ "+why:eq,bx.x+12,y+29,bx.w-24,18);c.restore()})}
+ function lab(c,s,x,y,col,al){c.font="13px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ function dot(c,x,y,col,r){c.beginPath();c.arc(map.X(x),map.Y(y),r||5,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function drawForms(c,T,I){const X=map.X,Y=map.Y;
+  if(!I.same){drawLine(c,map,I.A,I.B,I.C,T.blue,2.5);const both=I.a!==null&&I.b!==null&&Z(I.a)&&Z(I.b);
+   if(both){dot(c,0,0,T.gold);lab(c,"a = b = 0",X(0)+10,Y(0)-14,T.goldText)}
+   else{if(I.a!==null){dot(c,I.a,0,T.gold);lab(c,"a = "+F(I.a),X(I.a)+8,Y(0)-14,T.goldText)}
+    if(I.b!==null){dot(c,0,I.b,T.gold);lab(c,"b = "+F(I.b),X(0)+10,Y(I.b)-14,T.goldText)}}}
+  dot(c,P1.x,P1.y,T.blue,6);dot(c,P2.x,P2.y,T.blue,6);lab(c,"P₁",X(P1.x)-10,Y(P1.y)-14,T.fg,"right");lab(c,"P₂",X(P2.x)+10,Y(P2.y)-14,T.fg)}
+ function ghosts(c,T,fn){c.save();c.globalAlpha=.16;for(let v=-5;v<=5;v+=.5)fn(v);c.restore()}
+ function drawFam(c,T){const X=map.X,Y=map.Y,b=map.box;
+  if(fam==="point"){ghosts(c,T,v=>drawLine(c,map,v,-1,1-v,T.blue,1.5));drawLine(c,map,m,-1,1-m,T.blue,2.5);
+   dot(c,1,1,T.gold,6);lab(c,"定点 (1, 1)",X(1)+10,Y(1)+16,T.goldText);lab(c,"mx − y + 1 − m = 0 ⇔ y − 1 = m(x − 1)",b.x+16,b.y+20,T.fg)}
+  else if(fam==="par"){ghosts(c,T,v=>drawLine(c,map,2,-1,v,T.blue,1.5));drawLine(c,map,2,-1,bb,T.blue,2.5);
+   dot(c,0,bb,T.gold);lab(c,"b = "+F(bb),X(0)+10,Y(bb)-14,T.goldText);lab(c,"y = 2x + b：k 都是 2，互相平行",b.x+16,b.y+20,T.fg)}
+  else{drawLine(c,map,1,1,-5,T.blue,2.5);drawLine(c,map,3,-2,0,T.red,2.5);
+   dot(c,5,0,T.gold);dot(c,0,5,T.gold);dot(c,0,0,T.gold);lab(c,"a = 5",X(5)+8,Y(0)+16,T.goldText);lab(c,"b = 5",X(0)+10,Y(5)-12,T.goldText);lab(c,"a = b = 0",X(0)+10,Y(0)+16,T.goldText);
+   dot(c,2,3,T.fg,6);lab(c,"(2, 3)",X(2)+10,Y(3)-14,T.fg);lab(c,"x + y = 5",X(5.5)+8,Y(-0.5),T.blue);lab(c,"y = 1.5x",X(-3)+10,Y(-4.5),T.redText);
+   lab(c,"截距相等：别漏掉过原点的那条",b.x+16,b.y+20,T.redText)}}
+ function rows(T,I){
+  if(mode==="forms")return[["P₁",pt(P1)],["P₂",pt(P2)],["k",I.same?"两点重合":I.vert?"斜率不存在":F(I.k),I.vert||I.same?T.redText:T.blue],["横截距 a",I.a===null?"无":F(I.a),T.goldText],["纵截距 b",I.b===null?"无":F(I.b),T.goldText]];
+  if(fam==="point")return[["m",F(m)],["方程",poly([[m,"x"],[-1,"y"],[1-m,""]])+" = 0",T.blue],["k",F(m),T.blue],["定点","(1, 1)",T.goldText],["求法","m(x − 1) − y + 1 = 0，令 x − 1 = 0 ⇒ x = 1，y = 1"],["注意","这族直线取不到 x = 1",T.redText]];
+  if(fam==="par")return[["b",F(bb)],["方程","y = "+poly([[2,"x"],[bb,""]]),T.blue],["k","2（都平行）",T.blue],["纵截距",F(bb),T.goldText],["横截距",F(-bb/2),T.goldText]];
+  return[["过点","(2, 3)"],["截距不为 0","设 x/a + y/a = 1 ⇒ a = 5 ⇒ x + y = 5",T.blue],["截距为 0","过原点 ⇒ y = 1.5x",T.redText],["结论","两条：x + y − 5 = 0 与 3x − 2y = 0"]]}
+ function upd(){sub.hidden=mode!=="fam";sm.hidden=mode!=="fam"||fam!=="point";sb.hidden=mode!=="fam"||fam!=="par";last=""}
+ return{
+  text:"同一条直线有五种写法，各管各的场景：知道一点和斜率用<b>点斜式</b>，知道截距和斜率用<b>斜截式</b>，知道两点用<b>两点式</b>，知道两截距用<b>截距式</b>；<b>一般式 Ax + By + C = 0</b> 能表示所有直线，是最后的统一形式。注意每种特殊形式都有表示不了的直线。拖动 P₁、P₂ 看五张卡怎么变。",
+  points:["点斜式、斜截式需斜率存在","两点式需 x₁ ≠ x₂ 且 y₁ ≠ y₂","截距式需两截距存在且不为 0","一般式 Ax + By + C = 0（A、B 不全为 0）能表示所有直线","直线过定点：把参数提出来，令其系数为 0"],
+  gk:"选填常考：直线过定点、截距相等的直线方程。<br>易错：截距可以为负或零；「截距相等」要包括过原点的直线。",
+  mount(ctrl,read){ctrl.append(chips([{label:"五种形式",value:"forms"},{label:"直线系",value:"fam"}],mode,v=>{mode=v;upd()}));
+   sub=chips([{label:"① 过定点",value:"point"},{label:"② 平行系",value:"par"},{label:"③ 截距相等",value:"eq"}],fam,v=>{fam=v;upd()});
+   sm=slider("m",-5,5,0.5,m,null,v=>m=v);sb=slider("b",-5,5,0.5,bb,null,v=>bb=v);ctrl.append(sub,sm,sb);
+   ro=readout([]);cc=el("canvas");cc.style.cssText="height:320px;margin-top:12px";cc.hidden=true;read.append(ro,cc);upd()},
+  draw(c,w,h){const T=theme(),wide=window.innerWidth>=768,fm=mode==="forms",bw=fm&&wide?Math.round(w*0.6):w;
+   map=drawAxes(c,{x:0,y:0,w:bw,h},[-6.5,6.5],[-6.5,6.5]);const I=info();let L=null;
+   if(fm){drawForms(c,T,I);L=forms(I);
+    if(wide){c.strokeStyle=T.grid;c.lineWidth=1;c.beginPath();c.moveTo(bw+.5,0);c.lineTo(bw+.5,h);c.stroke();cards(c,{x:bw+16,y:16,w:w-bw-32,h:h-32},T,L)}}
+   else drawFam(c,T);
+   if(cc){const show=fm&&!wide;cc.hidden=!show;if(show){const cw=Math.round(cc.getBoundingClientRect().width);if(cw>0){
+    if(cc.width!==cw*DPR||cc.height!==320*DPR){cc.width=cw*DPR;cc.height=320*DPR}const k2=cc.getContext("2d");k2.setTransform(DPR,0,0,DPR,0,0);k2.fillStyle=T.bg;k2.fillRect(0,0,cw,320);cards(k2,{x:1,y:1,w:cw-2,h:318},T,L)}}}
+   if(ro){const rs=rows(T,I),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){return mode==="forms"?drag(e,type,x,y):false},
+  unmount(){ro=cc=sub=sm=sb=null}}})();
+CH[2].ready=true;
+MODS[2]=(()=>{
+ const A1={x:-4,y:-2},B1={x:2,y:1},A2={x:-2,y:4},B2={x:2,y:0},M1={x:-4,y:-1},M2={x:4,y:3},P={x:2,y:4},S1={x:-4,y:-3},S2={x:4,y:3},Q={x:1,y:4},R1={x:-5,y:-1},R2={x:5,y:-1},RA={x:-4,y:3},RB={x:3,y:2};
+ let mode="pos",sym="pt",area=false,map=null,ro=null,sub=null,tg=null,last="";
+ const dg={pos:dragPoints([A1,B1,A2,B2],()=>map,0.5),dist:dragPoints([M1,M2,P],()=>map,0.5),pt:dragPoints([S1,S2,Q],()=>map,0.5),ray:dragPoints([R1,R2,RA,RB],()=>map,0.5)};
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const F=fmtNum,Z=v=>Math.abs(v)<1e-9,pt=p=>`(${F(p.x)}, ${F(p.y)})`,par=v=>v<0||/[\/√]/.test(F(v))?"("+F(v)+")":F(v),hyp=(p,q)=>Math.hypot(q.x-p.x,q.y-p.y);
+ function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a}
+ function L(p,q){const dx=q.x-p.x,dy=q.y-p.y;if(Z(dx)&&Z(dy))return null;
+  let A=Math.round(dy*4),B=Math.round(-dx*4),C=Math.round((dx*p.y-dy*p.x)*4);const g=gcd(gcd(A,B),C)||1;A/=g;B/=g;C/=g;
+  if(A<0||(A===0&&B<0)){A=-A;B=-B;C=-C}return{A:A+0,B:B+0,C:C+0}}
+ function poly(ts){let s="";ts.forEach(([c,v])=>{if(Z(c))return;const a=Math.abs(c),m=v&&Z(a-1)?"":F(a);s+=(s?(c<0?" − ":" + "):(c<0?"−":""))+m+v});return s||"0"}
+ const eq=l=>poly([[l.A,"x"],[l.B,"y"],[l.C,""]])+" = 0";
+ const val=(l,p)=>l.A*p.x+l.B*p.y+l.C;
+ const foot=(l,p)=>{const k=val(l,p)/(l.A*l.A+l.B*l.B);return{x:p.x-k*l.A,y:p.y-k*l.B}};
+ const refl=(l,p)=>{const h=foot(l,p);return{x:2*h.x-p.x,y:2*h.y-p.y}};
+ const dir=l=>{const n=Math.hypot(l.A,l.B);return{x:l.B/n,y:-l.A/n}};
+ function lab(c,s,x,y,col,al){c.font="13px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ const labM=(c,s,p,dx,dy,col,al)=>lab(c,s,map.X(p.x)+dx,map.Y(p.y)+dy,col,al);
+ function dot(c,p,col,r){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),r||5,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function seg(c,p,q,col,w,dash){c.save();c.strokeStyle=col;c.lineWidth=w;c.setLineDash(dash?[6,5]:[]);c.beginPath();c.moveTo(map.X(p.x),map.Y(p.y));c.lineTo(map.X(q.x),map.Y(q.y));c.stroke();c.restore()}
+ function ra(c,p,u,v,col){const s=11/map.s,q=[{x:p.x+u.x*s,y:p.y+u.y*s},{x:p.x+(u.x+v.x)*s,y:p.y+(u.y+v.y)*s},{x:p.x+v.x*s,y:p.y+v.y*s}];
+  c.save();c.strokeStyle=col;c.lineWidth=1.5;c.beginPath();q.forEach((r,i)=>i?c.lineTo(map.X(r.x),map.Y(r.y)):c.moveTo(map.X(r.x),map.Y(r.y)));c.stroke();c.restore()}
+ function arc(c,M,v1,v2,r,col){const a1=Math.atan2(-v1.y,v1.x),a2=Math.atan2(-v2.y,v2.x);let d=a2-a1;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;
+  c.save();c.beginPath();c.arc(map.X(M.x),map.Y(M.y),r,a1,a1+d,d<0);c.strokeStyle=col;c.lineWidth=1.5;c.stroke();c.restore();return a1+d/2}
+ const ln=(c,l,col)=>l&&drawLine(c,map,l.A,l.B,l.C,col,2.5);
+ function subst(l,p){const n=val(l,p),dn=l.A*l.A+l.B*l.B;
+  return`|${par(l.A)}·${par(p.x)} + ${par(l.B)}·${par(p.y)} + ${par(l.C)}|/√(${par(l.A)}² + ${par(l.B)}²) = ${F(Math.abs(n))}/√${dn} = ${F(Math.abs(n)/Math.sqrt(dn))}`}
+ function pos(c,T){const l1=L(A1,B1),l2=L(A2,B2),R=[["l₁",l1?eq(l1):"两点重合",T.blue],["l₂",l2?eq(l2):"两点重合",T.redText]];ln(c,l1,T.blue);ln(c,l2,T.red);
+  if(l1&&l2){const{A:a1,B:b1,C:c1}=l1,{A:a2,B:b2,C:c2}=l2,D=a1*b2-a2*b1,Pd=a1*a2+b1*b2;
+   R.push(["A₁B₂ − A₂B₁",`${par(a1)}·${par(b2)} − ${par(a2)}·${par(b1)} = ${F(D)}`,Z(D)?T.goldText:T.blue],["A₁A₂ + B₁B₂",`${par(a1)}·${par(a2)} + ${par(b1)}·${par(b2)} = ${F(Pd)}`,Z(Pd)?T.goldText:T.fg]);
+   if(!Z(D)){const X={x:(b1*c2-b2*c1)/D,y:(c1*a2-c2*a1)/D};if(Z(Pd))ra(c,X,dir(l1),dir(l2),T.fg);dot(c,X,T.gold);labM(c,pt(X),X,10,16,T.goldText);
+    R.push(["位置关系",Z(Pd)?"垂直（A₁A₂ + B₁B₂ = 0）":"相交（A₁B₂ − A₂B₁ ≠ 0）",T.blue],["交点",pt(X),T.goldText])}
+   else if(Z(a1*c2-a2*c1)&&Z(b1*c2-b2*c1))R.push(["位置关系","重合（方程组有无数解）",T.redText]);
+   else{const k=Z(a2)?b1/b2:a1/a2,c2s=c2*k,n=a1*a1+b1*b1,d=Math.abs(c1-c2s)/Math.sqrt(n),l2s={A:a1,B:b1,C:c2s},F1={x:(A1.x+B1.x)/2,y:(A1.y+B1.y)/2},F2=foot(l2s,F1);
+    seg(c,F1,F2,T.redText,2,true);dot(c,F1,T.gold,4);dot(c,F2,T.gold,4);labM(c,"d = "+F(d),{x:(F1.x+F2.x)/2,y:(F1.y+F2.y)/2},10,0,T.goldText);
+    R.push(["位置关系","平行（A₁B₂ − A₂B₁ = 0 且不重合）",T.goldText],["化同系数","l₂: "+poly([[a1,"x"],[b1,"y"],[c2s,""]])+" = 0",T.redText],["平行线距离",`|${par(c1)} − ${par(c2s)}|/√${n} = ${F(d)}`,T.goldText])}}
+  else R.push(["提示","每条直线需要两个不同的点",T.redText]);
+  [A1,B1].forEach(p=>dot(c,p,T.blue,6));[A2,B2].forEach(p=>dot(c,p,T.red,6));labM(c,"l₁",B1,10,-14,T.blue);labM(c,"l₂",B2,10,-14,T.redText);return R}
+ function dist(c,T){const l=L(M1,M2),R=[["P",pt(P)]];ln(c,l,T.blue);
+  if(l){const H=foot(l,P),n=val(l,P),d=Math.abs(n)/Math.sqrt(l.A*l.A+l.B*l.B);
+   if(area){c.save();c.globalAlpha=.12;c.fillStyle=T.blue;c.beginPath();[P,M1,M2].forEach((p,i)=>i?c.lineTo(map.X(p.x),map.Y(p.y)):c.moveTo(map.X(p.x),map.Y(p.y)));c.fill();c.restore();seg(c,P,M1,T.fg,1);seg(c,P,M2,T.fg,1)}
+   if(!Z(d)){seg(c,P,H,T.redText,2,true);ra(c,H,dir(l),{x:(P.x-H.x)/d,y:(P.y-H.y)/d},T.fg);labM(c,"d = "+F(d),{x:(P.x+H.x)/2,y:(P.y+H.y)/2},10,0,T.redText)}
+   dot(c,H,T.gold);labM(c,"H "+pt(H),H,10,16,T.goldText);
+   R.unshift(["直线 l",eq(l),T.blue]);R.push(["公式代入",subst(l,P)],["d",F(d),T.redText],["垂足 H",pt(H),T.goldText]);
+   if(area){const S=Math.abs((M1.x-P.x)*(M2.y-P.y)-(M2.x-P.x)*(M1.y-P.y))/2,mn=hyp(M1,M2);
+    R.push(["S△PMN",F(S)],["|MN|",F(mn)],["面积法",`d = 2S/|MN| = ${F(2*S)}/${F(mn)} = ${F(2*S/mn)}`,T.blue],["结论","与公式结果一致",T.blue])}}
+  else R.push(["提示","直线上的两点重合",T.redText]);
+  dot(c,M1,T.blue,6);dot(c,M2,T.blue,6);dot(c,P,T.fg,6);labM(c,"P",P,-10,-14,T.fg,"right");
+  if(area){labM(c,"M",M1,-10,-14,T.fg,"right");labM(c,"N",M2,10,-14,T.fg)}return R}
+ function symPt(c,T){const l=L(S1,S2),R=[["P",pt(Q)]];ln(c,l,T.blue);
+  if(l){const Pp=refl(l,Q),Mi=foot(l,Q),d=hyp(Q,Mi),dx=Pp.x-Q.x,dy=Pp.y-Q.y;
+   if(!Z(d)){seg(c,Q,Pp,T.redText,2,true);ra(c,Mi,dir(l),{x:(Q.x-Mi.x)/d,y:(Q.y-Mi.y)/d},T.fg)}
+   dot(c,Mi,T.gold);labM(c,"中点 "+pt(Mi),Mi,10,16,T.goldText);dot(c,Pp,T.blue,6);labM(c,"P′ "+pt(Pp),Pp,10,-14,T.blue);
+   R.unshift(["直线 l",eq(l),T.blue]);R.push(["P′",pt(Pp),T.blue],["中点",pt(Mi)+" 在 l 上",T.goldText],
+    ["代入 l",`${par(l.A)}·${par(Mi.x)} + ${par(l.B)}·${par(Mi.y)} + ${par(l.C)} = 0`],["PP′ ⊥ l",`PP′ = (${F(dx)}, ${F(dy)}) ∥ (A, B) = (${F(l.A)}, ${F(l.B)})`,T.redText],["结论","中点在线上 + 连线垂直 ⇒ 确定 P′",T.blue])}
+  else R.push(["提示","直线上的两点重合",T.redText]);
+  dot(c,S1,T.blue,6);dot(c,S2,T.blue,6);dot(c,Q,T.fg,6);labM(c,"P",Q,-10,-14,T.fg,"right");return R}
+ function ray(c,T){const l=L(R1,R2),R=[["A",pt(RA)],["B",pt(RB)]];ln(c,l,T.blue);
+  if(l){const Ap=refl(l,RA),sa=val(l,RA),sb=val(l,RB);seg(c,RA,Ap,T.redText,1.5,true);dot(c,Ap,T.blue,5);labM(c,"A′",Ap,10,14,T.blue);
+   R.unshift(["镜面 l",eq(l),T.blue]);R.push(["A′",pt(Ap),T.blue]);
+   if(sa*sb>0){const va=val(l,Ap),t=va/(va-sb),M={x:Ap.x+t*(RB.x-Ap.x),y:Ap.y+t*(RB.y-Ap.y)},u=dir(l);
+    seg(c,Ap,M,T.blue,1.5,true);seg(c,RA,M,T.gold,2.5);seg(c,M,RB,T.gold,2.5);
+    [RA,RB].forEach(p=>{const v={x:p.x-M.x,y:p.y-M.y},s=v.x*u.x+v.y*u.y>=0?1:-1,m=arc(c,M,{x:u.x*s,y:u.y*s},v,24,T.gold);
+     lab(c,"θ",map.X(M.x)+38*Math.cos(m),map.Y(M.y)+38*Math.sin(m),T.goldText,"center")});
+    const am=hyp(RA,M),mb=hyp(M,RB),th=Math.acos(Math.min(1,Math.abs((RA.x-M.x)*u.x+(RA.y-M.y)*u.y)/am))*180/Math.PI;
+    dot(c,M,T.gold);labM(c,"M",M,0,18,T.goldText,"center");
+    R.push(["反射点 M",pt(M),T.goldText],["入射角 = 反射角",`与 l 夹角 θ = ${th.toFixed(1)}°`,T.goldText],["|AM| + |MB|",`${am.toFixed(3)} + ${mb.toFixed(3)} = ${(am+mb).toFixed(3)}`],
+     ["|A′B|",`${hyp(Ap,RB).toFixed(3)}（相等，折线最短）`,T.blue])}
+   else{lab(c,"A、B 需在 l 同侧",map.box.x+16,map.box.y+20,T.redText);R.push(["提示","A、B 在 l 异侧或在 l 上：直接连 AB 即最短",T.redText])}}
+  else R.push(["提示","镜面上的两点重合",T.redText]);
+  dot(c,R1,T.blue,6);dot(c,R2,T.blue,6);dot(c,RA,T.fg,6);dot(c,RB,T.fg,6);labM(c,"A",RA,-10,-14,T.fg,"right");labM(c,"B",RB,10,-14,T.fg);return R}
+ function upd(){sub.hidden=mode!=="sym";tg.hidden=mode!=="dist";last=""}
+ return{
+  text:"两条直线 l₁: A₁x + B₁y + C₁ = 0、l₂: A₂x + B₂y + C₂ = 0，联立方程组<b>有唯一解就相交</b>，<b>无解就平行</b>，<b>无数解就重合</b>。用系数判断：A₁B₂ − A₂B₁ ≠ 0 相交；= 0 时再看是否重合。垂直的条件是 <b>A₁A₂ + B₁B₂ = 0</b>。点到直线的距离 <b>d = |Ax₀ + By₀ + C|/√(A² + B²)</b>。光线反射里，作 A 关于 l 的对称点 A′，连 A′B 交 l 于 M，就是「将军饮马」：|AM| + |MB| = |A′B| 最短。",
+  points:["l₁∥l₂ ⇔ A₁B₂ − A₂B₁ = 0 且不重合","l₁⊥l₂ ⇔ A₁A₂ + B₁B₂ = 0","d = |Ax₀ + By₀ + C|/√(A² + B²)","平行线距离 |C₁ − C₂|/√(A² + B²)（x、y 系数须相同）","对称点：中点在线上 + 连线垂直"],
+  gk:"选填常考：由平行/垂直求参数、点到直线距离、对称与最短路径。<br>易错：用平行条件求出参数后要排除重合；平行线距离公式要先把 x、y 系数化成一样。",
+  mount(ctrl,read){ctrl.append(chips([{label:"两直线位置",value:"pos"},{label:"点到直线距离",value:"dist"},{label:"对称问题",value:"sym"}],mode,v=>{mode=v;upd()}));
+   sub=chips([{label:"点关于直线对称",value:"pt"},{label:"光线反射",value:"ray"}],sym,v=>{sym=v;upd()});tg=toggle("面积法",area,v=>{area=v;last=""});
+   ctrl.append(sub,tg);ro=readout([]);read.append(ro);upd()},
+  draw(c,w,h){const T=theme();map=drawAxes(c,{x:0,y:0,w,h},[-6.5,6.5],[-6.5,6.5]);
+   const rs=mode==="pos"?pos(c,T):mode==="dist"?dist(c,T):sym==="pt"?symPt(c,T):ray(c,T);
+   if(ro){const key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){return dg[mode==="sym"?sym:mode](e,type,x,y)},
+  unmount(){ro=sub=tg=null}}})();
+CH[3].ready=true;
+MODS[3]=(()=>{
+ const C={x:1,y:1},P={x:4,y:1},M={x:-3,y:3,fixed:true},A={x:-3,y:0},B={x:1,y:3},K={x:3,y:-1};
+ let mode="std",showM=false,D=-2,E=4,Fv=-4,map=null,ro=null,tg=null,sls=null,last="",ox=3,oy=0;
+ C.onmove=()=>{P.x=+(C.x+ox).toFixed(6);P.y=+(C.y+oy).toFixed(6)};P.onmove=()=>{ox=P.x-C.x;oy=P.y-C.y};
+ const dg={std:dragPoints([C,P,M],()=>map,0.5),three:dragPoints([A,B,K],()=>map,0.5)};
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const F=fmtNum,Z=v=>Math.abs(v)<1e-9,pt=p=>`(${F(p.x)}, ${F(p.y)})`,par=v=>v<0||/[\/√]/.test(F(v))?"("+F(v)+")":F(v);
+ function poly(ts){let s="";ts.forEach(([c,v])=>{if(Z(c))return;const a=Math.abs(c),m=v&&Z(a-1)?"":F(a);s+=(s?(c<0?" − ":" + "):(c<0?"−":""))+m+v});return s||"0"}
+ const sq=(a,v)=>Z(a)?v+"²":`(${v} ${a>0?"−":"+"} ${F(Math.abs(a))})²`;
+ const gen=(d,e,f)=>poly([[1,"x²"],[1,"y²"],[d,"x"],[e,"y"],[f,""]])+" = 0";
+ const stdEq=(a,b,r2)=>`${sq(a,"x")} + ${sq(b,"y")} = ${F(r2)}`;
+ function lab(c,s,x,y,col,al){c.font="13px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ const labM=(c,s,p,dx,dy,col,al)=>lab(c,s,map.X(p.x)+dx,map.Y(p.y)+dy,col,al);
+ function dot(c,p,col,r){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),r||5,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function seg(c,p,q,col,w,dash){c.save();c.strokeStyle=col;c.lineWidth=w;c.setLineDash(dash?[6,5]:[]);c.beginPath();c.moveTo(map.X(p.x),map.Y(p.y));c.lineTo(map.X(q.x),map.Y(q.y));c.stroke();c.restore()}
+ function msg(c,s,col,T){const b=map.box,x=b.x+b.w/2,y=b.y+b.h/2-48;c.font="600 16px "+SANS;const tw=c.measureText(s).width+32;
+  c.save();c.globalAlpha=.92;c.fillStyle=T.bg;rrect(c,x-tw/2,y-20,tw,40,14);c.fill();c.restore();c.fillStyle=col;c.textAlign="center";c.textBaseline="middle";c.fillText(s,x,y)}
+ function std(c,T){const a=C.x,b=C.y,r2=(P.x-a)**2+(P.y-b)**2,r=Math.sqrt(r2),R=[["圆心 C",pt(C),T.goldText],["半径 r",F(r),T.goldText]];
+  if(Z(r2))R.push(["提示","P 与 C 重合，半径为 0，不成圆",T.redText]);
+  else{drawCircle(c,map,a,b,r,T.blue,2.5);R.push(["标准方程",stdEq(a,b,r2),T.blue],["一般方程",gen(-2*a,-2*b,a*a+b*b-r2)],["D, E, F",`${F(-2*a)}, ${F(-2*b)}, ${F(a*a+b*b-r2)}`])}
+  seg(c,C,P,T.gold,2.5);if(!Z(r2))labM(c,"r = "+F(r),{x:(C.x+P.x)/2,y:(C.y+P.y)/2},8,-12,T.goldText);
+  if(showM){const m2=(M.x-a)**2+(M.y-b)**2,dm=Math.sqrt(m2),s=Z(m2-r2)?0:m2<r2?-1:1,w=["圆内","圆上","圆外"][s+1],col=[T.blue,T.goldText,T.redText][s+1];
+   seg(c,M,C,T.redText,2,true);dot(c,M,T.fg,6);labM(c,"M "+w,M,10,-14,col);
+   R.push(["点 M",pt(M)],["|MC| 与 r",F(dm)+(s<0?" < ":s>0?" > ":" = ")+F(r),col],["位置","M 在"+w,col])}
+  dot(c,C,T.gold,6);labM(c,"C",C,-10,-14,T.goldText,"right");dot(c,P,T.blue,6);labM(c,"P",P,10,-14,T.blue);return R}
+ function gn(c,T,w,h){const dl=D*D+E*E-4*Fv,O={x:-D/2,y:-E/2},col=Z(dl)?T.goldText:dl>0?T.blue:T.redText;
+  const R=[["方程",gen(D,E,Fv),T.blue],["配方公式","(x + D/2)² + (y + E/2)² = (D² + E² − 4F)/4"],["配方",`${sq(O.x,"x")} + ${sq(O.y,"y")} = ${F(dl/4)}`],["D² + E² − 4F",`${F(D*D)} + ${F(E*E)} − ${par(4*Fv)} = ${F(dl)}`,col]];
+  if(Z(dl)){dot(c,O,T.gold,7);labM(c,"表示一个点 "+pt(O),O,12,-14,T.goldText);R.push(["结论","= 0，表示一个点 "+pt(O),T.goldText])}
+  else if(dl>0){const r=Math.sqrt(dl)/2;drawCircle(c,map,O.x,O.y,r,T.blue,2.5);dot(c,O,T.gold,6);labM(c,"C "+pt(O),O,10,-14,T.goldText);
+   R.push(["圆心",pt(O)+" = (−D/2, −E/2)",T.goldText],["半径",`√${F(dl)}/2 = ${F(r)}`,T.goldText],["结论","> 0，表示圆",T.blue])}
+  else{msg(c,"不表示任何图形",T.redText,T);R.push(["结论","< 0，不表示任何图形",T.redText])}
+  const bx=20,bw=w-40,by=h-30,mid=bx+bw/2,len=Math.max(-1,Math.min(1,dl/240))*bw/2;
+  c.save();c.globalAlpha=.92;c.fillStyle=T.bg;rrect(c,bx-10,by-30,bw+20,48,12);c.fill();c.globalAlpha=.18;c.fillStyle=T.fg;rrect(c,bx,by-4,bw,8,4);c.fill();c.restore();
+  if(!Z(dl)){c.fillStyle=dl>0?T.blue:T.red;c.fillRect(Math.min(mid,mid+len),by-4,Math.abs(len),8)}
+  c.fillStyle=T.fg;c.fillRect(mid-1,by-8,2,16);lab(c,"D² + E² − 4F = "+F(dl),bx,by-18,col);lab(c,"< 0",bx,by+12-4,T.redText);lab(c,"> 0",bx+bw,by+12-4,T.blue,"right");lab(c,"0",mid,by-18,T.fg,"center");return R}
+ function three(c,T){const ax=A.x,ay=A.y,bx=B.x,by=B.y,cx=K.x,cy=K.y,d=2*(ax*(by-cy)+bx*(cy-ay)+cx*(ay-by)),R=[["A",pt(A)],["B",pt(B)],["C",pt(K)]];
+  const pb=(p,q)=>{const u=q.x-p.x,v=q.y-p.y;if(Z(u)&&Z(v))return;c.save();c.globalAlpha=.45;drawLine(c,map,u,v,-(u*(p.x+q.x)/2+v*(p.y+q.y)/2),T.fg,1.5,true);c.restore()};pb(A,B);pb(B,K);
+  if(Z(d)){msg(c,"三点共线，不能确定圆",T.redText,T);R.push(["提示","三点共线，不能确定圆",T.redText])}
+  else{const s1=ax*ax+ay*ay,s2=bx*bx+by*by,s3=cx*cx+cy*cy,O={x:(s1*(by-cy)+s2*(cy-ay)+s3*(ay-by))/d,y:(s1*(cx-bx)+s2*(ax-cx)+s3*(bx-ax))/d},r2=(ax-O.x)**2+(ay-O.y)**2;
+   drawCircle(c,map,O.x,O.y,Math.sqrt(r2),T.blue,2.5);dot(c,O,T.gold,6);labM(c,"圆心 "+pt(O),O,10,16,T.goldText);
+   R.push(["圆心",pt(O),T.goldText],["r²",F(r2),T.goldText],["标准方程",stdEq(O.x,O.y,r2),T.blue],["一般方程",gen(-2*O.x,-2*O.y,O.x*O.x+O.y*O.y-r2)],["作法","AB、BC 的中垂线交于圆心"])}
+  [[A,"A"],[B,"B"],[K,"C"]].forEach(([p,n])=>{dot(c,p,T.blue,6);labM(c,n,p,-10,-14,T.fg,"right")});return R}
+ function upd(){tg.hidden=mode!=="std";sls.forEach(s=>s.hidden=mode!=="gen");M.fixed=!showM;last=""}
+ const fm=v=>(v<0?"−":"")+Math.abs(v);
+ return{
+  text:"圆是平面内<b>到定点距离等于定长的点的集合</b>。标准方程 <b>(x − a)² + (y − b)² = r²</b>，圆心 (a, b)、半径 r 一眼可读。展开得一般方程 <b>x² + y² + Dx + Ey + F = 0</b>，配方后圆心 (−D/2, −E/2)，半径 √(D² + E² − 4F)/2。只有 <b>D² + E² − 4F &gt; 0</b> 时才是圆；等于 0 是一个点，小于 0 不表示任何图形。",
+  points:["标准方程 (x − a)² + (y − b)² = r²","一般方程 x² + y² + Dx + Ey + F = 0，需 D² + E² − 4F &gt; 0","圆心 (−D/2, −E/2)，r = √(D² + E² − 4F)/2","点 M 与圆：比较 |MC| 与 r","三点定圆：中垂线交点，或待定系数法"],
+  gk:"选填常考：由一般方程求圆心、半径；方程表示圆时求参数范围。<br>易错：x²、y² 的系数必须相等且不为 0，并且没有 xy 项，才可能是圆。",
+  mount(ctrl,read){ctrl.append(chips([{label:"标准方程",value:"std"},{label:"一般方程",value:"gen"},{label:"三点定圆",value:"three"}],mode,v=>{mode=v;upd()}));
+   tg=toggle("点与圆的位置",showM,v=>{showM=v;upd()});
+   sls=[slider("D",-10,10,0.5,D,fm,v=>{D=v;last=""}),slider("E",-10,10,0.5,E,fm,v=>{E=v;last=""}),slider("F",-10,10,0.5,Fv,fm,v=>{Fv=v;last=""})];
+   ctrl.append(tg,...sls);ro=readout([]);read.append(ro);upd()},
+  draw(c,w,h){const T=theme();map=drawAxes(c,{x:0,y:0,w,h},[-6.5,6.5],[-6.5,6.5]);
+   const rs=mode==="std"?std(c,T):mode==="gen"?gn(c,T,w,h):three(c,T);
+   if(ro){const key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){const d=dg[mode];return d?d(e,type,x,y):false},
+  unmount(){ro=tg=sls=null}}})();
+CH[4].ready=true;
+MODS[4]=(()=>{
+ const C={x:0,y:0},L1={x:-5,y:-3},L2={x:4,y:2},P={x:1,y:1};
+ let mode="pos",r=3,useKB=false,k=0.6,bb=-1,kf=1,showMin=false,map=null,ro=null,last="",cR=null,cT=null,cK=null,cB=null,cM=null,cF=null;
+ const dg={pos:dragPoints([C,L1,L2],()=>map,0.5),chord:dragPoints([C,L1,L2,P],()=>map,0.5)};
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const F=fmtNum,Z=v=>Math.abs(v)<1e-7,pt=p=>`(${F(p.x)}, ${F(p.y)})`;
+ function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a}
+ function poly(ts){let s="";ts.forEach(([c,v])=>{if(Z(c))return;const a=Math.abs(c),m=v&&Z(a-1)?"":F(a);s+=(s?(c<0?" − ":" + "):(c<0?"−":""))+m+v});return s||"0"}
+ function L2p(p,q){const dx=q.x-p.x,dy=q.y-p.y;if(Z(dx)&&Z(dy))return null;
+  let A=Math.round(dy*4),B=Math.round(-dx*4),Cc=Math.round((dx*p.y-dy*p.x)*4);const g=gcd(gcd(A,B),Cc)||1;A/=g;B/=g;Cc/=g;
+  if(A<0||(A===0&&B<0)){A=-A;B=-B;Cc=-Cc}return{A:A+0,B:B+0,C:Cc+0}}
+ const eq=l=>poly([[l.A,"x"],[l.B,"y"],[l.C,""]])+" = 0";
+ const ctr=()=>mode==="fix"?{x:0,y:0}:C;
+ function line(){if(mode==="fix")return{A:kf,B:-1,C:1-2*kf};if(useKB)return{A:k,B:-1,C:bb};return L2p(L1,L2)}
+ function lab(c,s,x,y,col,al){c.font="13px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ const labM=(c,s,p,dx,dy,col,al)=>lab(c,s,map.X(p.x)+dx,map.Y(p.y)+dy,col,al);
+ function dot(c,p,col,rr){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),rr||5,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function seg(c,p,q,col,w,dash){c.save();c.strokeStyle=col;c.lineWidth=w;c.setLineDash(dash?[6,5]:[]);c.beginPath();c.moveTo(map.X(p.x),map.Y(p.y));c.lineTo(map.X(q.x),map.Y(q.y));c.stroke();c.restore()}
+ function tri(c,ps,col){c.save();c.globalAlpha=.14;c.fillStyle=col;c.beginPath();ps.forEach((p,i)=>i?c.lineTo(map.X(p.x),map.Y(p.y)):c.moveTo(map.X(p.x),map.Y(p.y)));c.closePath();c.fill();c.restore()}
+ function geom(l){const O=ctr(),n=Math.hypot(l.A,l.B),d=Math.abs(l.A*O.x+l.B*O.y+l.C)/n,t=(l.A*O.x+l.B*O.y+l.C)/(l.A*l.A+l.B*l.B),H={x:O.x-t*l.A,y:O.y-t*l.B},u={x:l.B/n,y:-l.A/n},
+  s=Z(d-r)?0:d<r?-1:1,rel=["相交","相切","相离"][s+1],half=d<r?Math.sqrt(Math.max(0,r*r-d*d)):0;
+  return{O,d,H,u,s,rel,half,chord:2*half,A1:{x:H.x-u.x*half,y:H.y-u.y*half},B1:{x:H.x+u.x*half,y:H.y+u.y*half}}}
+ function quad(l){const O=ctr(),a=O.x,b=O.y;
+  if(!Z(l.B)){const kk=-l.A/l.B,m=-l.C/l.B,A2=1+kk*kk,B2=2*(kk*(m-b)-a),C2=a*a+(m-b)**2-r*r;
+   return{sub:"代入 y = "+poly([[kk,"x"],[m,""]]),txt:poly([[A2,"x²"],[B2,"x"],[C2,""]])+" = 0",dl:B2*B2-4*A2*C2}}
+  const x0=-l.C/l.A,B2=-2*b,C2=b*b+(x0-a)**2-r*r;
+  return{sub:"代入 x = "+F(x0),txt:poly([[1,"y²"],[B2,"y"],[C2,""]])+" = 0",dl:B2*B2-4*C2}}
+ function panel(c,x,y,w,h,title,lines,T){c.save();rrect(c,x,y,w,h,12);c.strokeStyle=isDark()?"rgba(255,255,255,.18)":"rgba(0,0,0,.14)";c.lineWidth=1;c.stroke();
+  c.textAlign="left";c.textBaseline="top";c.font="600 13px "+SANS;c.fillStyle=T.fg;c.fillText(title,x+12,y+10);
+  let yy=y+34;lines.forEach(([s,col])=>{c.font="13px "+SANS;c.fillStyle=col||T.fg;yy=wrapText(c,s,x+12,yy,w-24,18)+3});c.restore()}
+ function daxis(c,T,w,h,d){const bx=26,bw=w-52,by=h-24,S=v=>bx+Math.min(v,6.5)/6.5*bw;
+  c.save();c.globalAlpha=.92;c.fillStyle=T.bg;rrect(c,bx-14,by-30,bw+28,48,12);c.fill();c.restore();
+  c.save();c.globalAlpha=.3;c.fillStyle=T.fg;rrect(c,S(0),by-3,bw-(S(0)-bx),6,3);c.fill();c.restore();
+  c.fillStyle=T.teal;rrect(c,S(0),by-3,S(r)-S(0),6,3);c.fill();
+  c.beginPath();c.arc(S(r),by,5,0,7);c.fillStyle=T.gold;c.fill();
+  c.fillStyle=T.fg;c.fillRect(S(d)-1,by-11,2,22);
+  lab(c,"d = "+F(d),S(d),by-20,T.fg,"center");lab(c,"0",bx,by+16,T.fg,"center");lab(c,"r = "+F(r),S(r),by+16,T.goldText,"center");
+  lab(c,"相交",(S(0)+S(r))/2,by+16,T.blue,"center");lab(c,"相离",(S(r)+bx+bw)/2,by+16,T.fg,"center")}
+ function scene(c,T,w,h){const l=line(),O=ctr(),Rw=[];
+  drawCircle(c,map,O.x,O.y,r,T.blue,2.5);dot(c,O,T.gold,6);labM(c,"C "+pt(O),O,-10,-14,T.goldText,"right");
+  if(!l){lab(c,"直线上的两点重合",map.box.x+16,map.box.y+20,T.redText);return[["提示","直线上的两点重合",T.redText]]}
+  if(mode==="fix"){c.save();c.globalAlpha=.16;for(let v=-4;v<=4;v+=.5)drawLine(c,map,v,-1,1-2*v,T.blue,1.5);c.restore()}
+  drawLine(c,map,l.A,l.B,l.C,T.blue,2.5);
+  const G=geom(l),Q=quad(l),col=G.s<0?T.blue:G.s===0?T.goldText:T.redText;
+  if(!Z(G.d))seg(c,O,G.H,T.red,2,true);
+  if(G.s<0){dot(c,G.A1,T.gold,6);dot(c,G.B1,T.gold,6);labM(c,"A "+pt(G.A1),G.A1,10,-14,T.goldText);labM(c,"B "+pt(G.B1),G.B1,10,16,T.goldText)}
+  else if(G.s===0){dot(c,G.H,T.gold,6);labM(c,"切点 "+pt(G.H),G.H,10,-14,T.goldText)}
+  if(!Z(G.d))labM(c,"d = "+F(G.d),{x:(O.x+G.H.x)/2,y:(O.y+G.H.y)/2},10,0,T.redText);
+  if(mode==="chord"&&G.s<0){tri(c,[O,G.H,G.B1],T.blue);seg(c,O,G.B1,T.gold,2);labM(c,"r = "+F(r),{x:(O.x+G.B1.x)/2,y:(O.y+G.B1.y)/2},8,-12,T.goldText);
+   labM(c,"半弦 "+F(G.half),{x:(G.H.x+G.B1.x)/2,y:(G.H.y+G.B1.y)/2},0,18,T.fg,"center")}
+  if(mode==="chord"&&showMin){const dp=Math.hypot(P.x-O.x,P.y-O.y);dot(c,P,T.fg,6);labM(c,"P "+pt(P),P,10,-14,T.fg);seg(c,O,P,T.red,2,true);
+   if(dp<r-1e-9){const mh=Math.sqrt(r*r-dp*dp),ux=dp<1e-9?1:-(P.y-O.y)/dp,uy=dp<1e-9?0:(P.x-O.x)/dp;
+    seg(c,{x:P.x-ux*mh,y:P.y-uy*mh},{x:P.x+ux*mh,y:P.y+uy*mh},T.gold,3);
+    const vx=dp<1e-9?0:(P.x-O.x)/dp,vy=dp<1e-9?1:(P.y-O.y)/dp;seg(c,{x:O.x-vx*r,y:O.y-vy*r},{x:O.x+vx*r,y:O.y+vy*r},T.teal,2.5);
+    Rw.push(["|CP|",F(dp),T.redText],["最短弦","2√(r² − |CP|²) = "+F(2*mh)+"（⊥ CP）",T.goldText],["最长弦","直径 = "+F(2*r),T.blue])}
+   else Rw.push(["提示","P 要在圆内，最短弦才存在",T.redText])}
+  if(mode==="fix"){dot(c,{x:2,y:1},T.gold,6);labM(c,"定点 (2, 1)",{x:2,y:1},10,16,T.goldText);
+   const din=Math.hypot(2,1)<r;Rw.push(["定点","(2, 1)：k(x − 2) − y + 1 = 0 恒过",T.goldText],["(2,1) 与圆",din?"√5 < r，在圆内 ⇒ 必相交":"√5 ≥ r，不在圆内",din?T.blue:T.redText])}
+  const sym=G.s<0?" < ":G.s===0?" = ":" > ",dsign=Q.dl>1e-7?"Δ > 0 ⇒ 两个交点":Z(Q.dl)?"Δ = 0 ⇒ 一个交点":"Δ < 0 ⇒ 无交点";
+  if(w>=680){const bw2=Math.round(w*0.36),gap=10,ph=100,px=w-bw2-16,py=16;
+   panel(c,px,py,bw2,ph,"几何法：比 d 与 r",[["d = "+F(G.d),T.redText],["r = "+F(r),T.goldText],[F(G.d)+sym+F(r)+" ⇒ "+G.rel,col]],T);
+   panel(c,px,py+ph+gap,bw2,ph+36,"代数法：联立看 Δ",[[Q.sub],[Q.txt,T.blue],["Δ = "+F(Q.dl),col],[dsign,col],["两法结论一致",T.fg]],T)}
+  daxis(c,T,w,h,G.d);
+  if(mode!=="fix"&&!useKB){dot(c,L1,T.blue,6);dot(c,L2,T.blue,6)}
+  return[["直线 l",eq(l),T.blue],["圆 C",`${Z(O.x)?"x²":"(x − "+F(O.x)+")²"} + ${Z(O.y)?"y²":"(y − "+F(O.y)+")²"} = ${F(r*r)}`,T.blue],
+   ["d",F(G.d),T.redText],["r",F(r),T.goldText],["d 与 r",F(G.d)+sym+F(r),col],["位置关系",G.rel,col],["Δ",Q.txt+"，Δ = "+F(Q.dl),col],
+   ["弦长 |AB|",G.s<0?`2√(r² − d²) = 2√(${F(r*r)} − ${F(G.d*G.d)}) = ${F(G.chord)}`:G.s===0?"相切，弦长 0":"相离，无弦",col],...Rw]}
+ function upd(){const fx=mode==="fix";cT.hidden=fx;cK.hidden=fx||!useKB;cB.hidden=fx||!useKB;cM.hidden=mode!=="chord";cF.hidden=!fx;
+  L1.fixed=L2.fixed=useKB;P.fixed=!(mode==="chord"&&showMin);last=""}
+ return{
+  text:"判断直线与圆的关系，最快的是<b>几何法</b>：比较圆心到直线的距离 d 与半径 r。<b>d &lt; r 相交，d = r 相切，d &gt; r 相离</b>。代数法是联立方程看判别式 Δ，结论一致但计算更重。相交时，半弦、d 与 r 组成直角三角形，所以 <b>|AB| = 2√(r² − d²)</b>。过圆内一点 P 的弦中，垂直于 CP 的最短，直径最长。直线过圆内定点，必与圆相交。",
+  points:["d &lt; r 相交，d = r 相切，d &gt; r 相离","代数法：联立后看 Δ 的正负，结论与几何法一致","弦长 |AB| = 2√(r² − d²)","过圆内一点：⊥ CP 的弦最短 2√(r² − |CP|²)，直径最长","直线过圆内定点 ⇒ 必相交"],
+  gk:"选填高频：直线与圆相交求弦长、已知弦长求参数、过定点直线与圆的弦长最值。<br>易错：设直线为点斜式时漏掉斜率不存在的情形。",
+  mount(ctrl,read){ctrl.append(chips([{label:"位置关系",value:"pos"},{label:"弦长",value:"chord"},{label:"过定点的直线",value:"fix"}],mode,v=>{mode=v;upd()}));
+   cR=slider("r",0.5,5,0.1,r,null,v=>{r=v;last=""});cT=toggle("用 k、b 滑块定直线",useKB,v=>{useKB=v;upd()});
+   cK=slider("k",-5,5,0.1,k,null,v=>{k=v;last=""});cB=slider("b",-5,5,0.5,bb,null,v=>{bb=v;last=""});
+   cM=toggle("弦长最短的直线",showMin,v=>{showMin=v;upd()});cF=slider("k（过定点）",-4,4,0.1,kf,null,v=>{kf=v;last=""});
+   ctrl.append(cR,cT,cK,cB,cM,cF);ro=readout([]);read.append(ro);upd()},
+  draw(c,w,h){const T=theme();map=drawAxes(c,{x:0,y:0,w,h},[-6.5,6.5],[-6.5,6.5]);const rs=scene(c,T,w,h);
+   if(ro){const key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){const d=dg[mode];return d?d(e,type,x,y):false},
+  unmount(){ro=cR=cT=cK=cB=cM=cF=null}}})();
+CH[5].ready=true;
+MODS[5]=(()=>{
+ const C1={x:-1.5,y:0},C2={x:2,y:0.5};
+ let r1=3,r2=2,showT=true,map=null,ro=null,last="",sw=null;
+ const dg=dragPoints([C1,C2],()=>map,0.5);
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const F=fmtNum,Z=v=>Math.abs(v)<1e-6,pt=p=>`(${F(p.x)}, ${F(p.y)})`;
+ function poly(ts){let s="";ts.forEach(([c,v])=>{if(Z(c))return;const a=Math.abs(c),m=v&&Z(a-1)?"":F(a);s+=(s?(c<0?" − ":" + "):(c<0?"−":""))+m+v});return s||"0"}
+ const sq=(a,v)=>Z(a)?v+"²":`(${v} ${a>0?"−":"+"} ${F(Math.abs(a))})²`;
+ const gen=(d,e,f)=>poly([[1,"x²"],[1,"y²"],[d,"x"],[e,"y"],[f,""]])+" = 0";
+ const stdEq=(a,b,r2)=>`${sq(a,"x")} + ${sq(b,"y")} = ${F(r2)}`;
+ function lab(c,s,x,y,col,al){c.font="13px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ const labM=(c,s,p,dx,dy,col,al)=>lab(c,s,map.X(p.x)+dx,map.Y(p.y)+dy,col,al);
+ function dot(c,p,col,rr){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),rr||5,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function seg(c,p,q,col,w,dash){c.save();c.strokeStyle=col;c.lineWidth=w;c.setLineDash(dash?[6,5]:[]);c.beginPath();c.moveTo(map.X(p.x),map.Y(p.y));c.lineTo(map.X(q.x),map.Y(q.y));c.stroke();c.restore()}
+ const NAMES=["内含","内切","相交","外切","外离"];
+ function rel(d){const a=Math.abs(r1-r2),b=r1+r2;if(Z(d)&&Z(a))return -1;return Z(d-a)?1:Z(d-b)?3:d<a?0:d<b?2:4}
+ function keys(){const a=Math.abs(r1-r2),b=r1+r2,e=b+2,t1=a/e*3.8,t2=b/e*3.8;return[[0,0],[t1,a],[t1+.6,a],[t2+.6,b],[t2+1.2,b],[5,e]]}
+ function sweepD(t){const k=keys();if(t>=5)return k[5][1];for(let i=1;i<k.length;i++)if(t<=k[i][0]){const[ta,va]=k[i-1],[tb,vb]=k[i];return tb-ta<1e-9?vb:va+(vb-va)*(t-ta)/(tb-ta)}return k[5][1]}
+ function start(){C1.x=Math.max(-6,Math.round(-(r1+r2+2))/2);C1.y=Math.round(C1.y*2)/2;C2.y=C1.y;C2.x=C1.x;C1.fixed=C2.fixed=true;sw=performance.now()/1000;last=""}
+ function stop(){sw=null;C1.fixed=C2.fixed=false}
+ function tans(d,u){const L=[];if(Z(d))return L;const nx=-u.y,ny=u.x;
+  [(r2-r1)/d,-(r1+r2)/d].forEach((k,i)=>{if(Math.abs(k)>1+1e-9)return;const q=Math.sqrt(Math.max(0,1-k*k));
+   (Z(q)?[1]:[1,-1]).forEach(p=>{const n={x:k*u.x+p*q*nx,y:k*u.y+p*q*ny};L.push({A:n.x,B:n.y,C:r1-(n.x*C1.x+n.y*C1.y),int:i===1})})});return L}
+ function daxis(c,T,w,h,d,col,name){const a=Math.abs(r1-r2),b=r1+r2,M=b+2.5,bx=26,bw=w-52,by=h-28,S=v=>bx+Math.min(v,M)/M*bw;
+  c.save();c.globalAlpha=.92;c.fillStyle=T.bg;rrect(c,bx-14,by-66,bw+28,92,12);c.fill();c.restore();
+  [[0,a,T.purple],[a,b,T.blue],[b,M,T.teal]].forEach(([p,q,cl])=>{c.save();c.globalAlpha=.25;c.fillStyle=cl;c.fillRect(S(p),by-4,S(q)-S(p),8);c.restore()});
+  [[a,T.gold],[b,T.red]].forEach(([v,cl])=>{c.beginPath();c.arc(S(v),by,5,0,7);c.fillStyle=cl;c.fill()});
+  lab(c,"|r₁−r₂|",S(a),by-16,T.goldText,S(a)-bx<50?"left":"right");lab(c,"r₁+r₂",S(b),by-16,T.redText,"left");
+  [["内含",S(0),S(a)],["相交",S(a),S(b)],["外离",S(b),S(M)]].forEach(([n,p,q])=>{if(q-p>40)lab(c,n,(p+q)/2,by+16,T.fg,"center")});
+  c.fillStyle=T.fg;c.fillRect(S(d)-1,by-11,2,22);
+  c.font="600 20px "+SANS;c.fillStyle=col;c.textAlign="left";c.textBaseline="middle";c.fillText(name+"    d = "+F(d),bx,by-46)}
+ function scene(c,T,w,h){const dx=C2.x-C1.x,dy=C2.y-C1.y,d=Math.hypot(dx,dy),s=rel(d),u=d>1e-9?{x:dx/d,y:dy/d}:{x:1,y:0},n={x:-u.y,y:u.x};
+  const col=s<0?T.blue:[T.redText,T.goldText,T.blue,T.goldText,T.fg][s],name=s<0?"两圆重合":NAMES[s];
+  const D1=-2*C1.x,E1=-2*C1.y,F1=C1.x**2+C1.y**2-r1*r1,D2=-2*C2.x,E2=-2*C2.y,F2=C2.x**2+C2.y**2-r2*r2,la={A:D1-D2,B:E1-E2,C:F1-F2};
+  const leq=poly([[la.A,"x"],[la.B,"y"],[la.C,""]])+" = 0",x0=d>1e-9?(d*d+r1*r1-r2*r2)/(2*d):0,H={x:C1.x+u.x*x0,y:C1.y+u.y*x0};
+  if(showT)tans(d,u).forEach(l=>drawLine(c,map,l.A,l.B,l.C,l.int?T.purple:T.teal,1.5));
+  drawCircle(c,map,C1.x,C1.y,r1,T.blue,2.5);drawCircle(c,map,C2.x,C2.y,r2,T.red,2.5);
+  if(d>1e-9){seg(c,C1,C2,T.gold,2.5);labM(c,"d = "+F(d),{x:(C1.x+C2.x)/2,y:(C1.y+C2.y)/2},0,-14,T.goldText,"center")}
+  const cmp=s<0?"d = 0 且 r₁ = r₂":["d < |r₁ − r₂|","d = |r₁ − r₂|","|r₁ − r₂| < d < r₁ + r₂","d = r₁ + r₂","d > r₁ + r₂"][s];
+  const R=[["C₁",stdEq(C1.x,C1.y,r1*r1),T.blue],["C₂",stdEq(C2.x,C2.y,r2*r2),T.redText],["d",F(d),T.goldText],["r₁ + r₂",F(r1+r2)],["|r₁ − r₂|",F(Math.abs(r1-r2))],
+   ["比较",cmp,col],["位置关系",name,col],["C₁ 一般方程",gen(D1,E1,F1),T.blue],["C₂ 一般方程",gen(D2,E2,F2),T.redText]];
+  if(Z(la.A)&&Z(la.B))R.push(["两式相减",s<0?"两圆重合，方程相同":"同心圆，消不出直线",T.redText]);
+  else if(s===2){const half=Math.sqrt(Math.max(0,r1*r1-x0*x0)),A={x:H.x-n.x*half,y:H.y-n.y*half},B={x:H.x+n.x*half,y:H.y+n.y*half};
+   drawLine(c,map,la.A,la.B,la.C,T.redText,1.5,true);seg(c,A,B,T.redText,3.5);dot(c,H,T.fg,4);dot(c,A,T.redText,6);dot(c,B,T.redText,6);
+   labM(c,"A",A,10,-14,T.redText);labM(c,"B",B,10,14,T.redText);
+   R.push(["公共弦方程",leq+"（两式相减）",T.redText],["公共弦长",`d' = ${F(Math.abs(x0))}，2√(r₁² − d'²) = 2√(${F(r1*r1)} − ${F(x0*x0)}) = ${F(2*half)}`,T.redText],["性质","AB ⊥ C₁C₂，且被 C₁C₂ 平分"])}
+  else if(s===1||s===3){dot(c,H,T.gold,6);labM(c,"切点 "+pt(H),H,10,-14,T.goldText);R.push(["切点",pt(H),T.goldText],["两式相减",leq+"（过切点的公切线）"])}
+  else R.push(["两式相减",leq,T.redText],["易错","两圆不相交，这条直线不是公共弦",T.redText]);
+  if(showT)R.push(["公切线条数",s<0?"无数条（重合）":s+" 条："+["无","1 条，过切点","2 条外公切线","2 外 + 1 内（过切点）","2 外 + 2 内"][s],col]);
+  dot(c,C1,T.blue,6);labM(c,"C₁",C1,-10,-14,T.blue,"right");dot(c,C2,T.red,6);labM(c,"C₂",C2,10,-14,T.redText);
+  daxis(c,T,w,h,d,col,name);return R}
+ return{
+  text:"两圆的位置由<b>圆心距 d</b> 与两半径 r₁、r₂ 决定：<b>d &gt; r₁ + r₂ 外离，d = r₁ + r₂ 外切，|r₁ − r₂| &lt; d &lt; r₁ + r₂ 相交，d = |r₁ − r₂| 内切，d &lt; |r₁ − r₂| 内含</b>。相交时，把两圆的一般方程相减，x²、y² 消掉，得到的直线就是<b>公共弦所在的直线</b>。",
+  points:["比较 d 与 r₁ + r₂、|r₁ − r₂|，判断五种位置关系","两圆相交时，两方程相减得公共弦所在直线","公共弦 ⊥ 连心线，且被连心线平分；弦长 2√(r² − d'²)","公切线条数：外离 4、外切 3、相交 2、内切 1、内含 0"],
+  gk:"选填常考：由两圆位置关系求参数、公共弦方程与弦长、公切线条数。<br>易错：两圆方程相减得到的直线，只有在两圆相交时才是公共弦。",
+  mount(ctrl,read){ctrl.append(slider("r₁（蓝）",0.5,5,0.1,r1,null,v=>{r1=v;last=""}),slider("r₂（红）",0.5,5,0.1,r2,null,v=>{r2=v;last=""}),
+   button("扫一遍",start,true),toggle("公切线条数",showT,v=>{showT=v;last=""}));ro=readout([]);read.append(ro)},
+  draw(c,w,h,t){const T=theme();map=drawAxes(c,{x:0,y:0,w,h},[-6.5,6.5],[-6.5,6.5]);
+   if(sw!=null){const dt=Math.max(0,t-sw);C2.x=C1.x+sweepD(dt);C2.y=C1.y;if(dt>=5)stop()}
+   const rs=scene(c,T,w,h);if(ro){const key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(type==="down"&&sw!=null)stop();return dg(e,type,x,y)},
+  unmount(){stop();ro=null}}})();
+CH[6].ready=true;CH[6].book="高考拓展 · 选择性必修第一册 第二章 · 求轨迹方程";
+MODS[6]=(()=>{
+ const A={x:-2,y:0},B={x:2,y:0},Q={x:1,y:2};
+ let mode="apo",lam=2,rev=false,sub=1,k=24,th=0.6,lt=null,dragP=false,Pon=null,map=null,ro=null,last="",trail=[];
+ const dg=dragPoints([A,B],()=>map,0.5),dq=dragPoints([Q],()=>map,0.5);dg.onmove=()=>{trail=[]};
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const F=fmtNum,Z=v=>Math.abs(v)<1e-6,pt=p=>`(${F(p.x)}, ${F(p.y)})`,f3=v=>(Math.abs(v)<5e-4?0:v).toFixed(3),f2=p=>`(${(+p.x.toFixed(2))}, ${(+p.y.toFixed(2))})`.replace(/-/g,"−");
+ function poly(ts){let s="";ts.forEach(([c,v])=>{if(Z(c))return;const a=Math.abs(c),m=v&&Z(a-1)?"":F(a);s+=(s?(c<0?" − ":" + "):(c<0?"−":""))+m+v});return s||"0"}
+ const sq=(a,v)=>Z(a)?v+"²":`(${v} ${a>0?"−":"+"} ${F(Math.abs(a))})²`,stdEq=(a,b,r2)=>`${sq(a,"x")} + ${sq(b,"y")} = ${F(r2)}`;
+ const dist=(p,q)=>Math.hypot(p.x-q.x,p.y-q.y),mid=(p,q)=>({x:(p.x+q.x)/2,y:(p.y+q.y)/2}),on=(c,r)=>({x:c.x+r*Math.cos(th),y:c.y+r*Math.sin(th)});
+ function lab(c,s,x,y,col,al){c.font="13px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ const labM=(c,s,p,dx,dy,col,al)=>lab(c,s,map.X(p.x)+dx,map.Y(p.y)+dy,col,al);
+ function dot(c,p,col,rr,hollow){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),rr||5,0,7);c.fillStyle=hollow?theme().bg:col;c.fill();c.strokeStyle=hollow?col:theme().bg;c.lineWidth=2;c.stroke()}
+ function seg(c,p,q,col,w,dash){c.save();c.strokeStyle=col;c.lineWidth=w;c.setLineDash(dash?[6,5]:[]);c.beginPath();c.moveTo(map.X(p.x),map.Y(p.y));c.lineTo(map.X(q.x),map.Y(q.y));c.stroke();c.restore()}
+ function locus(){const dx=B.x-A.x,dy=B.y-A.y,d=Math.hypot(dx,dy),l2=lam*lam;if(d<1e-9)return null;
+  if(Z(lam-1))return{line:{A:2*dx,B:2*dy,C:A.x*A.x+A.y*A.y-B.x*B.x-B.y*B.y},m:mid(A,B),u:{x:-dy/d,y:dx/d}};
+  return{c:{x:(A.x-l2*B.x)/(1-l2),y:(A.y-l2*B.y)/(1-l2)},r:lam*d/Math.abs(1-l2)}}
+ function apoScene(c,T){const L=locus(),l2=lam*lam,R=[["A",pt(A)],["B",pt(B)],["λ",String(+lam.toFixed(2)),T.blue]];
+  if(!L){dot(c,A,T.fg,6);R.push(["提示","A、B 重合，比值无意义",T.redText]);Pon=null;return R}
+  let P;
+  if(L.line){drawLine(c,map,L.line.A,L.line.B,L.line.C,T.blue,2.5);P={x:L.m.x+L.u.x*5*Math.sin(th),y:L.m.y+L.u.y*5*Math.sin(th)};Pon={m:L.m,u:L.u,p:P};
+   labM(c,"中垂线",{x:L.m.x+L.u.x*4.2,y:L.m.y+L.u.y*4.2},10,0,T.blue)}
+  else{drawCircle(c,map,L.c.x,L.c.y,L.r,T.blue,2.5);P=on(L.c,L.r);Pon={c:L.c,p:P};const E={x:L.c.x+L.r,y:L.c.y};
+   seg(c,L.c,E,T.blue,1.5,true);dot(c,L.c,T.blue,4);labM(c,"圆心 "+pt(L.c),L.c,0,16,T.blue,"center");labM(c,"r = "+F(L.r),mid(L.c,E),0,-12,T.blue,"center")}
+  const pa=dist(P,A),pb=dist(P,B);seg(c,P,A,T.gold,2.5);seg(c,P,B,T.red,2.5);
+  labM(c,"|PA|",mid(P,A),-8,-12,T.goldText,"right");labM(c,"|PB|",mid(P,B),8,-12,T.redText);
+  dot(c,A,T.fg,6);labM(c,"A",A,-10,16,T.fg,"right");dot(c,B,T.fg,6);labM(c,"B",B,10,16,T.fg);dot(c,P,T.blue,7);labM(c,"P",P,10,-14,T.fg);
+  R.push(["|PA|",f3(pa),T.goldText],["|PB|",f3(pb),T.redText],["|PA| / |PB|",pb<1e-9?"—":f3(pa/pb)+"（恒为 λ）",T.blue],
+   ["设点 · 列式",`P(x, y)：${sq(A.x,"x")} + ${sq(A.y,"y")} = ${F(l2)}[${sq(B.x,"x")} + ${sq(B.y,"y")}]`]);
+  if(L.line)R.push(["轨迹方程",poly([[L.line.A,"x"],[L.line.B,"y"],[L.line.C,""]])+" = 0",T.blue],["轨迹","λ = 1：线段 AB 的中垂线",T.blue]);
+  else{const a=1-l2;R.push(["化简",poly([[1,"x²"],[1,"y²"],[-2*(A.x-l2*B.x)/a,"x"],[-2*(A.y-l2*B.y)/a,"y"],[(A.x*A.x+A.y*A.y-l2*(B.x*B.x+B.y*B.y))/a,""]])+" = 0"],
+   ["轨迹方程",stdEq(L.c.x,L.c.y,L.r*L.r),T.blue],["圆心",pt(L.c),T.blue],["半径",F(L.r),T.blue])}
+  return R}
+ function revScene(c,T){const A0={x:-4,y:0},C0={x:-1,y:0},O={x:0,y:0};drawCircle(c,map,0,0,2,T.blue,2.5);
+  const f=a=>{const p={x:2*Math.cos(a),y:2*Math.sin(a)};return dist(p,Q)+dist(p,C0)};let best=0,bv=1e9;
+  for(let i=0;i<720;i++){const a=i/360*Math.PI,v=f(a);if(v<bv){bv=v;best=a}}
+  const P=on(O,2),Pm={x:2*Math.cos(best),y:2*Math.sin(best)},pa=dist(P,A0),pc=dist(P,C0),pb=dist(P,Q),out=Q.x*Q.x+Q.y*Q.y>4+1e-9;Pon={c:O,p:P};
+  if(out)seg(c,Q,C0,T.blue,1.5,true);seg(c,P,A0,T.gold,2);seg(c,P,C0,T.gold,2,true);seg(c,P,Q,T.red,2.5);
+  dot(c,Pm,T.blue,5);labM(c,"P₀",Pm,10,14,T.blue);dot(c,A0,T.fg,6);labM(c,"A",A0,0,16,T.fg,"center");dot(c,C0,T.gold,5);labM(c,"C",C0,0,16,T.goldText,"center");
+  dot(c,Q,T.red,6);labM(c,"B",Q,10,-14,T.redText);dot(c,P,T.fg,7);labM(c,"P",P,10,-14,T.fg);
+  return[["圆","x² + y² = 4",T.blue],["A","(−4, 0)"],["B（可拖动）",pt(Q),T.redText],["构造","取 C(−1, 0)：|PC|² = 2x + 5，|PA|² = 8x + 20 ⇒ |PC| = ½|PA|",T.goldText],
+   ["|PA|",f3(pa),T.goldText],["½|PA| = |PC|",f3(pc),T.goldText],["|PB|",f3(pb),T.redText],["|PB| + ½|PA|",f3(pb+pc)],
+   ["最小值",out?`|PB| + |PC| ≥ |BC| = ${F(dist(Q,C0))}`:f3(bv)+"（B 在圆内，不能直接连 BC）",T.blue],["取最小时 P₀",f2(Pm),T.blue]]}
+ function locScene(c,T){Pon=null;const M=mid(A,B),d=dist(A,B);let P=null,R=[];
+  if(sub===2){const M1={x:4*Math.cos(th),y:0},N1={x:0,y:4*Math.sin(th)};P=mid(M1,N1);drawCircle(c,map,0,0,2,T.blue,1);
+   seg(c,M1,N1,T.gold,3);seg(c,{x:0,y:0},P,T.red,1.5,true);dot(c,M1,T.gold,6);dot(c,N1,T.gold,6);labM(c,"M",M1,0,16,T.goldText,"center");labM(c,"N",N1,10,0,T.goldText);
+   R=[["M",f2(M1),T.goldText],["N",f2(N1),T.goldText],["|MN|","4"],["中点 P",f2(P),T.blue],["设点","P(x, y) ⇒ M(2x, 0)，N(0, 2y)"],["列式","(2x)² + (2y)² = 4²"],
+    ["|OP|","2：直角三角形斜边中线等于斜边一半",T.goldText],["轨迹方程","x² + y² = 4",T.blue]]}
+  else if(d<1e-9)R=[["提示","A、B 重合",T.redText]];
+  else if(sub===1){const r2=(k-d*d/2)/2;R=[["A",pt(A)],["B",pt(B)],["k",F(k),T.blue],["化简","|PA|² + |PB|² = 2|PM|² + ½|AB|²"]];
+   if(r2<-1e-9)R.push(["轨迹",`k < ½|AB|² = ${F(d*d/2)}，无轨迹`,T.redText]);
+   else{const r=Math.sqrt(Math.max(0,r2));P=on(M,r);drawCircle(c,map,M.x,M.y,r,T.blue,1);seg(c,P,A,T.gold,2.5);seg(c,P,B,T.red,2.5);
+    R.push(["|PA|² + |PB|²",f3(dist(P,A)**2+dist(P,B)**2),T.blue],["轨迹方程",Z(r2)?"仅一点 M"+pt(M):stdEq(M.x,M.y,r2),T.blue],["圆心 M",pt(M),T.blue],["半径",F(r),T.blue])}}
+  else{const r=d/2;P=on(M,r);drawCircle(c,map,M.x,M.y,r,T.blue,1);seg(c,P,A,T.gold,2.5);seg(c,P,B,T.red,2.5);
+   const pa=dist(P,A),pb=dist(P,B);if(pa>0.3&&pb>0.3){const u={x:(A.x-P.x)/pa*.35,y:(A.y-P.y)/pa*.35},v={x:(B.x-P.x)/pb*.35,y:(B.y-P.y)/pb*.35};
+    c.strokeStyle=T.fg;c.lineWidth=1.5;c.beginPath();c.moveTo(map.X(P.x+u.x),map.Y(P.y+u.y));c.lineTo(map.X(P.x+u.x+v.x),map.Y(P.y+u.y+v.y));c.lineTo(map.X(P.x+v.x),map.Y(P.y+v.y));c.stroke()}
+   R=[["A",pt(A)],["B",pt(B)],["PA · PB",f3((A.x-P.x)*(B.x-P.x)+(A.y-P.y)*(B.y-P.y))+"（垂直 ⇔ 数量积为 0）",T.blue],["列式",(()=>{const fc=(a,v)=>Z(a)?v:`(${v} ${a>0?"−":"+"} ${F(Math.abs(a))})`,pr=(a,b,v)=>Z(a-b)?sq(a,v):fc(a,v)+fc(b,v);return pr(A.x,B.x,"x")+" + "+pr(A.y,B.y,"y")+" = 0"})()],
+    ["轨迹方程",stdEq(M.x,M.y,r*r),T.blue],["检验","去掉 A、B 两点（P 与 A 或 B 重合时不构成直角）",T.redText]]}
+  if(P){trail.push(P);if(trail.length>600)trail.shift();c.fillStyle=T.blue;trail.forEach((p,i)=>{c.globalAlpha=(i+1)/trail.length*.6;c.beginPath();c.arc(map.X(p.x),map.Y(p.y),2.5,0,7);c.fill()});c.globalAlpha=1}
+  if(sub!==2){const ho=sub===3;dot(c,A,ho?T.red:T.fg,6,ho);labM(c,"A",A,-10,16,ho?T.redText:T.fg,"right");dot(c,B,ho?T.red:T.fg,6,ho);labM(c,"B",B,10,16,ho?T.redText:T.fg)}
+  if(P){dot(c,P,T.blue,7);labM(c,"P",P,10,-14,T.fg)}return R}
+ return{
+  text:"到两定点 A、B 距离之比为常数 λ 的点的轨迹：<b>λ = 1 时是 AB 的中垂线，λ ≠ 1 时是一个圆——阿波罗尼斯圆</b>。设点 P(x, y)，列出 |PA| = λ|PB|，两边平方化简就能得到圆的方程。求轨迹的通法就是<b>「设点、列式、化简、检验」</b>。",
+  points:["阿氏圆：|PA|/|PB| = λ（λ &gt; 0，λ ≠ 1）的轨迹是圆，λ = 1 时为中垂线","求轨迹方程：设动点 → 列等式 → 化简 → 检验（去掉不满足的点）","常见轨迹：定点定长 → 圆；直径所对的圆周角为直角"],
+  gk:"选填常以阿氏圆为背景考最值或轨迹。<br>易错：轨迹题最后要剔除不满足条件的点（如直角顶点不能与 A、B 重合）。",
+  mount(ctrl,read){const box=el("div");box.style.display="contents";
+   const build=()=>{box.innerHTML="";trail=[];last="";
+    if(mode==="apo")box.append(slider("λ（λ = 1 时为直线）",0.2,5,0.05,lam,v=>v.toFixed(2),v=>{lam=v}),toggle("反用：将军饮马式最值",rev,v=>{rev=v}));
+    else{box.append(chips([{label:"① 距离平方和为定值",value:1},{label:"② 定长线段中点",value:2},{label:"③ 直角顶点",value:3}],sub,v=>{sub=v;build()}));
+     if(sub===1)box.append(slider("k = |PA|² + |PB|²",4,60,1,k,null,v=>{k=v;trail=[]}))}};
+   ctrl.append(chips([{label:"阿氏圆",value:"apo"},{label:"其它轨迹",value:"loc"}],mode,v=>{mode=v;build()}),box);build();ro=readout([]);read.append(ro)},
+  draw(c,w,h,t){const T=theme();map=drawAxes(c,{x:0,y:0,w,h},[-6.5,6.5],[-6.5,6.5]);
+   const dt=lt==null?0:Math.min(.1,Math.max(0,t-lt));lt=t;if(!dragP)th+=dt*0.6;
+   const R=mode==="apo"?(rev?revScene(c,T):apoScene(c,T)):locScene(c,T);if(ro){const key=JSON.stringify(R);if(key!==last){last=key;ro.update(R)}}},
+  pointer(e,type,x,y){if(!map)return false;
+   if(type==="down"&&Pon){const r=e&&e.pointerType==="touch"?22:12;if(Math.hypot(map.X(Pon.p.x)-x,map.Y(Pon.p.y)-y)<=r){dragP=true;return true}}
+   if(type==="move"&&dragP&&Pon){const px=map.invX(x),py=map.invY(y);if(Pon.c)th=Math.atan2(py-Pon.c.y,px-Pon.c.x);
+    else th=Math.asin(Math.max(-1,Math.min(1,((px-Pon.m.x)*Pon.u.x+(py-Pon.m.y)*Pon.u.y)/5)));return true}
+   if(type==="up"&&dragP){dragP=false;return true}
+   if(mode==="apo"&&rev)return dq(e,type,x,y);if(mode==="loc"&&sub===2)return false;return dg(e,type,x,y)},
+  unmount(){ro=null;dragP=false;lt=null}}})();
+CH[7].ready=true;CH[7].book="高考拓展 · 选择性必修第一册 第二章 · 切线与最值";
+MODS[7]=(()=>{
+ const C={x:0,y:0},P={x:4,y:2},L1={x:-5,y:5},L2={x:5,y:3},O={x:0,y:0},R2=Math.SQRT2,H0={x:-2,y:2},U={x:Math.SQRT1_2,y:Math.SQRT1_2};
+ let mode="tan",r=2,qa=0.8,s=3,dir=1,play=true,lt=null,drag=null,map=null,ro=null,last="",cR=null,cP=null;
+ const dg={tan:dragPoints([C,P],()=>map,0.5),dist:dragPoints([C,L1,L2],()=>map,0.5)};
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const F=fmtNum,Z=v=>Math.abs(v)<1e-6,pt=p=>`(${F(p.x)}, ${F(p.y)})`,f3=v=>(Math.abs(v)<5e-4?0:v).toFixed(3),f2=p=>`(${(+p.x.toFixed(2))}, ${(+p.y.toFixed(2))})`.replace(/-/g,"−");
+ function poly(ts){let s="";ts.forEach(([c,v])=>{if(Z(c))return;const a=Math.abs(c),m=v&&Z(a-1)?"":F(a);s+=(s?(c<0?" − ":" + "):(c<0?"−":""))+m+v});return s||"0"}
+ const sq=(a,v)=>Z(a)?v+"²":`(${v} ${a>0?"−":"+"} ${F(Math.abs(a))})²`,stdEq=(a,b,r2)=>`${sq(a,"x")} + ${sq(b,"y")} = ${F(r2)}`;
+ const fx=(a,v)=>Z(a)?v:`(${v} ${a>0?"−":"+"} ${F(Math.abs(a))})`,tm=(k,a,v)=>Z(k)?"0":(Z(k-1)?"":Z(k+1)?"−":k<0?`(${F(k)})`:F(k))+fx(a,v);
+ function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a}
+ function L2p(p,q){const dx=q.x-p.x,dy=q.y-p.y;if(Z(dx)&&Z(dy))return null;
+  let A=Math.round(dy*4),B=Math.round(-dx*4),Cc=Math.round((dx*p.y-dy*p.x)*4);const g=gcd(gcd(A,B),Cc)||1;A/=g;B/=g;Cc/=g;
+  if(A<0||(A===0&&B<0)){A=-A;B=-B;Cc=-Cc}return{A:A+0,B:B+0,C:Cc+0}}
+ function lab(c,s,x,y,col,al){c.font="13px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ const labM=(c,s,p,dx,dy,col,al)=>lab(c,s,map.X(p.x)+dx,map.Y(p.y)+dy,col,al);
+ function dot(c,p,col,rr){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),rr||5,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function seg(c,p,q,col,w,dash){c.save();c.strokeStyle=col;c.lineWidth=w;c.setLineDash(dash?[6,5]:[]);c.beginPath();c.moveTo(map.X(p.x),map.Y(p.y));c.lineTo(map.X(q.x),map.Y(q.y));c.stroke();c.restore()}
+ const thru=(c,p,q,col,w)=>drawLine(c,map,q.y-p.y,-(q.x-p.x),(q.x-p.x)*p.y-(q.y-p.y)*p.x,col,w);
+ function right(c,V,p,q,col){const a=Math.hypot(p.x-V.x,p.y-V.y),b=Math.hypot(q.x-V.x,q.y-V.y);if(a<1e-6||b<1e-6)return;const k=0.3,u={x:(p.x-V.x)/a*k,y:(p.y-V.y)/a*k},v={x:(q.x-V.x)/b*k,y:(q.y-V.y)/b*k};
+  c.save();c.strokeStyle=col;c.lineWidth=1.5;c.beginPath();c.moveTo(map.X(V.x+u.x),map.Y(V.y+u.y));c.lineTo(map.X(V.x+u.x+v.x),map.Y(V.y+u.y+v.y));c.lineTo(map.X(V.x+v.x),map.Y(V.y+v.y));c.stroke();c.restore()}
+ function tang(c,T,Oc,rr,Pp){const dx=Pp.x-Oc.x,dy=Pp.y-Oc.y,dp=Math.hypot(dx,dy),st=Math.abs(dp-rr)<1e-6?0:dp<rr?-1:1;
+  if(st<0)return{st,dp};
+  if(st===0){drawLine(c,map,dx,dy,-(dx*Pp.x+dy*Pp.y),T.blue,2.5);seg(c,Oc,Pp,T.fg,1.5);return{st,dp,L:0}}
+  const u={x:dx/dp,y:dy/dp},ph=Math.acos(rr/dp),rot=a=>({x:Oc.x+rr*(u.x*Math.cos(a)-u.y*Math.sin(a)),y:Oc.y+rr*(u.x*Math.sin(a)+u.y*Math.cos(a))}),A=rot(ph),B=rot(-ph),L=Math.sqrt(dp*dp-rr*rr);
+  c.save();c.globalAlpha=.1;c.fillStyle=T.blue;c.beginPath();[Pp,A,Oc,B].forEach((q,i)=>i?c.lineTo(map.X(q.x),map.Y(q.y)):c.moveTo(map.X(q.x),map.Y(q.y)));c.closePath();c.fill();c.restore();
+  thru(c,Pp,A,T.blue,2.5);thru(c,Pp,B,T.blue,2.5);seg(c,Oc,A,T.fg,1.5);seg(c,Oc,B,T.fg,1.5);seg(c,Oc,Pp,T.fg,1.5,true);seg(c,A,B,T.redText,3);
+  right(c,A,Oc,Pp,T.fg);right(c,B,Oc,Pp,T.fg);dot(c,A,T.gold,6);dot(c,B,T.gold,6);
+  const ea={x:A.x-Oc.x,y:A.y-Oc.y},eb={x:B.x-Oc.x,y:B.y-Oc.y};labM(c,"A",A,ea.x*6,-ea.y*6-4,T.goldText,"center");labM(c,"B",B,eb.x*6,-eb.y*6+4,T.goldText,"center");
+  return{st,dp,L,A,B}}
+ function tanScene(c,T){drawCircle(c,map,C.x,C.y,r,T.fg,2);const G=tang(c,T,C,r,P),a=C.x,b=C.y,x0=P.x,y0=P.y;
+  dot(c,C,T.fg,5);labM(c,"C",C,-10,14,T.fg,"right");dot(c,P,T.fg,7);labM(c,"P",P,10,-14,T.fg);
+  const ce=`${tm(x0-a,a,"x")} + ${tm(y0-b,b,"y")} = ${F(r*r)}`,ge=poly([[x0-a,"x"],[y0-b,"y"],[-a*(x0-a)-b*(y0-b)-r*r,""]])+" = 0";
+  const R=[["圆 C",stdEq(a,b,r*r)],["P",pt(P)],["|PC|",F(G.dp)]];
+  if(G.st<0){lab(c,"P 在圆内：无切线",map.box.x+16,map.box.y+22,T.redText);R.push(["切线","|PC| < r，P 在圆内，无切线",T.redText])}
+  else if(G.st===0){lab(c,"P 在圆上：只有一条切线",map.box.x+16,map.box.y+22,T.redText);
+   R.push(["切线","P 在圆上，只有一条切线",T.redText],["切线方程",ce+" ⇒ "+ge+"（切点弦公式退化为切线方程）",T.blue])}
+  else R.push(["切线长",`√(|PC|² − r²) = √(${F(G.dp*G.dp)} − ${F(r*r)}) = ${F(G.L)}`,T.blue],["切点 A、B",f2(G.A)+"、"+f2(G.B),T.goldText],
+   ["切点弦 AB",ce+" ⇒ "+ge,T.redText],["|AB|",`2r · 切线长 / |PC| = ${f3(2*r*G.L/G.dp)}`,T.redText],["四边形 PACB",`S = 切线长 × r = ${F(G.L)} × ${F(r)} = ${F(G.L*r)}`,T.blue]);
+  return R}
+ function distScene(c,T){drawCircle(c,map,C.x,C.y,r,T.fg,2);dot(c,C,T.fg,5);labM(c,"C",C,-10,14,T.fg,"right");const l=L2p(L1,L2);
+  if(!l){dot(c,L1,T.blue,6);lab(c,"直线上的两点重合",map.box.x+16,map.box.y+22,T.redText);return[["提示","直线上的两点重合",T.redText]]}
+  drawLine(c,map,l.A,l.B,l.C,T.blue,2.5);const n=Math.hypot(l.A,l.B),v0=l.A*C.x+l.B*C.y+l.C,d=Math.abs(v0)/n,sg=v0>0?1:-1,v={x:-sg*l.A/n,y:-sg*l.B/n};
+  const H={x:C.x+v.x*d,y:C.y+v.y*d},Fp={x:C.x-v.x*r,y:C.y-v.y*r},N={x:C.x+v.x*r,y:C.y+v.y*r},Q={x:C.x+r*Math.cos(qa),y:C.y+r*Math.sin(qa)};
+  const dq=(l.A*Q.x+l.B*Q.y+l.C)/n,HQ={x:Q.x-dq*l.A/n,y:Q.y-dq*l.B/n},sep=d>r+1e-6;
+  seg(c,Fp,H,T.fg,1.5,true);right(c,H,C,{x:H.x+l.B,y:H.y-l.A},T.fg);seg(c,Q,HQ,T.gold,2.5);right(c,HQ,Q,{x:HQ.x+l.B,y:HQ.y-l.A},T.gold);
+  dot(c,Fp,T.redText,6);labM(c,"最远 d + r",Fp,10,-12,T.redText);
+  if(sep){dot(c,N,T.blue,6);labM(c,"最近 d − r",N,10,14,T.blue)}else lab(c,d<r-1e-6?"相交：最小距离为 0":"相切：最小距离为 0",map.box.x+16,map.box.y+22,T.redText);
+  dot(c,L1,T.blue,6);dot(c,L2,T.blue,6);dot(c,Q,T.gold,7);labM(c,"Q",Q,10,-14,T.goldText);
+  const mn=sep?d-r:0;
+  return[["直线 l",poly([[l.A,"x"],[l.B,"y"],[l.C,""]])+" = 0",T.blue],["圆 C",stdEq(C.x,C.y,r*r)],["d（圆心到直线）",F(d)],["最大距离 d + r",F(d+r),T.redText],
+   ["最小距离",sep?`d − r = ${F(d-r)}`:"直线与圆有公共点，最小为 0",T.blue],["范围",`[${F(mn)}, ${F(d+r)}]`],["当前 Q 到 l",f3(Math.abs(dq)),T.goldText]]}
+ function minScene(c,T,w){drawCircle(c,map,0,0,R2,T.fg,2);drawLine(c,map,1,-1,4,T.blue,2.5);labM(c,"l: x − y + 4 = 0",{x:-5.5,y:-1.5},0,0,T.blue);
+  const Pp={x:H0.x+U.x*s,y:H0.y+U.y*s},G=tang(c,T,O,R2,Pp),at=Math.abs(s)<0.06;
+  seg(c,O,H0,T.gold,1.5,true);right(c,H0,O,{x:H0.x+U.x,y:H0.y+U.y},T.fg);dot(c,H0,T.gold,4);labM(c,"H",H0,-10,-12,T.goldText,"right");
+  dot(c,O,T.fg,5);dot(c,Pp,T.fg,7);labM(c,"P",Pp,10,-14,T.fg);if(at)lab(c,"PC ⊥ l：切线长最小",map.box.x+16,map.box.y+22,T.goldText);
+  const bw=Math.max(150,Math.min(230,w*0.4)),bh=150,bx=w-bw-12,by=12,px=bx+12,pw=bw-24,py=by+30,ph=bh-60,X=v=>px+(v+5)/10*pw,Y=f=>py+ph-f/6*ph;
+  c.save();c.globalAlpha=.92;c.fillStyle=T.bg;rrect(c,bx,by,bw,bh,12);c.fill();c.restore();c.save();rrect(c,bx,by,bw,bh,12);c.strokeStyle=T.grid;c.lineWidth=1;c.stroke();
+  c.strokeStyle=T.axis;c.beginPath();c.moveTo(px,py+ph);c.lineTo(px+pw,py+ph);c.stroke();c.strokeStyle=T.blue;c.lineWidth=2;c.beginPath();
+  for(let i=0;i<=100;i++){const v=-5+i/10;i?c.lineTo(X(v),Y(Math.sqrt(6+v*v))):c.moveTo(X(v),Y(Math.sqrt(6+v*v)))}c.stroke();c.restore();
+  c.beginPath();c.arc(X(0),Y(Math.sqrt(6)),5,0,7);c.fillStyle=T.gold;c.fill();c.beginPath();c.arc(X(s),Y(Math.sqrt(6+s*s)),4,0,7);c.fillStyle=T.fg;c.fill();
+  c.save();c.font="12px "+SANS;c.textBaseline="middle";c.fillStyle=T.fg;c.textAlign="left";c.fillText("切线长随 P 的位置",bx+12,by+16);
+  c.fillStyle=T.goldText;c.textAlign="center";c.fillText("最小 √6",X(0),Y(Math.sqrt(6))+16);c.fillStyle=T.fg;c.fillText("P 沿 l 移动（H 处最小）",bx+bw/2,by+bh-14);c.restore();
+  return[["圆","x² + y² = 2，C(0, 0)，r = √2"],["直线 l","x − y + 4 = 0",T.blue],["P",f2(Pp)],["|PC|",f3(G.dp)],["切线长",`√(|PC|² − 2) = ${f3(G.L)}`,T.blue],
+   ["转化","切线长最小 ⇔ |PC| 最小 ⇔ PC ⊥ l",T.goldText],["d","|0 − 0 + 4| / √2 = 2√2",T.goldText],["最小切线长","√(8 − 2) = √6 ≈ 2.449，此时 P(−2, 2)",T.blue],
+   ["PACB 面积最小","√6 × √2 = 2√3",T.blue]]}
+ function upd(){cR.hidden=mode==="min";cP.hidden=mode==="tan";last=""}
+ return{
+  text:"从圆外一点 P 向圆引两条切线，半径 ⊥ 切线，由直角三角形得<b>切线长 = √(|PC|² − r²)</b>。两切点的连线叫<b>切点弦</b>：圆 x² + y² = r² 上过 P(x₀, y₀) 的切点弦方程是 <b>x₀x + y₀y = r²</b>。圆上的点到直线的距离，最大是 <b>d + r</b>，最小是 <b>d − r</b>（相离时）——圆上的最值都是<b>「先到圆心，再加减半径」</b>。",
+  points:["切线长 = √(|PC|² − r²)","过圆 x² + y² = r² 外一点 P(x₀, y₀) 的切点弦：x₀x + y₀y = r²","圆上点到直线距离的范围 [d − r, d + r]（相离时）","动点在直线上求切线长最小 ⇔ 求 |PC| 最小 ⇔ 圆心到直线的距离"],
+  gk:"选填常考：切线长、切点弦方程、圆上点到直线距离的最值，以及四边形面积的最值。<br>易错：P 在圆上时只有一条切线，切点弦公式退化为切线方程。",
+  mount(ctrl,read){ctrl.append(chips([{label:"切线长与切点弦",value:"tan"},{label:"圆上点到直线",value:"dist"},{label:"切线长最小",value:"min"}],mode,v=>{mode=v;upd()}));
+   cR=slider("r",0.5,4,0.1,r,null,v=>{r=v;last=""});cP=toggle("播放",play,v=>{play=v});ctrl.append(cR,cP);ro=readout([]);read.append(ro);upd()},
+  draw(c,w,h,t){const T=theme();map=drawAxes(c,{x:0,y:0,w,h},[-6.5,6.5],[-6.5,6.5]);const dt=lt==null?0:Math.min(.1,Math.max(0,t-lt));lt=t;
+   if(play&&!drag){if(mode==="dist")qa+=dt*0.8;else if(mode==="min"){s+=dir*dt*1.5;if(s>5){s=5;dir=-1}if(s<-5){s=-5;dir=1}}}
+   const R=mode==="tan"?tanScene(c,T):mode==="dist"?distScene(c,T):minScene(c,T,w);if(ro){const key=JSON.stringify(R);if(key!==last){last=key;ro.update(R)}}},
+  pointer(e,type,x,y){if(!map)return false;
+   if(type==="down"&&mode!=="tan"){const q=mode==="dist"?{x:C.x+r*Math.cos(qa),y:C.y+r*Math.sin(qa)}:{x:H0.x+U.x*s,y:H0.y+U.y*s},rr=e&&e.pointerType==="touch"?22:12;
+    if(Math.hypot(map.X(q.x)-x,map.Y(q.y)-y)<=rr){drag=mode;return true}}
+   if(type==="move"&&drag){const px=map.invX(x),py=map.invY(y);if(drag==="dist")qa=Math.atan2(py-C.y,px-C.x);else s=Math.max(-5,Math.min(5,(px-H0.x)*U.x+(py-H0.y)*U.y));return true}
+   if(type==="up"&&drag){drag=null;return true}
+   const d=dg[mode];return d?d(e,type,x,y):false},
+  unmount(){ro=cR=cP=null;drag=null;lt=null}}})();
+CH[8].ready=true;
+MODS[8]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",S6=Math.sqrt(6),R7=Math.sqrt(7);
+ let cur=0,ring=false,map=null,ro=null,box=null,btn=null,last="";
+ const Q=[
+  {k:"单选",s:5,q:"直线 √3x − y + 1 = 0 的倾斜角为",o:["30°","60°","120°","150°"],a:[1],v:[[-6.5,6.5],[-6.5,6.5]],
+   ex:"化成斜截式 y = √3x + 1，斜率 k = √3。由 tan α = √3 且 α ∈ [0°, 180°) 得 α = 60°，选 B。（第 01 章）"},
+  {k:"单选",s:5,q:"若直线 ax + 2y + 1 = 0 与直线 x + (a − 1)y − 2 = 0 平行，则 a =",o:["2","−1","2 或 −1","1"],a:[2],v:[[-6.5,6.5],[-6.5,6.5]],
+   ex:"由 A₁B₂ − A₂B₁ = a(a − 1) − 2 = 0 得 a = 2 或 a = −1，但还要检验是否重合。a = 2 时为 2x + 2y + 1 = 0 与 x + y − 2 = 0；a = −1 时为 x − 2y − 1 = 0 与 x − 2y − 2 = 0，都平行不重合，选 C。（第 03 章）"},
+  {k:"单选",s:5,q:"圆 x² + y² − 4x + 2y + 1 = 0 的圆心和半径分别为",o:["(2, −1)，2","(−2, 1)，2","(2, −1)，4","(−2, 1)，4"],a:[0],v:[[-3,7],[-5,4]],
+   ex:"配方得 (x − 2)² + (y + 1)² = 4，圆心 (−D/2, −E/2) = (2, −1)。r² = 4 + 1 − 1 = 4，r = 2，选 A。（第 04 章）"},
+  {k:"单选",s:5,q:"直线 x − y + 1 = 0 被圆 x² + y² = 4 截得的弦长为",o:["√2","√7","2√7","√14"],a:[3],v:[[-3.5,3.5],[-3.5,3.5]],
+   ex:"圆心到直线距离 d = 1/√2，半弦长 √(r² − d²) = √(4 − 1/2) = √(7/2)。弦长 = 2√(7/2) = √14，选 D。（第 05 章）"},
+  {k:"多选",s:5,q:"已知圆 C₁: x² + y² = 1，圆 C₂: (x − 3)² + (y − 4)² = 16，则",o:["两圆外切","两圆有 3 条公切线","两圆相交","圆心距为 5"],a:[0,1,3],multi:true,v:[[-2,8],[-2,9]],
+   ex:"圆心距 d = √(3² + 4²) = 5 = 1 + 4 = r₁ + r₂，两圆外切，有 3 条公切线，选 ABD。全对 5 分，部分选对 2 分，有错选 0 分。（第 06 章）"},
+  {k:"填空",s:6,q:"P 为直线 x − y + 4 = 0 上一点，过 P 作圆 x² + y² = 2 的切线，切线长的最小值为 ____",fill:true,v:[[-5,3],[-2.5,5]],
+   ex:"切线长 = √(|PO|² − 2)，|PO| 最小时切线长最小，即 PO ⊥ l。|PO| 最小为 |4|/√2 = 2√2，切线长最小为 √(8 − 2) = √6，此时 P(−2, 2)。（第 08 章）"}];
+ const st=Q.map(()=>({sel:[],val:"",done:false,got:0}));
+ const total=()=>st.reduce((a,s)=>a+s.got,0),nDone=()=>st.filter(s=>s.done).length;
+ function grade(i){const q=Q[i],s=st[i];
+  if(q.fill){const v=s.val.replace(/\s|（|）/g,"").replace(/[()]/g,""),n=parseFloat(v);
+   return(["√6","根号6","sqrt6"].includes(v)||(/^[\d.]+$/.test(v)&&Math.abs(n-2.449)<=0.01))?q.s:0}
+  if(s.sel.some(x=>!q.a.includes(x)))return 0;if(s.sel.length===q.a.length)return q.s;return q.multi&&s.sel.length?2:0}
+ function reset(){st.forEach(s=>{s.sel=[];s.val="";s.done=false;s.got=0});cur=0;ring=false;render()}
+ function render(){if(!box)return;const T=theme(),q=Q[cur],s=st[cur];box.innerHTML="";
+  const nav=el("div","chips");Q.forEach((_,i)=>{const b=el("button",i===cur&&!ring?"on":"",String(i+1));b.setAttribute("aria-label","第 "+(i+1)+" 题"+(st[i].done?"，已提交":""));
+   if(st[i].done&&!(i===cur&&!ring))b.style.color=st[i].got===Q[i].s?T.blue:T.redText;b.onclick=()=>{cur=i;ring=false;render()};nav.append(b)});
+  if(nDone()===Q.length){const b=el("button",ring?"on":"","成绩");b.onclick=()=>{ring=true;render()};nav.append(b)}
+  box.append(nav);
+  if(ring){box.append(el("p","",`共 ${Q.length} 题，得分 <b>${total()}</b> / 31。点题号可回看每题解析。`),button("再做一遍",reset,true));upd();return}
+  box.append(el("p","",`<span style="color:var(--sub)">第 ${cur+1} 题 · ${q.k} ${q.s} 分</span><br>${q.q}`));
+  if(q.fill){const inp=el("input");Object.assign(inp,{type:"text",value:s.val,placeholder:"如 √6 或 2.449",disabled:s.done});inp.setAttribute("aria-label","填空答案");
+   inp.style.cssText="font:inherit;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:inherit;width:100%;box-sizing:border-box";
+   inp.oninput=()=>{s.val=inp.value;sb.disabled=!s.val.trim()};inp.onkeydown=e=>{if(e.key==="Enter"&&s.val.trim())submit()};box.append(inp)}
+  else{const ol=el("div","chips");ol.style.flexDirection="column";ol.style.alignItems="stretch";
+   q.o.forEach((o,j)=>{const on=s.sel.includes(j),b=el("button",on?"on":"",String.fromCharCode(65+j)+".  "+o);b.style.textAlign="left";b.disabled=s.done;b.setAttribute("aria-pressed",on);
+    if(s.done&&q.a.includes(j)&&!on)b.style.boxShadow="inset 0 0 0 2px "+T.blue;if(s.done&&on&&!q.a.includes(j)){b.style.background="none";b.style.boxShadow="inset 0 0 0 2px "+T.redText;b.style.color=T.redText}
+    b.onclick=()=>{if(s.done)return;s.sel=q.multi?(on?s.sel.filter(x=>x!==j):[...s.sel,j].sort()):[j];render()};ol.append(b)});box.append(ol)}
+  const sb=button(s.done?"已提交":"提交",submit,true);sb.disabled=s.done||(q.fill?!s.val.trim():!s.sel.length);box.append(sb);
+  if(s.done){const ok=s.got===q.s,ans=q.fill?"√6":q.a.map(x=>String.fromCharCode(65+x)).join("");
+   box.append(el("p","",`<b style="color:${ok?T.blue:T.redText}">${ok?"回答正确":s.got?"部分正确":"回答错误"} · 得 ${s.got} 分</b>　正确答案 ${ans}<br>${q.ex}`));
+   if(cur<Q.length-1)box.append(button("下一题",()=>{cur++;render()}))}
+  upd()}
+ function submit(){const s=st[cur];if(s.done)return;s.got=grade(cur);s.done=true;if(nDone()===Q.length)ring=true;render()}
+ function upd(){if(!ro)return;const B=theme().blue,q=Q[cur],s=st[cur];
+  ro.update(ring?[["已完成",nDone()+" / 6"],["总分",total()+" / 31",B],["正确率",Math.round(total()/31*100)+"%",B]]
+   :[["当前",`第 ${cur+1} 题 · ${q.k}`],["本题",s.done?s.got+" / "+q.s+" 分":"未提交",s.done?B:null],["已完成",nDone()+" / 6"],["累计得分",total()+" 分",B]])}
+ function lab(c,s,x,y,col,al){c.font="13px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="middle";c.fillText(s,x,y)}
+ const labM=(c,s,p,dx,dy,col,al)=>lab(c,s,map.X(p.x)+dx,map.Y(p.y)+dy,col,al);
+ function dot(c,p,col,r){c.beginPath();c.arc(map.X(p.x),map.Y(p.y),r||5,0,7);c.fillStyle=col;c.fill();c.strokeStyle=theme().bg;c.lineWidth=2;c.stroke()}
+ function seg(c,p,q,col,w,dash){c.save();c.strokeStyle=col;c.lineWidth=w;c.setLineDash(dash?[6,5]:[]);c.beginPath();c.moveTo(map.X(p.x),map.Y(p.y));c.lineTo(map.X(q.x),map.Y(q.y));c.stroke();c.restore()}
+ function scene(c,T,i,d){const B=T.blue,G=T.fg,O={x:0,y:0};
+  if(i===0){drawLine(c,map,Math.sqrt(3),-1,1,B,2.5);labM(c,"√3x − y + 1 = 0",{x:1.6,y:3.8},10,0,B);
+   if(d){const P={x:-1/Math.sqrt(3),y:0},r=28;c.save();c.strokeStyle=G;c.lineWidth=1.5;c.beginPath();c.arc(map.X(P.x),map.Y(0),r,-Math.PI/3,0);c.stroke();c.restore();
+    dot(c,P,G,4);lab(c,"α = 60°，k = √3",map.X(P.x)+r+6,map.Y(0)-14,B);dot(c,{x:0,y:1},G,4);labM(c,"(0, 1)",{x:0,y:1},-8,-10,G,"right")}}
+  else if(i===1){if(!d){drawLine(c,map,0,1,0.5,G,1,true);dot(c,{x:0,y:-0.5},G,5);dot(c,{x:2,y:0},G,5);labM(c,"l₁ 恒过 (0, −1/2)",{x:0,y:-0.5},10,14,G);labM(c,"l₂ 恒过 (2, 0)",{x:2,y:0},10,-14,G)}
+   else{drawLine(c,map,2,2,1,B,2.5);drawLine(c,map,1,1,-2,B,2.5);drawLine(c,map,1,-2,-1,B,2,true);drawLine(c,map,1,-2,-2,B,2,true);
+    lab(c,"a = 2：x + y + 1/2 = 0 ∥ x + y − 2 = 0",map.box.x+16,map.box.y+22,B);lab(c,"a = −1：x − 2y − 1 = 0 ∥ x − 2y − 2 = 0（虚线）",map.box.x+16,map.box.y+42,G)}}
+  else if(i===2){drawCircle(c,map,2,-1,2,B,2.5);if(d){const C={x:2,y:-1};seg(c,C,{x:4,y:-1},G,1.5);dot(c,C,G,5);labM(c,"C(2, −1)",C,-8,14,G,"right");labM(c,"r = 2",{x:3,y:-1},0,-12,B,"center")}}
+  else if(i===3){drawCircle(c,map,0,0,2,G,2);drawLine(c,map,1,-1,1,B,2.5);
+   if(d){const A={x:(-1+R7)/2,y:(1+R7)/2},Bp={x:(-1-R7)/2,y:(1-R7)/2},H={x:-0.5,y:0.5};seg(c,A,Bp,B,4);seg(c,O,H,G,1.5,true);seg(c,O,A,G,1);
+    dot(c,A,B,5);dot(c,Bp,B,5);dot(c,O,G,4);labM(c,"d = 1/√2",H,-8,-12,G,"right");labM(c,"|AB| = √14",A,10,0,B)}}
+  else if(i===4){drawCircle(c,map,0,0,1,G,2);drawCircle(c,map,3,4,4,B,2.5);
+   if(d){const C2={x:3,y:4},Tp={x:0.6,y:0.8};seg(c,O,C2,G,1.5,true);drawLine(c,map,3,4,-5,B,1.5);dot(c,O,G,4);dot(c,C2,G,4);dot(c,Tp,B,6);
+    labM(c,"d = 5 = 1 + 4",{x:1.5,y:2},10,0,G);labM(c,"外切 · 3 条公切线",Tp,12,14,B)}}
+  else{drawCircle(c,map,0,0,Math.SQRT2,G,2);drawLine(c,map,1,-1,4,B,2.5);labM(c,"x − y + 4 = 0",{x:-4.6,y:-0.6},10,0,B);
+   if(d){const P={x:-2,y:2},u=Math.atan2(1,-1),A={x:Math.SQRT2*Math.cos(u+Math.PI/3),y:Math.SQRT2*Math.sin(u+Math.PI/3)},Bq={x:Math.SQRT2*Math.cos(u-Math.PI/3),y:Math.SQRT2*Math.sin(u-Math.PI/3)};
+    seg(c,O,P,G,1.5,true);seg(c,P,A,B,2.5);seg(c,P,Bq,B,2.5);seg(c,O,A,G,1);seg(c,O,Bq,G,1);dot(c,P,G,6);dot(c,A,B,4);dot(c,Bq,B,4);
+    labM(c,"P(−2, 2)",P,-10,-12,G,"right");labM(c,"切线长最小 √6",A,8,-12,B)}}}
+ function drawRing(c,T,w,h){const r=Math.max(40,Math.min(w,h)*0.2),cx=w/2,cy=h/2-24,p=total()/31;
+  c.save();c.lineCap="round";c.lineWidth=14;c.strokeStyle=T.grid;c.beginPath();c.arc(cx,cy,r,0,7);c.stroke();
+  if(p>0){c.strokeStyle=T.blue;c.beginPath();c.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+p*2*Math.PI);c.stroke()}
+  c.textAlign="center";c.textBaseline="middle";c.fillStyle=T.fg;c.font="600 34px "+SANS;c.fillText(String(total()),cx,cy-6);
+  c.font="13px "+SANS;c.fillStyle=T.sub;c.fillText("/ 31 分",cx,cy+22);
+  const bw=132,bh=44,bx=cx-bw/2,by=cy+r+28;btn={x:bx,y:by,w:bw,h:bh};rrect(c,bx,by,bw,bh,22);c.fillStyle=T.blue;c.fill();
+  c.fillStyle=T.bg;c.font="500 15px "+SANS;c.fillText("再做一遍",cx,by+bh/2);c.restore()}
+ return{
+  text:"六道题覆盖本单元的核心考点：<b>倾斜角、平行条件、圆的方程、弦长、圆与圆、切线长最值</b>。点题号切换，提交后即时判分并给出解析，<b>已提交的题会锁定</b>。满分 31 分，全部完成后画布中央显示成绩。",
+  points:["单选每题 5 分；多选全对 5 分，部分选对 2 分，有错选 0 分；填空 6 分","平行条件 A₁B₂ − A₂B₁ = 0 求出后，要检验是否重合","弦长、切线长都先求圆心到直线的距离 d"],
+  gk:"这几类题都是高考选填常见题型。<br>每题解析都注明了对应章节，做错可回到那一章再看演示。",
+  mount(ctrl,read){box=el("div");box.style.cssText="display:flex;flex-direction:column;gap:12px";ctrl.append(box);ro=readout([]);read.append(ro);render()},
+  draw(c,w,h){const T=theme();btn=null;if(ring&&nDone()===Q.length){map=null;drawRing(c,T,w,h);return}
+   const q=Q[cur];map=drawAxes(c,{x:0,y:0,w,h},q.v[0],q.v[1]);scene(c,T,cur,st[cur].done);
+   lab(c,"第 "+(cur+1)+" 题",w-16,h-20,T.sub,"right")},
+  pointer(e,type,x,y){if(type==="down"&&btn&&x>=btn.x&&x<=btn.x+btn.w&&y>=btn.y&&y<=btn.y+btn.h){reset();return true}return false},
+  unmount(){ro=box=btn=null;map=null}}})();
+const $=id=>document.getElementById(id),pad=i=>String(i+1).padStart(2,"0");
+let cur=0,mod=null,W=0,H=0,DPR=1;
+const cv=$("cv"),ctx=cv.getContext("2d");
+/* ---------- theme ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function isDark(){return document.documentElement.classList.contains("dark")}
+function theme(){return isDark()
+ ?{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e2a336",teal:"#2ec4b6",purple:"#b197fc",goldText:"#f0b847",redText:"#ff7b72"}
+ :{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.05)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"}}
+function setDark(d){document.documentElement.classList.toggle("dark",d);store.set("linelab-dark",d?"1":"0");$("dark").textContent=$("mdark").textContent=d?"浅色":"深色"}
+setDark(store.get("linelab-dark")==="1");
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||fmtNum;const w=el("div","sl"),l=el("label"),o=el("output"),i=el("input");
+ l.append(document.createTextNode(label),o);i.type="range";Object.assign(i,{min,max,step,value:val});i.setAttribute("aria-label",label);o.textContent=fmt(+val);
+ i.oninput=()=>{o.textContent=fmt(+i.value);onchange&&onchange(+i.value)};w.append(l,i);
+ w.set=v=>{i.value=v;o.textContent=fmt(+v)};return w}
+function chips(options,val,onchange){const w=el("div","chips");const bs=options.map(op=>{const o=typeof op==="object"?op:{label:op,value:op};const b=el("button",o.value===val?"on":"",o.label);
+ b.onclick=()=>{bs.forEach(x=>x.classList.remove("on"));b.classList.add("on");onchange&&onchange(o.value)};w.append(b);return b});return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" primary":""),label);b.onclick=onclick;return b}
+function toggle(label,val,onchange){const b=el("button","tg"+(val?" on":""),"<span>"+label+"</span><i></i>");b.setAttribute("role","switch");b.setAttribute("aria-checked",!!val);
+ b.onclick=()=>{val=!val;b.classList.toggle("on",val);b.setAttribute("aria-checked",val);onchange&&onchange(val)};return b}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML=rs.map(r=>`<dt>${r[0]}</dt><dd style="${r[2]?"color:"+r[2]:""}">${r[1]}</dd>`).join("")};d.update(rows||[]);return d}
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){if(!isFinite(v))return v>0?"∞":v<0?"−∞":"—";const e=1e-6,s=v<0?"−":"",a=Math.abs(v);
+ if(Math.abs(a-Math.round(a))<e)return(Math.round(a)===0?"":s)+Math.round(a);
+ for(let d=2;d<=12;d++){const n=a*d;if(Math.abs(n-Math.round(n))<e)return s+Math.round(n)+"/"+d}
+ for(const r of[2,3,5,6,7,10,11,13,14,15]){const q=Math.sqrt(r);for(let d=1;d<=6;d++){const k=a*d/q;if(Math.abs(k-Math.round(k))<e&&Math.round(k)>0){const K=Math.round(k);return s+(K===1?"":K)+"√"+r+(d>1?"/"+d:"")}}}
+ return s+a.toFixed(2)}
+function drawAxes(ctx,box,xr,yr,opts){opts=Object.assign({equal:true,grid:true,ticks:true,step:1,labels:true},opts);const T=theme();
+ let[x0,x1]=xr,[y0,y1]=yr,sx=box.w/(x1-x0),sy=box.h/(y1-y0);
+ if(opts.equal){const s=Math.min(sx,sy),cx=(x0+x1)/2,cy=(y0+y1)/2;sx=sy=s;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)*sx,Y=y=>box.y+box.h-(y-y0)*sy,invX=p=>x0+(p-box.x)/sx,invY=p=>y0+(box.y+box.h-p)/sy;
+ let st=opts.step;while(st*sx<22)st*=2;
+ ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();ctx.lineWidth=1;
+ if(opts.grid){ctx.strokeStyle=T.grid;ctx.beginPath();for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st){ctx.moveTo(X(x),box.y);ctx.lineTo(X(x),box.y+box.h)}for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st){ctx.moveTo(box.x,Y(y));ctx.lineTo(box.x+box.w,Y(y))}ctx.stroke()}
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,Y(0));ctx.lineTo(box.x+box.w,Y(0));ctx.moveTo(X(0),box.y);ctx.lineTo(X(0),box.y+box.h);ctx.stroke();
+ if(opts.labels){ctx.fillStyle=T.sub;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";
+  for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st)if(Math.abs(x)>1e-9)ctx.fillText(fmtNum(x),X(x),Y(0)+4);
+  ctx.textAlign="right";ctx.textBaseline="middle";for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st)if(Math.abs(y)>1e-9)ctx.fillText(fmtNum(y),X(0)-5,Y(y));
+  ctx.textBaseline="top";ctx.fillText("O",X(0)-4,Y(0)+4);ctx.font="italic 13px "+getComputedStyle(document.body).fontFamily;ctx.fillStyle=T.fg;
+  ctx.fillText("x",box.x+box.w-4,Y(0)+4);ctx.textAlign="left";ctx.fillText("y",X(0)+6,box.y+4)}
+ ctx.restore();return{X,Y,invX,invY,s:sx,box,xr:[x0,x1],yr:[y0,y1]}}
+function drawLine(ctx,map,A,B,C,color,width,dashed){if(Math.abs(A)<1e-12&&Math.abs(B)<1e-12)return;const[x0,x1]=map.xr,[y0,y1]=map.yr,b=map.box;let p,q;
+ if(Math.abs(B)>=Math.abs(A)){p=[x0,-(A*x0+C)/B];q=[x1,-(A*x1+C)/B]}else{p=[-(B*y0+C)/A,y0];q=[-(B*y1+C)/A,y1]}
+ ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.setLineDash(dashed?[6,5]:[]);
+ ctx.beginPath();ctx.moveTo(map.X(p[0]),map.Y(p[1]));ctx.lineTo(map.X(q[0]),map.Y(q[1]));ctx.stroke();ctx.restore()}
+function drawCircle(ctx,map,cx,cy,r,color,width,fill){const b=map.box;ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.beginPath();ctx.arc(map.X(cx),map.Y(cy),Math.max(0,r*map.s),0,Math.PI*2);
+ if(fill){ctx.fillStyle=fill;ctx.fill()}if(width!==0){ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.stroke()}ctx.restore()}
+function dragPoints(points,map,snap){const M=()=>typeof map==="function"?map():map;const h=function(e,type,x,y){const m=M();if(!m)return false;
+ if(type==="down"){const R=e&&e.pointerType==="touch"?22:12;let best=-1,bd=R;points.forEach((p,i)=>{if(p.fixed)return;const d=Math.hypot(m.X(p.x)-x,m.Y(p.y)-y);if(d<=bd){bd=d;best=i}});h.active=best;return best>=0}
+ if(type==="move"&&h.active>=0){const p=points[h.active];let nx=m.invX(x),ny=m.invY(y);if(snap){nx=Math.round(nx/snap)*snap;ny=Math.round(ny/snap)*snap}
+  nx=Math.min(m.xr[1],Math.max(m.xr[0],nx));ny=Math.min(m.yr[1],Math.max(m.yr[0],ny));p.x=+nx.toFixed(6);p.y=+ny.toFixed(6);p.onmove&&p.onmove(p);h.onmove&&h.onmove(p,h.active);return true}
+ if(type==="up"){const was=h.active>=0;h.active=-1;return was}return false};h.active=-1;return h}
+function wrapText(ctx,text,x,y,maxW,lh){let line="";for(const ch of String(text)){if(ch==="\n"){ctx.fillText(line,x,y);line="";y+=lh;continue}
+ const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);line=ch;y+=lh}else line=t}if(line)ctx.fillText(line,x,y);return y+lh}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+/* ---------- placeholder ---------- */
+function drawSoon(ctx,w,h){const T=theme(),cw=Math.min(320,w-40),ch=150,x=(w-cw)/2,y=(h-ch)/2;
+ ctx.save();ctx.shadowColor="rgba(0,0,0,.08)";ctx.shadowBlur=24;ctx.shadowOffsetY=4;ctx.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(ctx,x,y,cw,ch,22);ctx.fill();ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.blue;ctx.font="13px ui-monospace,Menlo,monospace";ctx.fillText("CHAPTER "+pad(cur),w/2,y+38);
+ ctx.fillStyle=T.fg;ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText("即将上线",w/2,y+72);
+ ctx.fillStyle=T.sub;ctx.font="14px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText(CH[cur].n,w/2,y+108)}
+/* ---------- canvas loop ---------- */
+function resize(){const r=$("cwrap").getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);frame(performance.now())}
+function frame(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H);
+ try{mod&&mod.draw?mod.draw(ctx,W,H,t/1000):drawSoon(ctx,W,H)}catch(err){console.error(err)}}
+function loop(t){frame(t);requestAnimationFrame(loop)}
+new ResizeObserver(resize).observe($("cwrap"));window.addEventListener("resize",resize);
+function ptr(type){return e=>{if(!mod||!mod.pointer)return;const r=cv.getBoundingClientRect();
+ if(type==="down")try{cv.setPointerCapture(e.pointerId)}catch(_){}mod.pointer(e,type,e.clientX-r.left,e.clientY-r.top)}}
+cv.addEventListener("pointerdown",ptr("down"));cv.addEventListener("pointermove",ptr("move"));cv.addEventListener("pointerup",ptr("up"));cv.addEventListener("pointercancel",ptr("up"));
+/* ---------- chapters ---------- */
+function list(host,cls){host.innerHTML="";CH.forEach((c,i)=>{const b=el("button",cls,`<span class="mono">${pad(i)}</span><span>${c.n}</span>`);b.onclick=()=>{go(i);closeSheet()};host.append(b)})}
+list($("toc"),"");list($("slist"),"it");
+$("segs").innerHTML=CH.map(()=>"<i></i>").join("");
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod.unmount()}catch(e){console.error(e)}
+ cur=i;const c=CH[i],m=c.ready&&MODS[i]?MODS[i]:null;mod=m;
+ $("ctitle").textContent=pad(i)+"  "+c.n;$("cbook").textContent=c.book;$("ctext").innerHTML=m?m.text||"":"本章交互实验即将上线，敬请期待。";
+ const ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";$("pts").innerHTML="";$("gk").innerHTML="";
+ if(m){m.mount&&m.mount(ctrl,read);$("pts").innerHTML=m.points?"<ul>"+[].concat(m.points).map(p=>"<li>"+p+"</li>").join("")+"</ul>":"";$("gk").innerHTML=m.gk||""}
+ $("ctrlSec").hidden=!ctrl.children.length;$("readSec").hidden=!read.children.length;$("ptSec").hidden=!$("pts").innerHTML;$("gkSec").hidden=!$("gk").innerHTML;
+ if(!m){$("ctrlSec").hidden=false;ctrl.innerHTML='<p class="soon">本章控件即将上线。</p>'}
+ document.querySelectorAll("#toc button,#slist button").forEach(b=>{const on=+b.querySelector(".mono").textContent-1===i;b.classList.toggle("on",on);on?b.setAttribute("aria-current","true"):b.removeAttribute("aria-current")});
+ document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
+ $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+/* ---------- controls ---------- */
+$("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
+$("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("explain").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+function openSheet(){$("mask").hidden=$("sheet").hidden=false;const on=$("slist").querySelector(".on");on&&on.scrollIntoView({block:"nearest"})}
+function closeSheet(){$("mask").hidden=$("sheet").hidden=true}
+$("chbtn").onclick=openSheet;$("mask").onclick=closeSheet;
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"&&t.type!=="range"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable))return;
+ if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+go(fromHash());requestAnimationFrame(loop);
+</script>
+</body>
+</html>
