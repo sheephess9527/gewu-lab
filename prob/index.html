@@ -674,7 +674,7 @@ MODS[2] = (() => {
   function drawGrid(c, T, b, t){
     c.font = '13px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'center'; c.textBaseline = 'middle';
     c.fillText('路线网格 ' + m + '×' + n + '：每个格点的路线数', b.x + b.w / 2, b.y + 10);
-    const padX = 26, padT = 40, padB = 30;
+    const padX = 26, padT = 58, padB = 30;
     const cell = Math.min((b.w - 2 * padX) / m, (b.h - padT - padB) / n, 72);
     if (cell < 14) return;
     const gx = b.x + (b.w - cell * m) / 2, gy = b.y + padT + (b.h - padT - padB - cell * n) / 2 + cell * n;
@@ -901,13 +901,1136 @@ MODS[3] = (() => {
       c.stroke();
       const dt = lastT == null ? 1 : Math.min(.1, Math.max(0, t - lastT)); lastT = t;
       const e = 1 - Math.exp(-dt * 7), ch = chain(), b = bayes(ch[k]), n = counts(ch[k]);
-      const cols = [rgb(T.red), rgb(T.red), rgb(T.gold), rgb(T.line)];
+      const cols = [rgb(T.red), rgb(T.red), rgb(T.gold), rgb(T.dark ? '#3a3a3c' : '#d2d2d7')];
       drawDots(c, T, A, n, cols, rgb(T.card), e); drawTree(c, T, B, b);
     },
     unmount(){ ui = {}; lastT = null; }
   };
 })();
 CH[3].ready = true;
+
+/* ---- 第 5 章 分布列、均值与方差 ---- */
+MODS[4] = (() => {
+  const PRE = {
+    uni: [1, 1, 1, 1, 1, 1].map(x => x / 6),
+    mid: [.05, .15, .3, .3, .15, .05],
+    pol: [.35, .1, .05, .05, .1, .35],
+    left: [.3, .25, .2, .12, .08, .05]
+  };
+  let P = PRE.uni.slice(), D = P.slice(), preset = 'uni', tf = false, a = 2, b = 1;
+  let drag = -1, Ef = 2.5, Sf = Math.sqrt(35 / 12), ymax = .4, lastT = null, G = null, ui = {};
+  const f3 = x => (Math.abs(x) < 5e-4 ? 0 : x).toFixed(3);
+  const sg = x => x < 0 ? '−' + f3(-x) : f3(x);
+  const nm = x => x < 0 ? '−' + Math.abs(x) : String(x);
+  const stats = p => { const E = p.reduce((s, q, x) => s + x * q, 0), E2 = p.reduce((s, q, x) => s + x * x * q, 0);
+    const V = Math.max(0, p.reduce((s, q, x) => s + (x - E) * (x - E) * q, 0)); return {E, E2, V, S: Math.sqrt(V)}; };
+  function rr(c, x, y, w, h, r){ c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+  function setP(i, v){
+    v = Math.max(0, Math.min(1, v)); const rest = 1 - v, so = P.reduce((s, q, j) => s + (j === i ? 0 : q), 0);
+    P = P.map((q, j) => j === i ? v : so > 1e-9 ? q * rest / so : rest / 5);
+  }
+  function upd(){
+    if (!ui.ro) return;
+    const s = stats(P), sum = P.reduce((x, y) => x + y, 0);
+    const eT = P.slice(0, 3).map((q, x) => x + '×' + f3(q)).join(' + ');
+    const dT = P.slice(0, 2).map((q, x) => '(' + x + '−' + f3(s.E) + ')²×' + f3(q)).join(' + ');
+    const rows = [
+      ['ΣP', f3(sum)],
+      ['E(X) = Σ x·p', eT + ' + …<br>= <b>' + f3(s.E) + '</b>'],
+      ['D(X) = Σ (x−E)²·p', dT + ' + …<br>= <b>' + f3(s.V) + '</b>'],
+      ['D(X) = E(X²) − [E(X)]²', f3(s.E2) + ' − ' + f3(s.E) + '² = ' + f3(s.V)],
+      ['σ = √D(X)', '√' + f3(s.V) + ' = <b>' + f3(s.S) + '</b>']
+    ];
+    if (tf) {
+      const aa = nm(a), bb = b < 0 ? ' − ' + Math.abs(b) : ' + ' + b;
+      rows.push(['E(aX+b) = aE(X) + b', aa + '×' + f3(s.E) + bb + ' = <b>' + sg(a * s.E + b) + '</b>']);
+      rows.push(['D(aX+b) = a²D(X)', '(' + aa + ')²×' + f3(s.V) + ' = <b>' + f3(a * a * s.V) + '</b>（与 b 无关）']);
+      rows.push(['σ(aX+b) = |a|σ', Math.abs(a) + '×' + f3(s.S) + ' = ' + f3(Math.abs(a) * s.S)]);
+    }
+    ui.ro.update(rows);
+  }
+  function band(c, T, x0, x1, y0, y1){ c.fillStyle = T.accentSoft; rr(c, x0, y0, x1 - x0, y1 - y0, 8); c.fill(); }
+  function dashV(c, col, x, y0, y1){ c.setLineDash([4, 4]); c.strokeStyle = col; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x, y0); c.lineTo(x, y1); c.stroke(); c.setLineDash([]); }
+  function drawBars(c, T, R, X, bw){
+    const yt = R.y + 34, yb = R.y + R.h - 24, hh = yb - yt;
+    G.yt = yt; G.yb = yb;
+    c.font = '13px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'middle';
+    c.fillText('X 的分布列 · 上下拖动柱顶调整概率', R.x, R.y + 10);
+    band(c, T, X(Ef - Sf), X(Ef + Sf), yt - 8, yb);
+    c.strokeStyle = T.line; c.lineWidth = 1; c.beginPath(); c.moveTo(X(-.5), yb); c.lineTo(X(5.5), yb); c.stroke();
+    D.forEach((q, x) => {
+      const bh = Math.min(hh, q / ymax * hh), cx = X(x);
+      c.globalAlpha = drag === x ? 1 : .82; c.fillStyle = T.accent; rr(c, cx - bw / 2, yb - bh, bw, bh, [6, 6, 0, 0]); c.fill(); c.globalAlpha = 1;
+      if (drag === x) { c.strokeStyle = T.fg; c.lineWidth = 2; c.stroke(); }
+      c.fillStyle = T.card; rr(c, cx - 10, yb - bh - 3, 20, 6, 3); c.fill(); c.strokeStyle = T.accent; c.lineWidth = 1.5; c.stroke();
+      c.font = '12px ' + T.mono; c.fillStyle = T.fg; c.textAlign = 'center'; c.textBaseline = 'bottom';
+      c.fillText(f3(q), cx, yb - bh - 8);
+      c.font = '13px ' + T.mono; c.fillStyle = T.fg2; c.textBaseline = 'top'; c.fillText(x, cx, yb + 6);
+    });
+    dashV(c, T.accent, X(Ef), yt - 8, yb);
+  }
+  function drawSaw(c, T, S, X, bw){
+    const by = S.y + S.h * .62, maxS = Math.max(10, Math.min(bw * 1.1, S.h * .5));
+    band(c, T, X(Ef - Sf), X(Ef + Sf), by - maxS - 8, by + 12);
+    c.font = '13px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'middle';
+    c.fillText('跷跷板：砝码面积 ∝ 概率，支点在 E(X) 处平衡', S.x, S.y + 8);
+    D.forEach((q, x) => { const s = maxS * Math.sqrt(Math.max(0, q)); if (s < .5) return;
+      c.fillStyle = T.gold; rr(c, X(x) - s / 2, by - 2 - s, s, s, Math.min(4, s / 3)); c.fill(); });
+    c.fillStyle = T.fg2; rr(c, X(-.4), by - 2, X(5.4) - X(-.4), 5, 2.5); c.fill();
+    c.font = '12px ' + T.mono; c.textAlign = 'center'; c.textBaseline = 'top';
+    for (let x = 0; x <= 5; x++) { c.fillStyle = T.fg2; c.fillRect(X(x) - .5, by + 3, 1, 5); c.fillText(x, X(x) + (Math.abs(X(x) - X(Ef)) < 16 ? 14 : 0), by + 9); }
+    const fx = X(Ef); c.fillStyle = T.fg; c.beginPath(); c.moveTo(fx, by + 4); c.lineTo(fx - 14, by + 28); c.lineTo(fx + 14, by + 28); c.closePath(); c.fill();
+    c.font = '600 13px ' + T.mono; c.textBaseline = 'top'; c.fillText('E(X) = ' + f3(Ef), Math.max(S.x + 50, Math.min(S.x + S.w - 50, fx)), by + 33);
+  }
+  function drawTf(c, T, R, x0, x1){
+    const lo = -15.5, hi = 20.5, X2 = v => x0 + (v - lo) / (hi - lo) * (x1 - x0), unit = (x1 - x0) / (hi - lo);
+    const m = new Map(); D.forEach((q, x) => { const v = a * x + b; m.set(v, (m.get(v) || 0) + q); });
+    const E2 = a * Ef + b, S2 = Math.abs(a) * Sf, yt = R.y + 30, yb = R.y + R.h - 22, hh = yb - yt;
+    const bw = a === 0 ? 22 : Math.max(4, Math.min(unit * Math.abs(a) * .7, 22)), top = Math.max(ymax, ...m.values());
+    c.font = '13px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'middle';
+    c.fillText('Y = ' + (a === 1 ? '' : a === -1 ? '−' : nm(a)) + 'X' + (b ? (b < 0 ? ' − ' + -b : ' + ' + b) : '') + '：E(Y) = ' + sg(E2) + '，σ(Y) = ' + f3(S2), R.x, R.y + 10);
+    band(c, T, X2(E2 - S2) - (S2 ? 0 : 2), X2(E2 + S2) + (S2 ? 0 : 2), yt - 6, yb);
+    c.strokeStyle = T.line; c.lineWidth = 1; c.beginPath(); c.moveTo(x0, yb); c.lineTo(x1, yb); c.stroke();
+    c.font = '12px ' + T.mono; c.fillStyle = T.fg2; c.textAlign = 'center'; c.textBaseline = 'top';
+    for (let v = -15; v <= 20; v += 5) { c.fillRect(X2(v) - .5, yb, 1, 4); c.fillText(nm(v), X2(v), yb + 6); }
+    c.fillStyle = T.purple;
+    m.forEach((q, v) => { const bh = Math.min(hh, q / top * hh); rr(c, X2(v) - bw / 2, yb - bh, bw, bh, [3, 3, 0, 0]); c.fill(); });
+    dashV(c, T.purple, X2(E2), yt - 6, yb);
+  }
+  return {
+    text: '把随机变量 X 的每个取值和它的概率列成表，就是<b>分布列</b>，所有概率加起来等于 1。<b>均值</b> E(X) 是概率加权的平均，可以想成跷跷板的平衡点；<b>方差</b> D(X) 衡量取值偏离均值的程度，越分散方差越大。',
+    points: ['分布列性质：p<sub>i</sub> ≥ 0，Σp<sub>i</sub> = 1', 'E(X) = Σx<sub>i</sub>p<sub>i</sub>', 'D(X) = Σ(x<sub>i</sub> − E(X))²p<sub>i</sub> = E(X²) − [E(X)]²', 'E(aX+b) = aE(X) + b', 'D(aX+b) = a²D(X)', '两点分布：E(X) = p，D(X) = p(1−p)'],
+    gk: ['高考链接：概率大题必考写分布列、求期望，常与决策（比较两种方案的期望或方差）结合。', '易错：D(aX+b) 与 b 无关，且是 a² 不是 a；写分布列后要检验概率和为 1。'],
+    mount(ctrl, read){
+      ui.pre = chips([{label: '均匀', value: 'uni'}, {label: '集中在中间', value: 'mid'}, {label: '两极分化', value: 'pol'}, {label: '偏左', value: 'left'}], preset,
+        v => { preset = v; P = PRE[v].slice(); upd(); });
+      ui.box = el('div'); ui.box.style.cssText = 'display:' + (tf ? 'grid' : 'none') + ';gap:12px';
+      ui.box.append(slider('a', -2, 3, .5, a, x => x.toFixed(1), v => { a = v; upd(); }), slider('b', -5, 5, 1, b, x => String(x), v => { b = v; upd(); }));
+      ctrl.append(ui.pre, toggle('显示 aX+b', tf, v => { tf = v; ui.box.style.display = v ? 'grid' : 'none'; upd(); }), ui.box);
+      ui.ro = readout(); read.append(ui.ro); upd();
+    },
+    draw(c, w, h, t){
+      const T = theme(), ov = $('ov');
+      let top = ov.offsetParent !== null ? ov.offsetTop + ov.offsetHeight + 12 : 12;
+      top = Math.min(top, h * .4);
+      const dt = lastT == null ? 1 : Math.min(.1, Math.max(0, t - lastT)); lastT = t;
+      const e = 1 - Math.exp(-dt * 9), s = stats(P);
+      D = D.map((q, i) => drag === i ? P[i] : q + (P[i] - q) * e);
+      Ef += (s.E - Ef) * e; Sf += (s.S - Sf) * e;
+      if (drag < 0) ymax += (Math.max(.4, Math.ceil(Math.max(...P) * 10) / 10 + .1) - ymax) * e;
+      const x0 = 44, x1 = w - 28, X = v => x0 + (v + .5) / 6 * (x1 - x0), bw = Math.min((x1 - x0) / 6 * .6, 64);
+      const avail = h - top - 12, rT = tf ? avail * .3 : 0, rB = (avail - rT) * .58, rS = avail - rT - rB;
+      G = {X, bw};
+      if (tf) drawTf(c, T, {x: 12, y: top, w: w - 24, h: rT - 8}, x0, x1);
+      drawBars(c, T, {x: 12, y: top + rT, w: w - 24, h: rB}, X, bw);
+      drawSaw(c, T, {x: 12, y: top + rT + rB, w: w - 24, h: rS}, X, bw);
+    },
+    pointer(e, type, x, y){
+      if (!G || G.yb == null) return;
+      const vy = () => (G.yb - y) / (G.yb - G.yt) * ymax;
+      if (type === 'down') {
+        for (let i = 0; i < 6; i++) if (Math.abs(x - G.X(i)) < Math.max(G.bw / 2 + 6, 22) && y > G.yt - 40 && y < G.yb + 20) { drag = i; break; }
+        if (drag >= 0) { e.preventDefault(); setP(drag, vy()); preset = null; ui.pre && ui.pre.set(null); upd(); }
+      } else if (type === 'move' && drag >= 0) { setP(drag, vy()); upd(); }
+      else if (type === 'up' || type === 'cancel') drag = -1;
+    },
+    unmount(){ ui = {}; lastT = null; drag = -1; G = null; }
+  };
+})();
+CH[4].book = '人教A版 选择性必修第三册 · 7.2 离散型随机变量及其分布列、7.3 离散型随机变量的数字特征';
+CH[4].ready = true;
+
+/* ---- 第 6 章 二项分布与高尔顿板 ---- */
+MODS[5] = (() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)'), LV = .06, MAXF = 80;
+  let n = 10, p = .5, showT = true, auto = false, sel = 5, modes = [5];
+  let cnt = [], N = 0, sx = 0, sx2 = 0, balls = [], pend = 0, lastSp = -1, dirty = true, lastRead = -1, G = null, ui = {}, PM = [];
+  const nf = x => String(+x.toFixed(4));
+  const gcd = (a, b) => b ? gcd(b, a % b) : a;
+  function C(m, k){ let r = 1n; for (let i = 1; i <= k; i++) r = r * BigInt(m - k + i) / BigInt(i); return r; }
+  function rr(c, x, y, w, h, r){ c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+  function reset(){
+    cnt = new Array(n + 1).fill(0); N = 0; sx = sx2 = 0; balls = []; pend = 0;
+    PM = []; for (let k = 0; k <= n; k++) PM.push(Number(C(n, k)) * Math.pow(p, k) * Math.pow(1 - p, n - k));
+    const mx = Math.max(...PM); modes = []; PM.forEach((q, k) => { if (q >= mx * (1 - 1e-9)) modes.push(k); });
+    sel = modes[0]; dirty = true;
+  }
+  function path(){ const a = []; let k = 0; for (let i = 0; i < n; i++) { const r = Math.random() < p ? 1 : 0; a.push(r); k += r; } return {path: a, k}; }
+  function land(k){ if (k > n) return; cnt[k]++; N++; sx += k; sx2 += k * k; dirty = true; }
+  function setAuto(v){ auto = v; if (ui.go) ui.go.textContent = v ? '暂停' : '连续放'; }
+  function frac(k){
+    const m = Math.round(p * 20), g = gcd(m, 20), a = m / g, d = 20 / g;
+    const num = C(n, k) * BigInt(a) ** BigInt(k) * BigInt(d - a) ** BigInt(n - k), den = BigInt(d) ** BigInt(n);
+    return den <= 10n ** 8n ? num + '/' + den : null;
+  }
+  function upd(){
+    if (!ui.ro) return;
+    const m = N ? sx / N : 0, v = N ? Math.max(0, sx2 / N - m * m) : 0, fr = frac(sel);
+    ui.ro.update([
+      ['已放球数 N', '<b>' + N + '</b>'],
+      ['E(X) = np', n + '×' + nf(p) + ' = <b>' + nf(n * p) + '</b>'],
+      ['D(X) = np(1−p)', n + '×' + nf(p) + '×' + nf(1 - p) + ' = <b>' + nf(n * p * (1 - p)) + '</b>'],
+      ['样本均值 x̄（实测）', N ? '<b>' + m.toFixed(3) + '</b>' : '—'],
+      ['样本方差 s²（实测）', N ? '<b>' + v.toFixed(3) + '</b>' : '—'],
+      ['选中槽 k = ' + sel + ' · 实测频率', N ? cnt[sel] + '/' + N + ' ≈ <b>' + (cnt[sel] / N).toFixed(4) + '</b>' : '—'],
+      ['理论 P(X = ' + sel + ')', 'C(' + n + ',' + sel + ')·' + nf(p) + '<sup>' + sel + '</sup>·' + nf(1 - p) + '<sup>' + (n - sel) + '</sup><br>= ' + (fr ? fr + ' ≈ ' : '≈ ') + '<b>' + PM[sel].toFixed(4) + '</b>']
+    ]);
+  }
+  reset();
+  return {
+    text: '小球从顶端落下，每碰到一层钉子就以概率 <b>p</b> 向右、<b>1−p</b> 向左，层与层互不影响。经过 n 层，向右的次数 X 就服从<b>二项分布 B(n, p)</b>：P(X=k) = C(n,k)p<sup>k</sup>(1−p)<sup>n−k</sup>。球放得越多，槽里堆出的形状越接近理论柱形；p = 0.5 时左右对称，中间最高。',
+    points: ['独立重复试验 n 次，每次只有「成功/失败」，且成功概率都为 p', 'X 为成功次数，则 X ~ B(n, p)', 'P(X=k) = C(n,k)p<sup>k</sup>(1−p)<sup>n−k</sup>，k = 0, 1, …, n', 'E(X) = np，D(X) = np(1−p)', '最可能取值 k 满足 (n+1)p − 1 ≤ k ≤ (n+1)p'],
+    gk: ['高考链接：概率大题常考判断是否为二项分布并写分布列、求期望方差（如多次投篮、多道题答对个数）。', '易错：每次试验必须相互独立且 p 不变；「不放回地摸球」不是二项分布（下一章讲超几何分布）。'],
+    mount(ctrl, read){
+      const row = el('div', 'btns');
+      ui.go = button(auto ? '暂停' : '连续放', () => setAuto(!auto), true);
+      row.append(button('放 1 个', () => { pend += 1; }), button('放 100 个', () => { pend += 100; }), ui.go,
+        button('清空', () => { setAuto(false); reset(); upd(); }));
+      ctrl.append(
+        slider('层数 n', 4, 14, 1, n, x => String(x), v => { n = v; reset(); upd(); }),
+        slider('向右概率 p', .1, .9, .05, p, x => x.toFixed(2), v => { p = Math.round(v * 20) / 20; reset(); upd(); }),
+        row, toggle('显示理论值', showT, v => { showT = v; }));
+      ui.ro = readout(); read.append(ui.ro); upd();
+    },
+    draw(c, w, h, t){
+      const T = theme(), ov = $('ov');
+      let top = ov.offsetParent !== null ? ov.offsetTop + ov.offsetHeight + 12 : 12;
+      top = Math.min(top, h * .4);
+      // 投放
+      if (RM.matches) {
+        let m = pend + (auto ? 4 : 0); pend = 0;
+        balls.forEach(b => land(b.k)); balls = [];
+        while (m-- > 0) land(path().k);
+      } else if ((auto || pend > 0) && balls.length < MAXF && t - lastSp >= .016) {
+        const b = path(); b.t0 = t; balls.push(b); lastSp = t; if (pend > 0) pend--;
+      }
+      // 布局
+      const x0 = 16, x1 = w - 16, cx = w / 2, avail = Math.max(120, h - top - 12);
+      const dy = avail * .4 / (n + .6), dx = Math.max(10, Math.min((x1 - x0) / (n + 1), dy * 2.4, 64));
+      const pegTop = top + 26 + dy * .6, Y = s => pegTop + (s - .5) * dy;
+      const binTop = Y(n) + 4, binBot = h - 12 - 22, hh = Math.max(20, binBot - binTop - 24);
+      const BX = k => cx + (k - n / 2) * dx, br = Math.max(3, Math.min(7, dx * .22, dy * .32));
+      const ym = Math.max(...PM, N ? Math.max(...cnt) / N : 0) * 1.12 || 1;
+      const bh = k => (N ? cnt[k] / N : 0) / ym * hh;
+      G = {binTop, binBot, cx, dx};
+      c.font = '13px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'middle';
+      c.fillText('X ~ B(' + n + ', ' + nf(p) + ') · 点击槽查看该 k 的频率与概率', x0, top + 10);
+      // 钉子
+      c.fillStyle = T.fg2; c.globalAlpha = .6;
+      const pr = Math.max(2, Math.min(4, dx * .1));
+      for (let i = 0; i < n; i++) for (let j = 0; j <= i; j++) { c.beginPath(); c.arc(cx + (j - i / 2) * dx, pegTop + i * dy, pr, 0, Math.PI * 2); c.fill(); }
+      c.globalAlpha = 1;
+      // 槽
+      c.fillStyle = T.accentSoft; rr(c, BX(sel) - dx / 2 + 1, binTop, dx - 2, binBot - binTop, 6); c.fill();
+      c.strokeStyle = T.line; c.lineWidth = 1; c.beginPath();
+      for (let k = 0; k <= n + 1; k++) { const x = BX(k) - dx / 2; c.moveTo(x, binTop); c.lineTo(x, binBot); }
+      c.moveTo(BX(0) - dx / 2, binBot); c.lineTo(BX(n) + dx / 2, binBot); c.stroke();
+      for (let k = 0; k <= n; k++) {
+        const v = bh(k);
+        if (v > 0) { c.globalAlpha = k === sel ? 1 : .75; c.fillStyle = T.accent; rr(c, BX(k) - dx * .36, binBot - v, dx * .72, v, [4, 4, 0, 0]); c.fill(); c.globalAlpha = 1; }
+        c.font = (k === sel ? '600 ' : '') + '12px ' + T.mono; c.fillStyle = k === sel ? T.fg : T.fg2; c.textAlign = 'center'; c.textBaseline = 'top';
+        c.fillText(k, BX(k), binBot + 6);
+      }
+      // 理论值
+      if (showT) {
+        c.strokeStyle = T.gold; c.fillStyle = T.gold; c.lineWidth = 2; c.beginPath();
+        PM.forEach((q, k) => { const y = binBot - q / ym * hh; k ? c.lineTo(BX(k), y) : c.moveTo(BX(k), y); }); c.stroke();
+        PM.forEach((q, k) => { c.beginPath(); c.arc(BX(k), binBot - q / ym * hh, 4, 0, Math.PI * 2); c.fill(); });
+      }
+      const mx = modes.reduce((s, k) => s + BX(k), 0) / modes.length;
+      const my = Math.min(...modes.map(k => Math.min(binBot - bh(k), showT ? binBot - PM[k] / ym * hh - 4 : binBot))) - 8;
+      c.font = '600 12px ' + T.sans; c.fillStyle = T.fg; c.textAlign = 'center'; c.textBaseline = 'bottom';
+      c.fillText('最可能 k=' + modes.join(' 或 '), Math.max(x0 + 50, Math.min(x1 - 50, mx)), Math.max(binTop + 14, my));
+      // 小球
+      const FS = 2, done = [];
+      c.fillStyle = T.accent; c.globalAlpha = .55;
+      balls.forEach((b, bi) => {
+        const e = (t - b.t0) / LV; let x, y;
+        if (e < n) {
+          const s = Math.floor(e), f = e - s; let r = 0; for (let i = 0; i < s; i++) r += b.path[i];
+          const xs = cx + (r - s / 2) * dx, g = f * f * (3 - 2 * f);
+          x = xs + (b.path[s] ? .5 : -.5) * dx * g; y = Y(s) + f * dy - Math.sin(f * Math.PI) * dy * .3;
+        } else {
+          const fp = (e - n) / FS; if (fp >= 1) { done.push(bi); return; }
+          x = BX(b.k); y = Y(n) + (binBot - bh(b.k) - br - Y(n)) * fp * fp;
+        }
+        c.beginPath(); c.arc(x, y, br, 0, Math.PI * 2); c.fill();
+      });
+      c.globalAlpha = 1;
+      for (let i = done.length - 1; i >= 0; i--) { land(balls[done[i]].k); balls.splice(done[i], 1); }
+      if (dirty && (t - lastRead > .1 || t < lastRead)) { upd(); dirty = false; lastRead = t; }
+    },
+    pointer(e, type, x, y){
+      if (type !== 'down' || !G || y < G.binTop - 30 || y > G.binBot + 26) return;
+      const k = Math.round((x - G.cx) / G.dx + n / 2);
+      if (k >= 0 && k <= n && Math.abs(x - G.cx - (k - n / 2) * G.dx) <= G.dx / 2) { sel = k; upd(); }
+    },
+    unmount(){ setAuto(false); balls.forEach(b => land(b.k)); balls = []; pend = 0; ui = {}; G = null; lastSp = -1; lastRead = -1; }
+  };
+})();
+CH[5].book = '人教A版 选择性必修第三册 · 7.4 二项分布与超几何分布（二项分布部分）';
+CH[5].ready = true;
+
+MODS[6] = (() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)'), D = .7;
+  let N = 20, M = 8, n = 5, mode = 'h', sel = 2, red = [], cnt = {}, tot = {}, sum = {}, PH = [], PB = [], anim = null, lastX = null, G = null, ui = {};
+  const nf = x => String(+x.toFixed(4));
+  function C(m, k){ if (k < 0 || k > m) return 0; let r = 1; for (let i = 1; i <= k; i++) r = r * (m - k + i) / i; return Math.round(r); }
+  function rr(c, x, y, w, h, r){ c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+  function reset(){
+    red = []; for (let i = 0; i < N; i++) red.push(i < M);
+    for (let i = N - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [red[i], red[j]] = [red[j], red[i]]; }
+    ['h', 'b'].forEach(m => { cnt[m] = new Array(n + 1).fill(0); tot[m] = 0; sum[m] = 0; });
+    const q = M / N, cN = C(N, n); PH = []; PB = [];
+    for (let k = 0; k <= n; k++) { PH.push(C(M, k) * C(N - M, n - k) / cN); PB.push(C(n, k) * q ** k * (1 - q) ** (n - k)); }
+    sel = PH.indexOf(Math.max(...PH)); anim = null; lastX = null;
+  }
+  function sample(m){
+    const idx = [];
+    if (m === 'h') { const a = [...Array(N).keys()]; for (let j = 0; j < n; j++) { const r = j + (Math.random() * (N - j) | 0); [a[j], a[r]] = [a[r], a[j]]; idx.push(a[j]); } }
+    else for (let j = 0; j < n; j++) idx.push(Math.random() * N | 0);
+    return idx;
+  }
+  const countRed = idx => idx.reduce((s, i) => s + (red[i] ? 1 : 0), 0);
+  function record(m, x){ cnt[m][x]++; tot[m]++; sum[m] += x; }
+  function finish(){ if (anim && !anim.done) { anim.done = true; lastX = anim.X; record(anim.mode, anim.X); upd(); } }
+  function drawOnce(){ finish(); const idx = sample(mode); anim = {idx, mode, X: countRed(idx), t0: null, done: false}; lastX = null; }
+  function draw100(){ finish(); anim = null; lastX = null; for (let r = 0; r < 100; r++) record(mode, countRed(sample(mode))); upd(); }
+  function upd(){
+    if (!ui.ro) return;
+    const k = sel, q = M / N, cN = C(N, n), a = C(M, k), b = C(N - M, n - k), f = (N - n) / (N - 1), vb = n * q * (1 - q);
+    const lo = Math.max(0, n - N + M), hi = Math.min(n, M), m = mode;
+    ui.ro.update([
+      ['超几何 k 的取值', lo + ' ≤ k ≤ ' + hi + '（点击柱组切换 k）'],
+      ['超几何 P(X=' + k + ')', 'C(' + M + ',' + k + ')C(' + (N - M) + ',' + (n - k) + ')/C(' + N + ',' + n + ')<br>= ' + a + '×' + b + '/' + cN + ' = ' + (a * b) + '/' + cN + ' ≈ <b>' + PH[k].toFixed(4) + '</b>'],
+      ['二项 P(X=' + k + ')', 'C(' + n + ',' + k + ')·' + nf(q) + '<sup>' + k + '</sup>·' + nf(1 - q) + '<sup>' + (n - k) + '</sup> ≈ <b>' + PB[k].toFixed(4) + '</b>'],
+      ['E(X) = nM/N（两者相同）', n + '×' + M + '/' + N + ' = <b>' + nf(n * M / N) + '</b>'],
+      ['二项 D = n·(M/N)(1−M/N)', n + '×' + nf(q) + '×' + nf(1 - q) + ' = <b>' + nf(vb) + '</b>'],
+      ['修正因子 (N−n)/(N−1)', (N - n) + '/' + (N - 1) + ' ≈ <b>' + f.toFixed(4) + '</b>'],
+      ['超几何 D = 二项 D × 修正因子', nf(vb) + '×' + (N - n) + '/' + (N - 1) + ' ≈ <b>' + (vb * f).toFixed(4) + '</b>'],
+      ['实测次数（' + (m === 'h' ? '不放回' : '放回') + '）', '<b>' + tot[m] + '</b>'],
+      ['实测均值', tot[m] ? '<b>' + (sum[m] / tot[m]).toFixed(3) + '</b>' : '—']
+    ]);
+  }
+  reset();
+  return {
+    text: '袋中有 <b>N</b> 个球，其中 <b>M</b> 个红球，从中摸出 <b>n</b> 个，红球个数记为 X。如果摸后<b>不放回</b>，X 服从<b>超几何分布</b>；如果每次摸完<b>放回</b>，就是<b>二项分布 B(n, M/N)</b>。两者均值都是 n·M/N，但不放回时方差更小；总数 N 很大时，放不放回差别很小，两种分布几乎重合。',
+    points: ['超几何：不放回，P(X=k) = C(M,k)C(N−M,n−k)/C(N,n)，k 从 max(0, n−N+M) 到 min(n, M)', '超几何 E(X) = nM/N', '二项：放回或独立重复，E(X) = np', 'N 远大于 n 时，超几何近似二项'],
+    gk: ['高考链接：常考「从含次品的一批产品中抽取」「从男女生中选人」写分布列，判断是超几何还是二项是第一步。', '易错：题目说「从大批产品中抽取」或「以频率估计概率、每次相互独立」时用二项；「从 N 件中任取 n 件」用超几何；k 的取值范围要写对。'],
+    mount(ctrl, read){
+      const mBox = el('div');
+      const buildM = () => { mBox.innerHTML = ''; mBox.appendChild(slider('红球数 M', 1, N - 1, 1, M, String, v => { M = v; reset(); upd(); })); };
+      ui.mode = chips([{label: '不放回（超几何）', value: 'h'}, {label: '放回（二项）', value: 'b'}], mode, v => { finish(); mode = v; anim = null; lastX = null; upd(); });
+      const row = el('div', 'btns');
+      row.append(button('摸一次', drawOnce, true), button('摸 100 次（不播动画）', draw100), button('清空', () => { reset(); upd(); }));
+      ctrl.append(slider('总数 N', 10, 60, 1, N, String, v => { N = v; if (M > N - 1) M = N - 1; buildM(); reset(); upd(); }), mBox,
+        slider('摸出个数 n', 1, 10, 1, n, String, v => { n = Math.min(v, N); reset(); upd(); }), ui.mode, row);
+      buildM(); ui.ro = readout(); read.append(ui.ro); upd();
+    },
+    draw(c, w, h, t){
+      const T = theme(), ov = $('ov');
+      let top = ov.offsetParent !== null ? ov.offsetTop + ov.offsetHeight + 12 : 12;
+      top = Math.min(top, h * .4);
+      if (anim && !anim.done) {
+        if (anim.t0 == null) anim.t0 = RM.matches ? t - 1e4 : t;
+        if ((t - anim.t0) / D >= n + .3) finish();
+      }
+      // 布局
+      const wide = w >= 640, y0 = top + 24, bot = h - 12;
+      let B, R, P;
+      if (wide) {
+        const bw = Math.min(320, (w - 32) * .38), x = 16 + bw + 28, cw = w - 16 - x;
+        B = {x: 16, y: y0, w: bw, h: Math.min(bot - y0, bw * 1.25)}; R = {x, y: y0, w: cw}; P = {x, y: y0 + 76, w: cw, h: bot - y0 - 76};
+      } else {
+        const hb = Math.max(110, (bot - y0) * .36), bw = (w - 32) * .55;
+        B = {x: 16, y: y0, w: bw, h: hb}; R = {x: 16 + bw + 12, y: y0, w: w - 44 - bw}; P = {x: 16, y: y0 + hb + 30, w: w - 32, h: bot - y0 - hb - 30};
+      }
+      // 袋中小球位置
+      const pd = 14, aw = B.w - pd * 2, ah = B.h - pd * 2;
+      const cols = Math.max(1, Math.round(Math.sqrt(N * aw / ah))), rows = Math.ceil(N / cols);
+      const cell = Math.min(aw / cols, ah / rows), r = Math.max(3, Math.min(11, cell * .4));
+      const gx = B.x + B.w / 2 - cols * cell / 2, gy = B.y + B.h - pd - rows * cell;
+      const pos = i => ({x: gx + (i % cols + .5) * cell, y: gy + (Math.floor(i / cols) + .5) * cell});
+      const rc = Math.max(1, Math.min(n, Math.floor(R.w / (2 * r + 8)))), sp = Math.min(2 * r + 10, R.w / rc);
+      const slot = j => ({x: R.x + (j % rc + .5) * sp, y: R.y + 6 + r + Math.floor(j / rc) * (2 * r + 8)});
+      const rowBot = R.y + 6 + Math.ceil(n / rc) * (2 * r + 8);
+      const arc = (p, q, f) => { const g = f * f * (3 - 2 * f); return {x: p.x + (q.x - p.x) * g, y: p.y + (q.y - p.y) * g - Math.sin(Math.PI * g) * 40}; };
+      const ball = (p, i) => { c.fillStyle = red[i] ? T.red : T.fg2; c.globalAlpha = red[i] ? 1 : .45; c.beginPath(); c.arc(p.x, p.y, r, 0, Math.PI * 2); c.fill(); c.globalAlpha = 1; };
+      // 动画状态
+      const fly = [], hide = new Set(), copies = [];
+      if (anim && anim.t0 != null) {
+        const e = (t - anim.t0) / D;
+        anim.idx.forEach((i, j) => {
+          const u = e - j; if (u < 0) return;
+          const s = slot(j), p = pos(i);
+          if (anim.mode === 'h') { hide.add(i); if (u < .6) fly.push([arc(p, s, u / .6), i]); else copies.push([s, i]); }
+          else if (u < .55) { hide.add(i); fly.push([arc(p, s, u / .55), i]); }
+          else { copies.push([s, i]); if (u < 1) { hide.add(i); fly.push([arc(s, p, (u - .55) / .45), i]); } }
+        });
+      }
+      // 标题
+      c.font = '13px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'middle';
+      c.fillText('袋中 ' + N + ' 个：红 ' + M + ' · 灰 ' + (N - M), B.x, top + 10);
+      c.fillText('摸出的 ' + n + ' 个', R.x, top + 10);
+      // 袋子
+      c.fillStyle = T.fill; c.strokeStyle = T.line; c.lineWidth = 1.5; rr(c, B.x, B.y, B.w, B.h, 18); c.fill(); c.stroke();
+      for (let i = 0; i < N; i++) if (!hide.has(i)) ball(pos(i), i);
+      // 摸出的一排
+      c.strokeStyle = T.line; c.lineWidth = 1; c.setLineDash([3, 3]);
+      for (let j = 0; j < n; j++) { const s = slot(j); c.beginPath(); c.arc(s.x, s.y, r, 0, Math.PI * 2); c.stroke(); }
+      c.setLineDash([]);
+      copies.forEach(([s, i]) => ball(s, i));
+      if (lastX != null) {
+        c.font = '600 14px ' + T.sans; c.fillStyle = T.fg; c.textAlign = 'left'; c.textBaseline = 'top';
+        c.fillText('本次 X = ' + lastX, R.x, rowBot + 2);
+      }
+      // 主图
+      const ax = 34, X0 = P.x + ax, gw = (P.w - ax) / (n + 1), py0 = P.y + 30, pyb = P.y + P.h - 20, ph = Math.max(20, pyb - py0);
+      const obs = cnt[mode], tm = tot[mode];
+      const ym = Math.max(...PH, ...PB, ...(tm ? obs.map(v => v / tm) : [0])) * 1.12 || 1;
+      const Y = v => pyb - v / ym * ph;
+      G = {X0, gw, py0, pyb};
+      // 图例
+      c.font = '12px ' + T.sans; c.textBaseline = 'middle'; c.textAlign = 'left';
+      let lx = X0; const ly = P.y + 10;
+      [[T.accent, '超几何理论'], [T.gold, '二项理论']].forEach(([col, s]) => { c.fillStyle = col; rr(c, lx, ly - 5, 10, 10, 2); c.fill(); c.fillStyle = T.fg2; c.fillText(s, lx + 14, ly); lx += 28 + c.measureText(s).width; });
+      c.fillStyle = T.fg; c.beginPath(); c.arc(lx + 5, ly, 4, 0, Math.PI * 2); c.fill();
+      c.fillStyle = T.fg2; c.fillText('实测（' + (mode === 'h' ? '不放回' : '放回') + '）', lx + 14, ly);
+      // 选中列
+      c.fillStyle = T.accentSoft; rr(c, X0 + sel * gw + 2, py0 - 6, gw - 4, pyb - py0 + 6, 6); c.fill();
+      // 网格
+      const stp = ym > .5 ? .2 : ym > .25 ? .1 : .05;
+      c.font = '12px ' + T.mono; c.textAlign = 'right'; c.textBaseline = 'middle'; c.strokeStyle = T.line; c.lineWidth = 1;
+      for (let v = 0; v < ym; v += stp) {
+        const y = Y(v); c.fillStyle = T.fg2; c.fillText(v ? v.toFixed(2) : '0', X0 - 6, y);
+        c.globalAlpha = v ? .5 : 1; c.beginPath(); c.moveTo(X0, y); c.lineTo(P.x + P.w, y); c.stroke(); c.globalAlpha = 1;
+      }
+      // 双柱 + 实测点
+      const bw = Math.min(28, gw * .32);
+      for (let k = 0; k <= n; k++) {
+        const cx = X0 + (k + .5) * gw;
+        c.fillStyle = T.accent; rr(c, cx - bw - 1, Y(PH[k]), bw, pyb - Y(PH[k]), [3, 3, 0, 0]); c.fill();
+        c.fillStyle = T.gold; rr(c, cx + 1, Y(PB[k]), bw, pyb - Y(PB[k]), [3, 3, 0, 0]); c.fill();
+        if (tm) { const ox = mode === 'h' ? cx - bw / 2 - 1 : cx + 1 + bw / 2; c.fillStyle = T.fg; c.beginPath(); c.arc(ox, Y(obs[k] / tm), 4, 0, Math.PI * 2); c.fill(); }
+        c.font = (k === sel ? '600 ' : '') + '12px ' + T.mono; c.fillStyle = k === sel ? T.fg : T.fg2; c.textAlign = 'center'; c.textBaseline = 'top';
+        c.fillText(k, cx, pyb + 5);
+      }
+      // 飞行中的球（最上层）
+      fly.forEach(([p, i]) => ball(p, i));
+    },
+    pointer(e, type, x, y){
+      if (type !== 'down' || !G || y < G.py0 - 10 || y > G.pyb + 22) return;
+      const k = Math.floor((x - G.X0) / G.gw);
+      if (k >= 0 && k <= n) { sel = k; upd(); }
+    },
+    unmount(){ finish(); ui = {}; G = null; }
+  };
+})();
+CH[6].book = '人教A版 选择性必修第三册 · 7.4 二项分布与超几何分布（超几何分布部分）';
+CH[6].ready = true;
+
+/* ---- 第 8 章 正态分布 ---- */
+MODS[7] = (() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)'), XM = 8;
+  let mu = 0, sg = 1, dmu = 0, dsg = 1, dym = .45, mode = 1, a = -1, b = 1.5, bin = false, nB = 10, drag = null, lastT = null, G = null, ui = {};
+  const fm = x => (x < -1e-9 ? '−' : '') + String(+Math.abs(x).toFixed(2));
+  const f4 = x => Math.max(0, Math.min(1, x)).toFixed(4);
+  function erf(x){ const s = Math.sign(x); x = Math.abs(x); const t = 1 / (1 + .3275911 * x);
+    return s * (1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - .284496736) * t + .254829592) * t * Math.exp(-x * x)); }
+  const Phi = z => .5 * (1 + erf(z / Math.SQRT2));
+  const pdf = (x, m, s) => Math.exp(-(x - m) * (x - m) / (2 * s * s)) / (s * Math.sqrt(2 * Math.PI));
+  function rr(c, x, y, w, h, r){ c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+  function binP(n){ const P = [Math.pow(.5, n)]; for (let k = 0; k < n; k++) P.push(P[k] * (n - k) / (k + 1)); return P; }
+  function range(m, s){ return mode === 'c' ? [a, b] : [m - mode * s, m + mode * s]; }
+  function prob(){ const [lo, hi] = range(mu, sg); return Phi((hi - mu) / sg) - Phi((lo - mu) / sg); }
+  function upd(){
+    if (!ui.ro) return;
+    const [lo, hi] = range(mu, sg), rows = [
+      ['分布', 'X ~ <b>N(' + fm(mu) + ', ' + fm(sg * sg) + ')</b>（σ = ' + fm(sg) + '）'],
+      ['E(X) = μ，D(X) = σ²', 'E(X) = ' + fm(mu) + '，D(X) = ' + fm(sg * sg)],
+      ['最大值 1/(σ√(2π))', '≈ <b>' + (1 / (sg * Math.sqrt(2 * Math.PI))).toFixed(4) + '</b>（在 x = ' + fm(mu) + ' 处）'],
+      [mode === 'c' ? 'P(a ≤ X ≤ b)' : 'P(μ−' + mode + 'σ ≤ X ≤ μ+' + mode + 'σ)', 'P(' + fm(lo) + ' ≤ X ≤ ' + fm(hi) + ') ≈ <b>' + f4(prob()) + '</b>']
+    ];
+    if (mode === 'c') rows.push(['P(X ≤ a)', 'P(X ≤ ' + fm(a) + ') ≈ <b>' + f4(Phi((a - mu) / sg)) + '</b>'],
+      ['P(X ≥ b)', 'P(X ≥ ' + fm(b) + ') ≈ <b>' + f4(1 - Phi((b - mu) / sg)) + '</b>']);
+    rows.push(['3σ 原则', 'P(μ−σ ≤ X ≤ μ+σ) ≈ 0.6827<br>P(μ−2σ ≤ X ≤ μ+2σ) ≈ 0.9545<br>P(μ−3σ ≤ X ≤ μ+3σ) ≈ 0.9973'],
+      ['对称性', 'P(X ≤ μ) = 0.5<br>P(X ≤ μ−a) = P(X ≥ μ+a)']);
+    if (bin) rows.push(['对比 B(' + nB + ', 0.5)', 'np = ' + fm(nB / 2) + '，√(np(1−p)) ≈ ' + Math.sqrt(nB / 4).toFixed(4) + '<br>标准化后对齐到 N(' + fm(mu) + ', ' + fm(sg * sg) + ')']);
+    ui.ro.update(rows);
+  }
+  function setMode(v){
+    mode = v;
+    if (v === 'c') { a = Math.max(-XM, Math.round((mu - sg) * 100) / 100); b = Math.min(XM, Math.round((mu + 1.5 * sg) * 100) / 100); }
+    upd();
+  }
+  return {
+    text: '身高、考试成绩、零件尺寸这类受很多微小因素共同影响的量，往往近似服从<b>正态分布 N(μ, σ²)</b>。曲线是「钟形」，关于 <b>x = μ</b> 对称；<b>μ 决定位置，σ 决定胖瘦</b>：σ 越小曲线越瘦高，数据越集中。曲线下总面积为 1，某区间上的面积就是落在该区间的概率。',
+    points: ['X ~ N(μ, σ²) 时，E(X) = μ，D(X) = σ²', '曲线关于 x = μ 对称，在 x = μ 处取最大值 1/(σ√(2π))', 'σ 越小，曲线越瘦高，数据越集中；σ 越大越矮胖、越分散', '3σ 原则：P(μ−σ ≤ X ≤ μ+σ) ≈ 0.6827，P(μ−2σ ≤ X ≤ μ+2σ) ≈ 0.9545，P(μ−3σ ≤ X ≤ μ+3σ) ≈ 0.9973', '利用对称性把所求概率转化到已知区间：P(X ≤ μ−a) = P(X ≥ μ+a)'],
+    gk: ['高考链接：常考给出 P(X > a) 用对称性求另一区间概率，或用 3σ 原则估计人数（如「成绩在 μ+2σ 以上的约占 2.3%」）。', '易错：N(μ, σ²) 的第二个参数是方差 σ²，不是 σ；P(X > μ+σ) = (1 − 0.6827)/2 ≈ 0.1587。'],
+    mount(ctrl, read){
+      const nBox = el('div'); nBox.hidden = !bin;
+      nBox.appendChild(slider('二项分布 n', 4, 60, 1, nB, String, v => { nB = v; upd(); }));
+      ctrl.append(
+        slider('均值 μ', -3, 3, .1, mu, fm, v => { mu = Math.round(v * 10) / 10; upd(); }),
+        slider('标准差 σ', .3, 3, .1, sg, x => x.toFixed(1), v => { sg = Math.round(v * 10) / 10; upd(); }),
+        chips([{label: '±1σ', value: 1}, {label: '±2σ', value: 2}, {label: '±3σ', value: 3}, {label: '自定义', value: 'c'}], mode, setMode),
+        toggle('对比二项分布', bin, v => { bin = v; nBox.hidden = !v; upd(); }), nBox);
+      ui.ro = readout(); read.append(ui.ro); upd();
+    },
+    draw(c, w, h, t){
+      const T = theme(), ov = $('ov');
+      let top = ov.offsetParent !== null ? ov.offsetTop + ov.offsetHeight + 12 : 12;
+      top = Math.min(top, h * .4);
+      // 平滑过渡
+      const dt = lastT == null ? 1 : Math.max(0, t - lastT); lastT = t;
+      const k = RM.matches ? 1 : 1 - Math.exp(-dt * 10);
+      dmu += (mu - dmu) * k; dsg += (sg - dsg) * k;
+      dym = 1.4;
+      // 布局
+      const L = 50, R = w - 16, py0 = top + 34, pyb = h - 34, ph = Math.max(40, pyb - py0);
+      const px = x => L + (x + XM) / (2 * XM) * (R - L), Y = v => pyb - v / dym * ph;
+      G = {L, R, py0, pyb};
+      c.font = '13px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'middle';
+      c.fillText('X ~ N(' + fm(mu) + ', ' + fm(sg * sg) + ')' + (mode === 'c' ? ' · 拖动金色竖线 a、b' : ''), 16, top + 10);
+      // 纵轴网格
+      const stp = .2;
+      c.font = '12px ' + T.mono; c.textAlign = 'right'; c.strokeStyle = T.line; c.lineWidth = 1;
+      for (let q = 0; q <= 7; q++) {
+        const v = q * stp, y = Y(v); c.fillStyle = T.fg2; c.fillText(+v.toFixed(1), L - 6, y);
+        if (!q) continue;
+        c.globalAlpha = .5; c.beginPath(); c.moveTo(L, y); c.lineTo(R, y); c.stroke(); c.globalAlpha = 1;
+      }
+      // 横轴与刻度
+      c.strokeStyle = T.fg2; c.beginPath(); c.moveTo(L, pyb); c.lineTo(R, pyb); c.stroke();
+      const gap = (R - L) / (2 * XM), every = gap >= 20 ? 1 : 2;
+      c.textAlign = 'center'; c.textBaseline = 'top';
+      for (let i = -XM; i <= XM; i++) {
+        c.beginPath(); c.moveTo(px(i), pyb); c.lineTo(px(i), pyb + 4); c.stroke();
+        if (i % every === 0) { c.fillStyle = T.fg2; c.fillText(i < 0 ? '−' + (-i) : i, px(i), pyb + 7); }
+      }
+      // 二项分布柱
+      if (bin) {
+        const P = binP(nB), s = Math.sqrt(nB / 4), bw = dsg / s;
+        c.fillStyle = T.teal; c.strokeStyle = T.teal;
+        P.forEach((q, j) => {
+          const xc = dmu + dsg * (j - nB / 2) / s, hgt = q * s / dsg;
+          if (xc + bw / 2 < -XM || xc - bw / 2 > XM) return;
+          const x0 = px(Math.max(-XM, xc - bw / 2)), x1 = px(Math.min(XM, xc + bw / 2)), y = Math.max(py0 - 20, Y(hgt));
+          c.globalAlpha = .28; c.fillRect(x0, y, x1 - x0, pyb - y);
+          c.globalAlpha = .7; c.lineWidth = 1; c.strokeRect(x0 + .5, y + .5, x1 - x0 - 1, pyb - y - .5);
+        });
+        c.globalAlpha = 1;
+      }
+      // 阴影区间
+      const [lo, hi] = range(dmu, dsg), sL = Math.max(-XM, lo), sR = Math.min(XM, hi);
+      if (sR > sL) {
+        c.fillStyle = T.accentSoft; c.beginPath(); c.moveTo(px(sL), pyb);
+        for (let i = 0; i <= 120; i++) { const x = sL + (sR - sL) * i / 120; c.lineTo(px(x), Y(pdf(x, dmu, dsg))); }
+        c.lineTo(px(sR), pyb); c.closePath(); c.fill();
+      }
+      // 密度曲线
+      c.strokeStyle = T.accent; c.lineWidth = 2.5; c.lineJoin = 'round'; c.beginPath();
+      for (let i = 0; i <= 480; i++) { const x = -XM + 2 * XM * i / 480, y = Math.max(py0 - 20, Y(pdf(x, dmu, dsg))); i ? c.lineTo(px(x), y) : c.moveTo(px(x), y); }
+      c.stroke();
+      // μ 竖直虚线
+      const pk = Y(pdf(dmu, dmu, dsg));
+      c.strokeStyle = T.fg2; c.lineWidth = 1; c.setLineDash([4, 4]); c.beginPath(); c.moveTo(px(dmu), pyb); c.lineTo(px(dmu), pk); c.stroke(); c.setLineDash([]);
+      c.font = '600 13px ' + T.sans; c.fillStyle = T.fg; c.textAlign = 'center'; c.textBaseline = 'bottom';
+      c.fillText('μ', px(dmu), pk - 6);
+      // 拐点 μ±σ
+      c.font = '12px ' + T.sans; c.textBaseline = 'bottom';
+      [-1, 1].forEach(sn => {
+        const x = dmu + sn * dsg; if (x < -XM || x > XM) return;
+        const y = Y(pdf(x, dmu, dsg));
+        c.fillStyle = T.fg; c.beginPath(); c.arc(px(x), y, 4, 0, Math.PI * 2); c.fill();
+        c.fillStyle = T.fg2; c.textAlign = sn < 0 ? 'right' : 'left'; c.fillText(sn < 0 ? 'μ−σ' : 'μ+σ', px(x) + sn * 7, y - 4);
+      });
+      // 概率标签
+      if (sR > sL) {
+        const s = (mode === 'c' ? 'P(a≤X≤b)' : 'P') + ' ≈ ' + f4(prob());
+        c.font = '600 13px ' + T.mono; const tw = c.measureText(s).width + 16;
+        const cxm = Math.max(L + tw / 2, Math.min(R - tw / 2, px((sL + sR) / 2)));
+        const cy = pyb - Math.min(ph * .3, (pyb - Y(pdf((sL + sR) / 2, dmu, dsg))) * .4) - 12;
+        c.fillStyle = T.card; c.globalAlpha = .92; rr(c, cxm - tw / 2, cy - 12, tw, 24, 8); c.fill(); c.globalAlpha = 1;
+        c.fillStyle = T.fg; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(s, cxm, cy);
+      }
+      // 自定义把手
+      if (mode === 'c') {
+        [['a', a], ['b', b]].forEach(([nm, v]) => {
+          const x = px(v);
+          c.strokeStyle = T.gold; c.lineWidth = drag === nm ? 3 : 2; c.beginPath(); c.moveTo(x, py0); c.lineTo(x, pyb); c.stroke();
+          c.fillStyle = T.gold; c.beginPath(); c.arc(x, py0 + 12, 12, 0, Math.PI * 2); c.fill();
+          c.font = '600 13px ' + T.sans; c.fillStyle = T.card; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(nm, x, py0 + 12);
+        });
+      }
+    },
+    pointer(e, type, x, y){
+      if (!G || mode !== 'c') return;
+      if (type === 'up' || type === 'cancel') { drag = null; return; }
+      const v = Math.max(-XM, Math.min(XM, Math.round((-XM + (x - G.L) / (G.R - G.L) * 2 * XM) * 100) / 100));
+      if (type === 'down') {
+        if (y < G.py0 - 16 || y > G.pyb + 24 || x < G.L - 24 || x > G.R + 24) return;
+        const pa = G.L + (a + XM) / (2 * XM) * (G.R - G.L), pb = G.L + (b + XM) / (2 * XM) * (G.R - G.L);
+        drag = Math.abs(x - pa) <= Math.abs(x - pb) ? 'a' : 'b';
+      }
+      if (!drag) return;
+      e.preventDefault && e.preventDefault();
+      if (drag === 'a') a = v; else b = v;
+      if (a > b) { [a, b] = [b, a]; drag = drag === 'a' ? 'b' : 'a'; }
+      upd();
+    },
+    unmount(){ ui = {}; G = null; drag = null; lastT = null; }
+  };
+})();
+CH[7].ready = true;
+
+MODS[8] = (() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)'), X0 = 60, X1 = 150, N = 100;
+  // 固定种子伪随机生成后写死的 100 个成绩（62–148，单峰，略左偏）
+  const D = [102,122,109,96,131,124,116,121,109,116,114,91,111,100,105,99,94,108,89,106,108,120,116,108,120,105,106,113,91,87,148,101,110,108,102,138,105,91,108,111,97,103,62,95,84,92,127,66,100,108,103,95,109,134,109,117,103,109,108,115,104,100,114,107,86,89,87,109,112,85,108,114,80,94,103,114,123,103,113,108,123,114,110,78,113,100,82,93,105,75,101,116,120,116,102,110,103,97,105,105];
+  const S = D.slice().sort((a, b) => a - b);
+  const mean = D.reduce((s, x) => s + x, 0) / N, med = (S[N / 2 - 1] + S[N / 2]) / 2;
+  const v2 = D.reduce((s, x) => s + (x - mean) * (x - mean), 0) / N;
+  const cnt = {}; D.forEach(x => cnt[x] = (cnt[x] || 0) + 1);
+  const mx = Math.max(...Object.values(cnt)), modes = Object.keys(cnt).filter(k => cnt[k] === mx).map(Number);
+  let bw = 10, oldW = 10, trS = -1, tr = 1, p = 75, est = false, dots = false, sel = -1, drag = false, lastT = null, G = null, ui = {};
+  const disp = {};
+  const f2 = x => String(+x.toFixed(2)), f4 = x => String(+x.toFixed(4));
+  function bins(w){ const n = Math.round((X1 - X0) / w), c = new Array(n).fill(0); D.forEach(x => c[Math.min(n - 1, Math.floor((x - X0) / w))]++); return c; }
+  const dens = (w, c, x) => { const i = Math.floor((x - X0) / w); return i < 0 || i >= c.length ? 0 : c[i] / N / w; };
+  function hq(q){ const c = bins(bw); let F = 0; for (let i = 0; i < c.length; i++) { const f = c[i] / N; if (F + f >= q - 1e-12 && f > 0) return X0 + i * bw + (q - F) / f * bw; F += f; } return X1; }
+  function hF(v){ const c = bins(bw); let F = 0; for (let i = 0; i < c.length; i++) { const a = X0 + i * bw; if (v >= a + bw) F += c[i] / N; else { if (v > a) F += c[i] / N * (v - a) / bw; break; } } return F; }
+  function hEst(){ const c = bins(bw), k = c.indexOf(Math.max(...c)); return {mean: c.reduce((s, n, i) => s + (X0 + (i + .5) * bw) * n / N, 0), med: hq(.5), mode: X0 + (k + .5) * bw}; }
+  function pct(pp){
+    const i = N * pp / 100;
+    if (Math.abs(i - Math.round(i)) < 1e-9) { const k = Math.round(i), v = k < N ? (S[k - 1] + S[k]) / 2 : S[N - 1];
+      return {v, txt: 'i = 100×' + pp + '% = ' + k + '，是整数，取第 ' + k + '、' + (k + 1) + ' 项的平均数：(' + S[k - 1] + ' + ' + S[k] + ')/2 = <b>' + f2(v) + '</b>'}; }
+    const k = Math.ceil(i); return {v: S[k - 1], txt: 'i = 100×' + pp + '% = ' + f2(i) + '，不是整数，取第 ' + k + ' 项：<b>' + S[k - 1] + '</b>'};
+  }
+  function targets(){ const h = hEst(); return est ? {mean: h.mean, med: h.med, mode: h.mode, pv: hq(p / 100)} : {mean, med, mode: modes[0], pv: pct(p).v}; }
+  function upd(){
+    if (!ui.ro) return;
+    const h = hEst(), P = pct(p), both = (a, b) => est ? '原始数据值 ' + f2(a) + '<br>直方图估计值 <b>' + f2(b) + '</b>' : '<b>' + f2(a) + '</b>';
+    ui.ro.update([
+      ['样本容量 n', '<b>100</b>（组距 ' + bw + '，共 ' + bins(bw).length + ' 组）'],
+      ['平均数 x̄', both(mean, h.mean) + (est ? '<br>Σ 组中值×频率' : '')],
+      ['中位数', both(med, h.med) + (est ? '<br>左侧面积 = 0.5 处插值' : '')],
+      ['众数', est ? '原始数据值 ' + modes.join('、') + '（' + mx + ' 次）<br>直方图估计值 <b>' + f2(h.mode) + '</b>（最高组中点）' : '<b>' + modes.join('、') + '</b>（出现 ' + mx + ' 次）'],
+      ['方差 s² = (1/n)Σ(xᵢ−x̄)²', '<b>' + f2(v2) + '</b>'],
+      ['标准差 s', '<b>' + f2(Math.sqrt(v2)) + '</b>'],
+      ['第 ' + p + ' 百分位数', P.txt + (est ? '<br>直方图估计值 ' + f2(hq(p / 100)) : '')],
+      ['极差', S[N - 1] + ' − ' + S[0] + ' = <b>' + (S[N - 1] - S[0]) + '</b>'],
+      ['偏态', 'x̄ = ' + f2(mean) + ' < 中位数 ' + f2(med) + '，低分拖尾（左偏）']
+    ]);
+  }
+  function setW(w){ if (w === bw) return; oldW = tr < 1 ? oldW : bw; bw = w; trS = -1; tr = 0; sel = -1; upd(); }
+  return {
+    text: '某校随机抽取 100 名高一学生的数学成绩（满分 150）。把数据分组画成<b>频率分布直方图</b>，纵轴是「<b>频率/组距</b>」，所以每个小矩形的<b>面积就是该组的频率</b>，面积总和为 1。平均数是直方图的「重心」，中位数把面积左右平分，众数取最高矩形底边中点；第 p 百分位数表示有 p% 的数据不超过它。',
+    points: ['频率分布直方图纵轴为频率/组距，小矩形面积 = 频率，所有矩形面积和 = 1', '平均数 ≈ Σ 组中值 × 频率', '中位数左右两侧直方图面积各为 0.5', '众数 ≈ 最高矩形底边中点', '第 p 百分位数：先算 i = n×p%；i 不是整数取第 ⌈i⌉ 项，i 是整数取第 i 项与第 i+1 项的平均数', '方差 s² = (1/n)Σ(xᵢ − x̄)²，标准差 s = √s²'],
+    gk: ['高考链接：常考由直方图求参数 a（面积和为 1），再估计平均数、中位数、百分位数。', '易错：纵轴不是频率，频率 = 纵轴值 × 组距；第 p 百分位数 i 为整数时要取两项平均；左偏分布平均数小于中位数。'],
+    mount(ctrl, read){
+      ui.sl = slider('百分位 p', 1, 99, 1, p, x => x + '%', v => { p = v; upd(); });
+      ctrl.append(chips([5, 10, 15, 18].map(v => ({label: '组距 ' + v, value: v})), bw, setW), ui.sl,
+        toggle('按直方图估计', est, v => { est = v; upd(); }), toggle('显示数据点', dots, v => { dots = v; }));
+      ui.ro = readout(); read.append(ui.ro); upd();
+    },
+    draw(c, w, h, t){
+      const T = theme(), ov = $('ov');
+      let top = ov.offsetParent !== null ? ov.offsetTop + ov.offsetHeight + 12 : 12; top = Math.min(top, h * .4);
+      const dt = lastT == null ? 1 : Math.max(0, t - lastT); lastT = t;
+      const k = RM.matches ? 1 : 1 - Math.exp(-dt * 9);
+      if (tr < 1) { if (trS < 0) trS = t; tr = RM.matches ? 1 : Math.min(1, (t - trS) / .5); }
+      const e = tr < 1 ? 1 - Math.pow(1 - tr, 3) : 1, cN = bins(bw), cO = bins(oldW);
+      const tg = targets(); for (const key in tg) disp[key] = disp[key] == null ? tg[key] : disp[key] + (tg[key] - disp[key]) * k;
+      const ymT = Math.max(...cN) / N / bw * 1.15; disp.ym = disp.ym == null ? ymT : disp.ym + (ymT - disp.ym) * k;
+      const L = 58, R = w - 18, py0 = top + 72, pyb = h - (dots ? 74 : 38), ph = Math.max(40, pyb - py0);
+      const px = x => L + (x - X0) / (X1 - X0) * (R - L), Y = v => pyb - v / disp.ym * ph;
+      G = {L, R, py0, pyb, px};
+      // 纵轴
+      const st = [.002, .005, .01, .02].find(s => disp.ym / s <= 6) || .02;
+      c.font = '12px ' + T.mono; c.textAlign = 'right'; c.textBaseline = 'middle'; c.strokeStyle = T.line; c.lineWidth = 1;
+      for (let v = st; v < disp.ym; v += st) { const y = Y(v); c.fillStyle = T.fg2; c.fillText(v.toFixed(3), L - 6, y);
+        c.beginPath(); c.moveTo(L, y); c.lineTo(R, y); c.stroke(); }
+      c.font = '12px ' + T.sans; c.textAlign = 'left'; c.textBaseline = 'bottom'; c.fillStyle = T.fg2; c.fillText('频率/组距', 8, py0 - 52);
+      // 横轴
+      c.strokeStyle = T.fg2; c.beginPath(); c.moveTo(L, pyb); c.lineTo(R, pyb); c.stroke();
+      c.font = '12px ' + T.mono; c.textAlign = 'center'; c.textBaseline = 'top';
+      const xs = (R - L) / 90 * bw < 26 ? 10 : bw;
+      for (let x = X0; x <= X1 + 1e-9; x += xs) { c.beginPath(); c.moveTo(px(x), pyb); c.lineTo(px(x), pyb + 4); c.stroke(); c.fillStyle = T.fg2; c.fillText(x, px(x), pyb + 6); }
+      // 直方图（新旧组距之间平滑过渡）
+      const ed = new Set(); for (let x = X0; x <= X1; x += bw) ed.add(x); for (let x = X0; x <= X1; x += oldW) ed.add(x);
+      const E = [...ed].sort((a, b) => a - b), seg = [];
+      for (let j = 0; j < E.length - 1; j++) { const m = (E[j] + E[j + 1]) / 2; seg.push([E[j], E[j + 1], dens(oldW, cO, m) * (1 - e) + dens(bw, cN, m) * e]); }
+      const fillH = (col, a) => { c.fillStyle = col; c.globalAlpha = a; seg.forEach(([a0, a1, d]) => c.fillRect(px(a0), Y(d), px(a1) - px(a0), pyb - Y(d))); c.globalAlpha = 1; };
+      fillH(T.accent, .22);
+      // 百分位左侧着色
+      const pv = disp.pv, ppx = px(pv);
+      c.save(); c.beginPath(); c.rect(L, py0 - 80, ppx - L, ph + 80); c.clip(); fillH(T.purple, .32); c.restore();
+      if (sel >= 0 && tr >= 1 && sel < cN.length) { const d = cN[sel] / N / bw; c.fillStyle = T.accent; c.globalAlpha = .35; c.fillRect(px(X0 + sel * bw), Y(d), px(X0 + (sel + 1) * bw) - px(X0 + sel * bw), pyb - Y(d)); c.globalAlpha = 1; }
+      c.strokeStyle = T.accent; c.lineWidth = 1.2; c.beginPath(); c.moveTo(px(X0), pyb);
+      seg.forEach(([a0, a1, d]) => { c.lineTo(px(a0), Y(d)); c.lineTo(px(a1), Y(d)); }); c.lineTo(px(X1), pyb); c.stroke();
+      c.globalAlpha = e; c.beginPath();
+      for (let i = 1; i < cN.length; i++) { const x = X0 + i * bw, j = seg.findIndex(s => s[0] >= x - 1e-9), d = Math.min(seg[j - 1][2], seg[j][2]); c.moveTo(px(x), pyb); c.lineTo(px(x), Y(d)); }
+      c.stroke(); c.globalAlpha = 1;
+      // 平均数 / 中位数 / 众数 竖线
+      [[disp.mean, T.accent, 'x̄'], [disp.med, T.teal, '中位数'], [disp.mode, T.gold, '众数']].forEach(([v, col, nm], r) => {
+        const x = px(v), ly = py0 - 8 - r * 17;
+        c.strokeStyle = col; c.lineWidth = 2; c.setLineDash(r ? [5, 4] : []); c.beginPath(); c.moveTo(x, ly + 2); c.lineTo(x, pyb); c.stroke(); c.setLineDash([]);
+        c.font = '600 12px ' + T.sans; c.fillStyle = col; c.textAlign = x > R - 90 ? 'right' : 'left'; c.textBaseline = 'bottom';
+        c.fillText(nm + ' ' + f2(v), x + (x > R - 90 ? -4 : 4), ly + 6);
+      });
+      // 第 p 百分位数（紫，可拖）
+      c.strokeStyle = T.purple; c.lineWidth = drag ? 3.5 : 2.5; c.beginPath(); c.moveTo(ppx, py0 - 60); c.lineTo(ppx, pyb); c.stroke();
+      c.fillStyle = T.purple; c.beginPath(); c.arc(ppx, py0 - 60, 9, 0, Math.PI * 2); c.fill();
+      c.font = '600 13px ' + T.sans; c.textAlign = ppx > R - 80 ? 'right' : 'left'; c.textBaseline = 'middle';
+      c.fillText('P' + p + ' ' + f2(pv), ppx + (ppx > R - 80 ? -14 : 14), py0 - 60);
+      const ar = hF(pv); c.font = '600 14px ' + T.mono; c.textAlign = 'center'; c.fillStyle = T.fg;
+      if (ppx - L > 50) c.fillText(est ? p + '%' : p + '%（面积≈' + ar.toFixed(2) + '）', Math.max(L + 60, (L + ppx) / 2), pyb - 18);
+      // 数据点带
+      if (dots) { const seen = {}; c.fillStyle = T.fg2; S.forEach(x => { const n = seen[x] = (seen[x] || 0) + 1; c.beginPath(); c.arc(px(x), pyb + 28 + (n - 1) * 4, 2, 0, Math.PI * 2); c.fill(); }); }
+      // 悬停 / 点击提示
+      if (sel >= 0 && tr >= 1 && sel < cN.length) {
+        const a0 = X0 + sel * bw, a1 = a0 + bw, n = cN[sel], f = n / N;
+        const s = '[' + a0 + ',' + a1 + (sel === cN.length - 1 ? ']' : ')') + '：频数 ' + n + '，频率 ' + f2(f) + '，频率/组距 ' + f4(f / bw);
+        c.font = '13px ' + T.sans; const tw = c.measureText(s).width + 20, cx = Math.max(L + tw / 2, Math.min(R - tw / 2, px((a0 + a1) / 2))), cy = Math.max(py0 + 16, Y(f / bw) - 22);
+        c.fillStyle = T.card; c.strokeStyle = T.line; c.beginPath(); c.roundRect ? c.roundRect(cx - tw / 2, cy - 14, tw, 28, 8) : c.rect(cx - tw / 2, cy - 14, tw, 28); c.fill(); c.stroke();
+        c.fillStyle = T.fg; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(s, cx, cy);
+      }
+    },
+    pointer(e, type, x, y){
+      if (!G) return;
+      if (type === 'up' || type === 'cancel') { drag = false; return; }
+      const v = X0 + (x - G.L) / (G.R - G.L) * (X1 - X0);
+      if (type === 'down' && Math.abs(x - G.px(disp.pv)) < 16 && y > G.py0 - 74 && y < G.pyb + 8) drag = true;
+      if (drag) {
+        e.preventDefault && e.preventDefault();
+        const q = est ? hF(v) * 100 : S.filter(s => s <= v).length;
+        p = Math.max(1, Math.min(99, Math.round(q))); ui.sl && ui.sl.set(p); upd(); return;
+      }
+      const inside = v >= X0 && v < X1 && y > G.py0 - 20 && y <= G.pyb;
+      if (type === 'down' || e.pointerType === 'mouse') sel = inside ? Math.floor((v - X0) / bw) : (type === 'down' ? -1 : sel);
+      if (e.pointerType === 'mouse' && !inside && type === 'move') sel = -1;
+    },
+    unmount(){ ui = {}; G = null; drag = false; lastT = null; sel = -1; }
+  };
+})();
+CH[8].ready = true;
+
+MODS[9] = (() => {
+  const XS = [1, 2, 3, 4, 5, 6, 7, 8];
+  const PRE = {
+    ad: XS.map((x, i) => [x, [3.1, 4.0, 5.2, 5.6, 6.9, 7.4, 8.5, 9.1][i]]),
+    neg: XS.map((x, i) => [x, [10.2, 9.1, 8.5, 7.0, 6.4, 5.1, 4.6, 3.2][i]]),
+    none: XS.map((x, i) => [x, [6.5, 3.2, 8.1, 4.4, 7.6, 3.8, 6.9, 5.0][i]]),
+    out: [[1, 3.1], [2, 4.0], [3, 5.2], [4, 5.6], [5, 6.9], [6, 7.4], [7, 8.5], [9.5, 1.5]]
+  };
+  let P = PRE.ad.map(p => p.slice()), pre = 'ad', showRes = false, own = false, A = [1, 6], B = [9, 6], x0 = 10;
+  let G = null, ui = {}, drag = null, dn = null, lp = 0, lastTap = {i: -1, t: 0}, msg = '', msgT = 0;
+  const f3 = v => isFinite(v) ? String(+v.toFixed(3)) : '—';
+  const cl = (v, a, b) => Math.max(a, Math.min(b, v)), rd = v => Math.round(v * 10) / 10;
+  function stat(){
+    const n = P.length; let mx = 0, my = 0; P.forEach(([x, y]) => { mx += x; my += y; }); mx /= n; my /= n;
+    let sxy = 0, sxx = 0, syy = 0; P.forEach(([x, y]) => { sxy += (x - mx) * (y - my); sxx += (x - mx) ** 2; syy += (y - my) ** 2; });
+    const b = sxx > 1e-12 ? sxy / sxx : NaN, a = my - b * mx;
+    const r = sxx > 1e-12 && syy > 1e-12 ? sxy / Math.sqrt(sxx * syy) : NaN;
+    const Q = isFinite(b) ? P.reduce((s, [x, y]) => s + (y - b * x - a) ** 2, 0) : NaN;
+    return {n, mx, my, sxy, sxx, syy, b, a, r, Q, R2: syy > 1e-12 ? 1 - Q / syy : NaN};
+  }
+  function ownQ(){ if (Math.abs(B[0] - A[0]) < 1e-9) return NaN; const k = (B[1] - A[1]) / (B[0] - A[0]); return P.reduce((s, [x, y]) => s + (y - A[1] - k * (x - A[0])) ** 2, 0); }
+  const eq = (b, a) => isFinite(b) ? 'ŷ = ' + f3(b) + 'x ' + (a < 0 ? '− ' : '+ ') + f3(Math.abs(a)) : '无法确定（x 全相同）';
+  function judge(r){ if (!isFinite(r)) return '无法计算'; return (Math.abs(r) >= .75 ? '强' : '较弱的') + (r > 0 ? '正相关' : r < 0 ? '负相关' : '不相关'); }
+  function upd(){
+    if (!ui.ro) return;
+    const s = stat(), y0 = s.b * x0 + s.a, xmin = Math.min(...P.map(p => p[0])), xmax = Math.max(...P.map(p => p[0]));
+    const rows = [
+      ['样本容量 n', '<b>' + s.n + '</b>'],
+      ['x̄，ȳ', f3(s.mx) + '，' + f3(s.my)],
+      ['b̂ = Σ(xᵢ−x̄)(yᵢ−ȳ) / Σ(xᵢ−x̄)²', f3(s.sxy) + ' / ' + f3(s.sxx) + ' ≈ <b>' + f3(s.b) + '</b>'],
+      ['â = ȳ − b̂x̄', f3(s.my) + ' − ' + f3(s.b) + '×' + f3(s.mx) + ' ≈ <b>' + f3(s.a) + '</b>'],
+      ['经验回归方程', '<b>' + eq(s.b, s.a) + '</b>'],
+      ['相关系数 r', '<b>' + f3(s.r) + '</b>（' + judge(s.r) + '）'],
+      ['残差平方和 Q = Σeᵢ²', '<b>' + f3(s.Q) + '</b>'],
+      ['R² = 1 − Q / Σ(yᵢ−ȳ)²', '1 − ' + f3(s.Q) + ' / ' + f3(s.syy) + ' ≈ <b>' + f3(s.R2) + '</b>']
+    ];
+    if (own) { const q = ownQ(); rows.push(['自画线的残差平方和', '<b>' + f3(q) + '</b>' + (isFinite(q) && isFinite(s.Q) ? '<br>比最小二乘线大 ' + f3(q - s.Q) : '')]); }
+    rows.push(['预测值 ŷ₀（x₀ = ' + f3(x0) + '）', '<b>' + f3(y0) + '</b>' + (isFinite(y0) && (x0 < xmin || x0 > xmax) ? '<br>超出数据范围 [' + f3(xmin) + ', ' + f3(xmax) + ']，仅作估计' : '')]);
+    ui.ro.update(rows);
+  }
+  function setPre(k){ pre = k; P = PRE[k].map(p => p.slice()); lastTap = {i: -1, t: 0}; if (own) resetOwn(); upd(); }
+  function resetOwn(){ const m = cl(stat().my, 0, 12); A = [1, m]; B = [9, m]; }
+  function unsel(){ pre = null; ui.ch && ui.ch.set(null); }
+  function del(i){ if (P.length <= 3) { msg = '至少保留 3 个点'; msgT = performance.now(); return; } P.splice(i, 1); lastTap = {i: -1, t: 0}; unsel(); upd(); }
+  return {
+    text: '某商店记录了 8 个月的广告费 x（万元）与销售额 y（万元）。把数据画成<b>散点图</b>，点大致沿一条直线分布，说明两者<b>线性相关</b>。<b>最小二乘法</b>要找的直线，使所有点到直线的竖直距离（<b>残差</b>）的平方和最小，这条经验回归直线一定经过<b>样本中心 (x̄, ȳ)</b>。样本相关系数 r 越接近 ±1，线性相关越强。',
+    points: ['r = Σ(xᵢ−x̄)(yᵢ−ȳ) / √[Σ(xᵢ−x̄)²·Σ(yᵢ−ȳ)²]，|r| ≤ 1', 'b̂ = Σ(xᵢ−x̄)(yᵢ−ȳ) / Σ(xᵢ−x̄)²，â = ȳ − b̂x̄', '经验回归直线 ŷ = b̂x + â 一定经过样本中心 (x̄, ȳ)', '残差 eᵢ = yᵢ − ŷᵢ', 'R² = 1 − Σeᵢ² / Σ(yᵢ−ȳ)²，越接近 1 拟合越好', 'r 与 b̂ 同号：同为正是正相关，同为负是负相关'],
+    gk: ['高考链接：常考用公式求经验回归方程并预测、由回归直线过样本中心求参数、残差与 R² 的判断。', '易错：预测值只是估计值，不是精确值；相关关系不等于因果关系；回归方程只适用于数据范围附近。'],
+    mount(ctrl, read){
+      ui.ch = chips([{label: '广告费与销售额', value: 'ad'}, {label: '负相关', value: 'neg'}, {label: '几乎不相关', value: 'none'}, {label: '有离群点', value: 'out'}], pre, setPre);
+      const lab = el('label', '', '预测 x₀'); lab.style.cssText = 'display:block;font-size:13px;color:var(--fg2);margin:10px 0 6px';
+      const inp = el('input'); Object.assign(inp, {type: 'number', step: '0.1', value: x0}); inp.setAttribute('aria-label', '预测 x₀');
+      inp.style.cssText = 'width:100%;min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--fg);font:15px var(--mono)';
+      inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (isFinite(v)) { x0 = v; upd(); } });
+      const tip = el('div', '', '拖动蓝点；点空白处加点（最多 20 个）；双击或长按 0.5 秒删点。'); tip.style.cssText = 'font-size:13px;color:var(--fg2);margin-top:8px';
+      ctrl.append(ui.ch, toggle('显示残差', showRes, v => { showRes = v; }), toggle('自己画一条', own, v => { own = v; if (v) resetOwn(); upd(); }), lab, inp, tip);
+      ui.ro = readout(); read.append(ui.ro); upd();
+    },
+    draw(c, w, h){
+      const T = theme(), ov = $('ov'), s = stat();
+      let top = ov.offsetParent !== null ? ov.offsetTop + ov.offsetHeight + 12 : 12; top = Math.min(top, h * .4);
+      const L = 44, R = w - 18, Tp = top + 10, Bt = h - 34;
+      const X = x => L + x / 10 * (R - L), Y = y => Bt - y / 12 * (Bt - Tp);
+      G = {L, R, Tp, Bt, ux: px => (px - L) / (R - L) * 10, uy: py => (Bt - py) / (Bt - Tp) * 12, X, Y};
+      // 网格与刻度
+      c.lineWidth = 1; c.strokeStyle = T.line; c.font = '12px ' + T.mono; c.fillStyle = T.fg2;
+      c.textAlign = 'center'; c.textBaseline = 'top';
+      for (let i = 0; i <= 10; i++) { c.beginPath(); c.moveTo(X(i), Tp); c.lineTo(X(i), Bt); c.stroke(); c.fillText(i, X(i), Bt + 6); }
+      c.textAlign = 'right'; c.textBaseline = 'middle'; const ys = Bt - Tp < 240 ? 2 : 1;
+      for (let j = 0; j <= 12; j++) { c.beginPath(); c.moveTo(L, Y(j)); c.lineTo(R, Y(j)); c.stroke(); if (j % ys === 0) c.fillText(j, L - 6, Y(j)); }
+      c.strokeStyle = T.fg2; c.beginPath(); c.moveTo(L, Tp); c.lineTo(L, Bt); c.lineTo(R, Bt); c.stroke();
+      c.font = '12px ' + T.sans; c.textAlign = 'right'; c.textBaseline = 'bottom'; c.fillText('x 广告费（万元）', R, Bt - 4);
+      c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('y 销售额（万元）', L + 6, Tp + 4);
+      c.save(); c.beginPath(); c.rect(L, Tp, R - L, Bt - Tp); c.clip();
+      const ok = isFinite(s.b), yh = x => s.b * x + s.a;
+      // 残差与平方
+      if (showRes && ok) P.forEach(([x, y]) => {
+        const py = Y(y), pl = Y(yh(x)), sd = Math.abs(py - pl);
+        c.fillStyle = T.red; c.globalAlpha = .14; c.fillRect(X(x), Math.min(py, pl), sd, sd);
+        c.globalAlpha = .5; c.strokeStyle = T.red; c.lineWidth = 1; c.strokeRect(X(x), Math.min(py, pl), sd, sd);
+        c.globalAlpha = 1; c.lineWidth = 2; c.beginPath(); c.moveTo(X(x), py); c.lineTo(X(x), pl); c.stroke();
+      });
+      // 自画线
+      if (own) {
+        c.strokeStyle = T.fg2; c.lineWidth = 2; c.setLineDash([7, 6]); c.beginPath();
+        if (Math.abs(B[0] - A[0]) < 1e-9) { c.moveTo(X(A[0]), Tp); c.lineTo(X(A[0]), Bt); }
+        else { const k = (B[1] - A[1]) / (B[0] - A[0]); c.moveTo(X(-1), Y(A[1] + k * (-1 - A[0]))); c.lineTo(X(11), Y(A[1] + k * (11 - A[0]))); }
+        c.stroke(); c.setLineDash([]);
+      }
+      // 最小二乘线
+      if (ok) { c.strokeStyle = T.accent; c.lineWidth = 2.5; c.beginPath(); c.moveTo(X(-1), Y(yh(-1))); c.lineTo(X(11), Y(yh(11))); c.stroke(); }
+      // 预测点
+      const y0 = yh(x0);
+      if (ok && x0 >= 0 && x0 <= 10 && y0 >= 0 && y0 <= 12) {
+        c.strokeStyle = T.accent; c.lineWidth = 1; c.setLineDash([3, 4]); c.beginPath(); c.moveTo(X(x0), Bt); c.lineTo(X(x0), Y(y0)); c.lineTo(L, Y(y0)); c.stroke(); c.setLineDash([]);
+        c.lineWidth = 2; c.fillStyle = T.card; c.beginPath(); c.arc(X(x0), Y(y0), 6, 0, Math.PI * 2); c.fill(); c.stroke();
+      }
+      c.restore();
+      // 自画线把手
+      if (own) [A, B].forEach(p => { c.fillStyle = T.card; c.strokeStyle = T.fg2; c.lineWidth = 2.5; c.beginPath(); c.arc(X(p[0]), Y(p[1]), 10, 0, Math.PI * 2); c.fill(); c.stroke(); });
+      // 散点
+      P.forEach(([x, y], i) => { c.fillStyle = T.accent; c.beginPath(); c.arc(X(x), Y(y), drag && drag.i === i ? 10 : 8, 0, Math.PI * 2); c.fill(); c.strokeStyle = T.card; c.lineWidth = 2; c.stroke(); });
+      // 样本中心
+      const cx = X(s.mx), cy = Y(s.my);
+      c.strokeStyle = T.gold; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 10, cy); c.lineTo(cx + 10, cy); c.moveTo(cx, cy - 10); c.lineTo(cx, cy + 10); c.stroke();
+      c.font = '600 12px ' + T.sans; c.fillStyle = T.gold; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('(x̄, ȳ)', cx + 8, cy + 6);
+      // 方程与 r
+      c.font = '600 14px ' + T.mono; c.textAlign = 'right'; c.textBaseline = 'top'; c.fillStyle = T.accent;
+      c.fillText(eq(s.b, s.a) + '   r = ' + f3(s.r), R - 6, Tp + 6);
+      if (showRes) { c.fillStyle = T.red; c.fillText('Q = ' + f3(s.Q), R - 6, Tp + 26); }
+      if (own) { c.fillStyle = T.fg2; c.fillText('自画线 Q′ = ' + f3(ownQ()), R - 6, Tp + (showRes ? 46 : 26)); }
+      if (msg && performance.now() - msgT < 1600) { c.font = '600 14px ' + T.sans; c.textAlign = 'center'; c.fillStyle = T.red; c.fillText(msg, (L + R) / 2, Tp + 70); }
+    },
+    pointer(e, type, x, y){
+      if (!G) return;
+      if (type === 'up' || type === 'cancel') { drag = null; clearTimeout(lp); return; }
+      if (type === 'down') {
+        e.preventDefault && e.preventDefault(); dn = {x, y, moved: false};
+        if (own) for (const p of [A, B]) if (Math.hypot(G.X(p[0]) - x, G.Y(p[1]) - y) < 22) { drag = {h: p}; return; }
+        let i = -1, best = 22; P.forEach(([px, py], k) => { const d = Math.hypot(G.X(px) - x, G.Y(py) - y); if (d < best) { best = d; i = k; } });
+        if (i >= 0) {
+          const now = performance.now();
+          if (lastTap.i === i && now - lastTap.t < 320) { del(i); return; }
+          lastTap = {i, t: now}; drag = {i}; clearTimeout(lp);
+          lp = setTimeout(() => { if (drag && drag.i === i && !dn.moved) { drag = null; del(i); } }, 500); return;
+        }
+        if (x >= G.L && x <= G.R && y >= G.Tp && y <= G.Bt) {
+          if (P.length >= 20) { msg = '最多 20 个点'; msgT = performance.now(); return; }
+          P.push([rd(cl(G.ux(x), 0, 10)), rd(cl(G.uy(y), 0, 12))]); unsel(); upd();
+        }
+        return;
+      }
+      if (type === 'move' && drag) {
+        if (Math.hypot(x - dn.x, y - dn.y) > 6) dn.moved = true;
+        if (!dn.moved) return;
+        e.preventDefault && e.preventDefault();
+        const nx = rd(cl(G.ux(x), 0, 10)), ny = rd(cl(G.uy(y), 0, 12));
+        if (drag.h) { drag.h[0] = nx; drag.h[1] = ny; } else { P[drag.i] = [nx, ny]; lastTap = {i: -1, t: 0}; unsel(); }
+        upd();
+      }
+    },
+    unmount(){ ui = {}; G = null; drag = null; clearTimeout(lp); }
+  };
+})();
+CH[9].ready = true;
+
+MODS[10] = (() => {
+  const AL = [0.1, 0.05, 0.01, 0.005, 0.001], XA = [2.706, 3.841, 6.635, 7.879, 10.828];
+  const PRE = {def: [40, 60, 65, 35], same: [50, 50, 52, 48], big: [35, 65, 65, 35]};
+  let B = PRE.def.slice(), k = 1, ai = 2, pre = 'def', disp = 0, lastT = null, G = null, ui = {}, hold = 0, rep = 0, pressed = null;
+  const f3 = v => isFinite(v) ? v.toFixed(3) : '—', pct = p => isFinite(p) ? (p * 100).toFixed(1) + '%' : '—';
+  function calc(){
+    const [a, b, c, d] = B.map(v => v * k), n = a + b + c + d, r1 = a + b, r2 = c + d, c1 = a + c, c2 = b + d, den = r1 * r2 * c1 * c2, D = a * d - b * c;
+    return {a, b, c, d, n, r1, r2, c1, c2, den, D, x: den > 0 ? n * D * D / den : NaN};
+  }
+  function rr(c, x, y, w, h, r){ c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+  function upd(){
+    if (!ui.f) return;
+    const s = calc(), al = AL[ai], xa = XA[ai];
+    ui.f.innerHTML = 'χ² = n(ad−bc)² / [(a+b)(c+d)(a+c)(b+d)]<br>= ' + s.n + '×(' + s.a + '×' + s.d + '−' + s.b + '×' + s.c + ')² / (' + s.r1 + '×' + s.r2 + '×' + s.c1 + '×' + s.c2 + ')<br>= ' + s.n + '×' + Math.abs(s.D) + '² / ' + s.den + ' ≈ <b>' + f3(s.x) + '</b>';
+    const cell = (t, on, hd) => '<span style="padding:6px 4px;text-align:center;border-radius:8px;' + (on ? 'background:var(--acc-soft);color:var(--acc);font-weight:600;' : '') + (hd ? 'color:var(--fg2);' : '') + '">' + t + '</span>';
+    ui.t.innerHTML = cell('α', false, true) + AL.map((v, i) => cell(v, i === ai)).join('') + cell('xα', false, true) + XA.map((v, i) => cell(v, i === ai)).join('');
+    ui.c.innerHTML = !isFinite(s.x) ? '有合计为 0，无法计算 χ²。' : s.x >= xa
+      ? 'χ² ≈ ' + f3(s.x) + ' ≥ ' + xa + '。根据小概率值 α=' + al + ' 的独立性检验，我们推断 H0 不成立，即认为是否经常锻炼与是否近视<b>有关联</b>，此推断犯错误的概率不大于 ' + al + '。'
+      : 'χ² ≈ ' + f3(s.x) + ' < ' + xa + '。根据小概率值 α=' + al + ' 的独立性检验，<b>没有充分证据推断 H0 不成立</b>，可以认为两者独立。';
+    ui.c.style.borderColor = isFinite(s.x) && s.x >= xa ? 'var(--red)' : 'var(--line)';
+    ui.ro.update([
+      ['经常锻炼组近视比例 a/(a+b)', s.a + '/' + s.r1 + ' ≈ <b>' + pct(s.a / s.r1) + '</b>'],
+      ['不常锻炼组近视比例 c/(c+d)', s.c + '/' + s.r2 + ' ≈ <b>' + pct(s.c / s.r2) + '</b>'],
+      ['样本量 n', '<b>' + s.n + '</b>' + (k > 1 ? '（×' + k + '）' : '')]
+    ]);
+  }
+  function bump(i, d){ const nv = Math.max(0, Math.min(999, B[i] + d)); if (nv === B[i]) return; B[i] = nv; pre = null; ui.pr && ui.pr.set(null); upd(); }
+  function stop(){ clearTimeout(hold); clearInterval(rep); pressed = null; }
+  function lab(t){ const l = el('div', '', t); l.style.cssText = 'font-size:13px;color:var(--fg2);margin:10px 0 6px'; return l; }
+  return {
+    text: '调查 200 名学生「是否经常锻炼」与「是否近视」，得到 2×2 <b>列联表</b>。先假设 <b>H0：两者无关联（相互独立）</b>。如果 H0 成立，两组的近视比例应该差不多；比例差得越多，<b>χ²</b> 越大。χ² 超过小概率值 α 对应的临界值 xα，就推断 H0 不成立，认为两者有关联，此推断犯错误的概率不超过 α。',
+    points: ['χ² = n(ad−bc)² / [(a+b)(c+d)(a+c)(b+d)]，其中 n = a+b+c+d', '独立性检验步骤：提出 H0 → 计算 χ² → 与临界值 xα 比较 → 下结论', 'χ² 越大，越倾向于认为两者有关联', '比例不变而样本量扩大 m 倍，χ² 也扩大 m 倍'],
+    gk: ['高考链接：几乎每年都考，常见于统计大题：补全列联表、计算 χ²、按规范用语下结论。', '易错：χ² 较小时只能说「没有充分证据推断 H0 不成立」，不能说「证明了两者无关」；临界值要和题目给的 α 对应。'],
+    mount(ctrl, read){
+      ui.al = chips(AL.map((v, i) => ({label: String(v), value: i})), ai, v => { ai = v; upd(); });
+      ui.pr = chips([{label: '默认数据', value: 'def'}, {label: '几乎无差异', value: 'same'}, {label: '差异明显', value: 'big'}], pre, v => { pre = v; B = PRE[v].slice(); upd(); });
+      ui.sl = slider('整体放大样本量', 1, 5, 1, k, v => '×' + v, v => { k = v; upd(); });
+      const rs = el('div', 'btns'); rs.style.marginTop = '10px';
+      rs.append(button('重置', () => { B = PRE.def.slice(); k = 1; ai = 2; pre = 'def'; ui.al.set(ai); ui.pr.set(pre); ui.sl.set(k); upd(); }));
+      const tip = el('div', '', '点表格里的 − / + 改数据，按住连续变化。'); tip.style.cssText = 'font-size:13px;color:var(--fg2);margin-top:8px';
+      ctrl.append(lab('小概率值 α'), ui.al, lab('预设'), ui.pr, ui.sl, rs, tip);
+      ui.f = el('div'); ui.f.style.cssText = 'font:14px/1.7 var(--mono);margin-bottom:10px;word-break:break-all';
+      ui.t = el('div'); ui.t.style.cssText = 'display:grid;grid-template-columns:auto repeat(5,1fr);gap:2px;font:13px var(--mono);margin-bottom:10px';
+      ui.c = el('div'); ui.c.style.cssText = 'font-size:14px;line-height:1.6;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px';
+      ui.ro = readout(); read.append(ui.f, ui.t, ui.c, ui.ro); upd();
+    },
+    draw(c, w, h, t){
+      const T = theme(), ov = $('ov'), s = calc(), xa = XA[ai];
+      const dt = lastT == null ? 1 : Math.min(.1, t - lastT); lastT = t;
+      const tgt = isFinite(s.x) ? s.x : 0; disp += (tgt - disp) * Math.min(1, dt * 8);
+      let top = ov.offsetParent !== null ? ov.offsetTop + ov.offsetHeight + 12 : 12; top = Math.min(top, h * .4);
+      const L = 14, R = w - 14, nar = w < 520, avail = h - top - 14;
+      const lw = nar ? 62 : 96, tw = nar ? 56 : 96, cw = (R - L - lw - tw) / 2, wide = cw >= 170;
+      const hh = 30, th = 34, rh = Math.max(wide ? 84 : 104, Math.min(140, (avail * .5 - hh - th) / 2)), tabH = hh + 2 * rh + th;
+      const btns = []; G = {btns};
+      const vals = [s.a, s.b, s.c, s.d], mx = Math.max(1, ...vals);
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.font = '600 14px ' + T.sans; c.fillStyle = T.fg2;
+      ['近视', '不近视'].forEach((tx, j) => c.fillText(tx, L + lw + (j + .5) * cw, top + hh / 2));
+      c.fillText('合计', R - tw / 2, top + hh / 2);
+      ['经常锻炼', '不常锻炼'].forEach((tx, r) => c.fillText(tx, L + lw / 2, top + hh + (r + .5) * rh));
+      c.fillText('合计', L + lw / 2, top + hh + 2 * rh + th / 2);
+      vals.forEach((v, i) => {
+        const r = i >> 1, col = i & 1, x0 = L + lw + col * cw, y0 = top + hh + r * rh;
+        c.fillStyle = T.accent; c.globalAlpha = .06 + .34 * v / mx; rr(c, x0 + 3, y0 + 3, cw - 6, rh - 6, 12); c.fill(); c.globalAlpha = 1;
+        c.font = '12px ' + T.mono; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('abcd'[i], x0 + 10, y0 + 8);
+        const fs = Math.round(Math.min(40, rh * .42, cw * (wide ? .2 : .3)));
+        const ny = wide ? y0 + rh / 2 : y0 + rh * .36;
+        c.font = '600 ' + fs + 'px ' + T.mono; c.fillStyle = T.fg; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(v, x0 + cw / 2, ny);
+        const pos = wide ? [[x0 + 32, ny], [x0 + cw - 32, ny]] : [[x0 + cw / 2 - 27, y0 + rh - 29], [x0 + cw / 2 + 27, y0 + rh - 29]];
+        pos.forEach(([bx, by], j) => {
+          const d = j ? 1 : -1, on = pressed && pressed.i === i && pressed.d === d;
+          c.fillStyle = on ? T.fill : T.card; c.strokeStyle = T.line; c.lineWidth = 1.5;
+          c.beginPath(); c.arc(bx, by, 22, 0, Math.PI * 2); c.fill(); c.stroke();
+          c.font = '500 22px ' + T.sans; c.fillStyle = T.fg; c.fillText(j ? '+' : '−', bx, by + 1);
+          btns.push({x: bx, y: by, i, d});
+        });
+      });
+      c.font = '600 18px ' + T.mono; c.fillStyle = T.fg;
+      [s.r1, s.r2].forEach((v, r) => c.fillText(v, R - tw / 2, top + hh + (r + .5) * rh));
+      const ty = top + hh + 2 * rh + th / 2;
+      [s.c1, s.c2].forEach((v, j) => c.fillText(v, L + lw + (j + .5) * cw, ty));
+      c.fillStyle = T.accent; c.fillText('n=' + s.n, R - tw / 2, ty);
+      c.strokeStyle = T.line; c.lineWidth = 1; c.beginPath();
+      [hh, hh + 2 * rh].forEach(yy => { c.moveTo(L, top + yy); c.lineTo(R, top + yy); });
+      c.moveTo(L + lw, top); c.lineTo(L + lw, top + tabH); c.moveTo(R - tw, top); c.lineTo(R - tw, top + tabH); c.stroke();
+      // 下方区域
+      const by = top + tabH + 18, bh = h - 14 - by; if (bh < 80) return;
+      const side = w >= 560, A1 = side ? [L, by, L + (R - L) * .38, by + bh] : [L, by, R, by + bh * .5], A2 = side ? [L + (R - L) * .44, by, R, by + bh] : [L, by + bh * .5 + 8, R, by + bh];
+      // 堆积条形图
+      { const [x0, y0, x1, y1] = A1; c.font = '12px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('各组近视比例（红：近视 灰：不近视）', x0, y0);
+        const bw = Math.min(80, (x1 - x0) / 4), yt = y0 + 22, yb = y1 - 22, H2 = yb - yt;
+        [[s.a / s.r1, '经常锻炼'], [s.c / s.r2, '不常锻炼']].forEach(([p, nm], j) => {
+          const cx = x0 + (x1 - x0) * (j ? .7 : .3), ok = isFinite(p), rp = ok ? p * H2 : 0;
+          c.fillStyle = T.fill; rr(c, cx - bw / 2, yt, bw, H2, 6); c.fill();
+          if (rp > 0) { c.fillStyle = T.red; rr(c, cx - bw / 2, yb - rp, bw, rp, 6); c.fill(); }
+          c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '600 13px ' + T.mono;
+          if (ok) { if (rp > 20) { c.fillStyle = '#fff'; c.fillText(pct(p), cx, yb - rp / 2); } if (H2 - rp > 20) { c.fillStyle = T.fg2; c.fillText(pct(1 - p), cx, yt + (H2 - rp) / 2); } }
+          c.font = '12px ' + T.sans; c.fillStyle = T.fg; c.textBaseline = 'top'; c.fillText(nm, cx, yb + 6);
+        });
+      }
+      // χ² 数轴
+      { const [x0, y0, x1, y1] = A2; c.font = '12px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('χ² 数轴（浅红为 α=' + AL[ai] + ' 的拒绝域）', x0, y0);
+        const ay = Math.max(y0 + 70, y0 + (y1 - y0) * .55), X = v => x0 + 8 + v / 20 * (x1 - x0 - 30);
+        c.fillStyle = T.red; c.globalAlpha = .14; c.fillRect(X(xa), ay - 26, X(20) + 14 - X(xa), 26); c.globalAlpha = 1;
+        c.strokeStyle = T.fg2; c.fillStyle = T.fg2; c.lineWidth = 1.5; c.beginPath(); c.moveTo(X(0), ay); c.lineTo(X(20) + 14, ay); c.stroke();
+        c.beginPath(); c.moveTo(X(20) + 20, ay); c.lineTo(X(20) + 12, ay - 4); c.lineTo(X(20) + 12, ay + 4); c.fill();
+        c.font = '12px ' + T.mono; c.textAlign = 'center'; c.textBaseline = 'top'; c.lineWidth = 1; const st = (x1 - x0) < 360 ? 4 : 2;
+        for (let i = 0; i <= 20; i++) { c.beginPath(); c.moveTo(X(i), ay); c.lineTo(X(i), ay + (i % st ? 3 : 6)); c.stroke(); if (i % st === 0) c.fillText(i, X(i), ay + 8); }
+        XA.forEach((v, j) => {
+          const on = j === ai, ly = ay - 34 - (j % 2) * 15;
+          c.strokeStyle = on ? T.red : T.fg2; c.lineWidth = on ? 2 : 1; c.beginPath(); c.moveTo(X(v), ly + 6); c.lineTo(X(v), ay); c.stroke();
+          c.font = (on ? '600 ' : '') + '12px ' + T.mono; c.fillStyle = on ? T.red : T.fg2; c.textBaseline = 'bottom'; c.fillText(v, X(v), ly + 6);
+        });
+        const over = disp > 20, px = X(Math.min(disp, 20.4)), py = ay + 24;
+        c.strokeStyle = T.accent; c.fillStyle = T.accent; c.lineWidth = 3; c.beginPath(); c.moveTo(px, ay - 22); c.lineTo(px, py); c.stroke();
+        c.beginPath(); c.moveTo(px, py - 8); c.lineTo(px - 7, py + 4); c.lineTo(px + 7, py + 4); c.fill();
+        c.font = '600 14px ' + T.mono; c.textBaseline = 'top'; const lbl = 'χ² = ' + f3(s.x) + (over ? ' →' : ''), lw2 = c.measureText(lbl).width;
+        c.textAlign = 'left'; c.fillText(lbl, Math.max(x0, Math.min(x1 - lw2, px - lw2 / 2)), py + 8);
+      }
+    },
+    pointer(e, type, x, y){
+      if (!G) return;
+      if (type === 'up' || type === 'cancel') { stop(); return; }
+      if (type !== 'down') return;
+      const b = G.btns.find(b => Math.hypot(b.x - x, b.y - y) <= 24); if (!b) return;
+      e.preventDefault && e.preventDefault(); stop(); pressed = {i: b.i, d: b.d}; bump(b.i, b.d);
+      hold = setTimeout(() => { rep = setInterval(() => bump(b.i, b.d), 70); }, 420);
+    },
+    unmount(){ stop(); ui = {}; G = null; lastT = null; }
+  };
+})();
+CH[10].ready = true;
+
+MODS[11] = (() => {
+  const L = 'ABCD';
+  const Q = [
+    {t: 's', s: 5, q: '甲、乙两车间生产同一种零件，甲车间产量占 60%，次品率为 2%；乙车间产量占 40%，次品率为 5%。从全部零件中任取一件，它是次品的概率为', o: ['0.032', '0.035', '0.07', '0.0325'], a: [0],
+      ex: '全概率公式：P = 0.6×0.02 + 0.4×0.05 = 0.012 + 0.020 = 0.032。', ch: 4},
+    {t: 's', s: 5, q: '接第 1 题，若取到的零件是次品，则它来自乙车间的概率为', o: ['2/5', '3/8', '5/8', '5/7'], a: [2],
+      ex: '贝叶斯公式：P(乙|次品) = 0.4×0.05 / 0.032 = 0.020 / 0.032 = 5/8。', ch: 4},
+    {t: 's', s: 5, q: '已知随机变量 X~B(n, p)，且 E(X)=3，D(X)=2，则 n =', o: ['6', '9', '12', '18'], a: [1],
+      ex: 'np = 3，np(1−p) = 2，两式相除得 1−p = 2/3，p = 1/3，n = 9。', ch: 6},
+    {t: 's', s: 5, q: '某次考试成绩 X~N(100, σ²)，已知 P(X>120)=0.1，则 P(80<X<100) =', o: ['0.2', '0.3', '0.4', '0.8'], a: [2],
+      ex: '由对称性 P(X<80) = 0.1，P(80<X<120) = 0.8；再由关于 x = 100 对称，P(80<X<100) = 0.4。', ch: 8},
+    {t: 'm', s: 6, q: '下列说法正确的是', o: ['经验回归直线 ŷ = b̂x + â 一定经过样本中心点 (x̄, ȳ)', '样本相关系数 r 越大，两个变量的线性相关性越强',
+      '由 2×2 列联表算得 χ² ≈ 5.2，则根据小概率值 α = 0.01（x₀.₀₁ = 6.635）的独立性检验，可以推断两个变量有关联', '从含 3 件次品的 10 件产品中不放回地任取 4 件，次品数 X 的均值为 1.2'], a: [0, 3],
+      ex: 'A 对；B 错，应是 |r| 越接近 1 线性相关性越强；C 错，5.2 < 6.635，没有充分证据推断 H0 不成立；D 对，超几何分布 E(X) = 4×3/10 = 1.2。相关内容见第 10、11、7 章。', ch: 10},
+    {t: 'f', s: 5, q: '同时掷两枚质地均匀的骰子，已知两枚点数之和为 8，则第一枚点数为偶数的概率为 ____。', ans: '3/5', ok: ['3/5', '0.6', '.6', '60%', '六分之三', '五分之三'],
+      ex: '和为 8 的样本点有 (2,6)(3,5)(4,4)(5,3)(6,2) 共 5 个，第一枚为偶数的有 3 个，P = 3/5。', ch: 2}
+  ];
+  let st = [], ui = {}, dS = 0, dA = 0, lastT = null;
+  const score = () => st.reduce((s, v) => s + (v ? v.p : 0), 0), done = () => st.filter(Boolean).length;
+  const CSS = '.xq{border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px}'
+    + '.xq .xh{font:12px var(--mono);color:var(--fg2)}.xq .xt{font-size:15px}.xos{display:flex;flex-direction:column;gap:8px}'
+    + '.xo{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:10px 16px;border-radius:980px;background:var(--fill);text-align:left;font-size:14px;border:2px solid transparent;transition:background .2s,border-color .2s}'
+    + '.xo:hover:not(:disabled){background:var(--acc-soft)}.xo:disabled{cursor:default}.xo b{font:600 13px var(--mono);flex:none}.xo span{flex:1}.xo i{font-style:normal;font-weight:700;flex:none}'
+    + '.xo.sel{border-color:var(--acc);background:var(--acc-soft)}.xo.ok{border-color:var(--teal)}.xo.ok i{color:var(--teal)}.xo.bad{border-color:var(--red)}.xo.bad i{color:var(--red)}'
+    + '.xr{font-size:14px;font-weight:600}.xr.ok{color:var(--teal)}.xr.bad{color:var(--red)}.xr.half{color:var(--gold)}'
+    + '.xe{font-size:14px;color:var(--fg2);background:var(--bg);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}'
+    + '.xf{display:flex;gap:8px}.xin{flex:1;min-width:0;min-height:48px;border-radius:980px;border:1px solid var(--line);background:var(--bg);color:var(--fg);padding:0 16px;font:15px var(--mono)}'
+    + '.xin:focus{outline:2px solid var(--acc);outline-offset:1px}.xf .btn{min-height:48px}';
+  function norm(v){ return String(v).trim().replace(/\s+/g, '').replace(/[／]/g, '/').replace(/[．。]/g, '.').replace(/[％]/g, '%')
+    .replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFEE0)); }
+  function finish(i, p, res, cls){
+    st[i] = {p, cls};
+    const c = ui.cards[i];
+    c.res.className = 'xr ' + cls; c.res.textContent = res; c.res.hidden = false; c.ex.hidden = false;
+  }
+  function judgeOpts(i, sel){
+    const q = Q[i], c = ui.cards[i];
+    c.bs.forEach((b, k) => {
+      b.disabled = true; b.classList.remove('sel');
+      const right = q.a.includes(k), picked = sel.includes(k);
+      if (right) { b.classList.add('ok'); b.querySelector('i').textContent = '✓'; }
+      else if (picked) { b.classList.add('bad'); b.querySelector('i').textContent = '✗'; }
+    });
+    const key = q.a.map(k => L[k]).join('');
+    if (q.t === 's') { const ok = sel[0] === q.a[0]; finish(i, ok ? q.s : 0, ok ? '✓ 正确 +' + q.s + ' 分' : '✗ 错误 · 正确答案 ' + key, ok ? 'ok' : 'bad'); return; }
+    c.sub.disabled = true;
+    const wrong = sel.some(k => !q.a.includes(k)), full = !wrong && sel.length === q.a.length;
+    if (full) finish(i, 6, '✓ 全部选对 +6 分', 'ok');
+    else if (!wrong) finish(i, 2, '◐ 选对但不全 +2 分 · 正确答案 ' + key, 'half');
+    else finish(i, 0, '✗ 有选错 0 分 · 正确答案 ' + key, 'bad');
+  }
+  function judgeFill(i){
+    const q = Q[i], c = ui.cards[i], v = norm(c.inp.value);
+    if (!v) { c.inp.focus(); return; }
+    const ok = q.ok.includes(v);
+    c.inp.disabled = true; c.sub.disabled = true;
+    c.inp.style.borderColor = ok ? 'var(--teal)' : 'var(--red)';
+    finish(i, ok ? q.s : 0, ok ? '✓ 正确 +' + q.s + ' 分' : '✗ 错误 · 正确答案 ' + q.ans, ok ? 'ok' : 'bad');
+  }
+  function render(){
+    st = Q.map(() => null); ui.list.innerHTML = ''; ui.cards = [];
+    Q.forEach((q, i) => {
+      const card = el('div', 'xq'), c = {bs: []};
+      card.append(el('div', 'xh', '第 ' + (i + 1) + ' 题 · ' + ({s: '单选', m: '多选', f: '填空'})[q.t] + ' · ' + q.s + ' 分' + (q.t === 'm' ? '（全对 6，选对不全 2，有错 0）' : '')), el('div', 'xt', (i + 1) + '. ' + q.q));
+      if (q.t === 'f') {
+        const f = el('div', 'xf'); c.inp = el('input', 'xin');
+        Object.assign(c.inp, {type: 'text', placeholder: '输入答案，如 1/2', autocomplete: 'off'}); c.inp.setAttribute('aria-label', '第 6 题答案');
+        c.inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); judgeFill(i); } });
+        c.sub = button('提交', () => judgeFill(i), true); f.append(c.inp, c.sub); card.appendChild(f);
+      } else {
+        const os = el('div', 'xos'), sel = new Set();
+        q.o.forEach((o, k) => {
+          const b = el('button', 'xo', '<b>' + L[k] + '</b><span>' + o + '</span><i></i>'); c.bs.push(b);
+          b.onclick = () => {
+            if (q.t === 's') { judgeOpts(i, [k]); return; }
+            sel.has(k) ? sel.delete(k) : sel.add(k); b.classList.toggle('sel', sel.has(k)); b.setAttribute('aria-pressed', sel.has(k)); c.sub.disabled = !sel.size;
+          };
+          os.appendChild(b);
+        });
+        card.appendChild(os);
+        if (q.t === 'm') { c.sub = button('提交', () => judgeOpts(i, [...sel].sort()), true); c.sub.disabled = true; c.sub.style.minHeight = '48px'; card.appendChild(c.sub); }
+      }
+      c.res = el('div', 'xr'); c.res.hidden = true; c.res.setAttribute('aria-live', 'polite');
+      c.ex = el('div', 'xe', '<div>解析：' + q.ex + '</div>'); c.ex.hidden = true;
+      c.ex.appendChild(button('回看第 ' + q.ch + ' 章', () => { go(q.ch - 1); scrollTo(0, 0); }));
+      card.append(c.res, c.ex); ui.list.appendChild(card); ui.cards.push(c);
+    });
+  }
+  function comment(s){ return s >= 26 ? '很扎实' : s >= 18 ? '基本掌握，回看错题对应章节' : '建议从第 4 章起再练一遍'; }
+  return {
+    text: '6 道新高考 I 卷风格小题：单选 4 道（每题 5 分）、多选 1 道（6 分）、填空 1 道（5 分），<b>满分 31 分</b>。单选点一下即判；多选选完点「提交」；填空输入后点「提交」或按回车。每题判分后展开解析，可跳回对应章节复习。',
+    points: ['条件概率与全概率公式', '二项分布的均值与方差', '正态分布的对称性', '回归直线与相关系数', '独立性检验的结论表述', '超几何分布的均值'],
+    gk: ['高考链接：概率统计在新高考 I 卷中常以「1–2 道小题 + 1 道大题」出现，大题常考全概率公式、分布列与期望、独立性检验。', '易错：多选题宁缺毋滥，不确定的选项不要选。'],
+    mount(ctrl){
+      if (!$('x-quiz-css')) { const s = el('style'); s.id = 'x-quiz-css'; s.textContent = CSS; document.head.appendChild(s); }
+      $('ctrlCard').querySelector('h3').textContent = '题目';
+      ui.list = el('div'); ui.list.style.cssText = 'display:flex;flex-direction:column;gap:12px';
+      ui.again = button('再做一次', () => { render(); dS = 0; dA = 0; ui.list.firstChild.scrollIntoView({block: 'nearest'}); });
+      ui.again.style.minHeight = '48px';
+      ctrl.append(ui.list, ui.again); render(); dS = 0; dA = 0; lastT = null;
+    },
+    draw(c, w, h, t){
+      const T = theme(), dt = lastT == null ? 0 : Math.min(.1, t - lastT); lastT = t;
+      const S = score(), D = done(), k = Math.min(1, dt * 5);
+      dS += (S - dS) * k; dA += (D - dA) * k; if (Math.abs(S - dS) < .01) dS = S; if (Math.abs(D - dA) < .01) dA = D;
+      const big = w >= 1024 / 2 && h > 420, R = Math.max(54, Math.min(150, Math.min(w, h) * .27)), lw = R * .14;
+      const cx = w / 2, cy = Math.min(h - R - 92, Math.max(R + 20, h * (big ? .56 : .45)));
+      c.lineCap = 'round';
+      c.strokeStyle = T.fill; c.lineWidth = lw; c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.stroke();
+      if (dS > 0) { c.strokeStyle = T.accent; c.beginPath(); c.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * dS / 31); c.stroke(); }
+      const r2 = R - lw * 1.3, lw2 = lw * .4;
+      c.strokeStyle = T.fill; c.lineWidth = lw2; c.beginPath(); c.arc(cx, cy, r2, 0, Math.PI * 2); c.stroke();
+      if (dA > 0) { c.strokeStyle = T.teal; c.beginPath(); c.arc(cx, cy, r2, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * dA / 6); c.stroke(); }
+      c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillStyle = T.fg;
+      c.font = '600 ' + Math.round(R * .5) + 'px ' + T.mono; c.fillText(Math.round(dS), cx, cy + R * .12);
+      c.font = Math.max(12, Math.round(R * .14)) + 'px ' + T.mono; c.fillStyle = T.fg2; c.fillText('/ 31 分', cx, cy + R * .36);
+      // 每题小点
+      const gap = 22, y0 = cy + R + 28;
+      st.forEach((v, i) => {
+        const x = cx + (i - 2.5) * gap;
+        c.fillStyle = !v ? T.fill : v.cls === 'ok' ? T.teal : v.cls === 'half' ? T.gold : T.red;
+        c.beginPath(); c.arc(x, y0, 6, 0, Math.PI * 2); c.fill();
+      });
+      c.textBaseline = 'top'; c.font = '13px ' + T.sans; c.fillStyle = T.fg2;
+      c.fillText('已答 ' + D + ' / 6  ·  当前得分 ' + S + ' / 31', cx, y0 + 14);
+      if (D === 6) {
+        c.font = '600 16px ' + T.sans; c.fillStyle = T.fg;
+        c.fillText('总分 ' + S + ' / 31 · ' + comment(S), cx, y0 + 36);
+      }
+    },
+    unmount(){ const h = $('ctrlCard').querySelector('h3'); if (h) h.textContent = '控件'; ui = {}; lastT = null; }
+  };
+})();
+CH[11].book = '人教A版 必修第二册 第十章 + 选择性必修第三册 第七、八章';
+CH[11].ready = true;
 list($('toc')); list($('sheetList'), closeSheet);
 
 go(fromHash());
