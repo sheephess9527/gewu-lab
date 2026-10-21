@@ -1,0 +1,1306 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>天气系统 · 格物实验室</title>
+<script src="../lib/three-0.147.0/three.min.js"></script>
+<script src="../lib/three-0.147.0/OrbitControls.js"></script>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--sel:#e8f1fc;--selfg:#0058b0;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--sel:rgba(41,151,255,.18);--selfg:#6cb6ff;--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--shadow:0 0 0 1px rgba(255,255,255,.08)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.back b{font-size:22px;font-weight:400;margin-right:4px}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);font-size:14px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}
+html.dark .pill.primary,html.dark .chips button.on{color:#000}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc button,.sheet button.it{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px;align-items:center}
+.toc button:hover{background:var(--btn2)}
+.toc button.on,.sheet button.it.on{background:var(--sel);color:var(--selfg);font-weight:600}
+.toc .mono,.sheet .mono{font-size:13px;color:var(--sub)}.on .mono{color:var(--selfg)!important}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 20px}
+.explain{flex:none}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.etext{margin:8px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.explain.collapsed .etext,.explain.collapsed .book{display:none}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;color:var(--sub);min-height:32px}
+.cwrap{flex:1;min-height:0;position:relative;border-radius:22px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.cwrap canvas{position:absolute;inset:0}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:none}
+.sec h3{font-size:13px;color:var(--sub);font-weight:600;letter-spacing:0;margin:0 0 8px}
+.ctrls{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;font-size:14px}.sl output{font-family:var(--mono);color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}.chips button.on{background:var(--blue);color:#fff}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;min-height:36px;border:0;background:none;padding:0;width:100%}
+.tg i{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.tg.on i{background:#34c759}.tg.on i::after{left:20px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+.points ul{margin:0;padding-left:18px}.points li{margin:4px 0}
+.gk a{color:var(--blue);text-decoration:none;font-size:14px}
+.mdark{display:none}
+.soon{color:var(--sub);font-size:14px;margin:0}
+/* sheet */
+.mask{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;max-height:70vh;overflow:auto;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .prog{display:none}.app{display:block;height:auto}.toc{display:none}
+ .stage{padding:12px}.cwrap{order:-1;flex:none;height:56vh}
+ .explain .fold{display:none}.explain.collapsed .etext,.explain.collapsed .book{display:block}.etext{max-height:none;overflow:visible}
+ .panel{border:0;padding:0 12px 24px}
+}
+@media (min-width:1024px){.chbtn{display:none}}
+/* phone */
+@media (max-width:767px){
+ .top{height:calc(52px + env(safe-area-inset-top));gap:6px;padding-left:4px;padding-right:8px}
+ .back{width:44px;justify-content:center}.back span{display:none}.back b{margin:0}
+ .tname{flex:1;font-size:16px}.tbtns{display:none}.chbtn{margin-left:0;padding:0 12px}
+ .stage{padding:0;gap:0}.cwrap{height:52vh;border-radius:0;box-shadow:none;border-bottom:1px solid var(--line)}
+ .explain{background:none;box-shadow:none;padding:16px 16px 4px}.ehead h2{font-size:20px}.etext{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(84px + env(safe-area-inset-bottom))}
+ input[type=range]{height:44px}.chips button,.tg{min-height:44px}
+ .mdark{display:block;align-self:flex-start;min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
+  <div class="tname">天气系统 · WeatherLab</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 09</span></div>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button><button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chnum">01/09</span></button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h2 id="ctitle"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="etext" id="ctext"></p>
+    </section>
+    <div class="cwrap" id="cwrap"><canvas id="gl" hidden></canvas><canvas id="cv"></canvas></div>
+  </main>
+  <aside class="panel">
+    <section class="card sec" id="ctrlSec"><h3>控件</h3><div class="ctrls" id="ctrl"></div></section>
+    <section class="card sec" id="readSec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec points" id="ptSec"><h3>要点</h3><div id="pts"></div></section>
+    <section class="card sec gk" id="gkSec"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mask" id="mask" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><div id="slist"></div></div>
+<div class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></div>
+<script>
+const CH=[
+{n:"大气受热过程",book:"湘教版 必修第一册 · 第三章 第二节 大气受热过程",ready:false},
+{n:"等压线与风",book:"必修第一册 · 第三章 第三节 大气热力环流与风",ready:false},
+{n:"冷锋",book:"选择性必修1 · 第三章 第二节 常见的天气系统",ready:false},
+{n:"暖锋",book:"选择性必修1 · 第三章 第二节",ready:false},
+{n:"准静止锋与江淮梅雨",book:"选择性必修1 · 第三章 第二节",ready:false},
+{n:"气旋与反气旋",book:"选择性必修1 · 第三章 第二节",ready:false},
+{n:"锋面气旋",book:"选择性必修1 · 第三章 第二节",ready:false},
+{n:"台风与寒潮",book:"选择性必修1 · 第三章 · 浙江常见灾害性天气",ready:false},
+{n:"随堂检测",book:"浙江选考 天气系统",ready:false}];
+/* ---------- 3D stage (three r147)：GL3() 返回 {THREE,renderer,scene,camera,controls,root} ---------- */
+let G3=null,G3fail=false;
+function GL3(){if(G3)return G3;if(G3fail||!window.THREE)return null;
+ const T=window.THREE,cvs=document.getElementById("gl");let renderer;
+ try{renderer=new T.WebGLRenderer({canvas:cvs,antialias:true,alpha:true})}catch(e){console.error(e);G3fail=true;return null}
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setClearColor(0x000000,0);
+ renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+ const scene=new T.Scene(),camera=new T.PerspectiveCamera(45,1,0.1,2000);camera.position.set(0,8,14);
+ let controls=null;if(T.OrbitControls){controls=new T.OrbitControls(camera,cvs);controls.enableDamping=true;controls.dampingFactor=.08}
+ const hemi=new T.HemisphereLight(0xffffff,0x8899aa,.75),sun=new T.DirectionalLight(0xffffff,.8);
+ sun.position.set(6,12,8);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
+ Object.assign(sun.shadow.camera,{left:-15,right:15,top:15,bottom:-15,near:.5,far:60});sun.shadow.camera.updateProjectionMatrix();
+ const root=new T.Group();scene.add(hemi,sun,root);
+ G3={THREE:T,renderer,scene,camera,controls,root};gl3Size();return G3}
+function gl3Size(){if(!G3)return;G3.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));G3.renderer.setSize(W,H,false);
+ G3.camera.aspect=W/H;G3.camera.updateProjectionMatrix()}
+function gl3Clear(){if(!G3)return;const r=G3.root;
+ r.traverse(o=>{o.geometry&&o.geometry.dispose();[].concat(o.material||[]).forEach(m=>{for(const k in m){const v=m[k];v&&v.isTexture&&v.dispose()}m.dispose()})});
+ r.clear();G3.camera.position.set(0,8,14);if(G3.controls){G3.controls.target.set(0,0,0);G3.controls.update()}}
+function gl3Mode(on){$("gl").hidden=!on;cv.style.pointerEvents=on&&!!GL3()?"none":""}
+function gl3Render(){if(!G3)return;G3.controls&&G3.controls.update();G3.renderer.render(G3.scene,G3.camera)}
+function project(v){if(!G3)return{x:0,y:0,visible:false};const p=new G3.THREE.Vector3(v.x,v.y,v.z).project(G3.camera);
+ return{x:(p.x+1)/2*W,y:(1-p.y)/2*H,visible:p.z>-1&&p.z<1&&Math.abs(p.x)<=1&&Math.abs(p.y)<=1}}
+function drawNo3D(c,w,h){const T=theme(),cw=Math.min(340,w-32),ch=140,x=(w-cw)/2,y=(h-ch)/2,F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ c.save();c.shadowColor="rgba(0,0,0,.08)";c.shadowBlur=24;c.shadowOffsetY=4;c.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(c,x,y,cw,ch,22);c.fill();c.restore();
+ c.textAlign="center";c.textBaseline="middle";c.fillStyle=T.redText;c.font="13px ui-monospace,Menlo,monospace";c.fillText("WEBGL",w/2,y+36);
+ c.fillStyle=T.fg;c.font="600 16px "+F;wrapText(c,"3D 引擎未能加载，请检查网络后刷新",w/2,y+72,cw-40,24);
+ c.fillStyle=T.sub;c.font="14px "+F;c.fillText(CH[cur].n,w/2,y+ch-26)}
+const MODS=[];// MODS[i]={text,points,gk,use3d,mount(ctrlEl,readEl),draw(ctx,w,h,t),pointer(e,type,x,y),unmount()}
+/* ---------- 第 1 章 大气受热过程 ---------- */
+CH[0].ready=true;
+MODS[0]=(function(){
+ const S={day:true,cloud:false,g:40,nums:true};
+ let G=null,T3=null,run=false,last=0,lastAsp=0,ro=null,sunG,atmo,cloudG,sw,swr,lw,lwe,cr,dummy,UP,cL,cD;
+ const streams=[],rnd=(a,b)=>a+Math.random()*(b-a),SP={x:6.5,y:7.5,z:-1};
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ function setCam(){const a=W/H,r=35*Math.PI/180,D=Math.max(17,9.8/(Math.tan(22.5*Math.PI/180)*a));
+  G.camera.position.set(0,1.5+D*Math.sin(r),D*Math.cos(r));
+  if(G.controls){G.controls.target.set(0,1.5,0);G.controls.update()}else G.camera.lookAt(0,1.5,0);lastAsp=a}
+ function V(x,y,z){return new T3.Vector3(x,y,z)}
+ function mkP(s){const pts=s.path();let L=0;for(let i=1;i<pts.length;i++)L+=pts[i].distanceTo(pts[i-1]);return{pts,L:Math.max(L,.01)}}
+ function stream(color,op,N,speed,path){
+  const geo=new T3.ConeGeometry(.1,.34,8),mat=new T3.MeshBasicMaterial({color,transparent:true,opacity:op,depthWrite:false});
+  const mesh=new T3.InstancedMesh(geo,mat,N);mesh.frustumCulled=false;mesh.count=0;G.root.add(mesh);
+  const s={mesh,N,speed,path,n:0,k:1,ps:[]};
+  for(let i=0;i<N;i++){const p=mkP(s);p.u=Math.random();s.ps.push(p)}
+  streams.push(s);return s}
+ function regen(){streams.forEach(s=>s.ps.forEach(p=>{const q=mkP(s);p.pts=q.pts;p.L=q.L}))}
+ function build(){
+  T3=G.THREE;dummy=new T3.Object3D();UP=V(0,1,0);cL=new T3.Color(0xcfe6ff);cD=new T3.Color(0x4f74a6);
+  const box=(w,h,d,c,x,y,o)=>{const m=new T3.Mesh(new T3.BoxGeometry(w,h,d),new T3.MeshStandardMaterial(Object.assign({color:c,roughness:.85},o||{})));m.position.set(x,y,0);m.receiveShadow=true;G.root.add(m);return m};
+  box(5,.25,4,0x6f8f3e,-2.5,-.125);box(5,.55,4,0x8b6b45,-2.5,-.525);
+  box(5,.5,4,0x2f7fc8,2.5,-.25,{roughness:.35,transparent:true,opacity:.92});box(5,.3,4,0x55667a,2.5,-.65);
+  atmo=new T3.Mesh(new T3.BoxGeometry(10,3,4),new T3.MeshBasicMaterial({color:0xcfe6ff,transparent:true,opacity:.2,depthWrite:false}));
+  atmo.position.set(0,1.5,0);G.root.add(atmo);
+  const ed=new T3.LineSegments(new T3.EdgesGeometry(atmo.geometry),new T3.LineBasicMaterial({color:0x7fa8d8,transparent:true,opacity:.5}));ed.position.copy(atmo.position);G.root.add(ed);
+  cloudG=new T3.Group();const cm=new T3.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:.82,roughness:1,depthWrite:false});
+  const base=new T3.Mesh(new T3.BoxGeometry(9.6,.5,3.6),cm);base.position.set(0,3.65,0);cloudG.add(base);
+  for(let i=0;i<7;i++){const b=new T3.Mesh(new T3.SphereGeometry(1,20,14),cm);b.scale.set(1.15,.5,1.3);b.position.set(-4+i*1.33,3.95+(i%2)*.15,(i%3-1)*.5);cloudG.add(b)}
+  G.root.add(cloudG);
+  sunG=new T3.Group();const core=new T3.Mesh(new T3.SphereGeometry(.75,32,20),new T3.MeshBasicMaterial({color:0xffc93c}));
+  const halo=new T3.Mesh(new T3.SphereGeometry(1.25,32,20),new T3.MeshBasicMaterial({color:0xffd966,transparent:true,opacity:.28,depthWrite:false}));
+  sunG.add(core,halo);sunG.position.set(SP.x,SP.y,SP.z);G.root.add(sunG);
+  const gx=()=>rnd(-4.6,4.6),gz=()=>rnd(-1.6,1.6);
+  sw=stream(0xc98a12,.95,40,3.6,()=>[V(SP.x+rnd(-.3,.3),SP.y+rnd(-.3,.3),SP.z+rnd(-.3,.3)),V(gx(),.05,gz())]);
+  swr=stream(0xc98a12,.38,30,3.6,()=>{const A=V(SP.x+rnd(-.3,.3),SP.y+rnd(-.3,.3),SP.z),B=V(rnd(-1,4.5),S.cloud?4.35:3,gz());
+   const d=B.clone().sub(A);return[A,B,B.clone().add(V(d.x,-d.y,d.z).normalize().multiplyScalar(6))]});
+  lw=stream(0xe5484d,.9,40,1.4,()=>{const x=gx(),z=gz();return[V(x,.05,z),V(x+rnd(-.3,.3),rnd(1.2,2.9),z)]});
+  lwe=stream(0xe5484d,.5,20,2.2,()=>{const x=gx(),z=gz();return[V(x,.05,z),V(x-1.2,8.5,z)]});
+  cr=stream(0x8e6bd8,.9,50,1.2,()=>{const x=gx(),z=gz();return[V(x,rnd(2.2,2.95),z),V(x+rnd(-.3,.3),.05,z)]})}
+ function update(dt){const a=new T3.Vector3(),dir=new T3.Vector3();
+  streams.forEach(s=>{const m=s.mesh;m.count=s.n;
+   for(let i=0;i<s.n;i++){const p=s.ps[i];p.u+=dt*s.speed/p.L;if(p.u>=1){p.u-=1;const q=mkP(s);p.pts=q.pts;p.L=q.L}
+    let d=p.u*p.L,k=1;while(k<p.pts.length-1&&d>p.pts[k].distanceTo(p.pts[k-1])){d-=p.pts[k].distanceTo(p.pts[k-1]);k++}
+    const A=p.pts[k-1],B=p.pts[k],sl=A.distanceTo(B);dir.subVectors(B,A).normalize();a.copy(A).addScaledVector(dir,Math.min(d,sl));
+    const fade=Math.max(.05,Math.min(1,p.u*10,(1-p.u)*10));
+    dummy.position.copy(a);dummy.quaternion.setFromUnitVectors(UP,dir);dummy.scale.setScalar(s.k*fade);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix)}
+   m.instanceMatrix.needsUpdate=true})}
+ function vals(){const arrive=S.day?(S.cloud?45:85):0,back=Math.round(30+.4*S.g+(S.cloud?25:0));
+  const trend=S.day?(S.cloud?"白天升温慢":"白天升温快"):(S.cloud?"夜晚降温慢":S.g>=60?"夜晚降温较慢":"夜晚降温快");
+  const diff=S.cloud?"小":S.g>=60?"中":"大";return{arrive,back,trend,diff}}
+ function apply(){const v=vals(),T=theme();
+  ro&&ro.update([["昼 / 夜",S.day?"白天":"夜晚"],["晴 / 阴",S.cloud?"阴天":"晴天"],["到达地面的太阳辐射",v.arrive,T.goldText],
+   ["大气逆辐射",v.back,T.purple],["地面温度",v.trend],["昼夜温差",v.diff,T.redText]]);
+  if(!G)return;const g=S.g/100;
+  sunG.visible=S.day;cloudG.visible=S.cloud;
+  sw.n=S.day?Math.round(34*v.arrive/85):0;swr.n=S.day?(S.cloud?26:6):0;
+  lw.n=S.day?30:24;lwe.n=Math.max(1,Math.round((2+12*(1-g))*(S.cloud?.4:1)));
+  cr.n=Math.min(50,Math.round(6+v.back*.4));cr.k=.8+(v.back-30)/65*.7+(!S.day&&S.cloud?.3:0);
+  atmo.material.color.copy(cL).lerp(cD,g);atmo.material.opacity=.14+.24*g;regen()}
+ function lab(c,txt,p,color,size){const q=project(p);if(!q.visible)return;
+  c.font="600 "+size+"px "+F;c.textAlign="center";c.textBaseline="middle";c.lineJoin="round";
+  c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(txt,q.x,q.y);c.fillStyle=color;c.fillText(txt,q.x,q.y)}
+ function legend(c){const rows=[["#c98a12","太阳短波辐射"],["#e5484d","地面长波辐射"],["#8e6bd8","大气逆辐射"]];
+  c.font="13px "+F;c.textAlign="left";c.textBaseline="middle";c.lineJoin="round";
+  rows.forEach((r,i)=>{const y=20+i*22;c.fillStyle=r[0];c.beginPath();c.arc(20,y,5,0,Math.PI*2);c.fill();
+   c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(r[1],32,y);c.fillStyle="#1d1d1f";c.fillText(r[1],32,y)})}
+ return{
+  use3d:true,
+  text:"太阳辐射是<b>短波辐射</b>，大气对它吸收很少，大部分到达地面，地面增温——<b>太阳暖大地</b>。地面以<b>长波辐射</b>向外放热，近地面大气中的水汽、二氧化碳强烈吸收长波辐射而增温——<b>大地暖大气</b>，所以对流层大气的直接热源是地面。大气又以<b>逆辐射</b>把热量还给地面，起保温作用——<b>大气还大地</b>。",
+  points:["太阳辐射是地面的直接热源，地面辐射是近地面大气的直接热源","大气对太阳辐射的削弱：吸收、反射（云层最明显）、散射","大气逆辐射对地面有保温作用","阴天：白天削弱强、夜晚保温强，昼夜温差小；晴朗干燥的沙漠昼夜温差大"],
+  gk:"浙江选考常结合「霜冻多出现在晴朗夜晚」「青藏高原光照强但气温低」「温室大棚、覆膜、熏烟防冻」考查受热过程。<br><b>易错：</b>大气逆辐射夜晚也存在，阴天夜晚更强；对流层大气的直接热源是地面而不是太阳。",
+  mount(ctrl,read){
+   ctrl.append(chips([{label:"白天",value:true},{label:"夜晚",value:false}],S.day,v=>{S.day=v;apply()}),
+    chips([{label:"晴天",value:false},{label:"阴天",value:true}],S.cloud,v=>{S.cloud=v;apply()}),
+    slider("温室气体浓度",0,100,1,S.g,v=>Math.round(v)+"%",v=>{S.g=v;apply()}),
+    toggle("显示三个过程编号",S.nums,v=>{S.nums=v}));
+   ro=readout([]);read.append(ro);
+   G=GL3();if(G){build();setCam()}run=true;last=0;apply()},
+  draw(c,w,h,t){if(!G||!run)return;if(Math.abs(w/h-lastAsp)>.01)setCam();
+   const dt=last?Math.min(.05,Math.max(0,t-last)):0;last=t;update(dt);
+   const ink="#1d1d1f";if(S.day)lab(c,"太阳",V(SP.x,SP.y+1.6,SP.z),ink,13);
+   lab(c,"大气层",V(-4.1,2.75,2),ink,13);lab(c,"陆地",V(-2.5,-1,2.1),ink,13);lab(c,"海洋",V(2.5,-1,2.1),ink,13);lab(c,"宇宙空间",V(-3.6,6.5,0),ink,13);
+   if(S.cloud)lab(c,"云层",V(4.2,4.7,1.2),ink,13);
+   if(S.nums){if(S.day)lab(c,"① 太阳暖大地",V(3.4,4.8,0),"#9a6a00",15);
+    lab(c,"② 大地暖大气",V(-2.6,1.2,1.9),"#c0362c",15);lab(c,"③ 大气还大地",V(1.6,1.6,1.9),"#0071e3",15)}
+   legend(c)},
+  unmount(){run=false;streams.length=0;G=null;ro=null}}
+})();
+/* ---------- 第 2 章 等压线与风 ---------- */
+CH[1].ready=true;
+MODS[1]=(function(){
+ const S={upper:false,nh:1,field:"low",s:1,surf:false};
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",FC=1,KF=.7,R=4.8;
+ let G=null,T3=null,run=false,last=0,lastAsp=0,ro=null,UP,isoG,surf,parcel,aP,aC,aF,aW,pts,pGeo,wrap=null,drag=false,ray,plane;
+ const P0={x:2.6,z:1.4},isoLab=[],parts=[];let partT=0;
+ function V(x,y,z){return new T3.Vector3(x,y,z)}
+ function setCam(){const a=W/H,r=50*Math.PI/180,D=Math.max(15,7.2/(Math.tan(22.5*Math.PI/180)*a));
+  G.camera.position.set(0,D*Math.sin(r),D*Math.cos(r));
+  if(G.controls){G.controls.target.set(0,0,0);G.controls.update()}else G.camera.lookAt(0,0,0);lastAsp=a}
+ const g=()=>4/S.s;
+ function pres(x,z){const r=Math.hypot(x,z);return S.field==="low"?996+g()*r:S.field==="high"?1028-g()*r:1012+g()*z}
+ function rot(v,a){const c=Math.cos(a),s=Math.sin(a);return{x:v.x*c-v.z*s,z:v.x*s+v.z*c}}// a>0：俯视顺时针（向右）
+ function field(x,z){const r=Math.hypot(x,z),G0=g();let n;
+  if(S.field==="flat")n={x:0,z:-1};else{if(r<.25)return null;const k=S.field==="low"?-1:1;n={x:k*x/r,z:k*z/r}}
+  const alpha=S.upper?0:Math.atan(KF/FC),beta=Math.PI/2-alpha,w=rot(n,S.nh*beta);
+  const Vs=S.upper?G0/FC:G0/Math.hypot(FC,KF),c=rot(w,S.nh*Math.PI/2);
+  return{n,G:G0,w,V:Vs,c,alpha}}
+ function mkArrow(color,rad){const a=new T3.Group(),m=new T3.MeshStandardMaterial({color,roughness:.5});
+  a.sh=new T3.Mesh(new T3.CylinderGeometry(rad,rad,1,12),m);a.hd=new T3.Mesh(new T3.ConeGeometry(rad*2.6,1,16),m);a.add(a.sh,a.hd);G.root.add(a);return a}
+ function setArrow(a,o,d,len){if(len<.05){a.visible=false;return}a.visible=true;a.position.copy(o);
+  a.quaternion.setFromUnitVectors(UP,V(d.x,0,d.z).normalize());const hl=Math.min(.36,len*.4);
+  a.sh.scale.set(1,len-hl,1);a.sh.position.y=(len-hl)/2;a.hd.scale.set(1,hl,1);a.hd.position.y=len-hl/2;a.tip=o.clone().add(V(d.x,0,d.z).normalize().multiplyScalar(len+.35))}
+ function build(){T3=G.THREE;UP=V(0,1,0);ray=new T3.Raycaster();plane=new T3.Plane(V(0,1,0),0);
+  const gnd=new T3.Mesh(new T3.BoxGeometry(10,.2,10),new T3.MeshStandardMaterial({color:0xf3ede0,roughness:.95}));gnd.position.y=-.1;gnd.receiveShadow=true;G.root.add(gnd);
+  isoG=new T3.Group();G.root.add(isoG);
+  const sg=new T3.PlaneGeometry(10,10,50,50);sg.rotateX(-Math.PI/2);sg.setAttribute("color",new T3.BufferAttribute(new Float32Array(sg.attributes.position.count*3),3));
+  surf=new T3.Mesh(sg,new T3.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.3,side:T3.DoubleSide,depthWrite:false}));G.root.add(surf);
+  parcel=new T3.Mesh(new T3.SphereGeometry(.24,24,16),new T3.MeshStandardMaterial({color:0xff9f0a,roughness:.4}));parcel.castShadow=true;G.root.add(parcel);
+  aP=mkArrow(0x0071e3,.045);aC=mkArrow(0x9a6a00,.045);aF=mkArrow(0xc0362c,.045);aW=mkArrow(0x3a3a3c,.09);
+  pGeo=new T3.BufferGeometry();pGeo.setAttribute("position",new T3.BufferAttribute(new Float32Array(169*3).fill(-100),3));
+  pts=new T3.Points(pGeo,new T3.PointsMaterial({color:0x2c2c2e,size:.16,transparent:true,opacity:.85}));pts.frustumCulled=false;G.root.add(pts)}
+ const cB=()=>new T3.Color(0x0071e3),cR=()=>new T3.Color(0xc0362c);
+ function buildIso(){isoG.children.slice().forEach(o=>{o.geometry.dispose();o.material.dispose();isoG.remove(o)});isoLab.length=0;
+  const L=[];
+  if(S.field==="flat"){for(let P=1012-4*12;P<=1012+4*12;P+=4){const z=(P-1012)*S.s/4;if(Math.abs(z)<R)L.push({P,pts:[V(-5,.05,z),V(5,.05,z)],at:V(4.4,.05,z)})}}
+  else for(let m=1;m*S.s<R;m++){const r=m*S.s,P=S.field==="low"?996+4*m:1028-4*m,ps=[];
+   for(let i=0;i<=96;i++){const a=i/96*Math.PI*2;ps.push(V(r*Math.cos(a),.05,r*Math.sin(a)))}L.push({P,pts:ps,at:V(r*.707,.05,r*.707)})}
+  const mn=Math.min(...L.map(l=>l.P)),mx=Math.max(...L.map(l=>l.P)),mid=(mn+mx)/2;
+  L.forEach(l=>{const t=mx>mn?(l.P-mn)/(mx-mn):.5,c=cB().lerp(cR(),t);
+   isoG.add(new T3.Line(new T3.BufferGeometry().setFromPoints(l.pts),new T3.LineBasicMaterial({color:c})));
+   isoLab.push({txt:String(l.P),p:l.at,col:l.P<mid?"#0071e3":l.P>mid?"#c0362c":"#1d1d1f"})});
+  const pa=surf.geometry.attributes.position,ca=surf.geometry.attributes.color,vs=[];let lo=1e9,hi=-1e9;
+  for(let i=0;i<pa.count;i++){const p=pres(pa.getX(i),pa.getZ(i));vs.push(p);lo=Math.min(lo,p);hi=Math.max(hi,p)}
+  for(let i=0;i<pa.count;i++){const t=(vs[i]-lo)/(hi-lo||1),c=cB().lerp(cR(),t);pa.setY(i,.7+1.6*t);ca.setXYZ(i,c.r,c.g,c.b)}
+  pa.needsUpdate=ca.needsUpdate=true;surf.geometry.computeBoundingSphere()}
+ const DIRS=["北","东北","东","东南","南","西南","西","西北"];
+ function fromDir(w){const a=(Math.atan2(-w.x,w.z)*180/Math.PI+360)%360;return DIRS[Math.round(a/45)%8]+"风"}// 吹来方向 = −w；北 = −z
+ function level(Vs){return Vs<3.5?"弱":Vs<5.5?"中":"强"}
+ function clampP(){const lim=4.6;P0.x=Math.max(-lim,Math.min(lim,P0.x));P0.z=Math.max(-lim,Math.min(lim,P0.z));
+  if(S.field!=="flat"){const r=Math.hypot(P0.x,P0.z);if(r<.7){const k=.7/(r||1);P0.x=r?P0.x*k:.7;P0.z*=r?k:0}}}
+ function apply(){const T=theme();clampP();const f=field(P0.x,P0.z);
+  if(G){parcel.position.set(P0.x,.24,P0.z);const o=V(P0.x,.3,P0.z),k=.26;
+   setArrow(aP,o,f.n,f.G*k);setArrow(aC,o,f.c,FC*f.V*k);setArrow(aF,o,{x:-f.w.x,z:-f.w.z},S.upper?0:KF*f.V*k);setArrow(aW,o,f.w,f.V*.3);
+   surf.visible=S.surf}
+  ro&&ro.update([["所在点气压",pres(P0.x,P0.z).toFixed(1)+" hPa"],["风向",fromDir(f.w),T.fg],["风速等级",level(f.V),T.redText],
+   ["风向与等压线夹角",S.upper?"0°（平行）":"约 "+Math.round(f.alpha*180/Math.PI)+"°（斜交）",T.blue],["偏转方向",S.nh>0?"向右（北半球）":"向左（南半球）",T.goldText]])}
+ function rebuild(){G&&buildIso();apply()}
+ function release(){if(!G)return;parts.length=0;for(let i=0;i<13;i++)for(let j=0;j<13;j++)parts.push({x:-4.5+i*.75,z:-4.5+j*.75,on:true});partT=0}
+ function stepParts(dt){if(!parts.length)return;partT+=dt;const a=pGeo.attributes.position;
+  parts.forEach((p,i)=>{if(p.on&&partT<9){const f=field(p.x,p.z);if(!f){p.on=false}else{p.x+=f.w.x*f.V*.17*dt;p.z+=f.w.z*f.V*.17*dt;if(Math.abs(p.x)>5||Math.abs(p.z)>5)p.on=false}}else p.on=false;
+   a.setXYZ(i,p.x,p.on?.14:-100,p.z)});a.needsUpdate=true;if(partT>=9)parts.length=0}
+ function hitGround(e){const r=G.renderer.domElement.getBoundingClientRect(),q=new T3.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+  ray.setFromCamera(q,G.camera);const t=new T3.Vector3();return ray.ray.intersectPlane(plane,t)?t:null}
+ function onDown(e){if(!G||!run)return;const r=G.renderer.domElement.getBoundingClientRect(),q=project(V(P0.x,.24,P0.z));
+  if(Math.hypot(e.clientX-r.left-q.x,e.clientY-r.top-q.y)>(e.pointerType==="touch"?30:20))return;
+  drag=true;if(G.controls)G.controls.enabled=false;e.stopPropagation();e.preventDefault();
+  window.addEventListener("pointermove",onMove);window.addEventListener("pointerup",onUp);window.addEventListener("pointercancel",onUp)}
+ function onMove(e){if(!drag)return;const t=hitGround(e);if(t){P0.x=t.x;P0.z=t.z;apply()}}
+ function onUp(){drag=false;if(G&&G.controls)G.controls.enabled=true;
+  window.removeEventListener("pointermove",onMove);window.removeEventListener("pointerup",onUp);window.removeEventListener("pointercancel",onUp)}
+ function lab(c,txt,p,color,size){const q=project(p);if(!q.visible)return;
+  c.font="600 "+size+"px "+F;c.textAlign="center";c.textBaseline="middle";c.lineJoin="round";
+  c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(txt,q.x,q.y);c.fillStyle=color;c.fillText(txt,q.x,q.y)}
+ function legend(c){const rows=[["#0071e3","水平气压梯度力"],["#9a6a00","地转偏向力"],["#c0362c","摩擦力"],["#3a3a3c","风向（粗箭头）"]];
+  c.font="13px "+F;c.textAlign="left";c.textBaseline="middle";c.lineJoin="round";
+  rows.forEach((r,i)=>{if(i===2&&S.upper)return;const y=20+i*22;c.fillStyle=r[0];c.beginPath();c.arc(20,y,5,0,Math.PI*2);c.fill();
+   c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(r[1],32,y);c.fillStyle="#1d1d1f";c.fillText(r[1],32,y)})}
+ return{
+  use3d:true,
+  text:"<b>水平气压梯度力</b>是形成风的直接原因，方向垂直于等压线、由高压指向低压。<b>地转偏向力</b>使风向偏离：北半球向右、南半球向左，它只改变风向不改变风速。高空摩擦力可忽略，风向最终与等压线<b>平行</b>；近地面受<b>摩擦力</b>影响，风向与等压线<b>斜交</b>。等压线越密，气压梯度力越大，风力越大。",
+  points:["梯度力：垂直等压线、高压指向低压，是风的直接原因","偏向力：北右南左，赤道上为零，始终与风向垂直","高空风平行等压线，近地面风与等压线斜交","风向按「风从哪来」命名；等压线密集处风大"],
+  gk:"浙江选考几乎每年考等压线图判读风向风力：先画梯度力箭头，再按半球偏转 30°–45°。<br><b>易错：</b>风向是「吹来」的方向（偏北风是从北往南吹）；比较风力要在同一图、同一等压距下看疏密。",
+  mount(ctrl,read){
+   ctrl.append(chips([{label:"高空（无摩擦）",value:true},{label:"近地面（有摩擦）",value:false}],S.upper,v=>{S.upper=v;apply()}),
+    chips([{label:"北半球",value:1},{label:"南半球",value:-1}],S.nh,v=>{S.nh=v;apply()}),
+    chips([{label:"低压中心",value:"low"},{label:"高压中心",value:"high"},{label:"平直等压线",value:"flat"}],S.field,v=>{S.field=v;parts.length=0;rebuild()}),
+    slider("等压线间距（疏↔密）",.5,1.5,.05,2-S.s,v=>v<.85?"疏":v<1.2?"中":"密",v=>{S.s=+(2-v).toFixed(2);rebuild()}),
+    toggle("显示气压曲面",S.surf,v=>{S.surf=v;apply()}),
+    button("放风",release,true));
+   ro=readout([]);read.append(ro);
+   G=GL3();if(G){build();setCam();buildIso();wrap=document.getElementById("cwrap");wrap.addEventListener("pointerdown",onDown,true)}
+   run=true;last=0;apply()},
+  draw(c,w,h,t){if(!G||!run)return;if(Math.abs(w/h-lastAsp)>.01)setCam();
+   const dt=last?Math.min(.05,Math.max(0,t-last)):0;last=t;stepParts(dt);
+   const ink="#1d1d1f";isoLab.forEach(l=>lab(c,l.txt,l.p,l.col,12));
+   if(S.field==="flat"){lab(c,"低",V(0,.1,-4.6),"#0071e3",18);lab(c,"高",V(0,.1,4.6),"#c0362c",18)}
+   else lab(c,S.field==="low"?"低":"高",V(0,.1,0),S.field==="low"?"#0071e3":"#c0362c",20);
+   lab(c,"北 ↑",V(-4.6,.1,-5.4),ink,13);lab(c,"气块（可拖动）",V(P0.x,.75,P0.z),ink,12);
+   if(aP.visible)lab(c,"梯度力",aP.tip,"#0071e3",12);if(aC.visible)lab(c,"偏向力",aC.tip,"#9a6a00",12);
+   if(aF.visible)lab(c,"摩擦力",aF.tip,"#c0362c",12);if(aW.visible)lab(c,"风",aW.tip,ink,14);
+   legend(c)},
+  unmount(){run=false;parts.length=0;if(drag)onUp();wrap&&wrap.removeEventListener("pointerdown",onDown,true);wrap=null;G=null;ro=null}}
+})();
+/* ---------- 锋面剖面沙盘 helper（冷锋 / 暖锋 / 准静止锋复用） ----------
+   冷气团在左（x<锋线），暖气团在右；楔形鼻尖 = 地面锋线 x；k = 锋面坡度（高/水平距离） */
+function front3(G,opt){const T=G.THREE,o=Object.assign({len:12,wid:4,H:4.6,hc:3,k:1,x:0},opt),L=o.len/2;
+ const base=new T.Mesh(new T.BoxGeometry(o.len,.2,o.wid),new T.MeshStandardMaterial({color:0xe6dcc3,roughness:.95}));base.position.y=-.1;base.receiveShadow=true;
+ const mat=(c,op)=>new T.MeshStandardMaterial({color:c,transparent:true,opacity:op,roughness:.9,depthWrite:false,side:T.DoubleSide});
+ const cold=new T.Mesh(new T.BufferGeometry(),mat(0x8ec5ff,.42)),warm=new T.Mesh(new T.BufferGeometry(),mat(0xffb36b,.22)),front=new T.Mesh(new T.BufferGeometry(),mat(0xffffff,.62));
+ cold.renderOrder=1;warm.renderOrder=2;front.renderOrder=3;G.root.add(base,cold,warm,front);
+ const ext=pts=>{const g=new T.ExtrudeGeometry(new T.Shape(pts.map(p=>new T.Vector2(p[0],p[1]))),{depth:o.wid,bevelEnabled:false});g.translate(0,0,-o.wid/2);return g};
+ const set=(m,pts)=>{m.geometry.dispose();m.geometry=ext(pts)};
+ const R={cold,warm,front,base,x:o.x,k:o.k,ht:0,xt:0,L,
+  update(){const p=R.x,k=R.k,ht=Math.max(.01,Math.min(o.hc,k*(p+L))),xt=p-ht/k,cap=xt>-L+1e-3;R.ht=ht;R.xt=xt;
+   set(cold,cap?[[-L,0],[p,0],[xt,ht],[-L,ht]]:[[-L,0],[p,0],[-L,ht]]);
+   set(warm,cap?[[p,0],[L,0],[L,o.H],[-L,o.H],[-L,ht],[xt,ht]]:[[p,0],[L,0],[L,o.H],[-L,o.H],[-L,ht]]);
+   set(front,[[p,0],[p+.05,0],[xt+.05,ht],[xt,ht]])},
+  setPos(x){R.x=x;R.update()},setSlope(k){R.k=Math.max(.05,k);R.update()}};
+ R.update();return R}
+/* ---------- 第 3 章 冷锋 ---------- */
+CH[2].ready=true;
+MODS[2]=(function(){
+ const S={t:0,play:false,rain:true,sym:true,sel:1};
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",K=1.25,ZS=1.3,NR=150,NW=70;
+ const ST=[{n:"A",x:-2.5},{n:"B",x:0},{n:"C",x:2.5}],drops=[],ups=[],rnd=(a,b)=>a+Math.random()*(b-a);
+ const WX=["暖气团控制，气温较高、气压较低、天气晴朗","阴天、大风、降温、雨雪，常伴雷雨","冷气团控制，气温下降、气压升高、天气转晴"];
+ let G=null,T3=null,run=false,last=0,lastAsp=0,ro=null,fs=null,cloud,rain,rGeo,wGeo,wrap=null,btnPlay=null,slT=null;
+ const pos=()=>-4+8*S.t/100;
+ function V(x,y,z){return new T3.Vector3(x,y,z)}
+ function setCam(){const a=W/H,el=22*Math.PI/180,az=.32,D=Math.max(15.5,7.6/(Math.tan(22.5*Math.PI/180)*a));
+  G.camera.position.set(D*Math.cos(el)*Math.sin(az),1.6+D*Math.sin(el),D*Math.cos(el)*Math.cos(az));
+  if(G.controls){G.controls.target.set(0,1.6,0);G.controls.update()}else G.camera.lookAt(0,1.6,0);lastAsp=a}
+ const sm=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v)};
+ // d = 锋线位置 − 站点 x：d<−0.3 过境前；−0.3…2.3 过境时（锋后雨区）；>2.3 过境后
+ function wx(d){return{T:26-12*sm((d+.3)/2.6),P:1006-3*sm((d+3)/2.7)+17*sm((d+.3)/2.6),st:d<-.3?0:d<=2.3?1:2}}
+ function build(){T3=G.THREE;fs=front3(G,{k:K,x:pos()});
+  const cm=new T3.MeshStandardMaterial({color:0xdfe3ea,roughness:1,transparent:true,opacity:.93}),dm=new T3.MeshStandardMaterial({color:0xa9b0bb,roughness:1,transparent:true,opacity:.93});
+  cloud=new T3.Group();
+  [[0,3.45,0,1.05,dm],[-.9,3.3,.5,.85,dm],[.8,3.3,-.4,.85,dm],[-.3,4.2,-.2,.95,cm],[.5,4.0,.6,.78,cm],[-1.1,3.5,-.8,.72,cm],[.2,3.25,1.1,.7,dm],[-.2,4.85,0,.9,cm]].forEach(s=>{
+   const m=new T3.Mesh(new T3.SphereGeometry(s[3],20,14),s[4]);m.position.set(s[0],s[1],s[2]);m.scale.set(s[1]>4.6?2:1,.8,s[1]>4.6?1.5:1);m.castShadow=true;cloud.add(m)});
+  G.root.add(cloud);
+  rGeo=new T3.BufferGeometry();rGeo.setAttribute("position",new T3.BufferAttribute(new Float32Array(NR*6),3));
+  rain=new T3.LineSegments(rGeo,new T3.LineBasicMaterial({color:0x2f7fe0,transparent:true,opacity:.85}));rain.frustumCulled=false;G.root.add(rain);
+  for(let i=0;i<NR;i++)drops.push({o:rnd(-2.6,-.4),y:rnd(0,2.9),z:rnd(-1.7,1.7),v:rnd(4,6)});
+  wGeo=new T3.BufferGeometry();wGeo.setAttribute("position",new T3.BufferAttribute(new Float32Array(NW*3),3));
+  const wp=new T3.Points(wGeo,new T3.PointsMaterial({color:0xff7a00,size:.15,transparent:true,opacity:.9,depthWrite:false}));wp.frustumCulled=false;G.root.add(wp);
+  for(let i=0;i<NW;i++)ups.push({u:Math.random(),z:rnd(-1.7,1.7),s:rnd(.45,.6)});
+  ST.forEach(s=>{const g=new T3.Group();g.position.set(s.x,0,ZS);
+   const pole=new T3.Mesh(new T3.CylinderGeometry(.05,.05,1.1,10),new T3.MeshStandardMaterial({color:0x6e6e73}));pole.position.y=.55;pole.castShadow=true;
+   s.base=new T3.Mesh(new T3.CylinderGeometry(.2,.24,.08,16),new T3.MeshStandardMaterial({color:0x8e8e93}));s.base.position.y=.04;
+   const tube=(c,x,op,r)=>{const m=new T3.Mesh(new T3.CylinderGeometry(r,r,1,12),new T3.MeshStandardMaterial({color:c,transparent:op<1,opacity:op,depthWrite:op>=1}));m.position.x=x;g.add(m);return m};
+   [-.09,.09].forEach(x=>{const gl=tube(0xffffff,x,.4,.075);gl.scale.y=.8;gl.position.y=1.5});
+   s.tl=tube(0xc0362c,-.09,1,.045);s.pl=tube(0x0071e3,.09,1,.045);g.add(pole,s.base);G.root.add(g)})}
+ function apply(){const p=pos(),T=theme();
+  if(G){fs.setPos(p);cloud.position.x=p-1.6;rain.visible=S.rain;
+   ST.forEach((s,i)=>{const w=wx(p-s.x),ft=Math.max(.05,(w.T-10)/20),fp=Math.max(.05,(w.P-998)/26);
+    s.tl.scale.y=.8*ft;s.tl.position.y=1.1+.4*ft;s.pl.scale.y=.8*fp;s.pl.position.y=1.1+.4*fp;
+    s.base.material.color.setHex(i===S.sel?0x0071e3:0x8e8e93)})}
+  const s=ST[S.sel],w=wx(p-s.x);
+  ro&&ro.update([["选中站点",s.n+" 站（点击站点切换）"],["状态",["过境前","过境时","过境后"][w.st],[T.fg,T.redText,T.blue][w.st]],["天气",WX[w.st]],
+   ["气温",w.T.toFixed(1)+" °C",T.redText],["气压",w.P.toFixed(1)+" hPa",T.blue],["地面锋线位置","x = "+(p<0?"−":"+")+Math.abs(p).toFixed(1)]]);
+  slT&&slT.set(Math.round(S.t));if(btnPlay)btnPlay.textContent=S.play?"暂停":"播放"}
+ function step(dt){if(S.play){S.t=Math.min(100,S.t+dt*6.25);if(S.t>=100)S.play=false;apply()}
+  const p=pos(),ht=fs.ht,a=rGeo.attributes.position,b=wGeo.attributes.position;
+  drops.forEach((d,i)=>{d.y-=d.v*dt;if(d.y<0){d.y=2.9;d.o=rnd(-2.6,-.4)}const x=p+d.o;a.setXYZ(2*i,x,d.y,d.z);a.setXYZ(2*i+1,x-.03,d.y+.22,d.z)});a.needsUpdate=true;
+  ups.forEach((q,i)=>{q.u+=dt*q.s;if(q.u>1)q.u-=1;let x,y;
+   if(q.u<.2){y=.2;x=p+2.4-q.u/.2*2.1}else{y=.2+(q.u-.2)/.8*3.3;x=p+.3-Math.min(y,ht)/K}
+   b.setXYZ(i,x,y,q.z)});b.needsUpdate=true}
+ function tx(c,t,x,y,col,size,al){c.font="600 "+size+"px "+F;c.textAlign=al||"center";c.textBaseline="middle";c.lineJoin="round";
+  c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(t,x,y);c.fillStyle=col;c.fillText(t,x,y)}
+ function lab(c,t,p,col,size){const q=project(p);if(q.visible)tx(c,t,q.x,q.y,col,size)}
+ function symbol(c,p){const P=z=>project(V(p,.02,z)),A=P(-2),B=P(2);c.save();c.lineCap="round";c.lineJoin="round";
+  const tris=[];for(let z=-1.5;z<1.6;z+=1){const u=P(z-.28),v=P(z+.28),t=project(V(p+.5,.02,z));tris.push([u,t,v])}
+  [["rgba(255,255,255,.9)",6],["#0071e3",3]].forEach(([col,lw])=>{c.strokeStyle=col;c.fillStyle=col;c.lineWidth=lw;
+   c.beginPath();c.moveTo(A.x,A.y);c.lineTo(B.x,B.y);c.stroke();
+   tris.forEach(r=>{c.beginPath();c.moveTo(r[0].x,r[0].y);c.lineTo(r[1].x,r[1].y);c.lineTo(r[2].x,r[2].y);c.closePath();lw>3?c.stroke():c.fill()})});c.restore()}
+ function chart(c,w,h){const bw=Math.min(230,w*.48),bh=Math.round(bw*.64),x0=w-bw-12,y0=h-bh-12,s=ST[S.sel];
+  c.save();c.fillStyle="rgba(255,255,255,.85)";rrect(c,x0,y0,bw,bh,12);c.fill();c.strokeStyle="rgba(0,0,0,.12)";c.lineWidth=1;c.stroke();
+  const px=x0+14,pw=bw-28,py=y0+30,ph=bh-50;
+  c.strokeStyle="rgba(0,0,0,.35)";c.beginPath();c.moveTo(px,py);c.lineTo(px,py+ph);c.lineTo(px+pw,py+ph);c.stroke();
+  const Y=(v,lo,hi)=>py+ph*(1-(v-lo)/(hi-lo));
+  const line=(f,lo,hi,col)=>{c.strokeStyle=col;c.lineWidth=2;c.beginPath();for(let t=0;t<=100;t+=2){const X=px+pw*t/100,yy=Y(f(wx(-4+8*t/100-s.x)),lo,hi);t?c.lineTo(X,yy):c.moveTo(X,yy)}c.stroke()};
+  line(v=>v.T,12,28,"#c0362c");line(v=>v.P,1000,1022,"#0071e3");
+  const X=px+pw*S.t/100,cw=wx(pos()-s.x);c.strokeStyle="#9a6a00";c.lineWidth=1.5;c.setLineDash([4,3]);c.beginPath();c.moveTo(X,py-2);c.lineTo(X,py+ph);c.stroke();c.setLineDash([]);
+  [[Y(cw.T,12,28),"#c0362c"],[Y(cw.P,1000,1022),"#0071e3"]].forEach(([yy,col])=>{c.fillStyle=col;c.beginPath();c.arc(X,yy,3.5,0,Math.PI*2);c.fill()});
+  tx(c,s.n+" 站",x0+12,y0+16,"#1d1d1f",13,"left");tx(c,"气压",x0+bw-12,y0+16,"#0071e3",12,"right");tx(c,"气温",x0+bw-46,y0+16,"#c0362c",12,"right");
+  tx(c,"时间 →",px+pw,py+ph+11,"#1d1d1f",12,"right");c.restore()}
+ function onDown(e){if(!G||!run)return;const r=G.renderer.domElement.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  let best=-1,bd=e.pointerType==="touch"?32:22;
+  ST.forEach((s,i)=>[.5,1.4,2.2].forEach(y=>{const q=project(V(s.x,y,ZS)),d=Math.hypot(q.x-mx,q.y-my);if(d<bd){bd=d;best=i}}));
+  if(best>=0){S.sel=best;apply();e.stopPropagation()}}
+ return{
+  use3d:true,
+  text:"<b>冷气团主动</b>向暖气团移动形成<b>冷锋</b>。冷空气密度大，像楔子一样插到暖空气下面，迫使暖空气<b>急剧抬升</b>，水汽冷却凝结，在<b>锋后</b>形成降水。冷锋过境时常出现阴天、大风、降温和雨雪天气，过境后气温降低、气压升高，天气转晴。",
+  points:["冷锋：冷气团主动，锋面坡度大，雨区主要在锋后，雨区窄、降水强度大、历时短","过境前：暖气团控制，气温高、气压低、天气晴朗","过境时：阴天、大风、降温、雨雪","过境后：冷气团控制，降温、升压、转晴；我国北方夏季暴雨、冬春寒潮、沙尘暴多与冷锋有关"],
+  gk:"浙江选考常给某站点几天的气温、气压变化曲线，判断冷锋过境时间；或在锋面气旋图上判断锋面类型和雨区位置。<br><b>易错：</b>冷锋雨区在锋后、暖锋雨区在锋前；判断锋的类型看「谁主动」，而不是看温度高低。",
+  mount(ctrl,read){
+   btnPlay=button("播放",()=>{if(!S.play&&S.t>=100)S.t=0;S.play=!S.play;apply()},true);
+   slT=slider("时间",0,100,1,S.t,v=>String(Math.round(v)),v=>{S.t=v;S.play=false;apply()});
+   ctrl.append(btnPlay,button("重置",()=>{S.play=false;S.t=0;apply()}),slT,
+    toggle("显示雨区",S.rain,v=>{S.rain=v;apply()}),toggle("显示锋面符号",S.sym,v=>{S.sym=v}));
+   ro=readout([]);read.append(ro);
+   G=GL3();if(G){build();setCam();wrap=document.getElementById("cwrap");wrap.addEventListener("pointerdown",onDown,true)}
+   run=true;last=0;apply()},
+  draw(c,w,h,t){if(!G||!run)return;if(Math.abs(w/h-lastAsp)>.01)setCam();
+   const dt=last?Math.min(.05,Math.max(0,t-last)):0;last=t;step(dt);
+   const p=pos(),ink="#1d1d1f";
+   lab(c,"冷气团",V((p-6)/2-.3,Math.max(.35,fs.ht*.3),2.05),"#0071e3",15);lab(c,"暖气团",V(Math.min(5,(p+6)/2+.4),2.9,2.05),"#c0362c",15);
+   lab(c,"锋面",V((p+fs.xt)/2+.35,fs.ht/2+.25,2.05),ink,13);lab(c,"积雨云",V(p-1.6,5.5,0),ink,13);
+   if(S.rain)lab(c,"雨区（锋后）",V(p-1.5,.35,2.25),"#0071e3",13);
+   lab(c,"冷锋移动方向 →",V(p+1.3,-.5,2.1),"#9a6a00",13);
+   ST.forEach((s,i)=>{const v=wx(p-s.x);lab(c,s.n+" 站",V(s.x,2.15,ZS),i===S.sel?"#0071e3":ink,14);lab(c,v.T.toFixed(0)+"°C · "+v.P.toFixed(0),V(s.x,2.5,ZS),ink,12)});
+   if(S.sym)symbol(c,p);chart(c,w,h)},
+  unmount(){run=false;S.play=false;wrap&&wrap.removeEventListener("pointerdown",onDown,true);wrap=null;G=null;ro=null;btnPlay=slT=null;fs=null;drops.length=0;ups.length=0}}
+})();
+/* ---------- 第 4 章 暖锋 ---------- */
+CH[3].ready=true;
+MODS[3]=(function(){
+ const S={t:0,play:false,rain:true,sym:true,cmp:false,sel:1};
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",K=.35,ZS=1.3,NR=260,NW=80,XM=5.9;
+ const ST=[{n:"A",x:-.4},{n:"B",x:1.5},{n:"C",x:3.4}],drops=[],ups=[],rnd=(a,b)=>a+Math.random()*(b-a);// 时间 0（锋线 x=−4）三站 d<−3.2 均在雨区外；时间 100（x=4）均已过境
+ const WX=["冷气团控制，气温低、气压高、天气晴朗","云层增厚，出现连续性降水","暖气团控制，气温升高、气压降低、天气转晴"];
+ // 层状云：o0…o1 = 相对锋线向前（冷气团一侧）的范围
+ const CL=[{n:"雨层云",o0:.2,o1:3.4,y:1.65,th:.75,c:0xa9b0bb,op:.95},{n:"高层云",o0:1.6,o1:5,y:2.55,th:.42,c:0xc9ced6,op:.9},
+  {n:"卷层云",o0:3.4,o1:6.6,y:3.35,th:.2,c:0xe3e6eb,op:.75},{n:"卷云",o0:5.2,o1:8,y:4.05,th:.08,c:0xf2f3f5,op:.6}];
+ let G=null,T3=null,run=false,last=0,lastAsp=0,ro=null,fs=null,rain,rGeo,wGeo,wrap=null,btnPlay=null,slT=null;
+ const pos=()=>-4+8*S.t/100;
+ function V(x,y,z){return new T3.Vector3(x,y,z)}
+ function setCam(){const a=W/H,el=22*Math.PI/180,az=.32,D=Math.max(15.5,7.6/(Math.tan(22.5*Math.PI/180)*a));
+  G.camera.position.set(D*Math.cos(el)*Math.sin(az),1.6+D*Math.sin(el),D*Math.cos(el)*Math.cos(az));
+  if(G.controls){G.controls.target.set(0,1.6,0);G.controls.update()}else G.camera.lookAt(0,1.6,0);lastAsp=a}
+ const sm=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v)};
+ // d = 锋线位置 − 站点 x：d<−3.2 过境前；−3.2…0 临近过境（锋前雨区）；>0 过境后
+ function wx(d){return{T:12+12*sm((d+.5)/2.5),P:1019-5*sm((d+4)/4)-6*sm((d+.3)/2.5),st:d<-3.2?0:d<0?1:2}}
+ function build(){T3=G.THREE;fs=front3(G,{k:K,x:-pos()});
+  // 镜像：front3 默认冷气团在左，这里翻转成暖气团在左、冷气团在右
+  const grp=new T3.Group();grp.scale.x=-1;[fs.base,fs.cold,fs.warm,fs.front].forEach(m=>grp.add(m));G.root.add(grp);
+  CL.forEach(l=>{l.m=new T3.Mesh(new T3.SphereGeometry(.5,32,16),new T3.MeshStandardMaterial({color:l.c,roughness:1,transparent:true,opacity:l.op,depthWrite:false}));
+   l.m.renderOrder=4;l.m.castShadow=true;G.root.add(l.m)});
+  rGeo=new T3.BufferGeometry();rGeo.setAttribute("position",new T3.BufferAttribute(new Float32Array(NR*6),3));
+  rain=new T3.LineSegments(rGeo,new T3.LineBasicMaterial({color:0x2f7fe0,transparent:true,opacity:.7}));rain.frustumCulled=false;G.root.add(rain);
+  for(let i=0;i<NR;i++)drops.push({o:rnd(.3,3.3),y:rnd(0,1.3),z:rnd(-1.8,1.8),v:rnd(2.6,3.6)});
+  wGeo=new T3.BufferGeometry();wGeo.setAttribute("position",new T3.BufferAttribute(new Float32Array(NW*3),3));
+  const wp=new T3.Points(wGeo,new T3.PointsMaterial({color:0xff7a00,size:.15,transparent:true,opacity:.9,depthWrite:false}));wp.frustumCulled=false;G.root.add(wp);
+  for(let i=0;i<NW;i++)ups.push({u:Math.random(),z:rnd(-1.7,1.7),s:rnd(.16,.24)});
+  ST.forEach(s=>{const g=new T3.Group();g.position.set(s.x,0,ZS);
+   const pole=new T3.Mesh(new T3.CylinderGeometry(.05,.05,1.1,10),new T3.MeshStandardMaterial({color:0x6e6e73}));pole.position.y=.55;pole.castShadow=true;
+   s.base=new T3.Mesh(new T3.CylinderGeometry(.2,.24,.08,16),new T3.MeshStandardMaterial({color:0x8e8e93}));s.base.position.y=.04;
+   const tube=(c,x,op,r)=>{const m=new T3.Mesh(new T3.CylinderGeometry(r,r,1,12),new T3.MeshStandardMaterial({color:c,transparent:op<1,opacity:op,depthWrite:op>=1}));m.position.x=x;g.add(m);return m};
+   [-.09,.09].forEach(x=>{const gl=tube(0xffffff,x,.4,.075);gl.scale.y=.8;gl.position.y=1.5});
+   s.tl=tube(0xc0362c,-.09,1,.045);s.pl=tube(0x0071e3,.09,1,.045);g.add(pole,s.base);G.root.add(g)})}
+ function clouds(p){CL.forEach(l=>{const a=Math.max(-XM,p+l.o0),b=Math.min(XM,p+l.o1);l.cx=(a+b)/2;l.on=b-a>.3;l.m.visible=l.on;
+  if(l.on){l.m.scale.set(b-a,l.th,3.4);l.m.position.set(l.cx,l.y,0)}})}
+ function apply(){const p=pos(),T=theme();
+  if(G){fs.setPos(-p);clouds(p);rain.visible=S.rain;
+   ST.forEach((s,i)=>{const w=wx(p-s.x),ft=Math.max(.05,(w.T-8)/20),fp=Math.max(.05,(w.P-1004)/18);
+    s.tl.scale.y=.8*ft;s.tl.position.y=1.1+.4*ft;s.pl.scale.y=.8*fp;s.pl.position.y=1.1+.4*fp;
+    s.base.material.color.setHex(i===S.sel?0x0071e3:0x8e8e93)})}
+  const s=ST[S.sel],w=wx(p-s.x);
+  ro&&ro.update([["选中站点",s.n+" 站（点击站点切换）"],["状态",["过境前","临近过境","过境后"][w.st],[T.blue,T.fg,T.redText][w.st]],["天气",WX[w.st]],
+   ["气温",w.T.toFixed(1)+" °C",T.redText],["气压",w.P.toFixed(1)+" hPa",T.blue],["地面锋线位置","x = "+(p<0?"−":"+")+Math.abs(p).toFixed(1)]]);
+  slT&&slT.set(Math.round(S.t));if(btnPlay)btnPlay.textContent=S.play?"暂停":"播放"}
+ function step(dt){if(S.play){S.t=Math.min(100,S.t+dt*5);if(S.t>=100)S.play=false;apply()}
+  const p=pos(),ht=fs.ht,a=rGeo.attributes.position,b=wGeo.attributes.position;
+  drops.forEach((d,i)=>{d.y-=d.v*dt;if(d.y<0){d.y=1.3;d.o=rnd(.3,3.3)}const x=p+d.o,y=x>XM?-1:d.y;a.setXYZ(2*i,x,y,d.z);a.setXYZ(2*i+1,x+.01,y+.14,d.z)});a.needsUpdate=true;
+  ups.forEach((q,i)=>{q.u+=dt*q.s;if(q.u>1)q.u-=1;let x,y;
+   if(q.u<.25){y=.2;x=p-2.6+q.u/.25*2.7}else{y=.2+(q.u-.25)/.75*2.6;x=p+.15+Math.min(y,ht)/K}
+   if(x>XM||x<-XM)y=-1;b.setXYZ(i,x,y,q.z)});b.needsUpdate=true}
+ function tx(c,t,x,y,col,size,al){c.font="600 "+size+"px "+F;c.textAlign=al||"center";c.textBaseline="middle";c.lineJoin="round";
+  c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(t,x,y);c.fillStyle=col;c.fillText(t,x,y)}
+ function lab(c,t,p,col,size){const q=project(p);if(q.visible)tx(c,t,q.x,q.y,col,size)}
+ // 暖锋符号：红线 + 实心半圆，半圆朝 +x（移动方向）
+ function symbol(c,p){const P=z=>project(V(p,.02,z)),A=P(-2),B=P(2);c.save();c.lineCap="round";c.lineJoin="round";
+  const semis=[];for(let z=-1.5;z<1.6;z+=1){const pts=[];for(let k=0;k<=12;k++){const an=Math.PI*k/12;pts.push(project(V(p+.3*Math.sin(an),.02,z+.3*Math.cos(an))))}semis.push(pts)}
+  [["rgba(255,255,255,.9)",6],["#c0362c",3]].forEach(([col,lw])=>{c.strokeStyle=col;c.fillStyle=col;c.lineWidth=lw;
+   c.beginPath();c.moveTo(A.x,A.y);c.lineTo(B.x,B.y);c.stroke();
+   semis.forEach(r=>{c.beginPath();r.forEach((q,k)=>k?c.lineTo(q.x,q.y):c.moveTo(q.x,q.y));c.closePath();lw>3?c.stroke():c.fill()})});c.restore()}
+ function compare(c,w){const bw=Math.min(250,w*.5),x0=w-bw-12,y0=12,bh=118,sz=w<420?12:13;
+  c.save();c.fillStyle="rgba(255,255,255,.88)";rrect(c,x0,y0,bw,bh,12);c.fill();c.strokeStyle="rgba(0,0,0,.12)";c.lineWidth=1;c.stroke();
+  tx(c,"冷锋 vs 暖锋",x0+12,y0+16,"#1d1d1f",13,"left");
+  tx(c,"冷锋",x0+12,y0+40,"#0071e3",sz,"left");tx(c,"锋面陡 · 雨区锋后",x0+50,y0+40,"#1d1d1f",sz,"left");tx(c,"雨区窄、强度大",x0+50,y0+58,"#1d1d1f",sz,"left");
+  tx(c,"暖锋",x0+12,y0+82,"#c0362c",sz,"left");tx(c,"锋面缓 · 雨区锋前",x0+50,y0+82,"#1d1d1f",sz,"left");tx(c,"雨区宽、连续性降水",x0+50,y0+100,"#1d1d1f",sz,"left");c.restore()}
+ function chart(c,w,h){const bw=Math.min(230,w*.48),bh=Math.round(bw*.64),x0=w-bw-12,y0=h-bh-12,s=ST[S.sel];
+  c.save();c.fillStyle="rgba(255,255,255,.85)";rrect(c,x0,y0,bw,bh,12);c.fill();c.strokeStyle="rgba(0,0,0,.12)";c.lineWidth=1;c.stroke();
+  const px=x0+14,pw=bw-28,py=y0+30,ph=bh-50;
+  c.strokeStyle="rgba(0,0,0,.35)";c.beginPath();c.moveTo(px,py);c.lineTo(px,py+ph);c.lineTo(px+pw,py+ph);c.stroke();
+  const Y=(v,lo,hi)=>py+ph*(1-(v-lo)/(hi-lo));
+  const line=(f,lo,hi,col)=>{c.strokeStyle=col;c.lineWidth=2;c.beginPath();for(let t=0;t<=100;t+=2){const X=px+pw*t/100,yy=Y(f(wx(-4+8*t/100-s.x)),lo,hi);t?c.lineTo(X,yy):c.moveTo(X,yy)}c.stroke()};
+  line(v=>v.T,10,26,"#c0362c");line(v=>v.P,1006,1021,"#0071e3");
+  const X=px+pw*S.t/100,cw=wx(pos()-s.x);c.strokeStyle="#9a6a00";c.lineWidth=1.5;c.setLineDash([4,3]);c.beginPath();c.moveTo(X,py-2);c.lineTo(X,py+ph);c.stroke();c.setLineDash([]);
+  [[Y(cw.T,10,26),"#c0362c"],[Y(cw.P,1006,1021),"#0071e3"]].forEach(([yy,col])=>{c.fillStyle=col;c.beginPath();c.arc(X,yy,3.5,0,Math.PI*2);c.fill()});
+  tx(c,s.n+" 站",x0+12,y0+16,"#1d1d1f",13,"left");tx(c,"气压",x0+bw-12,y0+16,"#0071e3",12,"right");tx(c,"气温",x0+bw-46,y0+16,"#c0362c",12,"right");
+  tx(c,"时间 →",px+pw,py+ph+11,"#1d1d1f",12,"right");c.restore()}
+ function onDown(e){if(!G||!run)return;const r=G.renderer.domElement.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  let best=-1,bd=e.pointerType==="touch"?32:22;
+  ST.forEach((s,i)=>[.5,1.4,2.2].forEach(y=>{const q=project(V(s.x,y,ZS)),d=Math.hypot(q.x-mx,q.y-my);if(d<bd){bd=d;best=i}}));
+  if(best>=0){S.sel=best;apply();e.stopPropagation()}}
+ return{
+  use3d:true,
+  text:"<b>暖气团主动</b>向冷气团移动形成<b>暖锋</b>。暖空气密度小，沿锋面<b>缓慢爬升</b>到冷空气上方，冷却凝结形成<b>层状云</b>，在<b>锋前</b>出现范围较广、历时较长的<b>连续性降水</b>。暖锋过境后，暖气团占据原来冷气团的位置，气温升高、气压降低，天气转晴。",
+  points:["暖锋：暖气团主动，锋面坡度小，雨区主要在锋前，雨区宽、多连续性降水","过境前：冷气团控制，气温低、气压高、天气晴朗","过境时：连续性降水","过境后：暖气团控制，升温、降压、转晴"],
+  gk:"浙江选考常要求根据<b>雨区位置、锋面符号</b>或<b>站点气温气压曲线</b>区分冷暖锋。<br><b>易错：</b>暖锋过境后气压降低、冷锋过境后气压升高；锋面符号的三角、半圆都指向锋面移动方向。",
+  mount(ctrl,read){
+   btnPlay=button("播放",()=>{if(!S.play&&S.t>=100)S.t=0;S.play=!S.play;apply()},true);
+   slT=slider("时间",0,100,1,S.t,v=>String(Math.round(v)),v=>{S.t=v;S.play=false;apply()});
+   ctrl.append(btnPlay,button("重置",()=>{S.play=false;S.t=0;apply()}),slT,
+    toggle("显示雨区",S.rain,v=>{S.rain=v;apply()}),toggle("显示锋面符号",S.sym,v=>{S.sym=v}),toggle("与冷锋对比",S.cmp,v=>{S.cmp=v}));
+   ro=readout([]);read.append(ro);
+   G=GL3();if(G){build();setCam();wrap=document.getElementById("cwrap");wrap.addEventListener("pointerdown",onDown,true)}
+   run=true;last=0;apply()},
+  draw(c,w,h,t){if(!G||!run)return;if(Math.abs(w/h-lastAsp)>.01)setCam();
+   const dt=last?Math.min(.05,Math.max(0,t-last)):0;last=t;step(dt);
+   const p=pos(),ink="#1d1d1f";
+   lab(c,"暖气团",V(Math.max(-5,(p-6)/2),1.2,2.05),"#c0362c",15);
+   const cx=Math.min(5.1,(p+6)/2+.6);lab(c,"冷气团",V(cx,.42,2.05),"#0071e3",15);lab(c,"缓慢后退 →",V(cx,.05,2.2),"#0071e3",12);
+   lab(c,"锋面",V(p+1.4,K*1.4+.25,2.05),ink,13);
+   CL.forEach(l=>{if(l.on)lab(c,l.n,V(l.cx,l.y+l.th/2+.22,0),ink,12)});
+   if(S.rain)lab(c,"雨区（锋前）",V(Math.min(XM-.8,p+1.9),.32,2.25),"#0071e3",13);
+   lab(c,"暖锋移动方向 →",V(p-1.2,-.5,2.1),"#9a6a00",13);
+   ST.forEach((s,i)=>{const v=wx(p-s.x);lab(c,s.n+" 站",V(s.x,2.15,ZS),i===S.sel?"#0071e3":ink,14);lab(c,v.T.toFixed(0)+"°C · "+v.P.toFixed(0),V(s.x,2.5,ZS),ink,12)});
+   if(S.sym)symbol(c,p);if(S.cmp)compare(c,w);chart(c,w,h)},
+  unmount(){run=false;S.play=false;wrap&&wrap.removeEventListener("pointerdown",onDown,true);wrap=null;G=null;ro=null;btnPlay=slT=null;fs=null;drops.length=0;ups.length=0}}
+})();
+/* ---------- 第 5 章 准静止锋与江淮梅雨 ---------- */
+CH[4].ready=true;
+MODS[4]=(function(){
+ const S={m:6.5,yr:"normal",km:false};
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",K=.3,NR=320,NW=90,XM=5.9;
+ // 雨带纬度关键帧 [月份, °N]
+ const KF={normal:[[4,21],[4.5,22.5],[5,23.5],[5.5,24.5],[6,25.5],[6.5,30],[7,31.5],[7.5,36],[8,39],[8.5,40],[9,24]],
+  dry:[[4,21],[4.5,22.5],[5,23.5],[5.5,24.5],[6,26],[6.5,35],[7,37.5],[7.5,39],[8,40.5],[8.5,41],[9,25]],
+  wet:[[4,21],[4.5,22.5],[5,23.5],[5.5,25],[6,28],[6.5,29.5],[7,30.5],[7.5,31],[8,32.5],[8.5,38],[9,24]]};
+ const YR={normal:"正常年份：副高进退正常，江淮约 6 月中旬入梅、7 月上旬出梅",dry:"空梅：副热带高压势力强、北跳快，雨带很快越过江淮，梅雨期短甚至无雨，伏旱提前",wet:"涝梅：副热带高压势力弱、北进慢，雨带在江淮停留过久，降水过多，易发洪涝"};
+ const CL=[{n:"雨层云",o0:-4.6,o1:.7,y:2.1,th:.75,c:0xa9b0bb,op:.95},{n:"高层云",o0:-5.9,o1:-1.4,y:2.9,th:.35,c:0xc9ced6,op:.85}];
+ const COAST=[[106.5,21.6],[108.5,21.6],[110.2,20.9],[111,21.5],[113.5,22.2],[116.5,23],[118,24.5],[119.5,26],[120.5,28],[122,30],[121,31.5],[120.5,33],[119.5,34.8],[120.5,36.2],[122.5,37],[121,37.7],[119,37.2],[118.5,38.5],[117.6,39],[119,39.5],[121,40.8],[122,40.5],[121.5,39],[124,40]];
+ const YZ=[[100.5,27],[102.5,26.2],[104.5,28.8],[106.5,29.6],[108.5,30.6],[111,30.5],[112.5,29.6],[114.3,30.6],[116.2,29.8],[117.5,31],[119,32.2],[121.6,31.6]];
+ const drops=[],ups=[],rnd=(a,b)=>a+Math.random()*(b-a),fmtM=v=>Math.floor(v)+" 月"+(v%1?"中旬":"初");
+ let G=null,T3=null,run=false,last=0,lastAsp=0,ro=null,fs=null,rain,rGeo,wGeo,terr=null,X=0,tt=0;
+ function V(x,y,z){return new T3.Vector3(x,y,z)}
+ function setCam(){const a=W/H,el=22*Math.PI/180,az=.32,D=Math.max(15.5,7.6/(Math.tan(22.5*Math.PI/180)*a));
+  G.camera.position.set(D*Math.cos(el)*Math.sin(az),1.6+D*Math.sin(el),D*Math.cos(el)*Math.cos(az));
+  if(G.controls){G.controls.target.set(0,1.6,0);G.controls.update()}else G.camera.lookAt(0,1.6,0);lastAsp=a}
+ function lat(){const k=KF[S.yr],m=S.m;for(let i=1;i<k.length;i++)if(m<=k[i][0]){const a=k[i-1],b=k[i],f=(m-a[0])/(b[0]-a[0]);return a[1]+(b[1]-a[1])*f}return k[k.length-1][1]}
+ function zone(){const l=lat();return S.m>8.5&&l<36?"南撤":l<27.5?"华南":l<=33.5?"江淮":"华北东北"}
+ // 剖面：左 = 北（冷气团），右 = 南（暖气团）；x=0 为江淮
+ function tgt(){return S.km?1.1:Math.max(-4.6,Math.min(4.6,-(lat()-30.5)*.9))}
+ const still=()=>S.km||zone()==="江淮";
+ function WXT(){const z=zone();return z==="华南"?"雨带在华南（前汛期），江淮尚未入梅":z==="江淮"?(S.yr==="wet"?"梅雨持续过久，阴雨连绵、降水过多，易发洪涝":"江淮梅雨：阴雨连绵、湿度大、连续性降水历时长")
+  :z==="华北东北"?(S.yr==="dry"?"江淮出梅过早，受副高控制，晴热少雨，伏旱提前":"江淮出梅，受副高控制，晴热少雨（伏旱）"):"雨带迅速南撤，北方雨季结束，江淮秋高气爽"}
+ function build(){T3=G.THREE;X=tgt();fs=front3(G,{k:K,x:X,hc:2.4});
+  const tg=new T3.ExtrudeGeometry(new T3.Shape([[1,0],[2.3,.7],[6,.7],[6,0]].map(p=>new T3.Vector2(p[0],p[1]))),{depth:4,bevelEnabled:false});tg.translate(0,0,-2);
+  terr=new T3.Mesh(tg,new T3.MeshStandardMaterial({color:0xc4a978,roughness:.95}));terr.castShadow=terr.receiveShadow=true;G.root.add(terr);
+  CL.forEach(l=>{l.m=new T3.Mesh(new T3.SphereGeometry(.5,32,16),new T3.MeshStandardMaterial({color:l.c,roughness:1,transparent:true,opacity:l.op,depthWrite:false}));
+   l.m.renderOrder=4;l.m.castShadow=true;G.root.add(l.m)});
+  rGeo=new T3.BufferGeometry();rGeo.setAttribute("position",new T3.BufferAttribute(new Float32Array(NR*6),3));
+  rain=new T3.LineSegments(rGeo,new T3.LineBasicMaterial({color:0x2f7fe0,transparent:true,opacity:.7}));rain.frustumCulled=false;G.root.add(rain);
+  for(let i=0;i<NR;i++)drops.push({o:rnd(-4.2,.3),y:rnd(0,1.7),z:rnd(-1.8,1.8),v:rnd(2.6,3.6)});
+  wGeo=new T3.BufferGeometry();wGeo.setAttribute("position",new T3.BufferAttribute(new Float32Array(NW*3),3));
+  const wp=new T3.Points(wGeo,new T3.PointsMaterial({color:0xff7a00,size:.15,transparent:true,opacity:.9,depthWrite:false}));wp.frustumCulled=false;G.root.add(wp);
+  for(let i=0;i<NW;i++)ups.push({u:Math.random(),z:rnd(-1.7,1.7),s:rnd(.14,.22)})}
+ function clouds(p){CL.forEach(l=>{const a=Math.max(-XM,p+l.o0),b=Math.min(XM,p+l.o1);l.cx=(a+b)/2;l.on=b-a>.3;l.m.visible=l.on;
+  if(l.on){l.m.scale.set(b-a,l.th,3.4);l.m.position.set(l.cx,l.y,0)}})}
+ function apply(){const T=theme(),z=zone(),l=lat();if(terr)terr.visible=S.km;if(!ro)return;const mt=fmtM(S.m);
+  if(S.km)ro.update([["当前月份",mt+"（本场景多见于冬半年）"],["场景","昆明准静止锋 · 云贵高原",T.goldText],["贵阳一侧","冷气团控制，阴雨连绵——「天无三日晴」",T.blue],
+   ["昆明一侧","暖气团控制，晴朗温暖——「四季如春」",T.redText],["成因","冷空气从贵州方向南下，被云贵高原阻挡，与暖空气势力相当"]]);
+  else ro.update([["当前月份",mt],["雨带位置",z+"（约 "+l.toFixed(0)+"°N）",T.blue],["锋面状态",still()?"准静止（来回摆动），雨最大":"锋面移动中",still()?T.blue:T.goldText],
+   ["天气特征",WXT()],["年型说明",YR[S.yr]]])}
+ function step(dt){tt+=dt;X+=(tgt()-X)*Math.min(1,dt*2);const st=still(),p=X+(st?.3:.06)*Math.sin(tt*1.1),frac=st?1:.45;fs.setPos(p);clouds(p);
+  const a=rGeo.attributes.position,b=wGeo.attributes.position,ht=fs.ht;
+  drops.forEach((d,i)=>{d.y-=d.v*dt;if(d.y<0){d.y=1.7;d.o=rnd(-4.2,.3)}const x=p+d.o,y=i<NR*frac&&Math.abs(x)<XM?d.y:-2;a.setXYZ(2*i,x,y,d.z);a.setXYZ(2*i+1,x+.01,y+.14,d.z)});a.needsUpdate=true;
+  ups.forEach((q,i)=>{q.u+=dt*q.s;if(q.u>1)q.u-=1;let x,y;
+   if(q.u<.25){x=p+3-q.u/.25*2.85;y=S.km&&x>2.3?.85:.15}else{y=.15+(q.u-.25)/.75*Math.max(.1,ht-.1);x=p+.15-y/K}
+   if(x>XM||x<-XM)y=-1;b.setXYZ(i,x,y,q.z)});b.needsUpdate=true;return p}
+ function tx(c,t,x,y,col,size,al){c.font="600 "+size+"px "+F;c.textAlign=al||"center";c.textBaseline="middle";c.lineJoin="round";
+  c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(t,x,y);c.fillStyle=col;c.fillText(t,x,y)}
+ function lab(c,t,p,col,size){const q=project(p);if(q.visible)tx(c,t,q.x,q.y,col,size)}
+ function sun(c,p){const q=project(p);if(!q.visible)return;c.save();c.fillStyle="#f2b233";c.strokeStyle="#f2b233";c.lineWidth=2;c.lineCap="round";
+  c.beginPath();c.arc(q.x,q.y,11,0,Math.PI*2);c.fill();for(let k=0;k<8;k++){const an=k*Math.PI/4;c.beginPath();c.moveTo(q.x+15*Math.cos(an),q.y+15*Math.sin(an));c.lineTo(q.x+21*Math.cos(an),q.y+21*Math.sin(an));c.stroke()}c.restore()}
+ // 中国东部示意地图（右上角）
+ function map(c,w){const mw=w<520?Math.min(130,w*.34):Math.min(210,w*.3),s=mw/24,mh=26*s,x0=w-mw-10,y0=10,P=(lo,la)=>[x0+(lo-100)*s,y0+(44-la)*s],ink="#1d1d1f";
+  c.save();c.fillStyle="rgba(255,255,255,.9)";rrect(c,x0,y0,mw,mh,12);c.fill();c.strokeStyle="rgba(0,0,0,.12)";c.lineWidth=1;c.stroke();
+  rrect(c,x0,y0,mw,mh,12);c.clip();
+  c.beginPath();c.moveTo(...P(100,21.6));COAST.forEach(q=>c.lineTo(...P(q[0],q[1])));c.lineTo(...P(124,44));c.lineTo(...P(100,44));c.closePath();
+  c.fillStyle="rgba(154,106,0,.1)";c.fill();c.strokeStyle="rgba(0,0,0,.3)";c.stroke();
+  c.setLineDash([2,3]);c.strokeStyle="rgba(0,0,0,.15)";[25,30,35,40].forEach(l=>{const y=P(0,l)[1];c.beginPath();c.moveTo(x0,y);c.lineTo(x0+mw,y);c.stroke()});c.setLineDash([]);
+  [25,30,35,40].forEach(l=>tx(c,l+"°N",x0+4,P(0,l)[1],"#9a6a00",12,"left"));
+  if(!S.km){const la=lat(),A=P(108,la+1.8),B=P(122.5,la-1.8);c.fillStyle="rgba(0,113,227,.38)";rrect(c,A[0],A[1],B[0]-A[0],B[1]-A[1],Math.min(6,(B[1]-A[1])/2));c.fill();
+   if(la-6>19.5){const q=P(117,la-6);tx(c,"副高",q[0],q[1],"#c0362c",12)}}
+  c.strokeStyle="#0071e3";c.lineWidth=2;c.lineJoin="round";c.beginPath();YZ.forEach((q,i)=>{const r=P(q[0],q[1]);i?c.lineTo(r[0],r[1]):c.moveTo(r[0],r[1])});c.stroke();
+  const yl=P(112,32.2);tx(c,"长江",yl[0],yl[1],"#0071e3",12);
+  if(!S.km){const la=lat(),q=P(121.5,la+2.8);tx(c,"雨带",q[0],q[1],"#0071e3",12,"right")}
+  else{const f1=P(105.6,27.8),f2=P(103.6,24.6);c.strokeStyle="#c0362c";c.lineWidth=3;c.setLineDash([5,4]);c.beginPath();c.moveTo(...f1);c.lineTo(...f2);c.stroke();
+   c.strokeStyle="#0071e3";c.lineDashOffset=4.5;c.beginPath();c.moveTo(...f1);c.lineTo(...f2);c.stroke();c.setLineDash([]);c.lineDashOffset=0;
+   [["贵阳",106.7,26.6,"#0071e3","left",5],["昆明",102.7,25,"#c0362c","left",5]].forEach(([n,lo,la,col,al,d])=>{const r=P(lo,la);c.fillStyle=col;c.beginPath();c.arc(r[0],r[1],3,0,Math.PI*2);c.fill();tx(c,n,r[0]+d,r[1]-9,col,12,al)})}
+  tx(c,"示意图",x0+mw-8,y0+14,ink,12,"right");c.restore()}
+ return{
+  use3d:true,
+  text:"当冷暖气团<b>势力相当</b>，或因<b>地形阻挡</b>，锋面很少移动，形成<b>准静止锋</b>。它常常带来<b>连续性阴雨</b>天气，持续时间长。每年初夏，来自海洋的暖湿气流与北方冷空气在长江中下游地区相遇，形成准静止锋，江淮一带阴雨连绵，正值梅子成熟，称<b>「梅雨」</b>。浙江大部分地区在 <b>6 月中旬到 7 月上旬</b>入梅。",
+  points:["准静止锋：冷暖势力相当或地形阻挡，移动缓慢","天气：长时间连续性阴雨","江淮准静止锋形成梅雨，雨带随副热带高压北进南退移动","昆明准静止锋：冬半年贵阳阴雨、昆明晴暖"],
+  gk:"浙江选考常考<b>梅雨的成因</b>、<b>雨带推移与副热带高压的关系</b>，以及「空梅 / 涝梅」导致的旱涝。<br><b>易错：</b>雨带位于副高<b>北侧</b>，副高北跳，雨带北移；梅雨是<b>锋面雨</b>，不是台风雨。",
+  mount(ctrl,read){
+   ctrl.append(slider("月份",4,9,.5,S.m,fmtM,v=>{S.m=v;apply()}),
+    chips([{label:"正常年份",value:"normal"},{label:"空梅",value:"dry"},{label:"涝梅",value:"wet"}],S.yr,v=>{S.yr=v;apply()}),
+    toggle("昆明准静止锋",S.km,v=>{S.km=v;apply()}));
+   ro=readout([]);read.append(ro);
+   G=GL3();if(G){build();setCam()}
+   run=true;last=0;tt=0;apply()},
+  draw(c,w,h,t){if(!G||!run)return;if(Math.abs(w/h-lastAsp)>.01)setCam();
+   const dt=last?Math.min(.05,Math.max(0,t-last)):0;last=t;const p=step(dt),ink="#1d1d1f",B="#0071e3",R="#c0362c",Gd="#9a6a00";
+   if(S.km){lab(c,"冷空气（来自贵州）→",V(-4.2,.3,2.05),B,13);lab(c,"贵阳 · 阴雨",V(-1.8,.5,2.05),B,14);lab(c,"「天无三日晴」",V(-1.8,.18,2.2),ink,12);
+    lab(c,"昆明 · 晴暖",V(4,1.2,2.05),R,14);lab(c,"「四季如春」",V(4,.92,2.2),ink,12);lab(c,"云贵高原",V(3.8,.45,2.15),Gd,13);lab(c,"← 暖空气",V(4.4,2.1,2.05),R,13);sun(c,V(4.2,3.5,0))}
+   else{lab(c,"冷气团",V(Math.max(-5,p-3.6),.35,2.05),B,15);lab(c,"暖气团",V(Math.min(5,p+2.6),1.5,2.05),R,15);
+    lab(c,still()?"准静止锋停留江淮 · 来回摆动":"锋面移动中 "+(zone()==="南撤"?"南撤 →":"← 北进"),V(p,-.5,2.1),Gd,13);
+    lab(c,"← 北",V(-5.4,-.5,2.1),ink,12);lab(c,"南 →",V(5.4,-.5,2.1),ink,12)}
+   lab(c,"准静止锋",V(p-1.3,K*1.3+.25,2.05),ink,13);lab(c,"暖湿空气爬升",V(Math.min(4.8,p+2),S.km&&p+2>2.3?1.05:.42,2.1),Gd,12);
+   CL.forEach(l=>{if(l.on)lab(c,l.n,V(l.cx,l.y+l.th/2+.22,0),ink,12)});
+   const rx=p-2;if(rx>-XM+.6)lab(c,"连续性降水（雨区宽）",V(Math.max(-XM+1.6,rx),.3,2.25),B,13);
+   map(c,w)},
+  unmount(){run=false;G=null;ro=null;fs=null;terr=null;drops.length=0;ups.length=0}}
+})();
+/* ---------- 第 6 章 气旋与反气旋 ---------- */
+CH[5].ready=true;
+MODS[5]=(function(){
+ const S={t:"low",h:"N",flat:false,sec:false};
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",NS=240,NC=150,NR=140,RR=[1.3,2.4,3.5,4.6];
+ const rnd=(a,b)=>a+Math.random()*(b-a),sf=[],col=[],drops=[];
+ let G=null,T3=null,run=false,last=0,lastAsp=0,ro=null,sGeo,tGeo,cGeo,ctGeo,rGeo,cMat=null,ctMat=null,cPts,cTail,rain,cloud;
+ function V(x,y,z){return new T3.Vector3(x,y,z)}
+ const low=()=>S.t==="low",spin=()=>(low()?1:-1)*(S.h==="N"?1:-1);// +1 = 俯视逆时针
+ function setCam(){const a=W/H,el=36*Math.PI/180,az=.28,D=Math.max(13.5,6.4/(Math.tan(22.5*Math.PI/180)*a));
+  G.camera.position.set(D*Math.cos(el)*Math.sin(az),1.2+D*Math.sin(el),D*Math.cos(el)*Math.cos(az));
+  if(G.controls){G.controls.target.set(0,1.2,0);G.controls.update()}else G.camera.lookAt(0,1.2,0);lastAsp=a}
+ function pts(n,color,size){const g=new T3.BufferGeometry();g.setAttribute("position",new T3.BufferAttribute(new Float32Array(n*3),3));
+  const m=new T3.PointsMaterial({color,size,transparent:true,opacity:.95,depthWrite:false}),p=new T3.Points(g,m);p.frustumCulled=false;G.root.add(p);return[g,m,p]}
+ function segs(n,color,op){const g=new T3.BufferGeometry();g.setAttribute("position",new T3.BufferAttribute(new Float32Array(n*6),3));
+  const m=new T3.LineBasicMaterial({color,transparent:true,opacity:op}),l=new T3.LineSegments(g,m);l.frustumCulled=false;G.root.add(l);return[g,m,l]}
+ function build(){T3=G.THREE;
+  const disk=new T3.Mesh(new T3.CircleGeometry(5,96),new T3.MeshStandardMaterial({color:0xf3ecdc,roughness:.95}));disk.rotation.x=-Math.PI/2;disk.receiveShadow=true;G.root.add(disk);
+  RR.forEach(r=>{const p=[];for(let k=0;k<96;k++){const a=k/96*Math.PI*2;p.push(V(r*Math.cos(a),.015,r*Math.sin(a)))}
+   G.root.add(new T3.LineLoop(new T3.BufferGeometry().setFromPoints(p),new T3.LineBasicMaterial({color:0x6e6e73,transparent:true,opacity:.75})))});
+  sGeo=pts(NS,0x0071e3,.13)[0];tGeo=segs(NS,0x0071e3,.55)[0];
+  let o=pts(NC,0xc0362c,.13);cGeo=o[0];cMat=o[1];cPts=o[2];o=segs(NC,0xc0362c,.5);ctGeo=o[0];ctMat=o[1];cTail=o[2];
+  o=segs(NR,0x2f7fe0,.7);rGeo=o[0];rain=o[2];
+  cloud=new T3.Group();const cm=new T3.MeshStandardMaterial({color:0xc3c7ce,roughness:1,transparent:true,opacity:.95,depthWrite:false});
+  [[0,0,0,1.1],[.9,-.1,.3,.8],[-.85,-.1,-.2,.85],[.2,.15,-.8,.75],[-.3,0,.85,.75],[.5,.35,.1,.7]].forEach(([x,y,z,r])=>{const m=new T3.Mesh(new T3.SphereGeometry(r,24,16),cm);
+   m.position.set(x,y,z);m.scale.y=.6;m.castShadow=true;m.renderOrder=4;cloud.add(m)});
+  cloud.position.set(0,3.7,0);G.root.add(cloud);
+  for(let i=0;i<NS;i++)sf.push({r:rnd(.6,4.8),a:rnd(0,Math.PI*2),v:rnd(.5,.8)});
+  for(let i=0;i<NC;i++)col.push({y:rnd(.15,3.3),a:rnd(0,Math.PI*2),r:rnd(.15,.75),v:rnd(.6,.9)});
+  for(let i=0;i<NR;i++){const r=1.3*Math.sqrt(Math.random()),a=rnd(0,Math.PI*2);drops.push({x:r*Math.cos(a),z:r*Math.sin(a),y:rnd(0,3.2),v:rnd(2.6,3.4)})}}
+ function step(dt){const s=spin(),L=low(),a=sGeo.attributes.position,b=tGeo.attributes.position,w=r=>s*.9/(r+.6),y=.12;
+  sf.forEach((p,i)=>{const dr=(L?-1:1)*p.v;p.r+=dr*dt;p.a+=w(p.r)*dt;
+   if(L&&p.r<.45){p.r=rnd(4.4,4.9);p.a=rnd(0,Math.PI*2)}if(!L&&p.r>4.9){p.r=rnd(.35,.6);p.a=rnd(0,Math.PI*2)}
+   const r0=Math.max(.05,p.r-dr*.35),a0=p.a-w(p.r)*.35,X=p.r*Math.cos(p.a),Z=-p.r*Math.sin(p.a);
+   a.setXYZ(i,X,y,Z);b.setXYZ(2*i,X,y,Z);b.setXYZ(2*i+1,r0*Math.cos(a0),y,-r0*Math.sin(a0))});a.needsUpdate=true;b.needsUpdate=true;
+  cPts.visible=cTail.visible=!S.flat;
+  if(!S.flat){const c=cGeo.attributes.position,d=ctGeo.attributes.position,vy=L?1:-1;
+   col.forEach((p,i)=>{p.y+=vy*p.v*dt;p.a+=s*1.6*dt;if(p.y>3.3)p.y=.15;if(p.y<.15)p.y=3.3;
+    const rr=p.r*(.7+.1*p.y),X=rr*Math.cos(p.a),Z=-rr*Math.sin(p.a),a0=p.a-s*.5;
+    c.setXYZ(i,X,p.y,Z);d.setXYZ(2*i,X,p.y,Z);d.setXYZ(2*i+1,rr*Math.cos(a0),p.y-vy*p.v*.3,-rr*Math.sin(a0))});c.needsUpdate=true;d.needsUpdate=true}
+  rain.visible=cloud.visible=L;
+  if(L){const r=rGeo.attributes.position;drops.forEach((q,i)=>{q.y-=q.v*dt;if(q.y<0)q.y=3.2;r.setXYZ(2*i,q.x,q.y,q.z);r.setXYZ(2*i+1,q.x,q.y+.14,q.z)});r.needsUpdate=true}
+  cloud.rotation.y+=s*.15*dt}
+ function apply(){if(cMat){const h=low()?0xc0362c:0x9a6a00;cMat.color.setHex(h);ctMat.color.setHex(h)}
+  if(!ro)return;const T=theme(),L=low(),ccw=spin()>0,hs=S.h==="N"?"北半球":"南半球";
+  ro.update([["系统类型",(L?"气旋":"反气旋")+" · "+hs,L?T.blue:T.redText],["中心气压",L?"低（低于四周）":"高（高于四周）",L?T.blue:T.redText],
+   ["近地面水平气流",L?"辐合（四周 → 中心）":"辐散（中心 → 四周）"],["旋转方向",ccw?"逆时针":"顺时针",T.goldText],
+   ["垂直气流",L?"上升":"下沉",L?T.redText:T.goldText],["天气",L?"阴雨（上升冷却，水汽凝结成云致雨）":"晴朗（下沉增温，水汽难以凝结）"],
+   ["实例",L?"台风是强烈发展的热带气旋":"我国长江流域伏旱（7–8 月副热带高压控制）；北方秋高气爽（冬季蒙古—西伯利亚高压前缘、秋季反气旋）"]])}
+ function tx(c,t,x,y,col,size,al){c.font="600 "+size+"px "+F;c.textAlign=al||"center";c.textBaseline="middle";c.lineJoin="round";
+  c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(t,x,y);c.fillStyle=col;c.fillText(t,x,y)}
+ function lab(c,t,p,col,size){const q=project(p);if(q.visible)tx(c,t,q.x,q.y,col,size)}
+ function sun(c,p){const q=project(p);if(!q.visible)return;c.save();c.fillStyle="#f2b233";c.strokeStyle="#f2b233";c.lineWidth=2;c.lineCap="round";
+  c.beginPath();c.arc(q.x,q.y,11,0,Math.PI*2);c.fill();for(let k=0;k<8;k++){const an=k*Math.PI/4;c.beginPath();c.moveTo(q.x+15*Math.cos(an),q.y+15*Math.sin(an));c.lineTo(q.x+21*Math.cos(an),q.y+21*Math.sin(an));c.stroke()}c.restore()}
+ function arrow(c,x1,y1,x2,y2,col,lw){const an=Math.atan2(y2-y1,x2-x1),h=6;c.strokeStyle=c.fillStyle=col;c.lineWidth=lw||2;c.lineCap="round";
+  c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+  c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-h*Math.cos(an-.45),y2-h*Math.sin(an-.45));c.lineTo(x2-h*Math.cos(an+.45),y2-h*Math.sin(an+.45));c.closePath();c.fill()}
+ // 竖直剖面（右上角）
+ function sec(c,w){const sm=w<520,mw=sm?Math.min(140,w*.38):Math.min(230,w*.3),mh=mw*.78+16,x0=w-mw-10,y0=10,L=low(),cx=x0+mw/2,
+   yg=y0+mh-36,yh=y0+46,yl=yg-9,ink="#1d1d1f",R="#c0362c",B="#0071e3",Gd="#9a6a00";
+  c.save();c.fillStyle="rgba(255,255,255,.92)";rrect(c,x0,y0,mw,mh,12);c.fill();c.strokeStyle="rgba(0,0,0,.12)";c.lineWidth=1;c.stroke();
+  tx(c,"剖面",x0+8,y0+13,ink,12,"left");tx(c,L?"高空 高压":"高空 低压",cx,y0+31,L?R:B,12);
+  c.strokeStyle="rgba(0,0,0,.45)";c.lineWidth=1.5;c.beginPath();c.moveTo(x0+8,yg);c.lineTo(x0+mw-8,yg);c.stroke();
+  L?arrow(c,cx,yl-6,cx,yh+6,R,2.5):arrow(c,cx,yh+6,cx,yl-6,Gd,2.5);
+  [-1,1].forEach(sd=>{const o=cx+sd*(mw/2-12),i=cx+sd*12;
+   L?arrow(c,o,yl,i,yl,B):arrow(c,i,yl,o,yl,B);L?arrow(c,i,yh,o,yh,B):arrow(c,o,yh,i,yh,B)});
+  tx(c,L?"地面 低压":"地面 高压",cx,yg+11,L?B:R,12);tx(c,"高空与近地面气压相反",cx,y0+mh-11,Gd,12);c.restore()}
+ return{
+  use3d:true,
+  text:"<b>气旋</b>是中心气压<b>低于</b>四周的大气涡旋，近地面气流<b>向中心辐合</b>，北半球呈<b>逆时针</b>旋转，中心气流<b>上升</b>，多<b>阴雨</b>天气。<b>反气旋</b>是中心气压<b>高于</b>四周的大气涡旋，近地面气流由中心<b>向四周辐散</b>，北半球呈<b>顺时针</b>旋转，中心气流<b>下沉</b>，多<b>晴朗</b>天气。南半球旋转方向相反。",
+  points:["气旋 = 低压：辐合、上升、阴雨","反气旋 = 高压：辐散、下沉、晴朗","北半球气旋逆时针、反气旋顺时针，南半球相反","台风是热带气旋；长江流域伏旱由副热带高压（反气旋）控制造成"],
+  gk:"浙江选考常给<b>等压线图</b>判断气旋 / 反气旋及其天气，或结合<b>台风、伏旱</b>考查。<br><b>易错：</b>判断旋转方向<b>先看半球再看高低压</b>；气旋中心是低压，反气旋中心是高压，不要和「高压脊、低压槽」混淆。",
+  mount(ctrl,read){
+   ctrl.append(chips([{label:"气旋（低压）",value:"low"},{label:"反气旋（高压）",value:"high"}],S.t,v=>{S.t=v;apply()}),
+    chips([{label:"北半球",value:"N"},{label:"南半球",value:"S"}],S.h,v=>{S.h=v;apply()}),
+    toggle("只看近地面水平气流",S.flat,v=>{S.flat=v}),toggle("显示剖面",S.sec,v=>{S.sec=v}));
+   ro=readout([]);read.append(ro);
+   G=GL3();if(G){build();setCam()}
+   run=true;last=0;apply()},
+  draw(c,w,h,t){if(!G||!run)return;if(Math.abs(w/h-lastAsp)>.01)setCam();
+   const dt=last?Math.min(.05,Math.max(0,t-last)):0;last=t;step(dt);const L=low(),ccw=spin()>0,ink="#1d1d1f",B="#0071e3",R="#c0362c",Gd="#9a6a00";
+   const vals=L?[1000,1004,1008,1012]:[1024,1020,1016,1012],th=-.45;
+   RR.forEach((r,i)=>lab(c,vals[i]+(i===3?" hPa":""),V(r*Math.sin(th),.03,r*Math.cos(th)),ink,12));
+   lab(c,L?"低 L":"高 H",V(0,.03,0),L?B:R,18);
+   lab(c,(ccw?"↺ 逆时针":"↻ 顺时针")+(L?" · 向中心辐合":" · 向四周辐散"),V(0,.05,5.6),Gd,14);
+   if(!S.flat)lab(c,L?"中心气流上升 ↑":"中心气流下沉 ↓",V(1.5,2.1,0),L?R:Gd,13);
+   if(L)lab(c,"上升冷却 · 成云致雨",V(0,4.65,0),ink,13);else{sun(c,V(2.6,4.4,-1));lab(c,"晴朗无云",V(0,4.2,0),ink,13)}
+   lab(c,S.h==="N"?"北半球（俯视）":"南半球（俯视）",V(-4.6,.05,-4.2),ink,12);
+   if(S.sec)sec(c,w)},
+  unmount(){run=false;G=null;ro=null;cMat=ctMat=null;sf.length=0;col.length=0;drops.length=0}}
+})();
+/* ---------- 第 7 章 锋面气旋 ---------- */
+CH[6].ready=true;
+MODS[6]=(function(){
+ // S：共享状态，S.shift = 气旋整体东移量（场景按此平移）；extras：每项 {mount(ctrl,read,S),draw(ctx,w,h,t,S),unmount()}
+ const S={shift:0,rain:true,sel:1},extras=[];
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",NP=120,C0={x:-.5,z:-.8},RR=[1.3,2.4,3.5],PV=[1000,1004,1008],TAU=Math.PI*2;
+ const CF={a:[-2.2,1.6],b:[0,2]},WF={a:[2.6,.6],b:[.4,1.2]};// 冷锋伸向西南、暖锋伸向东南（x 东，−z 北）
+ const ST=[{n:"甲",x:-2.7,z:.45,f:"冷气团控制，转晴降温"},{n:"乙",x:.36,z:1.55,f:"冷锋将至：降温、大风、雨雪"},
+  {n:"丙",x:2.26,z:-1.29,f:"暖锋过境后升温转晴"},{n:"丁",x:-.3,z:-4.6,f:"受气旋外围影响较小"}];
+ const rnd=(a,b)=>a+Math.random()*(b-a),ps=[],stM=[];
+ let G=null,T3=null,run=false,last=0,lastAsp=0,lastSh=null,ro=null,wrap=null,chipW=null,grp=null,rainG=null,pGeo,tGeo;
+ function V(x,y,z){return new T3.Vector3(x,y,z)}
+ const cen=()=>({x:C0.x+S.shift,z:C0.z}),nd=a=>{while(a>Math.PI)a-=TAU;while(a<-Math.PI)a+=TAU;return a};
+ function fp(f,s){return{x:f.a[0]*s+f.b[0]*s*s,z:f.a[1]*s+f.b[1]*s*s}}
+ function ft(f,s){const x=f.a[0]+2*f.b[0]*s,z=f.a[1]+2*f.b[1]*s,l=Math.hypot(x,z);return{x:x/l,z:z/l}}
+ function fm(f,s){const t=ft(f,s);return{x:t.z,z:-t.x}}// 锋面推进方向：冷锋指向暖区，暖锋指向锋前
+ function setCam(){const a=W/H,el=55*Math.PI/180,D=Math.max(14,6.8/(Math.tan(22.5*Math.PI/180)*a));
+  G.camera.position.set(0,D*Math.sin(el),.3+D*Math.cos(el));
+  if(G.controls){G.controls.target.set(0,0,.3);G.controls.update()}else G.camera.lookAt(0,0,.3);lastAsp=a}
+ function mesh(arr,color,op,y,par){const g=new T3.BufferGeometry();g.setAttribute("position",new T3.BufferAttribute(new Float32Array(arr),3));
+  const m=new T3.Mesh(g,new T3.MeshBasicMaterial({color,transparent:op<1,opacity:op,side:T3.DoubleSide,depthWrite:false}));m.position.y=y;m.renderOrder=2;(par||grp).add(m);return m}
+ function band(f,o0,o1,s0,s1){const o=[],N=40;for(let i=0;i<N;i++){const[A,B]=[s0+(s1-s0)*i/N,s0+(s1-s0)*(i+1)/N].map(s=>{const p=fp(f,s),m=fm(f,s);return[p.x+m.x*o0,p.z+m.z*o0,p.x+m.x*o1,p.z+m.z*o1]});
+   o.push(A[0],0,A[1],A[2],0,A[3],B[0],0,B[1],A[2],0,A[3],B[2],0,B[3],B[0],0,B[1])}return o}
+ function syms(f,warm){const o=[],r=.2;for(let k=1;k<=6;k++){const s=k/7,p=fp(f,s),t=ft(f,s),m=fm(f,s);
+   if(!warm)o.push(p.x-t.x*r,0,p.z-t.z*r,p.x+t.x*r,0,p.z+t.z*r,p.x+m.x*.34,0,p.z+m.z*.34);
+   else{const P=a=>[p.x+r*(Math.cos(a)*t.x+Math.sin(a)*m.x),0,p.z+r*(Math.cos(a)*t.z+Math.sin(a)*m.z)];
+    for(let j=0;j<10;j++)o.push(p.x,0,p.z,...P(Math.PI*j/10),...P(Math.PI*(j+1)/10))}}return o}
+ function build(){T3=G.THREE;
+  const plate=new T3.Mesh(new T3.BoxGeometry(10,.2,10),new T3.MeshStandardMaterial({color:0xdbe8f5,roughness:.95}));plate.position.y=-.1;plate.receiveShadow=true;G.root.add(plate);
+  grp=new T3.Group();G.root.add(grp);
+  const poly=[];for(let i=0;i<=30;i++)poly.push(fp(WF,i/30));for(let i=30;i>=0;i--)poly.push(fp(CF,i/30));
+  const sec=[];for(let i=0;i<poly.length-1;i++)sec.push(0,0,0,poly[i].x,0,poly[i].z,poly[i+1].x,0,poly[i+1].z);
+  mesh(sec,0xf5b26b,.42,.012);
+  RR.forEach(r=>{const p=[];for(let k=0;k<96;k++){const a=k/96*TAU;p.push(V(1.15*r*Math.cos(a),.02,r*Math.sin(a)))}
+   grp.add(new T3.LineLoop(new T3.BufferGeometry().setFromPoints(p),new T3.LineBasicMaterial({color:0x6e6e73,transparent:true,opacity:.8})))});
+  rainG=new T3.Group();grp.add(rainG);mesh(band(CF,-.75,-.08,.08,.95),0x2f7fe0,.34,.022,rainG);mesh(band(WF,.08,1.7,.05,.95),0x2f7fe0,.3,.022,rainG);
+  mesh(band(CF,-.07,.07,0,1),0x0071e3,1,.032);mesh(syms(CF,false),0x0071e3,1,.032);
+  mesh(band(WF,-.07,.07,0,1),0xc0362c,1,.032);mesh(syms(WF,true),0xc0362c,1,.032);
+  pGeo=new T3.BufferGeometry();pGeo.setAttribute("position",new T3.BufferAttribute(new Float32Array(NP*3),3));
+  const pp=new T3.Points(pGeo,new T3.PointsMaterial({color:0x3a3a3c,size:.12,transparent:true,opacity:.9,depthWrite:false}));pp.frustumCulled=false;grp.add(pp);
+  tGeo=new T3.BufferGeometry();tGeo.setAttribute("position",new T3.BufferAttribute(new Float32Array(NP*6),3));
+  const tl=new T3.LineSegments(tGeo,new T3.LineBasicMaterial({color:0x3a3a3c,transparent:true,opacity:.45}));tl.frustumCulled=false;grp.add(tl);
+  for(let i=0;i<NP;i++)ps.push({r:rnd(.5,4.4),a:rnd(0,TAU),v:rnd(.8,1.2)});
+  ST.forEach(s=>{const m=new T3.Mesh(new T3.CylinderGeometry(.13,.13,.5,20),new T3.MeshStandardMaterial({color:0x6e6e73,roughness:.5}));
+   m.position.set(s.x,.25,s.z);m.castShadow=true;G.root.add(m);stM.push(m)})}
+ function step(dt){grp.position.set(C0.x+S.shift,0,C0.z);rainG.visible=S.rain;const a=pGeo.attributes.position,b=tGeo.attributes.position,y=.1,w=r=>.9/(r+.6);
+  ps.forEach((p,i)=>{p.r-=p.v*.45*dt;p.a+=w(p.r)*dt;if(p.r<.35){p.r=rnd(3.8,4.5);p.a=rnd(0,TAU)}// 逆时针向中心辐合
+   const r0=p.r+p.v*.16,a0=p.a-w(p.r)*.35,X=1.1*p.r*Math.cos(p.a),Z=-p.r*Math.sin(p.a);
+   a.setXYZ(i,X,y,Z);b.setXYZ(2*i,X,y,Z);b.setXYZ(2*i+1,1.1*r0*Math.cos(a0),y,-r0*Math.sin(a0))});a.needsUpdate=true;b.needsUpdate=true;
+  if(S.shift!==lastSh){lastSh=S.shift;apply()}}
+ // 站点相对锋线的实际位置（随 S.shift 变化）
+ function where(x,z){const c=cen(),dx=x-c.x,dz=z-c.z,r=Math.hypot(dx,dz),th=Math.atan2(dz,dx);if(r>4.4)return{k:"气旋外",rain:false};
+  const ang=f=>{let s=1;for(let i=1;i<=40;i++){const p=fp(f,i/40);if(Math.hypot(p.x,p.z)>=r){s=i/40;break}}const p=fp(f,s);return Math.atan2(p.z,p.x)};
+  const dist=f=>{let d=9;for(let i=0;i<=40;i++){const p=fp(f,i/40);d=Math.min(d,Math.hypot(p.x-dx,p.z-dz))}return d};
+  const tw=ang(WF),tc=ang(CF);
+  if(nd(th-tw)>=0&&nd(tc-th)>=0)return{k:"暖区",rain:false};
+  if(nd(th-tc)>0&&nd(th-tc)<1.1)return{k:"冷锋后",rain:dist(CF)<.75};
+  if(nd(tw-th)>0&&nd(tw-th)<1.1)return{k:"暖锋前",rain:dist(WF)<1.7};
+  return{k:"气旋外",rain:false}}
+ function WX(w){return w.k==="冷锋后"?(w.rain?"冷锋后窄雨带：阴雨、大风、降温":"冷气团控制：气温低、气压高、天气转晴")
+  :w.k==="暖区"?"暖气团控制：气温高、天气相对晴暖":w.k==="暖锋前"?(w.rain?"暖锋前宽雨带：连续性降水，阴雨绵绵":"暖锋前方：云层渐厚，气温较低"):"受气旋外围影响小，天气较稳定"}
+ S.$={CF,WF,C0,fp,band,syms,get grp(){return grp},get rainG(){return rainG},apply:()=>apply()};// 供 extras 使用
+ function apply(){stM.forEach((m,i)=>m.material.color.setHex(i===S.sel?0x0071e3:0x6e6e73));
+  if(chipW)chipW.querySelectorAll("button").forEach((b,i)=>b.classList.toggle("on",i===S.sel));
+  if(!ro)return;const T=theme(),s=ST[S.sel],w=where(s.x,s.z),col={"冷锋后":T.blue,"暖区":T.redText,"暖锋前":T.goldText}[w.k];
+  ro.update([["站点",s.n+" 站"],["位置",w.k,col],["当前天气",WX(w)],["未来天气",s.f]])}
+ function tx(c,t,x,y,col,size,al){c.font="600 "+size+"px "+F;c.textAlign=al||"center";c.textBaseline="middle";c.lineJoin="round";
+  c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(t,x,y);c.fillStyle=col;c.fillText(t,x,y)}
+ function lab(c,t,p,col,size){const q=project(p);if(q.visible)tx(c,t,q.x,q.y,col,size)}
+ function onDown(e){if(!G||!run)return;const r=G.renderer.domElement.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  let best=-1,bd=e.pointerType==="touch"?32:22;
+  ST.forEach((s,i)=>[.1,.5,.85].forEach(y=>{const q=project(V(s.x,y,s.z)),d=Math.hypot(q.x-mx,q.y-my);if(d<bd){bd=d;best=i}}));
+  if(best>=0){S.sel=best;apply();e.stopPropagation()}}
+ return{
+  use3d:true,extras,S,
+  text:"在北半球中纬度地区，锋面常与气旋结合形成<b>锋面气旋</b>。低压中心向<b>西南</b>伸出<b>冷锋</b>、向<b>东南</b>伸出<b>暖锋</b>，两锋之间是暖气团控制的<b>暖区</b>。气旋整体<b>自西向东</b>移动，<b>冷锋后、暖锋前</b>出现降水，暖区天气较好。锋面气旋是影响我国北方春季天气的重要系统。",
+  points:["北半球：西南侧冷锋、东南侧暖锋，气流逆时针辐合","雨区：冷锋后窄、暖锋前宽","暖区由暖气团控制，相对晴暖","整体自西向东移，冷锋快，最终追上暖锋形成锢囚"],
+  gk:"浙江选考常给<b>锋面气旋图</b>考查锋面类型、雨区位置、某地未来天气。<br><b>易错：</b>先找<b>低压中心和气流方向</b>（北半球逆时针），西侧为冷锋；<b>南半球</b>锋面气旋的冷锋在<b>西北侧</b>。",
+  mount(ctrl,read){
+   chipW=chips(ST.map((s,i)=>({label:s.n+" 站",value:i})),S.sel,v=>{S.sel=v;apply()});
+   ctrl.append(chipW,toggle("显示雨区",S.rain,v=>{S.rain=v}));
+   ro=readout([]);read.append(ro);
+   G=GL3();if(G){build();setCam();wrap=document.getElementById("cwrap");wrap.addEventListener("pointerdown",onDown,true)}
+   extras.forEach(x=>x.mount&&x.mount(ctrl,read,S));
+   run=true;last=0;lastSh=null;apply()},
+  draw(c,w,h,t){if(!G||!run)return;if(Math.abs(w/h-lastAsp)>.01)setCam();
+   const dt=last?Math.min(.05,Math.max(0,t-last)):0;last=t;step(dt);
+   const k=cen(),P=(x,y,z)=>V(k.x+x,y,k.z+z),ink="#1d1d1f",B="#0071e3",R="#c0362c",Gd="#9a6a00",pt=(f,s,o)=>{const p=fp(f,s),m=fm(f,s);return P(p.x+m.x*o,.05,p.z+m.z*o)};
+   RR.forEach((r,i)=>lab(c,PV[i]+(i===2?" hPa":""),P(-.68*r,.03,-.81*r),ink,12));
+   lab(c,"L",P(0,.05,0),B,20);lab(c,"996",P(0,.05,.38),ink,12);
+   lab(c,"冷锋",pt(CF,1,-.45),B,14);lab(c,"暖锋",pt(WF,1,.45),R,14);lab(c,"暖区",P(.55,.05,2.3),R,15);
+   if(S.rain){lab(c,"冷锋后 窄雨带",pt(CF,.6,-.95),B,12);lab(c,"暖锋前 宽雨带",pt(WF,.55,1.2),B,12)}
+   lab(c,"↺ 逆时针辐合",P(-2.7,.05,-2.9),Gd,13);lab(c,"气旋东移 →",V(3.2,.05,4.6),Gd,13);lab(c,"北 ↑",V(-4.4,.05,-4.6),ink,12);
+   ST.forEach((s,i)=>lab(c,s.n+" 站",V(s.x,.85,s.z),i===S.sel?B:ink,14));
+   extras.forEach(x=>x.draw&&x.draw(c,w,h,t,S))},
+  unmount(){run=false;extras.forEach(x=>x.unmount&&x.unmount());wrap&&wrap.removeEventListener("pointerdown",onDown,true);wrap=null;G=null;ro=null;chipW=null;grp=rainG=null;ps.length=0;stM.length=0}}
+})();
+// 第 7 章 extra：移动与剖面
+MODS[6].extras.push((function(){
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",SPAN=1.58,ink="#1d1d1f",B="#0071e3",R="#c0362c";
+ let S=null,I=null,on=false,play=false,T=0,sec=false,last=0,btn=null,sl=null,a0=null,b0=null,G=null;
+ const k=()=>1-.6*T/100;// 暖区张角比例 1 → 0.4
+ function tx(c,t,x,y,col,size,al){c.font="600 "+size+"px "+F;c.textAlign=al||"center";c.textBaseline="middle";c.lineJoin="round";
+  c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(t,x,y);c.fillStyle=col;c.fillText(t,x,y)}
+ function geo(m,arr){if(!m||!G)return;const T3=G.THREE,g=new T3.BufferGeometry();
+  g.setAttribute("position",new T3.BufferAttribute(new Float32Array(arr),3));m.geometry.dispose();m.geometry=g}
+ function setT(v){T=Math.max(0,Math.min(100,v));S.shift=-3+6*T/100;
+  if(I&&a0){const d=(1-k())*SPAN,c=Math.cos(d),s=Math.sin(d);// 冷锋绕低压中心转向暖锋：冷锋更快
+   I.CF.a[0]=a0[0]*c+a0[1]*s;I.CF.a[1]=-a0[0]*s+a0[1]*c;I.CF.b[0]=b0[0]*c+b0[1]*s;I.CF.b[1]=-b0[0]*s+b0[1]*c;
+   if(I.grp){const P=[];for(let i=0;i<=30;i++)P.push(I.fp(I.WF,i/30));for(let i=30;i>=0;i--)P.push(I.fp(I.CF,i/30));
+    const q=[];for(let i=0;i<P.length-1;i++)q.push(0,0,0,P[i].x,0,P[i].z,P[i+1].x,0,P[i+1].z);
+    const ch=I.grp.children;geo(ch[0],q);geo(ch[5],I.band(I.CF,-.07,.07,0,1));geo(ch[6],I.syms(I.CF,false));
+    geo(I.rainG&&I.rainG.children[0],I.band(I.CF,-.75,-.08,.08,.95))}
+   I.apply()}
+  sl&&sl.set(Math.round(T));if(btn)btn.textContent=play?"暂停":"播放"}
+ function clip(){if(!G||!I.grp)return;const T3=G.THREE,N=(x,z)=>new T3.Vector3(x,0,z);G.renderer.localClippingEnabled=true;
+  const pl=[new T3.Plane(N(1,0),5),new T3.Plane(N(-1,0),5),new T3.Plane(N(0,1),5),new T3.Plane(N(0,-1),5)];
+  I.grp.traverse(o=>{if(o.material){o.material.clippingPlanes=pl;o.material.needsUpdate=true}})}
+ function profile(c,w,t){const mw=w<520?Math.min(140,w*.35):Math.min(260,w*.35),sm=mw<170,ph=Math.round(mw*.5),x0=w-mw-10,y0=10,
+   pl=x0+8,pw=mw-16,ty=y0+26,gy=ty+ph,mh=26+ph+24,K=k(),xc=pl+pw*(.4-.2*K),xw=pl+pw*(.38+.12*K),xct=xc-.08*pw,xwt=xw+.42*pw;
+  c.save();c.fillStyle="rgba(255,255,255,.92)";rrect(c,x0,y0,mw,mh,12);c.fill();c.strokeStyle="rgba(0,0,0,.12)";c.lineWidth=1;c.stroke();
+  c.fillStyle="rgba(120,180,240,.35)";c.fillRect(pl,ty,pw,ph);
+  c.fillStyle="rgba(245,178,107,.55)";c.beginPath();c.moveTo(xc,gy);c.lineTo(xw,gy);c.lineTo(xwt,ty);c.lineTo(xct,ty);c.closePath();c.fill();
+  c.lineCap="round";c.lineWidth=2;c.strokeStyle=B;c.beginPath();c.moveTo(xc,gy);c.lineTo(xct,ty);c.stroke();
+  c.strokeStyle=R;c.beginPath();c.moveTo(xw,gy);c.lineTo(xwt,ty);c.stroke();
+  c.strokeStyle=B;c.lineWidth=1.3;
+  const drops=(a,b,n)=>{for(let i=0;i<n;i++){const x=a+(b-a)*(i+.5)/n,f=(t*1.2+i*.37)%1,y=gy-ph*.6+f*(ph*.6-6);
+   c.beginPath();c.moveTo(x,y);c.lineTo(x-1.5,y+5);c.stroke()}};
+  drops(xc-.1*pw,xc-.015*pw,3);drops(xw+.04*pw,xw+.32*pw,sm?4:6);// 冷锋后窄、暖锋前宽
+  c.strokeStyle=ink;c.lineWidth=1.5;c.beginPath();c.moveTo(pl,gy);c.lineTo(pl+pw,gy);c.stroke();
+  tx(c,sm?"南侧剖面 西→东":"南侧剖面（西 → 东）",x0+mw/2,y0+14,ink,12);
+  tx(c,sm?"冷":"冷气团",(pl+xc)/2-(sm?0:4),gy-ph*.22,B,12);
+  tx(c,sm?"暖":"暖气团",(xct+xwt)/2-pw*.04,ty+ph*.25,R,12);
+  tx(c,sm?"冷":"冷气团",xw+pw*.36,gy-ph*.18,B,12);
+  tx(c,"冷锋",xc+2,gy+12,B,12,"right");tx(c,"暖锋",xw-2,gy+12,R,12,"left");c.restore()}
+ return{
+  mount(ctrl,read,s){S=s;I=S.$;on=true;play=false;last=0;T=50;a0=I.CF.a.slice();b0=I.CF.b.slice();G=GL3();
+   btn=button("播放",()=>{if(!play&&T>=100)T=0;play=!play;setT(T)},true);
+   sl=slider("时间",0,100,1,50,v=>String(Math.round(v)),v=>{play=false;setT(v)});
+   ctrl.append(btn,sl,toggle("显示剖面线",sec,v=>{sec=v}));
+   clip();setT(50)},
+  draw(c,w,h,t){if(!on)return;const dt=last?Math.min(.05,Math.max(0,t-last)):0;last=t;
+   if(play){let v=T+dt*100/15;if(v>=100){v=100;play=false}setT(v)}
+   if(!G)return;const V=(x,z)=>new G.THREE.Vector3(x,.05,z),cx=I.C0.x+S.shift,cz=I.C0.z;
+   if(T>90){const q=project(V(cx+.15,cz+.8));if(q.visible)tx(c,"锢囚",q.x,q.y,ink,14)}
+   if(sec){const zz=cz+1.6,xa=Math.max(-4.9,cx-4.5),xb=Math.min(4.9,cx+4.5);
+    if(xb>xa){const A=project(V(xa,zz)),Bq=project(V(xb,zz));
+     c.save();c.setLineDash([7,6]);c.lineCap="butt";c.beginPath();c.moveTo(A.x,A.y);c.lineTo(Bq.x,Bq.y);
+     c.lineWidth=3.5;c.strokeStyle="rgba(255,255,255,.9)";c.stroke();c.lineWidth=1.6;c.strokeStyle=ink;c.stroke();c.restore();
+     tx(c,"剖面线",A.x+4,A.y-13,ink,12,"left")}
+    profile(c,w,t)}},
+  unmount(){on=false;play=false;
+   if(I&&a0){I.CF.a[0]=a0[0];I.CF.a[1]=a0[1];I.CF.b[0]=b0[0];I.CF.b[1]=b0[1]}
+   if(S)S.shift=0;if(G&&G.renderer)G.renderer.localClippingEnabled=false;btn=sl=null;G=null;a0=b0=null}}
+})());
+// 第 8 章：台风与寒潮（本次先做台风）。S.mode："typhoon"（默认）| "cold"；台风场景全部建在 S.tyG 里，便于切换隐藏
+// extras：每项 {mount(ctrl,read,S),draw(ctx,w,h,t,S),unmount()}，与第 7 章相同
+CH[7].ready=true;
+MODS[7]=(function(){
+ const S={mode:"typhoon",tyG:null,T:0,path:"land",ring:true,sel:1},extras=[];
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",TAU=Math.PI*2,ink="#1d1d1f",B="#0071e3",Gd="#9a6a00",R="#c0362c";
+ const DIRS=["北","东北","东","东南","南","西南","西","西北"];
+ const PATHS={west:{n:"西行",a:[4.5,4.2],c:[1.5,3.6],b:[-4.6,3.3]},land:{n:"登陆浙江",a:[4.5,4.2],c:[1.2,1.2],b:[-3.6,-1.6]},turn:{n:"转向",a:[4.5,4.2],c:[-1.6,-.4],b:[3.8,-4.4]}};
+ const CITY=[{n:"杭州",x:-1.7,z:-2.5,ey:false},{n:"温州",x:-2,z:-.5,ey:false}];
+ let G=null,T3=null,run=false,play=false,last=0,lastAsp=0,ro=null,btn=null,sl=null,wrap=null,cloud=null,r7=null,r10=null,pathL=null,key="";const cityM=[];
+ const cx=z=>-1.6-.28*z+.25*Math.sin(z*2.3)+.12*Math.sin(z*5.3);// 海岸线 x(z)：x<cx 为陆地；x 东，−z 北
+ function V(x,y,z){return new T3.Vector3(x,y,z)}
+ function bz(p,s){const u=1-s;return{x:u*u*p.a[0]+2*u*s*p.c[0]+s*s*p.b[0],z:u*u*p.a[1]+2*u*s*p.c[1]+s*s*p.b[1]}}
+ function bdv(p,s){return{x:2*(1-s)*(p.c[0]-p.a[0])+2*s*(p.b[0]-p.c[0]),z:2*(1-s)*(p.c[1]-p.a[1])+2*s*(p.b[1]-p.c[1])}}
+ // 当前时刻台风状态：登陆越深强度 I 越小（摩擦增大、水汽减少）
+ function st(){const p=PATHS[S.path],s=S.T/100,c=bz(p,s),inl=Math.max(0,cx(c.z)-c.x),I=Math.max(.35,Math.min(1,1-.45*inl)),k=.6+.4*I;
+  return{c,d:bdv(p,s),inl,I,k,eye:.27*k,R10:Math.max(0,1.4*I-.2),R7:2.4*I+.2,P:Math.round(950+(1-I)*40)}}
+ function dir8(e,n){return DIRS[Math.round(((Math.atan2(e,n)*180/Math.PI)+360)%360/45)%8]}
+ function setCam(){const a=W/H,el=50*Math.PI/180,D=Math.max(15,8/(Math.tan(22.5*Math.PI/180)*a));
+  G.camera.position.set(0,D*Math.sin(el),.4+D*Math.cos(el));
+  if(G.controls){G.controls.target.set(0,0,.4);G.controls.update()}else G.camera.lookAt(0,0,.4);lastAsp=a}
+ function shape(pts,color,y){const m=new T3.Mesh(new T3.ShapeGeometry(new T3.Shape(pts.map(p=>new T3.Vector2(p[0],-p[1])))),new T3.MeshStandardMaterial({color,roughness:.95}));
+  m.rotation.x=-Math.PI/2;m.position.y=y;m.receiveShadow=true;S.tyG.add(m);return m}
+ function disc(color,op,y){const m=new T3.Mesh(new T3.CircleGeometry(1,72),new T3.MeshBasicMaterial({color,transparent:true,opacity:op,depthWrite:false}));
+  m.rotation.x=-Math.PI/2;m.position.y=y;m.renderOrder=2;S.tyG.add(m);return m}
+ function build(){T3=G.THREE;const g=S.tyG=new T3.Group();G.root.add(g);
+  const sea=new T3.Mesh(new T3.BoxGeometry(12,.2,10),new T3.MeshStandardMaterial({color:0x8fbbe6,roughness:.9}));sea.position.y=-.1;sea.receiveShadow=true;g.add(sea);
+  const cl=[];for(let i=0;i<=60;i++){const z=-5+i/6;cl.push([cx(z),z])}
+  shape([[-6,-5],...cl,[-6,5]],0xe3e8cc,.01);
+  const tw=[];for(let i=0;i<40;i++){const a=i/40*TAU;tw.push([-1.4+.3*Math.cos(a)+.05*Math.sin(3*a),2.4+.75*Math.sin(a)])}shape(tw,0xe3e8cc,.01);
+  g.add(new T3.Line(new T3.BufferGeometry().setFromPoints(cl.map(p=>V(p[0],.02,p[1]))),new T3.LineBasicMaterial({color:0x6e6e73})));
+  const pg=new T3.BufferGeometry();pg.setAttribute("position",new T3.BufferAttribute(new Float32Array(61*3),3));
+  pathL=new T3.Line(pg,new T3.LineDashedMaterial({color:0xc0362c,dashSize:.2,gapSize:.14}));pathL.frustumCulled=false;g.add(pathL);
+  r7=disc(0xf5c542,.28,.03);r10=disc(0xf08a24,.34,.04);
+  // 螺旋云带：程序生成柔光粒子；眼壁最厚，中心留出无云的台风眼
+  const cv2=document.createElement("canvas");cv2.width=cv2.height=64;const x2=cv2.getContext("2d"),gr=x2.createRadialGradient(32,32,0,32,32,32);
+  gr.addColorStop(0,"rgba(255,255,255,1)");gr.addColorStop(.5,"rgba(255,255,255,.5)");gr.addColorStop(1,"rgba(255,255,255,0)");x2.fillStyle=gr;x2.fillRect(0,0,64,64);
+  cloud=new T3.Group();g.add(cloud);const N=1600,pos=new Float32Array(N*3);
+  for(let i=0;i<N;i++){let r,a,y;
+   if(i<N*.38){r=.28+Math.random()*.34;a=Math.random()*TAU;y=.3+Math.random()*.75}
+   else{r=.62+2.1*Math.pow(Math.random(),.85);a=(i%4)*TAU/4-1.7*Math.log(r/.62)+(Math.random()-.5)*(.35+.12*r);y=.28+Math.random()*.32*(1.2-r/2.8)}// 北半球：云带向外顺时针拖尾，整体逆时针旋转
+   pos.set([r*Math.cos(a),y,-r*Math.sin(a)],i*3)}
+  const cg=new T3.BufferGeometry();cg.setAttribute("position",new T3.BufferAttribute(pos,3));
+  const pts=new T3.Points(cg,new T3.PointsMaterial({map:new T3.CanvasTexture(cv2),size:.42,transparent:true,opacity:.62,depthWrite:false,color:0xffffff}));pts.renderOrder=3;cloud.add(pts);
+  const deck=new T3.Mesh(new T3.RingGeometry(.3,2.5,72),new T3.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.2,depthWrite:false,side:T3.DoubleSide}));
+  deck.rotation.x=-Math.PI/2;deck.position.y=.25;deck.renderOrder=3;cloud.add(deck);
+  CITY.forEach(c=>{const m=new T3.Mesh(new T3.CylinderGeometry(.1,.1,.4,20),new T3.MeshStandardMaterial({color:0x6e6e73,roughness:.5}));
+   m.position.set(c.x,.2,c.z);m.castShadow=true;g.add(m);cityM.push(m)});
+  setPath()}
+ function setPath(){if(!pathL)return;const p=PATHS[S.path],a=pathL.geometry.attributes.position;
+  for(let i=0;i<=60;i++){const q=bz(p,i/60);a.setXYZ(i,q.x,.05,q.z)}a.needsUpdate=true;pathL.computeLineDistances()}
+ // 城市风向：逆时针切向 + 向中心偏转（辐合）；风力随距离减小而增大
+ function cityWind(c,s){const de=s.c.x-c.x,dn=c.z-s.c.z,r=Math.hypot(de,dn);
+  if(r<s.eye)return{eye:true,dir:"—",L:0,lv:"风平浪静（台风眼），眼区过后风向突转"};
+  const pe=-de/r,pn=-dn/r,we=-pn+.55*de/r,wn=pe+.55*dn/r;
+  const L=s.R10>s.eye&&r<s.R10?10+Math.round(2*(s.R10-r)/(s.R10-s.eye)):r<s.R7?7+Math.round(2.4*(s.R7-r)/Math.max(.1,s.R7-Math.max(s.R10,s.eye))):Math.max(2,Math.round(7-(r-s.R7)*2.5));
+  return{eye:false,dir:dir8(-we,-wn)+"风",L,lv:L+" 级"+(L>=10?"（狂风）":L>=7?"（大风）":"")}}
+ function where(s){const c=s.c;if(s.inl>0)return c.z<.3?"已登陆浙江，向内陆深入":"已登陆福建—广东沿海";
+  if(c.x<cx(c.z)+.5)return"逼近"+(c.z<.3?"浙江":"闽粤")+"沿海";
+  return c.z>2.6?"菲律宾以东洋面":c.z>-.5?(c.x<0?"台湾附近海面":"台湾以东洋面"):(c.x>1.8?"日本以南洋面":"东海海面")}
+ function hz(s){return s.inl>0?"狂风、暴雨，易发山洪；登陆后摩擦增大、水汽减少，迅速减弱"
+  :s.c.x<cx(s.c.z)+s.R7?"狂风、暴雨、风暴潮：渔船回港，沿海人员转移":"海上狂风巨浪：船只避风；陆地尚未直接受影响"}
+ function apply(){const s=st();
+  if(cloud){cloud.position.set(s.c.x,0,s.c.z);cloud.scale.setScalar(s.k);[r7,r10].forEach(m=>{m.position.x=s.c.x;m.position.z=s.c.z});
+   r7.scale.set(s.R7,s.R7,1);const q=Math.max(.01,s.R10);r10.scale.set(q,q,1);r7.visible=S.ring;r10.visible=S.ring&&s.R10>s.eye;
+   cityM.forEach((m,i)=>m.material.color.setHex(i===S.sel?0x0071e3:0x6e6e73))}
+  CITY.forEach(c=>{if(cityWind(c,s).eye)c.ey=true});
+  const k=[S.T.toFixed(1),S.path,S.sel].join();if(!ro||k===key)return;key=k;
+  const T=theme(),c=CITY[S.sel],w=cityWind(c,s);
+  ro.update([["台风位置",where(s)],["中心气压",s.P+" hPa"+(s.P>955?"（减弱）":"（低压）"),T.redText],["移动方向","向"+dir8(s.d.x,-s.d.z)+"移动"],
+   [c.n+" 风向",w.eye?"—（眼区）":w.dir+(c.ey?"（眼区已过，风向突转）":""),T.blue],[c.n+" 风力",w.lv,w.eye||w.L>=7?T.goldText:null],["灾害提示",hz(s),T.redText]])}
+ function setT(v){v=Math.max(0,Math.min(100,v));if(v<S.T)CITY.forEach(c=>c.ey=false);S.T=v;sl&&sl.set(Math.round(v));if(btn)btn.textContent=play?"暂停":"播放路径";apply()}
+ function tx(c,t,x,y,col,size,al){c.font="600 "+size+"px "+F;c.textAlign=al||"center";c.textBaseline="middle";c.lineJoin="round";
+  c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(t,x,y);c.fillStyle=col;c.fillText(t,x,y)}
+ function lab(c,t,p,col,size){const q=project(p);if(q.visible)tx(c,t,q.x,q.y,col,size)}
+ function onDown(e){if(!G||!run||S.mode!=="typhoon")return;const r=G.renderer.domElement.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  let best=-1,bd=e.pointerType==="touch"?32:22;
+  CITY.forEach((q,i)=>[.1,.4,.62].forEach(y=>{const p=project(V(q.x,y,q.z)),d=Math.hypot(p.x-mx,p.y-my);if(d<bd){bd=d;best=i}}));
+  if(best>=0){S.sel=best;key="";apply();e.stopPropagation()}}
+ return{
+  use3d:true,extras,S,
+  text:"<b>台风</b>是发生在西北太平洋上的强烈<b>热带气旋</b>，中心气压很低，近地面气流<b>逆时针</b>向中心辐合、强烈上升，形成高大的<b>螺旋云带</b>和暴雨。台风中心有一个风平浪静的<b>台风眼</b>。每年夏秋季节台风常影响浙江，带来<b>狂风、暴雨和风暴潮</b>，也能缓解伏旱、带来降温。",
+  points:["台风是强烈的热带气旋，北半球逆时针旋转","台风眼风小天晴，眼壁风雨最强","夏秋季（7–9 月）最多，浙江沿海常受影响","利：缓解伏旱、降温；弊：狂风、暴雨、风暴潮"],
+  gk:"浙江选考常考<b>台风过境时某地风向变化</b>（顺序判断）、台风的<b>利弊与防灾措施</b>。<br><b>易错：</b>台风中心是<b>低压</b>不是高压；台风<b>登陆后</b>因摩擦增大、水汽减少而<b>迅速减弱</b>。",
+  mount(ctrl,read){S.T=0;S.mode="typhoon";CITY.forEach(c=>c.ey=false);
+   btn=button("播放路径",()=>{if(!play&&S.T>=100)setT(0);play=!play;setT(S.T)},true);
+   sl=slider("时间",0,100,1,0,v=>String(Math.round(v)),v=>{play=false;setT(v)});
+   ctrl.append(btn,chips(Object.keys(PATHS).map(k=>({label:PATHS[k].n,value:k})),S.path,v=>{S.path=v;CITY.forEach(c=>c.ey=false);setPath();key="";apply()}),sl,
+    toggle("风雨圈",S.ring,v=>{S.ring=v;apply()}));
+   ro=readout([]);read.append(ro);
+   G=GL3();if(G){build();setCam();wrap=document.getElementById("cwrap");wrap.addEventListener("pointerdown",onDown,true)}
+   extras.forEach(x=>x.mount&&x.mount(ctrl,read,S));
+   run=true;play=false;last=0;key="";apply()},
+  draw(c,w,h,t){if(!G||!run)return;if(Math.abs(w/h-lastAsp)>.01)setCam();
+   const dt=last?Math.min(.05,Math.max(0,t-last)):0;last=t;
+   if(S.tyG)S.tyG.visible=S.mode==="typhoon";
+   if(S.mode==="typhoon"){if(play){let v=S.T+dt*100/12;if(v>=100){v=100;play=false}setT(v)}
+    if(cloud)cloud.rotation.y+=dt*.5;// 逆时针（俯视）
+    const s=st(),p=PATHS[S.path],e=bz(p,1);
+    lab(c,"浙江",V(-3.4,.05,-2.3),ink,15);lab(c,"台湾",V(-1.4,.05,3.4),ink,13);lab(c,"西北太平洋",V(3,.05,.4),B,15);
+    lab(c,"示意图",V(4.9,.05,4.6),ink,12);lab(c,"北 ↑",V(-5.4,.05,-4.6),ink,12);lab(c,p.n+"路径",V(e.x,.05,e.z),R,12);
+    if(S.ring){lab(c,"7 级风圈",V(s.c.x+s.R7*.72,.06,s.c.z+s.R7*.72),Gd,12);if(s.R10>s.eye)lab(c,"10 级风圈",V(s.c.x-s.R10*.75,.06,s.c.z+s.R10*.75),R,12)}
+    lab(c,"↺ 逆时针",V(s.c.x,.06,s.c.z-2.7*s.k),Gd,13);lab(c,s.P+" hPa",V(s.c.x,1.4*s.k,s.c.z),R,13);
+    CITY.forEach((q,i)=>lab(c,q.n,V(q.x,.65,q.z),i===S.sel?B:ink,14))}
+   extras.forEach(x=>x.draw&&x.draw(c,w,h,t,S))},
+  unmount(){run=false;play=false;extras.forEach(x=>x.unmount&&x.unmount());wrap&&wrap.removeEventListener("pointerdown",onDown,true);
+   wrap=null;G=null;ro=null;btn=sl=null;cloud=r7=r10=pathL=null;S.tyG=null;cityM.length=0}}
+})();
+// 第 8 章 extra：寒潮。场景建在 S.coldG；S.mode==="cold" 时显示并隐藏台风控件/读数
+MODS[7].extras.push((function(){
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",TAU=Math.PI*2,ink="#1d1d1f",B="#0071e3",Gd="#9a6a00",R="#c0362c";
+ const n=[.33,.944],tv=[.944,-.33],P0=[-2.2,-5];// 推进方向（偏南略东）、锋线方向、冷气团起点（蒙古—西伯利亚）
+ const CITY=[{n:"哈尔滨",x:3.4,z:-3.6,dr:12,wx:"偏北大风、气温骤降、降雪，霜冻严重"},{n:"北京",x:1,z:-1.3,dr:10,wx:"偏北大风、降温、霜冻，可伴沙尘暴"},
+  {n:"杭州",x:2.4,z:1.6,dr:8,wx:"偏北大风、降温、雨雪或冻雨、霜冻"},{n:"广州",x:-.2,z:4.1,dr:6,wx:"偏北风增大、降温、阴雨，偶有霜冻"}];
+ const COAST=[[5.5,-5],[4.6,-2.4],[2.2,-1.2],[2.6,-.4],[3.4,.2],[2.4,.8],[3,1.6],[2.2,3.2],[1,4.3],[-1.5,4.6],[-6,4.7]];
+ let S=null,G=null,T3=null,on=false,play=false,last=0,T=0,sel=1,key="",ro=null,btn=null,sl=null,wrap=null,dome=null,pg=null,pts=null,front=null,tyC=[],tyR=[],mine=[];
+ const cityM=[],NP=260,pr=[],pa=[],py=[];
+ function stc(){const p=T/100,u=7.8*p,Rd=2.3+.4*p,C={x:P0[0]+n[0]*u,z:P0[1]+n[1]*u};return{p,C,R:Rd,d:C.x*n[0]+C.z*n[1]+Rd*.92}}
+ const hit=(c,s)=>c.x*n[0]+c.z*n[1]<s.d;
+ function V(x,y,z){return new T3.Vector3(x,y,z)}
+ function shape(g,p,color,y){const m=new T3.Mesh(new T3.ShapeGeometry(new T3.Shape(p.map(q=>new T3.Vector2(q[0],-q[1])))),new T3.MeshStandardMaterial({color,roughness:.95}));
+  m.rotation.x=-Math.PI/2;m.position.y=y;m.receiveShadow=true;g.add(m);return m}
+ function setGeo(m,arr){const g=new T3.BufferGeometry();g.setAttribute("position",new T3.BufferAttribute(new Float32Array(arr),3));m.geometry.dispose();m.geometry=g}
+ function frontGeo(d){const L=[],q=[],w=.05,y=.06;
+  for(let i=0;i<=80;i++){const s=-10+i/4,x=n[0]*d+tv[0]*s,z=n[1]*d+tv[1]*s;if(Math.abs(x)<5.95&&Math.abs(z)<4.95)L.push([x,z])}
+  for(let i=0;i<L.length-1;i++){const a=L[i],b=L[i+1],A1=[a[0]-n[0]*w,a[1]-n[1]*w],A2=[a[0]+n[0]*w,a[1]+n[1]*w],B1=[b[0]-n[0]*w,b[1]-n[1]*w],B2=[b[0]+n[0]*w,b[1]+n[1]*w];
+   q.push(A1[0],y,A1[1],A2[0],y,A2[1],B2[0],y,B2[1],A1[0],y,A1[1],B2[0],y,B2[1],B1[0],y,B1[1])}
+  for(let i=1;i<L.length-1;i+=2){const a=L[i];// 三角指向冷锋推进方向
+   q.push(a[0]-tv[0]*.13,y,a[1]-tv[1]*.13,a[0]+tv[0]*.13,y,a[1]+tv[1]*.13,a[0]+n[0]*.26,y,a[1]+n[1]*.26)}
+  return q}
+ function build(){T3=G.THREE;const g=S.coldG=new T3.Group();G.root.add(g);
+  const sea=new T3.Mesh(new T3.BoxGeometry(12,.2,10),new T3.MeshStandardMaterial({color:0x8fbbe6,roughness:.9}));sea.position.y=-.1;sea.receiveShadow=true;g.add(sea);
+  shape(g,[[-6,-5],...COAST,[-6,5]],0xe3e8cc,.01);shape(g,[[-6,-5],[2,-5],[1,-3.2],[-2,-2.7],[-6,-2.9]],0xd5dccf,.015);
+  g.add(new T3.Line(new T3.BufferGeometry().setFromPoints(COAST.map(p=>V(p[0],.02,p[1]))),new T3.LineBasicMaterial({color:0x6e6e73})));
+  const N=(x,z)=>new T3.Vector3(x,0,z),cp=[new T3.Plane(N(1,0),5.95),new T3.Plane(N(-1,0),5.95),new T3.Plane(N(0,1),4.95),new T3.Plane(N(0,-1),4.95)];
+  dome=new T3.Mesh(new T3.SphereGeometry(1,48,16,0,TAU,0,Math.PI/2),new T3.MeshStandardMaterial({color:0xbfe0ff,transparent:true,opacity:.34,depthWrite:false,side:T3.DoubleSide,clippingPlanes:cp}));
+  dome.renderOrder=3;g.add(dome);
+  const cv2=document.createElement("canvas");cv2.width=cv2.height=32;const x2=cv2.getContext("2d"),gr=x2.createRadialGradient(16,16,0,16,16,16);
+  gr.addColorStop(0,"rgba(255,255,255,1)");gr.addColorStop(1,"rgba(255,255,255,0)");x2.fillStyle=gr;x2.fillRect(0,0,32,32);
+  for(let i=0;i<NP;i++){pr[i]=Math.random()*.95;pa[i]=Math.random()*TAU;py[i]=.1+Math.random()*.75}
+  pg=new T3.BufferGeometry();pg.setAttribute("position",new T3.BufferAttribute(new Float32Array(NP*3),3));
+  pts=new T3.Points(pg,new T3.PointsMaterial({map:new T3.CanvasTexture(cv2),size:.16,color:0x2f86e0,transparent:true,opacity:.85,depthWrite:false,clippingPlanes:cp}));
+  pts.frustumCulled=false;pts.renderOrder=4;g.add(pts);
+  front=new T3.Mesh(new T3.BufferGeometry(),new T3.MeshBasicMaterial({color:0x0071e3,side:T3.DoubleSide}));front.frustumCulled=false;front.renderOrder=2;g.add(front);
+  CITY.forEach(c=>{const m=new T3.Mesh(new T3.CylinderGeometry(.1,.1,.4,20),new T3.MeshStandardMaterial({color:0x6e6e73,roughness:.5}));
+   m.position.set(c.x,.2,c.z);m.castShadow=true;g.add(m);cityM.push(m)});
+  G.renderer.localClippingEnabled=true;g.visible=false}
+ function upd(){const s=stc(),k=T.toFixed(1)+"|"+sel;if(!ro||k===key)return;key=k;
+  const th=theme(),c=CITY[sel],h=hit(c,s),np=CITY.filter(q=>hit(q,s)).length;
+  ro.update([["寒潮","冷锋过境，常伴大风降温雨雪",th.blue],
+   ["冷锋位置",["蒙古—西伯利亚一带，冷气团积聚南下","越过东北，逼近华北","已过华北，向长江流域推进","已抵达浙江，向华南推进","已抵达华南沿海"][np]],
+   [c.n+" 状态",h?"受寒潮影响（冷锋已过境）":"尚未影响（冷锋未到）",h?th.blue:null],
+   ["24 小时降温",h?"约 "+c.dr+"℃（示意，越北越早越强）":"尚未影响",h?th.goldText:null],
+   ["天气",h?c.wx:"冷锋前：气温较高，天气较好"],
+   ["寒潮标准","我国标准：24 小时内降温 ≥8℃（或 48 小时 ≥10℃、72 小时 ≥12℃），且最低气温 ≤4℃"],
+   ["灾害","霜冻冻害、雨雪冰冻、大风",th.redText],["利","杀死越冬害虫；带来降水，缓解旱情",th.goldText],
+   ["防御","覆盖地膜、熏烟防霜、及时收割、加固大棚"]])}
+ function place(){if(!dome)return;const s=stc();dome.position.set(s.C.x,0,s.C.z);dome.scale.set(s.R,.75,s.R);pts.position.set(s.C.x,0,s.C.z);
+  setGeo(front,frontGeo(s.d));cityM.forEach((m,i)=>m.material.color.setHex(i===sel?0x0071e3:0x6e6e73));upd()}
+ function setT(v){T=Math.max(0,Math.min(100,v));sl&&sl.set(Math.round(T));if(btn)btn.textContent=play?"暂停":"播放南下";place()}
+ function setMode(m){S.mode=m;const c=m==="cold";if(!c)play=false;
+  tyC.forEach(e=>e.style.display=c?"none":"");tyR.forEach(e=>e.style.display=c?"none":"");mine.forEach(e=>e.style.display=c?"":"none");
+  if(S.coldG)S.coldG.visible=c;if(S.tyG)S.tyG.visible=!c;if(c){key="";setT(T)}}
+ function tx(c,t,x,y,col,size,al){c.font="600 "+size+"px "+F;c.textAlign=al||"center";c.textBaseline="middle";c.lineJoin="round";
+  c.strokeStyle="rgba(255,255,255,.92)";c.lineWidth=4;c.strokeText(t,x,y);c.fillStyle=col;c.fillText(t,x,y)}
+ function lab(c,t,p,col,size){const q=project(p);if(q.visible)tx(c,t,q.x,q.y,col,size)}
+ function onDown(e){if(!G||!on||S.mode!=="cold")return;const r=G.renderer.domElement.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  let best=-1,bd=e.pointerType==="touch"?32:22;
+  CITY.forEach((q,i)=>[.1,.4,.62].forEach(y=>{const p=project(V(q.x,y,q.z)),d=Math.hypot(p.x-mx,p.y-my);if(d<bd){bd=d;best=i}}));
+  if(best>=0){sel=best;key="";place();e.stopPropagation()}}
+ return{
+  mount(ctrl,read,s){S=s;on=true;play=false;last=0;T=0;sel=1;key="";
+   tyC=Array.from(ctrl.children);tyR=Array.from(read.children);
+   btn=button("播放南下",()=>{if(!play&&T>=100)T=0;play=!play;setT(T)},true);
+   sl=slider("时间",0,100,1,0,v=>String(Math.round(v)),v=>{play=false;setT(v)});
+   ro=readout([]);ctrl.append(btn,sl);read.append(ro);mine=[btn,sl,ro];
+   ctrl.prepend(chips([{label:"台风",value:"typhoon"},{label:"寒潮",value:"cold"}],"typhoon",v=>setMode(v)));
+   G=GL3();if(G){build();wrap=document.getElementById("cwrap");wrap.addEventListener("pointerdown",onDown,true)}
+   setMode("typhoon");setT(0)},
+  draw(c,w,h,t){if(!on)return;const dt=last?Math.min(.05,Math.max(0,t-last)):0;last=t;
+   if(S.coldG)S.coldG.visible=S.mode==="cold";if(S.mode!=="cold"||!G||!pg)return;
+   if(play){let v=T+dt*10;if(v>=100){v=100;play=false}setT(v)}
+   const s=stc(),a=pg.attributes.position;
+   for(let i=0;i<NP;i++){pa[i]-=dt*.5/(.25+pr[i]);pr[i]+=dt*.18;// 顺时针（俯视）且向外辐散
+    if(pr[i]>.95){pr[i]=.03+Math.random()*.15;pa[i]=Math.random()*TAU}
+    a.setXYZ(i,s.R*pr[i]*Math.cos(pa[i]),.05+.75*Math.sqrt(1-pr[i]*pr[i])*py[i],-s.R*pr[i]*Math.sin(pa[i]))}a.needsUpdate=true;
+   lab(c,"蒙古—西伯利亚高压",V(-3,.05,-4.4),B,14);lab(c,"示意图",V(4.9,.05,4.6),ink,12);lab(c,"北 ↑",V(-5.4,.05,-3.6),ink,12);lab(c,"东海",V(4.4,.05,2.6),B,13);
+   lab(c,"冷气团",V(s.C.x,.95,s.C.z),B,14);lab(c,"↻ 顺时针外流",V(s.C.x,.05,s.C.z+s.R*.55),Gd,12);
+   for(const k of[-1.5,1.5,-3.5,3.5]){const x=n[0]*(s.d+.35)+tv[0]*k,z=n[1]*(s.d+.35)+tv[1]*k;if(Math.abs(x)<5.4&&Math.abs(z)<4.6){lab(c,"冷锋",V(x,.06,z),B,13);break}}
+   CITY.forEach((q,i)=>{lab(c,q.n,V(q.x,.65,q.z),i===sel?B:ink,14);if(hit(q,s))lab(c,"降温 "+q.dr+"℃",V(q.x,.05,q.z+.42),R,12)})},
+  unmount(){on=false;play=false;wrap&&wrap.removeEventListener("pointerdown",onDown,true);
+   if(G&&S&&S.coldG)G.root.remove(S.coldG);if(G&&G.renderer)G.renderer.localClippingEnabled=false;
+   if(S){S.mode="typhoon";S.coldG=null}tyC.forEach(e=>e.style.display="");tyR.forEach(e=>e.style.display="");
+   wrap=G=null;ro=btn=sl=null;dome=pg=pts=front=null;cityM.length=0;tyC=[];tyR=[];mine=[]}}
+})());
+MODS[7].points.push("⑤寒潮：冬半年冷锋南下，大风、剧烈降温、雨雪霜冻；可杀虫、缓解旱情");
+MODS[7].gk+="<br>寒潮常与冷锋、蒙古—西伯利亚高压结合考查，注意寒潮的判定标准与防御措施（熏烟、覆膜）。";
+/* ---------- 第 9 章 随堂检测 ---------- */
+CH[8].ready=true;
+MODS[8]=(function(){
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",TAU=Math.PI*2,N=8;
+ const Q=[
+  {q:"深秋初冬，晴朗的夜晚容易出现霜冻，主要原因是：",o:["地面辐射强","大气逆辐射弱","太阳辐射弱","大气对太阳辐射削弱作用强"],a:1,ch:1,e:"晴夜云量少，大气逆辐射弱，保温作用差，地面降温快，易出现霜冻。"},
+  {q:"对流层大气的直接热源是：",o:["太阳辐射","地面辐射","大气逆辐射","大气辐射"],a:1,ch:1,e:"大气对太阳短波辐射吸收很少，主要吸收地面长波辐射而增温，「大地暖大气」。"},
+  {q:"北半球近地面某地等压线东西走向，北侧气压高、南侧气压低，该地吹：",o:["东北风","西北风","东南风","西南风"],a:0,ch:2,e:"梯度力由北指向南，北半球近地面向右偏 30°–45°，风从东北吹来，为东北风。"},
+  {q:"冷锋过境后，某地天气变化一般是：",o:["气温升高、气压降低、天气转晴","气温降低、气压升高、天气转晴","气温升高、气压升高、阴雨","气温降低、气压降低、连续性降水"],a:1,ch:3,e:"冷锋过境后受冷气团控制，降温、升压、天气转晴。"},
+  {q:"关于暖锋的叙述，正确的是：",o:["雨区主要在锋后","锋面坡度大","多连续性降水，雨区较宽","过境后气压升高"],a:2,ch:4,e:"暖锋锋面坡度小，暖空气缓慢爬升，雨区在锋前且较宽，多连续性降水；过境后升温降压。"},
+  {q:"每年 6 月中旬至 7 月上旬，浙江大部分地区阴雨连绵的「梅雨」，主要是受哪种天气系统影响：",o:["冷锋","暖锋","准静止锋","反气旋"],a:2,ch:5,e:"初夏暖湿气流与冷空气在江淮相遇、势均力敌，形成江淮准静止锋。"},
+  {q:"7–8 月长江中下游常出现伏旱，主要是受：",o:["气旋控制","副热带高压（反气旋）控制","冷锋影响","台风影响"],a:1,ch:6,e:"副热带高压控制，盛行下沉气流，晴朗少雨、高温，形成伏旱。"},
+  {q:"北半球某锋面气旋中，位于两锋之间暖区内的某站，未来最可能经历：",o:["暖锋过境，出现连续性降水","冷锋过境，出现大风降温和雨雪","台风登陆","一直晴暖"],a:1,ch:7,e:"气旋自西向东移，暖区西侧为冷锋，冷锋将移过该站，带来大风、降温和雨雪天气。"}];
+ // 状态：ord[i] = 第 i 题显示顺序（原始下标数组）；ans[i] = 所选原始下标（null 未答）
+ let idx=0,done=false,ans=Array(N).fill(null),ord=Q.map(()=>[0,1,2,3]),box=null,ro=null;
+ const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+ const stat=()=>{let n=0,c=0;const wr=[];ans.forEach((v,i)=>{if(v==null)return;n++;if(v===Q[i].a)c++;else wr.push(i+1)});return{n,c,wr}};
+ const BLUE="#0071e3",col=()=>{const T=theme();return{fg:T.fg,sub:T.fg,blue:isDark()?"#2997ff":BLUE,red:T.redText,gold:T.goldText}};
+ function chLink(k){const a=el("a",null,"→ 第 "+k+" 章 "+CH[k-1].n);a.href="#"+k;
+  a.style.cssText="display:inline-flex;align-items:center;min-height:44px;color:"+col().blue+";text-decoration:none;font-weight:600;font-size:14px";
+  a.onclick=e=>{e.preventDefault();location.hash="#"+k};return a}
+ function optBtn(txt,state){const C=col(),b=el("button");b.type="button";b.textContent=txt;
+  let s="display:block;width:100%;min-height:44px;padding:10px 14px;border-radius:12px;text-align:left;white-space:normal;overflow-wrap:anywhere;line-height:1.5;font:inherit;font-size:15px;cursor:pointer;";
+  if(state==="ok")s+="background:"+BLUE+";color:#fff;border:2px solid "+BLUE+";";
+  else if(state==="bad")s+="background:transparent;color:"+C.red+";border:2px solid "+C.red+";";
+  else s+="background:transparent;color:"+C.fg+";border:1px solid "+(isDark()?"rgba(255,255,255,.25)":"rgba(0,0,0,.18)")+";";
+  b.style.cssText=s;return b}
+ function upd(){if(!ro)return;const s=stat(),C=col();
+  ro.update([["已答",s.n+" / "+N],["正确",String(s.c),C.blue],["正确率",s.n?Math.round(s.c/s.n*100)+"%":"—"],["错题题号",s.wr.length?s.wr.join("、"):"—",s.wr.length?C.red:""]])}
+ function render(){if(!box)return;box.innerHTML="";const C=col();upd();
+  if(done){const s=stat();
+   const h=el("p",null,"总分 <b style=\"color:"+C.blue+"\">"+s.c+"</b> / "+N+" · 正确率 "+Math.round(s.c/N*100)+"%");h.style.cssText="margin:0;font-size:17px;line-height:1.5;color:"+C.fg;
+   box.append(h);
+   if(s.wr.length){const p=el("p",null,"错题：");p.style.cssText="margin:0;font-size:14px;color:"+C.red;box.append(p);
+    s.wr.forEach(k=>{const r=el("div");r.style.cssText="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:"+C.fg;
+     r.append(el("span",null,"第 "+k+" 题"),chLink(Q[k-1].ch));box.append(r)})}
+   else{const p=el("p",null,"全部答对，本单元掌握扎实。");p.style.cssText="margin:0;font-size:14px;color:"+C.gold;box.append(p)}
+   box.append(button("重新作答",()=>{ans=Array(N).fill(null);ord=Q.map(()=>shuf([0,1,2,3]));idx=0;done=false;render()},true));return}
+  const q=Q[idx],v=ans[idx];
+  const top=el("div");top.style.cssText="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 12px";
+  const no=el("span",null,"第 "+(idx+1)+" / "+N+" 题");no.style.cssText="font-size:13px;font-weight:600;color:"+C.gold;
+  top.append(no,chLink(q.ch));
+  const stem=el("p");stem.textContent=q.q;stem.style.cssText="margin:0;font-size:15px;line-height:1.6;font-weight:600;color:"+C.fg;
+  box.append(top,stem);
+  ord[idx].forEach((oi,p)=>{const st=v==null?"":oi===q.a?"ok":oi===v?"bad":"";
+   const b=optBtn("ABCD"[p]+"　"+q.o[oi],st);
+   if(v==null)b.onclick=()=>{ans[idx]=oi;render()};else{b.disabled=true;b.style.cursor="default";if(!st)b.style.opacity=".6"}
+   box.append(b)});
+  if(v!=null){const ok=v===q.a,ex=el("div");ex.style.cssText="font-size:14px;line-height:1.6;color:"+C.fg;
+   ex.innerHTML="<b style=\"color:"+(ok?C.blue:C.red)+"\">"+(ok?"回答正确":"回答错误")+"</b>　<b style=\"color:"+C.gold+"\">解析</b>　";
+   ex.append(document.createTextNode(q.e));box.append(ex);
+   box.append(button(idx<N-1?"下一题":"查看总分",()=>{if(idx<N-1)idx++;else done=true;render()},true))}}
+ return{
+  text:"用 <b>8 道浙江选考风格的选择题</b>检验本单元：大气受热过程、等压线与风、冷锋暖锋、准静止锋与梅雨、气旋反气旋、锋面气旋。答错的题可点<b>章节链接</b>回去再看一遍。",
+  points:["①先判断天气系统类型，再推天气","②锋面看「谁主动」，雨区看锋前锋后","③风向先画梯度力，再按半球偏转","④气旋低压阴雨，反气旋高压晴朗"],
+  gk:"浙江选考地理天气系统题多以<b>等压线图、锋面剖面图、站点气象曲线</b>为材料，选择题与综合题均常见。",
+  mount(ctrl,read){box=el("div");box.style.cssText="display:flex;flex-direction:column;gap:10px";ctrl.append(box);
+   ro=readout([]);read.append(ro);render()},
+  draw(c,w,h){const C=col(),s=stat(),cx=w/2,cy=h/2,R=Math.max(40,Math.min(w,h)/2-40),lw=Math.max(10,R*.13),st=-Math.PI/2;
+   c.lineCap="butt";c.lineWidth=lw;c.strokeStyle=isDark()?"rgba(255,255,255,.1)":"rgba(0,0,0,.07)";c.beginPath();c.arc(cx,cy,R,0,TAU);c.stroke();
+   for(let k=0;k<N;k++){const a=st+k/N*TAU;c.strokeStyle=theme().bg;c.lineWidth=2;c.beginPath();c.moveTo(cx+(R-lw/2-1)*Math.cos(a),cy+(R-lw/2-1)*Math.sin(a));c.lineTo(cx+(R+lw/2+1)*Math.cos(a),cy+(R+lw/2+1)*Math.sin(a));c.stroke()}
+   if(s.c){c.strokeStyle=C.blue;c.lineWidth=lw;c.lineCap="round";c.beginPath();c.arc(cx,cy,R,st,st+s.c/N*TAU*(s.c===N?.999:1));c.stroke()}
+   s.wr.forEach(k=>{const m=st+(k-.5)/N*TAU,d=TAU/N*.22;c.strokeStyle=C.red;c.lineWidth=lw*.55;c.lineCap="round";c.beginPath();c.arc(cx,cy,R+lw*1.05,m-d,m+d);c.stroke();
+    c.fillStyle=C.red;c.font="600 12px "+F;c.textAlign="center";c.textBaseline="middle";c.fillText(String(k),cx+(R+lw*2.2)*Math.cos(m),cy+(R+lw*2.2)*Math.sin(m))});
+   c.textAlign="center";c.textBaseline="middle";const big=Math.max(18,Math.min(34,R*.2));
+   if(!s.n){c.fillStyle=C.fg;c.font="600 "+big+"px "+F;c.fillText("随堂检测",cx,cy-big*.45);c.fillStyle=C.sub;c.font=Math.max(13,big*.5)+"px "+F;c.fillText("浙江选考 · 天气系统",cx,cy+big*.55);return}
+   c.fillStyle=C.fg;c.font="600 "+big+"px "+F;c.fillText("已答 "+s.n+" / "+N,cx,cy-big*.55);
+   c.fillStyle=C.blue;c.fillText("得分 "+s.c,cx,cy+big*.6);
+   c.fillStyle=C.sub;c.font="13px "+F;c.fillText("正确率 "+Math.round(s.c/s.n*100)+"%",cx,cy+big*1.6)},
+  unmount(){box=null;ro=null}}
+})();
+const $=id=>document.getElementById(id),pad=i=>String(i+1).padStart(2,"0");
+let cur=0,mod=null,W=0,H=0,DPR=1;
+const cv=$("cv"),ctx=cv.getContext("2d");
+/* ---------- theme ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function isDark(){return document.documentElement.classList.contains("dark")}
+function theme(){return isDark()
+ ?{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e2a336",teal:"#2ec4b6",purple:"#b197fc",goldText:"#f0b847",redText:"#ff7b72"}
+ :{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.05)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"}}
+function setDark(d){document.documentElement.classList.toggle("dark",d);store.set("weather-dark",d?"1":"0");$("dark").textContent=$("mdark").textContent=d?"浅色":"深色"}
+setDark(store.get("weather-dark")==="1");
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||fmtNum;const w=el("div","sl"),l=el("label"),o=el("output"),i=el("input");
+ l.append(document.createTextNode(label),o);i.type="range";Object.assign(i,{min,max,step,value:val});i.setAttribute("aria-label",label);o.textContent=fmt(+val);
+ i.oninput=()=>{o.textContent=fmt(+i.value);onchange&&onchange(+i.value)};w.append(l,i);
+ w.set=v=>{i.value=v;o.textContent=fmt(+v)};return w}
+function chips(options,val,onchange){const w=el("div","chips");const bs=options.map(op=>{const o=typeof op==="object"?op:{label:op,value:op};const b=el("button",o.value===val?"on":"",o.label);
+ b.onclick=()=>{bs.forEach(x=>x.classList.remove("on"));b.classList.add("on");onchange&&onchange(o.value)};w.append(b);return b});return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" primary":""),label);b.onclick=onclick;return b}
+function toggle(label,val,onchange){const b=el("button","tg"+(val?" on":""),"<span>"+label+"</span><i></i>");b.setAttribute("role","switch");b.setAttribute("aria-checked",!!val);
+ b.onclick=()=>{val=!val;b.classList.toggle("on",val);b.setAttribute("aria-checked",val);onchange&&onchange(val)};return b}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML=rs.map(r=>`<dt>${r[0]}</dt><dd style="${r[2]?"color:"+r[2]:""}">${r[1]}</dd>`).join("")};d.update(rows||[]);return d}
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){if(!isFinite(v))return v>0?"∞":v<0?"−∞":"—";const e=1e-6,s=v<0?"−":"",a=Math.abs(v);
+ if(Math.abs(a-Math.round(a))<e)return(Math.round(a)===0?"":s)+Math.round(a);
+ for(let d=2;d<=12;d++){const n=a*d;if(Math.abs(n-Math.round(n))<e)return s+Math.round(n)+"/"+d}
+ for(const r of[2,3,5,6,7,10,11,13,14,15]){const q=Math.sqrt(r);for(let d=1;d<=6;d++){const k=a*d/q;if(Math.abs(k-Math.round(k))<e&&Math.round(k)>0){const K=Math.round(k);return s+(K===1?"":K)+"√"+r+(d>1?"/"+d:"")}}}
+ return s+a.toFixed(2)}
+function drawAxes(ctx,box,xr,yr,opts){opts=Object.assign({equal:true,grid:true,ticks:true,step:1,labels:true},opts);const T=theme();
+ let[x0,x1]=xr,[y0,y1]=yr,sx=box.w/(x1-x0),sy=box.h/(y1-y0);
+ if(opts.equal){const s=Math.min(sx,sy),cx=(x0+x1)/2,cy=(y0+y1)/2;sx=sy=s;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)*sx,Y=y=>box.y+box.h-(y-y0)*sy,invX=p=>x0+(p-box.x)/sx,invY=p=>y0+(box.y+box.h-p)/sy;
+ let st=opts.step;while(st*sx<22)st*=2;
+ ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();ctx.lineWidth=1;
+ if(opts.grid){ctx.strokeStyle=T.grid;ctx.beginPath();for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st){ctx.moveTo(X(x),box.y);ctx.lineTo(X(x),box.y+box.h)}for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st){ctx.moveTo(box.x,Y(y));ctx.lineTo(box.x+box.w,Y(y))}ctx.stroke()}
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,Y(0));ctx.lineTo(box.x+box.w,Y(0));ctx.moveTo(X(0),box.y);ctx.lineTo(X(0),box.y+box.h);ctx.stroke();
+ if(opts.labels){ctx.fillStyle=T.sub;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";
+  for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st)if(Math.abs(x)>1e-9)ctx.fillText(fmtNum(x),X(x),Y(0)+4);
+  ctx.textAlign="right";ctx.textBaseline="middle";for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st)if(Math.abs(y)>1e-9)ctx.fillText(fmtNum(y),X(0)-5,Y(y));
+  ctx.textBaseline="top";ctx.fillText("O",X(0)-4,Y(0)+4);ctx.font="italic 13px "+getComputedStyle(document.body).fontFamily;ctx.fillStyle=T.fg;
+  ctx.fillText("x",box.x+box.w-4,Y(0)+4);ctx.textAlign="left";ctx.fillText("y",X(0)+6,box.y+4)}
+ ctx.restore();return{X,Y,invX,invY,s:sx,box,xr:[x0,x1],yr:[y0,y1]}}
+function drawLine(ctx,map,A,B,C,color,width,dashed){if(Math.abs(A)<1e-12&&Math.abs(B)<1e-12)return;const[x0,x1]=map.xr,[y0,y1]=map.yr,b=map.box;let p,q;
+ if(Math.abs(B)>=Math.abs(A)){p=[x0,-(A*x0+C)/B];q=[x1,-(A*x1+C)/B]}else{p=[-(B*y0+C)/A,y0];q=[-(B*y1+C)/A,y1]}
+ ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.setLineDash(dashed?[6,5]:[]);
+ ctx.beginPath();ctx.moveTo(map.X(p[0]),map.Y(p[1]));ctx.lineTo(map.X(q[0]),map.Y(q[1]));ctx.stroke();ctx.restore()}
+function drawCircle(ctx,map,cx,cy,r,color,width,fill){const b=map.box;ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.beginPath();ctx.arc(map.X(cx),map.Y(cy),Math.max(0,r*map.s),0,Math.PI*2);
+ if(fill){ctx.fillStyle=fill;ctx.fill()}if(width!==0){ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.stroke()}ctx.restore()}
+function dragPoints(points,map,snap){const M=()=>typeof map==="function"?map():map;const h=function(e,type,x,y){const m=M();if(!m)return false;
+ if(type==="down"){const R=e&&e.pointerType==="touch"?22:12;let best=-1,bd=R;points.forEach((p,i)=>{if(p.fixed)return;const d=Math.hypot(m.X(p.x)-x,m.Y(p.y)-y);if(d<=bd){bd=d;best=i}});h.active=best;return best>=0}
+ if(type==="move"&&h.active>=0){const p=points[h.active];let nx=m.invX(x),ny=m.invY(y);if(snap){nx=Math.round(nx/snap)*snap;ny=Math.round(ny/snap)*snap}
+  nx=Math.min(m.xr[1],Math.max(m.xr[0],nx));ny=Math.min(m.yr[1],Math.max(m.yr[0],ny));p.x=+nx.toFixed(6);p.y=+ny.toFixed(6);p.onmove&&p.onmove(p);h.onmove&&h.onmove(p,h.active);return true}
+ if(type==="up"){const was=h.active>=0;h.active=-1;return was}return false};h.active=-1;return h}
+function wrapText(ctx,text,x,y,maxW,lh){let line="";for(const ch of String(text)){if(ch==="\n"){ctx.fillText(line,x,y);line="";y+=lh;continue}
+ const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);line=ch;y+=lh}else line=t}if(line)ctx.fillText(line,x,y);return y+lh}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+/* ---------- placeholder ---------- */
+function drawSoon(ctx,w,h){const T=theme(),cw=Math.min(320,w-40),ch=150,x=(w-cw)/2,y=(h-ch)/2;
+ ctx.save();ctx.shadowColor="rgba(0,0,0,.08)";ctx.shadowBlur=24;ctx.shadowOffsetY=4;ctx.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(ctx,x,y,cw,ch,22);ctx.fill();ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.blue;ctx.font="13px ui-monospace,Menlo,monospace";ctx.fillText("CHAPTER "+pad(cur),w/2,y+38);
+ ctx.fillStyle=T.fg;ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText("即将上线",w/2,y+72);
+ ctx.fillStyle=T.sub;ctx.font="14px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText(CH[cur].n,w/2,y+108)}
+/* ---------- canvas loop ---------- */
+function resize(){const r=$("cwrap").getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);gl3Size();frame(performance.now())}
+function frame(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);const d3=!!(mod&&mod.use3d);
+ if(d3&&!GL3()){ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H);drawNo3D(ctx,W,H);return}
+ if(d3)gl3Render();else{ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H)}
+ try{mod&&mod.draw?mod.draw(ctx,W,H,t/1000):(!d3&&drawSoon(ctx,W,H))}catch(err){console.error(err)}}
+function loop(t){frame(t);requestAnimationFrame(loop)}
+new ResizeObserver(resize).observe($("cwrap"));window.addEventListener("resize",resize);
+function ptr(type){return e=>{if(!mod||!mod.pointer)return;const r=cv.getBoundingClientRect();
+ if(type==="down")try{cv.setPointerCapture(e.pointerId)}catch(_){}mod.pointer(e,type,e.clientX-r.left,e.clientY-r.top)}}
+cv.addEventListener("pointerdown",ptr("down"));cv.addEventListener("pointermove",ptr("move"));cv.addEventListener("pointerup",ptr("up"));cv.addEventListener("pointercancel",ptr("up"));
+/* ---------- chapters ---------- */
+function list(host,cls){host.innerHTML="";CH.forEach((c,i)=>{const b=el("button",cls,`<span class="mono">${pad(i)}</span><span>${c.n}</span>`);b.onclick=()=>{go(i);closeSheet()};host.append(b)})}
+list($("toc"),"");list($("slist"),"it");
+$("segs").innerHTML=CH.map(()=>"<i></i>").join("");
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod.unmount()}catch(e){console.error(e)}
+ gl3Clear();
+ cur=i;const c=CH[i],m=c.ready&&MODS[i]?MODS[i]:null;mod=m;
+ $("ctitle").textContent=pad(i)+"  "+c.n;$("cbook").textContent=c.book;$("ctext").innerHTML=m?m.text||"":"本章交互实验即将上线，敬请期待。";
+ const ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";$("pts").innerHTML="";$("gk").innerHTML="";
+ if(m){m.mount&&m.mount(ctrl,read);$("pts").innerHTML=m.points?"<ul>"+[].concat(m.points).map(p=>"<li>"+p+"</li>").join("")+"</ul>":"";$("gk").innerHTML=m.gk||""}
+ gl3Mode(!!(m&&m.use3d));
+ $("ctrlSec").hidden=!ctrl.children.length;$("readSec").hidden=!read.children.length;$("ptSec").hidden=!$("pts").innerHTML;$("gkSec").hidden=!$("gk").innerHTML;
+ if(!m){$("ctrlSec").hidden=false;ctrl.innerHTML='<p class="soon">本章控件即将上线。</p>'}
+ document.querySelectorAll("#toc button,#slist button").forEach(b=>{const on=+b.querySelector(".mono").textContent-1===i;b.classList.toggle("on",on);on?b.setAttribute("aria-current","true"):b.removeAttribute("aria-current")});
+ document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
+ $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+/* ---------- controls ---------- */
+$("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
+$("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("explain").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+function openSheet(){$("mask").hidden=$("sheet").hidden=false;const on=$("slist").querySelector(".on");on&&on.scrollIntoView({block:"nearest"})}
+function closeSheet(){$("mask").hidden=$("sheet").hidden=true}
+$("chbtn").onclick=openSheet;$("mask").onclick=closeSheet;
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"&&t.type!=="range"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable))return;
+ if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+go(fromHash());requestAnimationFrame(loop);
+</script>
+</body>
+</html>
