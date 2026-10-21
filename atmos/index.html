@@ -261,9 +261,87 @@
         *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;scroll-behavior:auto!important}
       }
     </style>
-    <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
-  </head>
+    <style>
+      /* ===== 手机 / 平板（≤1023px）：iOS 式「顶栏 · 画布 · 内容 · 翻页栏」；桌面不受影响 ===== */
+      .x-mchap,.x-mbar,.x-mtools,.x-scrim{display:none}
+      @keyframes x-up{from{transform:translateY(100%)}to{transform:none}}
+      @keyframes x-fade{from{opacity:0}to{opacity:1}}
+      @media (max-width:1023px){
+        .x-app,.x-app.x-toc-off{grid-template-columns:minmax(0,1fr);grid-template-rows:calc(52px + env(safe-area-inset-top)) 52vh minmax(0,1fr);grid-template-rows:calc(52px + env(safe-area-inset-top)) 52svh minmax(0,1fr);grid-template-areas:"top" "stage" "panel"}
+
+        /* 顶栏：‹ · 实验名 · 章节 */
+        .x-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:env(safe-area-inset-top) max(6px,env(safe-area-inset-right)) 0 max(6px,env(safe-area-inset-left));background:var(--x-topbg);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)}
+        .x-brand{display:contents}
+        .x-back{justify-self:start;justify-content:center;width:44px;height:44px;min-height:44px;padding:0;font-size:0;border-radius:980px}
+        .x-back:hover{text-decoration:none;background:var(--x-fill)}
+        .x-back b{font-size:32px;font-weight:300;margin:0;transform:translateY(-2px)}
+        .x-name{grid-column:2;justify-self:center;pointer-events:none;padding:0;min-height:44px}
+        .x-name b{font-size:clamp(15px,4.6vw,17px);overflow:visible;text-overflow:clip;white-space:nowrap}
+        .x-name .x-en,.x-name i,.x-prog,.x-tools,.x-handle{display:none}
+        .x-mchap{display:inline-flex;grid-column:3;justify-self:end;align-items:center;gap:6px;min-height:44px;padding:0 14px;border:0;border-radius:980px;background:var(--x-fill);color:var(--x-tx);font-size:15px;font-weight:500;white-space:nowrap}
+        .x-mchap span{font-family:var(--x-mono);font-size:13px;color:var(--x-tx2)}
+
+        /* 章节列表：底部升起的 sheet */
+        .x-app .x-side{display:none;position:fixed;left:0;right:0;bottom:0;top:auto;z-index:40;flex-direction:column;gap:2px;max-height:70vh;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:0 max(12px,env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));border:0;border-radius:20px 20px 0 0;background:var(--x-panel);box-shadow:0 -8px 40px rgba(0,0,0,.2)}
+        .x-app .x-side.x-open{display:flex;animation:x-up .28s var(--x-ease)}
+        .x-app .x-side::before{content:"章节";position:sticky;top:0;z-index:1;flex:none;padding:24px 0 10px;text-align:center;font-size:17px;font-weight:600;color:var(--x-tx);background:linear-gradient(var(--x-fill2),var(--x-fill2)) center 8px/36px 5px no-repeat,var(--x-panel)}
+        .x-app .x-side button{display:flex;align-items:center;gap:12px;flex:none;width:100%;min-height:52px;margin:0;padding:0 16px;border:0;border-radius:14px;text-align:left;white-space:normal}
+        .x-app .x-side button span{display:inline;min-width:24px;font-size:13px}
+        .x-app .x-side button b{font-size:16px}
+        .x-app .x-side button.on{background:var(--x-onbg);color:var(--x-blue-tx)}
+        .x-scrim:not([hidden]){display:block;position:fixed;inset:0;z-index:39;background:rgba(0,0,0,.38);animation:x-fade .2s ease}
+
+        /* 内容区：画布下方滚动 */
+        .x-panel{grid-area:panel;position:relative;left:auto;right:auto;bottom:auto;z-index:auto;max-height:none;transform:none;transition:none;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;gap:14px;padding:20px max(16px,env(safe-area-inset-right)) calc(96px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));border:0;border-top:.5px solid var(--x-line);border-radius:0;box-shadow:none;background:var(--x-bg1);backdrop-filter:none;-webkit-backdrop-filter:none}
+        #panel>div[id^="pc"]:not([hidden]):not(.x-card){display:contents}
+        #panel .x-card{margin-top:0!important}
+        #panel>#ov{order:-2}
+        #panel>.x-mtools{order:-1}
+        #panel .x-disp{order:1}
+        #panel .x-pts{order:2}
+        #panel .x-exam{order:3}
+        #panel>#ovB{order:4}
+        #panel>.x-ov{position:static;max-width:none;max-height:none;overflow:visible;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
+        #panel>.x-ov h1{display:block;font-size:20px;font-weight:600;line-height:1.35}
+        #panel>.x-ov h1 button{display:none}
+        #panel>.x-ov p{font-size:16px;line-height:1.7;margin-top:10px}
+        #panel>.x-ov .x-qo button{font-size:16px}
+        #panel>#ovB{margin:0;padding:14px 18px;border-radius:20px;background:var(--x-fill);font-size:13px;line-height:1.6;color:var(--x-tx2)}
+        .x-mtools{display:flex;flex-wrap:wrap;gap:8px}
+        .x-mtools button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border:0;border-radius:980px;background:var(--x-fill);color:var(--x-tx);font-size:14px;font-weight:500}
+        .x-mtools button[hidden]{display:none}
+        .x-mtools svg{width:17px;height:17px;flex:none}
+        .x-mtools span{display:inline-flex;align-items:center;gap:6px}
+        html.x-light .x-mt-sun,html:not(.x-light) .x-mt-moon{display:none}
+
+        /* 控件：整行、≥44px、标签左数值右、文字 ≥13px */
+        .x-row{min-height:44px;font-size:15px}
+        .x-row output{font-size:14px}
+        .x-card input[type=range]{display:block;width:100%}
+        .x-sw{min-height:44px}
+        .x-gl,.x-pop dt,.x-ov .x-book,.x-soon .x-book,.x-soon .x-count{font-size:13px}
+        .x-btn{min-height:44px}
+
+        /* 深色模式下蓝底按钮：加深蓝底，白字清楚 */
+        html:not(.x-light) .x-btn.on,html:not(.x-light) #oNext,html:not(.x-light) #qNx,html:not(.x-light) #uFac,html:not(.x-light) .x-st button.on{background:#0071e3;color:#fff}
+
+        /* 底部翻页栏 */
+        .x-mbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px max(16px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));border-top:.5px solid var(--x-line);background:var(--x-topbg);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)}
+        .x-mbar button{flex:1;min-height:48px;border:0;border-radius:980px;background:var(--x-fill);color:var(--x-tx);font-size:16px;font-weight:600}
+        .x-mbar .x-nx{background:#0071e3;color:#fff}
+        .x-mbar button:disabled{opacity:.35;cursor:default}
+        .x-soon{padding:16px 12px}
+      }
+      @media (min-width:768px) and (max-width:1023px){
+        .x-app,.x-app.x-toc-off{grid-template-rows:calc(52px + env(safe-area-inset-top)) 55vh minmax(0,1fr)}
+        .x-panel{padding-left:max(24px,calc((100% - 720px) / 2));padding-right:max(24px,calc((100% - 720px) / 2))}
+        .x-mbar{padding-left:max(24px,calc((100% - 560px) / 2));padding-right:max(24px,calc((100% - 560px) / 2))}
+        .x-app .x-side{left:max(0px,calc(50% - 320px));right:max(0px,calc(50% - 320px))}
+      }
+    </style>
+    <script src="../vendor/three@0.147.0/three.min.js"></script>
+    <script src="../vendor/three@0.147.0/OrbitControls.js"></script>
+  <style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
   <body>
     <div class="x-app" id="top">
       <header class="x-top">
@@ -276,6 +354,7 @@
           <button class="x-ib" id="bReset" title="重置视角 (R)" aria-label="重置视角">⟲</button>
           <button class="x-ib" id="bFull" title="全屏 (F)" aria-label="全屏">⛶</button>
         </div>
+        <button class="x-mchap" id="mChap" aria-haspopup="dialog" aria-controls="side" aria-expanded="false">章节 <span id="mChapN">01/11</span></button>
       </header>
       <nav class="x-side" id="side" aria-label="章节"></nav>
       <main class="x-stage" id="stage">
@@ -289,6 +368,10 @@
       </main>
       <aside class="x-panel" id="panel">
         <button class="x-handle" id="handle" aria-expanded="false">控件与要点</button>
+        <div class="x-mtools">
+          <button type="button" id="mReset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>重置视角</button>
+          <button type="button" id="mTheme"><span class="x-mt-moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>深色</span><span class="x-mt-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>浅色</span></button>
+        </div>
         <div id="pc1">
           <div class="x-card">
             <h4>粒子环流</h4>
@@ -520,6 +603,8 @@
           <label class="x-sw">辅助线<input type="checkbox" id="optGuide" checked /></label>
         </div>
       </aside>
+      <nav class="x-mbar" aria-label="翻页"><button id="mPrev">‹ 上一章</button><button class="x-nx" id="mNext">下一章 ›</button></nav>
+      <div class="x-scrim" id="mScrim" hidden></div>
     </div>
     <script>
       const CH = [
@@ -560,6 +645,7 @@
         [...$("segs").children].forEach((b, i) => { b.classList.toggle("on", i === n - 1); b.classList.toggle("done", i < n - 1); });
         $("side").children[n - 1].scrollIntoView({ block: "nearest", inline: "nearest" });
         $("count").textContent = `${pad(n)} / ${pad(CH.length)}`;
+        if (window.xMob) xMob(n);
         if (location.hash !== "#" + n) history.replaceState(null, "", "#" + n);
         const one = n === 1, two = n === 2, three = n === 3, four = n === 4, five = n === 5, six = n === 6, seven = n === 7, eight = n === 8, nine = n === 9, ten = n === 10, live = one || two || three || four || five || six || seven || eight || nine || ten;
         $("pc10").hidden = !ten;
@@ -905,7 +991,7 @@
         tx.setTransform(T.d, 0, 0, T.d, 0, 0);
         tx.clearRect(0, 0, W, H);
         const top = Math.min(H * 0.45, Math.max(40, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 36));
-        const yG = H - (innerWidth < 768 ? 100 : 60), h = Math.max(140, yG - top);
+        const yG = H - 60, h = Math.max(140, yG - top);
         const yU = yG - h * 0.78, yL = yG - h * 0.24;
         const xA = W * 0.28, xB = W * 0.72, xh = T.swap ? xB : xA, xc = T.swap ? xA : xB, cx = W / 2, hx = xh - cx;
         const cy = yG - h * 0.5, ry = h * 0.47;
@@ -1028,7 +1114,7 @@
       function uGeo() {
         const W = U.w, H = U.h, ov = $("ov");
         const top = Math.min(H * 0.4, Math.max(30, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 12));
-        const yG = H - (innerWidth < 768 ? 100 : 60), yT = top + 50, h = Math.max(130, yG - yT - 16);
+        const yG = H - 60, yT = top + 50, h = Math.max(130, yG - yT - 16);
         return { W, H, cx: W / 2, yG, yT, h, cy: yG - h / 2, ry: h * 0.47, C: W * 0.19, A: W * 0.17 };
       }
       // 内侧（市区）th=0 上升，th=π/2 高空流向郊区，th=π 郊区下沉，th=3π/2 近地面流回市区
@@ -1227,7 +1313,7 @@
         const font = (w, s) => `${w} ${s}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`;
         const lbl = $("optLbl").checked, gd = $("optGuide").checked, W = S.w, H = S.h, ov = $("ov");
         const gy = Math.min(H * 0.4, Math.max(12, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 12)), gh = 96;
-        const yG = H - (innerWidth < 768 ? 100 : 60), yT = gy + gh + 14, h = Math.max(120, yG - yT - 6);
+        const yG = H - 60, yT = gy + gh + 14, h = Math.max(120, yG - yT - 6);
         const cx = W / 2, cy = yG - h / 2, ry = h * 0.47, A = W * 0.27;
         const L = tL(S.t), M = tS(S.t), k = clamp((L - M) / 5, -1, 1), dir = Math.sign(k), al = Math.min(1, Math.abs(k) * 2);
         const txt = (s, x, y, z, c) => { sx.font = font(600, z); sx.lineWidth = 4; sx.strokeStyle = "rgba(10,16,28,.8)"; sx.strokeText(s, x, y); sx.fillStyle = c; sx.fillText(s, x, y); };
@@ -1387,7 +1473,7 @@
         const font = (w, s) => `${w} ${s}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`;
         const lbl = $("optLbl").checked, gd = $("optGuide").checked, fog = $("vFog").checked, W = Vv.w, H = Vv.h, ov = $("ov");
         const top = Math.min(H * 0.4, Math.max(12, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 12));
-        const yG = H - (innerWidth < 768 ? 100 : 60), yR = top + (yG - top) * 0.38, yTop = top + (yR - top) * 0.3 + 10;
+        const yG = H - 60, yR = top + (yG - top) * 0.38, yTop = top + (yR - top) * 0.3 + 10;
         const cx = W / 2, fw = W * 0.07, RX = W * 0.44, Ax = (RX - fw * 0.4) / 2, cc = fw * 0.4 + Ax;
         const gnd = (x) => { const d = Math.abs(x - cx); return d < fw ? yG : d > RX ? yR : yG - ((yG - yR) * (d - fw)) / (RX - fw); };
         const k = clamp((vSl(Vv.t) - vVa(Vv.t)) / 5, -1, 1), al = Math.min(1, Math.abs(k) * 2), nf = clamp(-k * 1.6, 0, 1);
@@ -1538,7 +1624,7 @@
         const lbl = $("optLbl").checked, gd = $("optGuide").checked, W = O.w, H = O.h, ov = $("ov"), mob = innerWidth < 768;
         const light = document.documentElement.classList.contains("x-light");
         const top = Math.min(H * 0.45, Math.max(16, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 40));
-        const yG = H - (mob ? 110 : 70), yT = top, hgt = yG - yT;
+        const yG = H - 70, yT = top, hgt = yG - yT;
         const sym = O.sym, hw = W * 0.44, x0 = W * 0.07, span = W * 0.86;
         const X = (lat, s) => (sym ? W / 2 + s * (lat / 90) * hw : x0 + (lat / 90) * span);
         const Y = (v) => yG - v * hgt;
@@ -1702,7 +1788,7 @@
         const lbl = $("optLbl").checked, gd = $("optGuide").checked, W = R7.w, H = R7.h, ov = $("ov"), mob = innerWidth < 768;
         const light = document.documentElement.classList.contains("x-light"), L = light ? 1 : 0, st = R7.step;
         const top = Math.min(H * 0.42, Math.max(16, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 36));
-        const yG = H - (mob ? 150 : 108), yT = top, hgt = yG - yT, nh = R7.nh, x0 = W * 0.05, span = W * 0.9;
+        const yG = H - 108, yT = top, hgt = yG - yT, nh = R7.nh, x0 = W * 0.05, span = W * 0.9;
         const X = (la) => (nh ? x0 + (la / 90) * span : x0 + ((la + 90) / 180) * span);
         const Y = (v) => yG - v * hgt;
         const f = (w, z) => `${w} ${z}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`;
@@ -1885,7 +1971,7 @@
         const lbl = $("optLbl").checked, gd = $("optGuide").checked, W = E8.w, H = E8.h, ov = $("ov"), mob = innerWidth < 768;
         const light = document.documentElement.classList.contains("x-light");
         const top = Math.min(H * 0.4, Math.max(16, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 20));
-        const bot = mob ? 70 : 24, R = Math.max(60, Math.min((H - top - bot) / 2, W / 2 - (mob ? 16 : 150)));
+        const bot = 24, R = Math.max(60, Math.min((H - top - bot) / 2, W / 2 - (mob ? 16 : 150)));
         Object.assign(E8, { R, cx: W / 2, cy: top + (H - top - bot) / 2 });
         const { cx, cy } = E8;
         const f = (w, z) => `${w} ${z}px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif`;
@@ -2052,7 +2138,7 @@
           if (o.lbl) { const [a, b] = pt(0), [c, d] = pt(1); ex.textAlign = "center"; o.txt("东南信风", a, b + 12, 12, o.gold); o.txt("西南季风（南亚）", c - 10, d - 14, 12, o.gold); }
         }
         // 左下角：直射点小标尺 + 38°N 实时判断
-        const bw = 236, bh = 100, bx = 12, by = H - (o.mob ? 70 : 24) - bh;
+        const bw = 236, bh = 100, bx = 12, by = H - 24 - bh;
         ex.fillStyle = o.light ? "rgba(255,255,255,.88)" : "rgba(21,30,48,.85)";
         ex.strokeStyle = o.light ? "rgba(29,36,51,.15)" : "rgba(255,255,255,.08)"; ex.lineWidth = 1;
         ex.beginPath(); ex.roundRect ? ex.roundRect(bx, by, bw, bh, 10) : ex.rect(bx, by, bw, bh); ex.fill(); ex.stroke();
@@ -2129,7 +2215,7 @@
         M10.last = t;
         const W = M10.w, H = M10.h, ov = $("ov"), mob = innerWidth < 768, lbl = $("optLbl").checked, gd = $("optGuide").checked;
         const light = document.documentElement.classList.contains("x-light");
-        const top = Math.min(H * 0.42, Math.max(12, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 12)), bot = mob ? 64 : 16;
+        const top = Math.min(H * 0.42, Math.max(12, ov.hidden ? 0 : ov.offsetTop + ov.offsetHeight + 12)), bot = 16;
         const s = Math.max(1, Math.min((W - 24) / 170, (H - top - bot) / 112)), ox = (W - 170 * s) / 2, oy = top + (H - top - bot - 112 * s) / 2;
         const X = (lo) => ox + (lo - 35) * s, Y = (la) => oy + (72 - la) * s, XY = (p) => [X(p[0]), Y(p[1])];
         const ink = light ? "#1D2433" : "#E6ECF5", grey = light ? "#5E6878" : "#8A97AD", red = light ? "#C0442A" : "#FF8A5C", blue = light ? "#2F6FC0" : "#8CBFFF", teal = light ? "#0B6159" : "#2EC4B6", gold = light ? "#8A5A00" : "#F2B544";
@@ -2317,6 +2403,72 @@
       (function () {
         var b = document.getElementById("bToc"), app = document.querySelector(".x-app");
         b.addEventListener("click", function () { var off = app.classList.toggle("x-toc-off"); b.setAttribute("aria-expanded", String(!off)); });
+      })();
+    </script>
+    <script>
+      /* 手机 / 平板（≤1023px）：说明移出画布进内容区、章节 sheet、底部翻页栏（桌面不变） */
+      (function () {
+        var mq = matchMedia("(max-width:1023px)");
+        var el = function (id) { return document.getElementById(id); };
+        var ov = el("ov"), ovB = el("ovB"), panel = el("panel"), stage = el("stage"), side = el("side"), soon = el("soon"), scrim = el("mScrim"), chap = el("mChap");
+        // 说明不再覆盖画布：手机上各画布按“无浮层”排版
+        ["offsetTop", "offsetHeight"].forEach(function (k) {
+          var d = Object.getOwnPropertyDescriptor(HTMLElement.prototype, k);
+          Object.defineProperty(ov, k, { configurable: true, get: function () { return mq.matches ? 0 : d.get.call(this); } });
+        });
+        // 卡片分组：控件 → 显示 → 要点 → 高考链接 → 教材出处
+        panel.querySelectorAll(".x-card").forEach(function (c) {
+          if (c.querySelector("#optLbl")) c.classList.add("x-disp");
+          else if (!c.classList.contains("x-exam") && !c.querySelector("input,button,output,.x-grad")) c.classList.add("x-pts");
+        });
+        function closeSheet() {
+          if (!side.classList.contains("x-open")) return;
+          side.classList.remove("x-open");
+          side.removeAttribute("role"); side.removeAttribute("aria-modal");
+          scrim.hidden = true;
+          chap.setAttribute("aria-expanded", "false");
+          if (mq.matches) chap.focus({ preventScroll: true });
+        }
+        function openSheet() {
+          side.classList.add("x-open");
+          side.setAttribute("role", "dialog"); side.setAttribute("aria-modal", "true");
+          scrim.hidden = false;
+          chap.setAttribute("aria-expanded", "true");
+          var on = side.querySelector("button.on") || side.firstElementChild;
+          side.scrollTop = Math.max(0, on.offsetTop - side.clientHeight / 2 + on.offsetHeight / 2);
+          on.focus({ preventScroll: true });
+        }
+        function lay() {
+          if (mq.matches) {
+            if (ov.parentNode !== panel) panel.insertBefore(ov, panel.firstChild);
+            if (ovB.parentNode !== panel) panel.appendChild(ovB);
+            if (ov.classList.contains("x-min")) { ov.classList.remove("x-min"); el("ovBtn").textContent = "收起"; el("ovBtn").setAttribute("aria-expanded", "true"); }
+            panel.classList.remove("open");
+          } else {
+            closeSheet();
+            if (ovB.parentNode !== ov) ov.insertBefore(ovB, ov.firstChild);
+            if (ov.parentNode !== stage) stage.insertBefore(ov, soon);
+          }
+        }
+        chap.onclick = function () { side.classList.contains("x-open") ? closeSheet() : openSheet(); };
+        scrim.onclick = closeSheet;
+        side.addEventListener("click", function (e) { if (mq.matches && e.target.closest("button")) closeSheet(); });
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
+        el("mPrev").onclick = function () { go(cur - 1); };
+        el("mNext").onclick = function () { go(cur + 1); };
+        el("mReset").onclick = resetView;
+        el("mTheme").onclick = theme;
+        window.xMob = function (n) {
+          el("mChapN").textContent = pad(n) + "/" + pad(CH.length);
+          chap.setAttribute("aria-label", "章节，第 " + n + " 章，共 " + CH.length + " 章");
+          el("mPrev").disabled = n <= 1;
+          el("mNext").disabled = n >= CH.length;
+          el("mReset").hidden = n !== 1;
+          panel.scrollTop = 0;
+        };
+        mq.addEventListener ? mq.addEventListener("change", lay) : mq.addListener(lay);
+        lay();
+        xMob(cur);
       })();
     </script>
   </body>
