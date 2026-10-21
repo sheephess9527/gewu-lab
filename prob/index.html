@@ -1573,17 +1573,25 @@ MODS[8] = (() => {
       for (let i = 1; i < cN.length; i++) { const x = X0 + i * bw, j = seg.findIndex(s => s[0] >= x - 1e-9), d = Math.min(seg[j - 1][2], seg[j][2]); c.moveTo(px(x), pyb); c.lineTo(px(x), Y(d)); }
       c.stroke(); c.globalAlpha = 1;
       // 平均数 / 中位数 / 众数 竖线
-      [[disp.mean, T.accent, 'x̄'], [disp.med, T.teal, '中位数'], [disp.mode, T.gold, '众数']].forEach(([v, col, nm], r) => {
-        const x = px(v), ly = py0 - 8 - r * 17;
-        c.strokeStyle = col; c.lineWidth = 2; c.setLineDash(r ? [5, 4] : []); c.beginPath(); c.moveTo(x, ly + 2); c.lineTo(x, pyb); c.stroke(); c.setLineDash([]);
-        c.font = '600 12px ' + T.sans; c.fillStyle = col; c.textAlign = x > R - 90 ? 'right' : 'left'; c.textBaseline = 'bottom';
-        c.fillText(nm + ' ' + f2(v), x + (x > R - 90 ? -4 : 4), ly + 6);
+      [[disp.mean, T.accent, 0], [disp.med, T.teal, 1], [disp.mode, T.gold, 1]].forEach(([v, col, ds]) => {
+        const x = px(v);
+        c.strokeStyle = col; c.lineWidth = 2; c.setLineDash(ds ? [5, 4] : []); c.beginPath(); c.moveTo(x, py0 - 4); c.lineTo(x, pyb); c.stroke(); c.setLineDash([]);
+        c.fillStyle = col; c.beginPath(); c.arc(x, py0 - 4, 3.5, 0, Math.PI * 2); c.fill();
       });
       // 第 p 百分位数（紫，可拖）
       c.strokeStyle = T.purple; c.lineWidth = drag ? 3.5 : 2.5; c.beginPath(); c.moveTo(ppx, py0 - 60); c.lineTo(ppx, pyb); c.stroke();
       c.fillStyle = T.purple; c.beginPath(); c.arc(ppx, py0 - 60, 9, 0, Math.PI * 2); c.fill();
-      c.font = '600 13px ' + T.sans; c.textAlign = ppx > R - 80 ? 'right' : 'left'; c.textBaseline = 'middle';
-      c.fillText('P' + p + ' ' + f2(pv), ppx + (ppx > R - 80 ? -14 : 14), py0 - 60);
+      // 图例（右上角；被柱或百分位线挡住时换到左上角）
+      { const it = [[T.purple, 'P' + p + ' ' + f2(pv), 0], [T.gold, '众数 ' + f2(disp.mode), 1], [T.teal, '中位数 ' + f2(disp.med), 1], [T.accent, 'x̄ ' + f2(disp.mean), 0]];
+        c.font = '600 12px ' + T.sans; const rh = 18, lw = Math.max(...it.map(r => c.measureText(r[1]).width)) + 44, lh = it.length * rh + 10, ly = py0 + 4;
+        const hit = lx => (ppx > lx - 12 && ppx < lx + lw + 12) || seg.some(([a0, a1, d]) => px(a1) > lx && px(a0) < lx + lw && Y(d) < ly + lh + 4);
+        const lx = [R - lw - 4, L + 4].find(x => !hit(x)) ?? R - lw - 4;
+        c.fillStyle = T.card; c.strokeStyle = T.line; c.lineWidth = 1; c.globalAlpha = .92; c.beginPath(); c.roundRect ? c.roundRect(lx, ly, lw, lh, 8) : c.rect(lx, ly, lw, lh); c.fill(); c.globalAlpha = 1; c.stroke();
+        c.textAlign = 'left'; c.textBaseline = 'middle';
+        it.forEach(([col, s, ds], i) => { const y = ly + 5 + (i + .5) * rh;
+          c.strokeStyle = col; c.lineWidth = i ? 2 : 2.5; c.setLineDash(ds ? [4, 3] : []); c.beginPath(); c.moveTo(lx + 10, y); c.lineTo(lx + 30, y); c.stroke(); c.setLineDash([]);
+          c.fillStyle = col; c.fillText(s, lx + 36, y); });
+      }
       const ar = hF(pv); c.font = '600 14px ' + T.mono; c.textAlign = 'center'; c.fillStyle = T.fg;
       if (ppx - L > 50) c.fillText(est ? p + '%' : p + '%（面积≈' + ar.toFixed(2) + '）', Math.max(L + 60, (L + ppx) / 2), pyb - 18);
       // 数据点带
@@ -1723,10 +1731,16 @@ MODS[9] = (() => {
       c.strokeStyle = T.gold; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 10, cy); c.lineTo(cx + 10, cy); c.moveTo(cx, cy - 10); c.lineTo(cx, cy + 10); c.stroke();
       c.font = '600 12px ' + T.sans; c.fillStyle = T.gold; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('(x̄, ȳ)', cx + 8, cy + 6);
       // 方程与 r
-      c.font = '600 14px ' + T.mono; c.textAlign = 'right'; c.textBaseline = 'top'; c.fillStyle = T.accent;
-      c.fillText(eq(s.b, s.a) + '   r = ' + f3(s.r), R - 6, Tp + 6);
-      if (showRes) { c.fillStyle = T.red; c.fillText('Q = ' + f3(s.Q), R - 6, Tp + 26); }
-      if (own) { c.fillStyle = T.fg2; c.fillText('自画线 Q′ = ' + f3(ownQ()), R - 6, Tp + (showRes ? 46 : 26)); }
+      { const ln = [[T.accent, eq(s.b, s.a)], [T.accent, 'r = ' + f3(s.r)]];
+        if (showRes) ln.push([T.red, 'Q = ' + f3(s.Q)]);
+        if (own) ln.push([T.fg2, '自画线 Q′ = ' + f3(ownQ())]);
+        c.font = '600 13px ' + T.mono; const lh = 18, bw = Math.max(...ln.map(l => c.measureText(l[1]).width)) + 20, bh = ln.length * lh + 12;
+        const bx = R - 8 - bw, by = Bt - 24 - bh;
+        c.fillStyle = T.card; c.globalAlpha = .85; c.beginPath(); c.roundRect ? c.roundRect(bx, by, bw, bh, 10) : c.rect(bx, by, bw, bh); c.fill(); c.globalAlpha = 1;
+        c.strokeStyle = T.line; c.lineWidth = 1; c.stroke();
+        c.textAlign = 'left'; c.textBaseline = 'middle';
+        ln.forEach(([col, tx], i) => { c.fillStyle = col; c.fillText(tx, bx + 10, by + 6 + (i + .5) * lh); });
+      }
       if (msg && performance.now() - msgT < 1600) { c.font = '600 14px ' + T.sans; c.textAlign = 'center'; c.fillStyle = T.red; c.fillText(msg, (L + R) / 2, Tp + 70); }
     },
     pointer(e, type, x, y){
@@ -1815,7 +1829,7 @@ MODS[10] = (() => {
       let top = ov.offsetParent !== null ? ov.offsetTop + ov.offsetHeight + 12 : 12; top = Math.min(top, h * .4);
       const L = 14, R = w - 14, nar = w < 520, avail = h - top - 14;
       const lw = nar ? 62 : 96, tw = nar ? 56 : 96, cw = (R - L - lw - tw) / 2, wide = cw >= 170;
-      const hh = 30, th = 34, rh = Math.max(wide ? 84 : 104, Math.min(140, (avail * .5 - hh - th) / 2)), tabH = hh + 2 * rh + th;
+      const mob = w < 600, hh = mob ? 26 : 30, th = mob ? 30 : 34, rh = Math.max(wide ? 84 : 104, Math.min(140, (avail * .5 - hh - th) / 2)) * (mob ? .85 : 1), tabH = hh + 2 * rh + th, br = mob ? 20 : 22;
       const btns = []; G = {btns};
       const vals = [s.a, s.b, s.c, s.d], mx = Math.max(1, ...vals);
       c.textAlign = 'center'; c.textBaseline = 'middle';
@@ -1828,15 +1842,15 @@ MODS[10] = (() => {
         const r = i >> 1, col = i & 1, x0 = L + lw + col * cw, y0 = top + hh + r * rh;
         c.fillStyle = T.accent; c.globalAlpha = .06 + .34 * v / mx; rr(c, x0 + 3, y0 + 3, cw - 6, rh - 6, 12); c.fill(); c.globalAlpha = 1;
         c.font = '12px ' + T.mono; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('abcd'[i], x0 + 10, y0 + 8);
-        const fs = Math.round(Math.min(40, rh * .42, cw * (wide ? .2 : .3)));
-        const ny = wide ? y0 + rh / 2 : y0 + rh * .36;
+        const fs = Math.round(Math.min(40, rh * (mob && !wide ? .34 : .42), cw * (wide ? .2 : .3)));
+        const ny = wide ? y0 + rh / 2 : y0 + rh * (mob ? .3 : .36), bo = mob ? 25 : 29;
         c.font = '600 ' + fs + 'px ' + T.mono; c.fillStyle = T.fg; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(v, x0 + cw / 2, ny);
-        const pos = wide ? [[x0 + 32, ny], [x0 + cw - 32, ny]] : [[x0 + cw / 2 - 27, y0 + rh - 29], [x0 + cw / 2 + 27, y0 + rh - 29]];
+        const pos = wide ? [[x0 + 32, ny], [x0 + cw - 32, ny]] : [[x0 + cw / 2 - 26, y0 + rh - bo], [x0 + cw / 2 + 26, y0 + rh - bo]];
         pos.forEach(([bx, by], j) => {
           const d = j ? 1 : -1, on = pressed && pressed.i === i && pressed.d === d;
           c.fillStyle = on ? T.fill : T.card; c.strokeStyle = T.line; c.lineWidth = 1.5;
-          c.beginPath(); c.arc(bx, by, 22, 0, Math.PI * 2); c.fill(); c.stroke();
-          c.font = '500 22px ' + T.sans; c.fillStyle = T.fg; c.fillText(j ? '+' : '−', bx, by + 1);
+          c.beginPath(); c.arc(bx, by, br, 0, Math.PI * 2); c.fill(); c.stroke();
+          c.font = '500 ' + br + 'px ' + T.sans; c.fillStyle = T.fg; c.fillText(j ? '+' : '−', bx, by + 1);
           btns.push({x: bx, y: by, i, d});
         });
       });
@@ -1849,10 +1863,20 @@ MODS[10] = (() => {
       [hh, hh + 2 * rh].forEach(yy => { c.moveTo(L, top + yy); c.lineTo(R, top + yy); });
       c.moveTo(L + lw, top); c.lineTo(L + lw, top + tabH); c.moveTo(R - tw, top); c.lineTo(R - tw, top + tabH); c.stroke();
       // 下方区域
-      const by = top + tabH + 18, bh = h - 14 - by; if (bh < 80) return;
-      const side = w >= 560, A1 = side ? [L, by, L + (R - L) * .38, by + bh] : [L, by, R, by + bh * .5], A2 = side ? [L + (R - L) * .44, by, R, by + bh] : [L, by + bh * .5 + 8, R, by + bh];
+      const by = top + tabH + (mob ? 14 : 18), bh = h - 14 - by; if (bh < 80) return;
+      const side = !mob, a1h = Math.max(62, Math.min(84, bh * .4)), A1 = side ? [L, by, L + (R - L) * .38, by + bh] : [L, by, R, by + a1h], A2 = side ? [L + (R - L) * .44, by, R, by + bh] : [L, by + a1h + 6, R, by + bh];
       // 堆积条形图
-      { const [x0, y0, x1, y1] = A1; c.font = '12px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('各组近视比例（红：近视 灰：不近视）', x0, y0);
+      if (mob) { const [x0, y0, x1, y1] = A1; c.font = '12px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('各组近视比例（红：近视 灰：不近视）', x0, y0);
+        const nw = 60, bx = x0 + nw, bw = x1 - bx, hb = Math.max(18, Math.min(24, (y1 - y0 - 26) / 2));
+        [[s.a / s.r1, '经常锻炼'], [s.c / s.r2, '不常锻炼']].forEach(([p, nm], j) => {
+          const yb = y0 + 20 + j * (hb + 6), ok = isFinite(p), rp = ok ? p * bw : 0;
+          c.font = '12px ' + T.sans; c.fillStyle = T.fg; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(nm, x0, yb + hb / 2);
+          c.save(); rr(c, bx, yb, bw, hb, 6); c.clip(); c.fillStyle = T.fill; c.fillRect(bx, yb, bw, hb);
+          if (rp > 0) { c.fillStyle = T.red; c.fillRect(bx, yb, rp, hb); } c.restore();
+          c.font = '600 12px ' + T.mono; c.textAlign = 'center';
+          if (ok) { if (rp > 48) { c.fillStyle = '#fff'; c.fillText(pct(p), bx + rp / 2, yb + hb / 2 + 1); } if (bw - rp > 48) { c.fillStyle = T.fg2; c.fillText(pct(1 - p), bx + rp + (bw - rp) / 2, yb + hb / 2 + 1); } }
+        });
+      } else { const [x0, y0, x1, y1] = A1; c.font = '12px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('各组近视比例（红：近视 灰：不近视）', x0, y0);
         const bw = Math.min(80, (x1 - x0) / 4), yt = y0 + 22, yb = y1 - 22, H2 = yb - yt;
         [[s.a / s.r1, '经常锻炼'], [s.c / s.r2, '不常锻炼']].forEach(([p, nm], j) => {
           const cx = x0 + (x1 - x0) * (j ? .7 : .3), ok = isFinite(p), rp = ok ? p * H2 : 0;
@@ -1865,12 +1889,29 @@ MODS[10] = (() => {
       }
       // χ² 数轴
       { const [x0, y0, x1, y1] = A2; c.font = '12px ' + T.sans; c.fillStyle = T.fg2; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('χ² 数轴（浅红为 α=' + AL[ai] + ' 的拒绝域）', x0, y0);
-        const ay = Math.max(y0 + 70, y0 + (y1 - y0) * .55), X = v => x0 + 8 + v / 20 * (x1 - x0 - 30);
+        const ay = mob ? Math.max(y0 + 72, Math.min(y1 - 22, y0 + (y1 - y0) * .62)) : Math.max(y0 + 70, y0 + (y1 - y0) * .55), X = v => x0 + 8 + v / 20 * (x1 - x0 - 30);
         c.fillStyle = T.red; c.globalAlpha = .14; c.fillRect(X(xa), ay - 26, X(20) + 14 - X(xa), 26); c.globalAlpha = 1;
         c.strokeStyle = T.fg2; c.fillStyle = T.fg2; c.lineWidth = 1.5; c.beginPath(); c.moveTo(X(0), ay); c.lineTo(X(20) + 14, ay); c.stroke();
         c.beginPath(); c.moveTo(X(20) + 20, ay); c.lineTo(X(20) + 12, ay - 4); c.lineTo(X(20) + 12, ay + 4); c.fill();
         c.font = '12px ' + T.mono; c.textAlign = 'center'; c.textBaseline = 'top'; c.lineWidth = 1; const st = (x1 - x0) < 360 ? 4 : 2;
         for (let i = 0; i <= 20; i++) { c.beginPath(); c.moveTo(X(i), ay); c.lineTo(X(i), ay + (i % st ? 3 : 6)); c.stroke(); if (i % st === 0) c.fillText(i, X(i), ay + 8); }
+        if (mob) {
+          const over = disp > 20, px = X(Math.min(disp, 20.4));
+          c.strokeStyle = T.accent; c.fillStyle = T.accent; c.lineWidth = 3; c.beginPath(); c.moveTo(px, ay - 38); c.lineTo(px, ay - 8); c.stroke();
+          c.beginPath(); c.moveTo(px, ay); c.lineTo(px - 6, ay - 10); c.lineTo(px + 6, ay - 10); c.fill();
+          c.font = '600 14px ' + T.mono; c.textBaseline = 'bottom'; const lbl = 'χ² = ' + f3(s.x) + (over ? ' →' : ''), lw2 = c.measureText(lbl).width;
+          c.textAlign = 'left'; c.fillText(lbl, Math.max(x0, Math.min(x1 - lw2, px - lw2 / 2)), ay - 41);
+          let n = 0;
+          XA.forEach((v, j) => {
+            const on = j === ai, lab = j === 1 || j === 2 || j === 4, ly = lab ? ay - 8 - (n++ % 2) * 15 : ay - 10;
+            c.strokeStyle = on ? T.red : T.fg2; c.lineWidth = on ? 2 : 1; c.beginPath(); c.moveTo(X(v), lab ? ly - 1 : ly); c.lineTo(X(v), ay); c.stroke();
+            if (!lab) return;
+            c.font = (on ? '600 ' : '') + '12px ' + T.mono; c.textAlign = 'center'; c.textBaseline = 'bottom'; const tw2 = c.measureText(v).width;
+            c.fillStyle = T.bg; c.globalAlpha = .85; c.fillRect(X(v) - tw2 / 2 - 2, ly - 14, tw2 + 4, 13); c.globalAlpha = 1;
+            c.fillStyle = on ? T.red : T.fg2; c.fillText(v, X(v), ly - 1);
+          });
+          return;
+        }
         XA.forEach((v, j) => {
           const on = j === ai, ly = ay - 34 - (j % 2) * 15;
           c.strokeStyle = on ? T.red : T.fg2; c.lineWidth = on ? 2 : 1; c.beginPath(); c.moveTo(X(v), ly + 6); c.lineTo(X(v), ay); c.stroke();
