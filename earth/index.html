@@ -260,6 +260,89 @@
         .x-panel, .x-chap { transition:none !important; }
       }
     </style>
+    <style>
+      /* ===== 手机 / 平板（≤1023px）：原生 App 式布局；桌面端不受影响 ===== */
+      .x-chbtn, .x-mtools, .x-bbar, .x-scrim, .x-mhead, .x-mm { display:none; }
+      @media (max-width:1023px) {
+        html, body.x-app { overflow:hidden; overflow-x:hidden; }
+        .x-shell { grid-template-columns:minmax(0,1fr); grid-template-rows:calc(52px + env(safe-area-inset-top)) 52vh minmax(0,1fr); grid-template-rows:calc(52px + env(safe-area-inset-top)) 52dvh minmax(0,1fr); }
+
+        /* 顶栏：返回 · 实验名 · 章节 */
+        .x-top { display:grid; grid-template-columns:minmax(44px,1fr) auto minmax(44px,1fr); align-items:center; gap:8px; box-sizing:border-box; height:calc(52px + env(safe-area-inset-top)); padding:env(safe-area-inset-top) max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left)); z-index:12; }
+        .x-brand { display:contents; }
+        .x-brand small, .x-back-t, .x-brand .x-en, .x-prog, .x-tools { display:none; }
+        .x-back { justify-self:start; justify-content:center; width:44px; height:44px; min-width:44px; margin:0; padding:0; }
+        .x-back span[aria-hidden] { font-size:30px; margin-top:-3px; }
+        .x-brand b { justify-self:center; min-width:0; font-size:clamp(14px, 4.4vw, 17px); white-space:nowrap; overflow:visible; text-overflow:clip; text-align:center; }
+        .x-chbtn { display:inline-flex; justify-self:end; align-items:center; gap:6px; min-height:44px; padding:0 14px; border:0; border-radius:980px; background:var(--x-btn2); color:var(--x-tx); font:500 15px/1 var(--x-sans); white-space:nowrap; cursor:pointer; }
+        .x-chbtn .x-mono { font-size:13px; color:var(--x-blue-tx); }
+
+        /* 章节列表：底部升起的 sheet */
+        .x-scrim { display:block; position:fixed; inset:0; z-index:20; background:rgba(0,0,0,.32); opacity:0; pointer-events:none; transition:opacity .3s var(--x-ease); }
+        .x-scrim.open { opacity:1; pointer-events:auto; }
+        .x-chap, .x-shell.x-tocoff .x-chap { position:fixed; left:0; right:0; bottom:0; z-index:21; display:block; height:auto; max-height:70vh; max-height:70dvh; box-sizing:border-box; margin:0 auto; max-width:680px; padding:0 max(12px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; white-space:normal; border:0; border-radius:20px 20px 0 0; background:var(--x-panel); box-shadow:0 -8px 32px rgba(0,0,0,.18); visibility:hidden; transform:translateY(100%); transition:transform .3s var(--x-ease), visibility 0s linear .3s; }
+        .x-chap.open, .x-shell.x-tocoff .x-chap.open { visibility:visible; transform:none; transition:transform .3s var(--x-ease), visibility 0s; }
+        .x-chap::before { content:"章节"; position:sticky; top:0; z-index:1; display:block; margin:0 -12px 4px; padding:22px 20px 10px; font:600 17px/1.3 var(--x-sans); color:var(--x-tx); background:var(--x-panel) linear-gradient(var(--x-tx2),var(--x-tx2)) no-repeat center 8px / 36px 5px; border-radius:20px 20px 0 0; }
+        .x-chap button { display:flex; align-items:center; gap:14px; width:100%; min-height:52px; margin:0 0 2px; padding:0 14px; border:0; border-radius:14px; text-align:left; }
+        .x-chap button span { flex:none; font-size:13px; }
+        .x-chap button b { font-size:16px; font-weight:500; }
+        .x-chap button[aria-current="true"] { background:var(--x-soft); }
+        .x-chap button[aria-current="true"] span, .x-chap button[aria-current="true"] b { color:var(--x-blue-tx); font-weight:600; }
+
+        /* 画布：不被遮挡，只在画布上禁止页面滚动手势 */
+        .x-stage { padding-bottom:0; border-bottom:.5px solid var(--x-line); }
+        .x-stage canvas { touch-action:none; }
+
+        /* 内容区 */
+        .x-panel { position:static; transform:none; max-height:none; min-height:0; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; border:0; border-radius:0; box-shadow:none; background:var(--x-bg1); gap:16px; padding:20px max(16px, env(safe-area-inset-right)) calc(92px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); transition:none; }
+        .x-panel > * { box-sizing:border-box; width:100%; max-width:680px; margin-left:auto; margin-right:auto; }
+        .x-panel .x-handle { display:none; }
+        .x-mhead, .x-mm { display:block; }
+        .x-mhead .x-ov { position:static; max-width:none; padding:0; border:0; border-radius:0; background:none; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
+        .x-mhead .x-ov .x-book { margin:0 0 6px; font-size:13px; }
+        .x-mhead .x-ov h1 { padding-right:0; font-size:20px; font-weight:600; line-height:1.35; }
+        .x-mhead .x-ov h1 .x-mono { font-size:14px; }
+        .x-mhead .x-ov p.x-lead, .x-mhead .x-ov.min p.x-lead { display:block; margin:10px 0 0; font-size:16px; line-height:1.7; }
+        .x-mhead .x-fold { display:none; }
+        .x-mm .x-mini { position:relative; inset:auto; width:100%; height:180px; margin:0; border-radius:18px; }
+        .x-mm .x-mini + .x-mini { margin-top:12px; }
+        .x-mm .x-mini canvas { display:block; width:100%; height:100%; }
+        .x-mm .x-mini#x-mini8 { height:220px !important; }
+
+        /* 重置视角 / 主题：一行小按钮 */
+        .x-mtools { display:flex; gap:8px; }
+        .x-mtools .x-btn { flex:1 1 0; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:15px; }
+        .x-mtools .x-btn span[aria-hidden] { font-size:17px; }
+
+        /* 本章内容：要点卡在前，控件在后 */
+        .x-panel > div[id^="x-p"] { display:flex; flex-direction:column; gap:16px; }
+        .x-panel > div[id^="x-p"] > * { margin-top:0 !important; }
+        .x-panel > div[id^="x-p"] > .x-card { order:-1; }
+
+        /* 控件：整行、≥44px，标签在左数值在右 */
+        .x-slider label { display:flex; justify-content:space-between; align-items:center; min-height:44px; font-size:15px; }
+        .x-slider label output { font-size:15px; }
+        .x-row > .x-btn { flex:1 1 auto; }
+        .x-btn { font-size:15px; }
+        .x-tg { flex-direction:column; gap:0; }
+        .x-tg label { flex-direction:row-reverse; justify-content:space-between; width:100%; min-height:48px; font-size:15px; }
+        .x-q9o .x-btn { font-size:15px; }
+        .x-read small, .x-ticks, .x-fine, .x-hint, .x-chip, .x-gk { font-size:13px; }
+        .x-gk { font-size:14px; }
+        .x-card ul { font-size:15px; }
+
+        /* 底部：上一章 / 下一章 */
+        .x-bbar { display:flex; gap:10px; position:fixed; left:0; right:0; bottom:0; z-index:10; padding:10px max(16px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); background:var(--x-glass); border-top:.5px solid var(--x-line); -webkit-backdrop-filter:saturate(180%) blur(20px); backdrop-filter:saturate(180%) blur(20px); }
+        .x-bbar .x-btn { flex:1 1 0; min-height:48px; max-width:330px; font-size:16px; }
+        .x-bbar .x-btn:first-child { margin-left:auto; }
+        .x-bbar .x-btn:last-child { margin-right:auto; background:var(--x-btn-bg); color:#fff; }
+        .x-bbar .x-btn:disabled { opacity:.4; cursor:default; }
+        .x-bbar .x-btn:last-child:disabled { background:var(--x-btn2); color:var(--x-tx); }
+      }
+      @media (max-width:1023px) and (prefers-reduced-motion: reduce) {
+        .x-chap, .x-chap.open, .x-scrim { transition:none !important; }
+      }
+    </style>
   </head>
   <body class="x-app">
     <div class="page x-shell" id="top">
@@ -274,7 +357,9 @@
           <button class="x-ib x-hide-m" id="x-reset" aria-label="重置视角（R）" title="重置视角 R">⟲</button>
           <button class="x-ib" id="x-full" aria-label="全屏（F）" title="全屏 F">⛶</button>
         </div>
+        <button class="x-chbtn" id="x-chbtn" aria-haspopup="true" aria-expanded="false" aria-controls="x-chap">章节 <span class="x-mono" id="x-chcount">01/09</span></button>
       </header>
+      <div class="x-scrim" id="x-scrim" aria-hidden="true"></div>
       <nav class="x-chap" id="x-chap" aria-label="章节目录"></nav>
       <main class="x-stage" id="x-stage">
         <canvas id="x-gl" aria-label="地球绕太阳公转的三维演示"></canvas>
@@ -294,6 +379,12 @@
       </main>
       <aside class="x-panel" id="x-panel" aria-label="讲解与控件">
         <button class="x-handle" id="x-handle" aria-expanded="false"><span id="x-hd-main">6月21日 · 夏至日</span><span>控件 ▴</span></button>
+        <div class="x-mhead" id="x-mhead"></div>
+        <div class="x-mtools">
+          <button class="x-btn" id="x-mreset" type="button"><span aria-hidden="true">⟲</span>重置视角</button>
+          <button class="x-btn" id="x-mtheme" type="button"><span aria-hidden="true">◐</span><span id="x-mtheme-t">深色</span></button>
+        </div>
+        <div class="x-mm" id="x-mm"></div>
         <div id="x-p1">
           <div class="x-grp">
             <h2>当前</h2>
@@ -629,6 +720,10 @@
           <div class="x-card" id="x-pgcard"><h2>要点</h2><ul id="x-pglist"></ul></div>
         </div>
       </aside>
+      <nav class="x-bbar" aria-label="章节切换">
+        <button class="x-btn" id="x-bprev" type="button">‹ 上一章</button>
+        <button class="x-btn" id="x-bnext" type="button">下一章 ›</button>
+      </nav>
     </div>
     <script src="hark.js"></script>
     <script>
@@ -641,8 +736,8 @@
         };
       })();
     </script>
-    <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="../vendor/three@0.147.0/three.min.js"></script>
+    <script src="../vendor/three@0.147.0/OrbitControls.js"></script>
     <script>
       /* ---------- 章节内容（取自 earth.txt） ---------- */
       var CH = [
@@ -658,6 +753,7 @@
       ];
       var $ = function (id) { return document.getElementById(id); };
       var cur = -1, pad = function (n) { return (n < 10 ? "0" : "") + n; };
+      var MQ = window.matchMedia("(max-width:1023px)");
 
       /* ---------- 外壳 ---------- */
       CH.forEach(function (c, i) {
@@ -674,9 +770,13 @@
         cur = i;
         var c = CH[i];
         if (location.hash !== "#" + (i + 1)) history.replaceState(null, "", "#" + (i + 1));
-        [].forEach.call($("x-chap").children, function (b, k) { b.setAttribute("aria-current", k === i ? "true" : "false"); if (k === i) b.scrollIntoView({ block: "nearest", inline: "nearest" }); });
+        [].forEach.call($("x-chap").children, function (b, k) { b.setAttribute("aria-current", k === i ? "true" : "false"); if (k === i && !MQ.matches) b.scrollIntoView({ block: "nearest", inline: "nearest" }); });
         [].forEach.call($("x-segs").children, function (s, k) { s.className = k <= i ? "on" : ""; });
         $("x-count").textContent = pad(i + 1) + " / " + pad(CH.length);
+        $("x-chcount").textContent = pad(i + 1) + "/" + pad(CH.length);
+        $("x-bprev").disabled = i === 0;
+        $("x-bnext").disabled = i === CH.length - 1;
+        if (MQ.matches && prev !== -1) $("x-panel").scrollTop = 0;
         $("x-num").textContent = pad(i + 1);
         $("x-title").textContent = c.t;
         $("x-lead").textContent = c.p[0];
@@ -1778,6 +1878,50 @@
       updOb4();
       go(parseInt(location.hash.slice(1), 10) - 1 || 0);
       updateHud();
+    </script>
+    <script>
+      /* ---------- 手机 / 平板外壳：讲解与小图排进内容区，章节 sheet，底部切章 ---------- */
+      (function () {
+        var stage = $("x-stage"), ov = $("x-ov"), soon = $("x-soon"), err = $("x-err");
+        var minis = ["x-mini5", "x-mini6", "x-mini7", "x-mini7b", "x-mini8"].map($);
+        function layout() {
+          if (MQ.matches) {
+            $("x-mhead").appendChild(ov);
+            minis.forEach(function (m) { $("x-mm").appendChild(m); });
+          } else {
+            stage.insertBefore(ov, soon);
+            minis.forEach(function (m) { stage.insertBefore(m, err); });
+            closeSheet(true);
+          }
+          window.dispatchEvent(new Event("resize"));
+        }
+        var sheet = $("x-chap"), scrim = $("x-scrim"), btn = $("x-chbtn");
+        function openSheet() {
+          sheet.classList.add("open"); scrim.classList.add("open");
+          btn.setAttribute("aria-expanded", "true");
+          var c = sheet.querySelector('[aria-current="true"]');
+          if (c) { sheet.scrollTop = Math.max(0, c.offsetTop - sheet.clientHeight / 2); c.focus({ preventScroll: true }); }
+        }
+        function closeSheet(silent) {
+          if (!sheet.classList.contains("open")) return;
+          sheet.classList.remove("open"); scrim.classList.remove("open");
+          btn.setAttribute("aria-expanded", "false");
+          if (!silent) btn.focus({ preventScroll: true });
+        }
+        btn.onclick = function () { sheet.classList.contains("open") ? closeSheet() : openSheet(); };
+        scrim.onclick = function () { closeSheet(); };
+        sheet.addEventListener("click", function (e) { if (MQ.matches && e.target.closest("button")) closeSheet(); });
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); }, true);
+        $("x-bprev").onclick = function () { go(cur - 1); };
+        $("x-bnext").onclick = function () { go(cur + 1); };
+        $("x-mreset").onclick = $("x-reset").onclick = function () { resetView(); };
+        $("x-mtheme").onclick = toggleTheme;
+        function themeLabel() { $("x-mtheme-t").textContent = document.documentElement.getAttribute("data-theme") === "dark" ? "浅色" : "深色"; }
+        new MutationObserver(themeLabel).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+        themeLabel();
+        if (MQ.addEventListener) MQ.addEventListener("change", layout); else MQ.addListener(layout);
+        if (MQ.matches) layout();
+      })();
     </script>
   </body>
 </html>
