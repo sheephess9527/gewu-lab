@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>格物实验室 · 面向浙江高考的交互学习</title>
-    <meta name="description" content="把高考里最难想象的那部分，变成你能转动、拖拽、亲手推演的实验。数学、地理、历史，免安装免注册。" />
+    <meta name="description" content="把高考里最难想象的那部分，变成你能转动、拖拽、亲手推演的实验。历史、地理、数学，按浙江教材编排。" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light dark" />
@@ -208,9 +208,9 @@
       <nav class="x-wrap" aria-label="主导航">
         <a class="x-brand" href="#top">格物实验室</a>
         <ul>
-          <li><a href="#math">数学</a></li>
-          <li><a href="#geo">地理</a></li>
           <li><a href="#history">历史</a></li>
+          <li><a href="#geo">地理</a></li>
+          <li><a href="#math">数学</a></li>
           <li><a href="#about">关于</a></li>
         </ul>
         <a class="x-nav__start" href="#labs"><span>开始</span></a>
@@ -224,7 +224,7 @@
             <p class="x-tag">GEWU LAB · 浙江高考</p>
             <h1 class="x-display" id="hero-title">看见，才会懂。</h1>
             <p class="x-sub">把高考里最难想象的那部分，变成你能转动、拖拽、亲手推演的实验。</p>
-            <p class="x-meta"><b id="stat-labs">–</b> 个实验 · <b id="stat-ch">–</b> 个交互章节 · 免安装免注册</p>
+            <p class="x-meta"><b id="stat-labs">–</b> 个实验 · <b id="stat-ch">–</b> 个交互章节 · 按浙江教材编排</p>
           </div>
           <img class="x-hero__img" src="img/gw-hero.jpg" alt="悬浮的玻璃球，内含地球经纬线与金色曲线" fetchpriority="high" />
         </div>
@@ -234,9 +234,9 @@
         <div class="x-wrap">
           <div class="x-seg" role="group" aria-label="按学科筛选">
             <button type="button" data-f="all" aria-pressed="true">全部</button>
-            <button type="button" data-f="math" aria-pressed="false">数学</button>
-            <button type="button" data-f="geo" aria-pressed="false">地理</button>
             <button type="button" data-f="history" aria-pressed="false">历史</button>
+            <button type="button" data-f="geo" aria-pressed="false">地理</button>
+            <button type="button" data-f="math" aria-pressed="false">数学</button>
           </div>
           <label class="x-search">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="5" /><path d="M11 11l3.5 3.5" /></svg>
@@ -276,39 +276,39 @@
       document.querySelectorAll(".x-pool img").forEach(function (im) { POOL[im.getAttribute("data-img")] = im; });
       /* 加实验：在 LABS 里加一行即可（img 用 img/gw-<slug>.jpg）。 */
       var LABS = [
+        { slug: "zhidu",   name: "制度变迁", en: "ZhiduLab",   subject: "history", group: "古代政治制度",   ch: 9, desc: "从三公九卿到军机处，一张权力结构图看懂两千年。", tags: "皇帝制度 郡县制 推恩令 中外朝 三省六部 科举 二府三司 行省 内阁 军机处 改土归流", img: "img/gw-zhidu.jpg", added: "2026-10-21 19:40" },
+        { slug: "jindai",  name: "近代中国", en: "ModernLab",  subject: "history", group: "中国近代史",     ch: 10, desc: "从虎门销烟到抗战胜利，条约、路线、战场都落在地图上。", tags: "鸦片战争 南京条约 太平天国 洋务运动 甲午 马关条约 辛丑条约 辛亥革命 五四 中共一大 嘉兴南湖 北伐 抗日战争", img: "img/gw-jindai.jpg", added: "2026-10-21 19:40" },
+        { slug: "atlas",   name: "疆域变迁", en: "AtlasLab",   subject: "history", group: "疆域与战争",     ch: 17,   desc: "从秦到清，十六个时期的疆域，一条时间轴滑过去。", tags: "边疆机构 大运河 长城 随堂检测", img: "img/gw-atlas.jpg", added: "2026-10-20" },
+        { slug: "war",     name: "战役沙盘", en: "WarLab",     subject: "history", group: "疆域与战争",     ch: 10,   desc: "长平、官渡、赤壁、淝水……在三维沙盘上重新推演胜负。", tags: "中外 9 场战役 兵力部署 关键转折", img: "img/gw-war.jpg", added: "2026-10-20" },
+        { slug: "weather", name: "天气系统", en: "WeatherLab", subject: "geo",     group: "大气与天气",       ch: 9,    desc: "冷锋、暖锋、梅雨、台风，在三维沙盘里看天气怎样变。", tags: "大气受热过程 等压线 冷锋 暖锋 准静止锋 梅雨 气旋 反气旋 锋面气旋 台风 寒潮", img: "img/gw-weather.jpg", added: "2026-10-21 20:35" },
+        { slug: "atmos",   name: "大气环流", en: "AtmosLab",   subject: "geo",     group: "大气与天气",       ch: 11,   desc: "从一杯热空气，到全球三圈环流。", tags: "热力环流 海陆风 气压带风带 季风", img: "img/gw-atmos.jpg", added: "2026-10-20" },
+        { slug: "land",    name: "地质地貌", en: "LandLab",    subject: "geo",     group: "地表形态",       ch: 9,    desc: "板块、褶皱、河流、沙丘、溶洞，在石膏沙盘上看地表怎样被塑造。", tags: "圈层结构 地震波 板块构造 岩石循环 背斜 向斜 断层 V形谷 曲流 冲积扇 三角洲 新月形沙丘 雅丹 喀斯特 溶洞 海蚀 海积", img: "img/gw-land.jpg", added: "2026-10-21 21:10" },
+        { slug: "contour", name: "等高线",   en: "ContourLab", subject: "geo",     group: "地表形态",       ch: 10,   desc: "把平面上的线，堆成一座山。", tags: "山脊山谷 鞍部陡崖 坡度 剖面图", img: "img/gw-contour.jpg", added: "2026-10-20" },
+        { slug: "water",   name: "水循环",   en: "WaterLab",   subject: "geo",     group: "水与地表",       ch: 11,   desc: "一滴水的旅程，也是一道综合题的思路。", tags: "海陆间循环 下渗径流 海绵城市 水量平衡", img: "img/gw-water.jpg", added: "2026-10-20" },
+        { slug: "earth",   name: "地球运动", en: "EarthLab",   subject: "geo",     group: "宇宙中的地球",       ch: 9,    desc: "晨昏线、直射点、昼夜长短，一条时间轴全部串起来。", tags: "自转 公转 正午太阳高度 四季", img: "img/gw-earth.jpg", added: "2026-10-20" },
+        { slug: "seq",     name: "数列",     en: "SeqLab",     subject: "math",    group: "数列与概率",     ch: 11, desc: "一块骨牌推倒下一块，数列就这样走向它的极限。", tags: "等差等比 蛛网图 构造通项 裂项相消 放缩 数学归纳法", img: "img/gw-seq.jpg", added: "2026-10-21" },
+        { slug: "prob",    name: "概率统计", en: "ProbLab",    subject: "math",    group: "数列与概率",     ch: 12, desc: "一千个小球落下来，你会亲眼看见正态分布。", tags: "条件概率 二项分布 正态分布 线性回归 独立性检验", img: "img/gw-prob.jpg", added: "2026-10-21" },
+        { slug: "pro",     name: "压轴专题", en: "ProLab",     subject: "math",    group: "压轴专题",       ch: 9, desc: "ω 范围、翻折动点、概率递推、新定义，难题拆开来看。", tags: "ω取值范围 整体换元 翻折 动点最值 概率递推 二项分布 新定义 第19题 抽象函数 周期", img: "img/gw-pro.jpg", added: "2026-10-21 18:30" },
         { slug: "basic",   name: "集合与函数性质", en: "BasicLab",   subject: "math",    group: "函数与导数",     ch: 9, desc: "高中数学的第一块地基，每一条规则都能拖出来看。", tags: "集合运算 充要条件 基本不等式 二次不等式 奇偶单调 对称周期 比较大小", img: "img/gw-basic.jpg", added: "2026-10-21" },
-        { slug: "func",    name: "函数图像", en: "FuncLab",    subject: "math",    group: "函数与导数",     ch: 8,    desc: "平移、伸缩、翻折，一拖就懂。", tags: "图像变换 指对函数 三角函数 导数 零点 定积分", img: "img/gw-func.jpg", added: "2026-10-20" },
         { slug: "deriv",   name: "导数",     en: "DerivLab",   subject: "math",    group: "函数与导数",     ch: 11, desc: "割线一转成了切线，压轴题的路也就看清了。", tags: "切线 含参单调 零点与恒成立 切线放缩 极值点偏移 同构", img: "img/gw-deriv.jpg", added: "2026-10-21" },
+        { slug: "func",    name: "函数图像", en: "FuncLab",    subject: "math",    group: "函数与导数",     ch: 8,    desc: "平移、伸缩、翻折，一拖就懂。", tags: "图像变换 指对函数 三角函数 导数 零点 定积分", img: "img/gw-func.jpg", added: "2026-10-20" },
         { slug: "trig",    name: "三角与解三角形", en: "TrigLab",    subject: "math",    group: "三角·向量·复数", ch: 9, desc: "一个圆、一个三角形，公式自己长出来。", tags: "和差与二倍角 辅助角 正弦定理 余弦定理 解的个数 面积最值", img: "img/gw-trig.jpg", added: "2026-10-21" },
         { slug: "vec",     name: "平面向量", en: "VecLab",     subject: "math",    group: "三角·向量·复数", ch: 9, desc: "箭头一拖，加减乘除都成了看得见的几何。", tags: "基本定理 数量积与投影 极化恒等式 等和线 三角形四心", img: "img/gw-vec.jpg", added: "2026-10-21" },
         { slug: "cplx",    name: "复数",     en: "ComplexLab",    subject: "math",    group: "三角·向量·复数", ch: 7, desc: "乘一个 i，就是转九十度。", tags: "复平面与模 加减即向量 乘法即旋转 共轭与除法 单位根", img: "img/gw-cplx.jpg", added: "2026-10-21" },
         { slug: "line",    name: "直线与圆", en: "LineLab",    subject: "math",    group: "解析几何",       ch: 9, desc: "圆心到直线的距离，一把尺子量清所有关系。", tags: "斜率 直线方程 距离与对称 弦长 两圆关系 阿氏圆 切线最值", img: "img/gw-line.jpg", added: "2026-10-21" },
-        { slug: "conic",   name: "圆锥曲线", en: "ConicLab",   subject: "math",    group: "解析几何",       ch: 8,    desc: "一刀切下去，椭圆、双曲线、抛物线都在这里。", tags: "截线 Dandelin 双球 离心率 光学性质", img: "img/gw-conic.jpg", added: "2026-10-20" },
         { slug: "cpro",    name: "解析几何进阶", en: "ConicPro",   subject: "math",    group: "解析几何",       ch: 9, desc: "设而不求、定点定值、面积范围，大题套路一步步拖出来。", tags: "韦达 弦长 点差法 定点 定值 最值范围 焦点弦 非对称韦达", img: "img/gw-cpro.jpg", added: "2026-10-21 18:10" },
-        { slug: "geo",     name: "立体几何", en: "GeoSpace",     subject: "math",    group: "立体几何",       ch: 9,    desc: "把空间想象力，交给可以旋转的模型。", tags: "三视图 截面 空间角 空间向量 外接球", img: "img/gw-geo.jpg", added: "2026-10-20" },
-        { slug: "seq",     name: "数列",     en: "SeqLab",     subject: "math",    group: "数列与概率",     ch: 11, desc: "一块骨牌推倒下一块，数列就这样走向它的极限。", tags: "等差等比 蛛网图 构造通项 裂项相消 放缩 数学归纳法", img: "img/gw-seq.jpg", added: "2026-10-21" },
-        { slug: "prob",    name: "概率统计", en: "ProbLab",    subject: "math",    group: "数列与概率",     ch: 12, desc: "一千个小球落下来，你会亲眼看见正态分布。", tags: "条件概率 二项分布 正态分布 线性回归 独立性检验", img: "img/gw-prob.jpg", added: "2026-10-21" },
-        { slug: "pro",     name: "压轴专题", en: "ProLab",     subject: "math",    group: "压轴专题",       ch: 9, desc: "ω 范围、翻折动点、概率递推、新定义，难题拆开来看。", tags: "ω取值范围 整体换元 翻折 动点最值 概率递推 二项分布 新定义 第19题 抽象函数 周期", img: "img/gw-pro.jpg", added: "2026-10-21 18:30" },
-        { slug: "earth",   name: "地球运动", en: "EarthLab",   subject: "geo",     group: "自然地理",       ch: 9,    desc: "晨昏线、直射点、昼夜长短，一条时间轴全部串起来。", tags: "自转 公转 正午太阳高度 四季", img: "img/gw-earth.jpg", added: "2026-10-20" },
-        { slug: "atmos",   name: "大气环流", en: "AtmosLab",   subject: "geo",     group: "自然地理",       ch: 11,   desc: "从一杯热空气，到全球三圈环流。", tags: "热力环流 海陆风 气压带风带 季风", img: "img/gw-atmos.jpg", added: "2026-10-20" },
-        { slug: "water",   name: "水循环",   en: "WaterLab",   subject: "geo",     group: "自然地理",       ch: 11,   desc: "一滴水的旅程，也是一道综合题的思路。", tags: "海陆间循环 下渗径流 海绵城市 水量平衡", img: "img/gw-water.jpg", added: "2026-10-20" },
-        { slug: "contour", name: "等高线",   en: "ContourLab", subject: "geo",     group: "自然地理",       ch: 10,   desc: "把平面上的线，堆成一座山。", tags: "山脊山谷 鞍部陡崖 坡度 剖面图", img: "img/gw-contour.jpg", added: "2026-10-20" },
-        { slug: "weather", name: "天气系统", en: "WeatherLab", subject: "geo",     group: "自然地理",       ch: 9,    desc: "冷锋、暖锋、梅雨、台风，在三维沙盘里看天气怎样变。", tags: "大气受热过程 等压线 冷锋 暖锋 准静止锋 梅雨 气旋 反气旋 锋面气旋 台风 寒潮", img: "img/gw-weather.jpg", added: "2026-10-21 20:35" },
-        { slug: "land",    name: "地质地貌", en: "LandLab",    subject: "geo",     group: "自然地理",       ch: 9,    desc: "板块、褶皱、河流、沙丘、溶洞，在石膏沙盘上看地表怎样被塑造。", tags: "圈层结构 地震波 板块构造 岩石循环 背斜 向斜 断层 V形谷 曲流 冲积扇 三角洲 新月形沙丘 雅丹 喀斯特 溶洞 海蚀 海积", img: "img/gw-land.jpg", added: "2026-10-21 21:10" },
-        { slug: "atlas",   name: "疆域变迁", en: "AtlasLab",   subject: "history", group: "时空与战役",     ch: 17,   desc: "从秦到清，十六个时期的疆域，一条时间轴滑过去。", tags: "边疆机构 大运河 长城 随堂检测", img: "img/gw-atlas.jpg", added: "2026-10-20" },
-        { slug: "war",     name: "战役沙盘", en: "WarLab",     subject: "history", group: "时空与战役",     ch: 10,   desc: "长平、官渡、赤壁、淝水……在三维沙盘上重新推演胜负。", tags: "中外 9 场战役 兵力部署 关键转折", img: "img/gw-war.jpg", added: "2026-10-20" },
-        { slug: "zhidu",   name: "制度变迁", en: "ZhiduLab",   subject: "history", group: "古代政治制度",   ch: 9, desc: "从三公九卿到军机处，一张权力结构图看懂两千年。", tags: "皇帝制度 郡县制 推恩令 中外朝 三省六部 科举 二府三司 行省 内阁 军机处 改土归流", img: "img/gw-zhidu.jpg", added: "2026-10-21 19:40" },
-        { slug: "jindai",  name: "近代中国", en: "ModernLab",  subject: "history", group: "中国近代史",     ch: 10, desc: "从虎门销烟到抗战胜利，条约、路线、战场都落在地图上。", tags: "鸦片战争 南京条约 太平天国 洋务运动 甲午 马关条约 辛丑条约 辛亥革命 五四 中共一大 嘉兴南湖 北伐 抗日战争", img: "img/gw-jindai.jpg", added: "2026-10-21 19:40" }
+        { slug: "conic",   name: "圆锥曲线", en: "ConicLab",   subject: "math",    group: "解析几何",       ch: 8,    desc: "一刀切下去，椭圆、双曲线、抛物线都在这里。", tags: "截线 Dandelin 双球 离心率 光学性质", img: "img/gw-conic.jpg", added: "2026-10-20" },
+        { slug: "geo",     name: "立体几何", en: "GeoSpace",     subject: "math",    group: "立体几何",       ch: 9,    desc: "把空间想象力，交给可以旋转的模型。", tags: "三视图 截面 空间角 空间向量 外接球", img: "img/gw-geo.jpg", added: "2026-10-20" }
       ];
 
       var SUBJECTS = [
-        { id: "math", name: "数学", tag: "MATHEMATICS · 人教A版", line: "让抽象，有形状。" },
-        { id: "geo", name: "地理", tag: "GEOGRAPHY · 湘教版", line: "地球怎么转，风从哪里来。" },
-        { id: "history", name: "历史", tag: "HISTORY · 统编版", line: "时间，有了地图。" }
+        { id: "history", name: "历史", tag: "HISTORY · 统编版", line: "制度、条约、疆域，都能摆在眼前。" },
+        { id: "geo", name: "地理", tag: "GEOGRAPHY · 湘教版", line: "天气怎么变，地表怎样被塑造。" },
+        { id: "math", name: "数学", tag: "MATHEMATICS · 人教A版", line: "让抽象，有形状。" }
       ];
 
       (function () {
-        var FILTERS = ["all", "math", "geo", "history"];
+        var FILTERS = ["all", "history", "geo", "math"];
         var state = { f: "all", q: "" };
         var listEl = document.getElementById("list");
         var emptyEl = document.getElementById("empty");
