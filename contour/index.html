@@ -250,7 +250,91 @@
         *, *::before, *::after { transition: none !important; animation: none !important; }
       }
     </style>
-  </head>
+    <style>
+      /* ====== 手机 / 平板布局（≤1023px）：顶栏 + 画布 + 内容区 + 翻章栏；桌面不受影响 ====== */
+      [hidden] { display: none !important; }
+      .x-chap, .x-mc, .x-pn { display: none; }
+      @media (max-width: 1023px) {
+        html, body { overflow: hidden; }
+        .app { display: flex; flex-direction: column; height: 100%; height: 100dvh; }
+        /* 顶栏：‹ · 实验名 · 章节 */
+        .top { flex: none; display: grid; grid-template-columns: 104px minmax(0, 1fr) 104px; align-items: center; gap: 4px; height: calc(52px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) max(6px, env(safe-area-inset-right)) 0 max(6px, env(safe-area-inset-left)); }
+        .brand { display: contents; }
+        .x-back { grid-column: 1; justify-self: start; justify-content: center; width: 44px; min-width: 44px; height: 44px; padding: 0; }
+        .x-back span:first-child { font-size: 30px; margin-top: -3px; }
+        .x-back__t, .x-sep, .prog, .tools { display: none !important; }
+        .x-name { grid-column: 2; justify-self: center; text-align: center; overflow: visible; text-overflow: clip; white-space: nowrap; font: 600 clamp(14px, 4.6vw, 17px)/1.2 var(--sans); letter-spacing: -0.01em; }
+        .x-chap { grid-column: 3; justify-self: end; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: var(--pill); background: var(--chip); color: var(--ink); font: 500 14px/1 var(--sans); white-space: nowrap; }
+        .x-chap:active { background: var(--chip-hover); }
+        .x-chap__n { font: 400 13px/1 var(--mono); color: var(--ink2); }
+        /* 主体：画布在上，内容在下 */
+        .body, .x-toc-off .body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+        .chaps, .x-toc-off .chaps { display: none !important; }
+        .stage { flex: none; height: 52vh; height: 52svh; }
+        .lab { font-size: 13px; }
+        .x-mc { display: flex; flex-direction: column; gap: 14px; flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; border-top: 0.5px solid var(--line); padding: 20px max(16px, env(safe-area-inset-right), calc(50% - 340px)) calc(92px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left), calc(50% - 340px)); }
+        .x-mc > *, .x-mc .float > *, .x-mc .float__body > *, .x-mc #panel-body > * { flex: none; min-width: 0; }
+        /* 讲解：不再浮在画布上 */
+        .x-mc .float, .x-mc .float__body, .x-mc .float.min .float__body { display: contents !important; }
+        .x-mc .fold { display: none; }
+        .x-mc #f-title { order: 1; margin: 0; padding: 0; font: 600 20px/1.35 var(--sans); letter-spacing: -0.02em; }
+        .x-mc .float__body p { order: 2; margin: 0; font-size: 16px; line-height: 1.7; color: var(--ink); }
+        .x-mc .float__body p.float__src { order: 7; padding: 14px 16px; border-radius: var(--r); background: var(--panel); box-shadow: 0 0 0 0.5px var(--line); font: 400 13px/1.6 var(--mono) !important; color: var(--acc2) !important; }
+        /* 视角与工具 */
+        .x-mtools { order: 3; display: flex; flex-wrap: wrap; gap: 8px; }
+        .x-mc .dock { position: static; flex: 1 1 100%; display: flex; flex-wrap: nowrap; max-width: none; padding: 3px; background: var(--chip); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+        .x-mc .dock button { flex: 1 1 auto; min-height: 44px; padding: 0 8px; font-size: 14px; white-space: nowrap; }
+        .x-mc .dock button:hover { background: transparent; }
+        .x-mc .dock button[aria-pressed="true"] { background: var(--acc-fill); color: #fff; }
+        .x-tool { flex: 1 1 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: var(--pill); background: var(--chip); color: var(--ink); font-size: 14px; }
+        .x-tool:active { background: var(--chip-hover); }
+        .x-ico-sun { display: none; }
+        :root[data-skin="night"] .x-ico-sun { display: block; }
+        :root[data-skin="night"] .x-ico-moon { display: none; }
+        .x-mc .readout { order: 4; position: static; width: auto; font: 400 13px/1.6 var(--mono); padding: 10px 14px; box-shadow: 0 0 0 0.5px var(--line); }
+        /* 原控制面板：直接排进内容区 */
+        .x-mc .panel, .x-mc #panel-body { display: contents; }
+        .x-mc .drawer__grab { display: none; }
+        .x-mc #panel-body > * { order: 6; }
+        .x-mc #panel-body > [data-x="key"] { order: 8; }
+        .x-mc #panel-body > [data-x="quiz"] { order: 9; }
+        .x-mc .card { padding: 16px; box-shadow: 0 0 0 0.5px var(--line); }
+        .x-mc .ttl, .x-mc .legend, .x-mc .val { font-size: 13px; }
+        .x-mc .note { font-size: 14px; }
+        .x-mc .row { min-height: 48px; }
+        .x-mc .row label { flex: 1; min-width: 0; }
+        .x-mc .row label:has(.val) { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .x-mc input[type="range"] { display: block; width: 100%; }
+        .x-mc .x-btns > .x-btn { flex: 1 1 auto; }
+        .x-mc svg text { font-size: 13px; }
+        .x-mc [style*="12px"] { font-size: 13px !important; }
+        /* 底部翻章栏 */
+        .x-pn { position: fixed; left: 0; right: 0; bottom: 0; z-index: 7; display: flex; gap: 10px; padding: 10px max(16px, env(safe-area-inset-right), calc(50% - 340px)) calc(10px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left), calc(50% - 340px)); background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-top: 0.5px solid var(--line); }
+        .x-pn button { flex: 1; min-height: 48px; border-radius: var(--pill); font: 500 16px/1 var(--sans); }
+        .x-pn__prev { background: var(--chip); color: var(--ink); }
+        .x-pn__next { background: var(--acc-fill); color: #fff; }
+        .x-pn button span { font-size: 20px; vertical-align: -1px; }
+        .x-pn button:active { transform: scale(0.97); }
+        .x-pn button:disabled { opacity: 0.4; cursor: default; transform: none; }
+        /* 章节列表 sheet */
+        .x-sheet { position: fixed; inset: 0; z-index: 20; }
+        .x-sheet__bg { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.36); animation: x-fade var(--dur) var(--ease); }
+        .x-sheet__panel { position: absolute; left: 0; right: 0; bottom: 0; max-width: 600px; margin: 0 auto; max-height: 70vh; max-height: 70dvh; display: flex; flex-direction: column; background: var(--panel); border-radius: 20px 20px 0 0; box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18); padding-bottom: env(safe-area-inset-bottom); animation: x-up var(--dur) var(--ease); }
+        .x-sheet__head { position: relative; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 14px 8px 4px 20px; }
+        .x-sheet__head::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 5px; margin-left: -18px; border-radius: var(--pill); background: var(--track); }
+        .x-sheet__head h2 { margin: 0; font: 600 17px/1.3 var(--sans); }
+        .x-sheet__done { min-height: 44px; min-width: 44px; padding: 0 12px; border-radius: var(--pill); color: var(--acc-ink); font: 500 16px/1 var(--sans); }
+        .x-sheet__list { overflow-y: auto; overscroll-behavior: contain; padding: 4px 12px 16px max(12px, env(safe-area-inset-left)); }
+        .x-sheet__item { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 52px; padding: 8px 12px; border-radius: 12px; text-align: left; color: var(--ink); font: 400 16px/1.4 var(--sans); }
+        .x-sheet__item b { flex: none; width: 24px; font: 400 13px var(--mono); color: var(--ink2); }
+        .x-sheet__item:active { background: var(--chip); }
+        .x-sheet__item.is-on { background: var(--acc-soft); color: var(--acc-ink); font-weight: 600; }
+        .x-sheet__item.is-on b { color: var(--acc-ink); }
+        @keyframes x-up { from { transform: translateY(100%); } to { transform: none; } }
+        @keyframes x-fade { from { opacity: 0; } to { opacity: 1; } }
+      }
+    </style>
+  <style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
   <body>
     <div class="app">
       <header class="top">
@@ -263,6 +347,7 @@
           <button class="tbtn" id="reset" aria-label="重置视角">R</button>
           <button class="tbtn" id="full" aria-label="全屏">F</button>
         </div>
+        <button class="x-chap" id="x-chap" aria-haspopup="dialog" aria-controls="x-sheet" aria-expanded="false"><span>章节</span><span class="x-chap__n" id="x-chap-n">01/10</span></button>
       </header>
       <div class="body">
         <nav class="chaps" id="chaps" aria-label="章节"></nav>
@@ -281,10 +366,27 @@
             <button id="spin" aria-pressed="false">自动旋转</button>
           </div>
         </div>
+        <div class="x-mc" id="x-mc">
+          <div class="x-mtools" id="x-mtools">
+            <button class="x-tool" id="x-reset"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4.5 10a5.5 5.5 0 1 0 1.7-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M5.6 2.8v3.6h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>重置视角</span></button>
+            <button class="x-tool" id="x-theme"><svg class="x-ico-moon" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><svg class="x-ico-sun" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="10" r="3.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span id="x-theme-t">深色</span></button>
+          </div>
+        </div>
         <aside class="panel" id="panel">
           <button class="drawer__grab" id="grab">控制面板 ▲</button>
           <div id="panel-body"></div>
         </aside>
+      </div>
+    </div>
+    <nav class="x-pn" id="x-pn" aria-label="翻章">
+      <button class="x-pn__prev" id="x-prev"><span aria-hidden="true">‹</span> 上一章</button>
+      <button class="x-pn__next" id="x-next">下一章 <span aria-hidden="true">›</span></button>
+    </nav>
+    <div class="x-sheet" id="x-sheet" hidden>
+      <button class="x-sheet__bg" id="x-sheet-bg" aria-label="关闭章节列表" tabindex="-1"></button>
+      <div class="x-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="x-sheet-t">
+        <div class="x-sheet__head"><h2 id="x-sheet-t">章节</h2><button class="x-sheet__done" id="x-sheet-done">完成</button></div>
+        <div class="x-sheet__list" id="x-sheet-list"></div>
       </div>
     </div>
     <script src="hark.js"></script>
@@ -299,7 +401,7 @@
         });
       })();
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="../vendor/three@0.128.0/three.min.js"></script>
     <script>
       /* ---------- 内容：10 章讲解（取自 contour.txt） ---------- */
       const CH = [
@@ -2114,6 +2216,73 @@
           },
         };
         if (cur === 9) go(9);
+      })();
+    </script>
+    <script>
+      /* ---------- 手机 / 平板外壳（≤1023px，仅布局与导航，不改章节逻辑） ---------- */
+      (function () {
+        const mq = matchMedia("(max-width: 1023px)");
+        const mc = el("x-mc"), tools = el("x-mtools"), sheet = el("x-sheet"), list = el("x-sheet-list"), chapBtn = el("x-chap");
+        const MOVE = ["float", "readout", "dock", "panel"].map((id) => {
+          const n = el(id), c = document.createComment(" " + id + " ");
+          n.parentNode.insertBefore(c, n); return { n: n, c: c };
+        });
+        function layout() {
+          const m = mq.matches;
+          MOVE.forEach((o) => {
+            if (m) { if (o.n.id === "dock") tools.insertBefore(o.n, tools.firstChild); else mc.appendChild(o.n); }
+            else o.c.parentNode.insertBefore(o.n, o.c.nextSibling);
+          });
+          if (!m) closeSheet(false);
+          window.dispatchEvent(new Event("resize"));
+        }
+        /* 章节列表 */
+        CH.forEach((c, i) => {
+          const b = document.createElement("button");
+          b.className = "x-sheet__item"; b.innerHTML = "<b>" + String(i + 1).padStart(2, "0") + "</b><span>" + c.t + "</span>";
+          b.onclick = () => { closeSheet(true); go(i); };
+          list.appendChild(b);
+        });
+        function openSheet() {
+          sheet.hidden = false; chapBtn.setAttribute("aria-expanded", "true");
+          const on = list.children[cur]; if (on) { on.scrollIntoView({ block: "nearest" }); on.focus({ preventScroll: true }); }
+        }
+        function closeSheet(focus) {
+          if (sheet.hidden) return;
+          sheet.hidden = true; chapBtn.setAttribute("aria-expanded", "false");
+          if (focus) chapBtn.focus({ preventScroll: true });
+        }
+        chapBtn.onclick = openSheet;
+        el("x-sheet-bg").onclick = () => closeSheet(true);
+        el("x-sheet-done").onclick = () => closeSheet(true);
+        document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(true); }, true);
+        /* 翻章、工具 */
+        el("x-prev").onclick = () => go(cur - 1);
+        el("x-next").onclick = () => go(cur + 1);
+        el("x-reset").onclick = () => el("reset").click();
+        el("x-theme").onclick = () => { el("theme").click(); themeLabel(); };
+        function themeLabel() { el("x-theme-t").textContent = document.documentElement.dataset.skin === "night" ? "浅色" : "深色"; }
+        /* 每次切章后同步 */
+        let last = -1;
+        function sync() {
+          const n = CH.length;
+          el("x-chap-n").textContent = String(cur + 1).padStart(2, "0") + "/" + String(n).padStart(2, "0");
+          chapBtn.setAttribute("aria-label", "章节，第 " + (cur + 1) + " 章，共 " + n + " 章");
+          [].forEach.call(list.children, (b, k) => { b.classList.toggle("is-on", k === cur); if (k === cur) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); });
+          el("x-prev").disabled = cur === 0; el("x-next").disabled = cur === n - 1;
+          if (cur !== last) { mc.scrollTop = 0; last = cur; }
+        }
+        function tag() {
+          [].forEach.call(el("panel-body").children, (c) => {
+            const h = c.querySelector("h3");
+            if (c.id === "c10-sc" || c.querySelector("#c10-q")) c.dataset.x = "quiz";
+            else if (h && h.textContent.trim() === "要点") c.dataset.x = "key";
+          });
+        }
+        new MutationObserver(sync).observe(el("count"), { childList: true, characterData: true, subtree: true });
+        new MutationObserver(tag).observe(el("panel-body"), { childList: true });
+        if (mq.addEventListener) mq.addEventListener("change", layout); else mq.addListener(layout);
+        themeLabel(); tag(); sync(); layout();
       })();
     </script>
   </body>
