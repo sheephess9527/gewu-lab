@@ -1,0 +1,1439 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>格物实验室 集合与函数性质</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--acc:#0071e3;--accSoft:#e8f1fc;--accDeep:#0058b0;--sec:#f5f5f7;--onAcc:#fff;--glass:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.04);
+--font:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--acc:#2997ff;--accSoft:rgba(41,151,255,.18);--accDeep:#6cb6ff;--sec:#2c2c2e;--onAcc:#000;--glass:rgba(0,0,0,.72);--shadow:0 2px 12px rgba(0,0,0,.5)}
+[hidden]{display:none!important}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--fg);font:15px/1.6 var(--font);-webkit-text-size-adjust:100%;overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+a{color:var(--acc);text-decoration:none}
+.mono{font-family:var(--mono)}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 16px;border-radius:999px;background:var(--sec);font-size:14px;font-weight:500;white-space:nowrap}
+.pill.primary{background:var(--acc);color:var(--onAcc)}
+.pill:disabled{opacity:.4;cursor:default}
+.pill:focus-visible,.toc button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{display:inline-flex;align-items:center;min-height:44px;font-size:15px;white-space:nowrap}
+.ttl{flex:1;min-width:0;font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttl small{color:var(--sub);font-weight:400;font-size:13px;margin-left:6px}
+.prog{display:flex;align-items:center;gap:4px}
+.prog i{width:18px;height:4px;border-radius:2px;background:var(--line)}
+.prog i.on{background:var(--acc)}
+.cnt{font-family:var(--mono);font-size:13px;color:var(--sub);margin-left:6px}
+.acts{display:flex;gap:8px}
+/* layout */
+.main{display:grid;grid-template-columns:220px minmax(0,1fr) 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);padding:16px 10px;overflow:auto}
+.toc button{display:flex;width:100%;gap:10px;align-items:center;text-align:left;padding:9px 12px;border-radius:12px;font-size:14px;min-height:40px}
+.toc button:hover{background:var(--sec)}
+.toc button.on{background:var(--accSoft);color:var(--accDeep);font-weight:600}
+.toc .mono{font-size:13px;opacity:.75}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.explain{flex:none;padding:16px 20px}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h1{flex:1;font-size:20px;min-width:0}
+.book{color:var(--sub);font-size:13px;margin-top:2px}
+.etext{margin-top:6px;max-height:4.8em;overflow:auto;color:var(--fg)}
+.explain.folded .etext,.explain.folded .book{display:none}
+.fold{font-size:13px;color:var(--sub);min-height:32px;padding:0 10px;border-radius:999px;background:var(--sec)}
+.cwrap{flex:1;min-height:0;position:relative;overflow:hidden}
+canvas{display:block;width:100%;height:100%;touch-action:none;border-radius:22px}
+.panel{border-left:1px solid var(--line);padding:16px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.box{padding:16px}
+.box h3{font-size:13px;color:var(--sub);font-weight:600;margin-bottom:8px;letter-spacing:0}
+.ctrl{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}
+.row b{font-family:var(--mono);font-weight:500}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips .pill.on{background:var(--acc);color:var(--onAcc)}
+.sw{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.sw.on{background:#34c759}.sw.on::after{transform:translateX(18px)}
+.read{display:grid;gap:6px;font-size:14px}
+.read .row b{font-size:15px}
+.pts{padding-left:18px;font-size:14px;display:grid;gap:4px}
+.muted{color:var(--sub);font-size:14px}
+.mdark,.mbar,.chbtn,.sheetbg{display:none}
+/* tablet + phone */
+@media (max-width:1023px){
+  .main{display:block;height:auto}
+  .toc{display:none}
+  .prog{display:none}
+  .chbtn{display:inline-flex}
+  .stage{padding:12px 16px 0}
+  .cwrap{order:-1;flex:none;height:56vh}
+  .etext{max-height:none}
+  .fold{display:none}
+  .explain.folded .etext,.explain.folded .book{display:block}
+  .panel{border:0;padding:12px 16px 24px}
+  .sheetbg{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.32);display:flex;align-items:flex-end}
+  .sheetbg[hidden]{display:none!important}
+  .sheet{width:100%;max-height:70vh;overflow:auto;background:var(--card);border-radius:20px 20px 0 0;padding:8px 12px calc(16px + env(safe-area-inset-bottom))}
+  .sheet .grip{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 8px}
+  .sheet button{min-height:48px}
+}
+@media (max-width:767px){
+  .top{height:52px;padding:0 6px;gap:4px;padding-top:env(safe-area-inset-top)}
+  .back{width:44px;height:44px;justify-content:center;font-size:24px}
+  .back span,.ttl small,.acts,.cnt{display:none}
+  .ttl{font-size:16px}
+  .chbtn{min-height:44px;min-width:44px;font-family:var(--mono);font-size:13px}
+  .cwrap{height:52vh;border-radius:18px}
+  canvas{border-radius:18px}
+  .ehead h1{font-size:20px}
+  .etext{font-size:16px;line-height:1.7}
+  .explain{padding:16px}
+  .pill{min-height:44px}
+  .ctrl .row{min-height:44px}
+  .mdark{display:inline-flex;align-self:flex-start}
+  .panel{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+  .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;gap:10px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+  .mbar .pill{flex:1;min-height:44px}
+}
+@media (min-width:1024px){html,body{height:100%;overflow:hidden}}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../" aria-label="返回格物实验室">‹<span>&nbsp;格物实验室</span></a>
+  <div class="ttl">集合与函数性质 · BasicLab<small>格物实验室</small></div>
+  <div class="prog" id="prog" aria-hidden="true"></div>
+  <span class="cnt" id="cnt">01 / 09</span>
+  <button class="pill chbtn" id="chbtn" aria-label="打开章节列表">章节 01/09</button>
+  <div class="acts">
+    <button class="pill" id="prev">上一章</button>
+    <button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button>
+    <button class="pill" id="fs">全屏</button>
+  </div>
+</header>
+<div class="main">
+  <nav class="toc" id="toc" aria-label="章节目录"></nav>
+  <div class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h1 id="etitle">集合与韦恩图</h1><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="ebook"></p>
+      <div class="etext" id="etext"></div>
+    </section>
+    <div class="card cwrap" id="cwrap"><canvas id="cv" aria-label="实验画布"></canvas></div>
+  </div>
+  <aside class="panel">
+    <div class="card box" id="ctrlBox"><h3>控件</h3><div class="ctrl" id="ctrl"></div></div>
+    <div class="card box" id="readBox"><h3>读数</h3><div class="read" id="read"></div></div>
+    <div class="card box"><h3>要点</h3><ul class="pts" id="pts"></ul></div>
+    <div class="card box" id="gkBox"><h3>高考链接</h3><div class="muted" id="gk"></div></div>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mbar"><button class="pill" id="mprev">上一章</button><button class="pill primary" id="mnext">下一章</button></div>
+<div class="sheetbg" id="sheetbg" hidden><div class="sheet toc" id="sheet" role="dialog" aria-label="章节列表"><div class="grip"></div></div></div>
+<script>
+"use strict";
+const B = "人教A版 必修第一册 · ";
+const CH = [
+  {n:"集合与韦恩图", book:B+"1.1–1.3 集合的概念、基本关系与基本运算", ready:false},
+  {n:"充分条件与必要条件", book:B+"1.4 充分条件与必要条件、1.5 全称量词与存在量词", ready:false},
+  {n:"基本不等式", book:B+"2.2 基本不等式", ready:false},
+  {n:"二次函数与一元二次不等式", book:B+"2.3 二次函数与一元二次方程、不等式", ready:false},
+  {n:"函数的概念与分段函数", book:B+"3.1 函数的概念及其表示", ready:false},
+  {n:"单调性与奇偶性", book:B+"3.2 函数的基本性质", ready:false},
+  {n:"对称性与周期性", book:B+"3.2 · 高考拓展", ready:false},
+  {n:"比较大小", book:B+"4.2–4.4 指数函数、对数函数 · 高考拓展", ready:false},
+  {n:"随堂检测", book:B+"第一至四章", ready:false}
+];
+const MODS = new Array(CH.length).fill(null);
+CH[0].ready = true;
+MODS[0] = (() => {
+  const S = {mode:"venn", op:0, dm:false, A:{x:.38, y:.52}, B:{x:.62, y:.52}, boxes:[], drag:null,
+    a1:-3, a2:2, b1:0, b2:4, oa1:false, oa2:true, ob1:true, ob2:false, lop:"i", pa:2, pc:0};
+  const U = [1,2,3,4,5,6,7,8,9,10], SA = new Set([1,2,3,4,5,6]), SB = new Set([4,5,6,7,8]);
+  const OPS = [["A∩B",(a,b)=>a&&b],["A∪B",(a,b)=>a||b],["∁ᵤA",a=>!a],["∁ᵤ(A∪B)",(a,b)=>!(a||b)],["A∩∁ᵤB",(a,b)=>a&&!b],["(∁ᵤA)∪(∁ᵤB)",(a,b)=>!a||!b]];
+  const DM = [["∁ᵤ(A∩B)",(a,b)=>!(a&&b)],["(∁ᵤA)∪(∁ᵤB)",(a,b)=>!a||!b]];
+  const pick = f => U.filter(n => f(SA.has(n), SB.has(n)));
+  const list = f => { const r = pick(f); return r.length ? "{" + r.join(", ") + "}" : "∅"; };
+  const FF = () => getComputedStyle(document.body).fontFamily;
+  const geo = bx => { const r = Math.min(bx.w * .26, bx.h * .36);
+    return {r, A:{x:bx.x + S.A.x * bx.w, y:bx.y + S.A.y * bx.h}, B:{x:bx.x + S.B.x * bx.w, y:bx.y + S.B.y * bx.h}}; };
+  function venn(c, bx, f, cap){
+    const t = theme(), g = geo(bx), TAU = Math.PI * 2;
+    const path = (p, inv) => { const P = new Path2D(); if (inv) P.rect(bx.x, bx.y, bx.w, bx.h); P.moveTo(p.x + g.r, p.y); P.arc(p.x, p.y, g.r, 0, TAU); return P; };
+    c.save(); c.globalAlpha = .28; c.fillStyle = t.blue;
+    [[1,1],[1,0],[0,1],[0,0]].forEach(([a, b]) => { if (!f(!!a, !!b)) return;
+      c.save(); c.clip(path(g.A, !a), "evenodd"); c.clip(path(g.B, !b), "evenodd"); c.fillRect(bx.x, bx.y, bx.w, bx.h); c.restore(); });
+    c.restore(); c.strokeStyle = t.fg; c.lineWidth = 1.5; c.strokeRect(bx.x, bx.y, bx.w, bx.h);
+    c.stroke(path(g.A)); c.stroke(path(g.B));
+    c.fillStyle = t.fg; c.font = "italic 600 15px " + FF(); c.textBaseline = "middle"; c.textAlign = "left";
+    c.fillText("U", bx.x + 10, bx.y + 16); c.textAlign = "center";
+    c.fillText("A", g.A.x - g.r * .72, g.A.y - g.r * .86); c.fillText("B", g.B.x + g.r * .72, g.B.y - g.r * .86);
+    if (cap){ c.font = "600 14px " + FF(); c.fillStyle = t.blue; c.fillText(cap + " = " + list(f), bx.x + bx.w / 2, bx.y - 14); }
+    const dx = g.B.x - g.A.x, dy = g.B.y - g.A.y, d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d, px = -uy, py = ux;
+    const h = Math.sqrt(Math.max(0, g.r * g.r - d * d / 4)), mx = (g.A.x + g.B.x) / 2, my = (g.A.y + g.B.y) / 2;
+    const at = (o, u, p) => [o.x + ux * u + px * p, o.y + uy * u + py * p], r = g.r;
+    const pos = {1:at(g.A, -.5*r, .38*r), 2:at(g.A, -.66*r, 0), 3:at(g.A, -.5*r, -.38*r), 4:[mx - px*h*.5, my - py*h*.5], 5:[mx, my], 6:[mx + px*h*.5, my + py*h*.5],
+      7:at(g.B, .5*r, .26*r), 8:at(g.B, .5*r, -.26*r), 9:[bx.x + 18, bx.y + bx.h - 16], 10:[bx.x + bx.w - 22, bx.y + bx.h - 16]};
+    U.forEach(n => { const on = f(SA.has(n), SB.has(n)); c.fillStyle = on ? t.blue : t.fg; c.font = (on ? "600 " : "") + "14px ui-monospace,Menlo,monospace"; c.fillText(n, pos[n][0], pos[n][1]); });
+  }
+  const iv = (a, b, oa, ob) => ({a, b, oa, ob}), emp = I => I.a > I.b || (I.a === I.b && (I.oa || I.ob));
+  function inter(I, J){
+    const lo = I.a > J.a ? [I.a, I.oa] : J.a > I.a ? [J.a, J.oa] : [I.a, I.oa || J.oa];
+    const hi = I.b < J.b ? [I.b, I.ob] : J.b < I.b ? [J.b, J.ob] : [I.b, I.ob || J.ob];
+    const R = iv(lo[0], hi[0], lo[1], hi[1]); return emp(I) || emp(J) || emp(R) ? [] : [R];
+  }
+  function union(I, J){
+    if (emp(I)) return emp(J) ? [] : [J]; if (emp(J)) return [I];
+    if (J.a < I.a) [I, J] = [J, I];
+    if (!(I.b > J.a || (I.b === J.a && !(I.ob && J.oa)))) return [I, J];
+    const oa = I.a < J.a ? I.oa : I.oa && J.oa, hi = I.b > J.b ? [I.b, I.ob] : J.b > I.b ? [J.b, J.ob] : [I.b, I.ob && J.ob];
+    return [iv(I.a, hi[0], oa, hi[1])];
+  }
+  const comp = I => emp(I) ? [iv(-Infinity, Infinity, true, true)] : [iv(-Infinity, I.a, true, !I.oa), iv(I.b, Infinity, !I.ob, true)];
+  const f = v => !isFinite(v) ? (v > 0 ? "+∞" : "−∞") : (v < 0 ? "−" : "") + Math.abs(v);
+  const toI = I => I.a === I.b ? "{" + f(I.a) + "}" : (I.oa ? "(" : "[") + f(I.a) + ", " + f(I.b) + (I.ob ? ")" : "]");
+  const toD = I => { if (!isFinite(I.a) && !isFinite(I.b)) return "x ∈ R"; if (I.a === I.b) return "x = " + f(I.a);
+    return (isFinite(I.a) ? f(I.a) + (I.oa ? " < " : " ≤ ") : "") + "x" + (isFinite(I.b) ? (I.ob ? " < " : " ≤ ") + f(I.b) : ""); };
+  const intvStr = L => L.length ? L.map(toI).join(" ∪ ") : "∅";
+  const descStr = L => L.length ? "{x | " + L.map(toD).join(" 或 ") + "}" : "∅";
+  const LOPS = {i:["A ∩ B", (A, B) => inter(A, B)], u:["A ∪ B", (A, B) => union(A, B)], c:["∁ʀA", A => comp(A)]};
+  const lineSets = () => { const A = iv(S.a1, S.a2, S.oa1, S.oa2), B = iv(S.b1, S.b2, S.ob1, S.ob2); return {A, B, R:LOPS[S.lop][1](A, B)}; };
+  const CONDS = [["B ⊆ A", a => a >= 1 && a <= 2, "1 ≤ a ≤ 2"], ["A ∩ B = ∅", a => a < 0 || a > 3, "a < 0 或 a > 3"], ["A ∩ B ≠ ∅", a => a >= 0 && a <= 3, "0 ≤ a ≤ 3"]];
+  const pa = () => Math.round(S.pa * 10) / 10;
+  const edgeNote = a => S.pc === 0 ? (a === 2 ? "a = 2 时 B = [2,3] 仍满足" : a === 1 ? "a = 1 时 B = [1,2] 仍满足" : "")
+    : a === 0 ? "a = 0 时 A∩B = {1} ≠ ∅" : a === 3 ? "a = 3 时 A∩B = {3} ≠ ∅" : "";
+  function upd(){
+    if (S.mode === "venn"){
+      if (S.dm) return readout([[DM[0][0], list(DM[0][1]), "blue"], [DM[1][0], list(DM[1][1]), "blue"], ["结论", "两区域完全相同", "gold"], ["同理", "∁ᵤ(A∪B) = (∁ᵤA)∩(∁ᵤB) = " + list(OPS[3][1])]]);
+      return readout([[OPS[S.op][0], list(OPS[S.op][1]), "blue"], ["A", "{1, 2, 3, 4, 5, 6}"], ["B", "{4, 5, 6, 7, 8}"], ["U", "{1, 2, …, 10}"]]);
+    }
+    if (S.mode === "line"){ const {A, B, R} = lineSets();
+      return readout([["A", emp(A) ? "∅" : toI(A), "blue"], ["B", emp(B) ? "∅" : toI(B), "red"], [LOPS[S.lop][0], intvStr(R), "gold"], ["描述法", descStr(R), "gold"]]); }
+    const a = pa(), C = CONDS[S.pc], ok = C[1](a);
+    readout([["a", f(a)], ["B", "[" + f(a) + ", " + f(Math.round((a + 1) * 10) / 10) + "]"], [C[0], ok ? "成立" : "不成立", ok ? "blue" : "red"], ["答案", C[2], "gold"],
+      ["端点", S.pc === 0 ? "a = 2 时 B = [2,3] 仍满足" : "a = 0 或 3 时有公共端点", "gold"]]);
+  }
+  let sub = null;
+  function build(){
+    sub.innerHTML = "";
+    if (S.mode === "venn"){
+      chips(sub, {label:"运算", value:S.op, options:OPS.map((o, i) => ({label:o[0], value:i})), onChange:v => { S.op = v; upd(); }});
+      toggle(sub, "德摩根律", S.dm, v => { S.dm = v; upd(); });
+    } else if (S.mode === "line"){
+      chips(sub, {label:"运算", value:S.lop, options:[{label:"∩", value:"i"}, {label:"∪", value:"u"}, {label:"∁<sub>R</sub>A", value:"c"}], onChange:v => { S.lop = v; upd(); }});
+      [["a1","oa1","a₁"],["a2","oa2","a₂"],["b1","ob1","b₁"],["b2","ob2","b₂"]].forEach(([k, o, n]) => {
+        slider(sub, {label:n, min:-5, max:5, step:.5, value:S[k], fmt:f, onInput:v => { S[k] = v; upd(); }});
+        toggle(sub, n + " 开（空心）", S[o], v => { S[o] = v; upd(); });
+      });
+    } else {
+      chips(sub, {label:"条件", value:S.pc, options:CONDS.map((c, i) => ({label:c[0], value:i})), onChange:v => { S.pc = v; upd(); }});
+      slider(sub, {label:"a", min:-2, max:5, step:.1, value:S.pa, fmt:v => f(Math.round(v * 10) / 10), onInput:v => { S.pa = v; upd(); }});
+    }
+    upd();
+  }
+  function label(c, nl, y, k, text, color){ c.fillStyle = color; c.font = "italic 600 13px " + FF(); c.textAlign = "right"; c.textBaseline = "middle"; c.fillText(text, nl.X(-99) < 0 ? 0 : 0, 0); }
+  function draw(c, w, h){
+    const t = theme(); c.textAlign = "center"; c.textBaseline = "middle";
+    if (S.mode === "venn"){
+      const pd = 24, top = 44;
+      if (!S.dm){ S.boxes = [{x:pd, y:top, w:w - 2 * pd, h:h - top - pd}]; venn(c, S.boxes[0], OPS[S.op][1], OPS[S.op][0]); return; }
+      const st = w < 560, bw = st ? w - 2 * pd : (w - 3 * pd) / 2, bh = st ? (h - 2 * top - 2 * pd) / 2 : h - top - pd;
+      S.boxes = [0, 1].map(i => st ? {x:pd, y:top + i * (bh + top), w:bw, h:bh} : {x:pd + i * (bw + pd), y:top, w:bw, h:bh});
+      S.boxes.forEach((b, i) => venn(c, b, DM[i][1], DM[i][0])); return;
+    }
+    const box = {x:52, y:h * .22, w:w - 76, h:Math.min(220, h * .5)}, base = box.y + box.h * .62, ly = k => base - 14 - k * 14;
+    const tag = (k, s, col) => { c.fillStyle = col; c.font = "italic 600 13px " + FF(); c.textAlign = "right"; c.fillText(s, box.x - 8, ly(k)); };
+    c.font = "600 16px " + FF(); c.textAlign = "center";
+    if (S.mode === "line"){ const {A, B, R} = lineSets(), xr = [-6, 6];
+      numberLine(c, box, xr, [emp(A) ? null : Object.assign({color:t.blue, openA:A.oa, openB:A.ob}, A), emp(B) ? null : Object.assign({color:t.red, openA:B.oa, openB:B.ob}, B)].map(x => x || {a:NaN, b:NaN, color:"transparent"}));
+      R.forEach(I => numberLine(c, box, xr, [, , {a:I.a, b:I.b, openA:I.oa, openB:I.ob, color:t.gold}]));
+      c.fillStyle = t.goldText; c.fillText(LOPS[S.lop][0] + " = " + intvStr(R), w / 2, box.y - 6);
+      tag(0, "A", t.blue); tag(1, "B", t.redText); tag(2, LOPS[S.lop][0].replace(/ /g, ""), t.goldText); return;
+    }
+    const a = pa(), C = CONDS[S.pc], ok = C[1](a), note = edgeNote(a);
+    numberLine(c, box, [-3, 7], [{a:1, b:3, color:t.gold}, {a:a, b:a + 1, color:ok ? t.blue : t.red}]);
+    c.fillStyle = ok ? t.blue : t.redText; c.fillText(C[0] + (ok ? " 成立" : " 不成立") + "（a = " + f(a) + "）", w / 2, box.y - 6);
+    tag(0, "A", t.goldText); tag(1, "B", ok ? t.blue : t.redText);
+    if (note){ c.fillStyle = t.goldText; c.font = "600 14px " + FF(); c.textAlign = "center"; c.fillText(note, w / 2, box.y + box.h + 24); }
+  }
+  function pointer(e, type, x, y){
+    if (S.mode !== "venn") return;
+    if (type === "down"){ S.drag = null; let best = Infinity;
+      S.boxes.forEach(bx => { const g = geo(bx); ["A", "B"].forEach(k => { const d = Math.hypot(g[k].x - x, g[k].y - y); if (d < g.r && d < best){ best = d; S.drag = {k, bx}; } }); }); return; }
+    if (type === "up"){ S.drag = null; return; }
+    if (!S.drag) return; const {k, bx} = S.drag, g = geo(bx), o = g[k === "A" ? "B" : "A"], r = g.r;
+    let nx = x, ny = y, d = Math.hypot(nx - o.x, ny - o.y) || 1; const cd = Math.min(1.6 * r, Math.max(.9 * r, d));
+    nx = o.x + (nx - o.x) / d * cd; ny = o.y + (ny - o.y) / d * cd;
+    nx = Math.min(bx.x + bx.w - r - 6, Math.max(bx.x + r + 6, nx)); ny = Math.min(bx.y + bx.h - r - 6, Math.max(bx.y + r + 6, ny));
+    S[k] = {x:(nx - bx.x) / bx.w, y:(ny - bx.y) / bx.h};
+  }
+  return {
+    text:"交集 A∩B 是「既在 A 又在 B」，并集 A∪B 是「在 A 或在 B」，补集 ∁ᵤA 是「在全集里但不在 A」。离散的集合用韦恩图看，连续的集合用数轴看。区间端点是否取到，决定画实心点还是空心点，这正是集合题最容易丢分的地方。韦恩图中可拖动圆 A、B。",
+    points:["A∩B = {x | x∈A 且 x∈B}，A∪B = {x | x∈A 或 x∈B}，∁ᵤA = {x | x∈U 且 x∉A}", "德摩根律：∁ᵤ(A∩B) = (∁ᵤA)∪(∁ᵤB)，∁ᵤ(A∪B) = (∁ᵤA)∩(∁ᵤB)", "A ⊆ B ⇔ A∩B = A ⇔ A∪B = B", "含 n 个元素的集合有 2ⁿ 个子集"],
+    gk:"新高考 I 卷第 1 题几乎必考集合运算。易错：端点开闭；B ⊆ A 时别忘了讨论 B = ∅ 的情形（本例 B 非空）。",
+    mount(ctrl){ S.drag = null;
+      chips(ctrl, {label:"模式", value:S.mode, options:[{label:"韦恩图", value:"venn"}, {label:"数轴运算", value:"line"}, {label:"含参问题", value:"param"}], onChange:v => { S.mode = v; build(); }});
+      sub = el("div", "ctrl"); ctrl.appendChild(sub); build(); },
+    draw, pointer, unmount(){ S.drag = null; }
+  };
+})();
+CH[1].ready = true;
+MODS[1] = (() => {
+  const S = {mode:"set", P:{cx:.42, cy:.5, w:.26, h:.4}, Q:{cx:.5, cy:.5, w:.56, h:.72}, box:null, drag:null,
+    ex:0, a1:-2, a2:1, b1:-3, b2:3, ni:0, flip:false, at:0};
+  const FF = () => getComputedStyle(document.body).fontFamily;
+  const CONC = (a, b) => a && b ? "p 是 q 的充要条件" : a ? "p 是 q 的充分不必要条件" : b ? "p 是 q 的必要不充分条件" : "p 是 q 的既不充分也不必要条件";
+  const REL = (a, b) => a && b ? "P = Q" : a ? "P ⊊ Q" : b ? "Q ⊊ P" : "互不包含";
+  const yn = v => v ? "是" : "否";
+  const ed = r => ({l:r.cx - r.w / 2, r:r.cx + r.w / 2, t:r.cy - r.h / 2, b:r.cy + r.h / 2});
+  const inR = (A, B, e = .004) => { const a = ed(A), b = ed(B); return a.l >= b.l - e && a.r <= b.r + e && a.t >= b.t - e && a.b <= b.b + e; };
+  const rel = () => [inR(S.P, S.Q), inR(S.Q, S.P)];
+  const n = v => !isFinite(v) ? (v > 0 ? "+∞" : "−∞") : (v < 0 ? "−" : "") + Math.abs(v);
+  const I = (a, b, oa, ob) => ({a, b, oa:!!oa, ob:!!ob}), INF = Infinity;
+  const EX = [
+    {l:"p: x > 2，q: x > 1", p:"x > 2", q:"x > 1", P:[I(2, INF, 1, 1)], Q:[I(1, INF, 1, 1)]},
+    {l:"p: x² = 1，q: x = 1", p:"x² = 1", q:"x = 1", P:[I(-1, -1), I(1, 1)], Q:[I(1, 1)]},
+    {l:"p: |x| < 1，q: −1 < x < 1", p:"|x| < 1", q:"−1 < x < 1", P:[I(-1, 1, 1, 1)], Q:[I(-1, 1, 1, 1)]},
+    {l:"p: x > 1，q: x < 2", p:"x > 1", q:"x < 2", P:[I(1, INF, 1, 1)], Q:[I(-INF, 2, 1, 1)]}];
+  const inI = (A, B) => (A.a > B.a || (A.a === B.a && (!B.oa || A.oa))) && (A.b < B.b || (A.b === B.b && (!B.ob || A.ob)));
+  const sub = (A, B) => A.every(x => B.some(y => inI(x, y)));
+  const toS = L => L.length ? L.map(x => x.a === x.b ? "{" + n(x.a) + "}" : (x.oa ? "(" : "[") + n(x.a) + ", " + n(x.b) + (x.ob ? ")" : "]")).join(" ∪ ") : "∅";
+  const lineSets = () => S.ex >= 0 ? EX[S.ex] : {P:S.a1 <= S.a2 ? [I(S.a1, S.a2)] : [], Q:S.b1 <= S.b2 ? [I(S.b1, S.b2)] : []};
+  const NEG = [
+    {s:[["∀", "∃"], "x∈R, x² + 1 ", [">", "≤"], " 0"], t:true},
+    {s:[["∃", "∀"], "x>0, ln x ", ["=", "≠"], " x − 1"], t:true},
+    {s:[["所有", "存在"], "正方形", ["都是", "不是"], "矩形"], t:true},
+    {s:[["存在", "任意"], "实数 x ", ["使", "都有"], " x² ", ["<", "≥"], " 0"], t:false}];
+  const plain = (N, k) => N.s.map(x => Array.isArray(x) ? x[k] : x).join("");
+  function upd(){
+    if (S.mode === "set"){ const [a, b] = rel();
+      return readout([["P ⊆ Q", yn(a), "blue"], ["Q ⊆ P", yn(b), "red"], ["关系", REL(a, b)], ["推出", (a ? "p ⇒ q" : "p ⇏ q") + "，" + (b ? "q ⇒ p" : "q ⇏ p"), "blue"], ["结论", CONC(a, b), "gold"]]); }
+    if (S.mode === "line"){ const L = lineSets(), a = sub(L.P, L.Q), b = sub(L.Q, L.P), E = EX[S.ex];
+      return readout([["p", E ? E.p + "，P = " + toS(L.P) : "x ∈ " + toS(L.P), "blue"], ["q", E ? E.q + "，Q = " + toS(L.Q) : "x ∈ " + toS(L.Q), "red"], ["关系", REL(a, b)], ["结论", CONC(a, b), "gold"]]); }
+    const N = NEG[S.ni];
+    readout([["原命题", plain(N, 0) + "（" + (N.t ? "真" : "假") + "）", N.t ? "blue" : "red"], ["否定", plain(N, 1) + "（" + (N.t ? "假" : "真") + "）", N.t ? "red" : "blue"], ["方法", "改量词、否结论", "gold"]]);
+  }
+  let box = null;
+  function build(){
+    box.innerHTML = "";
+    if (S.mode === "line"){
+      const exc = chips(box, {label:"例题", value:S.ex, options:EX.map((e, i) => ({label:e.l, value:i})), onChange:v => { S.ex = v; upd(); }});
+      box.appendChild(el("div", "row", "<span>自定义 p: x ∈ [a₁, a₂]，q: x ∈ [b₁, b₂]</span>"));
+      [["a1", "a₁"], ["a2", "a₂"], ["b1", "b₁"], ["b2", "b₂"]].forEach(([k, l]) =>
+        slider(box, {label:l, min:-5, max:5, step:.5, value:S[k], fmt:n, onInput:v => { S[k] = v; S.ex = -1; exc.set(-1); upd(); }}));
+    } else if (S.mode === "neg"){
+      chips(box, {label:"命题", value:S.ni, options:NEG.map((N, i) => ({label:plain(N, 0), value:i})), onChange:v => { S.ni = v; S.flip = false; S.at = 0; upd(); }});
+      button(box, "翻转", () => { S.flip = !S.flip; S.at = performance.now(); }, true);
+    } else box.appendChild(el("div", "row", "<span>拖动区域中心移动，拖边缘改大小</span>"));
+    upd();
+  }
+  function arrows(c, w, y, a, b){
+    const t = theme(); c.font = "600 20px " + FF(); c.textAlign = "center"; c.textBaseline = "middle";
+    [["p ⇒ q", a, .33], ["q ⇒ p", b, .67]].forEach(([s, on, k]) => { c.globalAlpha = on ? 1 : .28; c.fillStyle = on ? t.blue : t.fg; c.fillText(s, w * k, y); });
+    c.globalAlpha = 1;
+  }
+  function concl(c, w, y, a, b){ const t = theme(); c.fillStyle = t.goldText; c.font = "600 " + (w < 420 ? 18 : 22) + "px " + FF(); c.textAlign = "center"; c.fillText(CONC(a, b), w / 2, y); }
+  function draw(c, w, h){
+    const t = theme();
+    if (S.mode === "set"){ const [a, b] = rel(), B = S.box = {x:24, y:68, w:w - 48, h:h - 140};
+      arrows(c, w, 34, a, b);
+      [["Q", S.Q, t.red, t.redText], ["P", S.P, t.blue, t.blue]].forEach(([k, r, col, tc]) => {
+        const x = B.x + (r.cx - r.w / 2) * B.w, y = B.y + (r.cy - r.h / 2) * B.h, rw = r.w * B.w, rh = r.h * B.h, rad = Math.min(18, rw / 4, rh / 4);
+        c.beginPath(); c.roundRect ? c.roundRect(x, y, rw, rh, rad) : c.rect(x, y, rw, rh);
+        c.globalAlpha = .12; c.fillStyle = col; c.fill(); c.globalAlpha = 1; c.strokeStyle = col; c.lineWidth = 2; c.stroke();
+        c.fillStyle = tc; c.font = "italic 600 16px " + FF(); c.textAlign = "left"; c.textBaseline = "top"; c.fillText(k, x + 10, y + 8);
+      });
+      c.textBaseline = "middle"; concl(c, w, h - 36, a, b); return;
+    }
+    if (S.mode === "line"){ const L = lineSets(), a = sub(L.P, L.Q), b = sub(L.Q, L.P), xr = [-6, 6];
+      const bx = {x:52, y:h * .22, w:w - 76, h:Math.min(220, h * .5)}, base = bx.y + bx.h * .62;
+      arrows(c, w, 34, a, b); numberLine(c, bx, xr, []);
+      L.P.forEach(x => numberLine(c, bx, xr, [{a:x.a, b:x.b, openA:x.oa, openB:x.ob, color:t.blue}]));
+      L.Q.forEach(x => numberLine(c, bx, xr, [, {a:x.a, b:x.b, openA:x.oa, openB:x.ob, color:t.red}]));
+      c.font = "italic 600 13px " + FF(); c.textAlign = "right"; c.textBaseline = "middle";
+      c.fillStyle = t.blue; c.fillText("P", bx.x - 8, base - 14); c.fillStyle = t.redText; c.fillText("Q", bx.x - 8, base - 28);
+      concl(c, w, bx.y + bx.h + 40, a, b); return;
+    }
+    const N = NEG[S.ni], p = S.at ? Math.min(1, (performance.now() - S.at) / 600) : 1, k = S.flip ? 1 : 0;
+    const segs = N.s.map(x => Array.isArray(x) ? (p < .5 ? {s:x[1 - k], sc:1 - 2 * p, ch:1, alt:x} : {s:x[k], sc:2 * p - 1, ch:1, alt:x}) : {s:x, sc:1});
+    let fs = 30; c.font = "600 30px " + FF();
+    const wid = sg => sg.ch ? Math.max(c.measureText(sg.alt[0]).width, c.measureText(sg.alt[1]).width) : c.measureText(sg.s).width;
+    const tot = segs.reduce((s, sg) => s + wid(sg), 0); if (tot > w - 40){ fs = Math.floor(30 * (w - 40) / tot); }
+    c.font = "600 " + fs + "px " + FF(); c.textBaseline = "middle"; c.textAlign = "center";
+    const tw = segs.reduce((s, sg) => s + wid(sg), 0), cy = h * .42, truth = k ? !N.t : N.t;
+    c.fillStyle = t.fg; c.fillText(k ? "否定" : "原命题", w / 2, h * .26);
+    c.font = "600 " + fs + "px " + FF(); let x = (w - tw) / 2;
+    segs.forEach(sg => { const sw = wid(sg); c.save(); c.translate(x + sw / 2, cy); c.scale(1, Math.max(.02, sg.sc));
+      c.fillStyle = sg.ch ? t.goldText : t.fg; c.fillText(sg.s, 0, 0); c.restore(); x += sw; });
+    c.font = "600 18px " + FF(); c.fillStyle = truth ? t.blue : t.redText; c.fillText(truth ? "真命题" : "假命题", w / 2, h * .56);
+    c.font = "14px " + FF(); c.fillStyle = t.fg;
+    c.fillText("原命题：" + plain(N, 0) + "（" + (N.t ? "真" : "假") + "）", w / 2, h * .7);
+    c.fillText("否定：" + plain(N, 1) + "（" + (N.t ? "假" : "真") + "）", w / 2, h * .7 + 24);
+    c.fillStyle = t.goldText; c.font = "600 15px " + FF(); c.fillText("改量词、否结论 · 原命题与否定恰好一真一假", w / 2, h * .7 + 58);
+  }
+  function pointer(e, type, x, y){
+    if (S.mode !== "set" || !S.box) return; const B = S.box;
+    if (type === "up"){ if (S.drag){ S.drag = null; upd(); } return; }
+    const nx = (x - B.x) / B.w, ny = (y - B.y) / B.h;
+    if (type === "down"){ S.drag = null; const tol = 10;
+      for (const k of ["P", "Q"]){ const r = S[k], d = ed(r), L = B.x + d.l * B.w, R = B.x + d.r * B.w, T = B.y + d.t * B.h, Bo = B.y + d.b * B.h;
+        if (x < L - tol || x > R + tol || y < T - tol || y > Bo + tol) continue;
+        const ex = Math.min(Math.abs(x - L), Math.abs(x - R)) < tol, ey = Math.min(Math.abs(y - T), Math.abs(y - Bo)) < tol;
+        if (ex || ey){ S.drag = {k, ex, ey}; return; } }
+      const hit = ["P", "Q"].filter(k => { const d = ed(S[k]); return nx > d.l && nx < d.r && ny > d.t && ny < d.b; }).sort((a, b) => S[a].w * S[a].h - S[b].w * S[b].h)[0];
+      if (hit) S.drag = {k:hit, ox:nx - S[hit].cx, oy:ny - S[hit].cy}; return; }
+    if (!S.drag) return; const D = S.drag, r = S[D.k], o = S[D.k === "P" ? "Q" : "P"], cl = (v, a, b) => Math.min(b, Math.max(a, v));
+    if (D.ex || D.ey){ if (D.ex) r.w = cl(2 * Math.abs(nx - r.cx), .06, 2 * Math.min(r.cx, 1 - r.cx)); if (D.ey) r.h = cl(2 * Math.abs(ny - r.cy), .08, 2 * Math.min(r.cy, 1 - r.cy)); }
+    else { r.cx = cl(nx - D.ox, r.w / 2, 1 - r.w / 2); r.cy = cl(ny - D.oy, r.h / 2, 1 - r.h / 2); }
+    if (["cx", "cy", "w", "h"].every(q => Math.abs(r[q] - o[q]) < .025)) Object.assign(r, {cx:o.cx, cy:o.cy, w:o.w, h:o.h});
+    upd();
+  }
+  return {
+    text:"把条件 p、q 看成集合 P、Q：P ⊆ Q 时，p 能推出 q，p 是 q 的充分条件，q 是 p 的必要条件。口诀「小范围推大范围」：小的是充分，大的是必要；两个集合相等就是充要条件。",
+    points:["P ⊆ Q ⇔ p ⇒ q ⇔ p 是 q 的充分条件、q 是 p 的必要条件", "P = Q ⇔ p 是 q 的充要条件", "小范围推大范围", "全称命题的否定是存在命题：「改量词、否结论」"],
+    gk:"选择题常考充分必要条件判断，常与不等式、数列、向量结合。易错：「p 是 q 的充分条件」与「p 的充分条件是 q」方向相反。",
+    mount(ctrl){ S.drag = null;
+      chips(ctrl, {label:"模式", value:S.mode, options:[{label:"集合包含", value:"set"}, {label:"数轴判定", value:"line"}, {label:"否定命题", value:"neg"}], onChange:v => { S.mode = v; build(); }});
+      box = el("div", "ctrl"); ctrl.appendChild(box); build(); },
+    draw, pointer, unmount(){ S.drag = null; }
+  };
+})();
+CH[2].ready = true;
+MODS[2] = (() => {
+  const S = {mode:"semi", L:8, a:2.5, four:false, xs:{sum:3, prod:2}, fc:0, g:null, drag:false};
+  const FF = () => getComputedStyle(document.body).fontFamily;
+  const r2 = v => String(Math.round(v * 100) / 100).replace("-", "−");
+  const M = () => { const a = S.a, b = S.L - S.a; return {a, b, A:(a + b) / 2, G:Math.sqrt(a * b), H:2 * a * b / (a + b), Q:Math.sqrt((a * a + b * b) / 2), eq:Math.abs(a - b) < 1e-9}; };
+  const RECT = {
+    sum:{xr:[.5, 9.5], y:x => 10 - x, f:x => x * (10 - x), fx:"S(x) = x(10 − x)", k:"S", kn:"面积", fixed:"周长 2(x+y) = 20", opt:[5, 25], ol:"最大 25", sc:10, yr:[0, 28], best:"正方形：面积最大 S = 25"},
+    prod:{xr:[1.5, 10], y:x => 16 / x, f:x => 2 * (x + 16 / x), fx:"L(x) = 2(x + 16/x)", k:"L", kn:"周长", fixed:"面积 xy = 16", opt:[4, 16], ol:"最小 16", sc:11, yr:[0, 34], best:"正方形：周长最小 L = 16"}};
+  const FAIL = [
+    {l:"① x + 1/x（x<0）", fx:"y = x + 1/x（x < 0）", f:x => x < 0 ? x + 1 / x : NaN, xr:[-6, 1.5], yr:[-9, 3], pt:[-1, -2], pl:"最大值 −2",
+      bad:"✗ 直接写 x + 1/x ≥ 2：x < 0，违反「一正」", good:"✓ −x > 0：(−x) + 1/(−x) ≥ 2 ⇒ y ≤ −2，x = −1 取等", res:"最大值 −2（x = −1）", why:"「一正」不满足"},
+    {l:"② √(x²+2) + 1/√(x²+2)", fx:"y = √(x²+2) + 1/√(x²+2)", f:x => { const t = Math.sqrt(x * x + 2); return t + 1 / t; }, xr:[-4.5, 4.5], yr:[-.5, 6], pt:[0, 3 / Math.SQRT2], pl:"最小值 3√2/2", ref:2,
+      bad:"✗ 用 ≥ 2 需 √(x²+2) = 1，即 x² + 2 = 1 无解：「三相等」不成立", good:"✓ 令 t = √(x²+2) ≥ √2，y = t + 1/t 在 [√2, +∞) 上递增，t = √2（x = 0）时最小", res:"最小值 3/√2 = 3√2/2 ≈ 2.12（x = 0）", why:"「三相等」不成立"},
+    {l:"③ x + 4/(x−1)（x>1）", fx:"y = x + 4/(x − 1)（x > 1）", f:x => x > 1 ? x + 4 / (x - 1) : NaN, xr:[-.5, 9], yr:[-1, 14], pt:[3, 5], pl:"最小值 5",
+      bad:"✗ x · 4/(x−1) 不是定值：缺「二定」", good:"✓ 凑定：(x−1) + 4/(x−1) + 1 ≥ 2√4 + 1 = 5，x − 1 = 2 即 x = 3 取等", res:"最小值 5（x = 3）", why:"积不是定值，需凑「定」"}];
+  const clampA = () => { S.a = Math.min(S.L - .1, Math.max(.1, Math.round(S.a * 10) / 10)); };
+  function upd(){
+    if (S.mode === "semi"){ const m = M();
+      return readout([["a = AC", r2(m.a)], ["b = CB", r2(m.b)], ["半径 (a+b)/2", r2(m.A), "gold"], ["垂线 CD = √(ab)", r2(m.G), "blue"]]
+        .concat(S.four ? [["调和 H = 2ab/(a+b)", r2(m.H), "red"], ["平方 Q = √((a²+b²)/2)", r2(m.Q)], ["链", "H ≤ G ≤ A ≤ Q"]] : [])
+        .concat([["结论", m.eq ? "a = b，取等号" : "(a+b)/2 > √(ab)", m.eq ? "blue" : "gold"]])); }
+    if (RECT[S.mode]){ const R = RECT[S.mode], x = S.xs[S.mode];
+      return readout([["定值", R.fixed], ["x", r2(x)], ["y", r2(R.y(x))], [R.kn + " " + R.k, r2(R.f(x)), "blue"], ["最值", R.ol + "（x = y = " + R.opt[0] + "）", "gold"]]); }
+    const F = FAIL[S.fc];
+    readout([["函数", F.fx], ["问题", F.why, "red"], ["正确做法", F.good.slice(2)], ["结论", F.res, "gold"]]);
+  }
+  let box = null, aS = null;
+  function build(){
+    box.innerHTML = ""; aS = null;
+    if (S.mode === "semi"){
+      slider(box, {label:"总长 a + b", min:4, max:12, step:1, value:S.L, fmt:r2, onInput:v => {
+        S.a = S.a * v / S.L; S.L = v; clampA(); aS.el.querySelector("input").max = v - .1; aS.set(S.a); upd(); }});
+      aS = slider(box, {label:"a = AC", min:.1, max:S.L - .1, step:.1, value:S.a, fmt:r2, onInput:v => { S.a = v; upd(); }});
+      toggle(box, "四种平均", S.four, v => { S.four = v; upd(); });
+      box.appendChild(el("div", "row", "<span>拖动点 C 改变 a、b</span>"));
+    } else if (RECT[S.mode]){ const R = RECT[S.mode];
+      slider(box, {label:"x", min:R.xr[0], max:R.xr[1], step:.5, value:S.xs[S.mode], fmt:r2, onInput:v => { S.xs[S.mode] = v; upd(); }});
+    } else chips(box, {label:"案例", value:S.fc, options:FAIL.map((F, i) => ({label:F.l, value:i})), onChange:v => { S.fc = v; upd(); }});
+    upd();
+  }
+  const dot = (c, x, y, col, r) => { c.beginPath(); c.arc(x, y, r || 4, 0, 7); c.fillStyle = col; c.fill(); };
+  const txt = (c, s, x, y, col, font, al) => { c.fillStyle = col; c.font = (font || "600 14px ") + FF(); c.textAlign = al || "center"; c.fillText(s, x, y); };
+  function line(c, x1, y1, x2, y2, col, lw, dash){ c.save(); c.strokeStyle = col; c.lineWidth = lw; c.lineCap = "round"; if (dash) c.setLineDash([5, 5]);
+    c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); c.restore(); }
+  function semi(c, w, h, t){
+    const m = M(), s = Math.min((w - 64) / S.L, (h - 150) / (S.L / 2)), by = h - 56, Ax = w / 2 - S.L * s / 2, Bx = w / 2 + S.L * s / 2, Ox = w / 2;
+    const Cx = Ax + m.a * s, R = m.A * s, Dy = by - m.G * s, left = Cx < Ox - 1;
+    S.g = {Ax, s, by, Cx, Bx};
+    c.save(); c.strokeStyle = t.axis; c.lineWidth = 1.5; c.beginPath(); c.arc(Ox, by, R, Math.PI, Math.PI * 2); c.stroke(); c.restore();
+    line(c, Ax, by, Bx, by, t.fg, 2);
+    if (S.four){ const Fy = by - R, Ex = Cx + (Ox - Cx) * m.H / m.A, Ey = Dy + (by - Dy) * m.H / m.A;
+      line(c, Ox, by, Ox, Fy, t.axis, 1, true); line(c, Cx, by, Ex, Ey, t.axis, 1, true);
+      line(c, Cx, by, Ox, Fy, t.purple, 2.5); line(c, Cx, Dy, Ex, Ey, t.red, 3.5);
+      txt(c, "Q", (Cx + Ox) / 2 + (left ? 10 : -10), (by + Fy) / 2, t.fg, "italic 600 15px ", left ? "left" : "right");
+      txt(c, "H", (Cx + Ex) / 2 + (left ? -10 : 10), (Dy + Ey) / 2 - 8, t.redText, "italic 600 15px ", left ? "right" : "left");
+      dot(c, Ox, Fy, t.fg); txt(c, "F", Ox, Fy - 12, t.fg); dot(c, Ex, Ey, t.fg); }
+    line(c, Ox, by, Cx, Dy, t.gold, 3); line(c, Cx, by, Cx, Dy, t.blue, 3);
+    c.textBaseline = "middle";
+    txt(c, "(a+b)/2", (Ox + Cx) / 2 + (left ? 12 : -12), (by + Dy) / 2 + 14, t.goldText, null, left ? "left" : "right");
+    txt(c, "√(ab)", Cx + (left ? -10 : 10), (by + Dy) / 2 - 10, t.blue, null, left ? "right" : "left");
+    [[Ax, "A"], [Bx, "B"]].forEach(([x, n]) => { dot(c, x, by, t.fg); txt(c, n, x, by + 18, t.fg); });
+    dot(c, Ox, by, t.fg); dot(c, Cx, Dy, t.fg); txt(c, "D", Cx, Dy - 14, t.fg);
+    if (m.eq){ c.save(); c.strokeStyle = t.blue; c.lineWidth = 2; c.beginPath(); c.arc(Cx, by, 13, 0, 7); c.stroke(); c.restore(); txt(c, "C(O)", Cx, by + 18, t.fg); }
+    else { txt(c, "O", Ox, by + 18, t.fg); txt(c, "C", Cx, by + 18, t.blue); }
+    dot(c, Cx, by, t.blue, 7);
+    txt(c, "a = " + r2(m.a), (Ax + Cx) / 2, by + 38, t.fg, "13px "); txt(c, "b = " + r2(m.b), (Cx + Bx) / 2, by + 38, t.fg, "13px ");
+    const fs = w < 420 ? "600 15px " : "600 18px ";
+    txt(c, "(a+b)/2 = " + r2(m.A), w / 2 - 14, 28, t.goldText, fs, "right"); txt(c, m.eq ? "=" : "≥", w / 2, 28, t.fg, fs);
+    txt(c, "√(ab) = " + r2(m.G), w / 2 + 14, 28, t.blue, fs, "left");
+    txt(c, m.eq ? "a = b，取等号" : "半弦 CD 永远不超过半径", w / 2, 54, m.eq ? t.blue : t.fg, m.eq ? "600 16px " : "14px ");
+    if (S.four) txt(c, "H ≤ G ≤ A ≤ Q：" + [m.H, m.G, m.A, m.Q].map(r2).join(" ≤ "), w / 2, 78, t.fg, "14px ");
+  }
+  function rect(c, w, h, t){
+    const R = RECT[S.mode], x = S.xs[S.mode], y = R.y(x), v = R.f(x), wide = w >= 560, cw = Math.min(280, w * .4);
+    const cb = wide ? {x:w - cw - 20, y:70, w:cw, h:Math.min(200, h * .45)} : {x:44, y:56, w:w - 68, h:Math.min(150, h * .3)};
+    const rg = wide ? {x:24, y:60, w:cb.x - 60, h:h - 120} : {x:24, y:cb.y + cb.h + 36, w:w - 48, h:h - cb.y - cb.h - 96};
+    const sc = Math.min(rg.w, rg.h) / R.sc, rw = x * sc, rh = y * sc, rx = rg.x + (rg.w - rw) / 2, ry = rg.y + (rg.h - rh) / 2;
+    c.textBaseline = "middle"; txt(c, R.fixed, wide ? rg.x + rg.w / 2 : w / 2, wide ? 28 : 22, t.fg, "600 16px ");
+    c.save(); c.globalAlpha = .12; c.fillStyle = t.blue; c.fillRect(rx, ry, rw, rh); c.restore();
+    c.strokeStyle = t.blue; c.lineWidth = 2; c.strokeRect(rx, ry, rw, rh);
+    txt(c, R.kn + " " + R.k + " = " + r2(v), rx + rw / 2, ry + rh / 2, t.blue, "600 16px ");
+    txt(c, "x = " + r2(x), rx + rw / 2, ry + rh + 16, t.fg, "13px ");
+    txt(c, "y = " + r2(y), rw > 110 ? rx + 8 : rx + rw + 8, ry + Math.min(22, rh / 4), t.fg, "13px ", "left");
+    if (Math.abs(x - y) < 1e-9) txt(c, R.best, rx + rw / 2, ry + rh + 40, t.goldText, "600 15px ");
+    txt(c, R.fx, cb.x, cb.y - 14, t.fg, "13px ", "left");
+    const mp = drawAxes(c, cb, [0, R.sc + .5], R.yr);
+    plotFn(c, mp, R.f, [.3, R.sc + .5], t.blue, 2);
+    dot(c, mp.X(R.opt[0]), mp.Y(R.opt[1]), t.gold, 5);
+    c.textBaseline = "middle"; txt(c, R.ol, mp.X(R.opt[0]), mp.Y(R.opt[1]) + (S.mode === "sum" ? -14 : 16), t.goldText, "600 13px ");
+    dot(c, mp.X(x), mp.Y(v), t.blue, 5);
+  }
+  function fail(c, w, h, t){
+    const F = FAIL[S.fc], bx = {x:44, y:56, w:w - 72, h:Math.max(120, h - 170)};
+    c.textBaseline = "middle"; txt(c, F.fx, w / 2, 26, t.fg, "600 16px ");
+    const mp = drawAxes(c, bx, F.xr, F.yr);
+    if (F.ref){ plotFn(c, mp, () => F.ref, F.xr, t.red, 1.5, true); c.textBaseline = "top"; txt(c, "y = 2 取不到", bx.x + bx.w - 6, mp.Y(F.ref) + 6, t.redText, "13px ", "right"); }
+    plotFn(c, mp, F.f, F.xr, t.blue, 2.5);
+    const px = mp.X(F.pt[0]), py = mp.Y(F.pt[1]); dot(c, px, py, t.gold, 5.5);
+    c.textBaseline = "middle"; txt(c, F.pl + "（x = " + F.pt[0] + "）", px + 10, py + (S.fc === 0 ? 18 : -16), t.goldText, "600 14px ", "left");
+    c.textBaseline = "top"; c.textAlign = "center"; c.font = "14px " + FF();
+    let y0 = bx.y + bx.h + 22; c.fillStyle = t.redText; y0 += wrapText(c, F.bad, w / 2, y0, w - 40, 20) + 4;
+    c.fillStyle = t.goldText; c.font = "600 14px " + FF(); wrapText(c, F.good, w / 2, y0, w - 40, 20);
+  }
+  function draw(c, w, h){ const t = theme(); S.g = null; if (S.mode === "semi") semi(c, w, h, t); else if (RECT[S.mode]) rect(c, w, h, t); else fail(c, w, h, t); }
+  function pointer(e, type, x, y){
+    const g = S.g; if (!g) return;
+    if (type === "up"){ S.drag = false; return; }
+    if (type === "down") S.drag = Math.abs(y - g.by) < 36 && x > g.Ax - 20 && x < g.Bx + 20;
+    if (!S.drag) return;
+    S.a = (x - g.Ax) / g.s; clampA(); if (Math.abs(S.a - S.L / 2) < .15) S.a = S.L / 2;
+    aS && aS.set(S.a); upd();
+  }
+  return {
+    text:"a、b > 0 时，(a+b)/2 ≥ √(ab)，当且仅当 a = b 时取等号。几何上：把长 a+b 的线段作直径画半圆，在分点处作垂线，垂线长就是 √(ab)，而半径是 (a+b)/2——半弦永远不超过半径。用它求最值要记住三个字：一正、二定、三相等。",
+    points:["a, b > 0 时 (a+b)/2 ≥ √(ab)，a = b 时取等", "和定积最大，积定和最小", "一正、二定、三相等", "常用变形：a² + b² ≥ 2ab，ab ≤ ((a+b)/2)²"],
+    gk:"选填常考用基本不等式求最值（常配合「1 的代换」）。易错：取等条件不成立时不能用基本不等式，要改用函数单调性。",
+    mount(ctrl){ S.drag = false;
+      chips(ctrl, {label:"模式", value:S.mode, options:[{label:"半圆证明", value:"semi"}, {label:"和定积最大", value:"sum"}, {label:"积定和最小", value:"prod"}, {label:"失败案例", value:"fail"}], onChange:v => { S.mode = v; build(); }});
+      box = el("div", "ctrl"); ctrl.appendChild(box); build(); },
+    draw, pointer, unmount(){ S.drag = false; }
+  };
+})();
+CH[3].ready = true;
+MODS[3] = (() => {
+  const S = {mode:"three", a:1, b:-1, c:-2, k:2, p:3}, I = Infinity;
+  const FF = () => getComputedStyle(document.body).fontFamily;
+  const dec = v => String(Math.round(v * 100) / 100).replace("-", "−");
+  const term = (k, s, first) => { if (Math.abs(k) < 1e-9) return ""; const m = Math.abs(k), co = s && Math.abs(m - 1) < 1e-9 ? "" : dec(m);
+    return (first ? (k < 0 ? "−" : "") : (k < 0 ? " − " : " + ")) + co + s; };
+  const poly = (a, b, c) => { let s = term(a, "x²", true); s += term(b, "x", !s); s += term(c, "", !s); return s || "0"; };
+  const LEAF = [["a < 1", "(a, 1)"], ["a = 1", "∅"], ["a > 1", "(1, a)"]];
+  function solve(a, b, c){
+    const D = b * b - 4 * a * c, out = {D, roots:[]}; let pos, neg;
+    if (D > 1e-9){ const s = Math.sqrt(D), x1 = (-b - s) / (2 * a), x2 = (-b + s) / (2 * a), l = Math.min(x1, x2), r = Math.max(x1, x2), L = fmtNum(l), R = fmtNum(r);
+      out.roots = [l, r];
+      pos = {t:`(−∞, ${L}) ∪ (${R}, +∞)`, v:[{a:-I, b:l, openB:true}, {a:r, b:I, openA:true}]};
+      neg = {t:`(${L}, ${R})`, v:[{a:l, b:r, openA:true, openB:true}]};
+    } else if (D > -1e-9){ const x0 = -b / (2 * a) + 0; out.roots = [x0];
+      pos = {t:`{x | x ≠ ${fmtNum(x0)}}`, v:[{a:-I, b:x0, openB:true}, {a:x0, b:I, openA:true}]}; neg = {t:"∅", v:[]};
+    } else { pos = {t:"R", v:[{a:-I, b:I}]}; neg = {t:"∅", v:[]}; }
+    out.gt = a > 0 ? pos : neg; out.lt = a > 0 ? neg : pos; return out;
+  }
+  const why = k => Math.abs(k) < 1e-9 ? "a = 0：2x + 1 > 0 只在 x > −1/2 时成立，不恒成立" : k < 0 ? "a < 0：开口向下，不恒成立"
+    : Math.abs(k - 1) < 1e-9 ? "a = 1：Δ = 0，x = −1 时等于 0，不恒成立" : k < 1 ? "0 < a < 1：Δ > 0，与 x 轴有交点，不恒成立" : "a > 1：a > 0 且 Δ < 0，恒成立";
+  function upd(){
+    if (S.mode === "three"){ const R = solve(S.a, S.b, S.c), r = R.roots;
+      return readout([["函数", "y = " + poly(S.a, S.b, S.c)], ["Δ = b² − 4ac", dec(R.D), "blue"],
+        ["两根", r.length === 2 ? `x₁ = ${fmtNum(r[0])}，x₂ = ${fmtNum(r[1])}` : r.length ? `x₁ = x₂ = ${fmtNum(r[0])}` : "无实根", "gold"]]
+        .concat(r.length === 2 ? [["求根公式", `x = (${dec(-S.b)} ± √${dec(R.D)}) / ${dec(2 * S.a)}`]] : [])
+        .concat([["> 0 的解集", R.gt.t, "blue"], ["< 0 的解集", R.lt.t, "red"]])); }
+    if (S.mode === "hold"){ const k = S.k, ok = k > 1 + 1e-9;
+      return readout([["不等式", "ax² + 2x + 1 > 0 对一切 x 成立"], ["当前 a", dec(k)], ["Δ = 4 − 4a", dec(4 - 4 * k)],
+        ["条件", "a > 0 且 Δ = 4 − 4a < 0 ⇒ a > 1", "gold"], ["a = 0 单独讨论", "2x + 1 > 0 不恒成立", "red"], ["当前", why(k), ok ? "blue" : "red"]]); }
+    const p = S.p, eq = Math.abs(p - 1) < 1e-9, cs = eq ? 1 : p < 1 ? 0 : 2;
+    readout([["不等式", "x² − (a+1)x + a < 0"], ["因式分解", "(x − 1)(x − a) < 0"], ["两根", "1 与 a = " + dec(p), "gold"], ["情形", LEAF[cs][0]],
+      ["解集", eq ? "∅" : cs === 0 ? `(${dec(p)}, 1)` : `(1, ${dec(p)})`, "blue"]]);
+  }
+  let box = null;
+  function build(){
+    box.innerHTML = "";
+    if (S.mode === "three"){ let aS;
+      aS = slider(box, {label:"a（跳过 0）", min:-3, max:3, step:.5, value:S.a, fmt:dec, onInput:v => { if (v === 0){ v = S.a > 0 ? -.5 : .5; aS.set(v); } S.a = v; upd(); }});
+      slider(box, {label:"b", min:-6, max:6, step:.5, value:S.b, fmt:dec, onInput:v => { S.b = v; upd(); }});
+      slider(box, {label:"c", min:-6, max:6, step:.5, value:S.c, fmt:dec, onInput:v => { S.c = v; upd(); }});
+    } else if (S.mode === "hold") slider(box, {label:"a", min:-2, max:4, step:.05, value:S.k, fmt:dec, onInput:v => { S.k = Math.round(v * 100) / 100; upd(); }});
+    else slider(box, {label:"a", min:-2, max:4, step:.05, value:S.p, fmt:dec, onInput:v => { S.p = Math.round(v * 100) / 100; upd(); }});
+    upd();
+  }
+  const dot = (c, x, y, col, r) => { c.beginPath(); c.arc(x, y, r || 4, 0, 7); c.fillStyle = col; c.fill(); };
+  const txt = (c, s, x, y, col, font, al) => { c.fillStyle = col; c.font = (font || "600 14px ") + FF(); c.textAlign = al || "center"; c.fillText(s, x, y); };
+  const rbox = (c, x, y, w, h, col, lw) => { c.save(); c.strokeStyle = col; c.lineWidth = lw || 1; c.beginPath(); c.roundRect ? c.roundRect(x, y, w, h, 10) : c.rect(x, y, w, h); c.stroke(); c.restore(); };
+  const split = (c, mp, f, xr, t) => { plotFn(c, mp, x => f(x) >= 0 ? f(x) : NaN, xr, t.teal, 5); plotFn(c, mp, x => f(x) <= 0 ? f(x) : NaN, xr, t.red, 5); plotFn(c, mp, f, xr, t.blue, 1.5); };
+  function three(c, w, h, t){
+    const a = S.a, b = S.b, cc = S.c, f = x => a * x * x + b * x + cc, R = solve(a, b, cc), r = R.roots, hx = -b / (2 * a) + 0, k = f(hx);
+    const lo = Math.floor(Math.min(-5, hx - 4, (r.length ? r[0] : hx) - 1.5)), hi = Math.ceil(Math.max(5, hx + 4, (r.length ? r[r.length - 1] : hx) + 1.5));
+    const sp = Math.max(6, Math.abs(k) + 3), yr = a > 0 ? [Math.min(0, k) - 2, Math.max(0, k) + sp] : [Math.min(0, k) - sp, Math.max(0, k) + 2];
+    c.textBaseline = "middle"; txt(c, "y = " + poly(a, b, cc), w / 2 - 10, 22, t.fg, "600 16px ", "right"); txt(c, "Δ = " + dec(R.D), w / 2 + 10, 22, t.blue, "600 16px ", "left");
+    const g = {x:44, y:44, w:w - 72, h:Math.max(120, h - 180)}, mp = drawAxes(c, g, [lo, hi], yr);
+    split(c, mp, f, [lo, hi], t);
+    const vx = mp.X(hx), vy = mp.Y(k); dot(c, vx, vy, t.fg, 4.5);
+    txt(c, "顶点 (" + dec(hx) + ", " + dec(k) + ")", vx + 8, vy + (a > 0 ? 18 : -18), t.fg, "13px ", "left");
+    r.forEach((x, i) => { const px = mp.X(x), py = mp.Y(0); dot(c, px, py, t.gold, 5.5);
+      txt(c, (r.length === 1 ? "x₀ = " : i ? "x₂ = " : "x₁ = ") + fmtNum(x), px + (i ? 8 : -8), py + (a > 0 ? -16 : 16), t.goldText, "600 13px ", r.length === 1 ? "center" : i ? "left" : "right"); });
+    [[R.gt, "> 0", t.fg, t.teal], [R.lt, "< 0", t.redText, t.red]].forEach(([s, lab, tc, lc], i) => {
+      const nb = {x:76, y:g.y + g.h + 28 + i * 50, w:w - 100, h:44};
+      if (!s.v.length) numberLine(c, nb, [lo, hi], []); else s.v.forEach(iv => numberLine(c, nb, [lo, hi], [Object.assign({color:lc}, iv)]));
+      c.textBaseline = "middle"; txt(c, lab + (s.v.length ? "" : " ∅"), 20, nb.y + nb.h * .62 - 14, tc, "600 14px ", "left"); });
+  }
+  function hold(c, w, h, t){
+    const k = S.k, f = x => k * x * x + 2 * x + 1, ok = k > 1 + 1e-9, xr = [-5, 3];
+    c.textBaseline = "middle"; txt(c, "y = " + poly(k, 2, 1) + "（a = " + dec(k) + "）", w / 2, 22, t.fg, "600 16px ");
+    const g = {x:44, y:44, w:w - 72, h:Math.max(120, h - 110)}, mp = drawAxes(c, g, xr, [-4, 8]);
+    if (ok) plotFn(c, mp, f, xr, t.blue, 4.5); else split(c, mp, f, xr, t);
+    if (k > 1e-9){ const px = mp.X(-1 / k), py = mp.Y(1 - 1 / k); dot(c, px, py, t.gold, 5.5);
+      txt(c, "最小值 1 − 1/a = " + dec(1 - 1 / k), px + 10, py + 18, t.goldText, "600 13px ", "left"); }
+    if (Math.abs(k) < 1e-9){ const px = mp.X(-.5), py = mp.Y(0); dot(c, px, py, t.red, 5); txt(c, "x = −1/2", px + 8, py + 16, t.redText, "600 13px ", "left"); }
+    txt(c, ok ? "整条曲线在 x 轴上方：恒成立" : why(k), w / 2, g.y + g.h + 30, ok ? t.blue : t.redText, "600 15px ");
+    txt(c, "条件：a > 0 且 Δ = 4 − 4a < 0 ⇒ a > 1", w / 2, g.y + g.h + 54, t.goldText, "600 14px ");
+  }
+  function param(c, w, h, t){
+    const p = S.p, f = x => (x - 1) * (x - p), eq = Math.abs(p - 1) < 1e-9, cs = eq ? 1 : p < 1 ? 0 : 2, xr = [-3, 5];
+    const wide = w >= 620, gw = wide ? w * .58 - 44 : w - 72, gh = wide ? h - 170 : Math.max(110, h - 340);
+    c.textBaseline = "middle"; txt(c, "(x − 1)(x − a) < 0（a = " + dec(p) + "）", 44 + gw / 2, 22, t.fg, "600 16px ");
+    const g = {x:44, y:44, w:gw, h:gh}, mp = drawAxes(c, g, xr, [-3, 6]);
+    plotFn(c, mp, x => f(x) <= 0 ? f(x) : NaN, xr, t.red, 5); plotFn(c, mp, f, xr, t.blue, 2);
+    const near = Math.abs(mp.X(p) - mp.X(1)) < 30;
+    [[1, "1"], [p, "a"]].forEach(([x, n], i) => { const px = mp.X(x), py = mp.Y(0); dot(c, px, py, t.gold, 5.5);
+      if (!(eq && i)) txt(c, eq ? "1 = a" : n, px + (near ? (x < (i ? 1 : p) ? -8 : 8) : 0), py - 16, t.goldText, "600 14px ", near && !eq ? (x < (i ? 1 : p) ? "right" : "left") : "center"); });
+    const nb = {x:44, y:g.y + g.h + 26, w:gw, h:44};
+    numberLine(c, nb, xr, eq ? [] : [{a:Math.min(1, p), b:Math.max(1, p), openA:true, openB:true, color:t.blue}]);
+    c.textBaseline = "middle"; txt(c, "解集 " + (eq ? "∅" : cs === 0 ? `(${dec(p)}, 1)` : `(1, ${dec(p)})`), 44 + gw / 2, nb.y + nb.h + 16, t.blue, "600 15px ");
+    const T = wide ? {x:gw + 76, y:Math.max(60, h / 2 - 90), w:w - gw - 96} : {x:24, y:nb.y + nb.h + 46, w:w - 48};
+    const cx = T.x + T.w / 2, lw = (T.w - 16) / 3, ly = T.y + 80;
+    rbox(c, cx - 75, T.y, 150, 36, t.axis); txt(c, "比较两根 1 与 a", cx, T.y + 18, t.fg, "600 13px ");
+    LEAF.forEach(([k1, k2], i) => { const x = T.x + i * (lw + 8), on = i === cs, col = on ? t.blue : t.axis;
+      c.save(); c.strokeStyle = col; c.lineWidth = on ? 2 : 1; c.beginPath(); c.moveTo(cx, T.y + 36); c.lineTo(x + lw / 2, ly); c.stroke(); c.restore();
+      rbox(c, x, ly, lw, 54, col, on ? 2 : 1);
+      txt(c, k1, x + lw / 2, ly + 18, on ? t.blue : t.fg, "600 13px "); txt(c, k2, x + lw / 2, ly + 38, on ? t.blue : t.fg, "13px "); });
+  }
+  function draw(c, w, h){ const t = theme(); if (S.mode === "three") three(c, w, h, t); else if (S.mode === "hold") hold(c, w, h, t); else param(c, w, h, t); }
+  return {
+    text:"解 ax² + bx + c > 0，就是看抛物线 y = ax² + bx + c 在 x 轴上方的部分对应哪些 x。开口方向由 a 决定，与 x 轴有几个交点由 Δ = b² − 4ac 决定。三者合在一起：二次函数的图像、方程的根、不等式的解集，是同一件事的三种说法。",
+    points:["Δ > 0 两根，Δ = 0 一根，Δ < 0 无根", "a > 0 时「大于取两边，小于取中间」", "ax² + bx + c > 0 恒成立 ⇔ a > 0 且 Δ < 0（还要单独讨论 a = 0）", "含参时比较两根大小分类"],
+    gk:"一元二次不等式常作为集合题、定义域题的计算工具。易错：二次项系数含参时要先讨论 a = 0；a < 0 时先化为正再解。",
+    mount(ctrl){
+      chips(ctrl, {label:"模式", value:S.mode, options:[{label:"三个二次", value:"three"}, {label:"恒成立", value:"hold"}, {label:"含参分类", value:"param"}], onChange:v => { S.mode = v; build(); }});
+      box = el("div", "ctrl"); ctrl.appendChild(box); build(); },
+    draw
+  };
+})();
+CH[4].ready = true;
+MODS[4] = (() => {
+  const S = {mode:"vert", g:0, sx:-3, play:false, maxN:0, swept:false, d:4, x0:.5, ex:false}, I = Infinity, R3 = Math.sqrt(3);
+  const FF = () => getComputedStyle(document.body).fontFamily;
+  const dec = v => { const r = Math.round(v * 100) / 100; return String(r === 0 ? 0 : r).replace("-", "−"); };
+  const sq = v => v >= 0 ? Math.sqrt(v) : NaN, two = r => isNaN(r) ? [] : r < 1e-9 ? [0] : [r, -r];
+  const G = [
+    {n:"y = x²", ys:x => [x * x]}, {n:"x² + y² = 4", ys:x => two(sq(4 - x * x))}, {n:"y² = x", ys:x => two(sq(x))},
+    {n:"y = |x|", ys:x => [Math.abs(x)]}, {n:"y = √x", ys:x => x >= 0 ? [Math.sqrt(x)] : []}, {n:"x = 2", ys:x => Math.abs(x - 2) < .03 ? null : []}];
+  const cnt = ys => ys ? ys.length : I, nTxt = n => n === I ? "无数个" : n + " 个";
+  const D = [
+    {n:"y = √(x − 1)", f:x => sq(x - 1), c:[["偶次根式 ≥ 0", "x − 1 ≥ 0 ⇒ x ≥ 1"]], r:"[1, +∞)", v:[{a:1, b:I}]},
+    {n:"y = 1/(x − 2)", f:x => 1 / (x - 2), c:[["分母 ≠ 0", "x − 2 ≠ 0 ⇒ x ≠ 2"]], r:"(−∞, 2) ∪ (2, +∞)", v:[{a:-I, b:2, openB:true}, {a:2, b:I, openA:true}]},
+    {n:"y = ln(x + 1)", f:x => x > -1 ? Math.log(x + 1) : NaN, c:[["对数真数 > 0", "x + 1 > 0 ⇒ x > −1"]], r:"(−1, +∞)", v:[{a:-1, b:I, openA:true}]},
+    {n:"y = √(4 − x²)", f:x => sq(4 - x * x), c:[["偶次根式 ≥ 0", "4 − x² ≥ 0 ⇒ −2 ≤ x ≤ 2"]], r:"[−2, 2]", v:[{a:-2, b:2}]},
+    {n:"y = 1/√(x + 1) + ln(3 − x)", f:x => x > -1 && x < 3 ? 1 / Math.sqrt(x + 1) + Math.log(3 - x) : NaN,
+      c:[["偶次根式 ≥ 0 且分母 ≠ 0", "x + 1 > 0 ⇒ x > −1"], ["对数真数 > 0", "3 − x > 0 ⇒ x < 3"]], j:"x > −1 且 x < 3", r:"(−1, 3)", v:[{a:-1, b:3, openA:true, openB:true}]}];
+  const P = [{lo:-I, hi:-1, f:x => x + 2, s:"x + 2", d:"x ≤ −1"}, {lo:-1, hi:2, f:x => x * x, s:"x²", d:"−1 < x < 2"}, {lo:2, hi:I, f:x => 2 * x, s:"2x", d:"x ≥ 2"}];
+  const seg = x => x <= -1 ? 0 : x < 2 ? 1 : 2, NUM = ["一", "二", "三"];
+  function upd(){
+    if (S.mode === "vert"){ const F = G[S.g], n = cnt(F.ys(S.sx)), bad = S.maxN >= 2;
+      return readout([["图形", F.n], ["竖线位置", "x = " + dec(S.sx)], ["交点个数", nTxt(n), n >= 2 ? "red" : "gold"],
+        ["结论", bad ? "不是函数：有竖线与图像交于 ≥ 2 点" : S.swept ? "是函数：每条竖线至多 1 个交点" : "拖动竖线或播放扫描", bad ? "red" : S.swept ? "blue" : null]]); }
+    if (S.mode === "dom"){ const F = D[S.d];
+      return readout([["函数", F.n]].concat(F.c).concat(F.j ? [["取交集", F.j, "gold"]] : []).concat([["定义域", F.r, "blue"]])); }
+    const k = seg(S.x0), p = P[k], rows = [["x₀", dec(S.x0)], ["所在段", "第" + NUM[k] + "段 " + p.d, "gold"], ["对应式子", "f(x) = " + p.s],
+      ["f(x₀)", p.s.replace("x", "(" + dec(S.x0) + ")") + " = " + dec(p.f(S.x0)), "blue"]];
+    if (S.ex) rows.push(["第一段", "a + 2 = 3 ⇒ a = 1，不满足 a ≤ −1，舍去", "red"], ["第二段", "a² = 3 ⇒ a = ±√3，只有 √3 ∈ (−1, 2)", "gold"],
+      ["第三段", "2a = 3 ⇒ a = 1.5，不满足 a ≥ 2，舍去", "red"], ["答案", "a = √3", "blue"]);
+    readout(rows);
+  }
+  let box = null, xS = null;
+  const reset = () => { S.maxN = 0; S.swept = false; S.play = false; S.k = null; };
+  const setX = v => { v = Math.round(Math.max(-4, Math.min(4, v)) * 100) / 100; S.sx = S.g === 5 && Math.abs(v - 2) < .12 ? 2 : v; };
+  function build(){
+    box.innerHTML = ""; xS = null;
+    if (S.mode === "vert"){
+      chips(box, {label:"图形", value:S.g, options:G.map((g, i) => ({label:g.n, value:i})), onChange:v => { S.g = v; reset(); upd(); }});
+      xS = slider(box, {label:"竖线 x", min:-4, max:4, step:.05, value:S.sx, fmt:dec, onInput:v => { S.play = false; setX(v); }});
+      button(box, "播放扫描", () => { reset(); S.sx = -4; S.play = true; }, true);
+    } else if (S.mode === "dom") chips(box, {label:"函数", value:S.d, options:D.map((f, i) => ({label:f.n.slice(4), value:i})), onChange:v => { S.d = v; upd(); }});
+    else { slider(box, {label:"x₀", min:-4, max:4, step:.05, value:S.x0, fmt:dec, onInput:v => { S.x0 = Math.round(v * 100) / 100; upd(); }});
+      chips(box, {label:"例题", value:S.ex, options:[{label:"求值", value:false}, {label:"f(a) = 3，求 a", value:true}], onChange:v => { S.ex = v; upd(); }}); }
+    upd();
+  }
+  const dot = (c, x, y, col, r, open) => { c.beginPath(); c.arc(x, y, r || 4, 0, 7); c.fillStyle = open ? theme().bg : col; c.fill(); if (open){ c.strokeStyle = col; c.lineWidth = 2; c.stroke(); } };
+  const txt = (c, s, x, y, col, font, al) => { c.fillStyle = col; c.font = (font || "600 14px ") + FF(); c.textAlign = al || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  const vline = (c, X, g, col, lw, dash) => { c.save(); c.strokeStyle = col; c.lineWidth = lw; if (dash) c.setLineDash([4, 4]); c.beginPath(); c.moveTo(X, g[0]); c.lineTo(X, g[1]); c.stroke(); c.restore(); };
+  function vert(c, w, h, t, time){
+    if (S.play){ const p = S.sx; S.sx = Math.min(4, S.sx + Math.min(.05, time - (S.lt || time)) * 1.2);
+      if (S.g === 5 && p < 2 && S.sx >= 2) S.maxN = I; if (S.sx >= 4){ S.play = false; S.swept = true; } xS && xS.set(S.sx); }
+    S.lt = time;
+    const F = G[S.g], ys = F.ys(S.sx), n = cnt(ys), bad = n >= 2; S.maxN = Math.max(S.maxN, n);
+    txt(c, F.n, w / 2, 22, t.fg, "600 16px ");
+    const g = {x:30, y:44, w:w - 52, h:Math.max(120, h - 116)}, mp = drawAxes(c, g, [-4, 4], [-3, 4], {equal:true}); S.mp = mp;
+    if (S.g === 5) vline(c, mp.X(2), [g.y, g.y + g.h], t.blue, 2.5);
+    else [0, 1].forEach(k => plotFn(c, mp, x => { const y = F.ys(x); return y.length > k ? y[k] : NaN; }, mp.xr, t.blue, 2.5));
+    const X = mp.X(S.sx); vline(c, X, [g.y, g.y + g.h], bad ? t.red : t.blue, bad ? 3 : 1.5, !bad);
+    (ys || [-3, -2, -1, 0, 1, 2, 3, 4]).forEach(y => dot(c, X, mp.Y(y), t.gold, 6));
+    txt(c, "交点 " + nTxt(n) + (bad ? " ≥ 2：不是函数" : ""), w / 2, g.y + g.h + 26, bad ? t.redText : t.goldText);
+    if (S.maxN >= 2 || S.swept) txt(c, S.maxN >= 2 ? "结论：不是函数" : "结论：全程 ≤ 1 个交点，是函数", w / 2, g.y + g.h + 50, S.maxN >= 2 ? t.redText : t.blue);
+    const key = [S.g, S.sx, n, S.maxN, S.swept].join(); if (key !== S.k){ S.k = key; upd(); }
+  }
+  function dom(c, w, h, t){
+    const F = D[S.d], xr = [-4, 5]; txt(c, F.n, w / 2, 22, t.fg, "600 16px ");
+    const g = {x:44, y:44, w:w - 72, h:Math.max(120, h - 170)}, mp = drawAxes(c, g, xr, [-3, 5]);
+    plotFn(c, mp, F.f, xr, t.blue, 2.5);
+    const nb = {x:44, y:g.y + g.h + 20, w:w - 72, h:44};
+    F.v.forEach(iv => numberLine(c, nb, xr, [Object.assign({color:t.blue}, iv)]));
+    txt(c, "定义域 " + F.r, w / 2, nb.y + nb.h + 22, t.blue, "600 15px ");
+  }
+  function piece(c, w, h, t){
+    const xr = [-4, 4], k = seg(S.x0), y0 = P[k].f(S.x0);
+    txt(c, "f(x) = x + 2 (x ≤ −1)；x² (−1 < x < 2)；2x (x ≥ 2)", w / 2, 22, t.fg, (w < 480 ? "600 12px " : "600 15px "));
+    const g = {x:44, y:44, w:w - 72, h:Math.max(120, h - 84)}, mp = drawAxes(c, g, xr, [-3, 9]);
+    P.forEach((p, i) => plotFn(c, mp, x => x >= p.lo && x <= p.hi ? p.f(x) : NaN, [Math.max(p.lo, -4), Math.min(p.hi, 4)], t.blue, i === k ? 4 : 2));
+    [[-1, 1], [2, 4]].forEach(([x, y]) => { dot(c, mp.X(x), mp.Y(y), t.blue, 6, true); dot(c, mp.X(x), mp.Y(y), t.fg, 3.5);
+      txt(c, "(" + dec(x) + ", " + y + ")", mp.X(x) + (x < 0 ? -10 : 10), mp.Y(y) - 14, t.fg, "12px ", x < 0 ? "right" : "left"); });
+    const px = mp.X(S.x0), py = mp.Y(y0); vline(c, px, [mp.Y(0), py], t.gold, 1.5, true); dot(c, px, py, t.gold, 6);
+    txt(c, "f(" + dec(S.x0) + ") = " + dec(y0) + " · 第" + NUM[k] + "段", px + (S.x0 > 1 ? -10 : 10), py + 18, t.goldText, "600 13px ", S.x0 > 1 ? "right" : "left");
+    if (!S.ex) return;
+    plotFn(c, mp, () => 3, xr, t.gold, 1.5, true); txt(c, "y = 3", g.x + 6, mp.Y(3) - 12, t.goldText, "600 13px ", "left");
+    [[-R3, "−√3 舍", "center"], [1, "1 舍", "right"], [1.5, "1.5 舍", "left"]].forEach(([x, s, al]) => { dot(c, mp.X(x), mp.Y(3), t.red, 4.5, true);
+      txt(c, s, mp.X(x) + (al === "right" ? -4 : al === "left" ? 4 : 0), mp.Y(3) + 18, t.redText, "600 12px ", al); });
+    dot(c, mp.X(R3), mp.Y(3), t.gold, 6); txt(c, "a = √3", mp.X(R3) + 8, mp.Y(3) - 16, t.goldText, "600 14px ", "left");
+  }
+  return {
+    text:"函数是一种对应：定义域里的每一个 x，都有唯一的 y 和它对应。判断一条曲线是不是函数图像，用「竖线测试」——任何一条竖直线与图像最多只有一个交点。分段函数是同一个函数在不同区间用不同的式子，求值时先看 x 落在哪一段。",
+    points:["函数三要素：定义域、对应关系、值域", "竖线测试：任一竖线与图像至多一个交点", "定义域：偶次根式被开方数 ≥ 0、分母 ≠ 0、对数真数 > 0，取交集", "分段函数求值先定段，解方程要检验所属区间"],
+    gk:"选择题常考分段函数求值、解 f(a) = k、定义域。易错：解出的值要回代检验是否在对应段的区间内。",
+    mount(ctrl){
+      chips(ctrl, {label:"模式", value:S.mode, options:[{label:"竖线测试", value:"vert"}, {label:"定义域", value:"dom"}, {label:"分段函数", value:"piece"}], onChange:v => { S.mode = v; S.play = false; build(); }});
+      box = el("div", "ctrl"); ctrl.appendChild(box); build(); },
+    unmount(){ S.play = false; S.drag = false; },
+    pointer(e, type, x, y){
+      if (S.mode !== "vert" || !S.mp) return; const b = S.mp.box;
+      if (type === "down") S.drag = x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
+      if (type === "up"){ S.drag = false; return; }
+      if (S.drag){ S.play = false; setX(S.mp.invX(x)); xS && xS.set(S.sx); } },
+    draw(c, w, h, time){ const t = theme(); if (S.mode === "vert") vert(c, w, h, t, time); else if (S.mode === "dom") dom(c, w, h, t); else piece(c, w, h, t); }
+  };
+})();
+CH[5].ready = true;
+MODS[5] = (() => {
+  const S = {mode:"mono", m:0, x1:-1.5, x2:1, scan:null, p:0, x0:.6, mir:false, a:0, run:false, drag:0};
+  const FF = () => getComputedStyle(document.body).fontFamily, PI = Math.PI;
+  const dec = v => isFinite(v) ? String(Math.round(v * 100) / 100 || 0).replace("-", "−") : "无定义";
+  const cl = (v, a, b) => Math.round(Math.max(a, Math.min(b, v)) * 100) / 100, near = (u, v) => Math.abs(u - v) < 1e-6;
+  const txt = (c, s, x, y, col, font, al) => { c.fillStyle = col; c.font = (font || "600 14px ") + FF(); c.textAlign = al || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  const dot = (c, x, y, col, r, open) => { c.beginPath(); c.arc(x, y, r || 4, 0, 7); c.fillStyle = open ? theme().bg : col; c.fill(); if (open){ c.strokeStyle = col; c.lineWidth = 2; c.stroke(); } };
+  const seg = (c, x0, y0, x1, y1, col, lw, dash) => { c.save(); c.strokeStyle = col; c.lineWidth = lw || 1.5; if (dash) c.setLineDash([4, 4]); c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.restore(); };
+  const M = [
+    {n:"x²", f:x => x * x, iv:[["递减区间", "(−∞, 0]"], ["递增区间", "[0, +∞)"]]},
+    {n:"x³", f:x => x * x * x, iv:[["递增区间", "(−∞, +∞)"]]},
+    {n:"1/x", f:x => 1 / x, iv:[["递减区间", "(−∞, 0) 和 (0, +∞)"]], gap:true},
+    {n:"2ˣ", f:x => 2 ** x, iv:[["递增区间", "(−∞, +∞)"]]},
+    {n:"x + 1/x", f:x => x + 1 / x, iv:[["递增区间", "(−∞, −1] 和 [1, +∞)"], ["递减区间", "[−1, 0) 和 (0, 1]"]], gap:true},
+    {n:"|x − 1|", f:x => Math.abs(x - 1), iv:[["递减区间", "(−∞, 1]"], ["递增区间", "[1, +∞)"]]}];
+  const P = [
+    {n:"x³ − x", f:x => x ** 3 - x, k:"奇", d:"R"}, {n:"x² + 1", f:x => x * x + 1, k:"偶", d:"R"}, {n:"x + 1/x", f:x => x + 1 / x, k:"奇", d:"{x | x ≠ 0}"},
+    {n:"|x|", f:Math.abs, k:"偶", d:"R"}, {n:"x² + x", f:x => x * x + x, k:"非奇非偶", d:"R"},
+    {n:"√x", f:x => x >= 0 ? Math.sqrt(x) : NaN, k:"非奇非偶", d:"[0, +∞)", note:"定义域不关于原点对称 ⇒ 非奇非偶"},
+    {n:"eˣ − e⁻ˣ", f:x => Math.exp(x) - Math.exp(-x), k:"奇", d:"R"}, {n:"ln((1−x)/(1+x))", f:x => Math.log((1 - x) / (1 + x)), k:"奇", d:"(−1, 1)", x0:.5}];
+  const KC = {"奇":"blue", "偶":"gold", "非奇非偶":"red"}, g2 = x => x * x - 2 * x;
+  function upd(){
+    if (S.mode === "mono"){ const F = M[S.m], a = F.f(S.x1), b = F.f(S.x2), ok = isFinite(a) && isFinite(b);
+      const rows = [["函数", "f(x) = " + F.n], ["x₁ < x₂", dec(S.x1) + " < " + dec(S.x2)], ["f(x₁)", dec(a)], ["f(x₂)", dec(b)],
+        ["比较", !ok ? "有点不在定义域内" : a < b ? "f(x₁) < f(x₂)：割线上升" : a > b ? "f(x₁) > f(x₂)：割线下降" : "f(x₁) = f(x₂)", !ok ? "red" : a < b ? "blue" : a > b ? "red" : "gold"]];
+      if (F.gap && S.x1 < 0 && S.x2 > 0) rows.push(["注意", "x₁、x₂ 跨过 x = 0，不在同一单调区间", "gold"]);
+      if (S.scan !== null && S.scan >= 4){ F.iv.forEach(([k, v]) => rows.push([k, v, k === "递增区间" ? "blue" : "red"]));
+        if (F.iv.some(r => r[1].includes("和"))) rows.push(["易错", "多个单调区间用「和」或逗号隔开，不能用 ∪", "gold"]); }
+      return readout(rows); }
+    if (S.mode === "par"){ const F = P[S.p], a = F.f(S.x0), b = F.f(-S.x0), ok = isFinite(a) && isFinite(b);
+      const rel = !ok ? "x₀ 或 −x₀ 不在定义域内" : near(b, a) && near(b, -a) ? "f(−x₀) = f(x₀) = −f(x₀)" : near(b, a) ? "f(−x₀) = f(x₀)" : near(b, -a) ? "f(−x₀) = −f(x₀)" : "f(−x₀) ≠ ±f(x₀)";
+      const rows = [["函数", "f(x) = " + F.n], ["定义域", F.d], ["f(x₀)", dec(a), "blue"], ["f(−x₀)", dec(b), "gold"], ["−f(x₀)", dec(isFinite(a) ? -a : NaN)],
+        ["本点", rel], ["判断", F.k === "非奇非偶" ? F.k : F.k + "函数", KC[F.k]]];
+      if (F.note) rows.push(["提示", F.note, "red"]);
+      return readout(rows); }
+    readout([["已知", "f 是 R 上的奇函数，x > 0 时 f(x) = x² − 2x"], ["设 x < 0", "则 −x > 0，f(−x) = x² + 2x"], ["由奇函数", "f(x) = −f(−x) = −(x² + 2x)"],
+      S.a >= 1 ? ["答案", "f(x) = −x² − 2x（x < 0），f(0) = 0", "blue"] : ["下一步", "点「中心对称补全」", "gold"]]);
+  }
+  let box = null, s1 = null, s2 = null, s0 = null;
+  const setX1 = v => { S.x1 = cl(v, -4, S.x2 - .1); s1 && s1.set(S.x1); }, setX2 = v => { S.x2 = cl(v, S.x1 + .1, 4); s2 && s2.set(S.x2); };
+  const setX0 = v => { S.x0 = cl(v, -3.5, 3.5); s0 && s0.set(S.x0); };
+  function build(){
+    box.innerHTML = ""; s1 = s2 = s0 = null;
+    if (S.mode === "mono"){
+      chips(box, {label:"函数", value:S.m, options:M.map((f, i) => ({label:f.n, value:i})), onChange:v => { S.m = v; S.scan = null; upd(); }});
+      s1 = slider(box, {label:"x₁", min:-4, max:4, step:.05, value:S.x1, fmt:dec, onInput:v => { setX1(v); upd(); }});
+      s2 = slider(box, {label:"x₂", min:-4, max:4, step:.05, value:S.x2, fmt:dec, onInput:v => { setX2(v); upd(); }});
+      button(box, "扫描单调区间", () => { S.scan = -4; upd(); }, true);
+    } else if (S.mode === "par"){
+      chips(box, {label:"函数", value:S.p, options:P.map((f, i) => ({label:f.n, value:i})), onChange:v => { S.p = v; if (P[v].x0) setX0(P[v].x0); upd(); }});
+      s0 = slider(box, {label:"x₀", min:-3.5, max:3.5, step:.05, value:S.x0, fmt:dec, onInput:v => { setX0(v); upd(); }});
+      toggle(box, "镜像检验", S.mir, v => { S.mir = v; });
+    } else button(box, "中心对称补全", () => { S.a = 0; S.run = true; upd(); }, true);
+    upd();
+  }
+  function mono(c, w, h, t, dt){
+    const F = M[S.m]; txt(c, "f(x) = " + F.n, w / 2, 22, t.fg, "600 16px ");
+    const g = {x:44, y:44, w:w - 72, h:Math.max(120, h - 116)}, mp = drawAxes(c, g, [-4, 4], [-3, 5]); S.mp = mp;
+    plotFn(c, mp, F.f, mp.xr, t.blue, 2.5);
+    if (S.scan !== null){ S.scan = Math.min(4, S.scan + dt * 2.4); const sl = x => F.f(x + 1e-4) - F.f(x - 1e-4);
+      plotFn(c, mp, x => x <= S.scan && sl(x) > 0 ? F.f(x) : NaN, [-4, S.scan], t.teal, 4.5);
+      plotFn(c, mp, x => x <= S.scan && sl(x) < 0 ? F.f(x) : NaN, [-4, S.scan], t.red, 4.5); }
+    const a = F.f(S.x1), b = F.f(S.x2), ax = Math.min(Math.max(mp.Y(0), g.y), g.y + g.h);
+    if (isFinite(a) && isFinite(b)) seg(c, mp.X(S.x1), mp.Y(a), mp.X(S.x2), mp.Y(b), b > a ? t.teal : b < a ? t.red : t.gold, 2.5);
+    [[S.x1, a, "x₁"], [S.x2, b, "x₂"]].forEach(([x, y, n], i) => { const X = mp.X(x);
+      if (isFinite(y)){ seg(c, X, ax, X, mp.Y(y), t.axis, 1, true); dot(c, X, mp.Y(y), t.blue, 5);
+        txt(c, "f(" + n + ")", X + (i ? 8 : -8), mp.Y(y) - 14, t.fg, "600 13px ", i ? "left" : "right"); }
+      dot(c, X, ax, t.fg, 7); txt(c, n, X, ax + 20, t.fg, "600 14px "); });
+    txt(c, "f(x₁) = " + dec(a) + "    f(x₂) = " + dec(b), w / 2, g.y + g.h + 26, t.fg);
+    const ok = isFinite(a) && isFinite(b);
+    txt(c, !ok ? "有点不在定义域内" : a < b ? "f(x₁) < f(x₂)" : a > b ? "f(x₁) > f(x₂)" : "f(x₁) = f(x₂)", w / 2, g.y + g.h + 50, !ok || a > b ? t.redText : a < b ? t.blue : t.goldText, "600 15px ");
+  }
+  function par(c, w, h, t){
+    const F = P[S.p]; txt(c, "f(x) = " + F.n, w / 2, 22, t.fg, "600 16px ");
+    const g = {x:30, y:44, w:w - 52, h:Math.max(120, h - 128)}, mp = drawAxes(c, g, [-3.5, 3.5], [-3.5, 3.5], {equal:true}); S.mp = mp;
+    if (S.mir){ c.save(); c.globalAlpha = .45; plotFn(c, mp, x => F.f(-x), mp.xr, t.gold, 6); plotFn(c, mp, x => -F.f(-x), mp.xr, t.purple, 6); c.restore(); }
+    plotFn(c, mp, F.f, mp.xr, t.blue, 2.5);
+    const x = S.x0, a = F.f(x), b = F.f(-x);
+    if (isFinite(a)){ const px = mp.X(x), py = mp.Y(a), mx = mp.X(-x), oy = mp.Y(-a);
+      seg(c, px, py, mx, py, t.gold, 1.5, true); seg(c, px, py, mx, oy, t.purple, 1.5, true);
+      dot(c, mx, py, t.gold, 7, true); dot(c, mx, oy, t.purple, 7, true); dot(c, px, py, t.blue, 5);
+      txt(c, "(x₀, f(x₀))", px + (x >= 0 ? 10 : -10), py - 14, t.blue, "600 13px ", x >= 0 ? "left" : "right"); }
+    if (isFinite(b)){ const qx = mp.X(-x), qy = mp.Y(b); dot(c, qx, qy, t.gold, 4.5);
+      txt(c, "(−x₀, f(−x₀))", qx + (x >= 0 ? -10 : 10), qy + 16, t.goldText, "600 13px ", x >= 0 ? "right" : "left"); }
+    txt(c, "虚线圈：金 = 关于 y 轴的镜像点，紫 = 关于原点的对称点", w / 2, g.y + g.h + 22, t.fg, (w < 480 ? "12px " : "13px "));
+    txt(c, F.note ? F.note : "判断：" + (F.k === "非奇非偶" ? F.k : F.k + "函数"), w / 2, g.y + g.h + 46, F.k === "奇" ? t.blue : F.k === "偶" ? t.goldText : t.redText, "600 15px ");
+    if (S.mir) txt(c, "淡金或淡紫与原图重合 ⇒ 偶 / 奇", w / 2, g.y + g.h + 70, t.fg, "13px ");
+  }
+  function comp(c, w, h, t, dt){
+    txt(c, "f 为 R 上奇函数，x > 0 时 f(x) = x² − 2x", w / 2, 22, t.fg, (w < 480 ? "600 13px " : "600 16px "));
+    const g = {x:44, y:44, w:w - 72, h:Math.max(120, h - 100)}, mp = drawAxes(c, g, [-3.5, 3.5], [-4, 4]); S.mp = mp;
+    plotFn(c, mp, x => x > 0 ? g2(x) : NaN, [0, 3.5], t.blue, 2.5); dot(c, mp.X(0), mp.Y(0), t.blue, 5, true);
+    txt(c, "x² − 2x", mp.X(2.6), mp.Y(g2(2.6)), t.blue, "600 13px ", "left");
+    if (S.run){ S.a = Math.min(1, S.a + dt / 1.6); if (S.a >= 1){ S.run = false; upd(); } }
+    if (S.a > 0){ const th = PI * S.a, co = Math.cos(th), si = Math.sin(th), R = (x, y) => [mp.X(x * co - y * si), mp.Y(x * si + y * co)];
+      c.save(); c.beginPath(); c.rect(g.x, g.y, g.w, g.h); c.clip(); c.strokeStyle = t.gold; c.lineWidth = 2.5; c.beginPath();
+      for (let i = 1; i <= 120; i++){ const x = 3.5 * i / 120, p = R(x, g2(x)); i === 1 ? c.moveTo(p[0], p[1]) : c.lineTo(p[0], p[1]); }
+      c.stroke(); c.restore(); const v = R(1, -1);
+      seg(c, mp.X(0), mp.Y(0), mp.X(1), mp.Y(-1), t.blue, 1.2, true); seg(c, mp.X(0), mp.Y(0), v[0], v[1], t.gold, 1.2, true); dot(c, v[0], v[1], t.gold, 4); }
+    if (S.a >= 1){ dot(c, mp.X(0), mp.Y(0), t.fg, 5); txt(c, "f(0) = 0", mp.X(0) + 8, mp.Y(0) + 16, t.fg, "600 13px ", "left");
+      txt(c, "−x² − 2x", mp.X(-1), mp.Y(1) - 16, t.goldText, "600 13px "); }
+    txt(c, S.a >= 1 ? "f(x) = −x² − 2x（x < 0），f(0) = 0" : "绕原点旋转 180°：(x, y) → (−x, −y)", w / 2, g.y + g.h + 26, S.a >= 1 ? t.blue : t.fg, "600 15px ");
+  }
+  return {
+    text:"单调递增：x 变大，函数值跟着变大——任取 x₁ < x₂ 都有 f(x₁) < f(x₂)。奇函数关于原点中心对称，f(−x) = −f(x)；偶函数关于 y 轴对称，f(−x) = f(x)。判断奇偶性前，先看定义域是否关于原点对称。",
+    points:["单调性定义：在区间内任取 x₁ < x₂，比较 f(x₁) 与 f(x₂)", "奇函数 f(−x) = −f(x)，图像关于原点对称；在 0 处有定义则 f(0) = 0", "偶函数 f(−x) = f(x)，图像关于 y 轴对称",
+      "奇偶性前提：定义域关于原点对称", "奇函数在对称区间上单调性相同，偶函数相反"],
+    gk:"选填高频：利用奇偶性与单调性解不等式 f(2x − 1) < f(1)。易错：多个单调区间不能用 ∪ 连接；偶函数解不等式要用 |x|，即 f(|2x − 1|) < f(1)。",
+    mount(ctrl){
+      chips(ctrl, {label:"模式", value:S.mode, options:[{label:"单调性", value:"mono"}, {label:"奇偶性", value:"par"}, {label:"性质综合", value:"comp"}], onChange:v => { S.mode = v; S.drag = 0; S.mp = null; build(); }});
+      box = el("div", "ctrl"); ctrl.appendChild(box); build(); },
+    unmount(){ S.run = false; S.drag = 0; },
+    pointer(e, type, x, y){
+      if (!S.mp || S.mode === "comp") return; const b = S.mp.box;
+      if (type === "down"){ const inB = x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
+        S.drag = !inB ? 0 : S.mode === "par" ? 3 : Math.abs(S.mp.X(S.x1) - x) <= Math.abs(S.mp.X(S.x2) - x) ? 1 : 2; }
+      if (type === "up"){ S.drag = 0; return; }
+      if (S.drag){ const v = S.mp.invX(x); S.drag === 1 ? setX1(v) : S.drag === 2 ? setX2(v) : setX0(v); upd(); } },
+    draw(c, w, h, time){ const t = theme(), dt = Math.min(.05, time - (S.lt || time)); S.lt = time;
+      const k = [S.mode, S.scan !== null && S.scan >= 4].join(); if (k !== S.k){ S.k = k; upd(); }
+      if (S.mode === "mono") mono(c, w, h, t, dt); else if (S.mode === "par") par(c, w, h, t); else comp(c, w, h, t, dt); }
+  };
+})();
+CH[6].ready = true;
+MODS[6] = (() => {
+  const S = {mode:"ax", g:0, c:0, t:1.2, ex:false, cen:false, rv:0, run:false, drag:0, ys:{ax:[1, 2, -1, 0], cen:[0, 1.5, 2, 1]}};
+  const FF = () => getComputedStyle(document.body).fontFamily, PI = Math.PI;
+  const dec = v => isFinite(v) ? String(Math.round(v * 100) / 100 || 0).replace("-", "−") : "无定义";
+  const cl = (v, a, b) => Math.round(Math.max(a, Math.min(b, v)) * 100) / 100;
+  const txt = (c, s, x, y, col, font, al) => { c.fillStyle = col; c.font = (font || "600 14px ") + FF(); c.textAlign = al || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  const dot = (c, x, y, col, r, open) => { c.beginPath(); c.arc(x, y, r || 4, 0, 7); c.fillStyle = open ? theme().bg : col; c.fill(); if (open){ c.strokeStyle = col; c.lineWidth = 2; c.stroke(); } };
+  const seg = (c, x0, y0, x1, y1, col, lw, dash) => { c.save(); c.strokeStyle = col; c.lineWidth = lw || 1.5; if (dash) c.setLineDash([4, 4]); c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.restore(); };
+  const A = [{n:"(x − 1)²", f:x => (x - 1) ** 2, a:1, yr:[-1, 7]}, {n:"|x − 2| + 1", f:x => Math.abs(x - 2) + 1, a:2, yr:[-1, 7]}, {n:"cos(x − 1)", f:x => Math.cos(x - 1), a:1, yr:[-2.5, 2.5]}];
+  const C = [{n:"x³ − 3x² + 2", f:x => x ** 3 - 3 * x * x + 2, a:1, b:0, at:"1", yr:[-6, 6]}, {n:"1/(x − 1) + 2", f:x => 1 / (x - 1) + 2, a:1, b:2, at:"1", yr:[-3, 7]},
+    {n:"tan x · (0, 0)", f:Math.tan, a:0, b:0, at:"0", yr:[-5, 5]}, {n:"tan x · (π/2, 0)", f:Math.tan, a:PI / 2, b:0, at:"π/2", yr:[-5, 5]}];
+  const cub = C[0].f, PR = [[-3, 5], [-2, 4], [-1, 3], [0, 2]];
+  const L = () => S.cen ? 1 : 2, N = () => 16 / L(), XS = () => [0, L() / 3, 2 * L() / 3, L()];
+  function g0(r){ const xs = XS(), ys = S.ys[S.cen ? "cen" : "ax"]; for (let i = 1; i < 4; i++) if (r <= xs[i] + 1e-9){ const k = (r - xs[i - 1]) / (xs[i] - xs[i - 1]); return ys[i - 1] + k * (ys[i] - ys[i - 1]); } return ys[3]; }
+  function fp(x){ const r = ((x % 4) + 4) % 4;
+    if (!S.cen) return r <= 2 ? g0(r) : g0(4 - r);
+    return r <= 1 ? g0(r) : r <= 2 ? g0(2 - r) : r <= 3 ? -g0(r - 2) : -g0(4 - r); }
+  const tiles = () => { const l = L(); return [...Array(N())].map((_, i) => -8 + i * l).sort((p, q) => Math.abs(p) - Math.abs(q) || p - q).map(s => (s < 0 && s === -l ? s : s)); };
+  const done = () => S.rv >= N() - 1;
+  function upd(){
+    if (S.mode === "ax"){ const F = A[S.g], a = F.a, p = F.f(a + S.t), q = F.f(a - S.t);
+      return readout([["函数", "f(x) = " + F.n], ["对称轴", "x = " + a, "gold"], ["距离 t", dec(S.t)], ["f(a + t)", "f(" + dec(a + S.t) + ") = " + dec(p), "blue"],
+        ["f(a − t)", "f(" + dec(a - S.t) + ") = " + dec(q), "blue"], ["验证", Math.abs(p - q) < 1e-6 ? "f(a + t) = f(a − t) ⇒ 关于 x = " + a + " 对称" : "不相等", "blue"]]); }
+    if (S.mode === "cen"){
+      if (S.ex && S.c === 0) return readout([["求", "f(−3) + f(−2) + … + f(5)"], ["对称中心", "(1, 0)：f(1 + x) + f(1 − x) = 0", "gold"]]
+        .concat(PR.map(([u, v]) => ["f(" + dec(u) + ") + f(" + v + ")", dec(cub(u)) + " + " + dec(cub(v)) + " = 0"]))
+        .concat([["中间项", "f(1) = 0", "gold"], ["总和", "4 × 0 + 0 = 0", "blue"]]));
+      const F = C[S.c], p = F.f(F.a + S.t), q = F.f(F.a - S.t);
+      return readout([["函数", "f(x) = " + F.n.split(" · ")[0]], ["对称中心", "(" + F.at + ", " + F.b + ")", "gold"], ["距离 t", dec(S.t)], ["f(a + t)", dec(p), "blue"], ["f(a − t)", dec(q), "blue"],
+        ["f(a + t) + f(a − t)", dec(p + q)], ["2b", dec(2 * F.b), "gold"], ["验证", isFinite(p + q) ? "和 = 2b ⇒ 关于 (" + F.at + ", " + F.b + ") 对称" : "该点无定义", isFinite(p + q) ? "blue" : "red"]]); }
+    readout(S.cen ? [["条件", "f(−x) = −f(x)，f(1 + x) = f(1 − x)"], ["推导", "f(x + 2) = f(1 − (x + 1)) = f(−x) = −f(x)"], ["再推", "f(x + 4) = −f(x + 2) = f(x)"],
+      ["中心到轴距离", "d = 1 ⇒ T = 4d = 4", "gold"], ["周期", "T = 4", "blue"], ["状态", done() ? "已铺满 [−8, 8]" : "拖动控制点，点「反射」铺满", done() ? "blue" : "gold"]]
+      : [["条件", "f(−x) = f(x)，f(2 + x) = f(2 − x)"], ["推导", "f(x + 4) = f(2 − (x + 2)) = f(−x) = f(x)"], ["两轴距离", "d = 2 ⇒ T = 2d = 4", "gold"],
+      ["周期", "T = 4", "blue"], ["状态", done() ? "已铺满 [−8, 8]" : "拖动控制点，点「反射」铺满", done() ? "blue" : "gold"]]);
+  }
+  let box = null, ts = null;
+  const setT = v => { S.t = cl(v, .1, 3.5); ts && ts.set(S.t); };
+  function build(){
+    box.innerHTML = ""; ts = null;
+    if (S.mode === "ax") chips(box, {label:"函数", value:S.g, options:A.map((f, i) => ({label:f.n, value:i})), onChange:v => { S.g = v; upd(); }});
+    else if (S.mode === "cen"){ chips(box, {label:"函数", value:S.c, options:C.map((f, i) => ({label:f.n, value:i})), onChange:v => { S.c = v; upd(); }});
+      chips(box, {label:"例题", value:S.ex, options:[{label:"拖动验证", value:false}, {label:"求 f(−3) + … + f(5)", value:true}], onChange:v => { S.ex = v; if (v){ S.c = 0; build(); } else upd(); }}); }
+    if (S.mode !== "per"){ ts = slider(box, {label:"距离 t", min:.1, max:3.5, step:.05, value:S.t, fmt:dec, onInput:v => { setT(v); upd(); }}); }
+    else { toggle(box, "一个对称中心 (0, 0) + 一条对称轴 x = 1", S.cen, v => { S.cen = v; S.rv = 0; S.run = false; upd(); });
+      button(box, "反射", () => { S.rv = 0; S.run = true; upd(); }, true); }
+    upd();
+  }
+  const G = (w, h, d) => ({x:44, y:44, w:w - 72, h:Math.max(120, h - d)});
+  function axis(c, w, h, t){
+    const F = A[S.g], a = F.a, u = S.t, p = F.f(a + u), q = F.f(a - u);
+    txt(c, "f(x) = " + F.n + " · 对称轴 x = " + a, w / 2, 22, t.fg, "600 16px ");
+    const g = G(w, h, 116), mp = drawAxes(c, g, [-4, 6], F.yr); S.mp = mp; const ax0 = Math.min(Math.max(mp.Y(0), g.y), g.y + g.h);
+    seg(c, mp.X(a), g.y, mp.X(a), g.y + g.h, t.gold, 2, true); txt(c, "x = " + a, mp.X(a) + 6, g.y + 12, t.goldText, "600 13px ", "left");
+    plotFn(c, mp, F.f, mp.xr, t.blue, 2.5);
+    seg(c, mp.X(a - u), mp.Y(q), mp.X(a + u), mp.Y(p), t.teal, 1.5, true);
+    [[a - u, q, "a − t"], [a + u, p, "a + t"]].forEach(([x, y, n]) => { const X = mp.X(x); seg(c, X, ax0, X, mp.Y(y), t.axis, 1, true);
+      dot(c, X, mp.Y(y), t.blue, 5); dot(c, X, ax0, t.fg, 5); txt(c, n, X, ax0 + 20, t.fg, "600 13px "); });
+    txt(c, "f(a + t) = " + dec(p) + "    f(a − t) = " + dec(q), w / 2, g.y + g.h + 26, t.fg);
+    txt(c, "两侧对称位置函数值相等 ⇒ 图像关于直线 x = " + a + " 对称", w / 2, g.y + g.h + 50, t.blue, (w < 480 ? "600 12px " : "600 15px "));
+  }
+  function center(c, w, h, t){
+    const ex = S.ex && S.c === 0, F = C[S.c], a = F.a, u = S.t, p = F.f(a + u), q = F.f(a - u);
+    txt(c, ex ? "f(x) = x³ − 3x² + 2，求 f(−3) + f(−2) + … + f(5)" : "f(x) = " + F.n.split(" · ")[0] + " · 中心 (" + F.at + ", " + F.b + ")", w / 2, 22, t.fg, (w < 480 ? "600 13px " : "600 16px "));
+    const g = G(w, h, 116), mp = drawAxes(c, g, [-4, 6], ex ? [-56, 56] : F.yr); S.mp = mp;
+    plotFn(c, mp, F.f, mp.xr, t.blue, 2.5);
+    if (ex){ PR.forEach(([x1, x2]) => { seg(c, mp.X(x1), mp.Y(cub(x1)), mp.X(x2), mp.Y(cub(x2)), t.gold, 1.5, true);
+        [x1, x2].forEach(x => { dot(c, mp.X(x), mp.Y(cub(x)), t.blue, 5); txt(c, dec(cub(x)), mp.X(x) + (x < 1 ? -8 : 8), mp.Y(cub(x)), t.fg, "600 12px ", x < 1 ? "right" : "left"); }); });
+      dot(c, mp.X(1), mp.Y(0), t.red, 6, true); txt(c, "f(1) = 0", mp.X(1) + 10, mp.Y(0) + 16, t.redText, "600 13px ", "left");
+      txt(c, "−3 与 5、−2 与 4、−1 与 3、0 与 2 关于 x = 1 配对，每对和为 0", w / 2, g.y + g.h + 26, t.fg, (w < 480 ? "12px " : "14px "));
+      return txt(c, "4 对和为 0，加中间 f(1) = 0 ⇒ 总和 0", w / 2, g.y + g.h + 50, t.blue, "600 15px "); }
+    if (isFinite(p) && isFinite(q)) seg(c, mp.X(a - u), mp.Y(q), mp.X(a + u), mp.Y(p), t.gold, 1.5, true);
+    [[a - u, q], [a + u, p]].forEach(([x, y]) => isFinite(y) && dot(c, mp.X(x), mp.Y(y), t.blue, 5));
+    dot(c, mp.X(a), mp.Y(F.b), t.red, 6, true); txt(c, "中点 (" + F.at + ", " + F.b + ")", mp.X(a) + 10, mp.Y(F.b) + 16, t.goldText, "600 13px ", "left");
+    txt(c, "f(a + t) + f(a − t) = " + dec(p + q) + "    2b = " + dec(2 * F.b), w / 2, g.y + g.h + 26, t.fg);
+    txt(c, "两点中点恒为对称中心 ⇒ 图像关于 (" + F.at + ", " + F.b + ") 中心对称", w / 2, g.y + g.h + 50, t.blue, (w < 480 ? "600 12px " : "600 15px "));
+  }
+  function period(c, w, h, t, dt){
+    const l = L(), n = N(), cols = [t.blue, t.gold, t.teal, t.purple];
+    txt(c, S.cen ? "关于 (0, 0) 中心对称 + 关于 x = 1 对称 ⇒ T = 4" : "关于 x = 0 与 x = 2 对称 ⇒ T = 4", w / 2, 22, t.fg, (w < 480 ? "600 13px " : "600 16px "));
+    const g = G(w, h, 130), mp = drawAxes(c, g, [-8, 8], [-3, 3]); S.mp = mp;
+    if (S.run){ S.rv = Math.min(n - 1, S.rv + dt * 2.5); if (done()){ S.run = false; upd(); } }
+    for (let x = -8; x <= 8; x++){ const isAx = S.cen ? Math.abs(x % 2) === 1 : x % 2 === 0, main = S.cen ? x === 1 : x === 0 || x === 2;
+      if (isAx) seg(c, mp.X(x), g.y, mp.X(x), g.y + g.h, t.gold, main ? 2 : 1, true);
+      else if (S.cen && x % 2 === 0) dot(c, mp.X(x), mp.Y(0), t.red, main || x === 0 ? 6 : 4, true);
+      if (main || (S.cen && x === 0)) txt(c, isAx ? "x = " + x : "(0, 0)", mp.X(x) + 5, isAx ? g.y + 12 : mp.Y(0) + 16, isAx ? t.goldText : t.redText, "600 13px ", "left"); }
+    tiles().forEach((s, k) => { const al = k === 0 ? 1 : Math.max(0, Math.min(1, S.rv - k + 1)); if (!al) return;
+      c.save(); c.globalAlpha = al; plotFn(c, mp, fp, [s, s + l], cols[Math.round((((s % 4) + 4) % 4) / l)], k ? 2.5 : 3.5); c.restore(); });
+    XS().forEach((x, i) => { const y = g0(x); i === 1 || i === 2 ? dot(c, mp.X(x), mp.Y(y), t.blue, 7, true) : dot(c, mp.X(x), mp.Y(y), t.blue, 3.5); });
+    const by = g.y + g.h + 18;
+    if (done()) [[-4, 0, t.gold, t.goldText], [0, 4, t.blue, t.blue]].forEach(([a, b, col, tc]) => { const X0 = mp.X(a) + 2, X1 = mp.X(b) - 2;
+      seg(c, X0, by, X1, by, col, 2.5); seg(c, X0, by - 5, X0, by + 5, col, 2); seg(c, X1, by - 5, X1, by + 5, col, 2);
+      txt(c, "[" + dec(a) + ", " + b + "] · T = 4", (X0 + X1) / 2, by + 16, tc, "600 13px "); });
+    txt(c, done() ? "f(x + 4) = f(x)：每隔 4 重复一次" : "拖动空心控制点改基础曲线，点「反射」", w / 2, by + 42, done() ? t.blue : t.fg, (w < 480 ? "600 12px " : "600 15px "));
+  }
+  return {
+    text:"f(a + x) = f(a − x)：x = a 两侧对称位置函数值相等，图像关于直线 x = a 对称。f(a + x) + f(a − x) = 2b：图像关于点 (a, b) 中心对称。f(x + T) = f(x)：每隔 T 重复一次，是周期函数。两条对称轴（或两个对称中心）之间距离为 d 时，函数有周期 2d——对称性叠加就生出周期。",
+    points:["f(a + x) = f(a − x) ⇔ 图像关于 x = a 对称", "f(a + x) + f(a − x) = 2b ⇔ 图像关于 (a, b) 对称", "f(x + T) = f(x) ⇔ 周期为 T；f(x + a) = −f(x) ⇒ 周期 2a",
+      "两轴（或两中心）距离 d ⇒ 周期 2d", "一轴一中心距离 d ⇒ 周期 4d"],
+    gk:"新高考 I 卷多次考抽象函数的对称性与周期性，常配合奇偶性求 f(2026) 之类。易错：f(x + 1) 是偶函数 ⇒ f(x) 关于 x = 1 对称，不是关于 x = −1。",
+    mount(ctrl){
+      chips(ctrl, {label:"模式", value:S.mode, options:[{label:"轴对称", value:"ax"}, {label:"中心对称", value:"cen"}, {label:"对称生周期", value:"per"}], onChange:v => { S.mode = v; S.drag = 0; S.mp = null; build(); }});
+      box = el("div", "ctrl"); ctrl.appendChild(box); build(); },
+    unmount(){ S.run = false; S.drag = 0; },
+    pointer(e, type, x, y){
+      if (!S.mp || (S.mode === "cen" && S.ex && S.c === 0)) return; const b = S.mp.box, mp = S.mp;
+      if (type === "down"){ S.drag = 0; if (x < b.x || x > b.x + b.w || y < b.y - 10 || y > b.y + b.h + 10) return;
+        if (S.mode !== "per") S.drag = 9;
+        else XS().forEach((px, i) => { if ((i === 1 || i === 2) && Math.hypot(mp.X(px) - x, mp.Y(g0(px)) - y) < 24) S.drag = i; }); }
+      if (type === "up"){ S.drag = 0; return; }
+      if (!S.drag) return;
+      if (S.drag === 9){ setT(Math.abs(mp.invX(x) - (S.mode === "ax" ? A[S.g].a : C[S.c].a))); upd(); }
+      else S.ys[S.cen ? "cen" : "ax"][S.drag] = cl(mp.invY(y), -2.8, 2.8); },
+    draw(c, w, h, time){ const t = theme(), dt = Math.min(.05, time - (S.lt || time)); S.lt = time;
+      if (S.mode === "ax") axis(c, w, h, t); else if (S.mode === "cen") center(c, w, h, t); else period(c, w, h, t, dt); }
+  };
+})();
+CH[7].ready = true;
+MODS[7] = (() => {
+  const S = {mode:"base", a:2, m:.3, n:.5, on:[1, 1, 1, 1, 0, 0, 0, 0], q:0, rv:false};
+  const FF = () => getComputedStyle(document.body).fontFamily, LN = Math.log, lg = (b, x) => LN(x) / LN(b);
+  const d3 = (v, k) => (v < 0 ? "−" : "") + Math.abs(v).toFixed(k == null ? 3 : k);
+  const sh = v => String(+v.toFixed(3)).replace("-", "−");
+  const cmp = (p, q) => Math.abs(p - q) < 1e-9 ? "=" : p < q ? "<" : ">";
+  const txt = (c, s, x, y, col, font, al) => { c.fillStyle = col; c.font = (font || "600 14px ") + FF(); c.textAlign = al || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  const dot = (c, x, y, col, r) => { c.beginPath(); c.arc(x, y, r || 5, 0, 7); c.fillStyle = col; c.fill(); };
+  const seg = (c, x0, y0, x1, y1, col, lw, dash) => { c.save(); c.strokeStyle = col; c.lineWidth = lw || 1.5; if (dash) c.setLineDash([4, 4]); c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.restore(); };
+  const NUMS = [["2^0.3", 2 ** .3], ["0.3²", .09], ["log₂0.3", lg(2, .3)], ["log₀.₅3", lg(.5, 3)], ["3^−0.2", 3 ** -.2], ["ln 2", LN(2)], ["e^0.1", Math.exp(.1)], ["log₃2", lg(3, 2)]];
+  const zone = v => v < 0 ? ["(−∞, 0)", "red"] : v < 1 ? ["(0, 1)", "gold"] : ["(1, +∞)", "blue"];
+  const Q = [
+    {l:"① 2^0.3、0.3²、log₂0.3", v:[["a = 2^0.3", 2 ** .3], ["b = 0.3²", .09], ["c = log₂0.3", lg(2, .3)]], r:[-2, 2], tk:[-2, -1, 0, 1, 2], k:3, bands:true, ans:"c < b < a",
+      why:["a = 2^0.3 > 2⁰ = 1", "0 < b = 0.09 < 1", "c = log₂0.3 < log₂1 = 0", "中间量 0 和 1 一刀切开"]},
+    {l:"② log₃2、ln 2、5^−½", v:[["a = log₃2", lg(3, 2)], ["b = ln 2", LN(2)], ["c = 5^−½", 5 ** -.5]], r:[.4, .8], tk:[.4, .5, .6, .7, .8], k:3, mid:.5, ans:"c < a < b",
+      why:["a = ln 2 / ln 3 < ln 2 = b（ln 3 > 1）", "a = log₃2 > log₃√3 = 1/2", "c = 1/√5 < 1/2", "中间量取 1/2：c < 1/2 < a < b"]},
+    {l:"③ 2022 新高考 I 卷第 7 题", v:[["a = 0.1e^0.1", .1 * Math.exp(.1)], ["b = 1/9", 1 / 9], ["c = −ln 0.9", -LN(.9)]], r:[.1, .115], tk:[.1, .105, .11, .115], k:4, ans:"c < a < b",
+      why:["b = 0.1/(1 − 0.1)：ln a − ln b = 0.1 + ln 0.9 < 0 ⇒ a < b", "构造 f(x) = xeˣ + ln(1 − x)，f(0) = 0", "f′(x) = (1 + x)eˣ − 1/(1 − x) > 0 于 (0, 0.1] ⇒ f(0.1) > 0 ⇒ a > c", "数值：a ≈ 0.1105，b ≈ 0.1111，c ≈ 0.1054"]}
+  ];
+  const vals = () => { const a = S.a; return {a, inc:a > 1, em:a ** S.m, en:a ** S.n, lm:lg(a, S.m), ln:lg(a, S.n)}; };
+  const sel = () => NUMS.filter((_, i) => S.on[i]).sort((p, q) => p[1] - q[1]);
+  function upd(){
+    if (S.mode === "base"){ const V = vals(), m = sh(S.m), n = sh(S.n);
+      return readout([["底数 a", sh(V.a) + (V.inc ? " > 1" : " ∈ (0, 1)")], ["单调性", V.inc ? "aˣ、logₐx 都递增" : "aˣ、logₐx 都递减", "gold"],
+        ["aᵐ", "a^" + m + " = " + d3(V.em), "blue"], ["aⁿ", "a^" + n + " = " + d3(V.en), "blue"], ["指数比较", "a^" + m + " " + cmp(V.em, V.en) + " a^" + n, "blue"],
+        ["logₐm", "logₐ" + m + " = " + d3(V.lm), "gold"], ["logₐn", "logₐ" + n + " = " + d3(V.ln), "gold"], ["对数比较", "logₐ" + m + " " + cmp(V.lm, V.ln) + " logₐ" + n, "gold"],
+        ["说明", S.m === S.n ? "m = n，函数值相等" : V.inc ? "a > 1 递增：自变量大，函数值大" : "0 < a < 1 递减：自变量大，函数值反而小"]]); }
+    if (S.mode === "mid"){ const L = sel();
+      return readout(L.length ? L.map(([s, v], i) => [(i + 1) + ". " + s, d3(v) + " ∈ " + zone(v)[0], zone(v)[1]]).concat([["从小到大", L.map(x => x[0]).join(" < ")]]) : [["提示", "勾选要比较的数"]]); }
+    const q = Q[S.q];
+    readout(q.v.map(([s, v]) => [s, S.rv ? "≈ " + d3(v, q.k) : "?", "blue"]).concat(S.rv ? [["结论", q.ans, "gold"]].concat(q.why.map((s, i) => ["依据 " + (i + 1), s])) : [["结论", "点「揭晓」"]]));
+  }
+  let box = null;
+  function build(){
+    box.innerHTML = "";
+    if (S.mode === "base"){
+      const sa = slider(box, {label:"底数 a", min:.2, max:3, step:.1, value:S.a, fmt:sh, onInput:v => { if (Math.abs(v - 1) < .05){ v = S.a < 1 ? 1.1 : .9; sa.set(v); } S.a = +v.toFixed(1); upd(); }});
+      slider(box, {label:"m", min:.1, max:3, step:.05, value:S.m, fmt:sh, onInput:v => { S.m = v; upd(); }});
+      slider(box, {label:"n", min:.1, max:3, step:.05, value:S.n, fmt:sh, onInput:v => { S.n = v; upd(); }});
+    } else if (S.mode === "mid") NUMS.forEach((x, i) => toggle(box, x[0] + " ≈ " + d3(x[1]), S.on[i], v => { S.on[i] = v ? 1 : 0; upd(); }));
+    else { chips(box, {label:"题目", value:S.q, options:Q.map((q, i) => ({label:q.l, value:i})), onChange:v => { S.q = v; S.rv = false; upd(); }});
+      button(box, "揭晓", () => { S.rv = true; upd(); }, true); }
+    upd();
+  }
+  function vax(c, t, w, top, bot, r, tk, bands){
+    const ax = Math.max(96, w * .32), Y = v => bot - (v - r[0]) / (r[1] - r[0]) * (bot - top);
+    if (bands){ c.save(); c.globalAlpha = .1; [[t.red, Y(0), bot], [t.gold, Y(1), Y(0)], [t.blue, top - 10, Y(1)]].forEach(([col, a, b]) => { c.fillStyle = col; c.fillRect(16, a, w - 32, b - a); }); c.restore();
+      [["< 0", (Y(0) + bot) / 2, t.redText], ["(0, 1)", (Y(1) + Y(0)) / 2, t.goldText], ["> 1", (top + Y(1)) / 2, t.blue]].forEach(([s, y, col]) => txt(c, s, 24, y, col, "600 13px ", "left"));
+      [0, 1].forEach(v => seg(c, 16, Y(v), w - 16, Y(v), t.axis, 1, true)); }
+    seg(c, ax, bot + 8, ax, top - 10, t.axis, 1.2);
+    c.beginPath(); c.moveTo(ax, top - 14); c.lineTo(ax - 4, top - 6); c.lineTo(ax + 4, top - 6); c.fillStyle = t.axis; c.fill();
+    tk.forEach(v => { seg(c, ax - 4, Y(v), ax + 4, Y(v), t.axis, 1.2); txt(c, sh(v), ax - 8, Y(v), t.fg, "12px ", "right"); });
+    return {ax, Y};
+  }
+  function marks(c, A, items, top){
+    let prev = -1e9; items.sort((p, q) => q.v - p.v).forEach(it => { const y0 = A.Y(it.v), ly = Math.max(y0, prev + 20, top); prev = ly;
+      seg(c, A.ax, y0, A.ax + 32, ly, it.col, 1); dot(c, A.ax, y0, it.col, 5); txt(c, it.s, A.ax + 38, ly, it.col, "600 13px ", "left"); });
+  }
+  const zc = (t, v) => ({red:t.redText, gold:t.goldText, blue:t.blue})[zone(v)[1]];
+  function draw(c, w, h){
+    const t = theme(), sm = w < 480;
+    if (S.mode === "base"){ const V = vals(), a = V.a;
+      txt(c, "y = aˣ（蓝） y = logₐx（金） · a = " + sh(a), w / 2, 22, t.fg, sm ? "600 13px " : "600 15px ");
+      const g = {x:44, y:44, w:w - 72, h:Math.max(120, h - 134)}, mp = drawAxes(c, g, [-1.5, 4], [-3, 4]), cy = v => Math.max(g.y, Math.min(g.y + g.h, mp.Y(v)));
+      plotFn(c, mp, x => a ** x, mp.xr, t.blue, 2.5); plotFn(c, mp, x => x > 0 ? lg(a, x) : NaN, [.001, 4], t.gold, 2.5);
+      const X0 = mp.X(0), Y0 = mp.Y(0);
+      [[S.m, V.em, V.lm, "m"], [S.n, V.en, V.ln, "n"]].forEach(([x, e, l, nm]) => { const X = mp.X(x);
+        seg(c, X, Math.min(cy(e), cy(l), Y0), X, Math.max(cy(e), cy(l), Y0), t.axis, 1, true);
+        [[e, t.blue], [l, t.gold]].forEach(([v, col]) => { seg(c, X0, cy(v), X, cy(v), col, 1.2, true); if (mp.Y(v) >= g.y && mp.Y(v) <= g.y + g.h) dot(c, X, mp.Y(v), col, 5); });
+        txt(c, nm, X, Y0 + 16, t.fg, "italic 600 13px "); });
+      const b = g.y + g.h;
+      txt(c, "aᵐ = " + d3(V.em) + "  " + cmp(V.em, V.en) + "  aⁿ = " + d3(V.en), w / 2, b + 26, t.blue);
+      txt(c, "logₐm = " + d3(V.lm) + "  " + cmp(V.lm, V.ln) + "  logₐn = " + d3(V.ln), w / 2, b + 50, t.goldText);
+      return txt(c, V.inc ? "a > 1：两函数都递增，自变量大函数值大" : "0 < a < 1：两函数都递减，自变量大函数值反而小", w / 2, b + 74, t.fg, sm ? "12px " : "14px "); }
+    if (S.mode === "mid"){ txt(c, "中间量 0 和 1：看每个数落在哪一段", w / 2, 22, t.fg, sm ? "600 13px " : "600 15px ");
+      const A = vax(c, t, w, 60, h - 28, [-2, 3], [-2, -1, 0, 1, 2, 3], true);
+      return marks(c, A, sel().map(([s, v]) => ({s:s + " ≈ " + d3(v), v, col:zc(t, v)})), 52); }
+    const q = Q[S.q]; txt(c, q.l, w / 2, 22, t.fg, sm ? "600 13px " : "600 15px ");
+    if (S.rv) txt(c, q.ans, w / 2, 50, t.goldText, "600 20px ");
+    const top = S.rv ? 84 : 60, A = vax(c, t, w, top, h - 28, q.r, q.tk, q.bands);
+    if (q.mid){ seg(c, 16, A.Y(q.mid), w - 16, A.Y(q.mid), t.gold, 1.2, true); txt(c, "中间量 1/2", w - 20, A.Y(q.mid) - 10, t.goldText, "600 12px ", "right"); }
+    marks(c, A, q.v.map(([s, v]) => ({s:S.rv ? s + " ≈ " + d3(v, q.k) : s.split(" = ")[0] + " = " + s.split(" = ")[1], v, col:S.rv ? t.blue : t.fg})), top - 8);
+  }
+  return {
+    text:"比较 a、b、c 的大小，有三把钥匙。同底看单调性：2^0.3 < 2^0.5。同指数看底数：幂函数 x^0.5 在 x > 0 递增。底数、指数都不同，就找「中间量」——0 和 1 最常用：看比较对象分别落在 (−∞, 0)、(0, 1)、(1, +∞) 哪一段，大小立判。",
+    points:["同底：a > 1 增，0 < a < 1 减", "同指数：看幂函数的单调性", "中间量：0、1，必要时用 1/2 等", "logₐb 的正负看 a、b 是否在 1 的同侧：同侧为正，异侧为负"],
+    gk:"选择题常考指数、对数、幂比较大小，难题需构造函数（如 2022 新高考 I 卷第 7 题）。易错：0 < a < 1 时对数函数递减，log₀.₅3 < 0。",
+    mount(ctrl){
+      chips(ctrl, {label:"模式", value:S.mode, options:[{label:"同底比较", value:"base"}, {label:"中间量 0 和 1", value:"mid"}, {label:"经典三数", value:"cls"}], onChange:v => { S.mode = v; build(); }});
+      box = el("div", "ctrl"); ctrl.appendChild(box); build(); },
+    draw
+  };
+})();
+CH[8].ready = true;
+MODS[8] = (() => {
+  const FF = () => getComputedStyle(document.body).fontFamily;
+  const txt = (c, s, x, y, col, font, al) => { c.fillStyle = col; c.font = (font || "600 14px ") + FF(); c.textAlign = al || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  const dot = (c, x, y, col, r) => { c.beginPath(); c.arc(x, y, r || 5, 0, 7); c.fillStyle = col; c.fill(); };
+  const vline = (c, x, y0, y1, col) => { c.save(); c.strokeStyle = col; c.setLineDash([4, 4]); c.beginPath(); c.moveTo(x, y0); c.lineTo(x, y1); c.stroke(); c.restore(); };
+  const gbox = (w, h) => ({x:44, y:50, w:w - 80, h:Math.max(120, h - 130)});
+  function nl(c, w, h, xr){ const box = {x:24, y:50, w:w - 48, h:h - 110}, N = numberLine(c, box, xr, []); return {X:N.X, base:box.y + box.h * .62, L:box.x + 2, R:box.x + box.w - 2}; }
+  function bar(c, N, k, a, b, col, lab, t){
+    const y = N.base - 24 - k * 30, A = isFinite(a) ? N.X(a) : N.L, Bp = isFinite(b) ? N.X(b) : N.R;
+    c.save(); c.strokeStyle = col; c.lineWidth = 4; c.lineCap = "round"; c.beginPath(); c.moveTo(A, y); c.lineTo(Bp, y); c.stroke(); c.restore();
+    [[a, A], [b, Bp]].forEach(([v, p]) => { if (!isFinite(v)) return; vline(c, p, y, N.base, col); c.save(); c.lineWidth = 2; c.strokeStyle = col; c.beginPath(); c.arc(p, y, 5, 0, 7); c.fillStyle = t.bg; c.fill(); c.stroke(); c.restore(); });
+    if (lab) txt(c, lab, (A + Bp) / 2, y - 13, col === t.sub ? t.fg : col, "600 13px ");
+  }
+  const P5 = [[x => x ** 3, true, "奇函数 · 递增"], [x => x + 1 / x, false, "(0, 1) 上递减"], [x => Math.exp(x) - Math.exp(-x), true, "奇函数 · 递增"], [x => Math.abs(x), false, "偶函数"]];
+  const Q = [
+    {t:"one", p:5, cap:"集合运算与数轴", s:"已知集合 A = {x | x² − 2x − 3 < 0}，B = {x | x > 1}，则 A ∩ B =", o:["(1, 3)", "(−1, 3)", "(1, +∞)", "(−1, +∞)"], ans:0,
+      why:"x² − 2x − 3 < 0 即 (x + 1)(x − 3) < 0，得 A = (−1, 3)。与 B = (1, +∞) 取公共部分，A ∩ B = (1, 3)。见第 01、04 章。",
+      draw(c, w, h, t, d){ const N = nl(c, w, h, [-3, 5]); bar(c, N, 0, -1, 3, t.sub, "A = (−1, 3)", t); bar(c, N, 1, 1, Infinity, t.sub, "B = (1, +∞)", t); if (d) bar(c, N, 2, 1, 3, t.blue, "A ∩ B = (1, 3)", t); }},
+    {t:"one", p:5, cap:"充分条件与必要条件", s:"「x > 1」是「x² > 1」的", o:["充分不必要条件", "必要不充分条件", "充要条件", "既不充分也不必要条件"], ans:0,
+      why:"x > 1 ⇒ x² > 1，充分性成立；x = −2 时 x² > 1 但 x > 1 不成立，必要性不成立。小范围推大范围：{x | x > 1} ⊊ {x | x² > 1}。见第 02 章。",
+      draw(c, w, h, t, d){ const N = nl(c, w, h, [-3, 3]); bar(c, N, 0, 1, Infinity, d ? t.blue : t.sub, "P：x > 1", t);
+        bar(c, N, 1, -Infinity, -1, t.sub, "Q：x² > 1", t); bar(c, N, 1, 1, Infinity, t.sub, "", t);
+        if (d) txt(c, "P ⊊ Q：P ⇒ Q，Q ⇏ P，充分不必要", w / 2, N.base + 44, t.blue); }},
+    {t:"one", p:5, cap:"基本不等式", s:"已知 x > 0，y > 0，x + y = 4，则 xy 的最大值为", o:["2", "4", "8", "16"], ans:1,
+      why:"由基本不等式 xy ≤ ((x + y)/2)² = 4，当且仅当 x = y = 2 时取等号，所以最大值为 4。见第 03 章。",
+      draw(c, w, h, t, d){ const mp = drawAxes(c, gbox(w, h), [-.5, 4.5], [-.5, 5], {step:1}); plotFn(c, mp, x => x * (4 - x), [0, 4], d ? t.blue : t.sub, 2.5);
+        txt(c, "xy = x(4 − x)", mp.X(3.4), mp.Y(3.4), t.fg, "600 13px ", "left");
+        if (d){ vline(c, mp.X(2), mp.Y(4), mp.Y(0), t.blue); dot(c, mp.X(2), mp.Y(4), t.blue, 6); txt(c, "x = y = 2 时，最大值 4", mp.X(2), mp.Y(4) - 16, t.blue); } }},
+    {t:"one", p:5, cap:"比较大小", s:"设 a = 2^0.3，b = 0.3²，c = log₂0.3，则", o:["a > b > c", "a > c > b", "b > a > c", "c > a > b"], ans:0,
+      why:"a = 2^0.3 > 2⁰ = 1；0 < b = 0.09 < 1；c = log₂0.3 < log₂1 = 0。以 0、1 为中间量，a > b > c。见第 08 章。",
+      draw(c, w, h, t, d){ const mp = drawAxes(c, gbox(w, h), [-1, 2.5], [-2.5, 3], {step:1});
+        plotFn(c, mp, x => 2 ** x, null, t.sub, 2); plotFn(c, mp, x => x * x, null, t.sub, 2, true); plotFn(c, mp, x => x > 0 ? Math.log2(x) : NaN, [.001, 2.5], t.sub, 2);
+        txt(c, "y = 2ˣ", mp.X(1.5), mp.Y(2 ** 1.5) - 12, t.fg, "13px ", "right"); txt(c, "y = x²", mp.X(1.7), mp.Y(2.89) + 4, t.fg, "13px ", "left"); txt(c, "y = log₂x", mp.X(2.4), mp.Y(Math.log2(2.4)) + 16, t.fg, "13px ", "right");
+        vline(c, mp.X(.3), mp.Y(3), mp.Y(-2.5), t.axis); txt(c, "x = 0.3", mp.X(.3) + 6, mp.Y(-2.3), t.fg, "13px ", "left");
+        if (d) [["a ≈ 1.231", 2 ** .3], ["b = 0.09", .09], ["c ≈ −1.737", Math.log2(.3)]].forEach(([s, v]) => { dot(c, mp.X(.3), mp.Y(v), t.blue, 5); txt(c, s, mp.X(.3) - 10, mp.Y(v) - 10, t.blue, "600 13px ", "right"); }); }},
+    {t:"many", p:5, cap:"奇偶性与单调性", s:"下列函数中既是奇函数又在 (0, +∞) 上单调递增的有", o:["y = x³", "y = x + 1/x", "y = eˣ − e⁻ˣ", "y = |x|"], ans:[0, 2],
+      why:"y = x³ 与 y = eˣ − e⁻ˣ 都是奇函数，且在 (0, +∞) 上递增。y = x + 1/x 是奇函数但在 (0, 1) 上递减；y = |x| 是偶函数。见第 06 章。",
+      draw(c, w, h, t, d){ const pw = (w - 32) / 2, ph = (h - 70) / 2;
+        P5.forEach(([f, ok, why], k) => { const x0 = 16 + (k % 2) * pw, y0 = 44 + Math.floor(k / 2) * ph;
+          const mp = drawAxes(c, {x:x0 + 12, y:y0 + 26, w:pw - 24, h:ph - 34}, [-2.5, 2.5], [-3, 3], {step:1, labels:false});
+          plotFn(c, mp, f, null, d ? (ok ? t.blue : t.redText) : t.sub, 2);
+          txt(c, "ABCD"[k] + ". " + Q[4].o[k] + (d ? "  " + (ok ? "✓ " : "✗ ") + why : ""), x0 + pw / 2, y0 + 12, d ? (ok ? t.blue : t.redText) : t.fg, "600 13px "); }); }},
+    {t:"fill", p:6, cap:"对称性与周期性", s:"已知 f(x) 是定义在 R 上的奇函数，且 f(x + 2) = −f(x)，f(1) = 2，则 f(2027) = ____。", acc:"-2",
+      why:"f(x + 4) = −f(x + 2) = f(x)，周期为 4。2027 = 4 × 506 + 3，f(2027) = f(3) = f(1 + 2) = −f(1) = −2。见第 07 章。",
+      draw(c, w, h, t, d){ const mp = drawAxes(c, gbox(w, h), [-1, 9], [-3, 3], {step:1}); plotFn(c, mp, x => 2 * Math.sin(Math.PI * x / 2), null, t.sub, 2);
+        txt(c, "示意：满足条件的一个 f(x)", mp.X(8.8), mp.Y(2.8), t.fg, "12px ", "right");
+        dot(c, mp.X(1), mp.Y(2), t.fg, 5); txt(c, "f(1) = 2", mp.X(1) + 8, mp.Y(2) - 12, t.fg, "600 13px ", "left");
+        if (d){ [3, 7].forEach(x => dot(c, mp.X(x), mp.Y(-2), t.blue, 5)); txt(c, "f(3) = −2", mp.X(3) + 8, mp.Y(-2) + 14, t.blue, "600 13px ", "left");
+          txt(c, "T = 4：f(2027) = f(3) = −2", w / 2, mp.Y(-3) + 26, t.blue); } }}
+  ];
+  const S = {v:0, ring:false, a:Q.map(() => null), done:Q.map(() => false), btn:null};
+  const norm = s => String(s || "").replace(/\s/g, "").replace(/[−–—－]/g, "-");
+  const has = i => Q[i].t === "fill" ? !!norm(S.a[i]) : Q[i].t === "one" ? S.a[i] != null : !!(S.a[i] && S.a[i].length);
+  function sc(i){ const q = Q[i], a = S.a[i]; if (!S.done[i]) return 0;
+    if (q.t === "fill") return norm(a) === q.acc ? q.p : 0; if (q.t === "one") return a === q.ans ? q.p : 0;
+    if (!a || !a.length || a.some(x => !q.ans.includes(x))) return 0; return a.length === q.ans.length ? q.p : 2; }
+  const total = () => Q.reduce((s, _, i) => s + sc(i), 0);
+  function upd(){ const n = S.done.filter(Boolean).length, i = S.v;
+    readout([["当前", S.ring ? "成绩" : "第 " + (i + 1) + " 题"], ["已完成", n + " / 6"], ["得分", total() + " / 31", "blue"]].concat(S.ring ? [] : [["本题", S.done[i] ? sc(i) + " / " + Q[i].p : "未提交", S.done[i] ? "blue" : ""]])); }
+  let box = null;
+  function card(){
+    box.innerHTML = ""; const all = S.done.every(Boolean), t = theme();
+    chips(box, {label:"题号", value:S.ring ? 6 : S.v, options:Q.map((q, i) => ({label:(i + 1) + (S.done[i] ? " ✓" : ""), value:i})).concat(all ? [{label:"成绩", value:6}] : []),
+      onChange:v => { if (v === 6) S.ring = true; else { S.v = v; S.ring = false; } card(); }});
+    upd(); if (S.ring) return box.appendChild(el("div", "", "全部完成，画布中央是你的成绩。点题号可回看每题解析。"));
+    const i = S.v, q = Q[i], d = S.done[i], a = S.a[i];
+    box.appendChild(el("div", "muted", (q.t === "one" ? "单选" : q.t === "many" ? "多选（全对 5 分，部分选对 2 分，有错选 0 分）" : "填空") + " · " + q.p + " 分"));
+    box.appendChild(el("div", "", (i + 1) + ". " + q.s));
+    let sub;
+    if (q.t === "fill"){ const inp = el("input"); Object.assign(inp, {type:"text", value:a || "", disabled:d, placeholder:"输入答案"}); inp.setAttribute("aria-label", "第 " + (i + 1) + " 题答案");
+      inp.style.cssText = "min-height:44px;padding:0 14px;border-radius:12px;background:var(--sec);color:var(--fg);font:inherit;border:1.5px solid " + (d ? (sc(i) ? "var(--acc)" : t.redText) : "var(--line)");
+      inp.oninput = () => { S.a[i] = inp.value; sub.disabled = !has(i); upd(); }; box.appendChild(inp); }
+    else { const ops = el("div", "chips"); ops.style.flexDirection = "column";
+      q.o.forEach((s, k) => { const on = q.t === "one" ? a === k : (a || []).includes(k), ok = q.t === "one" ? q.ans === k : q.ans.includes(k);
+        const b = el("button", "pill" + (on && !d ? " on" : ""), (d && on ? (ok ? "✓ " : "✗ ") : "") + "ABCD"[k] + ". " + s);
+        b.style.cssText = "justify-content:flex-start;white-space:normal;text-align:left;min-height:44px;padding:8px 16px;opacity:1" + (d && ok ? ";color:var(--acc);box-shadow:inset 0 0 0 1.5px var(--acc)" : d && on ? ";color:" + t.redText + ";box-shadow:inset 0 0 0 1.5px " + t.redText : "");
+        b.disabled = d; b.setAttribute("aria-pressed", on);
+        b.onclick = () => { if (q.t === "one") S.a[i] = k; else { const L = (S.a[i] || []).slice(), j = L.indexOf(k); j < 0 ? L.push(k) : L.splice(j, 1); S.a[i] = L.sort(); } card(); };
+        ops.appendChild(b); }); box.appendChild(ops); }
+    sub = button(box, d ? "已提交" : "提交", () => { S.done[i] = true; if (S.done.every(Boolean)) S.ring = true; card(); }, true);
+    sub.disabled = d || !has(i);
+    if (d){ const s = sc(i), r = el("b", "", s === q.p ? "判对 +" + s + " 分" : s ? "部分选对 +" + s + " 分" : "判错 0 分");
+      r.style.color = s === q.p ? "var(--acc)" : s ? "var(--fg)" : t.redText; box.appendChild(r);
+      const e = el("div", "", "解析：" + q.why); e.style.fontSize = "14px"; box.appendChild(e); }
+  }
+  function ring(c, w, h, t){
+    const tot = total(), r = Math.max(40, Math.min(w, h) * .2), cx = w / 2, cy = h * .42;
+    c.save(); c.lineWidth = 14; c.lineCap = "round"; c.globalAlpha = .18; c.strokeStyle = t.axis; c.beginPath(); c.arc(cx, cy, r, 0, 7); c.stroke(); c.globalAlpha = 1;
+    if (tot > 0){ c.strokeStyle = t.blue; c.beginPath(); c.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * tot / 31); c.stroke(); } c.restore();
+    txt(c, tot + " / 31", cx, cy - 4, t.fg, "600 " + Math.round(r * .4) + "px "); txt(c, "随堂检测得分", cx, cy + r * .38, t.sub, "13px ");
+    const bw = 140, bh = 44, bx = cx - bw / 2, by = cy + r + 30; S.btn = {bx, by, bw, bh};
+    c.fillStyle = t.blue; c.beginPath(); c.roundRect ? c.roundRect(bx, by, bw, bh, 22) : c.rect(bx, by, bw, bh); c.fill(); txt(c, "再做一遍", cx, by + bh / 2, t.bg, "600 15px ");
+  }
+  function draw(c, w, h){
+    const t = theme(); if (S.ring) return ring(c, w, h, t); S.btn = null;
+    const q = Q[S.v], d = S.done[S.v]; txt(c, "第 " + (S.v + 1) + " 题 · " + q.cap, w / 2, 22, t.fg, w < 480 ? "600 13px " : "600 15px ");
+    q.draw(c, w, h, t, d);
+    if (d){ const s = sc(S.v); txt(c, s === q.p ? "判对 +" + s : s ? "部分选对 +" + s : "判错 0 分", w / 2, h - 18, s === q.p ? t.blue : s ? t.fg : t.redText); }
+  }
+  function pointer(e, type, x, y){ const b = S.btn;
+    if (type === "down" && b && x >= b.bx && x <= b.bx + b.bw && y >= b.by && y <= b.by + b.bh){ S.a = Q.map(() => null); S.done = Q.map(() => false); S.v = 0; S.ring = false; card(); return true; } return false; }
+  return {
+    text:"六道题覆盖前八章：集合运算、充要条件、基本不等式、比较大小、奇偶性与单调性、周期性。在右侧题卡作答，「提交」后即时判分并给出解析，画布同步标出答案要素。满分 31 分。",
+    points:["单选 4 题，每题 5 分", "多选 1 题：全对 5 分，部分选对 2 分，有错选 0 分", "填空 1 题，6 分", "已提交的题锁定，可回看解析"],
+    gk:"题型与新高考选择、填空题一致。做错的题按解析里注明的章节回去复习。",
+    mount(ctrl){ box = ctrl; card(); },
+    draw, pointer
+  };
+})();
+const $ = id => document.getElementById(id);
+const pad = i => String(i + 1).padStart(2, "0");
+
+/* ---------- theme ---------- */
+function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(e){ return null; } }
+function isDark(){ return document.documentElement.classList.contains("dark"); }
+function theme(){
+  return isDark()
+    ? {bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e5a92a",teal:"#2ec4c6",purple:"#b39cf0",goldText:"#f0c050",redText:"#ff7b72"}
+    : {bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.06)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"};
+}
+function setDark(on){
+  document.documentElement.classList.toggle("dark", on);
+  $("dark").textContent = $("mdark").textContent = on ? "浅色" : "深色";
+  store("gw-dark", on ? "1" : "0");
+}
+setDark(store("gw-dark") === "1");
+
+/* ---------- UI tools ---------- */
+function el(tag, cls, html){ const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function slider(parent, o){
+  const w = el("div"), r = el("div", "row"), lab = el("span", "", o.label), val = el("b");
+  const inp = el("input"); Object.assign(inp, {type:"range", min:o.min, max:o.max, step:o.step || 0.1, value:o.value});
+  inp.setAttribute("aria-label", o.label);
+  const fmt = o.fmt || fmtNum, show = () => val.textContent = fmt(+inp.value);
+  inp.addEventListener("input", () => { show(); o.onInput && o.onInput(+inp.value); });
+  show(); r.append(lab, val); w.append(r, inp); parent.appendChild(w);
+  return {el:w, get value(){ return +inp.value; }, set(v){ inp.value = v; show(); }};
+}
+function chips(parent, o){
+  const w = el("div"); if (o.label) w.appendChild(el("div", "row", "<span>" + o.label + "</span>"));
+  const box = el("div", "chips"); let cur = o.value;
+  const btns = o.options.map(op => {
+    const b = el("button", "pill", op.label != null ? op.label : op); const v = op.value != null ? op.value : op;
+    b.onclick = () => { cur = v; sync(); o.onChange && o.onChange(v); }; b._v = v; box.appendChild(b); return b;
+  });
+  const sync = () => btns.forEach(b => { b.classList.toggle("on", b._v === cur); b.setAttribute("aria-pressed", b._v === cur); });
+  sync(); w.appendChild(box); parent.appendChild(w);
+  return {el:w, get value(){ return cur; }, set(v){ cur = v; sync(); }};
+}
+function button(parent, label, onClick, primary){
+  const b = el("button", "pill" + (primary ? " primary" : ""), label); b.onclick = onClick; parent.appendChild(b); return b;
+}
+function toggle(parent, label, value, onChange){
+  const r = el("div", "row"), s = el("button", "sw"); let on = !!value;
+  s.setAttribute("role", "switch"); s.setAttribute("aria-label", label);
+  const sync = () => { s.classList.toggle("on", on); s.setAttribute("aria-checked", on); };
+  s.onclick = () => { on = !on; sync(); onChange && onChange(on); };
+  sync(); r.append(el("span", "", label), s); parent.appendChild(r);
+  return {el:r, get value(){ return on; }, set(v){ on = !!v; sync(); }};
+}
+function readout(rows){
+  const t = theme(), map = {blue:"var(--acc)", gold:t.goldText, red:t.redText};
+  $("read").innerHTML = rows.map(([k, v, c]) =>
+    `<div class="row"><span class="muted">${k}</span><b style="color:${map[c] || "var(--fg)"}">${v}</b></div>`).join("");
+}
+
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){
+  if (!isFinite(v)) return v > 0 ? "∞" : v < 0 ? "−∞" : "—";
+  const s = v < 0 ? "−" : "", a = Math.abs(v), e = 1e-9;
+  if (Math.abs(a - Math.round(a)) < e) return s + Math.round(a);
+  for (let d = 2; d <= 12; d++){ const n = a * d; if (Math.abs(n - Math.round(n)) < e) return s + Math.round(n) + "/" + d; }
+  for (const r of [2, 3, 5, 6, 7]){
+    const q = a / Math.sqrt(r);
+    for (let d = 1; d <= 6; d++){ const n = q * d; if (Math.abs(n - Math.round(n)) < e && Math.round(n) > 0){
+      const k = Math.round(n), num = (k === 1 ? "" : k) + "√" + r; return s + (d === 1 ? num : num + "/" + d); } }
+  }
+  return s + a.toFixed(2);
+}
+function drawAxes(ctx, box, xr, yr, opts){
+  opts = opts || {}; const t = theme();
+  let [x0, x1] = xr, [y0, y1] = yr;
+  if (opts.equal){
+    const sx = box.w / (x1 - x0), sy = box.h / (y1 - y0), s = Math.min(sx, sy);
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, hw = box.w / s / 2, hh = box.h / s / 2;
+    x0 = cx - hw; x1 = cx + hw; y0 = cy - hh; y1 = cy + hh;
+  }
+  const X = x => box.x + (x - x0) / (x1 - x0) * box.w, Y = y => box.y + box.h - (y - y0) / (y1 - y0) * box.h;
+  const invX = px => x0 + (px - box.x) / box.w * (x1 - x0), invY = py => y0 + (box.y + box.h - py) / box.h * (y1 - y0);
+  const step = (span, px) => { const raw = span / Math.max(2, px / 60), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p; return (m < 1.5 ? 1 : m < 3.5 ? 2 : 5) * p; };
+  const sx = opts.step || step(x1 - x0, box.w), sy = opts.stepY || opts.step || step(y1 - y0, box.h);
+  ctx.save(); ctx.lineWidth = 1;
+  if (opts.grid !== false){
+    ctx.strokeStyle = t.grid; ctx.beginPath();
+    for (let x = Math.ceil(x0 / sx) * sx; x <= x1; x += sx){ ctx.moveTo(X(x), box.y); ctx.lineTo(X(x), box.y + box.h); }
+    for (let y = Math.ceil(y0 / sy) * sy; y <= y1; y += sy){ ctx.moveTo(box.x, Y(y)); ctx.lineTo(box.x + box.w, Y(y)); }
+    ctx.stroke();
+  }
+  const ax = Math.min(Math.max(Y(0), box.y), box.y + box.h), ay = Math.min(Math.max(X(0), box.x), box.x + box.w);
+  ctx.strokeStyle = t.axis; ctx.fillStyle = t.axis; ctx.beginPath();
+  ctx.moveTo(box.x, ax); ctx.lineTo(box.x + box.w, ax); ctx.moveTo(ay, box.y + box.h); ctx.lineTo(ay, box.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(box.x + box.w, ax); ctx.lineTo(box.x + box.w - 7, ax - 4); ctx.lineTo(box.x + box.w - 7, ax + 4);
+  ctx.moveTo(ay, box.y); ctx.lineTo(ay - 4, box.y + 7); ctx.lineTo(ay + 4, box.y + 7); ctx.fill();
+  if (opts.labels !== false){
+    ctx.fillStyle = t.sub; ctx.font = "12px ui-monospace,Menlo,monospace"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    for (let x = Math.ceil(x0 / sx) * sx; x <= x1 - sx * .3; x += sx) if (Math.abs(x) > sx / 2) ctx.fillText(fmtNum(+x.toFixed(6)), X(x), ax + 4);
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    for (let y = Math.ceil(y0 / sy) * sy; y <= y1 - sy * .3; y += sy) if (Math.abs(y) > sy / 2) ctx.fillText(fmtNum(+y.toFixed(6)), ay - 5, Y(y));
+    ctx.textAlign = "right"; ctx.textBaseline = "top"; ctx.fillText("O", ay - 4, ax + 3);
+    ctx.font = "italic 13px " + getComputedStyle(document.body).fontFamily;
+    ctx.fillText(opts.xLabel || "x", box.x + box.w - 2, ax + 8); ctx.textAlign = "left"; ctx.fillText(opts.yLabel || "y", ay + 8, box.y);
+  }
+  ctx.restore();
+  return {X, Y, invX, invY, xr:[x0, x1], yr:[y0, y1], box};
+}
+function plotFn(ctx, map, f, xr, color, width, dashed){
+  const [a, b] = xr || map.xr, bx = map.box, jump = bx.h * 1.5;
+  const val = x => { const y = f(x); return isFinite(y) ? map.Y(y) : NaN; };
+  ctx.save(); ctx.strokeStyle = color || theme().blue; ctx.lineWidth = width || 2; ctx.lineJoin = ctx.lineCap = "round";
+  if (dashed) ctx.setLineDash([6, 5]);
+  ctx.beginPath(); ctx.rect(bx.x, bx.y, bx.w, bx.h); ctx.clip(); ctx.beginPath();
+  let pen = false;
+  const seg = (x0, y0, x1, y1, d) => {
+    const xm = (x0 + x1) / 2, ym = val(xm);
+    if (d < 6 && (isNaN(y0) !== isNaN(y1) || (!isNaN(y0) && !isNaN(y1) && (Math.abs(y1 - y0) > 4 || Math.abs(ym - (y0 + y1) / 2) > .5)))){
+      seg(x0, y0, xm, ym, d + 1); seg(xm, ym, x1, y1, d + 1); return;
+    }
+    if (isNaN(y1) || isNaN(y0) || Math.abs(y1 - y0) > jump){ pen = false; if (!isNaN(y1)){ ctx.moveTo(map.X(x1), y1); pen = true; } return; }
+    if (!pen){ ctx.moveTo(map.X(x0), y0); pen = true; } ctx.lineTo(map.X(x1), y1);
+  };
+  const n = Math.max(40, Math.ceil(Math.abs(map.X(b) - map.X(a)) / 3)), h = (b - a) / n;
+  let px = a, py = val(a); if (!isNaN(py)){ ctx.moveTo(map.X(a), py); pen = true; }
+  for (let i = 1; i <= n; i++){ const x = a + h * i, y = val(x); seg(px, py, x, y, 0); px = x; py = y; }
+  ctx.stroke(); ctx.restore();
+}
+function numberLine(ctx, box, xr, intervals){
+  const t = theme(), [x0, x1] = xr, X = x => box.x + 12 + (x - x0) / (x1 - x0) * (box.w - 24);
+  const base = box.y + box.h * .62; intervals = intervals || [];
+  ctx.save(); ctx.strokeStyle = t.axis; ctx.fillStyle = t.axis; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(box.x, base); ctx.lineTo(box.x + box.w, base); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(box.x + box.w, base); ctx.lineTo(box.x + box.w - 8, base - 4); ctx.lineTo(box.x + box.w - 8, base + 4); ctx.fill();
+  const st = Math.max(1, Math.ceil((x1 - x0) / Math.max(4, box.w / 50)));
+  ctx.font = "12px ui-monospace,Menlo,monospace"; ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillStyle = t.sub;
+  for (let x = Math.ceil(x0 / st) * st; x <= x1; x += st){ ctx.beginPath(); ctx.moveTo(X(x), base - 4); ctx.lineTo(X(x), base + 4); ctx.stroke(); ctx.fillText(fmtNum(x), X(x), base + 8); }
+  intervals.forEach((iv, k) => {
+    const c = iv.color || [t.blue, t.red, t.gold, t.teal, t.purple][k % 5], y = base - 14 - k * 14;
+    const A = isFinite(iv.a) ? X(Math.max(iv.a, x0)) : box.x + 2, Bp = isFinite(iv.b) ? X(Math.min(iv.b, x1)) : box.x + box.w - 2;
+    ctx.strokeStyle = c; ctx.lineWidth = 4; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(A, y); ctx.lineTo(Bp, y); ctx.stroke();
+    ctx.lineWidth = 1; ctx.setLineDash([2, 3]); ctx.beginPath();
+    if (isFinite(iv.a)){ ctx.moveTo(A, y); ctx.lineTo(A, base); } if (isFinite(iv.b)){ ctx.moveTo(Bp, y); ctx.lineTo(Bp, base); }
+    ctx.stroke(); ctx.setLineDash([]); ctx.lineWidth = 2;
+    [[iv.a, A, iv.openA], [iv.b, Bp, iv.openB]].forEach(([v, p, open]) => { if (!isFinite(v)) return;
+      ctx.beginPath(); ctx.arc(p, y, 5, 0, 7); ctx.fillStyle = open ? t.bg : c; ctx.fill(); ctx.stroke(); });
+  });
+  ctx.restore(); return {X, invX: px => x0 + (px - box.x - 12) / (box.w - 24) * (x1 - x0)};
+}
+function dragPoints(points, map, snap){
+  let act = -1;
+  return {
+    get active(){ return act; },
+    pointer(type, x, y){
+      if (type === "down"){ act = -1; let best = 22 * 22;
+        points.forEach((p, i) => { const d = (map.X(p.x) - x) ** 2 + (map.Y(p.y) - y) ** 2; if (d < best){ best = d; act = i; } }); return act >= 0; }
+      if (type === "move" && act >= 0){ const p = points[act]; let nx = map.invX(x), ny = map.invY(y);
+        if (snap){ nx = Math.round(nx / snap) * snap; ny = Math.round(ny / snap) * snap; }
+        if (!p.lockX) p.x = nx; if (!p.lockY) p.y = ny; p.onMove && p.onMove(p); return true; }
+      if (type === "up"){ const was = act >= 0; act = -1; return was; }
+      return false;
+    }
+  };
+}
+function wrapText(ctx, text, x, y, maxW, lh){
+  let line = "", n = 0;
+  for (const ch of String(text)){
+    if (ch === "\n" || ctx.measureText(line + ch).width > maxW){ ctx.fillText(line, x, y + n * lh); n++; line = ch === "\n" ? "" : ch; }
+    else line += ch;
+  }
+  if (line) { ctx.fillText(line, x, y + n * lh); n++; }
+  return n * lh;
+}
+
+/* ---------- shell ---------- */
+const cv = $("cv"), ctx = cv.getContext("2d");
+let cur = -1, W = 0, H = 0, mod = null;
+function resize(){
+  const r = $("cwrap").getBoundingClientRect(), d = window.devicePixelRatio || 1;
+  W = Math.max(1, r.width); H = Math.max(1, r.height);
+  cv.width = Math.round(W * d); cv.height = Math.round(H * d); ctx.setTransform(d, 0, 0, d, 0, 0); frame(performance.now());
+}
+function soon(ctx, w, h){
+  const t = theme(), cw = Math.min(320, w - 40), chh = 132, x = (w - cw) / 2, y = (h - chh) / 2;
+  ctx.save(); ctx.shadowColor = "rgba(0,0,0,.08)"; ctx.shadowBlur = 24; ctx.fillStyle = isDark() ? "#2c2c2e" : "#fbfbfd";
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, cw, chh, 22) : ctx.rect(x, y, cw, chh); ctx.fill(); ctx.restore();
+  ctx.textAlign = "center"; ctx.fillStyle = t.blue; ctx.font = "13px ui-monospace,Menlo,monospace";
+  ctx.fillText("CHAPTER " + pad(cur), w / 2, y + 36);
+  ctx.fillStyle = t.fg; ctx.font = "600 22px " + getComputedStyle(document.body).fontFamily; ctx.fillText("即将上线", w / 2, y + 72);
+  ctx.fillStyle = t.sub; ctx.font = "14px " + getComputedStyle(document.body).fontFamily; ctx.fillText(CH[cur].n, w / 2, y + 102);
+}
+function frame(t){
+  ctx.clearRect(0, 0, W, H); ctx.fillStyle = theme().bg; ctx.fillRect(0, 0, W, H);
+  ctx.save(); try { mod ? mod.draw(ctx, W, H, t / 1000) : soon(ctx, W, H); } catch(e){ console.error(e); } ctx.restore();
+}
+(function loop(t){ frame(t); requestAnimationFrame(loop); })(performance.now());
+new ResizeObserver(resize).observe($("cwrap"));
+window.addEventListener("resize", resize);
+
+function buildToc(box){
+  CH.forEach((c, i) => { const b = el("button", "", `<span class="mono">${pad(i)}</span><span>${c.n}</span>`);
+    b.onclick = () => { go(i); closeSheet(); }; box.appendChild(b); });
+}
+buildToc($("toc")); buildToc($("sheet"));
+$("prog").innerHTML = CH.map(() => "<i></i>").join("");
+
+function go(i){
+  i = Math.max(0, Math.min(CH.length - 1, i)); if (i === cur) return;
+  if (mod && mod.unmount) try { mod.unmount(); } catch(e){ console.error(e); }
+  cur = i; const c = CH[i], m = c.ready ? MODS[i] : null; mod = m;
+  $("ctrl").innerHTML = ""; $("read").innerHTML = "";
+  $("etitle").textContent = pad(i) + " " + c.n; $("ebook").textContent = c.book;
+  $("etext").textContent = m ? m.text : "本章交互实验正在制作中，敬请期待。可先浏览其他章节。";
+  $("pts").innerHTML = (m && m.points ? m.points : ["本章要点即将上线"]).map(p => "<li>" + p + "</li>").join("");
+  $("gk").innerHTML = m && m.gk ? m.gk : "即将上线";
+  $("ctrlBox").hidden = $("readBox").hidden = !m;
+  if (m && m.mount) try { m.mount($("ctrl"), $("read")); } catch(e){ console.error(e); }
+  document.querySelectorAll(".toc button").forEach(b => b.classList.toggle("on", b.querySelector(".mono").textContent === pad(i)));
+  document.querySelectorAll("#prog i").forEach((e, k) => e.classList.toggle("on", k <= i));
+  $("cnt").textContent = pad(i) + " / " + String(CH.length).padStart(2, "0");
+  $("chbtn").textContent = "章节 " + pad(i) + "/" + String(CH.length).padStart(2, "0");
+  $("prev").disabled = $("mprev").disabled = i === 0; $("next").disabled = $("mnext").disabled = i === CH.length - 1;
+  if (location.hash !== "#" + (i + 1)) history.replaceState(null, "", "#" + (i + 1));
+  resize();
+}
+const fromHash = () => { const n = parseInt(location.hash.slice(1), 10); return n >= 1 && n <= CH.length ? n - 1 : 0; };
+window.addEventListener("hashchange", () => go(fromHash()));
+$("prev").onclick = $("mprev").onclick = () => go(cur - 1);
+$("next").onclick = $("mnext").onclick = () => go(cur + 1);
+$("dark").onclick = $("mdark").onclick = () => setDark(!isDark());
+$("fs").onclick = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch(e){} };
+$("fold").onclick = () => { const f = $("explain").classList.toggle("folded"); $("fold").textContent = f ? "展开" : "收起"; $("fold").setAttribute("aria-expanded", !f); resize(); };
+function closeSheet(){ $("sheetbg").hidden = true; }
+$("chbtn").onclick = () => { $("sheetbg").hidden = false; const on = $("sheet").querySelector(".on"); on && on.scrollIntoView({block:"nearest"}); };
+$("sheetbg").onclick = e => { if (e.target === $("sheetbg")) closeSheet(); };
+document.addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest("input,textarea,select,[contenteditable]")) return;
+  if (e.key === "Escape") closeSheet();
+  if (e.key === "ArrowLeft") go(cur - 1); else if (e.key === "ArrowRight") go(cur + 1);
+});
+function fwd(type){ return e => {
+  if (!mod || !mod.pointer) return; const r = cv.getBoundingClientRect();
+  if (type === "down") try { cv.setPointerCapture(e.pointerId); } catch(_){}
+  try { mod.pointer(e, type, e.clientX - r.left, e.clientY - r.top); } catch(err){ console.error(err); }
+}; }
+cv.addEventListener("pointerdown", fwd("down")); cv.addEventListener("pointermove", fwd("move"));
+cv.addEventListener("pointerup", fwd("up")); cv.addEventListener("pointercancel", fwd("up"));
+go(fromHash());
+</script>
+</body>
+</html>
