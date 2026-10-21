@@ -1,0 +1,1065 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><script src="../lib/labfix-2d.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>近代中国 · 格物实验室</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--sel:#e8f1fc;--selfg:#0058b0;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--sel:rgba(41,151,255,.18);--selfg:#6cb6ff;--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--shadow:0 0 0 1px rgba(255,255,255,.08)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.back b{font-size:22px;font-weight:400;margin-right:4px}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);font-size:14px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}
+html.dark .pill.primary,html.dark .chips button.on{color:#000}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc button,.sheet button.it{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px;align-items:center}
+.toc button:hover{background:var(--btn2)}
+.toc button.on,.sheet button.it.on{background:var(--sel);color:var(--selfg);font-weight:600}
+.toc .mono,.sheet .mono{font-size:13px;color:var(--sub)}.on .mono{color:var(--selfg)!important}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 20px}
+.explain{flex:none}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.etext{margin:8px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.explain.collapsed .etext,.explain.collapsed .book{display:none}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;color:var(--sub);min-height:32px}
+.cwrap{flex:1;min-height:0;position:relative;border-radius:22px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:none}
+.sec h3{font-size:13px;color:var(--sub);font-weight:600;letter-spacing:0;margin:0 0 8px}
+.ctrls{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;font-size:14px}.sl output{font-family:var(--mono);color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}.chips button.on{background:var(--blue);color:#fff}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;min-height:36px;border:0;background:none;padding:0;width:100%}
+.tg i{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.tg.on i{background:#34c759}.tg.on i::after{left:20px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+.points ul{margin:0;padding-left:18px}.points li{margin:4px 0}
+.gk a{color:var(--blue);text-decoration:none;font-size:14px}
+.mdark{display:none}
+.soon{color:var(--sub);font-size:14px;margin:0}
+/* sheet */
+.mask{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;max-height:70vh;overflow:auto;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .prog{display:none}.app{display:block;height:auto}.toc{display:none}
+ .stage{padding:12px}.cwrap{order:-1;flex:none;height:56vh}
+ .explain .fold{display:none}.explain.collapsed .etext,.explain.collapsed .book{display:block}.etext{max-height:none;overflow:visible}
+ .panel{border:0;padding:0 12px 24px}
+}
+@media (min-width:1024px){.chbtn{display:none}}
+/* phone */
+@media (max-width:767px){
+ .top{height:calc(52px + env(safe-area-inset-top));gap:6px;padding-left:4px;padding-right:8px}
+ .back{width:44px;justify-content:center}.back span{display:none}.back b{margin:0}
+ .tname{flex:1;font-size:16px}.tbtns{display:none}.chbtn{margin-left:0;padding:0 12px}
+ .stage{padding:0;gap:0}.cwrap{height:52vh;border-radius:0;box-shadow:none;border-bottom:1px solid var(--line)}
+ .explain{background:none;box-shadow:none;padding:16px 16px 4px}.ehead h2{font-size:20px}.etext{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(84px + env(safe-area-inset-bottom))}
+ input[type=range]{height:44px}.chips button,.tg{min-height:44px}
+ .mdark{display:block;align-self:flex-start;min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
+  <div class="tname">近代中国 · ModernLab</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 10</span></div>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button><button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chnum">01/10</span></button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h2 id="ctitle"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="etext" id="ctext"></p>
+    </section>
+    <div class="cwrap" id="cwrap"><canvas id="cv"></canvas></div>
+  </main>
+  <aside class="panel">
+    <section class="card sec" id="ctrlSec"><h3>控件</h3><div class="ctrls" id="ctrl"></div></section>
+    <section class="card sec" id="readSec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec points" id="ptSec"><h3>要点</h3><div id="pts"></div></section>
+    <section class="card sec gk" id="gkSec"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mask" id="mask" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><div id="slist"></div></div>
+<div class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></div>
+<script>
+const CH=[
+{n:"鸦片战争与《南京条约》",book:"统编版《中外历史纲要（上）》第 16 课",ready:true},
+{n:"第二次鸦片战争与太平天国",book:"纲要（上）第 16–17 课",ready:true},
+{n:"洋务运动",book:"纲要（上）第 18 课",ready:true},
+{n:"甲午战争与瓜分狂潮",book:"纲要（上）第 18 课",ready:true},
+{n:"戊戌变法与义和团运动",book:"纲要（上）第 18 课",ready:true},
+{n:"辛亥革命",book:"纲要（上）第 19 课",ready:true},
+{n:"新文化运动与五四运动",book:"纲要（上）第 20–21 课",ready:true},
+{n:"中共成立与国民大革命",book:"纲要（上）第 21–22 课",ready:true},
+{n:"全民族抗战",book:"纲要（上）第 23–24 课",ready:true},
+{n:"随堂检测",book:"浙江选考 中国近代史",ready:true}];
+/* ---------- map tool (100–132°E, 18–44°N, equirectangular) ---------- */
+const MF="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+const COAST=[[107.9,21.5],[108.5,21.6],[109.6,21.5],[110.4,21.2],[111.6,21.6],[113.1,22.1],[114.2,22.3],[115.4,22.7],[116.7,23.4],[118.1,24.5],[119.0,25.3],[119.6,26.0],[120.2,26.9],[120.9,28.0],[121.5,28.7],[121.9,29.9],[121.0,30.6],[121.9,31.4],[120.9,32.6],[120.3,34.0],[119.4,34.7],[119.6,35.5],[120.4,36.1],[121.0,36.6],[122.1,37.4],[121.4,37.5],[120.3,37.6],[118.9,37.7],[118.0,38.3],[117.7,39.0],[118.5,39.2],[119.6,39.9],[121.0,40.8],[122.2,40.7],[121.6,38.9],[123.0,39.6],[124.4,40.1]];
+const KOREA=[[124.4,40.1],[125.0,39.6],[125.3,37.7],[126.4,36.9],[126.3,34.6],[127.6,34.7],[129.3,35.2],[129.4,36.5],[128.4,38.6],[129.7,41.0],[130.7,42.3],[132,43]];
+const LAND=[[100,18],[106,18],[105.8,19],[106.6,20.4]].concat(COAST,KOREA,[[132,44],[100,44]]);
+const TAIWAN=[[121.0,25.3],[121.9,25.0],[121.6,24.0],[121.0,22.6],[120.8,21.9],[120.3,22.5],[120.1,23.3],[120.3,24.3],[120.8,25.0]];
+const HAINAN=[[110.3,20.1],[111.0,19.6],[110.5,18.7],[109.6,18.2],[108.7,18.5],[108.6,19.3],[109.2,19.9],[109.7,20.0]];
+const YANGTZE=[[100.5,28.5],[104,29],[106.5,29.6],[108.5,30.8],[111.3,30.7],[113,29.6],[114.3,30.6],[116,29.8],[117.6,30.9],[118.8,32.1],[119.4,32.2],[121.0,31.8],[121.9,31.4]];
+const YELLOW=[[101,36],[103.8,36],[105.5,37.5],[106.5,39.5],[108,40.6],[110.5,40.3],[110.5,36.5],[110.2,34.6],[113.5,34.9],[116.5,36.3],[118.9,37.7]];
+function mapChina(ctx,box){const T=theme(),dk=isDark(),s=Math.min(box.w/32,box.h/26),ox=box.x+(box.w-32*s)/2,oy=box.y+(box.h-26*s)/2;
+ const X=lon=>ox+(lon-100)*s,Y=lat=>oy+(44-lat)*s,m={X,Y,s,box};
+ const poly=(pts,close)=>{ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])));if(close)ctx.closePath()};
+ ctx.save();ctx.beginPath();ctx.rect(ox,oy,32*s,26*s);ctx.clip();ctx.fillStyle=dk?"#14212e":"#e6f1fb";ctx.fillRect(ox,oy,32*s,26*s);
+ const coast=dk?"rgba(255,255,255,.35)":"rgba(0,0,0,.28)";ctx.fillStyle=dk?"#2a2a2c":"#f3efe6";ctx.strokeStyle=coast;ctx.lineWidth=1;ctx.lineJoin="round";
+ poly(LAND,true);ctx.fill();poly(COAST.concat(KOREA));ctx.stroke();[TAIWAN,HAINAN].forEach(p=>{poly(p,true);ctx.fill();ctx.stroke()});
+ ctx.strokeStyle=dk?"rgba(41,151,255,.7)":"rgba(0,113,227,.5)";ctx.lineWidth=1.2;[YANGTZE,YELLOW].forEach(p=>{poly(p);ctx.stroke()});
+ ctx.restore();ctx.save();ctx.fillStyle=T.fg;ctx.globalAlpha=.6;ctx.font="12px "+MF;ctx.textAlign="right";ctx.textBaseline="bottom";ctx.fillText("示意图",ox+32*s-8,oy+26*s-6);ctx.restore();return m}
+function city(ctx,m,name,lon,lat,color,r,side){const x=m.X(lon),y=m.Y(lat),g=(r=r||4)+4;side=side||"r";ctx.save();
+ ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=theme().bg;ctx.stroke();
+ if(name){ctx.font="600 12px "+MF;ctx.textBaseline="middle";ctx.textAlign=side==="l"?"right":side==="r"?"left":"center";
+  ctx.lineWidth=3;ctx.strokeStyle=theme().bg;const tx=x+(side==="l"?-g:side==="r"?g:0),ty=y+(side==="t"?-g-3:side==="b"?g+4:0);ctx.strokeText(name,tx,ty);ctx.fillText(name,tx,ty)}ctx.restore()}
+function arrowPath(ctx,m,pts,color,progress){progress=Math.max(0,Math.min(1,progress==null?1:progress));const P=pts.map(p=>[m.X(p[0]),m.Y(p[1])]),seg=[];let L=0;
+ for(let i=1;i<P.length;i++){const d=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);seg.push(d);L+=d}let left=L*progress;if(left<=0)return;
+ ctx.save();ctx.strokeStyle=ctx.fillStyle=color;ctx.lineWidth=2.5;ctx.lineCap=ctx.lineJoin="round";ctx.beginPath();ctx.moveTo(P[0][0],P[0][1]);let ex=P[0][0],ey=P[0][1],a=0;
+ for(let i=1;i<P.length&&left>0;i++){const f=Math.min(1,left/(seg[i-1]||1e-9));ex=P[i-1][0]+(P[i][0]-P[i-1][0])*f;ey=P[i-1][1]+(P[i][1]-P[i-1][1])*f;a=Math.atan2(P[i][1]-P[i-1][1],P[i][0]-P[i-1][0]);ctx.lineTo(ex,ey);left-=seg[i-1]}
+ ctx.stroke();ctx.beginPath();ctx.moveTo(ex+Math.cos(a)*4,ey+Math.sin(a)*4);ctx.lineTo(ex-Math.cos(a-.5)*10,ey-Math.sin(a-.5)*10);ctx.lineTo(ex-Math.cos(a+.5)*10,ey-Math.sin(a+.5)*10);ctx.closePath();ctx.fill();ctx.restore()}
+const MODS=[];// MODS[i]={text,points,gk,mount(ctrlEl,readEl),draw(ctx,w,h,t),pointer(e,type,x,y),unmount()}
+/* ---------- 01 鸦片战争与《南京条约》 ---------- */
+MODS[0]=(()=>{
+ const EV=[
+  {t:1839.45,d:"1839.6",n:"虎门销烟",s:"林则徐在虎门当众销毁鸦片，英国以此为借口发动战争。"},
+  {t:1840.45,d:"1840.6",n:"封锁珠江口",s:"英军封锁珠江口，鸦片战争爆发。"},
+  {t:1840.55,d:"1840.7",n:"攻占定海",s:"英军北上，攻占浙江定海。"},
+  {t:1840.63,d:"1840.8",n:"抵天津大沽口",s:"英舰抵天津大沽口，威胁京师，清廷求和。"},
+  {t:1841.05,d:"1841.1",n:"强占香港岛",s:"英军强占香港岛。"},
+  {t:1842.6,d:"1842.8",n:"攻镇江 · 兵临南京",s:"英军沿长江攻镇江，兵临南京，清政府被迫签订《南京条约》。"}];
+ const P={hm:[113.7,22.8],gz:[113.3,23.1],xm:[118.1,24.5],dh:[122.1,30.0],dg:[117.7,39.0],hk:[114.2,22.3],ws:[121.5,31.4],zj:[119.4,32.2],nj:[118.8,32.1]};
+ const A1=[P.gz,[113.9,22.2],[117.0,22.9],P.xm,[120.4,25.6],[122.5,28.4],P.dh];
+ const A2=[P.dh,[123.0,33.0],[122.9,36.9],[121.0,38.4],[119.3,38.7],P.dg];
+ const B=[P.ws,[120.3,31.9],P.zj,P.nj];
+ const PORTS=[["广州",113.3,23.1,"l"],["厦门",118.1,24.5,"r"],["福州",119.3,26.1,"r"],["宁波",121.6,29.9,"r"],["上海",121.5,31.2,"r"]];
+ const CL=[
+  {h:"《南京条约》",n:"割香港岛给英国",e:"领土主权被破坏",hl:"hk"},
+  {h:"《南京条约》",n:"赔款 2100 万银元",e:"加重人民负担"},
+  {h:"《南京条约》",n:"开放五口通商",e:"外国商品倾销，冲击自然经济",hl:"ports"},
+  {h:"《南京条约》",n:"协定关税",e:"关税自主权遭破坏"}];
+ const EX=[
+  {h:"1843《虎门条约》",n:"领事裁判权",e:"司法主权遭破坏",x:1},
+  {h:"1843《虎门条约》",n:"片面最惠国待遇",e:"英国可“一体均沾”，侵略特权不断扩大",x:1},
+  {h:"1843《虎门条约》",n:"租地建屋",e:"为日后列强在通商口岸设立租界埋下伏笔",x:1},
+  {h:"1844 美、法",n:"《望厦条约》（美）《黄埔条约》（法）",e:"美、法攫取与英国类似的特权，侵略势力扩大",hl:"ports",x:1}];
+ const S={mode:"war",step:0,t0:0,reset:true,timer:null,sel:-1,ext:false,rects:[],dots:[],ro:null,warRow:null,tg:null,play:null};
+ const cards=()=>S.ext?CL.concat(EX):CL;
+ function upd(){const T=theme();if(!S.ro)return;
+  if(S.mode==="war"){const e=EV[S.step];S.ro.update([["时间",e.d,T.blue],["事件",e.n,T.redText],["说明",e.s]])}
+  else{const c=cards()[S.sel];S.ro.update(c?[["条款",c.h+" "+c.n,c.x?T.blue:T.goldText],["影响",c.e,T.redText]]:[["提示","点击条款卡片，查看对主权的影响"]])}}
+ function setStep(k){S.step=Math.max(0,Math.min(EV.length-1,k));S.reset=true;upd()}
+ function stop(){if(S.timer){clearInterval(S.timer);S.timer=null}if(S.play)S.play.textContent="自动播放"}
+ function play(){if(S.timer)return stop();if(S.step>=EV.length-1)setStep(0);S.play.textContent="暂停";
+  S.timer=setInterval(()=>{if(S.step>=EV.length-1)return stop();setStep(S.step+1)},2200)}
+ function show(){S.warRow.hidden=S.mode!=="war";S.tg.hidden=S.mode!=="treaty";S.reset=true;upd()}
+ function ring(x,y,color,t){const k=(t*1.2)%1;ctx.save();ctx.strokeStyle=color;ctx.globalAlpha=1-k;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,6+k*12,0,Math.PI*2);ctx.stroke();ctx.restore()}
+ function drawWar(ctx,w,h,t){const T=theme(),R=T.redText,pad=12,tlH=64;
+  if(S.reset){S.t0=t;S.reset=false}const pr=Math.min(1,(t-S.t0)/1.6),k=S.step;
+  const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad-tlH});
+  if(k>=2)arrowPath(ctx,m,A1,R,k===2?pr:1);
+  if(k>=3)arrowPath(ctx,m,A2,R,k===3?pr:1);
+  if(k>=5)arrowPath(ctx,m,B,R,pr);
+  if(k>=2)city(ctx,m,"厦门",...P.xm,T.fg,3,"l");
+  const marks=[[["虎门",P.hm,"r"]],[["广州 · 珠江口",P.gz,"l"]],[["定海",P.dh,"r"]],[["天津大沽口",P.dg,"l"]],[["香港岛",P.hk,"b"]],[["吴淞",P.ws,"r"],["镇江",P.zj,"t"],["南京",P.nj,"l"]]];
+  marks.forEach((g,i)=>{if(i>k)return;g.forEach(([n,p,sd])=>{city(ctx,m,n,p[0],p[1],R,i===k?6:4,sd);if(i===k)ring(m.X(p[0]),m.Y(p[1]),R,t)})});
+  // timeline 1839—1843
+  const xa=pad+28,xb=w-pad-28,ty=h-pad-24,XT=y=>xa+(y-1839)/(1843-1839)*(xb-xa);
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xa,ty);ctx.lineTo(xb,ty);ctx.stroke();
+  ctx.font="12px ui-monospace,Menlo,monospace";ctx.fillStyle=T.fg;ctx.textAlign="center";ctx.textBaseline="top";
+  for(let y=1839;y<=1842;y++){ctx.beginPath();ctx.moveTo(XT(y),ty-4);ctx.lineTo(XT(y),ty+4);ctx.stroke();ctx.fillText(y,XT(y),ty+8)}
+  S.dots=EV.map((e,i)=>{const x=XT(e.t);ctx.beginPath();ctx.arc(x,ty,i===k?6:4,0,Math.PI*2);ctx.fillStyle=i<=k?R:T.bg;ctx.fill();ctx.strokeStyle=i<=k?R:T.axis;ctx.lineWidth=1.5;ctx.stroke();return x});
+  const cx=Math.max(xa,Math.min(xb,S.dots[k]));ctx.font="600 13px "+MF;ctx.fillStyle=R;ctx.textBaseline="bottom";
+  const lw=ctx.measureText(EV[k].d+" "+EV[k].n).width;ctx.textAlign="center";ctx.fillText(EV[k].d+" "+EV[k].n,Math.max(pad+lw/2,Math.min(w-pad-lw/2,cx)),ty-10);ctx.restore()}
+ function drawTreaty(ctx,w,h,t){const T=theme(),dk=isDark(),pad=12,gap=8,wide=w>=620,list=cards(),n=list.length;
+  const mb=wide?{x:pad,y:pad,w:w*0.58-pad,h:h-2*pad}:{x:pad,y:pad,w:w-2*pad,h:(h-2*pad)*0.52};
+  const m=mapChina(ctx,mb),c=list[S.sel]||{};
+  PORTS.forEach(p=>{city(ctx,m,p[0],p[1],p[2],T.goldText,5,p[3]);if(c.hl==="ports")ring(m.X(p[1]),m.Y(p[2]),T.goldText,t)});
+  city(ctx,m,"香港岛",...P.hk,T.redText,5,"b");if(c.hl==="hk")ring(m.X(P.hk[0]),m.Y(P.hk[1]),T.redText,t);
+  let ax,ay,aw,ah,cols;
+  if(wide){ax=w*0.58+gap;ay=pad;aw=w-ax-pad;ah=h-2*pad;cols=1}else{ax=pad;ay=mb.y+mb.h+gap;aw=w-2*pad;ah=h-ay-pad;cols=2}
+  const rows=Math.ceil(n/cols),cw=(aw-gap*(cols-1))/cols,ch=Math.max(36,Math.min(72,(ah-gap*(rows-1))/rows));
+  S.rects=list.map((it,i)=>{const x=ax+(i%cols)*(cw+gap),y=ay+Math.floor(i/cols)*(ch+gap),on=i===S.sel;
+   ctx.save();rrect(ctx,x,y,cw,ch,12);ctx.fillStyle=on?(dk?"rgba(41,151,255,.18)":"#e8f1fc"):(dk?"#2c2c2e":"#f5f5f7");ctx.fill();
+   if(on){ctx.strokeStyle=T.blue;ctx.lineWidth=2;ctx.stroke()}ctx.clip();ctx.textAlign="left";ctx.textBaseline="top";
+   const big=ch>=54;ctx.font="12px "+MF;ctx.fillStyle=it.x?T.blue:T.goldText;if(big)ctx.fillText(it.h,x+12,y+9);
+   ctx.font="600 13px "+MF;ctx.fillStyle=it.hl==="hk"&&!it.x?T.redText:T.fg;
+   if(big)wrapText(ctx,it.n,x+12,y+28,cw-24,17);else{ctx.textBaseline="middle";wrapText(ctx,it.n,x+12,y+ch/2,cw-24,17)}
+   ctx.restore();return[x,y,cw,ch]})}
+ return{
+  text:"鸦片战争是中国近代史的开端。英国为打开中国市场、扭转贸易逆差，以林则徐虎门销烟为借口发动战争。清政府战败，被迫签订中国近代史上第一个不平等条约《南京条约》。中国开始沦为半殖民地半封建社会，主权和领土完整遭到破坏。",
+  points:["根本原因：英国工业革命后急需开拓市场、掠夺原料","《南京条约》：割香港岛、赔款 2100 万银元、五口通商、协定关税","《虎门条约》等使英国获得领事裁判权、片面最惠国待遇","影响：中国开始沦为半殖民地半封建社会"],
+  gk:"<p>浙江选考常考《南京条约》各条款对应的主权损害（领土、关税、司法）。</p><p><b style=\"color:#c0362c\">易错：</b>领事裁判权、片面最惠国待遇出自《虎门条约》，不在《南京条约》本身。</p>",
+  mount(c,r){S.ro=readout();r.append(S.ro);
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px";
+   S.play=button("自动播放",play,true);row.append(button("上一步",()=>{stop();setStep(S.step-1)}),button("下一步",()=>{stop();setStep(S.step+1)}),S.play);
+   S.warRow=row;S.tg=toggle("附件与补充条约",S.ext,v=>{S.ext=v;if(S.sel>=cards().length)S.sel=-1;upd()});
+   c.append(chips([{label:"战争进程",value:"war"},{label:"条约内容",value:"treaty"}],S.mode,v=>{S.mode=v;stop();show()}),row,S.tg);show()},
+  draw(ctx,w,h,t){S.mode==="war"?drawWar(ctx,w,h,t):drawTreaty(ctx,w,h,t)},
+  pointer(e,type,x,y){if(type!=="down")return false;
+   if(S.mode==="war"){const ty=H-12-24;let best=-1,bd=16;S.dots.forEach((dx,i)=>{const d=Math.hypot(dx-x,ty-y);if(d<bd){bd=d;best=i}});if(best>=0){stop();setStep(best);return true}return false}
+   const i=S.rects.findIndex(([rx,ry,rw,rh])=>x>=rx&&x<=rx+rw&&y>=ry&&y<=ry+rh);if(i>=0){S.sel=i;upd();return true}return false},
+  unmount(){stop();S.ro=null}}})();
+/* ---------- 02 第二次鸦片战争与太平天国 ---------- */
+MODS[1]=(()=>{
+ const EA=[
+  {d:"1856",n:"亚罗号事件 · 马神甫事件",s:"英国借口亚罗号事件、法国借口马神甫事件，英法联军发动战争，攻占广州。"},
+  {d:"1858",n:"攻陷大沽炮台 · 《天津条约》",s:"英法联军北上，攻陷大沽炮台，清政府被迫签订《天津条约》。"},
+  {d:"1860",n:"攻占北京 · 火烧圆明园",s:"英法联军攻占北京，火烧圆明园，清政府被迫签订《北京条约》。"}];
+ const EB=[
+  {d:"1851",n:"金田起义",s:"洪秀全在广西金田起义，建号太平天国。"},
+  {d:"1853",n:"攻占南京 · 定都天京",s:"太平军攻占南京，定都天京，颁布《天朝田亩制度》。"},
+  {d:"1853—1855",n:"北伐 · 西征",s:"太平军北伐、西征，北伐军一度进抵天津附近。"},
+  {d:"1856",n:"天京变乱",s:"天京变乱，太平天国由盛转衰。"},
+  {d:"1859",n:"《资政新篇》",s:"洪仁玕提出《资政新篇》。"},
+  {d:"1864",n:"天京陷落",s:"天京陷落，太平天国运动失败。"}];
+ const P={gz:[113.3,23.1],dg:[117.7,39.0],tj:[117.2,39.1],bj:[116.4,39.9],kl:[114.2,22.3],jt:[109.9,23.4],ya:[110.4,24.0],gl:[110.3,25.3],cs:[113.0,28.2],wc:[114.3,30.6],nj:[118.8,32.1]};
+ const SEA=[P.gz,[113.9,22.2],[117.0,22.9],[118.6,24.2],[120.4,25.6],[122.5,28.4],[123.0,33.0],[122.9,36.9],[121.0,38.4],[119.3,38.7],P.dg];
+ const NORTH=[P.dg,P.tj,P.bj],TP=[P.jt,P.ya,P.gl,P.cs,P.wc,P.nj],NB=[P.nj,[116.4,33.9],[114.5,34.8],[114.6,36.6],[116.8,38.8]];
+ const RIVER=YANGTZE.slice(6);
+ const PORTS=[["牛庄",122.2,40.7,"r"],["登州",121.4,37.5,"r"],["汉口",114.3,30.6,"t"],["九江",116.0,29.7,"b"],["南京",118.8,32.1,"t"],["镇江",119.4,32.2,"r"],["潮州",116.7,23.4,"b"],["台南",120.2,23.0,"l"],["淡水",121.4,25.2,"r"],["琼州",110.3,20.0,"r"]];
+ const CA=[
+  {h:"《天津条约》1858",c:"gold",b:"公使驻京；增开 10 处通商口岸；外国商船、兵船可在长江各口往来；外国人可入内地游历、通商、传教；赔款",e:"侵略势力由沿海深入内地，半殖民地化程度加深",hl:"ports"},
+  {h:"《北京条约》1860",c:"gold",b:"增开天津为商埠；割九龙司地方一区给英国；赔款增加",e:"领土主权进一步丧失，列强势力逼近京畿",hl:"bj"},
+  {h:"沙俄",c:"red",b:"1858《瑷珲条约》、1860 中俄《北京条约》、1864《勘分西北界约记》等",e:"共割占中国东北和西北领土 150 多万平方公里（不在本图范围内）"}];
+ const CB=[
+  {h:"《天朝田亩制度》1853",c:"blue",b:"平均分配土地，「有田同耕，有饭同食」；体现农民平均主义理想",e:"脱离实际，未能实行"},
+  {h:"《资政新篇》1859 洪仁玕",c:"blue",b:"学习西方，发展近代工矿、交通、金融；带有资本主义色彩",e:"因战争环境，未能实施"}];
+ const S={mode:"a",a:0,b:0,sel:-1,ports:false,t0:0,reset:true,timer:null,rects:[],ro:null,row:null,tg:null,bc:null,play:null};
+ const col=k=>{const T=theme();return k==="gold"?T.goldText:k==="red"?T.redText:T.blue};
+ function upd(){const T=theme();if(!S.ro)return;const a=S.mode==="a",c=(a?CA:CB)[S.sel];
+  if(c)S.ro.update([[a?"条约":"纲领",c.h,col(c.c)],["内容",c.b],[a?"影响":"结局",c.e,T.redText]]);
+  else{const e=a?EA[S.a]:EB[S.b];S.ro.update([["时间",e.d,T.blue],["事件",e.n,a?T.redText:T.blue],["说明",e.s]])}}
+ function setA(k){S.a=Math.max(0,Math.min(EA.length-1,k));S.sel=-1;S.reset=true;upd()}
+ function stop(){if(S.timer){clearInterval(S.timer);S.timer=null}if(S.play)S.play.textContent="自动播放"}
+ function play(){if(S.timer)return stop();if(S.a>=EA.length-1)setA(0);S.play.textContent="暂停";
+  S.timer=setInterval(()=>{if(S.a>=EA.length-1)return stop();setA(S.a+1)},2200)}
+ function show(){S.row.hidden=S.tg.hidden=S.mode!=="a";S.bc.hidden=S.mode!=="b";S.sel=-1;S.reset=true;upd()}
+ function ring(ctx,m,p,color,t){const k=(t*1.2)%1;ctx.save();ctx.strokeStyle=color;ctx.globalAlpha=1-k;ctx.lineWidth=2;ctx.beginPath();ctx.arc(m.X(p[0]),m.Y(p[1]),6+k*12,0,Math.PI*2);ctx.stroke();ctx.restore()}
+ function label(ctx,s,x,y,color,align){ctx.save();ctx.font="600 13px "+MF;ctx.textAlign=align||"left";ctx.textBaseline="middle";ctx.lineWidth=3;ctx.strokeStyle=theme().bg;ctx.strokeText(s,x,y);ctx.fillStyle=color;ctx.fillText(s,x,y);ctx.restore()}
+ function layout(ctx,w,h,list){const T=theme(),dk=isDark(),wide=w>=620,pad=12,gap=8,n=list.length;
+  const mb=wide?{x:pad,y:pad,w:w*0.6-pad,h:h-2*pad}:{x:pad,y:pad,w:w-2*pad,h:(h-2*pad)*0.6};
+  const m=mapChina(ctx,mb);let ax,ay,aw,ah;
+  if(wide){ax=w*0.6+gap;ay=pad;aw=w-ax-pad;ah=h-2*pad}else{ax=pad;ay=mb.y+mb.h+gap;aw=w-2*pad;ah=h-ay-pad}
+  const cw=wide?aw:(aw-gap*(n-1))/n,ch=wide?Math.min(200,(ah-gap*(n-1))/n):ah;
+  S.rects=list.map((it,i)=>{const x=wide?ax:ax+i*(cw+gap),y=wide?ay+i*(ch+gap):ay,on=i===S.sel;
+   ctx.save();rrect(ctx,x,y,cw,ch,12);ctx.fillStyle=on?(dk?"rgba(41,151,255,.18)":"#e8f1fc"):(dk?"#2c2c2e":"#f5f5f7");ctx.fill();
+   if(on){ctx.strokeStyle=T.blue;ctx.lineWidth=2;ctx.stroke()}ctx.clip();ctx.textAlign="left";ctx.textBaseline="top";
+   ctx.font="600 13px "+MF;ctx.fillStyle=col(it.c);let yy=wrapText(ctx,it.h,x+12,y+10,cw-24,17)+2;
+   ctx.font="12px "+MF;ctx.fillStyle=T.fg;yy=wrapText(ctx,it.b,x+12,yy,cw-24,17)+2;
+   ctx.font="600 12px "+MF;ctx.fillStyle=T.redText;wrapText(ctx,it.e,x+12,yy,cw-24,17);ctx.restore();return[x,y,cw,ch]});return m}
+ function drawA(ctx,w,h,t){const T=theme(),R=T.redText,k=S.a,c=CA[S.sel]||{};if(S.reset){S.t0=t;S.reset=false}const pr=Math.min(1,(t-S.t0)/1.6);
+  const m=layout(ctx,w,h,CA),pOn=S.ports||c.hl==="ports";
+  if(pOn){ctx.save();ctx.strokeStyle=T.gold;ctx.lineWidth=5;ctx.lineCap=ctx.lineJoin="round";ctx.globalAlpha=.85;ctx.beginPath();
+   RIVER.forEach((p,i)=>i?ctx.lineTo(m.X(p[0]),m.Y(p[1])):ctx.moveTo(m.X(p[0]),m.Y(p[1])));ctx.stroke();ctx.restore();
+   label(ctx,"外国商船可驶入长江",m.X(118.6),m.Y(29.9),T.goldText,"center")}
+  if(k>=1)arrowPath(ctx,m,SEA,R,k===1?pr:1);
+  if(k>=2)arrowPath(ctx,m,NORTH,R,pr);
+  city(ctx,m,"广州",...P.gz,R,k===0?6:4,"l");if(k===0)ring(ctx,m,P.gz,R,t);
+  if(k>=1){city(ctx,m,"大沽口",...P.dg,R,k===1?6:4,"r");if(k===1)ring(ctx,m,P.dg,R,t)}
+  if(k>=2){city(ctx,m,"天津",...P.tj,R,4,"l");city(ctx,m,"北京",...P.bj,R,6,"t");ring(ctx,m,P.bj,R,t)}
+  if(pOn)PORTS.forEach(p=>{city(ctx,m,p[0],p[1],p[2],T.goldText,5,p[3]);if(c.hl==="ports")ring(ctx,m,[p[1],p[2]],T.goldText,t)});
+  if(pOn||c.hl==="bj"){city(ctx,m,"天津",...P.tj,T.goldText,5,"l");if(c.hl==="bj")ring(ctx,m,P.tj,T.goldText,t)}
+  if(c.hl==="bj"){city(ctx,m,"九龙司",...P.kl,R,5,"b");ring(ctx,m,P.kl,R,t)}
+  label(ctx,EA[k].d+" "+EA[k].n,m.X(100.6),m.Y(43.2),R)}
+ function drawB(ctx,w,h,t){const T=theme(),B=T.blue,k=S.b;if(S.reset){S.t0=t;S.reset=false}const pr=Math.min(1,(t-S.t0)/1.6);
+  const m=layout(ctx,w,h,CB);
+  if(k>=1)arrowPath(ctx,m,TP,B,k===1?pr:1);
+  if(k>=2){ctx.save();ctx.setLineDash([6,5]);arrowPath(ctx,m,NB,B,k===2?pr:1);ctx.restore();label(ctx,"北伐",m.X(114.2),m.Y(35.8),B,"right");city(ctx,m,"天津",...P.tj,T.fg,3,"r")}
+  city(ctx,m,"金田",...P.jt,B,k===0?6:4,"l");if(k===0)ring(ctx,m,P.jt,B,t);
+  if(k>=1){[["永安",P.ya,"r"],["桂林",P.gl,"l"],["长沙",P.cs,"l"],["武昌",P.wc,"l"]].forEach(([n,p,sd])=>city(ctx,m,n,p[0],p[1],B,4,sd));
+   const fall=k===5,cc=fall?T.redText:B;city(ctx,m,"天京（南京）",...P.nj,cc,6,"r");if(k===1||k>=3)ring(ctx,m,P.nj,cc,t)}
+  label(ctx,EB[k].d+" "+EB[k].n,m.X(100.6),m.Y(43.2),k===5?T.redText:B)}
+ return{
+  text:"第二次鸦片战争是第一次鸦片战争的继续和扩大，列强侵略势力由沿海深入内地，中国半殖民地化程度加深；沙俄趁机割占大片领土。同时期的太平天国运动是中国旧式农民战争的最高峰，提出了比较系统的纲领，但受阶级局限最终失败。",
+  points:["借口：亚罗号事件、马神甫事件","《天津条约》《北京条约》：公使驻京、长江通航、内地传教、割九龙司","沙俄割占中国领土 150 多万平方公里","太平天国：旧式农民战争的最高峰；《天朝田亩制度》与《资政新篇》均未实行"],
+  gk:"<p>浙江选考常考两次鸦片战争的不同影响（由沿海到内地），以及太平天国两个纲领的比较。</p><p><b style=\"color:#c0362c\">易错：</b>《资政新篇》是第一个在中国发展资本主义的方案，但未实施；割九龙司出自《北京条约》，不是《南京条约》。</p>",
+  mount(c,r){S.ro=readout();r.append(S.ro);
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px";
+   S.play=button("自动播放",play,true);row.append(button("上一步",()=>{stop();setA(S.a-1)}),button("下一步",()=>{stop();setA(S.a+1)}),S.play);
+   S.row=row;S.tg=toggle("新增通商口岸",S.ports,v=>{S.ports=v});
+   S.bc=chips(EB.map((e,i)=>({label:e.d,value:i})),S.b,v=>{S.b=v;S.sel=-1;S.reset=true;upd()});
+   c.append(chips([{label:"第二次鸦片战争",value:"a"},{label:"太平天国",value:"b"}],S.mode,v=>{S.mode=v;stop();show()}),row,S.tg,S.bc);show()},
+  draw(ctx,w,h,t){S.mode==="a"?drawA(ctx,w,h,t):drawB(ctx,w,h,t)},
+  pointer(e,type,x,y){if(type!=="down")return false;const i=S.rects.findIndex(([rx,ry,rw,rh])=>x>=rx&&x<=rx+rw&&y>=ry&&y<=ry+rh);
+   if(i>=0){S.sel=i;upd();return true}return false},
+  unmount(){stop();S.ro=null}}})();
+/* ---------- 03 洋务运动 ---------- */
+MODS[2]=(()=>{
+ // [类别, 名称, 年份, 创办人, 地点, 经度, 纬度, 性质, 标注方向, 绘制经度, 绘制纬度]
+ const D=[
+  ["a","安庆内军械所",1861,"曾国藩","安庆",117.0,30.5,"官办 · 近代军事工业","l"],
+  ["a","江南制造总局",1865,"李鸿章","上海",121.5,31.2,"官办 · 当时规模最大的近代军工企业","r"],
+  ["a","金陵机器制造局",1865,"李鸿章","南京",118.8,32.1,"官办 · 近代军事工业","t"],
+  ["a","福州船政局",1866,"左宗棠","福州",119.3,26.1,"官办 · 当时规模最大的近代造船厂","r"],
+  ["a","天津机器局",1867,"崇厚","天津",117.2,39.1,"官办 · 近代军事工业","l"],
+  ["b","轮船招商局",1872,"李鸿章","上海",121.5,31.2,"官督商办 · 最大的民用企业之一","r"],
+  ["b","开平矿务局",1878,"李鸿章（唐廷枢主持）","唐山",118.2,39.6,"官督商办 · 民用企业","r"],
+  ["b","天津电报总局",1880,"李鸿章","天津",117.2,39.1,"官督商办 · 民用企业","l"],
+  ["b","汉阳铁厂",1890,"张之洞","汉阳",114.3,30.5,"官办 · 民用企业","l",114.1,30.4],
+  ["b","湖北织布局",1890,"张之洞","武昌",114.3,30.6,"官办 · 民用企业","r",114.5,30.7],
+  ["c","京师同文馆",1862,"奕䜣","北京",116.4,39.9,"官办 · 第一所新式学堂","l"],
+  ["c","北洋舰队",1888,"李鸿章","旅顺",121.2,38.8,"新式海军 · 1888 年正式成军","l"],
+  ["c","北洋舰队",1888,"李鸿章","威海卫",122.1,37.5,"新式海军 · 1888 年正式成军","b"]];
+ const S={mode:"a",year:1861,sel:-1,lost:false,born:{},hits:[],ro:null,sl:null,btn:null};
+ const navy=d=>d[1]==="北洋舰队";
+ function col(d){const T=theme();if(navy(d))return S.lost?"#8e8e93":T.redText;return d[0]==="a"?T.blue:d[0]==="b"?T.goldText:T.fg}
+ function upd(){const T=theme();if(!S.ro)return;const n=c=>D.filter(d=>d[0]===c&&d[2]<=S.year).length,d=D[S.sel];
+  const rows=[["年份",S.year+" 年",T.blue],["已有军工",n("a")+" 家",T.blue],["已有民用",n("b")+" 家",T.goldText]];
+  if(d)rows.push(["名称",d[1],col(d)==="#8e8e93"?T.redText:col(d)],["创办",d[2]+" 年"],["创办人",d[3]],["地点",d[4]],["性质",d[7]]);
+  else if(!S.lost)rows.push(["提示","点击地图上的点位查看详情"]);
+  if(S.lost)rows.push(["甲午战败","标志着洋务运动的破产",T.redText]);S.ro.update(rows)}
+ function label(ctx,s,x,y,color,align){ctx.save();ctx.font="600 13px "+MF;ctx.textAlign=align||"left";ctx.textBaseline="middle";ctx.lineWidth=3;ctx.strokeStyle=theme().bg;ctx.strokeText(s,x,y);ctx.fillStyle=color;ctx.fillText(s,x,y);ctx.restore()}
+ function card(ctx,x,y,cw,ch){const T=theme(),dk=isDark(),L=x+12,mw=cw-24;
+  ctx.save();rrect(ctx,x,y,cw,ch,12);ctx.fillStyle=dk?"#2c2c2e":"#f5f5f7";ctx.fill();ctx.clip();ctx.textAlign="left";ctx.textBaseline="top";
+  const head=(s,yy)=>{ctx.font="600 12px "+MF;ctx.fillStyle=T.fg;ctx.fillText(s,L,yy);return yy+18};
+  let yy=head("口号",y+10);ctx.font="600 14px "+MF;let xx=L;
+  [["「自强」",T.blue],[" → ",T.fg],["「求富」",T.goldText]].forEach(([s,c])=>{ctx.fillStyle=c;ctx.fillText(s,xx,yy);xx+=ctx.measureText(s).width});
+  yy=head("代表人物",yy+24);ctx.font="13px "+MF;ctx.fillStyle=T.fg;yy=wrapText(ctx,"中央：奕䜣",L,yy,mw,18);yy=wrapText(ctx,"地方：曾国藩、李鸿章、左宗棠、张之洞",L,yy,mw,18);
+  yy=head("指导思想",yy+6);ctx.font="600 14px "+MF;ctx.fillStyle=T.redText;ctx.fillText("「中体西用」",L,yy);
+  ctx.font="13px "+MF;ctx.fillStyle=T.fg;yy=wrapText(ctx,"中学为体，西学为用",L,yy+20,mw,18);
+  if(S.lost){ctx.font="600 13px "+MF;ctx.fillStyle=T.redText;wrapText(ctx,"1894—1895 甲午战败，北洋舰队全军覆没",L,yy+6,mw,18)}ctx.restore()}
+ return{
+  text:"两次鸦片战争后，清政府中的洋务派以「自强」「求富」为口号，引进西方先进技术，创办近代军事工业和民用企业，建立新式海军，兴办新式学堂、派遣留学生。洋务运动没有使中国走上富强道路，但引进了西方先进生产技术，揭开了中国近代化的序幕。",
+  points:["目的：维护清朝统治","指导思想：中体西用","内容：先「自强」办军工，后「求富」办民用，建海军，办学堂","评价：中国近代化开端，但只学技术不变制度，甲午战败标志破产"],
+  gk:"<p>浙江选考常考洋务企业的性质（军工多为官办，民用多为官督商办）、洋务运动的积极作用与局限。</p><p><b style=\"color:#c0362c\">易错：</b>洋务运动没有触动封建制度；「中体西用」是其指导思想而非目标；江南制造总局在上海，福州船政局在福州。</p>",
+  mount(c,r){S.ro=readout();r.append(S.ro);
+   S.sl=slider("年份",1861,1894,1,S.year,v=>v+" 年",v=>{S.year=v;if(v<1894&&S.lost){S.lost=false;S.btn.textContent="1894—1895 甲午战败"}if(S.sel>=0&&D[S.sel][2]>v)S.sel=-1;upd()});
+   S.btn=button(S.lost?"返回洋务时期":"1894—1895 甲午战败",()=>{S.lost=!S.lost;if(S.lost){S.year=1894;S.sl.set(1894)}S.btn.textContent=S.lost?"返回洋务时期":"1894—1895 甲午战败";upd()},true);
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px";row.append(S.btn);
+   c.append(chips([{label:"自强（军事工业）",value:"a"},{label:"求富（民用企业）",value:"b"},{label:"海军与教育",value:"c"}],S.mode,v=>{S.mode=v;S.sel=-1;upd()}),S.sl,row);upd()},
+  draw(ctx,w,h,t){const T=theme(),wide=w>=620,pad=12,gap=8;
+   const mb=wide?{x:pad,y:pad,w:w*0.64-pad,h:h-2*pad}:{x:pad,y:pad,w:w-2*pad,h:(h-2*pad)*0.62};
+   const m=mapChina(ctx,mb);S.hits=[];
+   D.forEach((d,i)=>{const show=d[2]<=S.year&&(d[0]===S.mode||(S.lost&&navy(d)));if(!show){delete S.born[i];return}
+    if(S.born[i]==null)S.born[i]=t;const k=Math.min(1,(t-S.born[i])/0.45),base=i===S.sel?7:5;
+    const r=base*(k<.6?Math.max(.1,k/.6*1.4):1.4-(k-.6)/.4*.4),lon=d[9]||d[5],lat=d[10]||d[6],x=m.X(lon),y=m.Y(lat),c=col(d);
+    const gray=S.lost&&navy(d);city(ctx,m,gray?"":d[1]+(navy(d)?" · "+d[4]:""),lon,lat,c,r,d[8]);
+    if(gray){const sd=d[8],g=r+4;label(ctx,"北洋舰队 · "+d[4]+" 全军覆没",sd==="l"?x-g:x,sd==="b"?y+g+6:y,T.redText,sd==="l"?"right":"center")}
+    if(i===S.sel){ctx.save();ctx.strokeStyle=c;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r+5,0,Math.PI*2);ctx.stroke();ctx.restore()}
+    S.hits.push([i,x,y])});
+   label(ctx,S.year+" 年",m.X(100.6),m.Y(43.2),T.blue);
+   if(S.mode==="c"){label(ctx,"另有南洋水师、福建水师",m.X(100.6),m.Y(20.6),T.fg);if(S.year>=1872)label(ctx,"1872 起派留美幼童",m.X(100.6),m.Y(19.6),T.fg)}
+   if(wide)card(ctx,w*0.64+gap,pad,w-w*0.64-gap-pad,Math.min(h-2*pad,300));else card(ctx,pad,mb.y+mb.h+gap,w-2*pad,h-mb.y-mb.h-gap-pad)},
+  pointer(e,type,x,y){if(type!=="down")return false;const R=e&&e.pointerType==="touch"?22:16;let best=-1,bd=R;
+   S.hits.forEach(([i,hx,hy])=>{const d=Math.hypot(hx-x,hy-y);if(d<bd){bd=d;best=i}});if(best>=0){S.sel=best;upd();return true}return false},
+  unmount(){S.ro=null;S.born={}}}})();
+/* ---------- 04 甲午战争与瓜分狂潮 ---------- */
+MODS[3]=(()=>{
+ const EV=[
+  {d:"1894.7",n:"丰岛海战",s:"日本在朝鲜丰岛海面袭击清军运兵船，不宣而战。"},
+  {d:"1894.9",n:"平壤战役",s:"日军进攻平壤，清军败退，日军逼近鸭绿江。"},
+  {d:"1894.9.17",n:"黄海海战",s:"大东沟外海，北洋舰队与日本舰队激战；致远舰管带邓世昌壮烈殉国。"},
+  {d:"1894.11",n:"日军攻占旅顺",s:"日军越过鸭绿江、侵入辽东半岛，攻占旅顺，制造旅顺大屠杀。"},
+  {d:"1895.2",n:"威海卫战役",s:"日军在山东半岛登陆，攻陷威海卫，北洋舰队全军覆没。"},
+  {d:"1895.4",n:"签订《马关条约》",s:"清政府派李鸿章赴日本马关，签订《马关条约》。"}];
+ const P={fd:[126.2,37.2],py:[125.8,39.0],hh:[123.6,39.4],ls:[121.2,38.8],wh:[122.1,37.5],ml:[130.9,33.95]};
+ const A1=[P.fd,[126.0,38.1],P.py],A2=[P.py,[124.5,40.1],[123.3,40.3],[122.3,39.7],[121.6,39.1],P.ls],A3=[[121.8,38.6],[122.9,37.7],[122.55,37.15],P.wh];
+ const LIAO=[[121.0,38.7],[121.8,38.9],[122.6,39.4],[123.4,39.7],[124.0,40.0],[124.0,41.0],[122.4,41.0],[121.0,40.8],[121.9,40.0],[121.3,39.3]];
+ const PORTS=[["沙市",112.2,30.3,"t"],["重庆",106.5,29.6,"b"],["苏州",120.6,31.3,"l"],["杭州",120.2,30.3,"l"]];
+ const CL=[
+  {n:"割辽东半岛、台湾全岛及附属各岛屿、澎湖列岛给日本",e:"领土主权严重破坏；日本侵略势力扩张到中国东北和东南沿海",hl:"land"},
+  {n:"赔款白银 2 亿两",e:"清政府大举借外债，列强借此控制中国财政；人民负担加重"},
+  {n:"开放沙市、重庆、苏州、杭州为商埠",e:"列强侵略势力深入长江中上游和内地",hl:"ports"},
+  {n:"允许日本在通商口岸开设工厂",e:"列强资本输出合法化，严重阻碍民族资本主义发展"}];
+ const SP=[
+  {k:"德国",c:"purple",a:"山东",p:[[115.6,34.7],[119.3,34.8],[120.4,36.1],[121.0,36.6],[122.1,37.4],[120.3,37.6],[118.9,37.7],[117.7,38.2],[115.6,36.5]],
+   pt:[["胶州湾",120.2,36.1,"b"]],r:"1897 强占胶州湾；1898 租借胶州湾"},
+  {k:"俄国",c:"teal",a:"东北",p:[[119.6,40.0],[121.0,40.8],[122.2,40.7],[121.2,38.8],[123.0,39.6],[124.4,40.1],[126.5,41.6],[129.6,42.4],[131,43.2],[131,44],[118,44],[118,41.5]],
+   pt:[["旅顺",121.2,38.8,"l"],["大连",121.6,38.9,"b"]],r:"1898 租借旅顺、大连"},
+  {k:"英国",c:"red",a:"长江流域",p:[[104,28],[104,31.4],[108,32.4],[112,31.8],[116,32.5],[119,33.4],[120.9,32.6],[121.9,31.4],[121.0,30.6],[121.9,29.9],[119,28.5],[115,27.6],[110,27.6]],
+   pt:[["威海卫",122.1,37.5,"r"],["九龙新界",114.2,22.4,"b"]],r:"1898 租借威海卫、九龙新界"},
+  {k:"法国",c:"gold",a:"两广和云南",p:[[100,21.6],[100,26.5],[103.5,27.2],[106,25.8],[109.5,25.9],[113.5,25.5],[116.4,24.6],[116.7,23.4],[115.4,22.7],[114.2,22.3],[113.1,22.1],[111.6,21.6],[110.4,21.2],[109.6,21.5],[108.5,21.6],[107.9,21.5],[106.6,21.9],[103.5,22.6],[101.5,21.4]],
+   pt:[["广州湾",110.4,21.2,"b"]],r:"1898 强租广州湾，1899 订约租借"},
+  {k:"日本",c:"blue",a:"福建",p:[[116.6,23.8],[118.1,24.5],[119.0,25.3],[119.6,26.0],[120.2,26.9],[120.5,27.4],[118.6,28.3],[117.0,27.1],[116.3,25.0]],
+   pt:[],r:"1898 迫使清政府承诺不割让福建"}];
+ const S={mode:"war",step:0,t0:0,reset:true,timer:null,sel:-1,back:false,sp:-1,open:false,dots:[],polys:[],pts:[],ro:null,row:null,tb:null,ob:null,cards:null,cbs:[],play:null,dk:null};
+ function upd(){const T=theme();if(!S.ro)return;
+  if(S.mode==="war"){const e=EV[S.step];S.ro.update([["时间",e.d,T.blue],["事件",e.n,T.redText],["说明",e.s]])}
+  else if(S.mode==="treaty"){const c=CL[S.sel],rows=c?[["条款",c.n,T.goldText],["影响",c.e,T.redText]]:[["提示","点击条款卡片，查看影响"]];
+   if(S.back)rows.push(["三国干涉还辽","俄、德、法迫使日本归还辽东半岛；清政府另付「赎辽费」3000 万两",T.blue]);S.ro.update(rows)}
+  else{const s=SP[S.sp],rows=s?[["国家",s.k,T.blue],["势力范围",s.a],["租借地",s.r,T.redText]]:[["提示","点击地图色块，查看租借地与时间"]];
+   if(S.open)rows.push(["1899 门户开放","美国承认列强在华既得利益，要求「利益均沾」",T.blue]);S.ro.update(rows)}
+  S.cbs.forEach((b,i)=>{b.style.borderColor=i===S.sel?"var(--blue)":"transparent";b.style.background=i===S.sel?"var(--sel)":"var(--btn2)"})}
+ function paintCards(){const T=theme();S.dk=isDark();S.cbs.forEach((b,i)=>{b.innerHTML=`<span style="display:block;font-size:12px;color:${T.goldText}">《马关条约》第 ${i+1} 项</span><span style="display:block;font-weight:600;margin-top:2px">${CL[i].n}</span>`})}
+ function setStep(k){S.step=Math.max(0,Math.min(EV.length-1,k));S.reset=true;upd()}
+ function stop(){if(S.timer){clearInterval(S.timer);S.timer=null}if(S.play)S.play.textContent="自动播放"}
+ function play(){if(S.timer)return stop();if(S.step>=EV.length-1)setStep(0);S.play.textContent="暂停";
+  S.timer=setInterval(()=>{if(S.step>=EV.length-1)return stop();setStep(S.step+1)},2200)}
+ function show(){S.row.hidden=S.mode!=="war";S.tb.hidden=S.cards.hidden=S.mode!=="treaty";S.ob.hidden=S.mode!=="split";S.reset=true;upd()}
+ function ring(ctx,m,p,color,t){const k=(t*1.2)%1;ctx.save();ctx.strokeStyle=color;ctx.globalAlpha=1-k;ctx.lineWidth=2;ctx.beginPath();ctx.arc(m.X(p[0]),m.Y(p[1]),6+k*12,0,Math.PI*2);ctx.stroke();ctx.restore()}
+ function label(ctx,s,x,y,color,align){ctx.save();ctx.font="600 13px "+MF;ctx.textAlign=align||"left";ctx.textBaseline="middle";ctx.lineWidth=3;ctx.strokeStyle=theme().bg;ctx.strokeText(s,x,y);ctx.fillStyle=color;ctx.fillText(s,x,y);ctx.restore()}
+ function path(ctx,m,pts){ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(m.X(p[0]),m.Y(p[1])):ctx.moveTo(m.X(p[0]),m.Y(p[1])));ctx.closePath()}
+ function hatch(ctx,m,shape,color){ctx.save();shape();ctx.globalAlpha=.12;ctx.fillStyle=color;ctx.fill();ctx.globalAlpha=1;ctx.clip();ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();
+  for(let x=m.box.x-m.box.h;x<m.box.x+m.box.w;x+=6){ctx.moveTo(x,m.box.y+m.box.h);ctx.lineTo(x+m.box.h,m.box.y)}ctx.stroke();ctx.restore();ctx.save();shape();ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.stroke();ctx.restore()}
+ function drawWar(ctx,w,h,t){const T=theme(),R=T.redText,pad=12,tlH=64,k=S.step;if(S.reset){S.t0=t;S.reset=false}const pr=Math.min(1,(t-S.t0)/1.6);
+  const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad-tlH});
+  if(k>=1)arrowPath(ctx,m,A1,R,k===1?pr:1);
+  if(k>=3)arrowPath(ctx,m,A2,R,k===3?pr:1);
+  if(k>=4)arrowPath(ctx,m,A3,R,k===4?pr:1);
+  if(k>=3){label(ctx,"鸭绿江",m.X(124.9),m.Y(40.7),R,"left");label(ctx,"辽东半岛",m.X(122.9),m.Y(40.6),R,"right")}
+  if(k>=4)label(ctx,"山东半岛登陆",m.X(122.9),m.Y(36.8),R,"left");
+  const marks=[["丰岛",P.fd,"r"],["平壤",P.py,"r"],["黄海海战 · 大东沟外海",P.hh,"t"],["旅顺",P.ls,"l"],["威海卫",P.wh,"l"],["马关（日本）",P.ml,"t"]];
+  marks.forEach(([n,p,sd],i)=>{if(i>k)return;city(ctx,m,n,p[0],p[1],R,i===k?6:4,sd);if(i===k)ring(ctx,m,p,R,t)});
+  const xa=pad+28,xb=w-pad-28,ty=h-pad-24,XT=i=>xa+i/(EV.length-1)*(xb-xa);
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xa,ty);ctx.lineTo(xb,ty);ctx.stroke();
+  ctx.font="12px ui-monospace,Menlo,monospace";ctx.fillStyle=T.fg;ctx.textAlign="center";ctx.textBaseline="top";ctx.fillText("1894",XT(0),ty+8);ctx.fillText("1895",XT(4),ty+8);
+  S.dots=EV.map((e,i)=>{const x=XT(i);ctx.beginPath();ctx.arc(x,ty,i===k?6:4,0,Math.PI*2);ctx.fillStyle=i<=k?R:T.bg;ctx.fill();ctx.strokeStyle=i<=k?R:T.axis;ctx.lineWidth=1.5;ctx.stroke();return x});
+  const s=EV[k].d+" "+EV[k].n;ctx.font="600 13px "+MF;ctx.fillStyle=R;ctx.textBaseline="bottom";const lw=ctx.measureText(s).width;
+  ctx.fillText(s,Math.max(pad+lw/2,Math.min(w-pad-lw/2,S.dots[k])),ty-10);ctx.restore()}
+ function drawTreaty(ctx,w,h,t){const T=theme(),R=T.redText,G=T.goldText,c=CL[S.sel]||{},pad=12;if(S.dk!==isDark())paintCards();
+  const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad});
+  if(!S.back){hatch(ctx,m,()=>path(ctx,m,LIAO),R);label(ctx,"辽东半岛",m.X(124.3),m.Y(40.4),R)}
+  else{ctx.save();path(ctx,m,LIAO);ctx.setLineDash([4,4]);ctx.strokeStyle=T.blue;ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+   label(ctx,"辽东半岛：三国干涉还辽",m.X(124.3),m.Y(40.7),T.blue);label(ctx,"赎辽费 3000 万两",m.X(124.3),m.Y(39.8),T.blue)}
+  hatch(ctx,m,()=>path(ctx,m,TAIWAN),R);label(ctx,"台湾全岛及附属岛屿",m.X(122.2),m.Y(23.6),R);
+  hatch(ctx,m,()=>{ctx.beginPath();ctx.arc(m.X(119.6),m.Y(23.6),Math.max(6,m.s*.45),0,Math.PI*2)},R);label(ctx,"澎湖列岛",m.X(119.0),m.Y(23.6),R,"right");
+  if(c.hl==="land"){[[122.6,40],[120.9,23.8],[119.6,23.6]].forEach(p=>ring(ctx,m,p,R,t))}
+  PORTS.forEach(p=>{city(ctx,m,p[0],p[1],p[2],G,5,p[3]);if(c.hl==="ports")ring(ctx,m,[p[1],p[2]],G,t)});
+  label(ctx,"《马关条约》1895",m.X(100.6),m.Y(43.2),R)}
+ function drawSplit(ctx,w,h,t){const T=theme(),pad=12;const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad});S.polys=[];S.pts=[];SP.forEach((s,i)=>s.pt.forEach(p=>S.pts.push([i,m.X(p[1]),m.Y(p[2])])));
+  SP.forEach((s,i)=>{const col=T[s.c];ctx.save();path(ctx,m,s.p);ctx.globalAlpha=i===S.sp?.5:.3;ctx.fillStyle=col;ctx.fill();ctx.globalAlpha=1;
+   if(i===S.sp){ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke()}ctx.restore();S.polys.push(s.p.map(p=>[m.X(p[0]),m.Y(p[1])]))});
+  SP.forEach((s,i)=>{const cx=s.p.reduce((a,p)=>a+p[0],0)/s.p.length,cy=s.p.reduce((a,p)=>a+p[1],0)/s.p.length;
+   label(ctx,s.k+" · "+s.a,m.X(cx),m.Y(cy),T.fg,"center");s.pt.forEach(p=>{city(ctx,m,"",p[1],p[2],T[s.c],5);const l=p[3]==="l";label(ctx,p[0],m.X(p[1])+(l?-9:p[3]==="r"?9:0),m.Y(p[2])+(p[3]==="b"?14:0),T.fg,l?"right":p[3]==="r"?"left":"center");if(i===S.sp)ring(ctx,m,[p[1],p[2]],T[s.c],t)})});
+  label(ctx,"列强势力范围（示意） 1897—1899",m.X(100.6),m.Y(43.2),T.fg);
+  if(S.open){label(ctx,"1899 美国「门户开放」：",m.X(124.5),m.Y(33.2),T.blue);label(ctx,"承认既得利益，要求利益均沾",m.X(124.5),m.Y(32.2),T.blue)}}
+ function inPoly(x,y,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const[xi,yi]=P[i],[xj,yj]=P[j];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c}return c}
+ return{
+  text:"甲午中日战争中国战败，签订《马关条约》，大大加深了中国社会的半殖民地化。列强随即掀起瓜分中国的狂潮，强占租借地、划分势力范围，中华民族面临空前严重的危机。",
+  points:["《马关条约》：割辽东半岛、台湾、澎湖，赔款 2 亿两，开四埠，允许设厂","设厂条款适应列强资本输出需要","三国干涉还辽","瓜分狂潮与美国「门户开放」，民族危机空前严重"],
+  gk:"<p>浙江选考常考《马关条约》对中国经济的影响（设厂权、赔款→借外债）及与《南京条约》的比较。</p><p><b style=\"color:#c0362c\">易错：</b>开放的是沙市、重庆、苏州、<b style=\"color:#9a6a00\">杭州</b>（杭州是浙江考生常考点）；辽东半岛后被赎回。</p>",
+  mount(c,r){S.ro=readout();r.append(S.ro);
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px";
+   S.play=button("自动播放",play,true);row.append(button("上一步",()=>{stop();setStep(S.step-1)}),button("下一步",()=>{stop();setStep(S.step+1)}),S.play);S.row=row;
+   S.tb=button("三国干涉还辽",()=>{S.back=!S.back;S.tb.textContent=S.back?"恢复条约原貌":"三国干涉还辽";upd()},true);S.tb.textContent=S.back?"恢复条约原貌":"三国干涉还辽";
+   S.ob=button("门户开放",()=>{S.open=!S.open;S.ob.textContent=S.open?"隐藏门户开放":"门户开放";upd()},true);S.ob.textContent=S.open?"隐藏门户开放":"门户开放";
+   S.tb.style.alignSelf=S.ob.style.alignSelf="flex-start";
+   S.cards=el("div");S.cards.style.cssText="display:flex;flex-direction:column;gap:8px";
+   S.cbs=CL.map((it,i)=>{const b=el("button");b.style.cssText="display:block;width:100%;text-align:left;white-space:normal;word-break:break-all;height:auto;min-height:44px;border:2px solid transparent;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5;color:var(--fg);background:var(--btn2)";
+    b.onclick=()=>{S.sel=i;upd()};S.cards.append(b);return b});paintCards();
+   c.append(chips([{label:"战争进程",value:"war"},{label:"《马关条约》",value:"treaty"},{label:"瓜分狂潮",value:"split"}],S.mode,v=>{S.mode=v;stop();show()}),row,S.tb,S.cards,S.ob);show()},
+  draw(ctx,w,h,t){S.mode==="war"?drawWar(ctx,w,h,t):S.mode==="treaty"?drawTreaty(ctx,w,h,t):drawSplit(ctx,w,h,t)},
+  pointer(e,type,x,y){if(type!=="down")return false;
+   if(S.mode==="war"){const ty=H-12-24,R=e&&e.pointerType==="touch"?22:16;let best=-1,bd=R;S.dots.forEach((dx,i)=>{const d=Math.hypot(dx-x,ty-y);if(d<bd){bd=d;best=i}});if(best>=0){stop();setStep(best);return true}return false}
+   if(S.mode==="split"){let i=S.polys.findIndex(P=>inPoly(x,y,P));const r=e&&e.pointerType==="touch"?22:14;
+    S.pts.forEach(([k,px,py])=>{if(Math.hypot(px-x,py-y)<r)i=k});if(i>=0){S.sp=i;upd();return true}return false}return false},
+  unmount(){stop();S.ro=null;S.cbs=[]}}})();
+/* ---------- 05 戊戌变法与义和团运动 ---------- */
+MODS[4]=(()=>{
+ const EA=[
+  {d:"1895",n:"公车上书",s:"康有为联合在京应试举人「公车上书」。",hl:"bj"},
+  {d:"1895",n:"强学会 · 《万国公报》",s:"成立强学会，创办《万国公报》（后改《中外纪闻》），维新思想传播。",hl:"bj"},
+  {d:"1897",n:"《国闻报》 · 《天演论》",s:"严复在天津办《国闻报》，翻译《天演论》。",hl:"tj"},
+  {d:"1898.6.11",n:"「明定国是」诏书",s:"光绪帝颁布「明定国是」诏书，变法开始。",hl:"bj"},
+  {d:"1898.9.21",n:"戊戌政变",s:"慈禧太后发动政变，光绪被囚，谭嗣同等「戊戌六君子」被杀，变法历时 103 天失败（百日维新）。",hl:"bj",bad:1}];
+ const EC=[
+  {d:"1899—1900",n:"义和团兴起",s:"义和团在山东兴起，进入直隶，口号「扶清灭洋」。"},
+  {d:"1900",n:"八国联军侵华",s:"英、美、法、德、俄、日、意、奥八国联军侵华，由大沽口经天津攻入北京。",bad:1},
+  {d:"1901",n:"签订《辛丑条约》",s:"清政府被迫签订《辛丑条约》。",bad:1}];
+ const CB=[
+  {h:"政治",b:"改革政府机构、裁撤冗员、准许官民上书言事",e:"意在提高行政效率、开放言路，但未触动君主专制，也没有设议院"},
+  {h:"经济",b:"设农工商总局、保护奖励农工商业、修铁路开矿",e:"为民族资本主义发展创造条件"},
+  {h:"军事",b:"裁减旧军、训练新式陆军",e:"意在建立近代化军队、加强国防"},
+  {h:"文化",b:"废八股、改试策论、开办京师大学堂、设译书局",e:"培养新式人才、传播西学；京师大学堂是北京大学的前身",hl:"bj"}];
+ const CC=[
+  {b:"赔款白银 4.5 亿两（分 39 年还清，本息共 9.8 亿多两）",e:"清政府加紧搜刮，人民负担空前沉重；列强进一步控制中国财政"},
+  {b:"划定北京东交民巷为使馆界，允许各国驻兵保护，不准中国人居住",e:"使馆界成为「国中之国」",hl:"bj"},
+  {b:"拆毁大沽炮台，允许外国在北京至山海关铁路沿线要地驻兵",e:"京津门户洞开，清政府完全成为列强控制的工具",hl:"rail"},
+  {b:"清政府严禁人民参加反帝组织",e:"清政府镇压人民反抗，成为「洋人的朝廷」"}];
+ const P={bj:[116.4,39.9],tj:[117.2,39.1],sh:[121.5,31.2],cs:[113.0,28.2],dg:[117.7,39.0],shg:[119.8,40.0],ts:[118.2,39.6],sd:[117.0,36.65],zl:[115.5,38.9]};
+ const RAIL=[P.bj,P.tj,P.ts,P.shg],INV=[P.dg,P.tj,P.bj],BOX=[P.sd,[116.0,37.8],P.zl];
+ const S={mode:"a",a:0,c:0,b:-1,cc:-1,t0:0,reset:true,dots:[],ro:null,row:null,bw:null,cw:null,bbs:[],cbs:[],dk:null};
+ const card=()=>{const b=el("button");b.style.cssText="display:block;width:100%;text-align:left;white-space:normal;word-break:break-all;height:auto;min-height:44px;border:2px solid transparent;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5;color:var(--fg);background:var(--btn2)";return b};
+ function paint(){const T=theme();S.dk=isDark();
+  S.bbs.forEach((b,i)=>b.innerHTML=`<span style="display:block;font-size:12px;color:${T.blue}">${CB[i].h}</span><span style="display:block;font-weight:600;margin-top:2px">${CB[i].b}</span>`);
+  S.cbs.forEach((b,i)=>b.innerHTML=`<span style="display:block;font-size:12px;color:${T.goldText}">《辛丑条约》第 ${i+1} 项</span><span style="display:block;font-weight:600;margin-top:2px">${CC[i].b}</span>`);
+  if(S.note)S.note.innerHTML=`<p style="margin:0"><b style="color:${T.redText}">失败原因：</b>维新派力量弱小、脱离群众，顽固派势力强大</p><p style="margin:6px 0 0"><b style="color:${T.blue}">意义：</b>资产阶级的政治改革，也是思想启蒙运动</p>`}
+ function upd(){const T=theme();if(!S.ro)return;
+  if(S.mode==="a"){const e=EA[S.a];S.ro.update([["时间",e.d,T.blue],["事件",e.n,e.bad?T.redText:T.blue],["说明",e.s]])}
+  else if(S.mode==="b"){const c=CB[S.b];S.ro.update(c?[["领域",c.h,T.blue],["内容",c.b],["说明",c.e,T.goldText]]:[["提示","点击变法内容卡片，查看说明"]])}
+  else{const c=CC[S.cc],e=EC[S.c];S.ro.update(c?[["条款",c.b,T.goldText],["影响",c.e,T.redText]]:[["时间",e.d,T.blue],["事件",e.n,e.bad?T.redText:T.goldText],["说明",e.s]])}
+  const mark=(bs,k)=>bs.forEach((b,i)=>{b.style.borderColor=i===k?"var(--blue)":"transparent";b.style.background=i===k?"var(--sel)":"var(--btn2)"});mark(S.bbs,S.b);mark(S.cbs,S.cc)}
+ function step(k){if(S.mode==="a")S.a=Math.max(0,Math.min(EA.length-1,k));else{S.c=Math.max(0,Math.min(EC.length-1,k));S.cc=-1}S.reset=true;upd()}
+ function show(){S.row.hidden=S.mode==="b";S.bw.hidden=S.mode!=="b";S.cw.hidden=S.mode!=="c";S.reset=true;upd()}
+ function ring(ctx,m,p,color,t){const k=(t*1.2)%1;ctx.save();ctx.strokeStyle=color;ctx.globalAlpha=1-k;ctx.lineWidth=2;ctx.beginPath();ctx.arc(m.X(p[0]),m.Y(p[1]),6+k*12,0,Math.PI*2);ctx.stroke();ctx.restore()}
+ function label(ctx,s,x,y,color,align){ctx.save();ctx.font="600 13px "+MF;ctx.textAlign=align||"left";ctx.textBaseline="middle";ctx.lineWidth=3;ctx.strokeStyle=theme().bg;ctx.strokeText(s,x,y);ctx.fillStyle=color;ctx.fillText(s,x,y);ctx.restore()}
+ function timeline(ctx,w,h,list,k){const T=theme(),pad=12,xa=pad+28,xb=w-pad-28,ty=h-pad-24,XT=i=>xa+i/(list.length-1)*(xb-xa),col=e=>e.bad?T.redText:T.blue;
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xa,ty);ctx.lineTo(xb,ty);ctx.stroke();
+  ctx.font="12px ui-monospace,Menlo,monospace";ctx.fillStyle=T.fg;ctx.textAlign="center";ctx.textBaseline="top";
+  let last="";list.forEach((e,i)=>{const y=e.d.slice(0,4);if(y!==last){ctx.fillText(y,XT(i),ty+8);last=y}});
+  S.dots=list.map((e,i)=>{const x=XT(i);ctx.beginPath();ctx.arc(x,ty,i===k?6:4,0,Math.PI*2);ctx.fillStyle=i<=k?col(e):T.bg;ctx.fill();ctx.strokeStyle=i<=k?col(e):T.axis;ctx.lineWidth=1.5;ctx.stroke();return x});
+  const s=list[k].d+" "+list[k].n;ctx.font="600 13px "+MF;ctx.fillStyle=col(list[k]);ctx.textBaseline="bottom";const lw=Math.min(ctx.measureText(s).width,w-2*pad);
+  ctx.fillText(s,Math.max(pad+lw/2,Math.min(w-pad-lw/2,S.dots[k])),ty-10,w-2*pad);ctx.restore()}
+ function drawA(ctx,w,h,t){const T=theme(),B=T.blue,G=T.goldText,pad=12,k=S.a,e=EA[k],c=e.bad?T.redText:B;
+  const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad-64});
+  city(ctx,m,"上海 · 梁启超《时务报》",...P.sh,G,5,"l");city(ctx,m,"长沙 · 时务学堂",...P.cs,G,5,"r");
+  city(ctx,m,k>=2?"天津 · 《国闻报》":"天津",...P.tj,k===2?B:T.fg,k===2?6:4,"r");if(k===2)ring(ctx,m,P.tj,B,t);
+  city(ctx,m,"北京",...P.bj,e.hl==="bj"?c:B,e.hl==="bj"?6:4,"l");if(e.hl==="bj")ring(ctx,m,P.bj,c,t);
+  label(ctx,e.d+" "+e.n,m.X(100.6),m.Y(43.2),c);if(e.bad)label(ctx,"百日维新失败",m.X(100.6),m.Y(42.2),T.redText);
+  timeline(ctx,w,h,EA,k)}
+ function drawB(ctx,w,h,t){const T=theme(),pad=12,c=CB[S.b]||{},m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad});
+  city(ctx,m,c.hl==="bj"?"北京 · 京师大学堂":"北京",...P.bj,T.blue,6,"l");if(c.hl==="bj")ring(ctx,m,P.bj,T.blue,t);
+  city(ctx,m,"上海",...P.sh,T.goldText,4,"l");city(ctx,m,"长沙",...P.cs,T.goldText,4,"r");
+  label(ctx,"1898 百日维新 · 变法内容"+(c.h?"："+c.h:""),m.X(100.6),m.Y(43.2),T.blue)}
+ function drawC(ctx,w,h,t){const T=theme(),R=T.redText,G=T.goldText,pad=12,k=S.c,c=CC[S.cc]||{};if(S.reset){S.t0=t;S.reset=false}const pr=Math.min(1,(t-S.t0)/1.6);
+  const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad-64});
+  arrowPath(ctx,m,BOX,G,k===0?pr:1);city(ctx,m,"山东 · 义和团兴起",...P.sd,G,k===0?6:4,"r");city(ctx,m,"直隶",...P.zl,G,4,"l");
+  label(ctx,"「扶清灭洋」",m.X(113.6),m.Y(37.4),G,"right");
+  if(k>=1){arrowPath(ctx,m,INV,R,k===1?pr:1);city(ctx,m,"大沽口",...P.dg,R,4,"r");city(ctx,m,"天津",...P.tj,R,4,"b");
+   label(ctx,"八国联军：英 美 法 德 俄 日 意 奥",m.X(118.6),m.Y(37.6),R)}
+  if(k>=2){ctx.save();ctx.lineCap=ctx.lineJoin="round";ctx.beginPath();RAIL.forEach((p,i)=>i?ctx.lineTo(m.X(p[0]),m.Y(p[1])):ctx.moveTo(m.X(p[0]),m.Y(p[1])));
+   ctx.strokeStyle=R;ctx.lineWidth=5;ctx.stroke();ctx.setLineDash([5,5]);ctx.strokeStyle=T.bg;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+   city(ctx,m,"山海关",...P.shg,R,5,"r");label(ctx,"北京—山海关铁路沿线驻兵",m.X(119.4),m.Y(41.3),R,"center");if(c.hl==="rail"){ring(ctx,m,P.shg,R,t);ring(ctx,m,P.dg,R,t)}}
+  city(ctx,m,c.hl==="bj"?"北京 · 东交民巷使馆界":"北京",...P.bj,k>=1?R:T.fg,k>=1?6:4,"l");if(c.hl==="bj"||k===1)ring(ctx,m,P.bj,R,t);
+  label(ctx,EC[k].d+" "+EC[k].n,m.X(100.6),m.Y(43.2),k>=1?R:G);if(k>=2)label(ctx,"中国完全沦为半殖民地半封建社会",m.X(100.6),m.Y(42.2),R);
+  timeline(ctx,w,h,EC,k)}
+ return{
+  text:"甲午战败后民族危机加深，康有为、梁启超等发起维新变法，因顽固派反对仅百日而失败。随后义和团运动兴起，八国联军侵华，清政府签订《辛丑条约》。中国完全沦为半殖民地半封建社会，清政府成为「洋人的朝廷」。",
+  points:["公车上书 → 明定国是 → 戊戌政变，历时 103 天","变法内容涉及政治、经济、军事、文化","义和团「扶清灭洋」，沉重打击列强瓜分中国的野心","《辛丑条约》：赔款 4.5 亿两、使馆界、驻兵、拆炮台、禁止反帝"],
+  gk:"<p>浙江选考常考戊戌变法的性质（资产阶级改良）与思想启蒙作用、《辛丑条约》标志中国完全沦为半殖民地半封建社会。</p><p><b style=\"color:#c0362c\">易错：</b>戊戌变法并未改变君主专制本身，变法诏令中<b style=\"color:#9a6a00\">没有设议院</b>；「洋人的朝廷」出自《辛丑条约》之后。</p>",
+  mount(c,r){S.ro=readout();r.append(S.ro);
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px";row.append(button("上一步",()=>step((S.mode==="a"?S.a:S.c)-1)),button("下一步",()=>step((S.mode==="a"?S.a:S.c)+1),true));S.row=row;
+   const col=()=>{const d=el("div");d.style.cssText="display:flex;flex-direction:column;gap:8px";return d};
+   S.bw=col();S.bbs=CB.map((it,i)=>{const b=card();b.onclick=()=>{S.b=i;upd()};S.bw.append(b);return b});
+   S.note=el("div");S.note.style.cssText="font-size:14px;line-height:1.6;color:var(--fg);white-space:normal;word-break:break-all";S.bw.append(S.note);
+   S.cw=col();S.cbs=CC.map((it,i)=>{const b=card();b.onclick=()=>{S.cc=i;if(S.c<2){S.c=2;S.reset=true}upd()};S.cw.append(b);return b});paint();
+   c.append(chips([{label:"维新变法",value:"a"},{label:"变法内容",value:"b"},{label:"义和团与八国联军",value:"c"}],S.mode,v=>{S.mode=v;show()}),row,S.bw,S.cw);show()},
+  draw(ctx,w,h,t){if(S.dk!==isDark())paint();S.mode==="a"?drawA(ctx,w,h,t):S.mode==="b"?drawB(ctx,w,h,t):drawC(ctx,w,h,t)},
+  pointer(e,type,x,y){if(type!=="down"||S.mode==="b")return false;const ty=H-12-24,R=e&&e.pointerType==="touch"?22:16;let best=-1,bd=R;
+   S.dots.forEach((dx,i)=>{const d=Math.hypot(dx-x,ty-y);if(d<bd){bd=d;best=i}});if(best>=0){step(best);return true}return false},
+  unmount(){S.ro=null;S.bbs=[];S.cbs=[];S.note=null}}})();
+/* ---------- 06 辛亥革命 ---------- */
+MODS[5]=(()=>{
+ const P={wc:[114.3,30.6],sx:[120.6,30.0],aq:[117.0,30.5],gz:[113.3,23.1],cd:[104.1,30.7],nj:[118.8,32.1],bj:[116.4,39.9]};
+ const EA=[
+  {d:"1894",n:"兴中会成立",s:"孙中山在檀香山建立兴中会。",hl:"hon"},
+  {d:"1905",n:"中国同盟会成立",s:"在日本东京成立，纲领「驱除鞑虏，恢复中华，创立民国，平均地权」；《民报》提出三民主义。",hl:"tk"},
+  {d:"1907",n:"安庆起义 · 秋瑾就义",s:"徐锡麟发动安庆起义；秋瑾在绍兴就义（浙江本省人物）。",hl:"zj",bad:1},
+  {d:"1911.4",n:"黄花岗起义",s:"革命党人在广州发动黄花岗起义。",hl:"gz",bad:1},
+  {d:"1911",n:"四川保路运动",s:"四川爆发保路运动。",hl:"cd"}];
+ const SM=[{h:"民族",b:"推翻清王朝"},{h:"民权",b:"建立民主共和国"},{h:"民生",b:"平均地权"}];
+ const RS=[["长沙",113.0,28.2,12,"湘","l"],["西安",108.9,34.3,12,"陕","r"],["九江",116.0,29.7,13,"赣","r"],["太原",112.5,37.9,19,"晋","r"],["昆明",102.7,25.0,20,"滇","r"],
+  ["南昌",115.9,28.7,21,"赣","b"],["上海",121.5,31.2,24,"苏","r"],["贵阳",106.7,26.6,25,"黔","r"],["杭州",120.2,30.3,26,"浙","b"],["苏州",120.6,31.3,26,"苏","t"],
+  ["桂林",110.3,25.3,28,"桂","r"],["安庆",117.0,30.5,29,"皖","t"],["福州",119.3,26.1,30,"闽","r"],["广州",113.3,23.1,30,"粤","r"],["重庆",106.5,29.6,43,"川","r"],["成都",104.1,30.7,48,"川","t"]];
+ const EC=[
+  {d:"1912.1.1",n:"中华民国成立",s:"中华民国在南京成立，孙中山任临时大总统。"},
+  {d:"1912.2.12",n:"清帝退位",s:"清帝退位，两千多年的君主专制制度结束。",c:"g"},
+  {d:"1912.3",n:"颁布《临时约法》",s:"主权在民、三权分立、责任内阁制，意在限制袁世凯。"},
+  {d:"1912.3",n:"袁世凯就任",s:"袁世凯在北京就任临时大总统，革命果实被窃取。",c:"r"}];
+ const S={mode:"a",a:0,c:0,sm:-1,law:false,go:false,d:0,timer:null,t0:0,reset:true,dots:[],ro:null,dk:null,smb:[],lawb:null,note:null};
+ const fd=d=>d<=21?"10."+(10+d):"11."+(d-21);
+ const col=e=>{const T=theme();return e.bad||e.c==="r"?T.redText:e.c==="g"?T.goldText:T.blue};
+ const card=()=>{const b=el("button");b.style.cssText="display:block;width:100%;text-align:left;white-space:normal;word-break:break-all;overflow-wrap:anywhere;height:auto;min-height:44px;border:2px solid transparent;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5;color:var(--fg);background:var(--btn2)";return b};
+ function paint(){const T=theme();S.dk=isDark();
+  S.smb.forEach((b,i)=>b.innerHTML=`<span style="display:block;font-size:12px;color:${T.blue}">三民主义 · ${SM[i].h}主义</span><span style="display:block;font-weight:600;margin-top:2px">${SM[i].b}</span>`);
+  if(S.lawb)S.lawb.innerHTML=`<span style="display:block;font-size:12px;color:${T.blue}">1912.3 颁布 · ${S.law?"点击收起":"点击查看内容"}</span><span style="display:block;font-weight:600;margin-top:2px">《中华民国临时约法》</span>`;
+  if(S.note){S.note.hidden=!S.law;S.note.innerHTML=`<p style="margin:0"><b style="color:${T.blue}">主要内容：</b>主权在民；三权分立；实行责任内阁制</p><p style="margin:6px 0 0"><b style="color:${T.goldText}">意义：</b>中国第一部资产阶级民主宪法性质的文件</p><p style="margin:6px 0 0"><b style="color:${T.redText}">目的：</b>改总统制为责任内阁制，以限制袁世凯</p>`}}
+ function upd(){const T=theme(),B=T.blue,G=T.goldText,R=T.redText;if(!S.ro)return;
+  if(S.mode==="a"){const c=SM[S.sm],e=EA[S.a];S.ro.update(c?[["主义",c.h+"主义",B],["内容",c.b,G]]:[["时间",e.d,B],["事件",e.n,col(e)],["说明",e.s]])}
+  else if(S.mode==="b"){if(!S.go)S.ro.update([["提示","点击「1911.10.10 武昌起义」开始"]]);else{const on=RS.filter(r=>r[3]<=S.d),n=new Set(on.map(r=>r[4])).size,nw=on.filter(r=>r[3]===S.d).map(r=>r[0]).join("、");
+   S.ro.update([["日期","1911."+fd(S.d),B],["已响应省份",n+" 个（不含湖北）",G],["当日响应",nw||"—"],["结果","一个多月内十几个省宣布独立，清王朝统治土崩瓦解",R]])}}
+  else{const e=EC[S.c];S.ro.update([["时间",e.d,B],["事件",e.n,col(e)],["说明",e.s]])}
+  S.smb.forEach((b,i)=>{b.style.borderColor=i===S.sm?"var(--blue)":"transparent";b.style.background=i===S.sm?"var(--sel)":"var(--btn2)"});
+  if(S.lawb){S.lawb.style.borderColor=S.law?"var(--blue)":"transparent";S.lawb.style.background=S.law?"var(--sel)":"var(--btn2)"}}
+ function step(k){if(S.mode==="a"){S.a=Math.max(0,Math.min(EA.length-1,k));S.sm=-1}else S.c=Math.max(0,Math.min(EC.length-1,k));S.reset=true;upd()}
+ function stop(){if(S.timer){clearInterval(S.timer);S.timer=null}if(S.pb)S.pb.textContent="播放"}
+ function play(){if(S.timer)return stop();if(S.d>=51){S.d=0;S.sl.set(0)}S.pb.textContent="暂停";
+  S.timer=setInterval(()=>{if(S.d>=51)return stop();S.d++;S.sl.set(S.d);upd()},250)}
+ function start(){S.go=true;S.d=0;S.sl.hidden=S.pb.hidden=false;S.sl.set(0);stop();upd();play()}
+ function show(){S.row.hidden=S.mode==="b";S.aw.hidden=S.mode!=="a";S.bw.hidden=S.mode!=="b";S.cw.hidden=S.mode!=="c";S.reset=true;upd()}
+ function ring(ctx,m,p,color,t,sp){const k=(t*(sp||1.2))%1;ctx.save();ctx.strokeStyle=color;ctx.globalAlpha=1-k;ctx.lineWidth=2;ctx.beginPath();ctx.arc(m.X(p[0]),m.Y(p[1]),6+k*12,0,Math.PI*2);ctx.stroke();ctx.restore()}
+ function label(ctx,s,x,y,color,align){ctx.save();ctx.font="600 13px "+MF;ctx.textAlign=align||"left";ctx.textBaseline="middle";ctx.lineWidth=3;ctx.strokeStyle=theme().bg;ctx.strokeText(s,x,y);ctx.fillStyle=color;ctx.fillText(s,x,y);ctx.restore()}
+ function timeline(ctx,w,h,list,k){const T=theme(),pad=12,xa=pad+28,xb=w-pad-28,ty=h-pad-24,XT=i=>xa+i/(list.length-1)*(xb-xa);
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xa,ty);ctx.lineTo(xb,ty);ctx.stroke();
+  ctx.font="12px ui-monospace,Menlo,monospace";ctx.fillStyle=T.fg;ctx.textAlign="center";ctx.textBaseline="top";
+  let last="";list.forEach((e,i)=>{const y=e.d.slice(0,4);if(y!==last){ctx.fillText(y,XT(i),ty+8);last=y}});
+  S.dots=list.map((e,i)=>{const x=XT(i);ctx.beginPath();ctx.arc(x,ty,i===k?6:4,0,Math.PI*2);ctx.fillStyle=i<=k?col(e):T.bg;ctx.fill();ctx.strokeStyle=i<=k?col(e):T.axis;ctx.lineWidth=1.5;ctx.stroke();return x});
+  const s=list[k].d+" "+list[k].n;ctx.font="600 13px "+MF;ctx.fillStyle=col(list[k]);ctx.textBaseline="bottom";const lw=Math.min(ctx.measureText(s).width,w-2*pad);
+  ctx.fillText(s,Math.max(pad+lw/2,Math.min(w-pad-lw/2,S.dots[k])),ty-10,w-2*pad);ctx.restore()}
+ function drawA(ctx,w,h,t){const T=theme(),B=T.blue,R=T.redText,pad=12,k=S.a,e=EA[k];if(S.reset){S.t0=t;S.reset=false}const pr=Math.min(1,(t-S.t0)/1.2);
+  const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad-64});
+  if(k===0){arrowPath(ctx,m,[[123,24],[131.4,21.5]],B,pr);label(ctx,"檀香山 · 兴中会 →",m.X(131.4),m.Y(23.2),B,"right")}
+  if(k===1){arrowPath(ctx,m,[[124,32],[131.4,34]],B,pr);label(ctx,"日本东京 · 同盟会 →",m.X(131.4),m.Y(35.6),B,"right")}
+  if(k>=2){city(ctx,m,"安庆 · 徐锡麟起义",...P.aq,R,k===2?6:4,"l");city(ctx,m,"绍兴 · 秋瑾就义",...P.sx,R,k===2?6:4,"r");if(k===2){ring(ctx,m,P.aq,R,t);ring(ctx,m,P.sx,R,t)}}
+  if(k>=3){city(ctx,m,"广州 · 黄花岗起义",...P.gz,R,k===3?6:4,"r");if(k===3)ring(ctx,m,P.gz,R,t)}
+  if(k>=4){city(ctx,m,"成都 · 保路运动",...P.cd,B,6,"r");ring(ctx,m,P.cd,B,t)}
+  label(ctx,e.d+" "+e.n,m.X(100.6),m.Y(43.2),col(e));timeline(ctx,w,h,EA,k)}
+ function drawB(ctx,w,h,t){const T=theme(),B=T.blue,G=T.goldText,R=T.redText,pad=12,m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad});
+  if(!S.go){city(ctx,m,"武昌",...P.wc,T.fg,5,"t");RS.forEach(r=>city(ctx,m,"",r[1],r[2],T.fg,3));label(ctx,"点击「1911.10.10 武昌起义」开始",m.X(100.6),m.Y(43.2),B);return}
+  RS.forEach(r=>{const on=r[3]<=S.d;if(on&&S.d-r[3]<=2)arrowPath(ctx,m,[P.wc,[r[1],r[2]]],G,1);
+   city(ctx,m,on?r[0]+" "+fd(r[3])+(r[0]==="杭州"?" 浙江光复":""):"",r[1],r[2],on?G:T.fg,on?5:3,r[5])});
+  city(ctx,m,"武昌 10.10",...P.wc,R,6,"t");ring(ctx,m,P.wc,R,t,2);
+  const n=new Set(RS.filter(r=>r[3]<=S.d).map(r=>r[4])).size;
+  label(ctx,"1911."+fd(S.d)+" · 已响应 "+n+" 省",m.X(100.6),m.Y(43.2),G);label(ctx,"武昌起义 → 各省响应",m.X(100.6),m.Y(42.2),R)}
+ function drawC(ctx,w,h,t){const T=theme(),B=T.blue,G=T.goldText,R=T.redText,pad=12,k=S.c;if(S.reset){S.t0=t;S.reset=false}const pr=Math.min(1,(t-S.t0)/1.6);
+  const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad-64});
+  if(k===3)arrowPath(ctx,m,[P.nj,P.bj],R,pr);
+  city(ctx,m,"南京 · 中华民国成立",...P.nj,B,k===0||k===2?6:5,"r");if(k===0||k===2)ring(ctx,m,P.nj,B,t);
+  city(ctx,m,k===1?"北京 · 清帝退位":k===3?"北京 · 袁世凯就任":"北京",...P.bj,k===1?G:k===3?R:T.fg,k===1||k===3?6:4,"l");if(k===1||k===3)ring(ctx,m,P.bj,k===1?G:R,t);
+  label(ctx,EC[k].d+" "+EC[k].n,m.X(100.6),m.Y(43.2),col(EC[k]));
+  const sub=[["孙中山任临时大总统",B],["两千多年的君主专制制度结束",G],["主权在民 · 三权分立 · 责任内阁制",B],["革命果实被窃取",R]][k];label(ctx,sub[0],m.X(100.6),m.Y(42.2),sub[1]);
+  timeline(ctx,w,h,EC,k)}
+ return{
+  text:"辛亥革命推翻了统治中国两千多年的君主专制制度，建立了中华民国，使民主共和观念深入人心。但它没有改变中国半殖民地半封建社会的性质，没有完成反帝反封建的任务。",
+  points:["同盟会：第一个全国性的资产阶级革命政党；三民主义","武昌起义 → 各省响应","中华民国成立、清帝退位、《临时约法》","意义：结束君主专制，民主共和观念深入人心；局限：未改变社会性质"],
+  gk:"<p>浙江选考常考辛亥革命的历史意义与局限、《临时约法》的特点（责任内阁制）、浙江光复与秋瑾等本省人物。</p><p><b style=\"color:#c0362c\">易错：</b>辛亥革命结束的是两千多年的<b style=\"color:#9a6a00\">君主专制制度</b>，而非封建制度；《临时约法》改总统制为<b style=\"color:#9a6a00\">责任内阁制</b>是为了限制袁世凯。</p>",
+  mount(c,r){S.ro=readout();r.append(S.ro);
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px";row.append(button("上一步",()=>step((S.mode==="a"?S.a:S.c)-1)),button("下一步",()=>step((S.mode==="a"?S.a:S.c)+1),true));S.row=row;
+   const box=()=>{const d=el("div");d.style.cssText="display:flex;flex-direction:column;gap:8px";return d};
+   S.aw=box();S.smb=SM.map((it,i)=>{const b=card();b.onclick=()=>{S.sm=i;upd()};S.aw.append(b);return b});
+   S.bw=box();S.sl=slider("日期（1911 年）",0,51,1,S.d,fd,v=>{S.d=v;stop();upd()});S.pb=button("播放",play);
+   const pr=el("div");pr.style.cssText="display:flex;flex-wrap:wrap;gap:8px";pr.append(button("1911.10.10 武昌起义",start,true),S.pb);S.bw.append(pr,S.sl);S.sl.hidden=S.pb.hidden=!S.go;
+   S.cw=box();S.lawb=card();S.lawb.onclick=()=>{S.law=!S.law;if(S.law&&S.c!==2){S.c=2;S.reset=true}paint();upd()};
+   S.note=el("div");S.note.style.cssText="font-size:14px;line-height:1.6;color:var(--fg);white-space:normal;word-break:break-all;overflow-wrap:anywhere";S.cw.append(S.lawb,S.note);paint();
+   c.append(chips([{label:"革命准备",value:"a"},{label:"武昌起义与各省响应",value:"b"},{label:"建立民国",value:"c"}],S.mode,v=>{S.mode=v;stop();show()}),row,S.aw,S.bw,S.cw);show()},
+  draw(ctx,w,h,t){if(S.dk!==isDark())paint();S.mode==="a"?drawA(ctx,w,h,t):S.mode==="b"?drawB(ctx,w,h,t):drawC(ctx,w,h,t)},
+  pointer(e,type,x,y){if(type!=="down"||S.mode==="b")return false;const ty=H-12-24,R=e&&e.pointerType==="touch"?22:16;let best=-1,bd=R;
+   S.dots.forEach((dx,i)=>{const d=Math.hypot(dx-x,ty-y);if(d<bd){bd=d;best=i}});if(best>=0){step(best);return true}return false},
+  unmount(){stop();S.ro=null;S.smb=[];S.lawb=null;S.note=null;S.sl=null;S.pb=null}}})();
+/* ---------- 07 新文化运动与五四运动 ---------- */
+MODS[6]=(()=>{
+ const P={sh:[121.5,31.2],bj:[116.4,39.9],qd:[120.4,36.1]};
+ const EA=[
+  {d:"1915",p:"陈独秀",n:"上海创办《青年杂志》",s:"1916 年改名《新青年》，标志新文化运动兴起"},
+  {d:"1917",p:"蔡元培",n:"任北京大学校长",s:"「思想自由，兼容并包」；《新青年》编辑部迁北京"},
+  {d:"1917",p:"胡适 · 陈独秀",n:"《文学改良刍议》《文学革命论》",s:"提倡白话文"},
+  {d:"1918",p:"鲁迅",n:"《狂人日记》",s:"第一篇白话小说"},
+  {d:"1918",p:"李大钊",n:"《庶民的胜利》《布尔什维主义的胜利》",s:"开始宣传马克思主义",c:"g"}];
+ const EB=[
+  {d:"1919.1",n:"巴黎和会",s:"列强决定把德国在山东的权益转让给日本",c:"r"},
+  {d:"1919.5.4",n:"北京学生集会游行",s:"3000 多名学生天安门集会游行，「外争主权，内除国贼」"},
+  {d:"1919.6",n:"中心转向上海",s:"6.3 起北京大规模逮捕学生；6.5 上海工人罢工、商人罢市；主力转向工人阶级",c:"g"},
+  {d:"1919.6.28",n:"拒绝签字",s:"中国代表拒绝在对德和约上签字，运动取得初步胜利"}];
+ const NO=[["民主","专制"],["科学","迷信盲从"],["新道德","旧道德"],["新文学（白话文）","旧文学（文言文）"]];
+ const S={mode:"a",a:0,b:0,sel:-1,late:false,flip:[0,0,0,0],cards:[],t0:0,reset:true,dots:[],ty:0,ro:null,dk:null};
+ const col=e=>{const T=theme();return e.c==="r"?T.redText:e.c==="g"?T.goldText:T.blue};
+ const card=()=>{const b=el("button");b.style.cssText="display:block;width:100%;text-align:left;white-space:normal;word-break:break-all;overflow-wrap:anywhere;height:auto;min-height:44px;border:2px solid transparent;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5;color:var(--fg);background:var(--btn2)";return b};
+ function upd(){const T=theme(),B=T.blue,G=T.goldText,R=T.redText;S.dk=isDark();if(!S.ro)return;
+  S.cards.forEach((b,i)=>{const f=S.flip[i];b.innerHTML=`<span style="display:block;font-size:12px;color:${f?R:B}">${f?"旧 · 反对":"新 · 提倡"} · 点击翻转</span><span style="display:block;font-weight:600;margin-top:2px;color:${f?R:B}">${f?"反对":"提倡"}${NO[i][f]}</span>`;
+   b.style.borderColor=i===S.sel?"var(--blue)":"transparent";b.style.background=i===S.sel?"var(--sel)":"var(--btn2)"});
+  if(S.mode==="a"){const e=EA[S.a],rs=S.sel>=0?[["新",`提倡${NO[S.sel][0]}`,B],["旧",`反对${NO[S.sel][1]}`,R]]:[["时间",e.d,B],["人物",e.p,col(e)],["主张",e.n],["说明",e.s]];
+   if(S.late)rs.push(["后期","十月革命后，宣传马克思主义成为主流",G],["人物","李大钊",G]);S.ro.update(rs)}
+  else{const e=EB[S.b],late=S.b>=2;S.ro.update([["时间",e.d,B],["事件",e.n,col(e)],["说明",e.s],["阶段",late?"后期":"前期",late?G:B],["主力",late?"工人阶级":"学生",late?G:B],["中心",late?"上海":"北京",late?G:B]])}}
+ function step(k){const L=S.mode==="a"?EA:EB;k=Math.max(0,Math.min(L.length-1,k));S.mode==="a"?S.a=k:S.b=k;S.sel=-1;S.reset=true;upd()}
+ function show(){S.aw.hidden=S.mode!=="a";S.sel=-1;S.reset=true;upd()}
+ function label(ctx,s,x,y,color,align,maxW){ctx.save();ctx.font="600 13px "+MF;ctx.textAlign=align||"left";ctx.textBaseline="middle";ctx.lineWidth=3;ctx.strokeStyle=theme().bg;ctx.strokeText(s,x,y,maxW);ctx.fillStyle=color;ctx.fillText(s,x,y,maxW);ctx.restore()}
+ function ring(ctx,m,p,color,t){const k=(t*1.2)%1;ctx.save();ctx.strokeStyle=color;ctx.globalAlpha=1-k;ctx.lineWidth=2;ctx.beginPath();ctx.arc(m.X(p[0]),m.Y(p[1]),6+k*12,0,Math.PI*2);ctx.stroke();ctx.restore()}
+ function timeline(ctx,w,h,list,k){const T=theme(),pad=12,xa=pad+28,xb=w-pad-28,ty=h-pad-24,XT=i=>xa+i/(list.length-1)*(xb-xa);S.ty=ty;
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xa,ty);ctx.lineTo(xb,ty);ctx.stroke();
+  ctx.font="12px ui-monospace,Menlo,monospace";ctx.fillStyle=T.fg;ctx.textAlign="center";ctx.textBaseline="top";
+  let last="";list.forEach((e,i)=>{const y=e.d.slice(0,4);if(y!==last){ctx.fillText(y,XT(i),ty+8);last=y}});
+  S.dots=list.map((e,i)=>{const x=XT(i);ctx.beginPath();ctx.arc(x,ty,i===k?6:4,0,Math.PI*2);ctx.fillStyle=i<=k?col(e):T.bg;ctx.fill();ctx.strokeStyle=i<=k?col(e):T.axis;ctx.lineWidth=1.5;ctx.stroke();return x});
+  const s=list[k].d+" "+list[k].n;ctx.font="600 13px "+MF;ctx.fillStyle=col(list[k]);ctx.textBaseline="bottom";const lw=Math.min(ctx.measureText(s).width,w-2*pad);
+  ctx.fillText(s,Math.max(pad+lw/2,Math.min(w-pad-lw/2,S.dots[k])),ty-10,w-2*pad);ctx.restore()}
+ function drawA(ctx,w,h,t){const T=theme(),B=T.blue,G=T.goldText,pad=12,k=S.a,e=EA[k],mw=w-2*pad-12;if(S.reset){S.t0=t;S.reset=false}const pr=Math.min(1,(t-S.t0)/1.2);
+  const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad-64}),bx=m.X(P.bj[0]),by=m.Y(P.bj[1]);
+  if(k>=1)arrowPath(ctx,m,[P.sh,[119.6,35.8],P.bj],B,k===1?pr:1);
+  city(ctx,m,k===0?"上海 · 《青年杂志》":"上海",...P.sh,k===0?B:T.fg,k===0?6:4,"r");if(k===0)ring(ctx,m,P.sh,B,t);
+  const bl=["北京","北京大学 · 蔡元培","北京 · 白话文","北京 · 《狂人日记》","北京 · 李大钊"][k];
+  city(ctx,m,bl,...P.bj,k===0?T.fg:col(e),k===0?4:6,"l");if(k>=1)ring(ctx,m,P.bj,col(e),t);
+  if(S.late){label(ctx,"李大钊 · 宣传马克思主义",bx-10,by+20,G,"right");label(ctx,"十月革命后，宣传马克思主义成为主流",m.X(100.6),m.Y(41.2),G,"left",mw)}
+  label(ctx,e.d+" "+e.p+"："+e.n,m.X(100.6),m.Y(43.2),col(e),"left",mw);label(ctx,e.s,m.X(100.6),m.Y(42.2),B,"left",mw);timeline(ctx,w,h,EA,k)}
+ function drawB(ctx,w,h,t){const T=theme(),B=T.blue,G=T.goldText,R=T.redText,pad=12,k=S.b,e=EB[k],mw=w-2*pad-12;if(S.reset){S.t0=t;S.reset=false}const pr=Math.min(1,(t-S.t0)/1.2);
+  const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad-64-48});
+  if(k===0||k===3){arrowPath(ctx,m,[[114.6,40.6],[100.4,40.6]],B,pr);label(ctx,k===0?"← 巴黎和会":"← 巴黎 · 拒签",m.X(101),m.Y(39.6),B)}
+  if(k===0){arrowPath(ctx,m,[P.qd,[126,34.4]],R,pr);label(ctx,"德 → 日",m.X(123.6),m.Y(36.4),R)}
+  city(ctx,m,k===0?"青岛（山东）":"青岛",...P.qd,k===0?R:T.fg,k===0?6:4,"l");if(k===0)ring(ctx,m,P.qd,R,t);
+  if(k===2)arrowPath(ctx,m,[P.bj,[117.4,35],P.sh],G,pr);
+  const bl=k===1?"北京 · 天安门 3000 多学生":k===2?"北京 · 6.3 大逮捕":"北京";
+  city(ctx,m,bl,...P.bj,k===1?B:k===2?R:T.fg,k===1||k===2?6:4,"t");if(k===1)ring(ctx,m,P.bj,B,t);
+  city(ctx,m,k===2?"上海 · 6.5 罢工罢市":"上海",...P.sh,k===2?G:T.fg,k===2?6:4,"r");if(k===2)ring(ctx,m,P.sh,G,t);
+  label(ctx,e.d+" "+e.n,m.X(100.6),m.Y(43.2),col(e),"left",mw);
+  label(ctx,k===1?"外争主权，内除国贼":k===2?"工人阶级登上政治舞台":k===3?"运动取得初步胜利":"山东问题 → 五四导火线",m.X(100.6),m.Y(42.2),k===1?B:col(e),"left",mw);
+  const y0=m.box.y+m.box.h+8,gap=24,bw=(w-2*pad-gap)/2,late=k>=2;
+  [["前期 · 主力 学生 · 中心 北京",B,!late],["后期 · 主力 工人 · 中心 上海",G,late]].forEach((s,i)=>{const x=pad+i*(bw+gap);ctx.save();rrect(ctx,x,y0,bw,30,10);
+   ctx.globalAlpha=s[2]?.14:0;ctx.fillStyle=s[1];ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=s[2]?2:1;ctx.strokeStyle=s[2]?s[1]:T.axis;ctx.stroke();
+   ctx.font=(s[2]?"600 ":"")+"12px "+MF;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=s[2]?s[1]:T.fg;ctx.fillText(s[0],x+bw/2,y0+15,bw-10);ctx.restore()});
+  ctx.save();ctx.fillStyle=T.fg;ctx.font="600 14px "+MF;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("→",w/2,y0+15);ctx.restore();
+  timeline(ctx,w,h,EB,k)}
+ return{
+  text:"新文化运动高举民主与科学两面旗帜，猛烈抨击封建礼教，是一场空前的思想解放运动，后期开始传播马克思主义。1919 年巴黎和会外交失败引发五四运动，中国工人阶级登上政治舞台，运动取得初步胜利。五四运动是中国新民主主义革命的开端。",
+  points:["阵地《新青年》，中心北京大学","口号：民主与科学；内容：新道德、新文学","五四导火线：巴黎和会山东问题","五四：工人阶级登上政治舞台，新民主主义革命开端"],
+  gk:"<p>浙江选考常考新文化运动前后期的变化、五四运动的性质与意义。</p><p><b style=\"color:#c0362c\">易错：</b>新文化运动的局限是对东西方文化存在<b style=\"color:#9a6a00\">绝对肯定或绝对否定</b>的偏向；五四运动后期的主力是<b style=\"color:#9a6a00\">工人阶级</b>，中心是<b style=\"color:#9a6a00\">上海</b>。</p>",
+  mount(c,r){S.ro=readout();r.append(S.ro);
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px";row.append(button("上一步",()=>step((S.mode==="a"?S.a:S.b)-1)),button("下一步",()=>step((S.mode==="a"?S.a:S.b)+1),true));
+   S.aw=el("div");S.aw.style.cssText="display:flex;flex-direction:column;gap:8px";
+   S.cards=NO.map((p,i)=>{const b=card();b.onclick=()=>{S.flip[i]^=1;S.sel=i;upd()};S.aw.append(b);return b});
+   S.aw.append(toggle("后期（十月革命后）",S.late,v=>{S.late=v;upd()}));
+   c.append(chips([{label:"新文化运动",value:"a"},{label:"五四运动",value:"b"}],S.mode,v=>{S.mode=v;show()}),row,S.aw);show()},
+  draw(ctx,w,h,t){if(S.dk!==isDark())upd();S.mode==="a"?drawA(ctx,w,h,t):drawB(ctx,w,h,t)},
+  pointer(e,type,x,y){if(type!=="down")return false;const R=e&&e.pointerType==="touch"?22:16;let best=-1,bd=R;
+   S.dots.forEach((dx,i)=>{const d=Math.hypot(dx-x,S.ty-y);if(d<bd){bd=d;best=i}});if(best>=0){step(best);return true}return false},
+  unmount(){S.ro=null;S.cards=[];S.aw=null}}})();
+/* ---------- 08 中共成立与国民大革命 ---------- */
+MODS[7]=(()=>{
+ const P={sh:[121.5,31.2],bj:[116.4,39.9],jx:[120.8,30.75],gz:[113.3,23.1],cs:[113.0,28.2],wh:[114.3,30.6],nc:[115.9,28.7],hz:[120.2,30.3],nj:[118.8,32.1]};
+ const L={
+  a:[{d:"1920",n:"共产党早期组织",s:"陈独秀在上海、李大钊在北京等地建立共产党早期组织",hl:["sh","bj"]},
+   {d:"1921.7.23",n:"中共一大",s:"在上海召开，最后一天转移到浙江嘉兴南湖的游船上（「红船」）；宣告中国共产党成立，确定党的名称为中国共产党，奋斗目标是实现共产主义",hl:["sh","jx"],c:"r"},
+   {d:"1922.7",n:"中共二大",s:"在上海召开，制定民主革命纲领：打倒军阀，推翻国际帝国主义压迫，统一中国为真正的民主共和国",hl:["sh"],c:"g"},
+   {d:"1923.6",n:"中共三大",s:"在广州召开，决定共产党员以个人身份加入国民党，建立革命统一战线",hl:["gz"]}],
+  b:[{d:"1924.1",n:"国民党一大",s:"在广州召开，重新解释三民主义（新三民主义），标志第一次国共合作正式形成",hl:["gz"],c:"g"},
+   {d:"1924",n:"黄埔军校创办",s:"在广州创办黄埔军校",hl:["gz"]},
+   {d:"1925",n:"五卅运动",s:"上海爆发五卅运动",hl:["sh"]},
+   {d:"1926.7",n:"出师北伐",s:"国民革命军从广州出师北伐；点「播放北伐」看进军路线",hl:["gz"],c:"r"}],
+  c:[{d:"1927.4.12",n:"四一二反革命政变",s:"蒋介石在上海发动反革命政变",hl:["sh"],c:"r"},
+   {d:"1927.7.15",n:"七一五「分共」",s:"汪精卫在武汉「分共」",hl:["wh"],c:"r"},
+   {d:"1927",n:"大革命失败",s:"第一次国共合作破裂，大革命失败",hl:["sh","wh"],c:"r"}]};
+ const NM={sh:"上海",bj:"北京",jx:"嘉兴南湖 · 红船（浙江嘉兴）",gz:"广州",wh:"武汉"},SD={sh:"r",bj:"l",jx:"l",gz:"r",wh:"t"};
+ const WL=[{n:"吴佩孚",c:"gold",at:[111.6,33.8],p:[[109.5,25.5],[114,25.5],[114.2,27],[114.8,30],[116.2,31.5],[116.5,34.5],[114.5,36.3],[111,34.8],[110,31.5],[108.8,29]]},
+  {n:"孙传芳",c:"blue",at:[118.6,26.2],p:[[114,25.5],[117,23.6],[119.6,26],[121.5,28.7],[121.9,30],[121.9,31.4],[120.3,34.3],[117.5,34.6],[116.2,31.5],[114.8,30],[114.2,27]]},
+  {n:"张作霖",c:"teal",at:[123.4,41.4],p:[[115.5,38.8],[118,38.3],[117.7,39],[118.5,39.2],[119.6,39.9],[121,40.8],[122.2,40.7],[121.6,38.9],[123,39.6],[124.4,40.1],[125.5,41],[128,43],[128,44],[116,44],[115,41]]}];
+ const S={mode:"a",k:{a:0,b:0,c:0},p:0,timer:null,dots:[],ty:0,t0:0,reset:true,ro:null,list:null,bw:null,cw:null,cards:[],dk:null};
+ const col=e=>{const T=theme();return e.c==="r"?T.redText:e.c==="g"?T.goldText:T.blue};
+ const wrap="white-space:normal;word-break:break-all;overflow-wrap:anywhere;height:auto;";
+ const card=()=>{const b=el("button");b.style.cssText="display:block;width:100%;text-align:left;"+wrap+"min-height:44px;border:2px solid transparent;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5;color:var(--fg);background:var(--btn2)";return b};
+ const box=()=>{const d=el("div");d.style.cssText="display:flex;flex-direction:column;gap:8px";return d};
+ function ph(){const p=S.p;if(p<.4)return{st:"第一阶段",tg:"先打吴佩孚",i:0,s:"1926.7 广州出师 → "+(p<.2?"长沙":"长沙 → 武汉")};
+  if(p<.5)return{st:"第一阶段",tg:"先打吴佩孚",i:0,s:"1926.10 攻克武昌，叶挺独立团「铁军」"};
+  if(p<1)return{st:"第二阶段",tg:"再打孙传芳",i:1,s:"另一路 → 南昌 → 杭州 → 上海、南京"};return{st:"第二阶段",tg:"再打孙传芳",i:1,s:"1927.3 占领上海、南京"}}
+ function upd(){const T=theme(),B=T.blue,G=T.goldText;S.dk=isDark();if(!S.ro)return;const Ls=L[S.mode],k=S.k[S.mode],e=Ls[k];
+  if(S.mode==="b"&&S.p>0){const f=ph();S.ro.update([["阶段",f.st,B],["目标",f.tg,f.i?B:G],["进展",f.s]])}
+  else S.ro.update([["时间",e.d,B],["事件",e.n,col(e)],["说明",e.s]]);
+  S.cards.forEach((b,i)=>{const x=Ls[i],on=i===k&&!(S.mode==="b"&&S.p>0);b.innerHTML=`<span style="display:block;font-size:12px;font-family:var(--mono);color:${col(x)}">${x.d}</span><span style="display:block;font-weight:600;margin-top:2px">${x.n}</span>`;
+   b.style.borderColor=on?"var(--blue)":"transparent";b.style.background=on?"var(--sel)":"var(--btn2)"})}
+ function stop(){if(S.timer){clearInterval(S.timer);S.timer=null}}
+ function play(){stop();S.p=0;S.k.b=3;S.timer=setInterval(()=>{S.p=Math.min(1,S.p+.008);if(S.p>=1)stop();upd()},50);upd()}
+ function step(k){const Ls=L[S.mode];S.k[S.mode]=Math.max(0,Math.min(Ls.length-1,k));if(S.mode==="b"){stop();S.p=0}S.reset=true;upd()}
+ function render(){S.list.innerHTML="";S.cards=L[S.mode].map((x,i)=>{const b=card();b.onclick=()=>step(i);S.list.append(b);return b});S.bw.hidden=S.mode!=="b";S.cw.hidden=S.mode!=="c";S.reset=true;upd()}
+ function ring(ctx,m,p,color,t){const k=(t*1.2)%1;ctx.save();ctx.strokeStyle=color;ctx.globalAlpha=1-k;ctx.lineWidth=2;ctx.beginPath();ctx.arc(m.X(p[0]),m.Y(p[1]),6+k*12,0,Math.PI*2);ctx.stroke();ctx.restore()}
+ function label(ctx,s,x,y,color,align,maxW){ctx.save();ctx.font="600 13px "+MF;ctx.textAlign=align||"left";ctx.textBaseline="middle";ctx.lineWidth=3;ctx.strokeStyle=theme().bg;ctx.strokeText(s,x,y,maxW);ctx.fillStyle=color;ctx.fillText(s,x,y,maxW);ctx.restore()}
+ function timeline(ctx,w,h,list,k){const T=theme(),pad=12,xa=pad+28,xb=w-pad-28,ty=h-pad-24,XT=i=>xa+i/(list.length-1)*(xb-xa);S.ty=ty;
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xa,ty);ctx.lineTo(xb,ty);ctx.stroke();
+  ctx.font="12px ui-monospace,Menlo,monospace";ctx.fillStyle=T.fg;ctx.textAlign="center";ctx.textBaseline="top";
+  let last="";list.forEach((e,i)=>{const y=e.d.slice(0,4);if(y!==last){ctx.fillText(y,XT(i),ty+8);last=y}});
+  S.dots=list.map((e,i)=>{const x=XT(i);ctx.beginPath();ctx.arc(x,ty,i===k?6:4,0,Math.PI*2);ctx.fillStyle=i<=k?col(e):T.bg;ctx.fill();ctx.strokeStyle=i<=k?col(e):T.axis;ctx.lineWidth=1.5;ctx.stroke();return x});
+  const s=list[k].d+" "+list[k].n;ctx.font="600 13px "+MF;ctx.fillStyle=col(list[k]);ctx.textBaseline="bottom";const lw=Math.min(ctx.measureText(s).width,w-2*pad);
+  ctx.fillText(s,Math.max(pad+lw/2,Math.min(w-pad-lw/2,S.dots[k])),ty-10,w-2*pad);ctx.restore()}
+ function nodes(ctx,m,t,keys,e){const T=theme();keys.forEach(id=>{const on=e.hl.includes(id),c=id==="jx"?T.redText:on?col(e):T.fg;
+  city(ctx,m,id==="jx"&&!on?"嘉兴":NM[id],...P[id],c,on||id==="jx"?6:4,SD[id]);if(on)ring(ctx,m,P[id],c,t)})}
+ function drawA(ctx,w,h,t,m,e,mw){const T=theme();if(S.k.a===1){arrowPath(ctx,m,[P.sh,P.jx],T.redText,Math.min(1,(t-S.t0)/1.2))}
+  const ks=["bj","gz","sh"];if(S.k.a>=1)ks.push("jx");nodes(ctx,m,t,ks,e)}
+ function drawB(ctx,w,h,t,m,e,mw){const T=theme(),R=T.redText,p=S.p,f=ph();
+  WL.forEach((g,i)=>{ctx.save();ctx.beginPath();g.p.forEach((q,j)=>j?ctx.lineTo(m.X(q[0]),m.Y(q[1])):ctx.moveTo(m.X(q[0]),m.Y(q[1])));ctx.closePath();
+   const on=p>0&&f.i===i;ctx.globalAlpha=on?.34:.18;ctx.fillStyle=T[g.c];ctx.fill();if(on){ctx.globalAlpha=.8;ctx.strokeStyle=T[g.c];ctx.lineWidth=1.5;ctx.stroke()}ctx.restore()});
+  WL.forEach(g=>label(ctx,g.n+"（示意）",m.X(g.at[0]),m.Y(g.at[1]),T.fg,"center"));
+  if(p<=0){nodes(ctx,m,t,["gz","sh"],e);return}
+  arrowPath(ctx,m,[P.gz,P.cs,P.wh],R,p/.4);if(p>.5)arrowPath(ctx,m,[P.gz,P.nc,P.hz],R,(p-.5)/.38);
+  if(p>.88){arrowPath(ctx,m,[P.hz,P.sh],R,(p-.88)/.12);arrowPath(ctx,m,[P.hz,P.nj],R,(p-.88)/.12)}
+  city(ctx,m,"广州 1926.7 出师",...P.gz,R,6,"r");
+  const C=[["长沙",P.cs,.2,"l"],["武昌 1926.10 · 铁军",P.wh,.4,"t"],["南昌",P.nc,.7,"b"],["杭州",P.hz,.88,"b"],["上海 1927.3",P.sh,1,"r"],["南京 1927.3",P.nj,1,"t"]];
+  C.forEach(c=>{const on=p>=c[2];city(ctx,m,on?c[0]:"",...c[1],on?R:T.fg,on?5:3,c[3])});
+  if(p>=.4&&p<.5)ring(ctx,m,P.wh,R,t);if(p>=1){ring(ctx,m,P.sh,R,t);ring(ctx,m,P.nj,R,t)}}
+ function drawC(ctx,w,h,t,m,e,mw){const T=theme();nodes(ctx,m,t,["sh","wh"],e);
+  if(S.k.c===2)city(ctx,m,"南昌 · 1927.8.1 起义（下一阶段）",...P.nc,T.goldText,4,"b")}
+ return{
+  text:"在马克思列宁主义与中国工人运动结合的过程中，中国共产党于 1921 年诞生，中国革命面貌焕然一新。国共两党合作开展国民革命，北伐战争迅速推进，基本推翻北洋军阀统治。1927 年国民党右派叛变革命，大革命失败。",
+  points:["1921 中共一大：上海召开、嘉兴南湖闭幕","二大提出民主革命纲领","国民党一大标志国共合作形成；北伐先打吴佩孚、后孙传芳","四一二、七一五，大革命失败"],
+  gk:"<p>浙江选考常考中共一大与嘉兴南湖、二大民主革命纲领、国共合作的政治基础（新三民主义）。</p><p><b style=\"color:#c0362c\">易错：</b>一大<b style=\"color:#9a6a00\">没有</b>提出民主革命纲领（<b style=\"color:#9a6a00\">二大</b>才提出）；国共合作是<b style=\"color:#9a6a00\">党内合作</b>（个人身份加入）。</p>",
+  mount(c,r){S.ro=readout();r.append(S.ro);
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px";row.append(button("上一步",()=>step(S.k[S.mode]-1)),button("下一步",()=>step(S.k[S.mode]+1),true));
+   S.list=box();S.bw=box();S.bw.append(button("播放北伐",play,true));S.cw=box();
+   const T=theme(),info=(h,hc,body)=>{const d=el("div");d.style.cssText=wrap+"border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.6;color:var(--fg);background:var(--btn2)";d.innerHTML=`<b style="display:block;color:${hc}">${h}</b>${body}`;return d};
+   S.cw.append(info("失败原因","#c0362c",`<p style="margin:4px 0 0"><b style="color:#9a6a00">客观：</b>反革命力量强大；统一战线中资产阶级动摇</p><p style="margin:4px 0 0"><b style="color:#9a6a00">主观：</b>以陈独秀为代表的右倾错误</p>`),
+    info("历史意义","#9a6a00",`<p style="margin:4px 0 0">基本推翻北洋军阀统治，传播了反帝反封建思想</p>`),
+    info("下一阶段","#c0362c",`<p style="margin:4px 0 0"><span style="font-family:var(--mono)">1927.8.1</span> 南昌起义，打响武装反抗国民党反动派的第一枪</p>`));
+   c.append(chips([{label:"中共成立",value:"a"},{label:"国共合作与北伐",value:"b"},{label:"大革命失败",value:"c"}],S.mode,v=>{S.mode=v;stop();S.p=0;render()}),row,S.list,S.bw,S.cw);render()},
+  draw(ctx,w,h,t){if(S.dk!==isDark())upd();if(S.reset){S.t0=t;S.reset=false}const T=theme(),pad=12,Ls=L[S.mode],k=S.k[S.mode],e=Ls[k],mw=w-2*pad-12;
+   const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad-64});
+   (S.mode==="a"?drawA:S.mode==="b"?drawB:drawC)(ctx,w,h,t,m,e,mw);
+   if(S.mode==="b"&&S.p>0){const f=ph();label(ctx,"北伐 · "+f.tg,m.X(100.6),m.Y(43.2),f.i?T.blue:T.goldText,"left",mw);label(ctx,f.s,m.X(100.6),m.Y(42.2),T.redText,"left",mw)}
+   else label(ctx,e.d+" "+e.n,m.X(100.6),m.Y(43.2),col(e),"left",mw);
+   timeline(ctx,w,h,Ls,k)},
+  pointer(e,type,x,y){if(type!=="down")return false;const R=e&&e.pointerType==="touch"?22:16;let best=-1,bd=R;
+   S.dots.forEach((dx,i)=>{const d=Math.hypot(dx-x,S.ty-y);if(d<bd){bd=d;best=i}});if(best>=0){step(best);return true}return false},
+  unmount(){stop();S.p=0;S.ro=null;S.cards=[];S.list=S.bw=S.cw=null}}})();
+/* ---------- 09 全民族抗战 ---------- */
+MODS[8]=(()=>{
+ const P={sy:[123.4,41.8],bp:[116.2,39.85],xa:[108.9,34.3],sh:[121.5,31.2],ty:[112.5,37.9],tez:[117.7,34.6],wh:[114.3,30.6],pxg:[113.9,39.3],bt:[114.5,37.5],nj:[118.8,32.1],tw:[121,23.7]};
+ const A=[{d:"1931.9.18",n:"九一八事变",s:"日本侵占东北，中国局部抗战开始",hl:["sy"],c:"r"},
+  {d:"1935",n:"华北事变",s:"日本制造华北事变；北平爆发一二·九运动",hl:["bp"],c:"g"},
+  {d:"1936.12.12",n:"西安事变",s:"和平解决，成为时局转换的枢纽",hl:["xa"],c:"g"},
+  {d:"1937.7.7",n:"七七事变",s:"卢沟桥事变，全民族抗战开始",hl:["bp"],c:"r"},
+  {d:"1937.9",n:"抗日民族统一战线形成",s:"国民党公布中共提交的国共合作宣言，蒋介石发表谈话，抗日民族统一战线正式形成（第二次国共合作）",hl:[],c:"b"}];
+ const E=[{d:"1937.8—11",y:1937,n:"淞沪会战",f:"z",s:"国民党军在上海抗击日军",p:"sh",sd:"r"},
+  {d:"1937.9",y:1937,n:"平型关大捷",f:"d",s:"八路军 115 师，全民族抗战以来第一个大胜仗",p:"pxg",sd:"t"},
+  {d:"1937",y:1937,n:"太原会战",f:"z",s:"国民党军在山西抗击日军",p:"ty",sd:"l"},
+  {d:"1937.12",y:1937,n:"南京大屠杀",f:"x",s:"日军攻占南京后制造南京大屠杀，遇难同胞 30 万以上",p:"nj",sd:"t"},
+  {d:"1938.3—4",y:1938,n:"台儿庄战役",f:"z",s:"李宗仁指挥，抗战以来正面战场最大的胜利",p:"tez",sd:"r"},
+  {d:"1938",y:1938,n:"武汉会战",f:"z",s:"武汉会战之后，抗战进入战略相持阶段",p:"wh",sd:"l"},
+  {d:"1940",y:1940,n:"百团大战",f:"d",s:"彭德怀指挥，八路军在华北发动（示意点）",p:"bt",sd:"r"}];
+ const C=[{d:"1945.8.15",n:"日本宣布无条件投降",s:"1945 年 8 月 15 日，日本宣布无条件投降",c:"r"},
+  {d:"1945.9.2",n:"日本签署投降书",s:"1945 年 9 月 2 日，日本签署投降书",c:"b"},
+  {d:"9 月 3 日",y:"",n:"抗战胜利纪念日",s:"9 月 3 日定为中国人民抗日战争胜利纪念日",c:"g"},
+  {d:"1945.10.25",n:"台湾回归中国",s:"1945 年 10 月 25 日，台湾回归中国",c:"r"}];
+ const FN={z:"正面战场（国民党军）",d:"敌后战场（八路军、新四军）",x:"日军暴行"};
+ const PH=[["战略防御","1937.7—1938.10"],["战略相持","1938.10—1944"],["战略反攻","1945"]];
+ const BASE=[["陕甘宁",[108.6,37.0],1.5,[108.6,37.0]],["晋察冀",[115.6,40.2],1.3,[116.6,41.9]]];
+ const S={mode:"a",k:{a:0,c:0},sel:0,yr:1937,t0:0,reset:true,ro:null,list:null,bw:null,cw:null,sl:null,cards:[],dots:[],hits:[],ty:0,dk:null};
+ const col=e=>{const T=theme(),c=e.f?(e.f==="z"?"b":"r"):e.c;return c==="r"?T.redText:c==="g"?T.goldText:c==="b"?T.blue:T.fg};
+ const wrap="white-space:normal;word-break:break-all;overflow-wrap:anywhere;height:auto;";
+ const card=()=>{const b=el("button");b.style.cssText="display:block;width:100%;text-align:left;"+wrap+"min-height:44px;border:2px solid transparent;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5;color:var(--fg);background:var(--btn2)";return b};
+ const box=()=>{const d=el("div");d.style.cssText="display:flex;flex-direction:column;gap:8px";return d};
+ const phase=y=>y<=1938?0:y<=1944?1:2;
+ const L=()=>S.mode==="a"?A:S.mode==="b"?E:C,K=()=>S.mode==="b"?S.sel:S.k[S.mode];
+ function upd(){const T=theme(),B=T.blue,G=T.goldText;S.dk=isDark();if(!S.ro)return;const Ls=L(),k=K(),e=Ls[k];
+  if(S.mode==="b"){const ph=PH[phase(S.yr)];S.ro.update([["年份",S.yr+" 年",B],["阶段",ph[0]+"（"+ph[1]+"）",G],["事件",e.d+" "+e.n,col(e)],["战场",FN[e.f],col(e)],["说明",e.s]])}
+  else S.ro.update([["时间",e.d,B],["事件",e.n,col(e)],["说明",e.s]]);
+  S.cards.forEach((b,i)=>{const x=Ls[i],on=i===k,hid=S.mode==="b"&&x.y>S.yr;b.innerHTML=`<span style="display:block;font-size:12px;font-family:var(--mono);color:${col(x)}">${x.d}${x.f?" · "+FN[x.f]:""}</span><span style="display:block;font-weight:600;margin-top:2px">${x.n}</span>`;
+   b.style.opacity=hid?".55":"1";b.style.borderColor=on?"var(--blue)":"transparent";b.style.background=on?"var(--sel)":"var(--btn2)"})}
+ function setYr(v){S.yr=v;let s=0;E.forEach((e,i)=>{if(e.y<=v)s=i});S.sel=s;upd()}
+ function step(k){const Ls=L();k=Math.max(0,Math.min(Ls.length-1,k));if(S.mode==="b"){S.sel=k;if(E[k].y>S.yr){S.yr=E[k].y;S.sl&&S.sl.set(S.yr)}}else S.k[S.mode]=k;S.reset=true;upd()}
+ function render(){S.list.innerHTML="";S.cards=L().map((x,i)=>{const b=card();b.onclick=()=>step(i);S.list.append(b);return b});S.bw.hidden=S.mode!=="b";S.cw.hidden=S.mode!=="c";S.reset=true;upd()}
+ function ring(ctx,m,p,color,t){const k=(t*1.2)%1;ctx.save();ctx.strokeStyle=color;ctx.globalAlpha=1-k;ctx.lineWidth=2;ctx.beginPath();ctx.arc(m.X(p[0]),m.Y(p[1]),6+k*12,0,Math.PI*2);ctx.stroke();ctx.restore()}
+ function label(ctx,s,x,y,color,align,maxW){ctx.save();ctx.font="600 13px "+MF;ctx.textAlign=align||"left";ctx.textBaseline="middle";ctx.lineWidth=3;ctx.strokeStyle=theme().bg;ctx.strokeText(s,x,y,maxW);ctx.fillStyle=color;ctx.fillText(s,x,y,maxW);ctx.restore()}
+ function timeline(ctx,w,h,list,k){const T=theme(),pad=12,xa=pad+28,xb=w-pad-28,ty=h-pad-24,XT=i=>xa+i/(list.length-1)*(xb-xa);S.ty=ty;
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xa,ty);ctx.lineTo(xb,ty);ctx.stroke();
+  ctx.font="12px ui-monospace,Menlo,monospace";ctx.fillStyle=T.fg;ctx.textAlign="center";ctx.textBaseline="top";
+  let last="";list.forEach((e,i)=>{const y=e.y!=null?e.y:e.d.slice(0,4);if(y&&y!==last){ctx.fillText(y,XT(i),ty+8);last=y}});
+  S.dots=list.map((e,i)=>{const x=XT(i);ctx.beginPath();ctx.arc(x,ty,i===k?6:4,0,Math.PI*2);ctx.fillStyle=i<=k?col(e):T.bg;ctx.fill();ctx.strokeStyle=i<=k?col(e):T.axis;ctx.lineWidth=1.5;ctx.stroke();return x});
+  const s=list[k].d+" "+list[k].n;ctx.font="600 13px "+MF;ctx.fillStyle=col(list[k]);ctx.textBaseline="bottom";const lw=Math.min(ctx.measureText(s).width,w-2*pad);
+  ctx.fillText(s,Math.max(pad+lw/2,Math.min(w-pad-lw/2,S.dots[k])),ty-10,w-2*pad);ctx.restore()}
+ function phaseBar(ctx,w,h){const T=theme(),pad=12,gap=14,y=h-pad-44,bh=44,cw=(w-2*pad-2*gap)/3,cur=phase(S.yr);S.dots=[];
+  PH.forEach((p,i)=>{const x=pad+i*(cw+gap),on=i===cur;ctx.save();rrect(ctx,x,y,cw,bh,10);ctx.fillStyle=T.blue;ctx.globalAlpha=on?.16:.05;ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle=on?T.blue:T.axis;ctx.lineWidth=on?2:1;ctx.stroke();
+   ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="600 13px "+MF;ctx.fillStyle=on?T.blue:T.fg;ctx.fillText(p[0],x+cw/2,y+14,cw-8);
+   ctx.font="12px ui-monospace,Menlo,monospace";ctx.fillStyle=on?T.goldText:T.fg;ctx.fillText(p[1],x+cw/2,y+31,cw-8);
+   if(i<2){const ax=x+cw+gap/2;ctx.fillStyle=T.fg;ctx.beginPath();ctx.moveTo(ax+4,y+bh/2);ctx.lineTo(ax-3,y+bh/2-5);ctx.lineTo(ax-3,y+bh/2+5);ctx.closePath();ctx.fill()}ctx.restore()})}
+ function drawA(ctx,w,h,t,m,e){const T=theme(),k=S.k.a;if(k>=3)arrowPath(ctx,m,[P.sy,[120.5,40.6],P.bp],T.gold,k===3?(t-S.t0)/1.2:1);
+  const nm={sy:"沈阳",bp:k===3?"卢沟桥（北平）":"北平",xa:"西安"},sd={sy:"b",bp:"r",xa:"l"};
+  ["sy","bp","xa"].forEach(id=>{const on=e.hl.includes(id),c=on?col(e):T.fg;city(ctx,m,nm[id],...P[id],c,on?6:4,sd[id]);if(on)ring(ctx,m,P[id],c,t)});
+  if(k===4)label(ctx,"国共第二次合作",m.X(110),m.Y(31.5),T.blue,"center")}
+ function drawB(ctx,w,h,t,m){const T=theme(),wide=w>=560;S.hits=[];
+  if(S.yr>=1938)BASE.forEach(b=>{ctx.save();ctx.beginPath();ctx.arc(m.X(b[1][0]),m.Y(b[1][1]),b[2]*m.s,0,Math.PI*2);ctx.fillStyle=T.red;ctx.globalAlpha=.16;ctx.fill();ctx.globalAlpha=.5;ctx.strokeStyle=T.red;ctx.setLineDash([4,4]);ctx.stroke();ctx.restore();
+   label(ctx,b[0]+(wide?"根据地":""),m.X(b[3][0]),m.Y(b[3][1]),T.redText,"center")});
+  E.forEach((e,i)=>{if(e.y>S.yr)return;const c=col(e),x=m.X(P[e.p][0]),y=m.Y(P[e.p][1]),nm=wide?e.n+" "+e.d:e.n;S.hits.push([x,y,i]);
+   if(e.f==="x"){ctx.save();ctx.strokeStyle=c;ctx.lineWidth=3;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(x-6,y-6);ctx.lineTo(x+6,y+6);ctx.moveTo(x+6,y-6);ctx.lineTo(x-6,y+6);ctx.stroke();ctx.restore();label(ctx,nm,x,y-17,c,"center")}
+   else city(ctx,m,nm,...P[e.p],c,i===S.sel?6:5,e.sd);if(i===S.sel)ring(ctx,m,P[e.p],c,t)});
+  label(ctx,"● 正面战场（国民党军）",m.X(100.6),m.Y(43.2),T.blue,"left");label(ctx,"● 敌后战场（八路军、新四军）",m.X(100.6),m.Y(42.2),T.redText,"left")}
+ function drawC(ctx,w,h,t,m,e){const T=theme(),on=S.k.c===3;city(ctx,m,on?"台湾 1945.10.25 回归":"台湾",...P.tw,on?T.redText:T.fg,on?6:4,"r");if(on)ring(ctx,m,P.tw,T.redText,t);
+  label(ctx,e.s,m.X(100.6),m.Y(42.2),T.fg,"left",w-36)}
+ return{
+  text:"九一八事变后中国局部抗战开始，七七事变后全民族抗战爆发。国民党领导的正面战场和共产党领导的敌后战场相互配合，中国共产党成为全民族抗战的中流砥柱。1945 年中国人民取得了抗日战争的伟大胜利。",
+  points:["1931 九一八，局部抗战；1937 七七，全民族抗战","西安事变和平解决 → 第二次国共合作","正面战场：淞沪、台儿庄、武汉；敌后战场：平型关、百团大战","近代以来第一次完全胜利的反侵略战争"],
+  gk:"<p>浙江选考常考两个战场的关系、抗战胜利的意义、时间节点（<b style=\"color:#9a6a00\">14 年抗战从 1931 年算起</b>）。</p><p><b style=\"color:#c0362c\">易错：</b>平型关大捷是<b style=\"color:#c0362c\">八路军（敌后战场）</b>，台儿庄战役是<b style=\"color:#0071e3\">国民党军（正面战场）</b>；全民族抗战始于 <b style=\"color:#9a6a00\">1937 年七七事变</b>。</p>",
+  mount(c,r){S.ro=readout();r.append(S.ro);
+   const row=el("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:8px";row.append(button("上一步",()=>step(K()-1)),button("下一步",()=>step(K()+1),true));
+   S.list=box();S.bw=box();S.sl=slider("年份",1937,1945,1,S.yr,v=>v+" 年",setYr);S.bw.append(S.sl);S.cw=box();
+   const info=(h,hc,items)=>{const d=el("div");d.style.cssText=wrap+"border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.6;color:var(--fg);background:var(--btn2)";d.innerHTML=`<b style="display:block;color:${hc}">${h}</b>`+items.map(s=>`<p style="margin:4px 0 0">${s}</p>`).join("");return d};
+   S.cw.append(info("胜利原因","#c0362c",["全民族团结抗战","<b style=\"color:#c0362c\">中国共产党的中流砥柱作用</b>","世界反法西斯力量的支持"]),
+    info("历史意义","#9a6a00",["近代以来中国反抗外敌入侵<b style=\"color:#9a6a00\">第一次取得完全胜利</b>的民族解放战争","中国国际地位提高","为世界反法西斯战争胜利作出重大贡献"]));
+   c.append(chips([{label:"局部抗战到全面抗战",value:"a"},{label:"两个战场",value:"b"},{label:"胜利与意义",value:"c"}],S.mode,v=>{S.mode=v;render()}),row,S.list,S.bw,S.cw);render()},
+  draw(ctx,w,h,t){if(S.dk!==isDark())upd();if(S.reset){S.t0=t;S.reset=false}const T=theme(),pad=12,Ls=L(),k=K(),e=Ls[k];
+   const m=mapChina(ctx,{x:pad,y:pad,w:w-2*pad,h:h-2*pad-64});
+   if(S.mode==="a"){drawA(ctx,w,h,t,m,e);label(ctx,e.d+" "+e.n,m.X(100.6),m.Y(43.2),col(e),"left",Math.max(80,m.X(121)-m.X(100.6)));timeline(ctx,w,h,Ls,k)}
+   else if(S.mode==="b"){drawB(ctx,w,h,t,m);phaseBar(ctx,w,h)}
+   else{label(ctx,e.d+" "+e.n,m.X(100.6),m.Y(43.2),col(e),"left",w-36);drawC(ctx,w,h,t,m,e);timeline(ctx,w,h,Ls,k)}},
+  pointer(e,type,x,y){if(type!=="down")return false;const R=e&&e.pointerType==="touch"?22:16;let best=-1,bd=R;
+   if(S.mode==="b")S.hits.forEach(p=>{const d=Math.hypot(p[0]-x,p[1]-y);if(d<bd){bd=d;best=p[2]}});
+   else S.dots.forEach((dx,i)=>{const d=Math.hypot(dx-x,S.ty-y);if(d<bd){bd=d;best=i}});if(best>=0){step(best);return true}return false},
+  unmount(){S.ro=null;S.cards=[];S.list=S.bw=S.cw=S.sl=null}}})();
+/* ---------- 10 随堂检测 ---------- */
+MODS[9]=(()=>{
+ const Q=[
+  {q:"英国在华获得领事裁判权，最早出自",o:["《南京条约》","《虎门条约》","《天津条约》","《马关条约》"],a:1,e:"领事裁判权和片面最惠国待遇出自 1843 年《虎门条约》，《南京条约》本身没有。",c:1},
+  {q:"列强侵略势力由沿海深入内地，外国商船可在长江各口往来，出自",o:["《天津条约》","《南京条约》","《辛丑条约》","《北京条约》（中英）"],a:0,e:"1858 年《天津条约》规定外国商船、兵船可在长江各口往来，增开汉口等口岸。",c:2},
+  {q:"适应了列强资本输出需要、严重阻碍中国民族资本主义发展的条款是",o:["协定关税","公使驻京","允许日本在通商口岸开设工厂","划定使馆界"],a:2,e:"《马关条约》允许日本在通商口岸开设工厂，列强资本输出合法化。",c:4},
+  {q:"标志着中国完全沦为半殖民地半封建社会的是",o:["《马关条约》","八国联军侵华","甲午战争","《辛丑条约》"],a:3,e:"1901 年《辛丑条约》签订后，清政府成为「洋人的朝廷」。",c:5},
+  {q:"1919 年 6 月以后，五四运动的主力和中心分别是",o:["学生、北京","工人阶级、上海","商人、天津","农民、广州"],a:1,e:"六三以后上海工人罢工，运动中心转到上海，工人阶级登上政治舞台。",c:7},
+  {q:"中共一大最后一天的会议在何处举行",o:["上海法租界","北京大学","浙江嘉兴南湖游船上","广州黄埔"],a:2,e:"一大在上海召开，因受到干扰，最后一天转移到嘉兴南湖的游船上，宣告中国共产党成立。",c:8}];
+ const S={k:0,ans:Array(6).fill(-1),box:null,read:null,prev:null,next:null,dots:[],dy:0,t0:0};
+ const L="ABCD",right=()=>S.ans.filter((v,i)=>v===Q[i].a).length,done=()=>S.ans.every(v=>v>=0);
+ function comment(n){return n===6?"全对！":n>=4?"掌握较好。":"建议回看相关章节。"}
+ function render(){if(!S.box)return;const T=theme(),q=Q[S.k],a=S.ans[S.k],dk=isDark();S.box.innerHTML="";
+  S.box.append(el("p","",`<span style="display:block;font-size:12px;color:${T.goldText};font-family:var(--mono)">第 ${S.k+1} 题 / 共 6 题 · 单选</span><span style="display:block;font-weight:600;margin-top:4px;line-height:1.5">${q.q}（　　）</span>`));
+  q.o.forEach((s,i)=>{const b=el("button","pill",`${L[i]}. ${s}`);
+   b.style.cssText="display:block;width:100%;min-height:44px;white-space:normal;text-align:left;line-height:1.4;padding:10px 16px;margin-top:8px;border:1.5px solid transparent";
+   if(a>=0){b.disabled=true;b.style.opacity="1";b.style.cursor="default";
+    if(i===q.a){b.style.background=T.blue;b.style.color=dk?"#000":"#fff";b.textContent+="  ✓"}
+    else if(i===a){b.style.background=T.redText;b.style.color=dk?"#000":"#fff";b.textContent+="  ✗"}}
+   else b.onclick=()=>{S.ans[S.k]=i;S.t0=performance.now()/1000;render()};S.box.append(b)});
+  const nav=el("div","");nav.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px";
+  S.prev=button("上一题",()=>{S.k--;render()});S.next=button("下一题",()=>{S.k++;render()},a>=0);
+  S.prev.disabled=S.k===0;S.next.disabled=S.k===5;
+  nav.append(S.prev,S.next,button("重新开始",()=>{S.ans.fill(-1);S.k=0;render()}));S.box.append(nav);
+  [S.prev,S.next,nav.lastChild].forEach(b=>b.style.minHeight="44px");
+  S.read.innerHTML="";
+  if(a<0)S.read.append(el("p","",`<span style="color:${T.fg};font-size:14px">选出你的答案后，这里显示解析。</span>`));
+  else{const ok=a===q.a;
+   S.read.append(el("p","",`<span style="display:block;font-weight:600;color:${ok?T.blue:T.redText}">${ok?"回答正确":"回答错误"} · 答案 ${L[q.a]}</span><span style="display:block;margin-top:6px;line-height:1.6;font-size:14px;color:${T.fg}">${q.e}</span>`));
+   const g=button(`去第 ${q.c} 章`,()=>{location.hash="#"+q.c});g.style.marginTop="10px";g.style.minHeight="44px";S.read.append(g)}
+  if(done()){const n=right();S.read.append(el("p","",`<span style="display:block;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-weight:600;color:${n===6?T.blue:n>=4?T.goldText:T.redText}">总分 ${n} / 6 · ${comment(n)}</span>`))}}
+ return{
+  text:"六道浙江选考风格单选题，覆盖鸦片战争到中共成立。点选项立即判分并显示解析，解析末尾可跳回相关章节复习。",
+  points:["点选项即判：正确选项变蓝，选错变深红","画布成绩环显示答对数，题号圆点可点击跳题","全部答完显示总分与评语"],
+  gk:"<p>选考单选常考<b style=\"color:#9a6a00\">条约内容与影响的对应</b>、<b style=\"color:#9a6a00\">标志性事件</b>。</p><p><b style=\"color:#c0362c\">易错：</b>领事裁判权出自《虎门条约》而非《南京条约》；完全沦为半殖民地半封建社会以《辛丑条约》为标志。</p>",
+  mount(c,r){S.box=el("div","");S.read=el("div","");c.append(S.box);r.append(S.read);S.dk=isDark();render()},
+  draw(ctx,w,h,t){const T=theme();if(S.dk!==isDark()){S.dk=isDark();render()}
+   const n=right(),done6=done(),R=Math.max(34,Math.min(70,h*.2,w*.18)),cx=w/2,cy=24+R,pr=Math.min(1,Math.max(0,t-S.t0)/0.6),ease=1-Math.pow(1-pr,3);
+   ctx.save();ctx.lineWidth=10;ctx.lineCap="round";ctx.strokeStyle=T.grid.replace(/\.0?\d+\)/,".12)");ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.stroke();
+   S.disp=S.disp==null?n:S.disp+(n-S.disp)*Math.min(1,.15+ease*.1);if(Math.abs(S.disp-n)<.01)S.disp=n;
+   if(S.disp>0){ctx.strokeStyle=T.blue;ctx.beginPath();ctx.arc(cx,cy,R,-Math.PI/2,-Math.PI/2+Math.PI*2*S.disp/6);ctx.stroke()}
+   ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.fg;ctx.font=`600 ${Math.round(R*.55)}px ${MF}`;ctx.fillText(n+"/6",cx,cy-2);
+   ctx.font="12px "+MF;ctx.fillText("答对",cx,cy+R*.42);ctx.restore();
+   const gap=Math.min(48,(w-48)/6),y=cy+R+34,x0=cx-gap*2.5;S.dots=[];S.dy=y;
+   Q.forEach((q,i)=>{const x=x0+i*gap,a=S.ans[i],col=a<0?"#8e8e93":a===q.a?T.blue:T.redText;S.dots.push(x);
+    ctx.beginPath();ctx.arc(x,y,i===S.k?9:7,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+    if(i===S.k){ctx.lineWidth=2;ctx.strokeStyle=T.fg;ctx.beginPath();ctx.arc(x,y,13,0,Math.PI*2);ctx.stroke()}
+    ctx.fillStyle=T.fg;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";ctx.fillText(i+1,x,y+17)});
+   ctx.textAlign="center";ctx.textBaseline="top";let ty=y+46;
+   if(done6){ctx.fillStyle=n===6?T.blue:n>=4?T.goldText:T.redText;ctx.font=`600 18px ${MF}`;ctx.fillText(`总分 ${n} / 6 · ${comment(n)}`,cx,ty)}
+   else{ctx.fillStyle=T.fg;ctx.font=`14px ${MF}`;ctx.fillText(`已答 ${S.ans.filter(v=>v>=0).length} / 6 题 · 在控件区作答`,cx,ty)}},
+  pointer(e,type,x,y){if(type!=="down")return false;const R=e&&e.pointerType==="touch"?22:16;let best=-1,bd=R;
+   S.dots.forEach((dx,i)=>{const d=Math.hypot(dx-x,S.dy-y);if(d<bd){bd=d;best=i}});if(best>=0){S.k=best;render();return true}return false},
+  unmount(){S.box=S.read=S.prev=S.next=null}}})();
+const $=id=>document.getElementById(id),pad=i=>String(i+1).padStart(2,"0");
+let cur=0,mod=null,W=0,H=0,DPR=1;
+const cv=$("cv"),ctx=cv.getContext("2d");
+/* ---------- theme ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function isDark(){return document.documentElement.classList.contains("dark")}
+function theme(){return isDark()
+ ?{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e2a336",teal:"#2ec4b6",purple:"#b197fc",goldText:"#f0b847",redText:"#ff7b72"}
+ :{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.05)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"}}
+function setDark(d){document.documentElement.classList.toggle("dark",d);store.set("jindai-dark",d?"1":"0");$("dark").textContent=$("mdark").textContent=d?"浅色":"深色"}
+setDark(store.get("jindai-dark")==="1");
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||fmtNum;const w=el("div","sl"),l=el("label"),o=el("output"),i=el("input");
+ l.append(document.createTextNode(label),o);i.type="range";Object.assign(i,{min,max,step,value:val});i.setAttribute("aria-label",label);o.textContent=fmt(+val);
+ i.oninput=()=>{o.textContent=fmt(+i.value);onchange&&onchange(+i.value)};w.append(l,i);
+ w.set=v=>{i.value=v;o.textContent=fmt(+v)};return w}
+function chips(options,val,onchange){const w=el("div","chips");const bs=options.map(op=>{const o=typeof op==="object"?op:{label:op,value:op};const b=el("button",o.value===val?"on":"",o.label);
+ b.onclick=()=>{bs.forEach(x=>x.classList.remove("on"));b.classList.add("on");onchange&&onchange(o.value)};w.append(b);return b});return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" primary":""),label);b.onclick=onclick;return b}
+function toggle(label,val,onchange){const b=el("button","tg"+(val?" on":""),"<span>"+label+"</span><i></i>");b.setAttribute("role","switch");b.setAttribute("aria-checked",!!val);
+ b.onclick=()=>{val=!val;b.classList.toggle("on",val);b.setAttribute("aria-checked",val);onchange&&onchange(val)};return b}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML=rs.map(r=>`<dt>${r[0]}</dt><dd style="${r[2]?"color:"+r[2]:""}">${r[1]}</dd>`).join("")};d.update(rows||[]);return d}
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){if(!isFinite(v))return v>0?"∞":v<0?"−∞":"—";const e=1e-6,s=v<0?"−":"",a=Math.abs(v);
+ if(Math.abs(a-Math.round(a))<e)return(Math.round(a)===0?"":s)+Math.round(a);
+ for(let d=2;d<=12;d++){const n=a*d;if(Math.abs(n-Math.round(n))<e)return s+Math.round(n)+"/"+d}
+ for(const r of[2,3,5,6,7,10,11,13,14,15]){const q=Math.sqrt(r);for(let d=1;d<=6;d++){const k=a*d/q;if(Math.abs(k-Math.round(k))<e&&Math.round(k)>0){const K=Math.round(k);return s+(K===1?"":K)+"√"+r+(d>1?"/"+d:"")}}}
+ return s+a.toFixed(2)}
+function drawAxes(ctx,box,xr,yr,opts){opts=Object.assign({equal:true,grid:true,ticks:true,step:1,labels:true},opts);const T=theme();
+ let[x0,x1]=xr,[y0,y1]=yr,sx=box.w/(x1-x0),sy=box.h/(y1-y0);
+ if(opts.equal){const s=Math.min(sx,sy),cx=(x0+x1)/2,cy=(y0+y1)/2;sx=sy=s;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)*sx,Y=y=>box.y+box.h-(y-y0)*sy,invX=p=>x0+(p-box.x)/sx,invY=p=>y0+(box.y+box.h-p)/sy;
+ let st=opts.step;while(st*sx<22)st*=2;
+ ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();ctx.lineWidth=1;
+ if(opts.grid){ctx.strokeStyle=T.grid;ctx.beginPath();for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st){ctx.moveTo(X(x),box.y);ctx.lineTo(X(x),box.y+box.h)}for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st){ctx.moveTo(box.x,Y(y));ctx.lineTo(box.x+box.w,Y(y))}ctx.stroke()}
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,Y(0));ctx.lineTo(box.x+box.w,Y(0));ctx.moveTo(X(0),box.y);ctx.lineTo(X(0),box.y+box.h);ctx.stroke();
+ if(opts.labels){ctx.fillStyle=T.sub;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";
+  for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st)if(Math.abs(x)>1e-9)ctx.fillText(fmtNum(x),X(x),Y(0)+4);
+  ctx.textAlign="right";ctx.textBaseline="middle";for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st)if(Math.abs(y)>1e-9)ctx.fillText(fmtNum(y),X(0)-5,Y(y));
+  ctx.textBaseline="top";ctx.fillText("O",X(0)-4,Y(0)+4);ctx.font="italic 13px "+getComputedStyle(document.body).fontFamily;ctx.fillStyle=T.fg;
+  ctx.fillText("x",box.x+box.w-4,Y(0)+4);ctx.textAlign="left";ctx.fillText("y",X(0)+6,box.y+4)}
+ ctx.restore();return{X,Y,invX,invY,s:sx,box,xr:[x0,x1],yr:[y0,y1]}}
+function drawLine(ctx,map,A,B,C,color,width,dashed){if(Math.abs(A)<1e-12&&Math.abs(B)<1e-12)return;const[x0,x1]=map.xr,[y0,y1]=map.yr,b=map.box;let p,q;
+ if(Math.abs(B)>=Math.abs(A)){p=[x0,-(A*x0+C)/B];q=[x1,-(A*x1+C)/B]}else{p=[-(B*y0+C)/A,y0];q=[-(B*y1+C)/A,y1]}
+ ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.setLineDash(dashed?[6,5]:[]);
+ ctx.beginPath();ctx.moveTo(map.X(p[0]),map.Y(p[1]));ctx.lineTo(map.X(q[0]),map.Y(q[1]));ctx.stroke();ctx.restore()}
+function drawCircle(ctx,map,cx,cy,r,color,width,fill){const b=map.box;ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.beginPath();ctx.arc(map.X(cx),map.Y(cy),Math.max(0,r*map.s),0,Math.PI*2);
+ if(fill){ctx.fillStyle=fill;ctx.fill()}if(width!==0){ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.stroke()}ctx.restore()}
+function dragPoints(points,map,snap){const M=()=>typeof map==="function"?map():map;const h=function(e,type,x,y){const m=M();if(!m)return false;
+ if(type==="down"){const R=e&&e.pointerType==="touch"?22:12;let best=-1,bd=R;points.forEach((p,i)=>{if(p.fixed)return;const d=Math.hypot(m.X(p.x)-x,m.Y(p.y)-y);if(d<=bd){bd=d;best=i}});h.active=best;return best>=0}
+ if(type==="move"&&h.active>=0){const p=points[h.active];let nx=m.invX(x),ny=m.invY(y);if(snap){nx=Math.round(nx/snap)*snap;ny=Math.round(ny/snap)*snap}
+  nx=Math.min(m.xr[1],Math.max(m.xr[0],nx));ny=Math.min(m.yr[1],Math.max(m.yr[0],ny));p.x=+nx.toFixed(6);p.y=+ny.toFixed(6);p.onmove&&p.onmove(p);h.onmove&&h.onmove(p,h.active);return true}
+ if(type==="up"){const was=h.active>=0;h.active=-1;return was}return false};h.active=-1;return h}
+function wrapText(ctx,text,x,y,maxW,lh){let line="";for(const ch of String(text)){if(ch==="\n"){ctx.fillText(line,x,y);line="";y+=lh;continue}
+ const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);line=ch;y+=lh}else line=t}if(line)ctx.fillText(line,x,y);return y+lh}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+/* ---------- placeholder ---------- */
+function drawSoon(ctx,w,h){const T=theme(),cw=Math.min(320,w-40),ch=150,x=(w-cw)/2,y=(h-ch)/2;
+ ctx.save();ctx.shadowColor="rgba(0,0,0,.08)";ctx.shadowBlur=24;ctx.shadowOffsetY=4;ctx.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(ctx,x,y,cw,ch,22);ctx.fill();ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.blue;ctx.font="13px ui-monospace,Menlo,monospace";ctx.fillText("CHAPTER "+pad(cur),w/2,y+38);
+ ctx.fillStyle=T.fg;ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText("即将上线",w/2,y+72);
+ ctx.fillStyle=T.sub;ctx.font="14px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText(CH[cur].n,w/2,y+108)}
+/* ---------- canvas loop ---------- */
+function resize(){const r=$("cwrap").getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);frame(performance.now())}
+function frame(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H);
+ try{mod&&mod.draw?mod.draw(ctx,W,H,t/1000):drawSoon(ctx,W,H)}catch(err){console.error(err)}}
+function loop(t){frame(t);requestAnimationFrame(loop)}
+new ResizeObserver(resize).observe($("cwrap"));window.addEventListener("resize",resize);
+function ptr(type){return e=>{if(!mod||!mod.pointer)return;const r=cv.getBoundingClientRect();
+ if(type==="down")try{cv.setPointerCapture(e.pointerId)}catch(_){}mod.pointer(e,type,e.clientX-r.left,e.clientY-r.top)}}
+cv.addEventListener("pointerdown",ptr("down"));cv.addEventListener("pointermove",ptr("move"));cv.addEventListener("pointerup",ptr("up"));cv.addEventListener("pointercancel",ptr("up"));
+/* ---------- chapters ---------- */
+function list(host,cls){host.innerHTML="";CH.forEach((c,i)=>{const b=el("button",cls,`<span class="mono">${pad(i)}</span><span>${c.n}</span>`);b.onclick=()=>{go(i);closeSheet()};host.append(b)})}
+list($("toc"),"");list($("slist"),"it");
+$("segs").innerHTML=CH.map(()=>"<i></i>").join("");
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod.unmount()}catch(e){console.error(e)}
+ cur=i;const c=CH[i],m=c.ready&&MODS[i]?MODS[i]:null;mod=m;
+ $("ctitle").textContent=pad(i)+"  "+c.n;$("cbook").textContent=c.book;$("ctext").innerHTML=m?m.text||"":"本章交互实验即将上线，敬请期待。";
+ const ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";$("pts").innerHTML="";$("gk").innerHTML="";
+ if(m){m.mount&&m.mount(ctrl,read);$("pts").innerHTML=m.points?"<ul>"+[].concat(m.points).map(p=>"<li>"+p+"</li>").join("")+"</ul>":"";$("gk").innerHTML=m.gk||""}
+ $("ctrlSec").hidden=!ctrl.children.length;$("readSec").hidden=!read.children.length;$("ptSec").hidden=!$("pts").innerHTML;$("gkSec").hidden=!$("gk").innerHTML;
+ if(!m){$("ctrlSec").hidden=false;ctrl.innerHTML='<p class="soon">本章控件即将上线。</p>'}
+ document.querySelectorAll("#toc button,#slist button").forEach(b=>{const on=+b.querySelector(".mono").textContent-1===i;b.classList.toggle("on",on);on?b.setAttribute("aria-current","true"):b.removeAttribute("aria-current")});
+ document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
+ $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+/* ---------- controls ---------- */
+$("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
+$("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("explain").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+function openSheet(){$("mask").hidden=$("sheet").hidden=false;const on=$("slist").querySelector(".on");on&&on.scrollIntoView({block:"nearest"})}
+function closeSheet(){$("mask").hidden=$("sheet").hidden=true}
+$("chbtn").onclick=openSheet;$("mask").onclick=closeSheet;
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"&&t.type!=="range"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable))return;
+ if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+go(fromHash());requestAnimationFrame(loop);
+</script>
+</body>
+</html>
