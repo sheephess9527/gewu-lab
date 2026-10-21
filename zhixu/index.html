@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><script src="../lib/labfix-2d.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>两战与国际秩序 · 格物实验室</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--sel:#e8f1fc;--selfg:#0058b0;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--sel:rgba(41,151,255,.18);--selfg:#6cb6ff;--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--shadow:0 0 0 1px rgba(255,255,255,.08)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.back b{font-size:22px;font-weight:400;margin-right:4px}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);font-size:14px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}
+html.dark .pill.primary,html.dark .chips button.on{color:#000}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc button,.sheet button.it{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px;align-items:center}
+.toc button:hover{background:var(--btn2)}
+.toc button.on,.sheet button.it.on{background:var(--sel);color:var(--selfg);font-weight:600}
+.toc .mono,.sheet .mono{font-size:13px;color:var(--sub)}.on .mono{color:var(--selfg)!important}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 20px}
+.explain{flex:none}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.etext{margin:8px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.explain.collapsed .etext,.explain.collapsed .book{display:none}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;color:var(--sub);min-height:32px}
+.cwrap{flex:1;min-height:0;position:relative;border-radius:22px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:none}
+.sec h3{font-size:13px;color:var(--sub);font-weight:600;letter-spacing:0;margin:0 0 8px}
+.ctrls{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;font-size:14px}.sl output{font-family:var(--mono);color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}.chips button.on{background:var(--blue);color:#fff}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;min-height:36px;border:0;background:none;padding:0;width:100%}
+.tg i{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.tg.on i{background:#34c759}.tg.on i::after{left:20px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+.points ul{margin:0;padding-left:18px}.points li{margin:4px 0}
+.gk a{color:var(--blue);text-decoration:none;font-size:14px}
+.mdark{display:none}
+.soon{color:var(--sub);font-size:14px;margin:0}
+/* sheet */
+.mask{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;max-height:70vh;overflow:auto;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .prog{display:none}.app{display:block;height:auto}.toc{display:none}
+ .stage{padding:12px}.cwrap{order:-1;flex:none;height:56vh}
+ .explain .fold{display:none}.explain.collapsed .etext,.explain.collapsed .book{display:block}.etext{max-height:none;overflow:visible}
+ .panel{border:0;padding:0 12px 24px}
+}
+@media (min-width:1024px){.chbtn{display:none}}
+/* phone */
+@media (max-width:767px){
+ .top{height:calc(52px + env(safe-area-inset-top));gap:6px;padding-left:4px;padding-right:8px}
+ .back{width:44px;justify-content:center}.back span{display:none}.back b{margin:0}
+ .tname{flex:1;font-size:16px}.tbtns{display:none}.chbtn{margin-left:0;padding:0 12px}
+ .stage{padding:0;gap:0}.cwrap{height:52vh;border-radius:0;box-shadow:none;border-bottom:1px solid var(--line)}
+ .explain{background:none;box-shadow:none;padding:16px 16px 4px}.ehead h2{font-size:20px}.etext{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(84px + env(safe-area-inset-bottom))}
+ input[type=range]{height:44px}.chips button,.tg{min-height:44px}
+ .mdark{display:block;align-self:flex-start;min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
+  <div class="tname">两战与国际秩序 · OrderLab</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 09</span></div>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button><button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chnum">01/09</span></button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h2 id="ctitle"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="etext" id="ctext"></p>
+    </section>
+    <div class="cwrap" id="cwrap"><canvas id="cv"></canvas></div>
+  </main>
+  <aside class="panel">
+    <section class="card sec" id="ctrlSec"><h3>控件</h3><div class="ctrls" id="ctrl"></div></section>
+    <section class="card sec" id="readSec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec points" id="ptSec"><h3>要点</h3><div id="pts"></div></section>
+    <section class="card sec gk" id="gkSec"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mask" id="mask" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><div id="slist"></div></div>
+<div class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></div>
+<script>
+const CH=[
+{n:"一战：同盟体系的连锁反应",book:"《中外历史纲要（下）》第 14 课",ready:false},
+{n:"凡尔赛—华盛顿体系",book:"第 14 课",ready:false},
+{n:"十月革命与苏联模式",book:"第 15 课",ready:false},
+{n:"1929 年大危机与罗斯福新政",book:"第 17 课",ready:false},
+{n:"二战：反法西斯同盟与雅尔塔体系",book:"第 17 课",ready:false},
+{n:"冷战：两极格局",book:"第 18 课",ready:false},
+{n:"民族独立与第三世界",book:"第 16、21 课",ready:false},
+{n:"多极化与经济全球化",book:"第 20、22 课",ready:false},
+{n:"随堂检测",book:"浙江选考 20 世纪国际秩序",ready:false}];
+/* ---------- history drawing tools ---------- */
+const WORLD=[[[-68,-54],[-65,-55],[-69,-55],[-75,-53],[-68,-54]],[[173,-41],[174,-41],[173,-44],[169,-47],[167,-46],[173,-41]],[[175,-36],[179,-38],[175,-42],[173,-35],[175,-36]],[[50,-14],[47,-25],[44,-25],[44,-16],[49,-12],[50,-14]],[[144,-14],[153,-26],[153,-32],[150,-37],[146,-39],[141,-38],[138,-34],[137,-35],[138,-33],[136,-35],[131,-31],[118,-35],[115,-34],[114,-22],[121,-20],[126,-14],[130,-15],[132,-11],[136,-12],[136,-15],[140,-18],[142,-11],[144,-14]],[[134,-1],[135,-3],[138,-2],[145,-4],[151,-11],[145,-8],[143,-9],[138,-8],[138,-5],[133,-4],[132,-3],[134,-2],[131,-1],[134,-1]],[[125,1],[120,0],[121,-1],[123,-1],[122,-2],[123,-5],[121,-3],[119,-5],[120,1],[125,1]],[[106,-6],[103,-4],[95,5],[104,0],[106,-6]],[[118,2],[119,1],[116,-4],[110,-3],[109,0],[110,2],[117,7],[119,5],[118,2]],[[126,8],[125,6],[124,8],[122,7],[125,10],[126,8]],[[121,19],[122,14],[124,13],[120,15],[121,19]],[[-73,20],[-68,19],[-74,18],[-73,20]],[[-80,23],[-74,20],[-78,20],[-82,23],[-85,22],[-80,23]],[[141,37],[140,35],[136,33],[131,34],[130,31],[129,33],[139,38],[140,41],[142,40],[141,37]],[[144,44],[146,43],[140,42],[142,46],[144,44]],[[-56,51],[-53,49],[-53,47],[-59,48],[-56,51]],[[144,51],[145,49],[143,49],[144,46],[142,46],[142,53],[143,54],[144,51]],[[-7,52],[-10,52],[-10,54],[-7,55],[-7,52]],[[-3,59],[-3,56],[1,51],[-5,50],[-3,54],[-6,57],[-3,59]],[[-85,66],[-80,64],[-87,64],[-85,66]],[[-15,66],[-14,65],[-19,63],[-24,66],[-15,66]],[[-175,67],[-170,66],[-173,64],[-179,66],[-180,65],[-180,69],[-175,67]],[[-91,69],[-87,67],[-86,70],[-83,70],[-81,68],[-93,62],[-95,59],[-92,57],[-82,55],[-80,51],[-79,53],[-80,55],[-77,57],[-79,59],[-78,62],[-74,62],[-70,61],[-68,58],[-65,60],[-56,52],[-66,50],[-71,47],[-65,49],[-64,46],[-60,46],[-65,44],[-64,45],[-67,45],[-71,43],[-70,42],[-76,39],[-76,37],[-76,39],[-76,36],[-81,31],[-80,25],[-84,30],[-97,28],[-98,22],[-96,19],[-92,19],[-87,22],[-89,16],[-83,15],[-84,11],[-81,9],[-77,9],[-72,12],[-72,9],[-70,12],[-68,11],[-62,11],[-57,6],[-51,4],[-50,0],[-40,-3],[-35,-7],[-39,-13],[-41,-22],[-48,-25],[-54,-34],[-58,-34],[-57,-37],[-65,-41],[-63,-43],[-67,-46],[-66,-48],[-71,-54],[-75,-52],[-74,-47],[-76,-47],[-73,-42],[-74,-43],[-70,-20],[-76,-15],[-81,-6],[-80,-3],[-81,-1],[-77,4],[-78,8],[-81,7],[-86,10],[-87,13],[-104,18],[-114,32],[-115,30],[-109,23],[-112,25],[-124,40],[-125,48],[-123,47],[-123,49],[-127,51],[-134,58],[-147,61],[-152,59],[-151,61],[-158,56],[-165,54],[-157,59],[-162,59],[-166,62],[-161,65],[-168,66],[-162,66],[-167,68],[-157,71],[-137,69],[-128,70],[-109,67],[-106,69],[-96,67],[-94,69],[-96,70],[-95,72],[-91,69]],[[-114,73],[-108,72],[-108,73],[-107,73],[-101,70],[-116,69],[-112,70],[-119,72],[-114,73]],[[-87,73],[-72,72],[-62,67],[-64,65],[-68,66],[-65,63],[-69,64],[-66,62],[-78,64],[-74,65],[-73,68],[-79,70],[-89,70],[-90,72],[-87,73]],[[-100,74],[-97,74],[-97,72],[-102,73],[-100,74]],[[-120,71],[-126,72],[-125,74],[-118,74],[-116,73],[-120,71]],[[-108,76],[-106,75],[-118,75],[-108,76]],[[58,71],[52,71],[56,75],[69,77],[58,74],[55,72],[58,71]],[[-95,77],[-80,75],[-92,75],[-97,77],[-95,77]],[[107,77],[114,76],[109,74],[127,74],[131,71],[140,73],[161,69],[179,69],[180,69],[180,65],[177,65],[179,63],[164,60],[162,55],[157,51],[156,57],[164,63],[160,61],[157,61],[155,59],[142,59],[135,55],[140,54],[141,52],[138,46],[128,40],[129,35],[126,34],[125,40],[121,39],[122,41],[118,39],[119,37],[122,37],[119,35],[122,32],[122,28],[116,23],[106,20],[109,13],[105,9],[100,13],[99,9],[104,1],[98,8],[97,17],[94,16],[91,23],[87,21],[80,16],[80,10],[78,8],[73,21],[70,21],[66,25],[57,26],[48,30],[52,24],[56,26],[60,22],[55,17],[43,13],[35,30],[34,28],[32,30],[43,12],[45,10],[51,12],[51,11],[48,4],[39,-5],[41,-15],[35,-20],[36,-24],[33,-26],[32,-29],[26,-34],[18,-34],[12,-18],[14,-11],[9,-1],[9,4],[4,6],[-9,5],[-17,12],[-17,22],[-6,36],[10,37],[11,37],[10,34],[19,30],[22,33],[34,31],[36,37],[28,37],[26,39],[34,42],[42,42],[37,45],[39,47],[34,44],[31,47],[28,43],[29,41],[23,40],[24,38],[22,36],[20,42],[13,46],[13,44],[18,40],[17,40],[16,38],[9,44],[3,43],[-2,37],[-9,37],[-9,43],[-1,44],[-1,46],[-5,49],[8,54],[9,57],[11,58],[11,54],[20,54],[22,57],[24,57],[23,59],[29,60],[21,61],[22,63],[25,65],[22,66],[18,63],[19,60],[16,56],[13,55],[10,59],[6,59],[5,62],[25,71],[40,68],[40,66],[33,67],[37,64],[44,66],[43,69],[46,68],[46,67],[54,69],[60,68],[61,70],[69,68],[67,71],[73,73],[72,66],[75,68],[73,71],[75,73],[76,71],[82,72],[81,74],[87,75],[107,77]],[[18,80],[22,79],[16,77],[10,80],[18,80]],[[100,79],[91,80],[96,81],[100,79]],[[-87,80],[-91,78],[-97,80],[-92,81],[-87,80]],[[-68,83],[-62,82],[-77,79],[-75,79],[-81,76],[-89,76],[-85,78],[-88,78],[-85,79],[-87,80],[-82,80],[-92,82],[-68,83]],[[-27,84],[-21,83],[-31,82],[-12,81],[-20,80],[-18,80],[-20,79],[-18,77],[-22,77],[-19,74],[-25,72],[-22,71],[-26,70],[-22,70],[-40,65],[-43,60],[-48,61],[-52,64],[-54,67],[-51,70],[-55,70],[-51,71],[-56,72],[-55,73],[-59,76],[-73,78],[-66,79],[-68,80],[-63,82],[-27,84]]];
+const HSANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+function itext(ctx,text,x,y,o){o=o||{};ctx.save();ctx.font=(o.weight||400)+" "+(o.size||13)+"px "+HSANS;ctx.textAlign=o.align||"left";ctx.textBaseline=o.baseline||"middle";
+ ctx.lineJoin="round";ctx.lineWidth=3.5;ctx.strokeStyle=isDark()?"rgba(28,28,30,.85)":"rgba(255,255,255,.9)";ctx.strokeText(text,x,y);ctx.fillStyle=o.color||theme().fg;ctx.fillText(text,x,y);ctx.restore()}
+function worldMap(ctx,x,y,w,h,o){o=Object.assign({lon0:-180,lon1:180,lat0:-60,lat1:85},o);const d=isDark();
+ const P=(lon,lat)=>[x+(lon-o.lon0)/(o.lon1-o.lon0)*w,y+(o.lat1-lat)/(o.lat1-o.lat0)*h];
+ ctx.save();rrect(ctx,x,y,w,h,14);ctx.clip();ctx.fillStyle=d?"#1b2a3a":"#dbe9f4";ctx.fillRect(x,y,w,h);
+ ctx.fillStyle=d?"#3a3a3c":"#f3efe6";ctx.strokeStyle="#b9a98a";ctx.lineWidth=1;ctx.lineJoin="round";ctx.beginPath();
+ WORLD.forEach(poly=>{poly.forEach(([lo,la],i)=>{const[px,py]=P(lo,la);i?ctx.lineTo(px,py):ctx.moveTo(px,py)});ctx.closePath()});
+ ctx.fill();ctx.stroke();ctx.restore();return{P}}
+function nation(ctx,x,y,r,label,o){o=o||{};const T=theme(),col=o.color||T.blue;ctx.save();
+ if(o.active){ctx.shadowColor=col;ctx.shadowBlur=18;ctx.beginPath();ctx.arc(x,y,r+4,0,7);ctx.strokeStyle=col;ctx.lineWidth=3;ctx.stroke();ctx.shadowBlur=0}
+ ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=col;ctx.fill();
+ if(o.flag&&o.flag.length){ctx.save();ctx.clip();const n=o.flag.length;o.flag.forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(x-r,y-r+i*2*r/n,2*r,2*r/n+.5)});ctx.restore()}
+ ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.strokeStyle=T.bg;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+ if(label)itext(ctx,label,x,y+r+(o.active?8:4),{baseline:"top",align:"center",weight:o.active?600:400,color:T.fg});return{x,y,r}}
+function link(ctx,a,b,o){o=o||{};const T=theme(),dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),L=d-a.r-b.r;if(L<=0)return;
+ const ux=dx/d,uy=dy/d,p=Math.max(0,Math.min(1,o.progress==null?1:o.progress)),sx=a.x+ux*a.r,sy=a.y+uy*a.r,ex=sx+ux*L*p,ey=sy+uy*L*p;
+ ctx.save();ctx.strokeStyle=o.color||T.sub;ctx.lineWidth=o.width||2;ctx.lineCap="round";ctx.setLineDash(o.dash===true?[6,5]:o.dash||[]);
+ ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);ctx.stroke();ctx.restore();
+ if(o.label&&p>=.5){const mx=sx+ux*L/2,my=sy+uy*L/2;itext(ctx,o.label,mx-uy*12,my+ux*12,{align:"center",size:12,color:o.labelColor||T.fg})}}
+function lineChart(ctx,x,y,w,h,series,o){o=o||{};const T=theme(),all=series.flatMap(s=>s.pts),xs=all.map(p=>p[0]),ys=all.map(p=>p[1]);
+ const x0=o.xmin??Math.min(...xs),x1=o.xmax??Math.max(...xs),y0=o.ymin??Math.min(0,...ys),y1=o.ymax??Math.max(...ys);
+ const L=x+40,R=x+w-10,B=y+h-22,Tp=y+10,X=v=>L+(v-x0)/((x1-x0)||1)*(R-L),Y=v=>B-(v-y0)/((y1-y0)||1)*(B-Tp);
+ ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(L,Tp);ctx.lineTo(L,B);ctx.lineTo(R,B);ctx.stroke();ctx.restore();
+ itext(ctx,String(+y1.toFixed(2)),L-6,Tp,{align:"right",size:12});itext(ctx,String(+y0.toFixed(2)),L-6,B,{align:"right",size:12});
+ (o.labels||[[x0,String(x0)],[x1,String(x1)]]).forEach(l=>{const[v,s]=Array.isArray(l)?l:[l,String(l)];itext(ctx,s,X(v),B+5,{align:"center",baseline:"top",size:12})});
+ ctx.save();ctx.beginPath();ctx.rect(L,Tp-4,R-L+4,B-Tp+8);ctx.clip();
+ series.forEach(s=>{ctx.strokeStyle=s.color||T.blue;ctx.lineWidth=s.width||2;ctx.lineJoin=ctx.lineCap="round";ctx.beginPath();s.pts.forEach(([a,b],i)=>i?ctx.lineTo(X(a),Y(b)):ctx.moveTo(X(a),Y(b)));ctx.stroke()});ctx.restore();
+ series.forEach(s=>{if(!s.name||!s.pts.length)return;const[a,b]=s.pts[s.pts.length-1];itext(ctx,s.name,Math.min(X(a),R)-2,Y(b)-10,{align:"right",size:12,weight:600,color:s.color||T.fg})});
+ return{X,Y}}
+const MODS=[];// MODS[i]={text,points,gk,mount(ctrlEl,readEl),draw(ctx,w,h,t),pointer(e,type,x,y),unmount()}
+/* ---------- 第 1 章 一战：同盟体系的连锁反应 ---------- */
+CH[0].ready=true;
+MODS[0]=(()=>{
+ const N={UK:["英国",-2,53,"E"],FR:["法国",2.5,47,"E"],RU:["俄国",38,55,"E"],DE:["德国",11,51.5,"C"],AH:["奥匈帝国",18,47.8,"C"],IT:["意大利",12.5,42.5,"C"],
+  SR:["塞尔维亚",21.5,44,"S"],BE:["比利时",4.5,50.8,"N"],OT:["奥斯曼帝国",33,39.5,"O"]};
+ const SARA=[18.4,43.9];
+ const STEPS=[
+  {d:"7.28",e:"奥匈对塞尔维亚宣战",l:[["AH","SR"]],add:["AH","SR"]},
+  {d:"7.30",e:"俄国总动员，支援塞尔维亚",l:[["RU","SR"]],add:["RU"]},
+  {d:"8.1",e:"德国对俄宣战",l:[["DE","RU"]],add:["DE"]},
+  {d:"8.3",e:"德国对法宣战",l:[["DE","FR"]],add:["FR"]},
+  {d:"8.4",e:"德国入侵比利时，英国对德宣战",l:[["DE","BE"],["UK","DE"]],add:["BE","UK"]},
+  {d:"11 月",e:"奥斯曼帝国加入同盟国",l:[["OT","DE"]],add:["OT"]}];
+ let step=-1,stepAt=0,sparkAt=-9,timers=[],cause=false,proc=false,ro=null;
+ const now=()=>performance.now()/1000,date=st=>st.d.includes("月")?"1914 年 "+st.d:"1914."+st.d;
+ const inv=()=>{const s=new Set();STEPS.slice(0,step+1).forEach(x=>x.add.forEach(k=>s.add(k)));return s};
+ function upd(){const T=theme(),s=inv(),st=STEPS[step];
+  const camp=step<0?"三国同盟 vs 三国协约（对峙）":"同盟国："+["DE","AH","OT"].filter(k=>s.has(k)).map(k=>N[k][0]).join("、")+"；协约方："+["SR","RU","FR","BE","UK"].filter(k=>s.has(k)).map(k=>N[k][0]).join("、");
+  const rows=[["日期",step<0?(sparkAt>0?"1914.6.28":"1914 年前"):date(st)],
+   ["事件",step<0?(sparkAt>0?"萨拉热窝事件：奥匈皇储遇刺":"欧洲两大军事集团对峙"):st.e,step>=0||sparkAt>0?T.redText:""],
+   ["已卷入国家数",s.size+" 国"],["阵营",camp]];
+  if(step===STEPS.length-1)rows.push(["结论","局部冲突 → 大国全面战争：两大军事集团的同盟体系是重要原因",T.redText]);
+  ro&&ro.update(rows)}
+ function clear(){timers.forEach(clearTimeout);timers=[]}
+ function fire(){clear();step=-1;sparkAt=now();upd();
+  STEPS.forEach((_,i)=>timers.push(setTimeout(()=>{step=i;stepAt=now();upd()},900*(i+1))))}
+ function reset(){clear();step=-1;sparkAt=-9;upd()}
+ function col(k,T,s){const c=N[k][3];if(c==="E")return T.blue;if(c==="C")return T.redText;
+  if(c==="S")return T.gold;if(c==="O")return s.has("OT")?T.redText:T.sub;return T.sub}
+ const panel=(ctx,x,y,pw,ph,T)=>{ctx.save();ctx.fillStyle=isDark()?"rgba(28,28,30,.94)":"rgba(255,255,255,.94)";rrect(ctx,x,y,pw,ph,14);ctx.fill();ctx.strokeStyle=T.grid;ctx.stroke();ctx.restore()};
+ function drawCause(ctx,w,T){const x=10,y=10,pw=w-20,ph=158;panel(ctx,x,y,pw,ph,T);
+  itext(ctx,"资本主义政治经济发展不平衡 → 重新瓜分世界的要求",x+12,y+16,{weight:600,size:w<420?12:13,color:T.redText});
+  const ind=[["美",36],["德",16],["英",14],["法",6],["俄",5]],col2=[["英",3350],["法",1060],["德",290]];
+  const cw=(pw-36)/2,gx=[x+12,x+24+cw],bh=15,gap=5;
+  itext(ctx,"工业产值占世界 1913（示意）",gx[0],y+36,{size:12,color:T.blue});
+  itext(ctx,"殖民地 万 km²（示意）",gx[1],y+36,{size:12,color:T.goldText});
+  ind.forEach(([n,v],i)=>{const by=y+48+i*(bh+gap),bw=(cw-60)*v/36;itext(ctx,n,gx[0],by+bh/2,{size:12});
+   ctx.fillStyle=n==="德"?T.red:T.blue;ctx.fillRect(gx[0]+18,by,Math.max(2,bw),bh);itext(ctx,v+"%",gx[0]+22+bw,by+bh/2,{size:12})});
+  col2.forEach(([n,v],i)=>{const by=y+48+i*(bh+gap),bw=(cw-70)*v/3350;itext(ctx,n,gx[1],by+bh/2,{size:12});
+   ctx.fillStyle=n==="德"?T.red:T.gold;ctx.fillRect(gx[1]+18,by,Math.max(2,bw),bh);itext(ctx,"约 "+v,gx[1]+22+bw,by+bh/2,{size:12})});
+  itext(ctx,"德：工业强、殖民地少",gx[1],y+48+3*(bh+gap)+12,{size:12,color:T.redText})}
+ function drawProc(ctx,w,h,T){const ph=118,x=10,y=h-ph-10,pw=w-20;panel(ctx,x,y,pw,ph,T);
+  const L=x+26,R=x+pw-26,ay=y+52,X=v=>L+(v-1914)/(1919-1914)*(R-L);
+  itext(ctx,"战争进程 1914–1918",x+12,y+14,{weight:600,size:13});
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(L,ay);ctx.lineTo(R,ay);ctx.stroke();
+  ctx.fillStyle=T.red;ctx.globalAlpha=.35;ctx.fillRect(X(1916.15),ay-6,X(1916.95)-X(1916.15),12);ctx.restore();
+  [1914,1915,1916,1917,1918].forEach(v=>itext(ctx,String(v),X(v),ay+18,{align:"center",size:12}));
+  const ev=[[1914.5,"萨拉热窝",T.redText,-1],[1916.5,"凡尔登“绞肉机”",T.redText,1],[1917.3,"1917 美国参战",T.blue,-1],[1918.2,"俄国退出",T.goldText,1],[1918.86,"1918.11 德国投降",T.redText,-1]];
+  ev.forEach(([v,s,c,u])=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(X(v),ay,4,0,7);ctx.fill();
+   ctx.save();ctx.font="12px "+HSANS;const tw=ctx.measureText(s).width;ctx.restore();
+   itext(ctx,s,Math.max(x+8+tw/2,Math.min(x+pw-8-tw/2,X(v))),u<0?ay-14:ay+34,{align:"center",size:12,color:c})});
+  itext(ctx,"新武器：▰ 坦克　✈ 飞机　☁ 毒气　⚓ 潜艇",x+12,y+ph-14,{size:12,color:T.goldText})}
+ return{
+  text:"19 世纪末 20 世纪初，资本主义发展不平衡，后起的德国要求重新瓜分世界。欧洲逐渐形成三国同盟和三国协约两大军事集团。1914 年萨拉热窝事件成为导火线，同盟体系使局部冲突迅速演变为世界大战。",
+  points:["根本原因：资本主义政治经济发展不平衡","两大军事集团：三国同盟（德奥意）与三国协约（英法俄）","导火线：1914 年萨拉热窝事件","一战是帝国主义的掠夺战争，给人类带来深重灾难","战争期间俄国爆发十月革命，美国参战（→ 第 2、3 章）"],
+  gk:"统编版《中外历史纲要（下）》第 14 课「第一次世界大战与战后国际秩序」。浙江选考高频：一战的原因、性质与影响。",
+  mount(c,r){c.append(button("1914.6.28 萨拉热窝事件",fire,true),toggle("根本原因",cause,v=>cause=v),toggle("战争进程",proc,v=>proc=v),button("重置",reset));
+   c.querySelectorAll("button.pill").forEach(b=>b.style.minHeight="44px");ro=readout([]);r.append(ro);upd()},
+  draw(ctx,w,h,t){const T=theme(),tn=now(),s=inv(),portrait=h>w*1.1;
+   const{P}=worldMap(ctx,8,8,w-16,h-16,portrait?{lon0:-8,lon1:43,lat0:36,lat1:61}:{lon0:-10,lon1:45,lat0:35,lat1:62});
+   const r=Math.max(11,Math.min(20,Math.min(w,h)/24)),A={};
+   Object.keys(N).forEach(k=>{const[px,py]=P(N[k][1],N[k][2]);A[k]={x:px,y:py,r}});
+   const R2={color:T.redText,width:2.5},B2={color:T.blue,width:2.5};
+   link(ctx,A.DE,A.AH,{...R2,label:"三国同盟 1882",labelColor:T.redText});link(ctx,A.AH,A.IT,R2);link(ctx,A.IT,A.DE,R2);
+   link(ctx,A.UK,A.FR,B2);link(ctx,A.FR,A.RU,{...B2,label:"三国协约 1907",labelColor:T.blue});link(ctx,A.RU,A.UK,B2);
+   link(ctx,A.RU,A.SR,{color:T.gold,dash:true,label:"斯拉夫兄弟",labelColor:T.goldText});
+   link(ctx,A.UK,A.BE,{color:T.sub,dash:true,label:"保证中立"});
+   STEPS.slice(0,step+1).forEach((st,i)=>{const cur=i===step,p=cur?Math.min(1,(tn-stepAt)/.6):1,fl=cur?.55+.45*Math.sin(t*12):.75+.25*Math.sin(t*4+i);
+    st.l.forEach(([a,b])=>{ctx.save();ctx.globalAlpha=fl;link(ctx,A[a],A[b],{color:T.red,width:cur?4.5:3.5,progress:p});ctx.restore();
+     if(p>=.5)link(ctx,A[a],A[b],{color:"rgba(0,0,0,0)",width:.01,label:st.d,labelColor:T.redText})})});
+   Object.keys(N).forEach(k=>nation(ctx,A[k].x,A[k].y,r,N[k][0],{color:col(k,T,s),active:s.has(k)}));
+   itext(ctx,"1915 转投协约国",A.IT.x,A.IT.y+r+22,{align:"center",size:12,color:T.goldText});
+   itext(ctx,"中立",A.BE.x-r-4,A.BE.y,{align:"right",size:12});
+   if(sparkAt>0){const[sx,sy]=P(SARA[0],SARA[1]),ds=tn-sparkAt;
+    if(ds<1.2){const k=ds/1.2;ctx.save();ctx.strokeStyle=T.gold;ctx.lineWidth=2;ctx.globalAlpha=1-k;
+     for(let i=0;i<10;i++){const a=i*Math.PI/5+t;ctx.beginPath();ctx.moveTo(sx+Math.cos(a)*6,sy+Math.sin(a)*6);ctx.lineTo(sx+Math.cos(a)*(10+k*34),sy+Math.sin(a)*(10+k*34));ctx.stroke()}ctx.restore()}
+    ctx.fillStyle=T.red;ctx.beginPath();ctx.arc(sx,sy,4,0,7);ctx.fill();itext(ctx,"萨拉热窝 6.28",sx-6,sy+14,{align:"right",size:12,color:T.redText,weight:600})}
+   if(step===STEPS.length-1&&!proc)itext(ctx,w<420?"局部冲突 → 大国全面战争":"局部冲突 → 大国全面战争：同盟体系是重要原因",w/2,h-24,{align:"center",size:w<420?13:14,weight:600,color:T.redText});
+   if(step>=0&&!cause)itext(ctx,"已卷入 "+s.size+" 国 · "+date(STEPS[step]),18,24,{size:13,weight:600,color:T.redText});
+   if(cause)drawCause(ctx,w,T);if(proc)drawProc(ctx,w,h,T)},
+  unmount(){clear();step=-1;sparkAt=-9;ro=null}}
+})();
+/* ---------- 第 2 章 凡尔赛—华盛顿体系 ---------- */
+CH[1].ready=true;
+MODS[1]=(()=>{
+ // key:[名称,席次(1 主位/2 次之/3 边上/4 门外),代表,诉求,角度°]
+ const NA={FR:["法国",1,"克里孟梭","彻底削弱德国，收回阿尔萨斯—洛林",-90],UK:["英国",1,"劳合·乔治","维持欧洲均势，夺取殖民地与海上霸权",-150],
+  US:["美国",1,"威尔逊","建立国际联盟，“十四点原则”",-30],IT:["意大利",2,"","扩张领土，作为战胜国分享利益",150],JP:["日本",2,"","夺取德国在山东的权益",30],
+  CN:["中国",3,"","收回山东主权",90],DE:["德国",4,"","战败国无权参加和会",0]};
+ const SAT=[["FR","法",.85,"高"],["UK","英",.55,"中"],["US","美",.28,"低：国会拒绝批准和约、未加入国联"],["DE","德",.06,"极低：“复仇情绪”"],["CN","中国",.06,"极低：五四运动"]];
+ const CARDS=[["德国割地：阿尔萨斯—洛林归还法国",0],["德国殖民地由战胜国瓜分（“委任统治”）",0],["限制德国军备：陆军 ≤ 10 万，不得有空军",0],["德国须支付巨额赔款",0],["德国在山东的权益转让给日本 → 中国拒签 → 五四运动",1]];
+ const TR=[{n:"《四国条约》",d:"1921 · 美、英、日、法",c:"相互尊重太平洋岛屿属地，取代英日同盟",i:"英日同盟终止，美国削弱日本在远东的地位"},
+  {n:"《五国海军条约》",d:"1922 · 美、英、日、法、意",c:"主力舰吨位比例 美 5 : 英 5 : 日 3 : 法 1.75 : 意 1.75",i:"美国取得与英国同等的海军地位，限制日本海军扩张"},
+  {n:"《九国公约》",d:"1922 · 美、英、日、法、意、比、荷、葡、中",c:"“门户开放、机会均等”",i:"中国恢复了部分山东权益，但实质上回到列强共同支配",red:1}];
+ const NAV=[["美",5],["英",5],["日",3],["法",1.75],["意",1.75]];
+ let mode="A",sel=null,n=0,at=[],timers=[],ro=null,ctrl=null,hits=[];
+ const now=()=>performance.now()/1000,ease=p=>1-Math.pow(1-Math.max(0,Math.min(1,p)),3);
+ function clear(){timers.forEach(clearTimeout);timers=[]}
+ function run(k){clear();n=0;at=[];sel=null;upd();for(let i=0;i<k;i++)timers.push(setTimeout(()=>{n=i+1;at[i]=now();if(mode==="B"&&i<3)sel=i;upd()},700*(i+1)))}
+ function upd(){if(!ro)return;const T=theme();let r;
+  if(mode==="A"){const a=sel&&NA[sel],s=sel&&SAT.find(x=>x[0]===sel);
+   r=[["模式","巴黎和会的谈判桌（1919）"],["选中国家",a?a[0]+(a[2]?"（"+a[2]+"）":""):n?"《凡尔赛和约》":"点击桌边各国",sel==="DE"||sel==="CN"?T.redText:""],
+    ["主要内容",a?a[3]:n?"割地、瓜分殖民地（委任统治）、限制军备、巨额赔款；山东权益转让日本":"英法美三大国主导，意日次之，中国边缘，德国被排斥",sel==="DE"?T.redText:""],
+    ["影响",s&&n>=5?"满意度 "+s[3]:a&&sel==="DE"?"满意度 极低：“复仇情绪”":n>=5?"建立凡尔赛体系；中国拒签，引发五四运动":"—",s&&s[2]<.2||n>=5&&!s?T.redText:""]]}
+  else{const t=sel!=null&&TR[sel];
+   r=[["模式","华盛顿会议与新秩序（1921—1922）"],["选中条约",t?t.n:n>=4?"凡尔赛—华盛顿体系":"点击「召开会议」"],
+    ["主要内容",t?t.d+"；"+t.c:n>=4?"欧洲（凡尔赛体系）+ 亚太（华盛顿体系）":"—"],
+    ["影响",t?t.i:n>=4?"没有消除帝国主义矛盾，埋下新的战争隐患":"—",t&&t.red||!t&&n>=4?T.redText:""]]}
+  ro.update(r)}
+ function build(){ctrl.innerHTML="";ctrl.append(chips([{label:"巴黎和会的谈判桌",value:"A"},{label:"华盛顿会议与新秩序",value:"B"}],mode,v=>{mode=v;clear();n=0;at=[];sel=null;build();upd()}),
+   mode==="A"?button("签约",()=>{const s=sel;run(5);sel=s},true):button("召开会议",()=>run(4),true),button("重置",()=>{clear();n=0;at=[];sel=null;upd()}));
+  ctrl.querySelectorAll("button").forEach(b=>b.style.minHeight="44px")}
+ const card=(ctx,x,y,w,h,T,o)=>{ctx.save();ctx.globalAlpha=o.a??1;ctx.fillStyle=isDark()?"rgba(44,44,46,.96)":"rgba(255,255,255,.96)";rrect(ctx,x,y,w,h,10);ctx.fill();
+  ctx.strokeStyle=o.red?T.redText:o.on?T.blue:T.grid;ctx.lineWidth=o.on||o.red?2:1;ctx.stroke();ctx.restore()};
+ function lines(ctx,s,x,y,maxW,lh,o){ctx.save();ctx.font=(o.weight||400)+" "+(o.size||12)+"px "+HSANS;let out=[],l="";for(const ch of s){if(ctx.measureText(l+ch).width>maxW&&l){out.push(l);l=ch}else l+=ch}out.push(l);ctx.restore();
+  out.forEach((t,i)=>itext(ctx,t,x,y+i*lh,o));return y+out.length*lh}
+ function drawA(ctx,w,h,T,tn){const P=h>w*1.1,cx=P?w/2:w*.3,cy=P?h*.25:h*.47,R=P?Math.min(w*.26,h*.13):Math.min(w*.15,h*.27);hits=[];
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.fillStyle=isDark()?"rgba(226,163,54,.18)":"rgba(201,138,18,.14)";ctx.fill();ctx.strokeStyle=T.gold;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+  itext(ctx,"巴黎和会 1919",cx,cy-7,{align:"center",weight:600,size:P&&w<380?12:13});itext(ctx,"凡尔赛宫",cx,cy+11,{align:"center",size:12,color:T.goldText});
+  const base=Math.max(11,R*.2);
+  Object.keys(NA).forEach(k=>{const a=NA[k],tier=a[1];let x,y,r=base*(tier===1?1:tier===2?.8:.6);
+   if(tier===4){x=Math.min(w-r-40,cx+R*1.75);y=cy+R*(P?1.25:.95)}else{const ang=a[4]*Math.PI/180,d=R+r+(tier===3?10:4);x=cx+Math.cos(ang)*d;y=cy+Math.sin(ang)*d}
+   if(tier===4){ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle=T.redText;ctx.lineWidth=1.5;rrect(ctx,x-r-12,y-r-22,2*r+24,2*r+44,8);ctx.stroke();ctx.restore();itext(ctx,"门外",x,y-r-14,{align:"center",size:12,color:T.redText})}
+   ctx.save();if(tier===3)ctx.globalAlpha=.55;nation(ctx,x,y,r,a[0],{color:tier===1?T.blue:tier===2?T.gold:tier===3?T.sub:T.red,active:sel===k});ctx.restore();
+   if(a[2]&&!P)itext(ctx,a[2],x,y+r+22,{align:"center",size:12,color:T.blue});
+   if(k==="US"&&!P)itext(ctx,"“十四点原则”",x,y+r+38,{align:"center",size:12,color:T.blue});
+   if(tier===4)itext(ctx,"战败国无权参加",Math.min(x,w-50),y+r+42,{align:"center",size:12,weight:600,color:T.redText});
+   hits.push([k,x,y,r+14])});
+  const ax=P?10:w*.58,ay=P?h*.5:12,aw=P?w-20:w*.42-12,ah=P?h*.5-10:h-24,sh=n>=5?ah*.38:0,chh=Math.min(36,(ah-sh)/5.6);let y=ay;
+  if(!n){if(sel){const a=NA[sel];card(ctx,ax,y,aw,64,T,{on:1,red:sel==="DE"||sel==="CN"});itext(ctx,a[0]+(a[2]?" · "+a[2]:"")+" 的诉求",ax+12,y+16,{weight:600,size:13});
+    lines(ctx,a[3],ax+12,y+38,aw-24,16,{size:13,color:sel==="DE"||sel==="CN"?T.redText:T.blue})}
+   else itext(ctx,"点击桌边各国查看诉求，再按「签约」",ax+aw/2,y+20,{align:"center",size:13,color:T.goldText});return}
+  itext(ctx,"《凡尔赛和约》要点",ax,y+8,{weight:600,size:13});y+=20;
+  CARDS.slice(0,n).forEach(([s,red],i)=>{const p=ease((tn-at[i])/.5),yy=y+i*(chh+6)-(1-p)*30;card(ctx,ax,yy,aw,chh,T,{a:p,red});
+   ctx.save();ctx.globalAlpha=p;lines(ctx,s,ax+10,yy+chh/2,aw-20,14,{size:12,weight:red?600:400,color:red?T.redText:T.fg});ctx.restore()});
+  if(n>=5){let sy=ay+ah-sh+6;const rh=(sh-22)/5,bx=ax+40,bw=aw*.42;itext(ctx,"满意度",ax,sy+4,{weight:600,size:13});sy+=18;
+   SAT.forEach(([k,lab,v,t],i)=>{const yy=sy+i*rh,red=v<.2,p=ease((tn-at[4]-.4)/.8);itext(ctx,lab,ax,yy+rh/2,{size:12});
+    ctx.fillStyle=T.grid;ctx.fillRect(bx,yy+rh*.2,bw,rh*.6);ctx.fillStyle=red?T.red:v>.7?T.blue:T.gold;ctx.fillRect(bx,yy+rh*.2,Math.max(3,bw*v*p),rh*.6);
+    itext(ctx,aw<330?t.split("：")[0]:t,bx+bw+8,yy+rh/2,{size:12,color:red?T.redText:v>.7?T.blue:T.goldText})})}}
+ function drawB(ctx,w,h,T,tn){const P=h>w*1.1;hits=[];
+  const mh=P?h*.24:h*.3,top=10,avail=h-mh-30,rects=P?(()=>{const hs=[.27,.45,.28].map(f=>f*(avail-16));let y=top;return hs.map(v=>{const r=[10,y,w-20,v];y+=v+8;return r})})()
+   :[0,1,2].map(i=>{const cw=(w-36)/3;return[10+i*(cw+8),top,cw,avail]});
+  if(!n)itext(ctx,"1921.11—1922.2 华盛顿会议：按「召开会议」",w/2,top+20,{align:"center",size:13,color:T.goldText});
+  TR.forEach((t,i)=>{if(i>=n)return;const[x,y0,cw,ch]=rects[i],p=ease((tn-at[i])/.5),y=y0-(1-p)*30;card(ctx,x,y,cw,ch,T,{a:p,on:sel===i,red:t.red&&sel===i});hits.push([i,x,y0,cw,ch]);
+   ctx.save();ctx.globalAlpha=p;itext(ctx,t.n,x+12,y+16,{weight:600,size:13,color:T.blue});let yy=lines(ctx,t.d,x+12,y+34,cw-24,15,{size:12});
+   if(i===1){const bh=Math.max(10,Math.min(18,(ch-(yy-y)-14)/5-4)),bw=cw-90;NAV.forEach(([s,v],j)=>{const by=yy+2+j*(bh+4);itext(ctx,s,x+12,by+bh/2,{size:12});
+     ctx.fillStyle=s==="日"?T.gold:T.blue;ctx.fillRect(x+30,by,bw*v/5*ease((tn-at[i]-.3)/.8),bh);itext(ctx,String(v),x+36+bw*v/5,by+bh/2,{size:12})})}
+   else{yy=lines(ctx,t.c,x+12,yy+4,cw-24,15,{size:12,weight:600,color:i===2?T.goldText:T.fg});lines(ctx,t.i,x+12,yy+4,cw-24,15,{size:12,color:t.red?T.redText:T.fg})}ctx.restore()});
+  if(n>=4){const p=ease((tn-at[3])/.6),y=h-mh-10,bw=(w-20-56)/3,bh=Math.min(44,mh*.42);ctx.save();ctx.globalAlpha=p;
+   [["欧洲（凡尔赛体系）",T.fg],["亚太（华盛顿体系）",T.fg],["凡尔赛—华盛顿体系",T.blue]].forEach(([s,c],i)=>{const x=10+i*(bw+28);card(ctx,x,y,bw,bh,T,{on:i===2});
+    lines(ctx,s,x+bw/2,y+(bw<130?bh/2-7:bh/2),bw-12,14,{align:"center",size:12,weight:600,color:c});if(i<2)itext(ctx,i?"=":"+",x+bw+14,y+bh/2,{align:"center",size:16,weight:600})});
+   lines(ctx,"没有消除帝国主义矛盾，埋下新的战争隐患：“这不是和平，这是 20 年的休战”（福煦）",w/2,y+bh+16,Math.min(w-30,560),17,{align:"center",size:13,weight:600,color:T.redText});ctx.restore()}}
+ return{
+  text:"一战后，战胜国通过巴黎和会和华盛顿会议重新划分世界，建立凡尔赛—华盛顿体系，确立了战后帝国主义在欧洲、西亚、非洲和东亚太平洋地区的统治秩序。这一体系是大国强权政治的产物，加深了战败国的不满和列强之间的矛盾，并没有带来持久和平。",
+  points:["巴黎和会签订《凡尔赛和约》，建立凡尔赛体系","华盛顿会议签订《四国条约》《五国海军条约》《九国公约》","凡尔赛—华盛顿体系是帝国主义重新瓜分世界的产物","中国在巴黎和会外交失败，引发五四运动","体系内在矛盾重重，为二战埋下隐患；国际联盟成立但作用有限"],
+  gk:"统编版《中外历史纲要（下）》第 14 课。浙江选考高频：凡尔赛—华盛顿体系的实质与影响、巴黎和会与五四运动的联系。",
+  mount(c,r){ctrl=c;build();ro=readout([]);r.append(ro);upd()},
+  draw(ctx,w,h,t){const T=theme(),tn=now();mode==="A"?drawA(ctx,w,h,T,tn):drawB(ctx,w,h,T,tn)},
+  pointer(e,type,x,y){if(type!=="down")return;
+   if(mode==="A"){const hit=hits.find(([k,hx,hy,r])=>Math.hypot(x-hx,y-hy)<r);if(hit){sel=hit[0];upd()}}
+   else{const hit=hits.find(([i,hx,hy,cw,ch])=>x>=hx&&x<=hx+cw&&y>=hy&&y<=hy+ch);if(hit){sel=hit[0];upd()}}},
+  unmount(){clear();n=0;at=[];sel=null;mode="A";ro=null;ctrl=null;hits=[]}}
+})();
+/* ---------- 第 3 章 十月革命与苏联模式 ---------- */
+CH[2].ready=true;
+MODS[2]=(()=>{
+ const ST=[{d:"1917.3",s:"二月革命",t:"1917.3（俄历二月）二月革命",b:"彼得格勒工人、士兵起义，推翻沙皇专制统治。",c:"redText"},
+  {d:"1917.3—11",s:"两个政权",t:"两个政权并存",b:"资产阶级临时政府与工兵代表苏维埃同时存在。",c:"goldText"},
+  {d:"1917.4",s:"四月提纲",t:"1917.4 列宁《四月提纲》",b:"提出由资产阶级民主革命向社会主义革命过渡，“全部政权归苏维埃”。",c:"blue"},
+  {d:"1917.11.7",s:"武装起义",t:"1917.11.7（俄历十月）彼得格勒武装起义",b:"起义者攻打冬宫，推翻临时政府，十月革命胜利。",c:"redText"},
+  {d:"1917.11",s:"苏维埃政权",t:"苏维埃政权建立",b:"全俄苏维埃代表大会宣布政权归苏维埃，成立以列宁为首的人民委员会。",c:"redText"},
+  {d:"1918",s:"退出一战",t:"1918 退出一战",b:"苏俄与德国签订《布列斯特和约》，退出第一次世界大战。",c:"blue"},
+  {d:"1922",s:"苏联成立",t:"1922 苏联成立",b:"苏维埃社会主义共和国联盟成立：世界上第一个社会主义国家。",c:"goldText"}];
+ const PO=[{n:"战时共产主义",y:"1918—1921",m:["余粮收集制","全部工业国有化","实物配给"],v:[35,40,8],c:["sub","sub","redText"],r:"帮助赢得内战，但农民积极性跌到最低；1921 喀琅施塔得水兵叛乱",g:"特殊时期的非常措施",gc:"redText"},
+  {n:"新经济政策",y:"1921—1928",m:["粮食税代替余粮收集制","允许私营小企业","允许自由贸易"],v:[70,62,80],c:["blue","blue","blue"],r:"粮食、工业与农民积极性全面回升",g:"利用市场与商品货币关系发展经济",gc:"blue"},
+  {n:"斯大林模式",y:"1928 起",m:["农业集体化","优先发展重工业","高度集中的计划经济"],v:[40,100,25],c:["redText","goldText","redText"],r:"1937 工业总产值居欧洲第一、世界第二",g:"农轻重比例失调",gc:"redText"}];
+ const LB=["粮食产量","工业产量","农民积极性"];
+ let mode="A",step=0,stepAt=0,sel=0,cv3=[0,0,0],timers=[],ro=null,ctrl=null;
+ const now=()=>performance.now()/1000,ease=p=>1-Math.pow(1-Math.max(0,Math.min(1,p)),3);
+ function clear(){timers.forEach(clearTimeout);timers=[]}
+ function setStep(i){step=Math.max(0,Math.min(ST.length-1,i));stepAt=now();upd()}
+ function play(){clear();setStep(0);ST.forEach((_,i)=>i&&timers.push(setTimeout(()=>setStep(i),1800*i)))}
+ function upd(){if(!ro)return;const T=theme();
+  if(mode==="A"){const s=ST[step];ro.update([["模式","1917：两次革命"],["年份",s.d],["事件",s.t,T[s.c]],["说明",s.b]])}
+  else{const p=PO[sel],rows=[["模式","经济政策实验"],["年份",p.y],["政策",p.n+"：“"+p.g+"”",T[p.gc]],["三项指标",LB.map((l,i)=>l+" "+p.v[i]).join(" · ")+"（示意值）"]];
+   if(sel===2)rows.push(["作用","迅速实现工业化，为反法西斯战争奠定物质基础",T.blue],["弊端","管理体制僵化、比例失调",T.redText]);ro.update(rows)}}
+ function build(){ctrl.innerHTML="";ctrl.append(chips([{label:"1917：两次革命",value:"A"},{label:"经济政策实验",value:"B"}],mode,v=>{mode=v;clear();build();upd()}));
+  if(mode==="A")ctrl.append(button("下一步",()=>{clear();setStep(step+1)},true),button("自动播放",play),button("重置",()=>{clear();setStep(0)}));
+  else PO.forEach((p,i)=>ctrl.append(button("①②③"[i]+" "+p.y+" "+p.n,()=>{sel=i;build();upd()},i===sel)));
+  ctrl.querySelectorAll("button").forEach(b=>b.style.minHeight="44px")}
+ const card=(ctx,x,y,w,h,T,bc)=>{ctx.save();ctx.fillStyle=isDark()?"rgba(44,44,46,.96)":"rgba(255,255,255,.96)";rrect(ctx,x,y,w,h,12);ctx.fill();ctx.strokeStyle=bc||T.grid;ctx.lineWidth=bc?2:1;ctx.stroke();ctx.restore()};
+ function ln(ctx,s,x,y,maxW,lh,o){ctx.save();ctx.font=(o.weight||400)+" "+(o.size||12)+"px "+HSANS;let out=[],l="";for(const ch of s){if(ctx.measureText(l+ch).width>maxW&&l){out.push(l);l=ch}else l+=ch}out.push(l);ctx.restore();
+  out.forEach((t,i)=>itext(ctx,t,x,y+i*lh,o));return y+out.length*lh}
+ function arrow(ctx,x1,y1,x2,y2,c){const a=Math.atan2(y2-y1,x2-x1);ctx.save();ctx.strokeStyle=ctx.fillStyle=c;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-11*Math.cos(a-.45),y2-11*Math.sin(a-.45));ctx.lineTo(x2-11*Math.cos(a+.45),y2-11*Math.sin(a+.45));ctx.fill();ctx.restore()}
+ function palace(ctx,cx,cy,s,T,p,t){const w=s*2.2,h=s*.9,x=cx-w/2,y=cy-h/2+s*.2;ctx.save();ctx.strokeStyle=T.fg;ctx.lineWidth=2;
+  ctx.strokeRect(x,y,w,h);for(let i=1;i<8;i++){ctx.beginPath();ctx.moveTo(x+i*w/8,y+8);ctx.lineTo(x+i*w/8,y+h);ctx.stroke()}
+  ctx.beginPath();ctx.moveTo(x-8,y);ctx.lineTo(cx,y-s*.45);ctx.lineTo(x+w+8,y);ctx.closePath();ctx.stroke();
+  ctx.globalAlpha=.3*p;ctx.fillStyle=T.red;ctx.fillRect(x-8,y-s*.45,w+16,h+s*.45);ctx.globalAlpha=1;
+  const px=cx,top=y-s*.45-s*.9*p;ctx.beginPath();ctx.moveTo(px,y-s*.45);ctx.lineTo(px,top);ctx.stroke();
+  if(p>.3){ctx.fillStyle=T.redText;ctx.beginPath();ctx.moveTo(px,top);for(let i=0;i<=10;i++){const k=i/10;ctx.lineTo(px+k*s*.8,top+Math.sin(k*6+t*5)*4)}
+   for(let i=10;i>=0;i--){const k=i/10;ctx.lineTo(px+k*s*.8,top+s*.45+Math.sin(k*6+t*5)*4)}ctx.closePath();ctx.fill()}ctx.restore();
+  itext(ctx,"冬宫",cx,y+h+16,{align:"center",weight:600,size:13})}
+ function drawA(ctx,w,h,T,t){const L=40,R=w-40,ty=44,X=i=>L+i*(R-L)/(ST.length-1),narrow=w<520;
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(L,ty);ctx.lineTo(R,ty);ctx.stroke();ctx.strokeStyle=T.redText;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(L,ty);ctx.lineTo(X(step),ty);ctx.stroke();ctx.restore();
+  ST.forEach((s,i)=>{const on=i<=step;ctx.fillStyle=on?T[s.c]:T.bg;ctx.strokeStyle=on?T[s.c]:T.axis;ctx.lineWidth=2;ctx.beginPath();ctx.arc(X(i),ty,i===step?8:6,0,7);ctx.fill();ctx.stroke();
+   if(!narrow||i===step||i%2===0)itext(ctx,s.d,X(i),ty-(narrow&&i%2?22:18),{align:"center",size:12,weight:i===step?600:400,color:i===step?T[s.c]:T.fg});
+   if(!narrow||i===step)itext(ctx,s.s,X(i),ty+(i%2?34:18),{align:"center",size:12,color:i===step?T[s.c]:T.fg})});
+  const ch=narrow?104:88,cy0=ty+56,cy1=h-ch-24,cx=w/2,cy=(cy0+cy1)/2,s=Math.max(36,Math.min(80,(cy1-cy0)/3,w/7)),p=ease((now()-stepAt)/.7);
+  ctx.save();ctx.globalAlpha=Math.max(.15,p);
+  if(step===0){ctx.save();ctx.strokeStyle=T.goldText;ctx.lineWidth=3;ctx.beginPath();const cw=s*1.4,bx=cx-cw/2,by=cy+s*.35;ctx.moveTo(bx,by);ctx.lineTo(bx,by-s*.7);ctx.lineTo(bx+cw*.25,by-s*.3);ctx.lineTo(cx,by-s*.9);ctx.lineTo(bx+cw*.75,by-s*.3);ctx.lineTo(bx+cw,by-s*.7);ctx.lineTo(bx+cw,by);ctx.closePath();ctx.stroke();
+   ctx.strokeStyle=T.redText;ctx.lineWidth=5;const k=s*.9*p;ctx.beginPath();ctx.moveTo(cx-k,cy-k);ctx.lineTo(cx+k,cy+k);ctx.moveTo(cx+k,cy-k);ctx.lineTo(cx-k,cy+k);ctx.stroke();ctx.restore();
+   itext(ctx,"沙皇专制被推翻",cx,cy+s+14,{align:"center",weight:600,size:14,color:T.redText})}
+  else if(step===1){const d=Math.min(w*.28,s*2.4),r=s*.55,A={x:cx-d,y:cy,r},B={x:cx+d,y:cy,r};nation(ctx,A.x,A.y,r,"资产阶级临时政府",{color:T.gold,active:true});nation(ctx,B.x,B.y,r,"工兵代表苏维埃",{color:T.red,active:true});
+   arrow(ctx,A.x+r+8,cy-8,B.x-r-8,cy-8,T.goldText);arrow(ctx,B.x-r-8,cy+8,A.x+r+8,cy+8,T.redText);itext(ctx,"两个政权并存",cx,cy-r-26,{align:"center",weight:600,size:14,color:T.goldText})}
+  else if(step===2){const cw=Math.min(w-60,300),chh=s*1.5;card(ctx,cx-cw/2,cy-chh/2,cw,chh,T,T.blue);itext(ctx,"列宁《四月提纲》",cx,cy-chh/2+24,{align:"center",weight:600,size:15,color:T.blue});
+   itext(ctx,"民主革命 → 社会主义革命",cx,cy+4,{align:"center",size:13});itext(ctx,"“全部政权归苏维埃”",cx,cy+chh/2-22,{align:"center",weight:600,size:14,color:T.redText})}
+  else if(step===3){palace(ctx,cx,cy,s,T,p,t);itext(ctx,"攻打冬宫",cx,cy-s*1.5,{align:"center",weight:600,size:14,color:T.redText})}
+  else if(step===4){nation(ctx,cx,cy-8,s*.7,"",{color:T.red,active:true});itext(ctx,"苏维埃政权",cx,cy+s*.7+16,{align:"center",weight:600,size:15,color:T.redText});itext(ctx,"全部政权归苏维埃",cx,cy+s*.7+36,{align:"center",size:13})}
+  else if(step===5){const d=Math.min(w*.26,s*2.2),r=s*.5;nation(ctx,cx-d,cy,r,"苏俄",{color:T.red,active:true});nation(ctx,cx+d,cy,r,"一战战场",{color:T.sub});
+   ctx.save();ctx.setLineDash([6,5]);ctx.strokeStyle=T.axis;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx-d+r+8,cy);ctx.lineTo(cx+d-r-8,cy);ctx.stroke();ctx.restore();
+   arrow(ctx,cx-d,cy-r-14,cx-d-Math.min(60,d*.5),cy-r-14,T.blue);itext(ctx,"《布列斯特和约》：退出",cx,cy-14,{align:"center",size:12,color:T.blue,weight:600})}
+  else{nation(ctx,cx,cy-10,s*.75,"",{color:T.red,active:true});itext(ctx,"苏联",cx,cy-10,{align:"center",weight:600,size:16,color:T.fg});
+   itext(ctx,"1922 苏维埃社会主义共和国联盟",cx,cy+s*.75+12,{align:"center",size:13});itext(ctx,"世界上第一个社会主义国家",cx,cy+s*.75+34,{align:"center",weight:600,size:15,color:T.goldText})}
+  ctx.restore();
+  const st=ST[step],cw=Math.min(w-20,640),x=(w-cw)/2,y=h-ch-12;card(ctx,x,y,cw,ch,T,T[st.c]);
+  ln(ctx,st.t,x+14,y+18,cw-28,18,{weight:600,size:14,color:T[st.c]});ln(ctx,st.b,x+14,y+44,cw-28,18,{size:13});
+  itext(ctx,step<ST.length-1?"点击画面进入下一步 →":"点击时间轴可回看",x+cw-14,y+ch-12,{align:"right",size:12,color:T.blue})}
+ function drawB(ctx,w,h,T){const P=h>w*1.05,p=PO[sel],bx=10,by=10,bw=P?w-20:w*.5-15,bh=P?h*.48:h-20;
+  p.v.forEach((v,i)=>cv3[i]+=(v-cv3[i])*.12);card(ctx,bx,by,bw,bh,T);
+  itext(ctx,"经济仪表盘（示意值）· "+p.y,bx+14,by+18,{weight:600,size:13});
+  const base=by+bh-34,top=by+60,cw=(bw-40)/3,barW=Math.min(64,cw*.55);
+  ctx.save();ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(bx+14,base);ctx.lineTo(bx+bw-14,base);ctx.stroke();ctx.restore();
+  LB.forEach((l,i)=>{const mx=bx+20+cw*(i+.5),hh=(base-top)*cv3[i]/100,c=T[p.c[i]];ctx.fillStyle=c;ctx.fillRect(mx-barW/2,base-hh,barW,hh);
+   itext(ctx,String(Math.round(cv3[i])),mx,base-hh-10,{align:"center",size:12,weight:600,color:p.c[i]==="sub"?T.fg:c});itext(ctx,l,mx,base+16,{align:"center",size:12});
+   if(sel===2&&i===1)itext(ctx,"欧洲第一 · 世界第二",mx,top-22,{align:"center",size:12,weight:600,color:T.goldText});
+   if(sel===0&&i===2)itext(ctx,"最低",mx,base-hh-28,{align:"center",size:12,weight:600,color:T.redText})});
+  const nx=P?10:w*.5+5,ny=P?by+bh+10:10,nw=P?w-20:w*.5-15,nh=P?h-bh-30:h-20;card(ctx,nx,ny,nw,nh,T,T[p.gc]);
+  let y=ln(ctx,"①②③"[sel]+" "+p.y+" "+p.n,nx+14,ny+20,nw-28,20,{weight:600,size:15,color:T[p.gc]})+4;
+  p.m.forEach(m=>y=ln(ctx,"· "+m,nx+14,y,nw-28,18,{size:13}));y+=6;
+  y=ln(ctx,"→ "+p.r,nx+14,y,nw-28,18,{size:13,color:sel===2?T.goldText:sel===0?T.redText:T.blue})+6;
+  y=ln(ctx,"“"+p.g+"”",nx+14,y,nw-28,18,{weight:600,size:14,color:T[p.gc]})+8;
+  if(sel===2){y=ln(ctx,"作用：迅速实现工业化，为反法西斯战争奠定物质基础",nx+14,y,nw-28,18,{size:13,color:T.blue})+2;ln(ctx,"弊端：管理体制僵化、比例失调",nx+14,y,nw-28,18,{size:13,color:T.redText})}}
+ return{
+  text:"1917 年俄国爆发二月革命和十月革命，建立了世界上第一个社会主义国家政权。此后苏俄经历战时共产主义、新经济政策的探索，形成了高度集中的斯大林模式。苏联模式推动了工业化，但也存在严重弊端。",
+  points:["十月革命建立世界上第一个社会主义国家政权，开辟了人类历史新纪元","战时共产主义政策：特殊时期的非常措施","新经济政策：利用市场和商品货币关系发展经济","斯大林模式：高度集中的政治经济体制，作用与弊端并存","十月革命对中国：“十月革命一声炮响，给我们送来了马克思列宁主义”"],
+  gk:"统编版《中外历史纲要（下）》第 15 课「十月革命的胜利与苏联的社会主义实践」。浙江选考高频：新经济政策的特点、斯大林模式评价。",
+  mount(c,r){ctrl=c;stepAt=now();build();ro=readout([]);r.append(ro);upd()},
+  draw(ctx,w,h,t){const T=theme();mode==="A"?drawA(ctx,w,h,T,t):drawB(ctx,w,h,T)},
+  pointer(e,type,x,y){if(type!=="down"||mode!=="A")return;clear();
+   if(y<80){const L=40,R=W-40,i=Math.round((x-L)/((R-L)/(ST.length-1)));if(i>=0&&i<ST.length){setStep(i);return}}setStep(step+1)},
+  unmount(){clear();mode="A";step=0;sel=0;cv3=[0,0,0];ro=null;ctrl=null}}
+})();
+/* ---------- 第 4 章 1929 年大危机与罗斯福新政 ---------- */
+CH[3].ready=true;
+MODS[3]=(()=>{
+ const NS=[["生产过剩"],["产品卖不出"],["企业倒闭","裁员"],["失业增加","收入下降"],["购买力更低"]];
+ const PL=[{n:"①整顿银行与金融",s:"《紧急银行法》，恢复信用",at:-1},{n:"②调整工农业生产",s:"《全国工业复兴法》《农业调整法》",at:0},
+  {n:"③以工代赈、公共工程",s:"田纳西河流域工程，扩大就业",at:3},{n:"④社会保障",s:"1935《社会保障法》，增加购买力",at:4}];
+ const UD=[[1929,3.2],[1930,8.7],[1931,15.9],[1932,23.6],[1933,24.9],[1934,21.7],[1935,20.1],[1936,16.9],[1937,14.3]];
+ const PD=[[1929,100],[1930,83],[1931,68],[1932,56],[1933,54],[1934,62],[1935,72],[1936,84],[1937,92]];
+ let crashed=false,crashAt=-9,yr=1929.75,ph=0,lt=0,pol=[0,0,0,0],fas=false,ro=null,ctrl=null,lastY="";
+ const now=()=>performance.now()/1000,np=()=>pol.filter(Boolean).length;
+ const at=(D,y)=>{for(let i=1;i<D.length;i++)if(y<=D[i][0]){const[a,b]=D[i-1],[c,d]=D[i];return b+(d-b)*(y-a)/(c-a)}return D[D.length-1][1]};
+ const pts=(D,y)=>{const o=D.filter(p=>p[0]<y);o.push([y,at(D,y)]);return o};
+ function upd(){const T=theme(),n=np(),u=crashed?at(UD,yr):3.2;
+  const rows=[["年份",crashed?Math.floor(yr)+" 年":"1929 年（繁荣）"],["失业率",u.toFixed(1)+"%（示意）",crashed&&yr>=1933&&n===4?T.blue:crashed?T.redText:""],
+   ["已实施的新政措施",n?PL.filter((_,i)=>pol[i]).map(p=>p.n+"（"+p.s+"）").join("；"):"无"]];
+  if(crashed)rows.push(["原因","根本原因：资本主义基本矛盾——生产无限扩大与有效需求相对不足；直接原因：股市投机、信贷过度",T.redText]);
+  if(crashed&&n===4)rows.push(["结论","国家干预经济：资本主义的自我调节，开创了国家垄断资本主义（福利国家）的先河",T.goldText]);
+  if(fas)rows.push(["另一条路","危机导致法西斯势力上台，战争策源地形成 → 第 5 章",T.redText]);
+  ro&&ro.update(rows)}
+ function crash(){crashed=true;crashAt=now();yr=1929.8;lastY="";upd()}
+ function reset(){crashed=false;crashAt=-9;yr=1929.75;ph=0;pol=[0,0,0,0];fas=false;build();upd()}
+ function build(){if(!ctrl)return;ctrl.innerHTML="";ctrl.append(button("1929.10 纽约股市崩盘",crash,true));
+  PL.forEach((p,i)=>ctrl.append(toggle(p.n,!!pol[i],v=>{pol[i]=v?1:0;upd()})));
+  ctrl.append(toggle("另一条路：法西斯化",fas,v=>{fas=v;upd()}),button("重置",reset));
+  ctrl.querySelectorAll("button").forEach(b=>b.style.minHeight="44px")}
+ function wl(ctx,s,x,y,mw,lh,o){ctx.save();ctx.font=(o.weight||400)+" "+(o.size||13)+"px "+HSANS;let line="";const out=[];
+  for(const c of s){if(ctx.measureText(line+c).width>mw&&line){out.push(line);line=c}else line+=c}out.push(line);ctx.restore();
+  out.forEach((l,i)=>itext(ctx,l,x,y+i*lh,o));return y+out.length*lh}
+ function valve(ctx,x,y,T){ctx.save();ctx.beginPath();ctx.arc(x,y,10,0,7);ctx.fillStyle=T.blue;ctx.fill();ctx.strokeStyle=T.bg;ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x-5,y-4);ctx.lineTo(x+5,y-4);ctx.moveTo(x,y-4);ctx.lineTo(x,y+5);ctx.moveTo(x-5,y+5);ctx.lineTo(x+5,y+5);ctx.stroke();ctx.restore()}
+ function factory(ctx,x,y,s,c){ctx.save();ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x-s,y+s*.7);ctx.lineTo(x-s,y-s*.1);ctx.lineTo(x-s*.4,y-s*.5);ctx.lineTo(x-s*.4,y-s*.1);
+  ctx.lineTo(x+s*.2,y-s*.5);ctx.lineTo(x+s*.2,y-s*.1);ctx.lineTo(x+s*.45,y-s*.1);ctx.lineTo(x+s*.45,y-s);ctx.lineTo(x+s,y-s);ctx.lineTo(x+s,y+s*.7);ctx.closePath();ctx.fill();ctx.restore()}
+ function panel(ctx,x,y,pw,ph,T,c){ctx.save();ctx.fillStyle=isDark()?"rgba(28,28,30,.94)":"rgba(255,255,255,.94)";rrect(ctx,x,y,pw,ph,14);ctx.fill();
+  ctx.strokeStyle=c||T.grid;ctx.lineWidth=c?1.5:1;ctx.stroke();ctx.restore()}
+ return{
+  text:"1929 年美国股市崩盘引发席卷资本主义世界的经济大危机。罗斯福上台后实行新政，以国家干预经济的方式整顿金融、调整生产、兴办公共工程、建立社会保障，使美国逐步走出危机，开创了国家干预经济的新模式。而德、日则走上法西斯道路。",
+  points:["1929—1933 年经济大危机：范围广、时间长、破坏性大","根源：资本主义基本矛盾","罗斯福新政：整顿银行、调整工农业生产、以工代赈、社会保障","新政特点：国家干预经济，没有改变资本主义制度","德国、日本走上法西斯道路，形成战争策源地"],
+  gk:"统编版《中外历史纲要（下）》第 17 课「第二次世界大战与战后国际秩序的形成」（大危机部分）。浙江选考高频：罗斯福新政的措施与实质、凯恩斯主义。",
+  mount(c,r){ctrl=c;build();ro=readout([]);r.append(ro);upd()},
+  draw(ctx,w,h){const T=theme(),tn=now(),dt=lt?Math.min(.1,tn-lt):0,n=np(),P=h>w*1.1;lt=tn;
+   if(crashed){const lim=1933+(yr>=1933?n:0);if(yr<lim)yr=Math.min(lim,yr+dt*.45)}
+   const yk=String(Math.floor(yr));if(yk!==lastY){lastY=yk;upd()}
+   const rev=crashed&&n===4&&yr>=1933,spd=!crashed?0:rev?-1:(.5+Math.min(3.5,(yr-1929.8)*1.2))*(1-n*.22);ph+=spd*dt;
+   const col=rev?T.blue:T.red,cw=P?w:w*.55,chh=P?h*.5:h,cx=cw/2,cy=chh/2+(P?16:10),R=Math.max(55,Math.min(cw,chh)*.3),nr=Math.max(14,R*.17);
+   const A=NS.map((_,i)=>-Math.PI/2+i*2*Math.PI/5),pos=A.map(a=>[cx+R*Math.cos(a),cy+R*Math.sin(a)]),d=(nr+5)/R;
+   // 华尔街
+   const bx=10,by=10,bw=118,bh=42,wx=bx+bw,wy=by+bh/2;panel(ctx,bx,by,bw,bh,T,crashed?T.red:null);
+   itext(ctx,"华尔街",bx+10,by+14,{weight:600,size:13});itext(ctx,"股市 / 信贷",bx+10,by+30,{size:12,color:crashed?T.redText:T.fg});
+   ctx.save();ctx.setLineDash([5,5]);ctx.strokeStyle=crashed?T.red:T.sub;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(wx,wy);ctx.lineTo(pos[0][0]-nr-4,pos[0][1]);ctx.stroke();ctx.restore();
+   if(crashed){const f=Math.max(0,1-(tn-crashAt)/1.5);ctx.save();ctx.strokeStyle=T.red;ctx.lineWidth=2+3*f;ctx.shadowColor=T.red;ctx.shadowBlur=20*f;ctx.lineJoin="round";
+    ctx.beginPath();ctx.moveTo(bx+bw*.62,by);ctx.lineTo(bx+bw*.55,by+12);ctx.lineTo(bx+bw*.7,by+22);ctx.lineTo(bx+bw*.6,by+bh);
+    ctx.moveTo(bx+bw*.7,by+22);ctx.lineTo(bx+bw*.85,by+28);ctx.stroke();ctx.restore();
+    if(f>0)itext(ctx,"1929.10 崩盘！",bx+10,by+bh+14,{weight:600,size:13,color:T.redText})}
+   // 循环箭头
+   ctx.save();ctx.strokeStyle=crashed?col:T.sub;ctx.fillStyle=crashed?col:T.sub;ctx.lineWidth=2.5;ctx.lineCap="round";
+   A.forEach((a,i)=>{const s=a+d,e=a+2*Math.PI/5-d;ctx.beginPath();ctx.arc(cx,cy,R,s,e);ctx.stroke();
+    const g=rev?s:e,dir=rev?-1:1,px=cx+R*Math.cos(g),py=cy+R*Math.sin(g),tx=-Math.sin(g)*dir,ty=Math.cos(g)*dir;
+    ctx.beginPath();ctx.moveTo(px+tx*4,py+ty*4);ctx.lineTo(px-tx*7-ty*6,py-ty*7+tx*6);ctx.lineTo(px-tx*7+ty*6,py-ty*7-tx*6);ctx.closePath();ctx.fill()});ctx.restore();
+   if(crashed){ctx.save();ctx.fillStyle=col;for(let i=0;i<20;i++){const th=-Math.PI/2+i/20*2*Math.PI+ph,m=((th+Math.PI/2)%(2*Math.PI/5)+2*Math.PI/5)%(2*Math.PI/5);
+     if(m<d||m>2*Math.PI/5-d)continue;ctx.beginPath();ctx.arc(cx+R*Math.cos(th),cy+R*Math.sin(th),3.2,0,7);ctx.fill()}ctx.restore()}
+   pos.forEach(([x,y],i)=>{ctx.save();ctx.beginPath();ctx.arc(x,y,nr,0,7);ctx.fillStyle=T.bg;ctx.fill();ctx.strokeStyle=crashed?col:T.sub;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+    if(i===0)factory(ctx,x,y+2,nr*.55,crashed?col:T.sub);else itext(ctx,String(i+1),x,y,{align:"center",weight:600,size:13});
+    NS[i].forEach((l,k)=>itext(ctx,l,x,y+nr+12+k*16,{align:"center",size:12,weight:600}))});
+   PL.forEach((p,i)=>{if(!pol[i])return;p.at<0?valve(ctx,wx+14,wy,T):valve(ctx,pos[p.at][0]+nr*.85,pos[p.at][1]-nr*.85,T)});
+   itext(ctx,!crashed?"1920s 繁荣":rev?"循环逆转：走出危机":n?"新政减速中":"经济恶性循环",cx,cy-8,{align:"center",weight:600,size:14,color:!crashed?T.fg:rev?T.blue:n?T.goldText:T.redText});
+   if(crashed&&!rev)itext(ctx,"转速 ×"+Math.abs(spd).toFixed(1),cx,cy+12,{align:"center",size:12,color:T.redText});
+   // 曲线 + 法西斯面板
+   const gx=P?10:cw,gy=P?chh+10:10,gw=P?w-20:w-cw-10,gh=P?(fas?h*.27:h-chh-20):(fas?h*.52:h-20);
+   itext(ctx,"美国失业率 % 与工业产值（1929=100，示意）",gx+4,gy+8,{size:12,weight:600});
+   lineChart(ctx,gx,gy+18,gw,gh-18,[{pts:pts(UD,yr),color:T.redText,name:"失业率"},{pts:pts(PD,yr),color:T.blue,name:"工业产值"}],{xmin:1929,xmax:1937,ymin:0,ymax:100,labels:[1929,1931,1933,1935,1937]});
+   if(fas){const fy=gy+gh+8,fh=h-fy-10;panel(ctx,gx,fy,gw,fh,T,T.red);let y=fy+16;const mw=gw-24;
+    y=wl(ctx,"另一条路：法西斯化",gx+12,y,mw,18,{weight:600,size:14,color:T.redText})+2;
+    y=wl(ctx,"德国：1933 希特勒上台",gx+12,y,mw,17,{size:13});y=wl(ctx,"日本：军部法西斯专政",gx+12,y,mw,17,{size:13});
+    y=wl(ctx,"→ 对外扩张",gx+12,y,mw,17,{size:13,color:T.redText})+2;
+    wl(ctx,"危机导致法西斯势力上台，战争策源地形成 → 第 5 章",gx+12,y,mw,17,{weight:600,size:13,color:T.redText})}},
+  pointer(){},
+  unmount(){crashed=false;crashAt=-9;yr=1929.75;ph=0;lt=0;pol=[0,0,0,0];fas=false;ro=null;ctrl=null;lastY=""}}
+})();
+/* ---------- 第 5 章 二战：反法西斯同盟与雅尔塔体系 ---------- */
+CH[4].ready=true;
+MODS[4]=(()=>{
+ const EV=[[1931.7,"1931.9","九一八事变：日本侵占中国东北，亚洲战争策源地形成",123.4,41.8,"r"],
+  [1937.5,"1937.7","七七事变：日本全面侵华，中国全民族抗战开始",116.2,39.9,"r"],
+  [1938.7,"1938.9","慕尼黑阴谋：绥靖政策，英法牺牲捷克斯洛伐克",14.5,50,"r"],
+  [1939.67,"1939.9","德国闪击波兰，第二次世界大战全面爆发",21,52.2,"r"],
+  [1941.47,"1941.6","苏德战争爆发",30,52,"r"],
+  [1941.93,"1941.12","珍珠港事件，美国参战",148,21,"r"],
+  [1942.0,"1942.1","《联合国家宣言》：26 国签署，反法西斯同盟形成",null,null,"b"],
+  [1942.6,"1942—1943","斯大林格勒战役：二战的转折点",44.5,48.7,"g"],
+  [1944.42,"1944.6","诺曼底登陆：开辟欧洲第二战场",-0.5,49.3,"b"],
+  [1945.35,"1945.5","德国投降，欧洲战事结束",13.4,52.5,"b"],
+  [1945.62,"1945.8","日本投降，第二次世界大战结束",139.7,35.7,"b"]];
+ const NO=[[21,55.5],[14,54.5],[11,57],[6,58],[10,64],[16,65],[14,59],[9,55],[3,51.5]],EW=[[-4.5,48.5],[-1,43.5],[3,42.5],[7.5,44],[16,46.5],[19,42],[22,37],[26,40],[28,44]];
+ const GER=[[6,54],[14,54.5],[15,51],[13,48.5],[8,47.5],[6,50]],G38=[[6,54],[14,54.5],[19,50],[17,48],[16,46.5],[10,47],[6,49.5]],
+  G39=[[6,54],[14,54.5],[23,54.5],[24,50],[22,48.5],[17,48],[16,46.5],[10,47],[6,49.5]],
+  G40=[[-4.5,48.5],[-1,43.5],[3,42.5],[7.5,44],[16,46.5],[22,48.5],[24,50],[23.5,54.5]].concat(NO.slice(1)),
+  G41=EW.concat([[30,47],[34,52],[30,58],[24,57]],NO),G42=EW.concat([[34,45],[40,44],[44,48.7],[38,52],[35,55],[32,59],[24,57]],NO),
+  G44=EW.concat([[28,48],[26,54]],NO),G446=[[4,50],[6,46],[13,46],[19,42],[22,40],[24,44],[22,48.5],[20,52]].concat(NO.slice(0,8),[[6,53.5]]),
+  G45=[[6,53.5],[6,49],[8,47.5],[13,46.5],[17,46],[17,49],[15,51],[14,54]];
+ const ITA=[[7,46],[13,46.5],[18.5,40],[16,38],[12,41.5],[8,44]],ITN=[[7,46],[13,46.5],[13,43.5],[8,44]];
+ const JP=[[129.5,33],[131,31],[141,36],[142,40],[145,44],[141,45.5],[139,40],[131,34.5]],KR=[[124.5,38],[126,34.5],[129.5,35],[130,42.5],[124.5,40]],
+  MAN=[[120,42],[122,39.5],[125,40],[131,42.5],[135,48],[127,50],[120,47]],
+  CHN=[[110,41],[120,47],[127,50],[135,48],[131,42.5],[125,40],[122,37],[121,31],[120,26],[116,23],[113,22.5],[112,28],[111,35]],
+  SEA1=[[98,20],[105,22],[110,20],[118,22],[122,18],[127,8],[140,0],[150,0],[150,10],[145,15],[140,25],[130,30],[125,25],[120,15],[110,10],[105,5],[100,2],[98,8]],
+  SEA2=[[92,22],[98,26],[105,22],[110,20],[118,22],[122,18],[130,10],[150,0],[150,12],[145,25],[132,30],[125,22],[118,12],[110,0],[95,0],[92,10]],
+  SEA3=[[95,22],[105,22],[110,20],[118,22],[122,18],[125,10],[130,5],[135,0],[110,0],[98,5],[95,15]];
+ const STG=[[[1931,[ITA,JP,KR]],[1931.7,[ITA,JP,KR,MAN]],[1937.5,[ITA,JP,KR,CHN]],[1941.95,[ITA,JP,KR,CHN,SEA1]],[1942.4,[ITA,JP,KR,CHN,SEA2]],[1943.7,[ITN,JP,KR,CHN,SEA2]],[1944.5,[ITN,JP,KR,CHN,SEA3]],[1945.35,[JP,KR,CHN,SEA3]],[1945.62,[]]],
+  [[1933.1,[GER]],[1938.2,[G38]],[1939.7,[G39]],[1940.5,[G40]],[1941.6,[G41]],[1942.6,[G42]],[1943.1,[G41]],[1944.0,[G44]],[1944.6,[G446]],[1945.0,[G45]],[1945.35,[]]]];
+ const AL={CN:["中国",108,32],US:["美国",-14,40],UK:["英国",-2,53],SU:["苏联",45,57]};
+ const RES=[["① 彻底消灭法西斯","德国由美、英、法、苏分区占领","fg"],["② 建立联合国","安理会五大常任理事国，“大国一致”原则","b"],
+  ["③ 苏联对日作战","德国投降后 2—3 个月内对日作战","fg"],["④ 划分势力范围","东西两块：为冷战埋下伏笔","r"]];
+ let mode="A",y=1931,play=false,lt=0,ei=-1,eiAt=0,n=0,at=[],timers=[],ro=null,ctrl=null,sl=null;
+ const now=()=>performance.now()/1000,ease=p=>1-Math.pow(1-Math.max(0,Math.min(1,p)),3);
+ const C=(T,c)=>c==="r"?T.redText:c==="g"?T.goldText:c==="b"?T.blue:T.fg,stg=(S,v)=>{let r=[];S.forEach(s=>{if(v>=s[0])r=s[1]});return r};
+ const idx=v=>{let r=-1;EV.forEach((e,i)=>{if(v>=e[0])r=i});return r};
+ function clear(){timers.forEach(clearTimeout);timers=[]}
+ function upd(){if(!ro)return;const T=theme();
+  if(mode==="A"){const e=EV[ei];ro.update([["模式","战争地图（1931—1945）"],["年份",Math.floor(y)+" 年"],["事件",e?e[1]+" "+e[2]:"德、意、日法西斯势力抬头",e?C(T,e[5]):""],
+   ["阵营",y>=1942?"反法西斯同盟（中、美、英、苏等 26 国）vs 法西斯轴心国（德、意、日）":"法西斯国家（德、意、日）扩张；反法西斯力量尚未联合",y>=1942?T.blue:T.redText],
+   ["中国战场","世界反法西斯战争的东方主战场",T.goldText]])}
+  else{const r=RES[n-1],rows=[["模式","雅尔塔会议的桌子"],["年份","1945.2"],["事件",r?r[0]+"："+r[1]:"点击「召开雅尔塔会议（1945.2）」",r?C(T,r[2]):""],["阵营","美、英、苏三大国（罗斯福、丘吉尔、斯大林）"]];
+   if(n>=5)rows.push(["结论","雅尔塔体系：以美苏为主导，大国合作与强权政治并存",T.blue]);ro.update(rows)}}
+ function build(){ctrl.innerHTML="";ctrl.append(chips([{label:"战争地图",value:"A"},{label:"雅尔塔会议的桌子",value:"B"}],mode,v=>{mode=v;clear();play=false;n=0;at=[];build();upd()}));
+  if(mode==="A"){sl=slider("时间 1931–1945",1931,1945.9,.1,y,v=>Math.floor(v)+" 年",v=>{y=v;play=false;upd()});
+   ctrl.append(sl,button("自动播放",()=>{if(y>=1945.85)y=1931;play=true;lt=0},true),button("暂停",()=>play=false),button("重置",()=>{play=false;y=1931;sl.set(y);upd()}))}
+  else{sl=null;ctrl.append(button("召开雅尔塔会议（1945.2）",()=>{clear();n=0;at=[];upd();for(let i=0;i<5;i++)timers.push(setTimeout(()=>{n=i+1;at[i]=now();upd()},900*(i+1)))},true),button("重置",()=>{clear();n=0;at=[];upd()}))}
+  ctrl.querySelectorAll("button").forEach(b=>b.style.minHeight="44px")}
+ const card=(ctx,x,yy,w,h,T,bc,a)=>{ctx.save();ctx.globalAlpha=a??1;ctx.fillStyle=isDark()?"rgba(44,44,46,.96)":"rgba(255,255,255,.96)";rrect(ctx,x,yy,w,h,12);ctx.fill();ctx.strokeStyle=bc||T.grid;ctx.lineWidth=bc?2:1;ctx.stroke();ctx.restore()};
+ function ln(ctx,s,x,yy,mw,lh,o){ctx.save();ctx.font=(o.weight||400)+" "+(o.size||13)+"px "+HSANS;let out=[],l="";for(const ch of s){if(ctx.measureText(l+ch).width>mw&&l){out.push(l);l=ch}else l+=ch}out.push(l);ctx.restore();
+  out.forEach((t,i)=>itext(ctx,t,x,yy+i*lh,o));return yy+out.length*lh}
+ function poly(ctx,P,pts){ctx.beginPath();pts.forEach(([a,b],i)=>{const[px,py]=P(a,b);i?ctx.lineTo(px,py):ctx.moveTo(px,py)});ctx.closePath();ctx.fill();ctx.stroke()}
+ function drawA(ctx,w,h,T,t){const tn=now(),dt=lt?Math.min(.1,tn-lt):0;lt=tn;
+  if(play){y=Math.min(1945.9,y+dt*.7);if(y>=1945.9)play=false;sl&&sl.set(y)}
+  const k=idx(y);if(k!==ei){ei=k;eiAt=tn;upd()}else if(play&&Math.floor(y)!==Math.floor(y-dt*.7))upd();
+  const Pt=h>w*1.1,mh=Pt?Math.min(h-150,(w-16)*.85):h-16,{P}=worldMap(ctx,8,8,w-16,mh,{lon0:-20,lon1:150,lat0:0,lat1:65});
+  ctx.save();ctx.fillStyle=T.red;ctx.strokeStyle=T.redText;ctx.lineWidth=1.2;ctx.lineJoin="round";ctx.globalAlpha=.32;
+  STG.forEach(S=>stg(S,y).forEach(p=>poly(ctx,P,p)));ctx.restore();
+  const r=Math.max(10,Math.min(16,w/50)),A={};Object.keys(AL).forEach(c=>{const[px,py]=P(AL[c][1],AL[c][2]);A[c]={x:px,y:py,r}});
+  if(y>=1942){const p=ease((y-1942)/.4),ks=Object.keys(A);ks.forEach((a,i)=>ks.slice(i+1).forEach(b=>link(ctx,A[a],A[b],{color:T.blue,width:2.5,progress:p})));
+   Object.keys(A).forEach(c=>nation(ctx,A[c].x,A[c].y,r,AL[c][0],{color:T.blue,active:true}));
+   itext(ctx,"反法西斯同盟 · 26 国",A.UK.x+r+6,A.UK.y-r-10,{size:12,weight:600,color:T.blue})}
+  EV.slice(0,ei+1).forEach((e,i)=>{if(e[3]==null)return;const[px,py]=P(e[3],e[4]),c=C(T,e[5]),cur=i===ei;
+   ctx.fillStyle=c;ctx.beginPath();ctx.arc(px,py,cur?5+Math.sin(t*6)*1.5:3.5,0,7);ctx.fill();
+   if(cur)itext(ctx,e[1],px,py-14,{align:"center",size:12,weight:600,color:c});
+   if(cur&&i===2)itext(ctx,"英法牺牲捷克斯洛伐克",px,py+16,{align:"center",size:12,weight:600,color:T.redText});
+   if(cur&&i===5)itext(ctx,"珍珠港 →",px-8,py+16,{align:"right",size:12,color:T.redText})});
+  if(y>=1931.7)itext(ctx,"亚洲战争策源地",P(128,47)[0],P(128,47)[1]-4,{align:"center",size:12,color:T.redText});
+  if(y>=1933.1&&y<1945.35)itext(ctx,"欧洲战争策源地",P(10,51)[0],P(10,51)[1]+(y>=1940.5?48:30),{align:"center",size:12,color:T.redText});
+  itext(ctx,Math.floor(y)+" 年",w-22,28,{align:"right",size:20,weight:600});
+  if(y>=1937.5)itext(ctx,"中国战场：世界反法西斯战争的东方主战场",Pt?16:w-22,Pt?mh-12:54,{align:Pt?"left":"right",size:13,weight:600,color:T.goldText});
+  const e=EV[ei];if(e){const cw=Pt?w-20:Math.min(w*.55,460),ch=64,cx=10,cy=Pt?mh+18:h-ch-18,p=ease((tn-eiAt)/.5);card(ctx,cx,cy+(1-p)*16,cw,ch,T,C(T,e[5]),p);
+   ctx.save();ctx.globalAlpha=p;itext(ctx,e[1],cx+12,cy+18+(1-p)*16,{weight:600,size:14,color:C(T,e[5])});ln(ctx,e[2],cx+12,cy+40+(1-p)*16,cw-24,17,{size:13});ctx.restore()}}
+ function drawB(ctx,w,h,T,t){const tn=now(),Pt=h>w*1.05,cx=Pt?w/2:w*.24,cy=Pt?h*.15:h*.45,R=Pt?Math.min(w*.18,h*.08):Math.min(w*.12,h*.22),nr=Math.max(12,R*.32);
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.fillStyle=isDark()?"rgba(226,163,54,.18)":"rgba(201,138,18,.14)";ctx.fill();ctx.strokeStyle=T.gold;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+  itext(ctx,"雅尔塔",cx,cy-8,{align:"center",weight:600,size:13});itext(ctx,"1945.2",cx,cy+10,{align:"center",size:12,color:T.goldText});
+  [["罗斯福（美）",-90,T.blue],["丘吉尔（英）",150,T.blue],["斯大林（苏）",30,T.red]].forEach(([s,a,c])=>{const g=a*Math.PI/180,d=R+nr+6;nation(ctx,cx+Math.cos(g)*d,cy+Math.sin(g)*d-(a===-90?14:0),nr,s,{color:c,active:n>0})});
+  const ax=Pt?10:w*.48,ay=Pt?cy+R+nr*2+40:10,aw=Pt?w-20:w*.52-10,ah=h-ay-10,gap=8,u=(ah-5*gap)/6.6;let yy=ay;
+  if(!n){itext(ctx,"点击「召开雅尔塔会议（1945.2）」",ax+aw/2,ay+24,{align:"center",size:13,color:T.goldText});return}
+  RES.forEach((rr,i)=>{if(i>=n)return;const ch=i===3?u*2.2:u,p=ease((tn-at[i])/.5),c=C(T,rr[2]),oy=yy-(1-p)*24;card(ctx,ax,oy,aw,ch,T,rr[2]==="fg"?null:c,p);
+   ctx.save();ctx.globalAlpha=p;itext(ctx,rr[0],ax+12,oy+16,{weight:600,size:13,color:c});
+   if(i===1){const cr=Math.min(9,u*.16),tw=aw-24-5*(cr*2+14);ln(ctx,rr[1],ax+12,oy+36,Math.max(90,tw),15,{size:12});
+    ["中","美","英","苏","法"].forEach((s,j)=>nation(ctx,ax+aw-12-cr-(4-j)*(cr*2+14),oy+u*.4,cr,s,{color:T.blue}))}
+   else if(i===3){const mx=ax+10,my=oy+28,mw=aw-20,mhh=ch-36,{P}=worldMap(ctx,mx,my,mw,mhh,{lon0:-10,lon1:45,lat0:36,lat1:62}),sx=P(14,0)[0];
+    ctx.globalAlpha=p*.2;ctx.fillStyle=T.blue;ctx.fillRect(mx,my,sx-mx,mhh);ctx.fillStyle=T.red;ctx.fillRect(sx,my,mx+mw-sx,mhh);ctx.globalAlpha=p;
+    ctx.setLineDash([5,4]);ctx.strokeStyle=T.redText;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(sx,my);ctx.lineTo(sx,my+mhh);ctx.stroke();ctx.setLineDash([]);
+    itext(ctx,"西：美英",mx+8,my+14,{size:12,weight:600,color:T.blue});itext(ctx,"东：苏联",mx+mw-8,my+14,{align:"right",size:12,weight:600,color:T.redText});
+    itext(ctx,"为冷战埋下伏笔",mx+mw/2,my+mhh-14,{align:"center",size:13,weight:600,color:T.redText})}
+   else ln(ctx,rr[1],ax+12,oy+36,aw-24,15,{size:12});ctx.restore();yy+=ch+gap});
+  if(n>=5){const p=ease((tn-at[4])/.6);card(ctx,ax,yy,aw,u*1.2,T,T.blue,p);ctx.save();ctx.globalAlpha=p;
+   itext(ctx,"雅尔塔体系",ax+12,yy+16,{weight:600,size:14,color:T.blue});ln(ctx,"以美苏为主导，大国合作与强权政治并存",ax+12,yy+36,aw-24,15,{size:12,weight:600});ctx.restore()}}
+ return{
+  text:"20 世纪 30 年代，德、意、日法西斯发动侵略战争，英法推行绥靖政策，第二次世界大战全面爆发。1942 年反法西斯同盟形成，经过斯大林格勒战役等转折，反法西斯国家取得胜利。雅尔塔会议等奠定了战后国际秩序——雅尔塔体系。",
+  points:["亚洲、欧洲两个战争策源地","绥靖政策助长了法西斯侵略","1942 年《联合国家宣言》标志反法西斯同盟形成","中国战场是世界反法西斯战争的东方主战场","雅尔塔体系：以美苏两极为主导，联合国成立"],
+  gk:"统编版《中外历史纲要（下）》第 17 课「第二次世界大战与战后国际秩序的形成」。浙江选考高频：反法西斯同盟、雅尔塔体系的特点、中国战场地位。",
+  mount(c,r){ctrl=c;lt=0;ei=idx(y);build();ro=readout([]);r.append(ro);upd()},
+  draw(ctx,w,h,t){const T=theme();mode==="A"?drawA(ctx,w,h,T,t):drawB(ctx,w,h,T,t)},
+  pointer(){},
+  unmount(){clear();mode="A";y=1931;play=false;lt=0;ei=-1;n=0;at=[];ro=null;ctrl=null;sl=null}}
+})();
+CH[5].ready=true;
+MODS[5]=(()=>{
+ const EV=[[1946.2,"1946.3","丘吉尔“铁幕”演说：冷战序幕拉开",14,50,"r"],
+  [1947.2,"1947.3","杜鲁门主义出台：标志冷战开始",null,null,"b"],
+  [1947.45,"1947.6","马歇尔计划：美国援助西欧复兴",null,null,"b"],
+  [1948.5,"1948—1949","第一次柏林危机",13.4,52.5,"g"],
+  [1949.05,"1949.1","经济互助委员会成立：苏联与东欧经济合作",null,null,"r"],
+  [1949.3,"1949.4","北大西洋公约组织（北约）成立",null,null,"b"],
+  [1950.5,"1950—1953","朝鲜战争：冷战中的局部热战",127,38,"r"],
+  [1955.4,"1955.5","华沙条约组织（华约）成立：两极格局形成",null,null,"r"],
+  [1961.6,"1961.8","修筑柏林墙",13.4,52.5,"r"],
+  [1962.8,"1962.10","古巴导弹危机：冷战最危险时刻",-80,22,"r"],
+  [1989.85,"1989.11","柏林墙倒塌",13.4,52.5,"b"],
+  [1991.5,"1991.12","苏联解体：两极格局结束",null,null,"r"]];
+ const UB=[["美",-98,39],["加",-108,58],["英",-6,56],["法",0,45],["意",12,41],["挪",9,62]],SB=[["苏",60,57],["波",25,55],["捷",18,47.5],["罗",28,43]];
+ const TP=[[1945,20],[1946.2,40],[1947.2,55],[1948.5,72],[1949.5,60],[1950.5,82],[1953.6,60],[1955.5,66],[1959,55],[1961.6,82],[1962.8,100],[1963.5,66],[1969,52],[1972,36],[1975,30],[1979.9,70],[1983,82],[1985,60],[1987,40],[1989.85,25],[1991.9,6]];
+ const PH=[[1945,1960,"1945—50 年代","美攻苏守","b"],[1960,1980,"60—70 年代","苏攻美守（苏联扩张）","r"],[1980,1992,"80 年代","美攻苏守 → 苏联解体","b"]];
+ const Y0=1945,Y1=1991.99;let y=Y0,play=false,lt=0,ei=-1,eiAt=0,fy=0,sw=false,ro=null,sl=null;
+ const now=()=>performance.now()/1000,ease=p=>1-Math.pow(1-Math.max(0,Math.min(1,p)),3);
+ const C=(T,c)=>c==="r"?T.redText:c==="g"?T.goldText:c==="b"?T.blue:T.fg,idx=v=>{let r=-1;EV.forEach((e,i)=>{if(v>=e[0])r=i});return r};
+ const therm=v=>{for(let i=1;i<TP.length;i++)if(v<=TP[i][0]){const a=TP[i-1],b=TP[i];return a[1]+(b[1]-a[1])*(v-a[0])/(b[0]-a[0])}return 6};
+ const phase=()=>PH.find(p=>y<p[1])||PH[2];
+ function upd(){if(!ro)return;const T=theme(),e=EV[ei];fy=Math.floor(y);
+  const rows=[["年份",Math.floor(y)+" 年"],["事件",e?e[1]+" "+e[2]:"二战结束，美苏由战时盟友走向对抗",e?C(T,e[5]):""],
+   ["阵营",y<1947.2?"美苏由战时盟友走向对抗":y<1991.5?"资本主义阵营（美国为首）vs 社会主义阵营（苏联为首）":"苏联解体，社会主义阵营瓦解",y>=1991.5?T.redText:""],
+   ["格局",y<1955.4?"两极形成":y<1989.85?"两极对峙":y<1991.5?"两极瓦解":"两极瓦解：两极格局结束",y<1955.4?T.goldText:y<1989.85?T.redText:T.blue]];
+  if(sw){const p=phase();rows.push(["争霸态势",p[2]+" "+p[3],C(T,p[4])])}ro.update(rows)}
+ const card=(ctx,x,yy,w,h,T,bc,a)=>{ctx.save();ctx.globalAlpha=a??1;ctx.fillStyle=isDark()?"rgba(44,44,46,.96)":"rgba(255,255,255,.96)";rrect(ctx,x,yy,w,h,12);ctx.fill();ctx.strokeStyle=bc||T.grid;ctx.lineWidth=bc?2:1;ctx.stroke();ctx.restore()};
+ function ln(ctx,s,x,yy,mw,lh,o){ctx.save();ctx.font=(o.weight||400)+" "+(o.size||13)+"px "+HSANS;let out=[],l="";for(const ch of s){if(ctx.measureText(l+ch).width>mw&&l){out.push(l);l=ch}else l+=ch}out.push(l);ctx.restore();
+  if(!o.measure)out.forEach((t,i)=>itext(ctx,t,x,yy+i*lh,o));return yy+out.length*lh}
+ const ring=(ctx,x,yy,rad,c,a)=>{ctx.save();ctx.globalAlpha=a;ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,yy,rad,0,7);ctx.stroke();ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,yy,4,0,7);ctx.fill();ctx.restore()};
+ function draw(ctx,w,h){const T=theme(),tn=now(),dt=lt?Math.min(.1,tn-lt):0;lt=tn;
+  if(play){y=Math.min(Y1,y+dt*(y<1963.5?.9:2.2));if(y>=Y1)play=false;sl&&sl.set(y)}
+  const k=idx(y);if(k!==ei){ei=k;eiAt=tn;upd()}else if(Math.floor(y)!==fy)upd();
+  const Pt=h>w*1.1,tw=Pt?0:84,mh=Pt?Math.min(h-200,(w-16)*.75):h-16,mw=w-16-tw,{P}=worldMap(ctx,8,8,mw,mh,{lon0:-130,lon1:150,lat0:0,lat1:70});
+  const r=Math.max(9,Math.min(14,w/60)),pos=a=>{const[x,yy]=P(a[1],a[2]);return{x,y:yy,r}},UA=UB.map(pos),SA=SB.map(pos),fade=y>=1991.5?1-ease((y-1991.5)/.4):1;
+  if(y>=1946.2){const a=P(14,54),b=P(14,45),p=ease((y-1946.2)/.4);ctx.save();ctx.globalAlpha=y>=1989.85?.35:1;ctx.setLineDash([6,4]);ctx.strokeStyle=T.fg;ctx.lineWidth=2.5;
+   ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(a[0],a[1]+(b[1]-a[1])*p);ctx.stroke();ctx.restore();itext(ctx,"铁幕",b[0],b[1]+16,{align:"center",size:12,weight:600})}
+  if(y>=1949.3){const p=ease((y-1949.3)/.5);UA.slice(1).forEach(b=>link(ctx,UA[0],b,{color:T.blue,width:2.5,progress:p}));[[2,3],[3,4],[2,5]].forEach(([i,j])=>link(ctx,UA[i],UA[j],{color:T.blue,width:2,progress:p}));
+   itext(ctx,"北约",UA[1].x,UA[1].y-r-8,{align:"center",size:12,weight:600,color:T.blue})}
+  if(y>=1947.45){ctx.save();ctx.globalAlpha=fade;
+   if(y>=1949.05){const p=ease((y-1949.05)/.5),wd=y>=1955.4?3:1.5;SA.slice(1).forEach(b=>link(ctx,SA[0],b,{color:T.redText,width:wd,progress:p}));[[1,2],[2,3]].forEach(([i,j])=>link(ctx,SA[i],SA[j],{color:T.redText,width:wd,progress:p}));
+    itext(ctx,y>=1955.4?"华约":"经互会",SA[0].x,SA[0].y-r-8,{align:"center",size:12,weight:600,color:T.redText})}
+   SA.slice(1).forEach((a,i)=>nation(ctx,a.x,a.y,r,SB[i+1][0],{color:T.redText,active:y>=1955.4}));ctx.restore();
+   UA.slice(1).forEach((a,i)=>nation(ctx,a.x,a.y,r,UB[i+1][0],{color:T.blue,active:y>=1949.3}))}
+  nation(ctx,UA[0].x,UA[0].y,r*1.25,"美",{color:T.blue,active:true});
+  ctx.save();ctx.globalAlpha=fade;nation(ctx,SA[0].x,SA[0].y,r*1.25,"苏",{color:T.redText,active:true});ctx.restore();
+  if(y>=1991.5)itext(ctx,"苏联解体 · 两极格局结束",SA[0].x,SA[0].y+r*1.25+18,{align:"center",size:13,weight:600,color:T.redText});
+  if(y>=1947.45&&y<1952){[2,3,4].forEach(i=>{for(let j=0;j<3;j++){const f=(tn*.4+j/3)%1,x=UA[0].x+(UA[i].x-UA[0].x)*f,yy=UA[0].y+(UA[i].y-UA[0].y)*f-Math.sin(f*Math.PI)*30;
+    ctx.fillStyle=T.gold;ctx.beginPath();ctx.arc(x,yy,3.5,0,7);ctx.fill()}});
+   itext(ctx,"马歇尔计划 · 美元 →",(UA[0].x+UA[3].x)/2,(UA[0].y+UA[3].y)/2-40,{align:"center",size:12,weight:600,color:T.goldText})}
+  const B=P(13.4,52.5),pu=.5+.5*Math.sin(tn*6);
+  if(y>=1948.5&&y<1949.4){ring(ctx,B[0],B[1],8+pu*6,T.gold,1);itext(ctx,"柏林危机",B[0]-14,B[1]+4,{align:"right",size:12,weight:600,color:T.goldText})}
+  if(y>=1961.6){const f=y>=1989.85;ctx.save();ctx.strokeStyle=T.fg;ctx.lineWidth=4;if(f){ctx.globalAlpha=.35;ctx.setLineDash([3,4])}ctx.beginPath();ctx.moveTo(B[0],B[1]-9);ctx.lineTo(B[0],B[1]+9);ctx.stroke();ctx.restore();
+   itext(ctx,f?"柏林墙倒塌":"柏林墙",B[0]-10,B[1]+4,{align:"right",size:12,weight:600,color:f?T.blue:T.fg})}
+  if(y>=1950.5&&y<1953.6){const K=P(127,38);ring(ctx,K[0],K[1],7+pu*5,T.red,1);itext(ctx,"朝鲜战争 · 局部热战",K[0],K[1]+24,{align:"center",size:12,weight:600,color:T.redText})}
+  if(y>=1962.8&&y<1963.4){const U=P(-80,22);ring(ctx,U[0],U[1],10+pu*10,T.red,.4+.6*pu);itext(ctx,"古巴：冷战最危险时刻",U[0],U[1]+30,{align:"center",size:13,weight:600,color:T.redText})}
+  itext(ctx,Math.floor(y)+" 年",8+mw-14,30,{align:"right",size:20,weight:600});
+  const note="冷战：不直接开战，以政治、经济、军事对抗为主，局部热战",nw=Pt?Math.min(mw-90,260):Math.min(mw*.4,300),nh=ln(ctx,note,0,0,nw-20,16,{size:12,weight:600,measure:true})+12;
+  card(ctx,16,16,nw,nh,T,null,.92);ln(ctx,note,26,30,nw-20,16,{size:12,weight:600});
+  const e=EV[ei],cw=Pt?w-20:Math.min(mw*.5,420),ch=64,cx=10,cy=Pt?mh+50:h-ch-18;
+  if(e){const p=ease((tn-eiAt)/.5);card(ctx,cx,cy+(1-p)*16,cw,ch,T,C(T,e[5]),p);ctx.save();ctx.globalAlpha=p;
+   itext(ctx,e[1],cx+12,cy+18+(1-p)*16,{weight:600,size:14,color:C(T,e[5])});ln(ctx,e[2],cx+12,cy+40+(1-p)*16,cw-24,17,{size:13});ctx.restore();
+   const E=e[3]!=null&&P(e[3],e[4]);if(E&&e[3]!==13.4){ctx.fillStyle=C(T,e[5]);ctx.beginPath();ctx.arc(E[0],E[1],5+pu*1.5,0,7);ctx.fill()}}
+  if(sw){const cp=phase(),bw=Pt?(w-36)/3:Math.min(150,mw*.18),bh=58,by=Pt?mh+122:16+nh+8;
+   PH.forEach((p,i)=>{const bx=Pt?10+i*(bw+8):16+i*(bw+8),on=p===cp,c=C(T,p[4]);card(ctx,bx,by,bw,bh,T,on?c:null,on?1:.75);
+    itext(ctx,p[2],bx+8,by+16,{size:12,weight:600,color:c});ln(ctx,p[3],bx+8,by+34,bw-16,15,{size:12,weight:on?600:400})})}
+  const v=therm(y)/100,fc=v>.6?T.red:v>.35?T.gold:T.blue;ctx.save();
+  if(!Pt){const x=w-tw/2-4,top=70,bot=h-70,L=bot-top;itext(ctx,"冷战温度计",x,top-40,{align:"center",size:12,weight:600});itext(ctx,"紧张",x,top-16,{align:"center",size:12,color:T.redText});
+   ctx.fillStyle=T.grid;rrect(ctx,x-8,top,16,L,8);ctx.fill();ctx.strokeStyle=T.axis;ctx.lineWidth=1;ctx.stroke();ctx.fillStyle=fc;rrect(ctx,x-5,bot-L*v,10,L*v,5);ctx.fill();
+   ctx.beginPath();ctx.arc(x,bot+12,13,0,7);ctx.fill();itext(ctx,"缓和",x,bot+44,{align:"center",size:12,color:T.blue});itext(ctx,"示意",x,bot+60,{align:"center",size:12})}
+  else{const yy=mh+30,x0=48,x1=w-48,L=x1-x0;itext(ctx,"冷战温度计（示意）",10,mh+14,{size:12,weight:600});itext(ctx,"缓和",10,yy+4,{size:12,color:T.blue});itext(ctx,"紧张",w-10,yy+4,{align:"right",size:12,color:T.redText});
+   ctx.fillStyle=T.grid;rrect(ctx,x0,yy-6,L,12,6);ctx.fill();ctx.strokeStyle=T.axis;ctx.lineWidth=1;ctx.stroke();ctx.fillStyle=fc;rrect(ctx,x0+2,yy-4,Math.max(8,(L-4)*v),8,4);ctx.fill()}
+  ctx.restore()}
+ return{
+  text:"二战后，美苏由战时盟友走向对抗。美国以杜鲁门主义、马歇尔计划、北约遏制苏联；苏联以经互会、华约应对，形成以美苏为首的两极格局。冷战期间双方虽未直接开战，但对抗不断，局部热战频发。1991 年苏联解体，两极格局结束。",
+  points:["冷战原因：意识形态与国家利益的对立","杜鲁门主义标志冷战开始","1955 年华约成立标志两极格局形成","柏林危机、朝鲜战争、古巴导弹危机等","1991 年苏联解体，两极格局瓦解"],
+  gk:"统编版《中外历史纲要（下）》第 18 课「冷战与国际格局的演变」。浙江选考高频：冷战的表现与影响、两极格局形成的标志。",
+  mount(c,r){sl=slider("时间 1945–1991",Y0,Y1,.1,y,v=>Math.floor(v)+" 年",v=>{y=v;play=false;upd()});
+   c.append(sl,button("自动播放",()=>{if(y>=Y1-.05)y=Y0;play=true;lt=0},true),button("暂停",()=>play=false),button("重置",()=>{play=false;y=Y0;sl.set(y);upd()}),toggle("美苏争霸态势",sw,v=>{sw=v;upd()}));
+   c.querySelectorAll("button").forEach(b=>b.style.minHeight="44px");lt=0;ei=idx(y);ro=readout([]);r.append(ro);upd()},
+  draw(ctx,w,h){draw(ctx,w,h)},
+  pointer(){},
+  unmount(){y=Y0;play=false;lt=0;ei=-1;sw=false;ro=null;sl=null}}
+})();
+/* ---------- 第 7 章 民族独立与第三世界 ---------- */
+CH[6].ready=true;
+MODS[6]=(()=>{
+ const CF={英:"#8e2a24",法:"#2f5f9e",葡:"#2f7a4e",荷:"#d27d2c",比:"#7b6248",南非:"#6d6a75",半:"#8c8c8c"};
+ const AF=[["尼日利亚",8,9,"英"],["刚果（利）",24,-4,"比"],["喀麦隆",12.5,5,"法"],["塞内加尔",-14.5,14.5,"法"],["马里",-3,18,"法"],["尼日尔",9,17,"法"],["乍得",19,15,"法"],["马达加斯加",47,-19,"法"],["索马里",46,6,"英"],["多哥",0.6,7,"法"],["达荷美",3,11.5,"法"],["上沃尔特",-2,12.5,"法"],["科特迪瓦",-6,7.5,"法"],["中非",21,6.6,"法"],["加蓬",10.5,-1,"法"],["刚果（布）",15.5,-0.5,"法"],["毛里塔尼亚",-11,21,"法"]];
+ const R=[["印度尼西亚",118,-2,"荷",1945.6],["越南",106,16,"法",1945.7],["印度",79,22,"英",1947.6],["巴基斯坦",69,29,"英",1947.62],["中华人民共和国",104,34,"半",1949.75],["埃及",30,26,"英",1952.55],
+  ...AF.map(a=>[...a,1960.5]),["阿尔及利亚",3,28,"法",1962.5],["安哥拉",17,-12,"葡",1975.4],["莫桑比克",35,-18,"葡",1975.5],["纳米比亚",17,-22,"南非",1990.2]];
+ const EV=[[1945.6,"1945","印度尼西亚、越南宣布独立","b","印度尼西亚、越南","苏加诺（印尼）、胡志明（越南）"],
+  [1947.6,"1947","印巴分治：印度、巴基斯坦独立","b","印度、巴基斯坦","尼赫鲁、真纳"],
+  [1949.75,"1949","中华人民共和国成立：鼓舞亚非人民","g","中国","毛泽东"],
+  [1952.55,"1952—1956","埃及革命，纳赛尔执政；1956 年收回苏伊士运河","b","埃及","纳赛尔"],
+  [1960.5,"1960","“非洲独立年”：17 个非洲国家独立","r","非洲 17 国","—"],
+  [1962.5,"1962","阿尔及利亚摆脱法国统治，获得独立","b","阿尔及利亚","本·贝拉"],
+  [1975.4,"1975","安哥拉、莫桑比克摆脱葡萄牙殖民统治","b","安哥拉、莫桑比克","内图、马谢尔"],
+  [1990.2,"1990","纳米比亚独立：殖民体系最终瓦解","g","纳米比亚","努乔马"]];
+ const NA=["印度","埃及","南斯拉夫","印尼","加纳","缅甸","古巴"];
+ const Y0=1945,Y1=1990.99;let y=Y0,play=false,lt=0,ei=-1,eiAt=0,fy=0,bd=false,na=false,ro=null,sl=null;
+ const now=()=>performance.now()/1000,ease=p=>1-Math.pow(1-Math.max(0,Math.min(1,p)),3);
+ const C=(T,c)=>c==="r"?T.redText:c==="g"?T.goldText:c==="b"?T.blue:T.fg,idx=v=>{let r=-1;EV.forEach((e,i)=>{if(v>=e[0])r=i});return r};
+ const cnt=()=>R.filter(a=>a[3]!=="半"&&y>=a[4]).length;
+ function upd(){if(!ro)return;const T=theme(),e=EV[ei];fy=Math.floor(y);
+  const rows=[["年份",Math.floor(y)+" 年"],["地区",e?e[4]:"亚非大部分地区仍为殖民地"],["领导人",e?e[5]:"—"],
+   ["殖民体系",y>=1990.2?"最终瓦解":"瓦解中",y>=1990.2?T.goldText:T.redText]];
+  if(bd)rows.push(["万隆会议","1955 年，29 个亚非国家；周恩来提出“求同存异”，和平共处五项原则扩展为万隆十项原则",T.goldText]);
+  if(na)rows.push(["不结盟运动","第三世界兴起，成为国际舞台上的重要力量；1971 年新中国恢复联合国合法席位，“是非洲兄弟把我们抬进联合国的”",T.blue]);
+  ro.update(rows)}
+ const card=(ctx,x,yy,w,h,T,bc,a)=>{ctx.save();ctx.globalAlpha=a??1;ctx.fillStyle=isDark()?"rgba(44,44,46,.96)":"rgba(255,255,255,.96)";rrect(ctx,x,yy,w,h,12);ctx.fill();ctx.strokeStyle=bc||T.grid;ctx.lineWidth=bc?2:1;ctx.stroke();ctx.restore()};
+ function ln(ctx,s,x,yy,mw,lh,o){ctx.save();ctx.font=(o.weight||400)+" "+(o.size||13)+"px "+HSANS;let out=[],l="";for(const ch of s){if(ctx.measureText(l+ch).width>mw&&l){out.push(l);l=ch}else l+=ch}out.push(l);ctx.restore();
+  if(!o.measure)out.forEach((t,i)=>itext(ctx,t,x,yy+i*lh,o));return yy+out.length*lh}
+ const disc=(ctx,x,yy,rad,fill,stroke,lw)=>{ctx.beginPath();ctx.arc(x,yy,rad,0,7);ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke()};
+ function draw(ctx,w,h){const T=theme(),tn=now(),dt=lt?Math.min(.1,tn-lt):0;lt=tn;
+  if(play){y=Math.min(Y1,y+dt*(y<1963?1:2.4));if(y>=Y1)play=false;sl&&sl.set(y)}
+  const k=idx(y);if(k!==ei){ei=k;eiAt=tn;upd()}else if(Math.floor(y)!==fy)upd();
+  const Pt=h>w*1.1,mw=w-16,mh=Pt?Math.min(h-110,mw*.8):h-16,{P}=worldMap(ctx,8,8,mw,mh,{lon0:-20,lon1:150,lat0:-40,lat1:45}),r=Math.max(7,Math.min(12,w/70));
+  R.forEach(a=>{const[x,yy]=P(a[1],a[2]),af=a[4]===1960.5,rr=af?r*.75:r,p=ease((y-a[4])/.6),g=a[3]==="半"||a[0]==="纳米比亚";
+   ctx.save();disc(ctx,x,yy,rr,CF[a[3]],T.bg,1.5);if(p>0){ctx.globalAlpha=p;disc(ctx,x,yy,rr,"#ffffff",T.gold,g?3:2)}ctx.restore();
+   if(p>0&&p<1){ctx.save();ctx.globalAlpha=1-p;ctx.strokeStyle=T.gold;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,yy,rr+4+p*14,0,7);ctx.stroke();ctx.restore()}
+   if(!af)itext(ctx,a[0]==="中华人民共和国"&&p>0?"新中国 · 鼓舞亚非人民":a[0],x,yy+rr+4,{baseline:"top",align:"center",size:12,weight:p>0?600:400,color:g&&p>0?T.goldText:T.fg})});
+  if(y>=1960.5&&y<1962.5){const[x,yy]=P(2,-14),p=ease((y-1960.5)/.4);ctx.save();ctx.globalAlpha=p;itext(ctx,"17",x,yy,{align:"center",size:52,weight:600,color:T.redText});itext(ctx,"个非洲国家独立",x,yy+36,{align:"center",size:13,weight:600,color:T.redText});ctx.restore()}
+  if(y>=1952.55){const[x,yy]=P(32.5,30.5);ctx.save();ctx.fillStyle=y>=1956?T.gold:T.grid;ctx.beginPath();ctx.arc(x,yy,4,0,7);ctx.fill();ctx.restore();if(y>=1956&&y<1958)itext(ctx,"收回苏伊士运河",x+8,yy-6,{size:12,weight:600,color:T.goldText})}
+  const yc=y>=1990.2?T.goldText:T.redText;card(ctx,16,16,150,56,T,null,.94);itext(ctx,Math.floor(y)+" 年",28,34,{size:20,weight:600});itext(ctx,"殖民体系"+(y>=1990.2?"最终瓦解":"瓦解中"),28,58,{size:12,weight:600,color:yc});
+  const kx=8+mw-138;card(ctx,kx,16,130,64,T,null,.94);itext(ctx,"独立国家数（图示）",kx+12,30,{size:12});itext(ctx,String(cnt()),kx+12,58,{size:28,weight:600,color:T.goldText});
+  const e=EV[ei],cw=Pt?w-20:Math.min(mw*.46,400),ch=66,cx=10,cy=Pt?mh+28:h-ch-18;
+  if(e){const p=ease((tn-eiAt)/.5),o=(1-p)*16;card(ctx,cx,cy+o,cw,ch,T,C(T,e[3]),p);ctx.save();ctx.globalAlpha=p;
+   itext(ctx,e[1]+" · "+e[5],cx+12,cy+18+o,{weight:600,size:14,color:C(T,e[3])});ln(ctx,e[2],cx+12,cy+42+o,cw-24,17,{size:13});ctx.restore()}
+  if(bd){const R0=Math.min(mw,mh)*.2,B=P(107.6,-6.9),bx=Math.min(B[0],8+mw-R0-14),by=Math.max(8+R0+90,Math.min(B[1],8+mh-R0-34));
+   ctx.save();ctx.globalAlpha=.94;ctx.fillStyle=isDark()?"#2c2c2e":"#ffffff";ctx.beginPath();ctx.arc(bx,by,R0+12,0,7);ctx.fill();ctx.restore();
+   for(let i=0;i<29;i++){const t=i/29*Math.PI*2-Math.PI/2;disc(ctx,bx+Math.cos(t)*R0,by+Math.sin(t)*R0,Math.max(4,r*.5),T.blue,T.bg,1)}
+   itext(ctx,"万隆会议 1955 · 29 国",bx,by-26,{align:"center",size:12,weight:600});itext(ctx,"求同存异",bx,by,{align:"center",size:20,weight:600,color:T.goldText});
+   itext(ctx,"周恩来提出",bx,by+22,{align:"center",size:12,color:T.goldText});
+   itext(ctx,"和平共处五项原则 → 万隆十项原则",bx,by+R0+24,{align:"center",size:12,weight:600,color:T.blue})}
+  if(na){const pw=Math.min(mw-32,440),ph=150,px=16,py=Pt?(bd?mh-ph-6:90):90;card(ctx,px,py,pw,ph,T,T.gold,.96);
+   itext(ctx,"不结盟运动（1961）",px+pw/2,py+16,{align:"center",size:13,weight:600,color:T.goldText});
+   nation(ctx,px+44,py+70,r*1.3,"美国阵营",{color:T.blue});nation(ctx,px+pw-44,py+70,r*1.3,"苏联阵营",{color:T.red});
+   const mx=px+pw/2,my=py+66,rr=Math.min(34,pw*.09);NA.forEach((n,i)=>{const t=i/NA.length*Math.PI*2-Math.PI/2;disc(ctx,mx+Math.cos(t)*rr,my+Math.sin(t)*rr,5,T.gold,T.bg,1)});
+   itext(ctx,"不结盟",mx,my,{align:"center",size:12,weight:600,color:T.goldText});itext(ctx,"印度 · 埃及 · 南斯拉夫 等",mx,my+rr+16,{align:"center",size:12});
+   itext(ctx,"第三世界兴起，成为国际舞台上的重要力量",mx,py+ph-16,{align:"center",size:12,weight:600,color:T.blue})}}
+ return{
+  text:"二战后，亚非拉民族独立运动蓬勃发展，殖民体系逐步瓦解：亚洲印度、印尼等国相继独立；1960 年 17 个非洲国家独立；1990 年纳米比亚独立标志着殖民体系彻底崩溃。新独立国家通过万隆会议、不结盟运动团结合作，第三世界崛起。",
+  points:["二战后民族独立运动高涨的原因：二战削弱了老牌殖民国家、民族意识觉醒","1960 年“非洲独立年”","1990 年纳米比亚独立，殖民体系彻底瓦解","1955 年万隆会议、“求同存异”","不结盟运动与第三世界的兴起"],
+  gk:"统编版《中外历史纲要（下）》第 16、21 课。浙江选考高频：殖民体系瓦解的阶段、第三世界兴起的影响。",
+  mount(c,r){sl=slider("时间 1945–1990",Y0,Y1,.1,y,v=>Math.floor(v)+" 年",v=>{y=v;play=false;upd()});
+   c.append(sl,button("自动播放",()=>{if(y>=Y1-.05)y=Y0;play=true;lt=0},true),button("暂停",()=>play=false),button("重置",()=>{play=false;y=Y0;sl.set(y);upd()}),
+    toggle("万隆会议（1955）",bd,v=>{bd=v;upd()}),toggle("不结盟运动（1961）",na,v=>{na=v;upd()}));
+   c.querySelectorAll("button").forEach(b=>b.style.minHeight="44px");lt=0;ei=idx(y);ro=readout([]);r.append(ro);upd()},
+  draw(ctx,w,h){draw(ctx,w,h)},
+  pointer(){},
+  unmount(){y=Y0;play=false;lt=0;ei=-1;bd=false;na=false;ro=null;sl=null}}
+})();
+CH[7].ready=true;
+MODS[7]=(()=>{
+ let mode=0,ya=1950,yb=1945,two=false,play=false,lt=0,ro=null,box=null,sl=null,fk="";
+ const now=()=>performance.now()/1000,ease=p=>1-Math.pow(1-Math.max(0,Math.min(1,p)),3);
+ const ip=(k,y)=>{if(y<=k[0][0])return k[0][1];for(let i=1;i<k.length;i++)if(y<=k[i][0]){const[a,p]=k[i-1],[b,q]=k[i];return p+(q-p)*(y-a)/(b-a)}return k[k.length-1][1]};
+ const BA=[["us","美国",.2,.42,"blue",[[1950,1],[1990,.95],[2020,.72]]],["su","苏联",.78,.36,"red",[[1950,.8],[1990,.68]]],
+  ["eu","西欧",.47,.2,"teal",[[1950,.22],[1967,.45],[1993,.62],[2020,.6]]],["jp","日本",.83,.75,"purple",[[1950,.1],[1968,.38],[1990,.55],[2020,.42]]],
+  ["cn","中国",.56,.66,"gold",[[1950,.18],[1978,.26],[2000,.42],[2020,.8]]]];
+ const LK=[["us","eu",[[1950,.9],[2020,.7]]],["us","jp",[[1950,.6],[2020,.7]]],["su","cn",[[1950,.9],[1960,.15],[1990,.15],[2020,.5]]],["us","su",[[1950,.1],[2020,.25]]],
+  ["us","cn",[[1971,0],[1979,.45],[2020,.8]]],["eu","cn",[[1972,0],[1980,.2],[2020,.6]]],["jp","cn",[[1972,0],[1980,.25],[2020,.6]]],["eu","jp",[[1960,0],[1975,.3],[2020,.4]]],["eu","su",[[1970,0],[1991,.15],[2020,.35]]]];
+ const EA=[[1950,"美苏两极对峙"],[1967,"1967 年欧洲共同体成立"],[1968,"日本成为资本主义世界第二经济大国"],[1971,"1971 年中国恢复联合国合法席位；不结盟运动壮大"],[1991,"1991 年苏联解体，两极格局结束"],[1993,"1993 年欧盟成立"],[2000,"中国快速发展；新兴经济体（金砖国家）崛起"]];
+ const EB=[[1945,"1944 年布雷顿森林体系：国际货币基金组织、世界银行"],[1947,"1947 年关贸总协定 GATT 签订"],[1995,"1995 年世界贸易组织 WTO 成立"],[2001,"2001 年中国加入 WTO"],[2008,"2008 年国际金融危机，金融风险全球传导"]];
+ const CT=[["纽约",-74,40.7],["伦敦",0,51.5],["东京",139.7,35.7],["上海",121.5,31.2],["法兰克福",8.7,50.1],["新加坡",103.8,1.3],["圣保罗",-46.6,-23.5]];
+ const RT=[[0,1,1945],[0,4,1950],[1,4,1950],[0,2,1955],[1,5,1955],[0,6,1960],[2,5,1965],[1,2,1970],[3,5,1980],[3,2,1980],[3,0,1985],[3,1,1990],[3,4,1990],[3,6,2001]];
+ const ev=(E,y)=>{let r=E[0];E.forEach(e=>{if(y>=e[0])r=e});return r};
+ const ph=(y,T)=>y<1969?["两极格局",T.redText]:y<1991?["多极化趋势出现（20 世纪 70 年代起）",T.goldText]:["一超多强"+(y>=2000?"，多极化深入发展":""),T.blue];
+ const inst=y=>"IMF · 世界银行 · "+(y<1947?"—":y<1995?"GATT":"WTO（取代 GATT）");
+ function upd(){if(!ro)return;const T=theme(),y=Math.floor(mode?yb:ya);fk=mode+":"+y;
+  ro.update(mode?[["模式","全球化的流动"],["年份",y+" 年"],["机构",inst(y),T.blue],["关键事件",ev(EB,y)[1],y>=2001&&y<2008?T.goldText:y>=2008?T.redText:T.fg]]
+   :[["模式","从两极到多极"],["年份",y+" 年"],["格局",...ph(y,T)],["关键事件",ev(EA,y)[1]]])}
+ const card=(ctx,x,y,w,h,T,bc,a)=>{ctx.save();ctx.globalAlpha=a??.95;ctx.fillStyle=isDark()?"rgba(44,44,46,.96)":"rgba(255,255,255,.96)";rrect(ctx,x,y,w,h,12);ctx.fill();ctx.strokeStyle=bc||T.grid;ctx.lineWidth=bc?2:1;ctx.stroke();ctx.restore()};
+ function drawA(ctx,w,h,T){const y=ya,base=Math.min(w,h)*.16,B={};
+  BA.forEach(b=>{let s=ip(b[5],y),n=b[1];if(b[0]==="su"&&y>=1991){s=.38*ease((y-1991)/1.2);n="俄罗斯"}if(b[0]==="eu")n=y<1967?"西欧":y<1993?"西欧（欧共体）":"欧盟";
+   B[b[0]]={x:b[2]*w,y:b[3]*h,r:Math.max(4,base*Math.sqrt(s)),n,c:T[b[4]]}});
+  const bx=.27*w,by=.8*h,bp=y>=2000?ease((y-2000)/8):0,br=Math.max(4,base*.36*bp);B.br={x:bx,y:by,r:br*1.6,n:"",c:T.teal};
+  [...LK,["cn","br",[[2000,0],[2010,.5],[2020,.6]]],["su","br",[[2000,0],[2010,.3]]]].forEach(l=>{if(l[1]==="br"&&!bp)return;const v=ip(l[2],y);if(v<.03)return;link(ctx,B[l[0]],B[l[1]],{width:1+7*v,color:T.axis})});
+  if(y>=1991&&y<1993){const p=(y-1991)/2,s=B.su;ctx.save();ctx.globalAlpha=1-p;ctx.fillStyle=T.red;for(let i=0;i<14;i++){const a=i/14*7,d=base*(.4+p*1.6);ctx.beginPath();ctx.arc(s.x+Math.cos(a)*d,s.y+Math.sin(a)*d,base*.16*(1-p*.5),0,7);ctx.fill()}ctx.restore()}
+  BA.forEach(b=>{const o=B[b[0]];if(o.r>4||b[0]!=="su")nation(ctx,o.x,o.y,o.r,o.n,{color:o.c,active:b[0]==="us"&&y>=1991})});
+  if(bp){["印度","巴西","南非"].forEach((n,i)=>{const a=i/3*7-1.6;nation(ctx,bx+Math.cos(a)*br*1.5,by+Math.sin(a)*br*1.5,br,"",{color:T.teal})});
+   ctx.save();ctx.globalAlpha=bp;itext(ctx,"新兴经济体（金砖国家）",bx,by+br*2.6+8,{align:"center",size:12,weight:600,color:T.goldText});ctx.restore()}
+  const[pt,pc]=ph(y,T),cw=Math.min(w-32,300);card(ctx,16,16,cw,58,T);itext(ctx,Math.floor(y)+" 年",28,34,{size:20,weight:600});itext(ctx,pt,28,58,{size:12,weight:600,color:pc});
+  itext(ctx,"球的大小 = 实力示意 · 连线粗细 = 联系紧密程度",w-16,h-14,{align:"right",size:12})}
+ function drawB(ctx,w,h,T,tn){const y=yb,Pt=h>w*1.1,mw=w-16,mh=Pt?Math.min(h-16,mw*.9):h-16,{P}=worldMap(ctx,8,8,mw,mh,{lon0:-170,lon1:170,lat0:-50,lat1:70});
+  const C=CT.map(c=>P(c[1],c[2]));
+  RT.forEach((r,i)=>{if(y<r[2])return;const[a,b]=[C[r[0]],C[r[1]]],sh=r[0]===3||r[1]===3,boost=sh&&y>=2001,dx=b[0]-a[0],dy=b[1]-a[1],d=Math.hypot(dx,dy),cx=(a[0]+b[0])/2+dy*.18,cy=(a[1]+b[1])/2-Math.abs(dx)*.18;
+   const col=boost?T.gold:T.blue,n=Math.min(boost?22:12,Math.floor((2+(y-r[2])/6)*(boost?2:1))),bz=t=>[(1-t)*(1-t)*a[0]+2*t*(1-t)*cx+t*t*b[0],(1-t)*(1-t)*a[1]+2*t*(1-t)*cy+t*t*b[1]];
+   ctx.save();ctx.globalAlpha=.3;ctx.strokeStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.quadraticCurveTo(cx,cy,b[0],b[1]);ctx.stroke();ctx.restore();
+   ctx.fillStyle=col;for(let j=0;j<n;j++){const t=(tn*60/Math.max(80,d)+j/n+i*.137)%1,q=bz(j%2?t:1-t);ctx.beginPath();ctx.arc(q[0],q[1],2.2,0,7);ctx.fill()}});
+  CT.forEach((c,i)=>{const[x,yy]=C[i],sh=i===3&&y>=2001;ctx.beginPath();ctx.arc(x,yy,sh?6:4,0,7);ctx.fillStyle=sh?T.gold:T.fg;ctx.fill();itext(ctx,c[0],x,yy+(i===4?-14:10),{align:"center",baseline:"middle",size:12,weight:sh?600:400,color:sh?T.goldText:T.fg})});
+  if(y>=2001){const[x,yy]=C[3];itext(ctx,"2001 中国加入 WTO",x,yy+26,{align:"center",size:12,weight:600,color:T.goldText})}
+  const IN=[["IMF","国际货币基金组织 · 1944",1944],["世界银行","1944",1944],[y<1995?"GATT":"WTO",y<1995?"关贸总协定 · 1947":"世界贸易组织 · 1995",1947]],iw=Math.min(170,(mw-40)/3),iy=8+mh-62;
+  IN.forEach((s,i)=>{if(y<s[2])return;const x=16+i*(iw+6),a=ease((y-Math.max(1945,s[2]))/1.5);card(ctx,x,iy,iw,50,T,T.blue,a*.95);ctx.save();ctx.globalAlpha=a;itext(ctx,s[0],x+10,iy+16,{size:14,weight:600,color:T.blue});itext(ctx,s[1],x+10,iy+36,{size:12});ctx.restore()});
+  card(ctx,16,16,160,58,T);itext(ctx,Math.floor(y)+" 年",28,34,{size:20,weight:600});itext(ctx,y>=2008&&y<2010?"国际金融危机":"经济全球化发展",28,58,{size:12,weight:600,color:y>=2008&&y<2010?T.redText:T.blue});
+  if(two){const pw=Pt?mw-32:Math.min(mw*.4,300),py=Pt?90:8+mh*.32,F=[["积极",T.blue,["资源配置优化","技术传播","经济增长"]],["问题",T.redText,["贫富差距（南北差距）扩大","金融风险传导（2008 国际金融危机）","逆全球化思潮"]]];
+   F.forEach((f,i)=>{const x=Pt?16:(i?8+mw-pw-8:16),yy=Pt?py+i*124:py;card(ctx,x,yy,pw,114,T,f[1],.97);itext(ctx,f[0],x+12,yy+18,{size:14,weight:600,color:f[1]});f[2].forEach((s,k)=>itext(ctx,"· "+s,x+12,yy+44+k*22,{size:12,color:f[1]}))})}}
+ function draw(ctx,w,h){const T=theme(),tn=now(),dt=lt?Math.min(.1,tn-lt):0;lt=tn;
+  if(play){if(mode){yb=Math.min(2020,yb+dt*3);if(yb>=2020)play=false;sl&&sl.set(yb)}else{ya=Math.min(2020,ya+dt*3);if(ya>=2020)play=false;sl&&sl.set(ya)}}
+  if(fk!==mode+":"+Math.floor(mode?yb:ya))upd();mode?drawB(ctx,w,h,T,tn):drawA(ctx,w,h,T)}
+ function build(){box.innerHTML="";play=false;
+  if(mode){sl=slider("时间 1945 → 2020",1945,2020,.1,yb,v=>Math.floor(v)+" 年",v=>{yb=v;play=false;upd()});box.append(sl,button("自动播放",()=>{if(yb>=2019.9)yb=1945;play=true;lt=0},true),toggle("全球化的两面",two,v=>two=v))}
+  else{sl=slider("时间 1950 → 2020",1950,2020,.1,ya,v=>Math.floor(v)+" 年",v=>{ya=v;play=false;upd()});
+   box.append(sl,button("自动播放",()=>{if(ya>=2019.9)ya=1950;play=true;lt=0},true),...[["两极",1955],["一超多强",1995],["多极化",2020]].map(([l,v])=>button(l,()=>{play=false;ya=v;sl.set(v);upd()})))}
+  box.querySelectorAll("button").forEach(b=>b.style.minHeight="44px");upd()}
+ return{
+  text:"冷战后期，西欧、日本、中国等力量兴起，世界格局呈现多极化趋势；1991 年苏联解体后形成“一超多强”局面。二战后以布雷顿森林体系和关贸总协定为支柱，经济全球化不断发展，1995 年世界贸易组织成立，2001 年中国加入世贸组织。全球化带来机遇，也带来挑战，构建人类命运共同体成为时代课题。",
+  points:["多极化趋势：欧洲联合、日本崛起、中国发展、不结盟运动","冷战后“一超多强”，多极化深入发展","经济全球化的支柱：IMF、世界银行、GATT/WTO","2001 年中国加入 WTO","全球化是一把双刃剑，倡导构建人类命运共同体"],
+  gk:"统编版《中外历史纲要（下）》第 20、22 课「世界多极化与经济全球化」「全球化进程中的挑战与人类命运共同体」。浙江选考高频：多极化趋势的表现、经济全球化的影响。",
+  mount(c,r){const ch=chips([{label:"从两极到多极",value:0},{label:"全球化的流动",value:1}],mode,v=>{mode=v;build()});box=el("div");box.style.display="contents";
+   c.append(ch,box);ch.querySelectorAll("button").forEach(b=>b.style.minHeight="44px");ro=readout([]);r.append(ro);lt=0;build()},
+  draw(ctx,w,h){draw(ctx,w,h)},
+  pointer(){},
+  unmount(){mode=0;ya=1950;yb=1945;two=false;play=false;lt=0;ro=null;box=null;sl=null;fk=""}}
+})();
+/* ---------- 第 9 章 随堂检测 ---------- */
+CH[8].ready=true;
+MODS[8]=(()=>{
+ const Q=[
+  ["","1914 年萨拉热窝事件迅速演变为世界大战，重要原因是（ ）",["塞尔维亚实力强大","两大军事集团的同盟体系","美国积极推动","十月革命爆发"],1,"同盟体系使局部冲突迅速扩大。",1],
+  ["","巴黎和会上把德国在中国山东的权益转让给日本，直接引发了（ ）",["辛亥革命","五四运动","华盛顿会议","九一八事变"],1,"外交失败引发五四运动。",2],
+  ["","苏俄实行新经济政策的主要特点是（ ）",["余粮收集制","利用市场和商品货币关系发展经济","全面实行农业集体化","优先发展重工业"],1,"以粮食税代替余粮收集制，允许自由贸易。",3],
+  ["","罗斯福新政最突出的特点是（ ）",["改变资本主义制度","国家全面干预经济","实行自由放任","建立计划经济"],1,"新政以国家干预应对危机，没有改变资本主义制度。",4],
+  ["","1942 年 26 国签署《联合国家宣言》，标志着（ ）",["第二次世界大战爆发","世界反法西斯同盟正式形成","联合国成立","雅尔塔体系建立"],1,"《联合国家宣言》标志反法西斯同盟形成。",5],
+  ["","1955 年华沙条约组织成立，标志着（ ）",["冷战开始","两极格局形成","冷战结束","多极化格局形成"],1,"北约与华约对峙，两极格局形成；冷战开始以杜鲁门主义为标志。",6],
+  ["","1960 年被称为“非洲独立年”，因为这一年（ ）",["纳米比亚独立","17 个非洲国家获得独立","万隆会议召开","不结盟运动兴起"],1,"1960 年 17 个非洲国家独立。",7],
+  ["“2001 年中国正式加入世界贸易组织。”","这一事件反映了（ ）",["世界格局两极化","中国积极融入经济全球化","布雷顿森林体系建立","冷战结束"],1,"加入 WTO 是中国融入经济全球化的重要标志。",8]];
+ const L="ABCD",CSS=`.x-q{position:absolute;inset:0;overflow:auto;background:var(--card);color:var(--fg);padding:18px;display:flex;flex-direction:column;gap:12px;z-index:2}
+.x-q .x-dots{display:flex;gap:8px;align-items:center}.x-q .x-dots i{width:12px;height:12px;border-radius:50%;background:var(--line)}
+.x-q .x-dots i.cur{box-shadow:0 0 0 2px var(--card),0 0 0 4px #0071e3}.x-q .x-dots i.ok{background:#0071e3}.x-q .x-dots i.no{background:#c0362c}
+.x-q .x-n{font-size:13px;color:#9a6a00;font-weight:600;margin:0}.x-q .x-stem{font-size:17px;font-weight:600;margin:0;line-height:1.5}
+.x-q blockquote{margin:0;padding:10px 14px;border-left:3px solid #9a6a00;background:var(--btn2);border-radius:0 12px 12px 0}
+.x-q .x-opt{display:block;width:100%;box-sizing:border-box;text-align:left;white-space:normal;word-break:break-word;min-height:44px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--fg);font:inherit;cursor:pointer}
+.x-q .x-opt:disabled{cursor:default;opacity:1}.x-q .x-opt.ok{background:#e8f1fc;border-color:#0071e3;color:#0071e3;font-weight:600}.x-q .x-opt.no{background:#fdecea;border-color:#c0362c;color:#c0362c;font-weight:600}
+html.dark .x-q .x-opt.ok{background:rgba(41,151,255,.16);border-color:#2997ff;color:#2997ff}html.dark .x-q .x-opt.no{background:rgba(255,99,105,.16);border-color:#ff7b72;color:#ff7b72}
+.x-q .x-ex{margin:0;padding:12px 14px;border-radius:12px;background:var(--btn2)}.x-q .x-row{display:flex;gap:10px;flex-wrap:wrap}.x-q .x-row .pill{min-height:44px}
+.x-q .x-big{font-size:44px;font-weight:600;color:#0071e3;margin:0;line-height:1.1}`;
+ let i=0,ans=[],t0=0,t1=0,ov=null,ro=null;
+ const T=()=>theme(),ok=k=>ans[k]===Q[k][3],nOk=()=>ans.filter((a,k)=>a!=null&&ok(k)).length,nAns=()=>ans.filter(a=>a!=null).length;
+ const fmt=s=>Math.floor(s/60)+" 分 "+String(Math.round(s%60)).padStart(2,"0")+" 秒";
+ function upd(){if(!ro)return;const a=nAns(),c=nOk(),p=a?Math.round(c/a*100):0;
+  ro.update([["已答",a+" / 8"],["正确",c+" 题",T().blue],["正确率",a?p+"%":"—",a?(p>=75?T().blue:p>=50?T().goldText:T().redText):""]])}
+ function dots(){const d=el("div","x-dots");d.setAttribute("aria-label","进度");Q.forEach((_,k)=>{const s=el("i",(ans[k]==null?"":ok(k)?"ok":"no")+(k===i&&i<8?" cur":""));d.append(s)});return d}
+ const jump=n=>{location.hash="#"+n};
+ function show(){if(!ov)return;ov.innerHTML="";ov.scrollTop=0;ov.append(dots());if(i>=8)return result();
+  const q=Q[i],a=ans[i];ov.append(el("p","x-n","第 "+(i+1)+" / 8 题 · 单选"));
+  if(q[0])ov.append(el("blockquote","","材料："+q[0]));ov.append(el("p","x-stem",q[1]));
+  q[2].forEach((o,k)=>{const b=el("button","x-opt",L[k]+"．"+o);
+   if(a!=null){b.disabled=true;if(k===q[3]){b.classList.add("ok");b.textContent+="  ✓"}else if(k===a){b.classList.add("no");b.textContent+="  ✗"}}
+   else b.onclick=()=>{ans[i]=k;if(i===7)t1=performance.now();upd();show()};ov.append(b)});
+  if(a!=null){const r=ok(i);const ex=el("p","x-ex");ex.innerHTML=`<b style="color:${r?T().blue:T().redText}">${r?"回答正确":"回答错误，正确答案 "+L[q[3]]}</b>　${q[4]}`;
+   const row=el("div","x-row");row.append(button("回到第 "+q[5]+" 章",()=>jump(q[5])),button(i===7?"查看结果":"下一题",()=>{i++;show()},true));ov.append(ex,row)}}
+ function result(){const c=nOk(),wr=Q.map((q,k)=>k).filter(k=>!ok(k));
+  ov.append(el("p","x-n","检测结果"),el("p","x-big",c+" / 8"),el("p","","用时 "+fmt(((t1||performance.now())-t0)/1000)));
+  if(wr.length){ov.append(el("p","x-stem","错题对应章节"));const row=el("div","x-row");
+   wr.forEach(k=>{const n=Q[k][5],b=button("第 "+(k+1)+" 题 → 第 "+n+" 章 "+CH[n-1].n,()=>jump(n));b.style.whiteSpace="normal";b.style.textAlign="left";row.append(b)});ov.append(row)}
+  else ov.append(el("p","",`<b style="color:${T().blue}">全部正确，8 章内容掌握扎实。</b>`));
+  const row=el("div","x-row");row.append(button("重做",redo,true));ov.append(row)}
+ function redo(){i=0;ans=[];t0=performance.now();t1=0;upd();show()}
+ return{
+  text:"8 道选考风格单选，覆盖本实验 1–8 章，答完可跳回对应章节复习。",
+  points:["一题一屏，点选即判，附解析","错题可一键跳回对应章节","结束页显示得分、用时与错题章节"],
+  gk:"浙江选考 20 世纪国际秩序。",
+  mount(c,r){if(!document.getElementById("x-quiz-css")){const s=el("style");s.id="x-quiz-css";s.textContent=CSS;document.head.append(s)}
+   ov=el("div","x-q");ov.setAttribute("role","region");ov.setAttribute("aria-label","随堂检测");document.getElementById("cwrap").append(ov);
+   const rb=button("重做",redo);rb.style.minHeight="44px";c.append(rb);ro=readout([]);r.append(ro);i=0;ans=[];t0=performance.now();t1=0;upd();show()},
+  draw(){},
+  pointer(){},
+  unmount(){ov&&ov.remove();ov=null;ro=null}}
+})();
+const $=id=>document.getElementById(id),pad=i=>String(i+1).padStart(2,"0");
+let cur=0,mod=null,W=0,H=0,DPR=1;
+const cv=$("cv"),ctx=cv.getContext("2d");
+/* ---------- theme ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function isDark(){return document.documentElement.classList.contains("dark")}
+function theme(){return isDark()
+ ?{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e2a336",teal:"#2ec4b6",purple:"#b197fc",goldText:"#f0b847",redText:"#ff7b72"}
+ :{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.05)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"}}
+function setDark(d){document.documentElement.classList.toggle("dark",d);store.set("zhixu-dark",d?"1":"0");$("dark").textContent=$("mdark").textContent=d?"浅色":"深色"}
+setDark(store.get("zhixu-dark")==="1");
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||fmtNum;const w=el("div","sl"),l=el("label"),o=el("output"),i=el("input");
+ l.append(document.createTextNode(label),o);i.type="range";Object.assign(i,{min,max,step,value:val});i.setAttribute("aria-label",label);o.textContent=fmt(+val);
+ i.oninput=()=>{o.textContent=fmt(+i.value);onchange&&onchange(+i.value)};w.append(l,i);
+ w.set=v=>{i.value=v;o.textContent=fmt(+v)};return w}
+function chips(options,val,onchange){const w=el("div","chips");const bs=options.map(op=>{const o=typeof op==="object"?op:{label:op,value:op};const b=el("button",o.value===val?"on":"",o.label);
+ b.onclick=()=>{bs.forEach(x=>x.classList.remove("on"));b.classList.add("on");onchange&&onchange(o.value)};w.append(b);return b});return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" primary":""),label);b.onclick=onclick;return b}
+function toggle(label,val,onchange){const b=el("button","tg"+(val?" on":""),"<span>"+label+"</span><i></i>");b.setAttribute("role","switch");b.setAttribute("aria-checked",!!val);
+ b.onclick=()=>{val=!val;b.classList.toggle("on",val);b.setAttribute("aria-checked",val);onchange&&onchange(val)};return b}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML=rs.map(r=>`<dt>${r[0]}</dt><dd style="${r[2]?"color:"+r[2]:""}">${r[1]}</dd>`).join("")};d.update(rows||[]);return d}
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){if(!isFinite(v))return v>0?"∞":v<0?"−∞":"—";const e=1e-6,s=v<0?"−":"",a=Math.abs(v);
+ if(Math.abs(a-Math.round(a))<e)return(Math.round(a)===0?"":s)+Math.round(a);
+ for(let d=2;d<=12;d++){const n=a*d;if(Math.abs(n-Math.round(n))<e)return s+Math.round(n)+"/"+d}
+ for(const r of[2,3,5,6,7,10,11,13,14,15]){const q=Math.sqrt(r);for(let d=1;d<=6;d++){const k=a*d/q;if(Math.abs(k-Math.round(k))<e&&Math.round(k)>0){const K=Math.round(k);return s+(K===1?"":K)+"√"+r+(d>1?"/"+d:"")}}}
+ return s+a.toFixed(2)}
+function drawAxes(ctx,box,xr,yr,opts){opts=Object.assign({equal:true,grid:true,ticks:true,step:1,labels:true},opts);const T=theme();
+ let[x0,x1]=xr,[y0,y1]=yr,sx=box.w/(x1-x0),sy=box.h/(y1-y0);
+ if(opts.equal){const s=Math.min(sx,sy),cx=(x0+x1)/2,cy=(y0+y1)/2;sx=sy=s;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)*sx,Y=y=>box.y+box.h-(y-y0)*sy,invX=p=>x0+(p-box.x)/sx,invY=p=>y0+(box.y+box.h-p)/sy;
+ let st=opts.step;while(st*sx<22)st*=2;
+ ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();ctx.lineWidth=1;
+ if(opts.grid){ctx.strokeStyle=T.grid;ctx.beginPath();for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st){ctx.moveTo(X(x),box.y);ctx.lineTo(X(x),box.y+box.h)}for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st){ctx.moveTo(box.x,Y(y));ctx.lineTo(box.x+box.w,Y(y))}ctx.stroke()}
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,Y(0));ctx.lineTo(box.x+box.w,Y(0));ctx.moveTo(X(0),box.y);ctx.lineTo(X(0),box.y+box.h);ctx.stroke();
+ if(opts.labels){ctx.fillStyle=T.sub;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";
+  for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st)if(Math.abs(x)>1e-9)ctx.fillText(fmtNum(x),X(x),Y(0)+4);
+  ctx.textAlign="right";ctx.textBaseline="middle";for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st)if(Math.abs(y)>1e-9)ctx.fillText(fmtNum(y),X(0)-5,Y(y));
+  ctx.textBaseline="top";ctx.fillText("O",X(0)-4,Y(0)+4);ctx.font="italic 13px "+getComputedStyle(document.body).fontFamily;ctx.fillStyle=T.fg;
+  ctx.fillText("x",box.x+box.w-4,Y(0)+4);ctx.textAlign="left";ctx.fillText("y",X(0)+6,box.y+4)}
+ ctx.restore();return{X,Y,invX,invY,s:sx,box,xr:[x0,x1],yr:[y0,y1]}}
+function drawLine(ctx,map,A,B,C,color,width,dashed){if(Math.abs(A)<1e-12&&Math.abs(B)<1e-12)return;const[x0,x1]=map.xr,[y0,y1]=map.yr,b=map.box;let p,q;
+ if(Math.abs(B)>=Math.abs(A)){p=[x0,-(A*x0+C)/B];q=[x1,-(A*x1+C)/B]}else{p=[-(B*y0+C)/A,y0];q=[-(B*y1+C)/A,y1]}
+ ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.setLineDash(dashed?[6,5]:[]);
+ ctx.beginPath();ctx.moveTo(map.X(p[0]),map.Y(p[1]));ctx.lineTo(map.X(q[0]),map.Y(q[1]));ctx.stroke();ctx.restore()}
+function drawCircle(ctx,map,cx,cy,r,color,width,fill){const b=map.box;ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.beginPath();ctx.arc(map.X(cx),map.Y(cy),Math.max(0,r*map.s),0,Math.PI*2);
+ if(fill){ctx.fillStyle=fill;ctx.fill()}if(width!==0){ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.stroke()}ctx.restore()}
+function dragPoints(points,map,snap){const M=()=>typeof map==="function"?map():map;const h=function(e,type,x,y){const m=M();if(!m)return false;
+ if(type==="down"){const R=e&&e.pointerType==="touch"?22:12;let best=-1,bd=R;points.forEach((p,i)=>{if(p.fixed)return;const d=Math.hypot(m.X(p.x)-x,m.Y(p.y)-y);if(d<=bd){bd=d;best=i}});h.active=best;return best>=0}
+ if(type==="move"&&h.active>=0){const p=points[h.active];let nx=m.invX(x),ny=m.invY(y);if(snap){nx=Math.round(nx/snap)*snap;ny=Math.round(ny/snap)*snap}
+  nx=Math.min(m.xr[1],Math.max(m.xr[0],nx));ny=Math.min(m.yr[1],Math.max(m.yr[0],ny));p.x=+nx.toFixed(6);p.y=+ny.toFixed(6);p.onmove&&p.onmove(p);h.onmove&&h.onmove(p,h.active);return true}
+ if(type==="up"){const was=h.active>=0;h.active=-1;return was}return false};h.active=-1;return h}
+function wrapText(ctx,text,x,y,maxW,lh){let line="";for(const ch of String(text)){if(ch==="\n"){ctx.fillText(line,x,y);line="";y+=lh;continue}
+ const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);line=ch;y+=lh}else line=t}if(line)ctx.fillText(line,x,y);return y+lh}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+/* ---------- placeholder ---------- */
+function drawSoon(ctx,w,h){const T=theme(),cw=Math.min(320,w-40),ch=150,x=(w-cw)/2,y=(h-ch)/2;
+ ctx.save();ctx.shadowColor="rgba(0,0,0,.08)";ctx.shadowBlur=24;ctx.shadowOffsetY=4;ctx.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(ctx,x,y,cw,ch,22);ctx.fill();ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.blue;ctx.font="13px ui-monospace,Menlo,monospace";ctx.fillText("CHAPTER "+pad(cur),w/2,y+38);
+ ctx.fillStyle=T.fg;ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText("即将上线",w/2,y+72);
+ ctx.fillStyle=T.sub;ctx.font="14px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText(CH[cur].n,w/2,y+108)}
+/* ---------- canvas loop ---------- */
+function resize(){const r=$("cwrap").getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);frame(performance.now())}
+function frame(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H);
+ try{mod&&mod.draw?mod.draw(ctx,W,H,t/1000):drawSoon(ctx,W,H)}catch(err){console.error(err)}}
+function loop(t){frame(t);requestAnimationFrame(loop)}
+new ResizeObserver(resize).observe($("cwrap"));window.addEventListener("resize",resize);
+function ptr(type){return e=>{if(!mod||!mod.pointer)return;const r=cv.getBoundingClientRect();
+ if(type==="down")try{cv.setPointerCapture(e.pointerId)}catch(_){}mod.pointer(e,type,e.clientX-r.left,e.clientY-r.top)}}
+cv.addEventListener("pointerdown",ptr("down"));cv.addEventListener("pointermove",ptr("move"));cv.addEventListener("pointerup",ptr("up"));cv.addEventListener("pointercancel",ptr("up"));
+/* ---------- chapters ---------- */
+function list(host,cls){host.innerHTML="";CH.forEach((c,i)=>{const b=el("button",cls,`<span class="mono">${pad(i)}</span><span>${c.n}</span>`);b.onclick=()=>{go(i);closeSheet()};host.append(b)})}
+list($("toc"),"");list($("slist"),"it");
+$("segs").innerHTML=CH.map(()=>"<i></i>").join("");
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod.unmount()}catch(e){console.error(e)}
+ cur=i;const c=CH[i],m=c.ready&&MODS[i]?MODS[i]:null;mod=m;
+ $("ctitle").textContent=pad(i)+"  "+c.n;$("cbook").textContent=c.book;$("ctext").innerHTML=m?m.text||"":"本章交互实验即将上线，敬请期待。";
+ const ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";$("pts").innerHTML="";$("gk").innerHTML="";
+ if(m){m.mount&&m.mount(ctrl,read);$("pts").innerHTML=m.points?"<ul>"+[].concat(m.points).map(p=>"<li>"+p+"</li>").join("")+"</ul>":"";$("gk").innerHTML=m.gk||""}
+ $("ctrlSec").hidden=!ctrl.children.length;$("readSec").hidden=!read.children.length;$("ptSec").hidden=!$("pts").innerHTML;$("gkSec").hidden=!$("gk").innerHTML;
+ if(!m){$("ctrlSec").hidden=false;ctrl.innerHTML='<p class="soon">本章控件即将上线。</p>'}
+ document.querySelectorAll("#toc button,#slist button").forEach(b=>{const on=+b.querySelector(".mono").textContent-1===i;b.classList.toggle("on",on);on?b.setAttribute("aria-current","true"):b.removeAttribute("aria-current")});
+ document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
+ $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+/* ---------- controls ---------- */
+$("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
+$("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("explain").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+function openSheet(){$("mask").hidden=$("sheet").hidden=false;const on=$("slist").querySelector(".on");on&&on.scrollIntoView({block:"nearest"})}
+function closeSheet(){$("mask").hidden=$("sheet").hidden=true}
+$("chbtn").onclick=openSheet;$("mask").onclick=closeSheet;
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"&&t.type!=="range"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable))return;
+ if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+go(fromHash());requestAnimationFrame(loop);
+</script>
+</body>
+</html>
