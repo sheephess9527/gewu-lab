@@ -1,0 +1,2225 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>格物实验室 平面向量</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--red:#e5484d;--gold:#c98a12;--teal:#0a9396;--purple:#8e6bd8;--soft:#f5f5f7;--sel:#eaf3fe;--seltext:#0058b0;--glass:rgba(251,251,253,.72);--grid:rgba(0,0,0,.06);--axis:rgba(0,0,0,.45);--shadow:0 1px 2px rgba(0,0,0,.04),0 6px 24px rgba(0,0,0,.05);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--safe:env(safe-area-inset-bottom,0px)}
+.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--red:#ff6369;--gold:#e0a93a;--teal:#2ec4b6;--purple:#a98bf0;--soft:#2c2c2e;--sel:#10263d;--seltext:#2997ff;--glass:rgba(0,0,0,.72);--grid:rgba(255,255,255,.08);--axis:rgba(255,255,255,.5);--shadow:0 1px 2px rgba(0,0,0,.4)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);overflow-x:hidden;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--blue);text-decoration:none}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 18px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{font-size:14px;color:var(--blue);white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.title{font-size:15px;font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;gap:3px;margin-left:auto;align-items:center}
+.prog i{width:16px;height:4px;border-radius:2px;background:var(--line)}.prog i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub);white-space:nowrap}
+.tbtns{display:flex;gap:6px}
+.pill{border:0;border-radius:980px;padding:7px 15px;background:var(--soft);font-size:13px;min-height:32px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}.pill:disabled{opacity:.4;cursor:default}
+.chbtn{display:none}
+/* layout */
+.app{display:grid;grid-template-columns:220px minmax(0,1fr) 340px;height:calc(100vh - 56px);height:calc(100dvh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc button{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;padding:9px 10px;border-radius:10px;font-size:14px;line-height:1.4;min-height:40px}
+.toc button b{font:13px var(--mono);color:var(--sub);font-weight:400;padding-top:1px}
+.toc button:hover{background:var(--soft)}
+.toc button.on{background:var(--sel);color:var(--seltext)}.toc button.on b,.toc button.on span{color:var(--seltext);background:none}
+.sheethead{display:none}
+.stage{display:flex;flex-direction:column;gap:14px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.intro{padding:16px 20px;flex:0 0 auto}
+.introhead{display:flex;align-items:center;gap:10px}
+.introhead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.text{margin:6px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.intro.fold .book,.intro.fold .text{display:none}
+.cvwrap{position:relative;flex:1;min-height:0;overflow:hidden;padding:0}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.soon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.soon div{padding:22px 30px;text-align:center}.soon h3{font-size:20px}.soon p{margin:4px 0 0;color:var(--sub);font-size:14px}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.sec{padding:16px 18px}.sec h3{font-size:13px;color:var(--sub);font-weight:600;margin-bottom:8px;letter-spacing:0}
+.mtitle,.mbook,.mtext{display:none}
+/* controls */
+.ctl{margin:10px 0}.ctl:first-child{margin-top:0}
+.ctl .row{display:flex;justify-content:space-between;gap:10px;font-size:14px}.ctl .row span:last-child{font-family:var(--mono);color:var(--sub)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:none;margin:2px 0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(var(--blue),var(--blue)) 0/var(--p,50%) 100% no-repeat,var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:4px;border-radius:2px;background:var(--blue)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25),0 0 0 .5px rgba(0,0,0,.08)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chips button{border:0;border-radius:980px;padding:6px 13px;background:var(--soft);font-size:13px;min-height:32px}
+.chips button.on{background:var(--blue);color:#fff}
+.btnrow{margin:10px 0}
+.tog{display:flex;justify-content:space-between;align-items:center;margin:10px 0;font-size:14px;gap:10px}
+.sw{position:relative;width:46px;height:28px;border-radius:14px;border:0;background:var(--line);flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.sw.on{background:#34c759}.sw.on::after{transform:translateX(18px)}
+.read{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px;margin:0}
+.read dt{color:var(--sub)}.read dd{margin:0;font-family:var(--mono);text-align:right;overflow-wrap:anywhere}
+.empty{color:var(--sub);font-size:14px;margin:0}
+.pts{margin:0;padding-left:18px;font-size:14px}.pts li{margin:4px 0}
+.gk a{display:block;font-size:14px;padding:4px 0}
+.mdark,.bbar,.scrim{display:none}
+sub,sup{font-size:12px}
+/* tablet + phone */
+@media (max-width:1023px){
+  .app{display:block;height:auto}
+  .stage{padding:12px 12px 0}
+  .cvwrap{order:-1;flex:none;height:52vh}
+  .toc{position:fixed;left:0;right:0;bottom:0;z-index:40;max-height:70vh;background:var(--card);border:0;border-radius:20px 20px 0 0;padding:8px 12px calc(16px + var(--safe));transform:translateY(105%);transition:transform .25s ease;box-shadow:0 -8px 30px rgba(0,0,0,.15)}
+  .toc button{min-height:44px;font-size:15px}
+  body.sheet .toc{transform:none}
+  .sheethead{display:flex;justify-content:center;padding:6px 0 10px}.sheethead i{width:36px;height:5px;border-radius:3px;background:var(--line)}
+  .scrim{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.3)}body.sheet .scrim{display:block}
+  .chbtn{display:inline-flex;align-items:center;min-height:44px}
+  .panel{border:0;overflow:visible;padding:12px}
+  .toc-d{display:none}
+}
+@media (min-width:768px) and (max-width:1023px){.prog,.back span{display:none}.title{flex:1 0 auto}.back{min-width:44px;justify-content:center;font-size:22px}.cvwrap{height:56vh}.panel{display:grid;grid-template-columns:1fr 1fr}}
+@media (max-width:767px){
+  .top{height:52px;padding:0 6px 0 2px;gap:6px}
+  .back{width:44px;height:44px;justify-content:center;font-size:24px}.back span{display:none}
+  .title{flex:1}
+  .prog,.count,.tbtns{display:none}
+  .chbtn{margin-left:auto;font-size:13px}
+  .cvwrap{border-radius:18px}
+  .intro{display:none}
+  .mtitle{display:block;font-size:20px;margin:6px 4px 0}.mbook{display:block;font-size:13px;color:var(--sub);margin:0 4px}
+  .mtext{display:block;font-size:16px;line-height:1.7;margin:0 4px}
+  .ctl,.tog{min-height:44px}.chips button,.btnrow .pill{min-height:44px;padding:10px 16px;font-size:14px}.btnrow .pill{width:100%}
+  input[type=range]{height:36px}
+  .mdark{display:inline-block;align-self:flex-start;font-size:13px;min-height:44px;min-width:64px}
+  .panel{padding:12px 12px calc(84px + var(--safe))}
+  .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:25;padding:10px 12px calc(10px + var(--safe));background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+  .bbar .pill{flex:1;min-height:44px;font-size:15px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../" aria-label="返回格物实验室">‹<span>&nbsp;格物实验室</span></a>
+  <h1 class="title">平面向量 · VecLab</h1>
+  <div class="prog" id="prog" aria-hidden="true"></div>
+  <span class="count" id="count">01 / 09</span>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button>
+    <button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button>
+    <button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn" aria-haspopup="dialog">章节 <span class="mono" id="chcount">&nbsp;01/09</span></button>
+</header>
+<div class="scrim" id="scrim"></div>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"><div class="sheethead"><i></i></div><ol id="toclist"></ol></nav>
+  <main class="stage">
+    <section class="card intro" id="intro">
+      <div class="introhead"><h2 id="ctitle"></h2><button class="pill" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="text" id="ctext"></p>
+    </section>
+    <div class="card cvwrap" id="cvwrap">
+      <canvas id="cv"></canvas>
+      <div class="soon" id="soon" hidden><div class="card"><h3>即将上线</h3><p>本章交互实验正在制作中</p></div></div>
+    </div>
+  </main>
+  <aside class="panel">
+    <h2 class="mtitle" id="mtitle"></h2>
+    <p class="mbook" id="mbook"></p>
+    <p class="mtext" id="mtext"></p>
+    <section class="card sec"><h3>控件</h3><div id="ctrl"></div></section>
+    <section class="card sec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec"><h3>要点</h3><ul class="pts" id="pts"></ul></section>
+    <section class="card sec gk"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<nav class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></nav>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+const BK = "人教A版 必修第二册 · ";
+const CH = [
+  { n: "向量的概念与线性运算", book: BK + "6.1 平面向量的概念、6.2.1–6.2.2 向量的加法、减法运算", ready: true },
+  { n: "数乘与共线", book: BK + "6.2.3 向量的数乘运算", ready: false },
+  { n: "平面向量基本定理", book: BK + "6.3.1", ready: false },
+  { n: "坐标运算", book: BK + "6.3.2–6.3.4", ready: false },
+  { n: "数量积与投影", book: BK + "6.2.4、6.3.5", ready: false },
+  { n: "极化恒等式", book: "高考拓展", ready: false },
+  { n: "等和线", book: "高考拓展", ready: false },
+  { n: "三角形四心", book: "高考拓展", ready: false },
+  { n: "随堂检测", book: "第六章 平面向量及其应用", ready: false },
+];
+const MODS = [];
+
+/* ---------- 第 1 章 向量的概念与线性运算 ---------- */
+MODS[0] = (() => {
+  const A = { x: 3, y: 1 }, B = { x: 1, y: 2 };
+  const C = [{ x: -4, y: -2 }, { x: -1, y: -3 }, { x: 2, y: -1 }, { x: 3, y: 2 }, { x: 0, y: 4 }];
+  /* b 平移到 a 终点后的终点：拖它即改 b */
+  const Bt = {
+    get x() { return A.x + B.x; }, set x(v) { B.x = v - A.x; },
+    get y() { return A.y + B.y; }, set y(v) { B.y = v - A.y; },
+  };
+  let mode = "tri", snap = true, eq = false, both = false, anim = null, m = null, drag = null, rd = null, key = "";
+  const ui = {};
+  const clamp = (p) => {
+    if (!m) return;
+    const x = Math.max(Math.ceil(m.x0), Math.min(Math.floor(m.x1), p.x));
+    const y = Math.max(Math.ceil(m.y0), Math.min(Math.floor(m.y1), p.y));
+    p.x = x; p.y = y;
+  };
+  [A, B, Bt, ...C].forEach((p) => (p.onmove = clamp));
+  const mkDrag = () => {
+    const pts = mode === "multi" ? C : mode === "tri" ? [A, Bt] : [A, B];
+    drag = dragPoints(pts, () => m, snap ? 1 : false);
+  };
+  const sync = () => {
+    ui.anim.hidden = mode !== "tri";
+    ui.both.hidden = mode !== "sub";
+    ui.eq.hidden = mode === "multi";
+  };
+
+  /* 数值格式 */
+  const len = (v) => Math.hypot(v.x, v.y);
+  const f = (v) => String(+(+v).toFixed(2)).replace("-", "−");
+  const vc = (v) => "(" + f(v.x) + ", " + f(v.y) + ")";
+  const surd = (v) => {
+    const s = v.x * v.x + v.y * v.y, r = Math.round(s), l = Math.sqrt(s);
+    if (Math.abs(s - r) > 1e-6 || r === 0) return l.toFixed(2);
+    const q = Math.round(Math.sqrt(r));
+    if (q * q === r) return String(q);
+    let k = 1;
+    for (let i = 2; i * i <= r; i++) if (r % (i * i) === 0) k = i;
+    return (k > 1 ? k : "") + "√" + r / (k * k) + "≈" + l.toFixed(2);
+  };
+  const sub2 = (p, q) => ({ x: p.x - q.x, y: p.y - q.y });
+
+  function rows(T) {
+    if (mode === "multi") {
+      const vs = [0, 1, 2, 3].map((i) => sub2(C[i + 1], C[i]));
+      const s = sub2(C[4], C[0]), tot = vs.reduce((a, v) => a + len(v), 0);
+      const r = vs.map((v, i) => ["abcd"[i], vc(v) + " · |" + "abcd"[i] + "|=" + surd(v), i ? null : T.blue]);
+      r.push(["a+b+c+d", vc(s) + " · " + surd(s)]);
+      r.push(["不等式", "|a+b+c+d| ≤ |a|+|b|+|c|+|d|"]);
+      r.push(["数值", len(s).toFixed(2) + " ≤ " + tot.toFixed(2)]);
+      const e = Math.abs(len(s) - tot) < 1e-6;
+      r.push(["等号", e ? "成立 · 各向量共线同向" : "不成立", e ? T.blue : null]);
+      return r;
+    }
+    const isSub = mode === "sub", op = isSub ? "−" : "+";
+    const S = { x: A.x + B.x, y: A.y + B.y }, D = sub2(A, B), s = isSub ? D : S;
+    const la = len(A), lb = len(B), L = Math.abs(la - lb), M = len(s), R = la + lb;
+    const r = [
+      ["a", vc(A) + " · |a|=" + surd(A), T.blue],
+      ["b", vc(B) + " · |b|=" + surd(B)],
+      ["a" + op + "b", vc(s) + " · |a" + op + "b|=" + surd(s)],
+    ];
+    if (isSub && both) r.push(["a+b", vc(S) + " · |a+b|=" + surd(S)]);
+    r.push(["不等式", "||a|−|b|| ≤ |a" + op + "b| ≤ |a|+|b|"]);
+    r.push(["数值", L.toFixed(2) + " ≤ " + M.toFixed(2) + " ≤ " + R.toFixed(2)]);
+    const eL = Math.abs(L - M) < 1e-6, eR = Math.abs(M - R) < 1e-6;
+    const txt = eL && eR ? "两边都取等 · 含零向量，a、b 共线" : eL ? "左边取等 · a、b 共线" : eR ? "右边取等 · a、b 共线" : "不成立 · a、b 不共线";
+    r.push(["等号", txt, eL || eR ? T.blue : null]);
+    return r;
+  }
+
+  return {
+    text: "向量既有大小又有方向，可以自由平移——只要长度和方向不变，就是同一个向量。加法有两种画法：三角形法则「首尾相接，从第一个起点指向最后一个终点」；平行四边形法则「共起点，对角线就是和」。减法 a−b：共起点时，从 b 的终点指向 a 的终点。",
+    points: [
+      "向量 = 大小 + 方向",
+      "零向量方向任意，与任意向量共线",
+      "相等向量：模相等且方向相同",
+      "加法交换律 a+b=b+a，结合律 (a+b)+c=a+(b+c)",
+      "||a|−|b|| ≤ |a±b| ≤ |a|+|b|",
+    ],
+    gk: [
+      "常与平面几何结合，用加减法把未知向量用已知向量表示，如 AD 是中线时 AD=(AB+AC)/2。",
+      "易错：a−b 的方向是指向被减向量 a 的终点。",
+      "易错：平行向量与共线向量是同一概念。",
+    ],
+    mount(ctrl, read) {
+      ui.mode = chips(
+        [{ v: "tri", l: "三角形法则" }, { v: "para", l: "平行四边形法则" }, { v: "sub", l: "减法" }, { v: "multi", l: "多个向量相加" }],
+        mode, (v) => { mode = v; anim = null; mkDrag(); sync(); });
+      ui.anim = button("平移动画", () => { anim = performance.now() / 1000; }, true);
+      ui.both = toggle("也画 a+b", both, (v) => (both = v));
+      ui.eq = toggle("显示相等向量", eq, (v) => (eq = v));
+      ui.snap = toggle("整数吸附", snap, (v) => {
+        snap = v;
+        if (v) [A, B, ...C].forEach((p) => { p.x = Math.round(p.x); p.y = Math.round(p.y); });
+        mkDrag();
+      });
+      rd = readout(); key = "";
+      ctrl.append(ui.mode, ui.anim, ui.both, ui.eq, ui.snap);
+      read.append(rd);
+      mkDrag(); sync();
+    },
+    unmount() { anim = null; rd = null; },
+    pointer(e, type, x, y) { return drag && drag(e, type, x, y); },
+    draw(c, w, h, t) {
+      const T = theme();
+      m = drawAxes(c, { x: 0, y: 0, w, h }, [-6, 6], [-4.5, 4.5], { equal: true });
+      const { X, Y } = m, O = { x: 0, y: 0 };
+      const ar = (p, q, col, lab, wd) => arrow(c, X(p.x), Y(p.y), X(q.x), Y(q.y), col, lab, wd);
+      const dash = (p, q, col) => {
+        c.save(); c.setLineDash([5, 5]); c.strokeStyle = col; c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(X(p.x), Y(p.y)); c.lineTo(X(q.x), Y(q.y)); c.stroke(); c.restore();
+      };
+      const dot = (p, col) => {
+        c.beginPath(); c.arc(X(p.x), Y(p.y), 6, 0, 7); c.fillStyle = col; c.fill();
+        c.lineWidth = 2; c.strokeStyle = T.bg; c.stroke();
+      };
+      const fade = (a, fn) => { c.save(); c.globalAlpha = a; fn(); c.restore(); };
+      const S = { x: A.x + B.x, y: A.y + B.y };
+
+      if (mode === "multi") {
+        const cols = [T.blue, T.red, T.gold, T.purple];
+        ar(C[0], C[4], T.teal, "a+b+c+d", 4);
+        for (let i = 0; i < 4; i++) ar(C[i], C[i + 1], cols[i], "abcd"[i]);
+        C.forEach((p, i) => dot(p, i ? cols[i - 1] : T.fg));
+      } else {
+        if (eq) {
+          const cand = [[-5, -4], [2, -4], [-5, 2], [-3, -4], [4, -3], [-5, 0], [1, 3], [-2, 2], [3, -1]];
+          const inV = (x, y) => x >= m.x0 + .3 && x <= m.x1 - .3 && y >= m.y0 + .3 && y <= m.y1 - .3;
+          let n = 0;
+          for (const [sx, sy] of cand) {
+            if (n > 1) break;
+            if (!inV(sx, sy) || !inV(sx + A.x, sy + A.y)) continue;
+            fade(.35, () => ar({ x: sx, y: sy }, { x: sx + A.x, y: sy + A.y }, T.blue, "a"));
+            n++;
+          }
+        }
+        if (mode === "tri") {
+          let p = 1;
+          if (anim !== null) { p = Math.min(1, Math.max(0, t - anim)); if (p >= 1) anim = null; }
+          const e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+          const off = { x: A.x * e, y: A.y * e };
+          fade(.3, () => ar(O, B, T.red, "b"));
+          dash(B, S, T.sub);
+          if (p >= 1) ar(O, S, T.teal, "a+b", 4); else fade(p * p, () => ar(O, S, T.teal, "a+b", 4));
+          ar(O, A, T.blue, "a");
+          ar(off, { x: off.x + B.x, y: off.y + B.y }, T.red, "b");
+          dot(A, T.blue); dot(S, T.red);
+        } else {
+          if (mode === "para" || both) { dash(A, S, T.red); dash(B, S, T.blue); ar(O, S, T.teal, "a+b", 4); }
+          if (mode === "sub") ar(B, A, T.purple, "a−b", 4);
+          ar(O, A, T.blue, "a"); ar(O, B, T.red, "b");
+          dot(A, T.blue); dot(B, T.red);
+        }
+      }
+      c.fillStyle = T.sub; c.font = "13px " + getComputedStyle(document.body).fontFamily;
+      c.textAlign = "left"; c.textBaseline = "top";
+      c.fillText("拖动圆点改变向量", 12, 10);
+
+      if (rd) {
+        const r = rows(T), k = JSON.stringify(r);
+        if (k !== key) { key = k; rd.update(r); }
+      }
+    },
+  };
+})();
+const pad = (i) => String(i + 1).padStart(2, "0");
+
+/* ---------- theme ---------- */
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+let themeCache = null;
+function theme() {
+  if (themeCache) return themeCache;
+  const s = getComputedStyle(document.documentElement), v = (n) => s.getPropertyValue("--" + n).trim();
+  return (themeCache = { bg: v("card"), fg: v("fg"), sub: v("sub"), grid: v("grid"), axis: v("axis"), blue: v("blue"), red: v("red"), gold: v("gold"), teal: v("teal"), purple: v("purple") });
+}
+function setDark(on) {
+  document.documentElement.classList.toggle("dark", on); themeCache = null;
+  $("dark").textContent = $("mdark").textContent = on ? "浅色" : "深色";
+  store.set("veclab-dark", on ? "1" : "0");
+}
+setDark(store.get("veclab-dark") === "1");
+const flipDark = () => setDark(!document.documentElement.classList.contains("dark"));
+
+/* ---------- UI tools ---------- */
+function slider(label, min, max, step, val, fmt, onchange) {
+  fmt = fmt || ((v) => v);
+  const w = el("div", "ctl"), row = el("div", "row"), l = el("span", null, label), o = el("span", null, fmt(val)), i = el("input");
+  Object.assign(i, { type: "range", min, max, step, value: val }); i.setAttribute("aria-label", label);
+  const paint = () => { const v = +i.value; o.textContent = fmt(v); i.style.setProperty("--p", ((v - min) / (max - min)) * 100 + "%"); };
+  i.oninput = () => { paint(); onchange && onchange(+i.value); };
+  row.append(l, o); w.append(row, i); paint();
+  w.set = (v) => { i.value = v; paint(); }; w.input = i;
+  return w;
+}
+function chips(options, val, onchange) {
+  const w = el("div", "chips");
+  const opts = options.map((o) => (typeof o === "object" ? o : { v: o, l: String(o) }));
+  const bs = opts.map((o) => { const b = el("button", null, o.l); b.onclick = () => { w.set(o.v); onchange && onchange(o.v); }; w.append(b); return b; });
+  w.set = (v) => opts.forEach((o, k) => { bs[k].classList.toggle("on", o.v === v); bs[k].setAttribute("aria-pressed", o.v === v); });
+  w.set(val); return w;
+}
+function button(label, onclick, primary) {
+  const w = el("div", "btnrow"), b = el("button", "pill" + (primary ? " primary" : ""), label);
+  b.onclick = onclick; w.append(b); w.btn = b; return w;
+}
+function toggle(label, val, onchange) {
+  const w = el("label", "tog"), s = el("button", "sw"); s.setAttribute("role", "switch"); s.setAttribute("aria-label", label);
+  w.set = (v) => { val = !!v; s.classList.toggle("on", val); s.setAttribute("aria-checked", val); };
+  s.onclick = (e) => { e.preventDefault(); w.set(!val); onchange && onchange(val); };
+  w.append(el("span", null, label), s); w.set(val); return w;
+}
+function readout(rows) {
+  const d = el("dl", "read");
+  d.update = (rs) => { d.textContent = ""; rs.forEach(([k, v, c]) => { const dd = el("dd", null, v); if (c) dd.style.color = c; d.append(el("dt", null, k), dd); }); };
+  d.update(rows || []); return d;
+}
+
+/* ---------- canvas tools ---------- */
+function drawAxes(ctx, box, xr, yr, opts) {
+  opts = opts || {}; const T = theme();
+  let [x0, x1] = xr, [y0, y1] = yr;
+  let sx = box.w / (x1 - x0), sy = box.h / (y1 - y0);
+  if (opts.equal) { const s = Math.min(sx, sy), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    sx = sy = s; x0 = cx - box.w / s / 2; x1 = cx + box.w / s / 2; y0 = cy - box.h / s / 2; y1 = cy + box.h / s / 2; }
+  const X = (x) => box.x + (x - x0) * sx, Y = (y) => box.y + box.h - (y - y0) * sy;
+  const invX = (px) => x0 + (px - box.x) / sx, invY = (py) => y0 + (box.y + box.h - py) / sy;
+  const step = opts.step || 1;
+  ctx.save(); ctx.lineWidth = 1;
+  if (opts.grid !== false) { ctx.strokeStyle = T.grid; ctx.beginPath();
+    for (let x = Math.ceil(x0 / step) * step; x <= x1; x += step) { ctx.moveTo(Math.round(X(x)) + .5, box.y); ctx.lineTo(Math.round(X(x)) + .5, box.y + box.h); }
+    for (let y = Math.ceil(y0 / step) * step; y <= y1; y += step) { ctx.moveTo(box.x, Math.round(Y(y)) + .5); ctx.lineTo(box.x + box.w, Math.round(Y(y)) + .5); }
+    ctx.stroke(); }
+  if (opts.axes !== false) {
+    ctx.strokeStyle = T.axis; ctx.beginPath();
+    if (y0 <= 0 && y1 >= 0) { ctx.moveTo(box.x, Y(0)); ctx.lineTo(box.x + box.w, Y(0)); }
+    if (x0 <= 0 && x1 >= 0) { ctx.moveTo(X(0), box.y); ctx.lineTo(X(0), box.y + box.h); }
+    ctx.stroke();
+    if (opts.labels !== false) { ctx.fillStyle = T.sub; ctx.font = "12px ui-monospace,Menlo,monospace"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+      const ls = opts.labelStep || step * Math.max(1, Math.ceil(28 / (sx * step)));
+      for (let x = Math.ceil(x0 / ls) * ls; x <= x1; x += ls) if (Math.abs(x) > 1e-9) ctx.fillText(+x.toFixed(3), X(x), Y(0) + 4);
+      ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      for (let y = Math.ceil(y0 / ls) * ls; y <= y1; y += ls) if (Math.abs(y) > 1e-9) ctx.fillText(+y.toFixed(3), X(0) - 5, Y(y));
+      ctx.textBaseline = "top"; ctx.fillText("O", X(0) - 4, Y(0) + 4); }
+  }
+  ctx.restore();
+  return { X, Y, invX, invY, sx, sy, x0, x1, y0, y1 };
+}
+function arrow(ctx, x1, y1, x2, y2, color, label, width) {
+  width = width || 2.5; const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy); if (len < 1) return;
+  const ux = dx / len, uy = dy / len, hl = Math.min(12 + width, len * .5), hw = hl * .45;
+  ctx.save(); ctx.strokeStyle = ctx.fillStyle = color; ctx.lineWidth = width; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - ux * hl * .8, y2 - uy * hl * .8); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - ux * hl - uy * hw, y2 - uy * hl + ux * hw); ctx.lineTo(x2 - ux * hl + uy * hw, y2 - uy * hl - ux * hw); ctx.closePath(); ctx.fill();
+  if (label) { ctx.font = "italic 600 15px " + getComputedStyle(document.body).fontFamily; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const mx = (x1 + x2) / 2 - uy * 14, my = (y1 + y2) / 2 + ux * 14;
+    ctx.lineWidth = 4; ctx.strokeStyle = theme().bg; ctx.strokeText(label, mx, my); ctx.fillText(label, mx, my); }
+  ctx.restore();
+}
+function dragPoints(points, map, snap) {
+  let held = null;
+  return function (e, type, x, y) {
+    const m = typeof map === "function" ? map() : map; if (!m) return false;
+    if (type === "down") { const r = e && e.pointerType === "touch" ? 22 : 12; let best = r;
+      held = null; points.forEach((p) => { if (p.fixed) return; const d = Math.hypot(m.X(p.x) - x, m.Y(p.y) - y); if (d <= best) { best = d; held = p; } });
+      return !!held; }
+    if (type === "move" && held) { let nx = m.invX(x), ny = m.invY(y);
+      if (snap) { const s = snap === true ? 1 : snap; nx = Math.round(nx / s) * s; ny = Math.round(ny / s) * s; }
+      held.x = nx; held.y = ny; held.onmove && held.onmove(held); return true; }
+    if (type === "up") { const was = !!held; held = null; return was; }
+    return false;
+  };
+}
+
+/* ---------- shell ---------- */
+const cv = $("cv"), ctx = cv.getContext("2d");
+let cur = -1, mod = null, W = 0, H = 0, DPR = 1;
+const prog = $("prog"), list = $("toclist");
+CH.forEach((c, i) => {
+  prog.append(el("i"));
+  const li = el("li"), b = el("button"); b.append(el("b", null, pad(i)), el("span", null, c.n));
+  b.onclick = () => { go(i); closeSheet(); }; li.append(b); list.append(li);
+});
+function resize() {
+  const r = $("cvwrap").getBoundingClientRect(); DPR = Math.min(window.devicePixelRatio || 1, 3);
+  W = Math.max(1, Math.round(r.width)); H = Math.max(1, Math.round(r.height));
+  cv.width = W * DPR; cv.height = H * DPR; render(performance.now());
+}
+function render(t) {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); const T = theme();
+  ctx.fillStyle = T.bg; ctx.fillRect(0, 0, W, H);
+  if (mod && mod.draw) { ctx.save(); mod.draw(ctx, W, H, t / 1000); ctx.restore(); }
+  else drawAxes(ctx, { x: 0, y: 0, w: W, h: H }, [-8, 8], [-5, 5], { equal: true, axes: false });
+}
+(function loop(t) { render(t); requestAnimationFrame(loop); })(performance.now());
+if (window.ResizeObserver) new ResizeObserver(resize).observe($("cvwrap")); else window.addEventListener("resize", resize);
+
+function go(i) {
+  i = Math.max(0, Math.min(CH.length - 1, i)); if (i === cur) return;
+  if (mod && mod.unmount) mod.unmount();
+  cur = i; const c = CH[i], m = MODS[i];
+  mod = c.ready && m ? m : null;
+  $("ctrl").textContent = ""; $("read").textContent = "";
+  $("ctitle").textContent = $("mtitle").textContent = pad(i) + " " + c.n;
+  $("cbook").textContent = $("mbook").textContent = c.book;
+  const text = (mod && mod.text) || "本章实验即将上线，敬请期待。";
+  $("ctext").textContent = $("mtext").textContent = text;
+  $("soon").hidden = !!mod;
+  if (mod && mod.mount) mod.mount($("ctrl"), $("read"));
+  if (!$("ctrl").childNodes.length) $("ctrl").append(el("p", "empty", "暂无控件"));
+  if (!$("read").childNodes.length) $("read").append(el("p", "empty", "—"));
+  const pts = $("pts"); pts.textContent = "";
+  ((mod && mod.points) || ["本章要点整理中"]).forEach((p) => pts.append(el("li", null, p)));
+  const gk = $("gk"); gk.textContent = "";
+  const g = mod && mod.gk; const gs = g ? (Array.isArray(g) ? g : [g]) : [];
+  if (gs.length) gs.forEach((x) => { if (typeof x === "string") gk.append(el("p", "empty", x)); else { const a = el("a", null, x.label + " ›"); a.href = x.href; a.target = "_blank"; a.rel = "noopener"; gk.append(a); } });
+  else gk.append(el("p", "empty", "高考真题链接整理中"));
+  [...prog.children].forEach((e, k) => e.classList.toggle("on", k <= i));
+  $("count").textContent = pad(i) + " / " + pad(CH.length - 1);
+  $("chcount").textContent = "\u00a0" + pad(i) + "/" + pad(CH.length - 1);
+  [...list.querySelectorAll("button")].forEach((b, k) => { b.classList.toggle("on", k === i); b.setAttribute("aria-current", k === i ? "step" : "false"); });
+  $("prev").disabled = $("bprev").disabled = i === 0;
+  $("next").disabled = $("bnext").disabled = i === CH.length - 1;
+  if (location.hash !== "#" + (i + 1)) history.replaceState(null, "", "#" + (i + 1));
+  render(performance.now());
+}
+const step = (d) => go(cur + d);
+$("prev").onclick = $("bprev").onclick = () => step(-1);
+$("next").onclick = $("bnext").onclick = () => step(1);
+$("dark").onclick = $("mdark").onclick = flipDark;
+$("fs").onclick = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) {} };
+$("fold").onclick = () => { const f = $("intro").classList.toggle("fold"); $("fold").textContent = f ? "展开" : "收起"; $("fold").setAttribute("aria-expanded", !f); resize(); };
+const closeSheet = () => document.body.classList.remove("sheet");
+$("chbtn").onclick = () => document.body.classList.add("sheet");
+$("scrim").onclick = closeSheet;
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") return closeSheet();
+  const t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+  if (e.key === "ArrowLeft") step(-1); else if (e.key === "ArrowRight") step(1);
+});
+const fromHash = () => { const n = parseInt(location.hash.slice(1), 10); return n >= 1 && n <= CH.length ? n - 1 : null; };
+window.addEventListener("hashchange", () => { const n = fromHash(); if (n != null) go(n); });
+
+/* pointer forwarding, CSS px */
+const pt = (e) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+const fwd = (type) => (e) => {
+  if (!mod || !mod.pointer) return;
+  if (type === "down") { try { cv.setPointerCapture(e.pointerId); } catch (_) {} }
+  const [x, y] = pt(e); mod.pointer(e, type, x, y);
+};
+cv.addEventListener("pointerdown", fwd("down"));
+cv.addEventListener("pointermove", fwd("move"));
+cv.addEventListener("pointerup", fwd("up"));
+cv.addEventListener("pointercancel", fwd("up"));
+
+/* ---------- chapter modules (added one per edit) ---------- */
+
+/* ---------- 第 2 章 数乘与共线 ---------- */
+MODS[1] = (() => {
+  const a = { x: 2, y: 1 }, O = { x: -4, y: -3 }, A = { x: -2, y: 2 }, B = { x: 3, y: 1 }, O0 = { x: 0, y: 0 };
+  let mode = "mul", lam = 1.5, lc = 0.4, mu = 0.6, free = false, anim = null, m = null, drag = null, rd = null, key = "";
+  const ui = {};
+  const f = (v) => String(+(+v).toFixed(2)).replace("-", "−");
+  const vc = (v) => "(" + f(v.x) + ", " + f(v.y) + ")";
+  const len = (v) => Math.hypot(v.x, v.y);
+  const r1 = (v) => Math.round(v * 10) / 10;
+  const sub = (p, q) => ({ x: p.x - q.x, y: p.y - q.y });
+  const keep = (p) => { p.px = p.x; p.py = p.y; };
+  /* 吸附到网格、留在画面内；a 不能为零向量，A、B 不能重合 */
+  [a, O, A, B].forEach((p) => {
+    keep(p);
+    p.onmove = (q) => {
+      if (m) {
+        q.x = Math.max(Math.ceil(m.x0), Math.min(Math.floor(m.x1), q.x));
+        q.y = Math.max(Math.ceil(m.y0), Math.min(Math.floor(m.y1), q.y));
+      }
+      const bad = q === a ? !q.x && !q.y : A.x === B.x && A.y === B.y;
+      if (bad) { q.x = q.px; q.y = q.py; } else keep(q);
+    };
+  });
+  const sync = () => {
+    ui.lam.hidden = ui.sweep.hidden = mode !== "mul";
+    ui.lc.hidden = ui.free.hidden = mode !== "col";
+    ui.mu.hidden = mode !== "col" || !free;
+    drag = dragPoints(mode === "mul" ? [a] : [O, A, B], () => m, 1);
+  };
+  /* OP = λOA + μOB，非自由时 μ = 1−λ */
+  const calc = () => {
+    const l = lc, u = free ? mu : r1(1 - lc);
+    const P = { x: O.x + l * (A.x - O.x) + u * (B.x - O.x), y: O.y + l * (A.y - O.y) + u * (B.y - O.y) };
+    return { l, u, P, on: Math.abs(l + u - 1) < 1e-9 };
+  };
+
+  function rows(T) {
+    if (mode === "mul") {
+      const la = { x: lam * a.x, y: lam * a.y }, n = len(a), al = Math.abs(lam);
+      return [
+        ["a", vc(a) + " · |a|=" + n.toFixed(2), T.blue],
+        ["λ", f(lam)],
+        ["λa", vc(la) + " · |λa|=" + len(la).toFixed(2)],
+        ["|λ|·|a|", f(al) + " × " + n.toFixed(2) + " = " + (al * n).toFixed(2)],
+        ["方向", lam > 0 ? "与 a 同向" : lam < 0 ? "与 a 反向" : "λa = 0（零向量）"],
+      ];
+    }
+    const { l, u, P, on } = calc(), inside = on && l >= 0 && l <= 1;
+    const r = [
+      ["λ", f(l), T.blue],
+      [free ? "μ" : "1−λ", f(u)],
+      ["系数和", f(l + u) + (on ? " = 1" : " ≠ 1"), on ? T.blue : null],
+      ["P", vc(P)],
+    ];
+    if (on) r.push(["位置", inside ? "线段 AB 内" : "AB 延长线上"]);
+    if (inside) r.push(["AP:PB", "(1−λ):λ = " + f(u) + ":" + f(l)]);
+    r.push(["是否共线", on ? "P 在直线 AB 上 ✓" : "不共线 · P 偏离直线 AB", on ? T.blue : null]);
+    return r;
+  }
+
+  return {
+    text: "λa 把向量 a 拉长或压缩 |λ| 倍：λ>0 方向不变，λ<0 反向，λ=0 得零向量。共线定理：b 与非零向量 a 共线 ⇔ 存在唯一实数 λ 使 b=λa。三点共线的常用形式：P 在直线 AB 上 ⇔ OP=λOA+(1−λ)OB，系数和为 1。",
+    points: [
+      "|λa| = |λ||a|",
+      "λ(μa)=(λμ)a，(λ+μ)a=λa+μa，λ(a+b)=λa+λb",
+      "b∥a（a≠0）⇔ b=λa",
+      "OP=λOA+μOB 且 A、B、P 共线 ⇔ λ+μ=1",
+    ],
+    gk: [
+      "三点共线系数和为 1 是选填高频结论，常配合「求 λ+μ」或「求 mn 最值」。",
+      "易错：共线定理要求 a≠0。",
+      "易错：λ+μ=1 要以同一起点 O 写出三个向量。",
+    ],
+    mount(ctrl, read) {
+      ui.mode = chips([{ v: "mul", l: "数乘" }, { v: "col", l: "三点共线" }], mode, (v) => { mode = v; anim = null; sync(); });
+      ui.lam = slider("λ", -3, 3, 0.1, lam, f, (v) => { lam = v; anim = null; });
+      ui.sweep = button("λ 从 −3 扫到 3", () => { anim = performance.now() / 1000; }, true);
+      ui.lc = slider("λ（OA 的系数）", -1, 2, 0.1, lc, f, (v) => (lc = v));
+      ui.free = toggle("自由系数", free, (v) => {
+        free = v;
+        if (v) { mu = r1(1 - lc); ui.mu.set(mu); }
+        sync();
+      });
+      ui.mu = slider("μ（OB 的系数）", -1, 2, 0.1, mu, f, (v) => (mu = v));
+      rd = readout(); key = "";
+      ctrl.append(ui.mode, ui.lam, ui.sweep, ui.lc, ui.free, ui.mu);
+      read.append(rd);
+      sync();
+    },
+    unmount() { anim = null; rd = null; },
+    pointer(e, type, x, y) { return drag && drag(e, type, x, y); },
+    draw(c, w, h, t) {
+      const T = theme(), font = getComputedStyle(document.body).fontFamily;
+      m = drawAxes(c, { x: 0, y: 0, w, h }, [-7, 7], [-5, 5], { equal: true });
+      const { X, Y } = m;
+      const ar = (p, q, col, lab, wd) => arrow(c, X(p.x), Y(p.y), X(q.x), Y(q.y), col, lab, wd);
+      const seg = (p, q, col, wd, dash, alpha) => {
+        c.save(); if (dash) c.setLineDash([5, 5]); if (alpha) c.globalAlpha = alpha;
+        c.strokeStyle = col; c.lineWidth = wd; c.lineCap = "round";
+        c.beginPath(); c.moveTo(X(p.x), Y(p.y)); c.lineTo(X(q.x), Y(q.y)); c.stroke(); c.restore();
+      };
+      /* 过 p、沿 d 方向的整条直线 */
+      const line = (p, d, col, alpha) => {
+        const k = 60 / (len(d) || 1);
+        seg({ x: p.x - d.x * k, y: p.y - d.y * k }, { x: p.x + d.x * k, y: p.y + d.y * k }, col, 1.5, false, alpha);
+      };
+      const txt = (s, x, y, col, align) => {
+        c.save(); c.font = "600 14px " + font; c.textAlign = align || "left"; c.textBaseline = "middle";
+        c.lineWidth = 4; c.strokeStyle = T.bg; c.strokeText(s, x, y); c.fillStyle = col; c.fillText(s, x, y); c.restore();
+      };
+      const dot = (p, col, lab) => {
+        c.beginPath(); c.arc(X(p.x), Y(p.y), 6, 0, 7); c.fillStyle = col; c.fill();
+        c.lineWidth = 2; c.strokeStyle = T.bg; c.stroke();
+        if (lab) txt(lab, X(p.x) + 9, Y(p.y) - 12, col);
+      };
+
+      if (mode === "mul") {
+        if (anim !== null) {
+          const p = Math.min(1, Math.max(0, (t - anim) / 3));
+          lam = r1(-3 + 6 * p); if (ui.lam) ui.lam.set(lam);
+          if (p >= 1) anim = null;
+        }
+        line(O0, a, T.blue, .3);
+        const la = { x: lam * a.x, y: lam * a.y }, neg = lam < 0;
+        if (lam === 0) dot(O0, T.gold, "λa = 0");
+        else ar(O0, la, neg ? T.red : T.gold, neg ? "λa 反向" : "λa", 5);
+        ar(O0, a, T.blue, "a");
+        dot(a, T.blue);
+        c.font = "13px " + font;
+        txt("拖动 a 的终点 · 所有 λa 都在淡色直线上", 12, 20, T.sub);
+      } else {
+        const { l, P, on } = calc(), d = sub(B, A);
+        const inside = on && l >= 0 && l <= 1, pc = !on ? T.purple : inside ? T.teal : T.gold;
+        line(A, d, T.fg, .22);
+        seg(A, B, T.fg, 2);
+        if (!on) {
+          const k = ((P.x - A.x) * d.x + (P.y - A.y) * d.y) / (d.x * d.x + d.y * d.y);
+          const F = { x: A.x + k * d.x, y: A.y + k * d.y };
+          seg(P, F, T.purple, 1.5, true);
+          txt("偏离", (X(P.x) + X(F.x)) / 2 + 8, (Y(P.y) + Y(F.y)) / 2, T.purple);
+        }
+        ar(O, A, T.blue); ar(O, B, T.red); ar(O, P, pc, null, 4);
+        dot(O, T.fg, "O"); dot(A, T.blue, "A"); dot(B, T.red, "B"); dot(P, pc, "P");
+        txt(free ? "OP = λOA + μOB" : "拖动 O、A、B · OP = λOA + (1−λ)OB", 12, 20, T.sub);
+      }
+
+      if (rd) {
+        const r = rows(T), k = JSON.stringify(r);
+        if (k !== key) { key = k; rd.update(r); }
+      }
+    },
+  };
+})();
+CH[1].ready = true;
+
+/* ---------- 第 3 章 平面向量基本定理 ---------- */
+MODS[2] = (() => {
+  const e1 = { x: 2, y: 0 }, e2 = { x: 1, y: 1.5 }, a = { x: 4, y: 3 }, O = { x: 0, y: 0 };
+  const PRE = { orth: [[2, 0], [0, 2], [3, 2]], skew: [[2, 0], [1, 1.5], [4, 3]], tri: [[4, -1], [1, 3], [4, 3]] };
+  /* 三角形中各目标向量的起点、终点（以 AB、AC 为基底的系数） */
+  const TG = { AD: [[0, 0], [1 / 2, 1 / 2]], BE: [[1, 0], [0, 1 / 3]], AG: [[0, 0], [1 / 3, 1 / 3]] };
+  let pre = "skew", tgt = "AD", snap = true, cx = 1, cy = 2, m = null, drag = null, rd = null, key = "";
+  const ui = {};
+  const cl = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const f = (v) => String(+(+v).toFixed(2)).replace("-", "−");
+  const vc = (v) => "(" + f(v.x) + ", " + f(v.y) + ")";
+  const det = () => e1.x * e2.y - e1.y * e2.x;
+  const ang = () => {
+    const l = Math.hypot(e1.x, e1.y) * Math.hypot(e2.x, e2.y);
+    return l ? (Math.acos(cl((e1.x * e2.x + e1.y * e2.y) / l, -1, 1)) * 180) / Math.PI : 0;
+  };
+  const ok = () => { const t = ang(); return t >= 3 && t <= 177; };
+  const solve = (v) => { const d = det(); return { x: (v.x * e2.y - v.y * e2.x) / d, y: (e1.x * v.y - e1.y * v.x) / d }; };
+  const comb = (x, y) => ({ x: x * e1.x + y * e2.x, y: x * e1.y + y * e2.y });
+  const vec = () => {
+    if (pre !== "tri") return { S: O, E: a, v: a };
+    const [s, e] = TG[tgt], S = comb(s[0], s[1]), E = comb(e[0], e[1]);
+    return { S, E, v: { x: E.x - S.x, y: E.y - S.y } };
+  };
+  /* 简单分数：分母不超过 12 */
+  const GL = { "1/2": "½", "1/3": "⅓", "2/3": "⅔", "1/4": "¼", "3/4": "¾", "1/6": "⅙", "5/6": "⅚" };
+  const fr = (v) => {
+    const s = v < 0 ? "−" : "", u = Math.abs(v);
+    for (let q = 1; q <= 12; q++) {
+      const p = Math.round(u * q);
+      if (Math.abs(u - p / q) < 0.004) return p === 0 ? "0" : s + (q === 1 ? p : GL[p + "/" + q] || p + "/" + q);
+    }
+    return null;
+  };
+  const fx = (v) => { const r = fr(v); return r === null ? f(v) : /^−?\d+$/.test(r) ? r : r + " ≈ " + f(v); };
+  const coef = (v) => fr(v) ?? f(v);
+  const formula = (x, y, n1, n2) => {
+    const t = [[x, n1], [y, n2]].map(([v, n]) => { const s = coef(v); return s === "0" ? "" : s === "1" ? n : s === "−1" ? "−" + n : s + " " + n; }).filter(Boolean);
+    return t.length ? t.join(" + ").replace("+ −", "− ") : "0";
+  };
+  const store = () => { if (ok()) { const s = solve(a); cx = s.x; cy = s.y; } };
+  const fit = (p) => { if (m) { p.x = cl(p.x, m.x0 + .2, m.x1 - .2); p.y = cl(p.y, m.y0 + .2, m.y1 - .2); } };
+  e1.onmove = e2.onmove = (p) => {
+    fit(p); p.x = Math.round(p.x * 2) / 2; p.y = Math.round(p.y * 2) / 2;
+    if (snap && pre !== "tri" && ok()) Object.assign(a, comb(cx, cy)); else store();
+  };
+  a.onmove = (p) => {
+    fit(p);
+    if (snap && ok()) { const s = solve(p); cx = Math.round(s.x); cy = Math.round(s.y); Object.assign(p, comb(cx, cy)); }
+    else { p.x = Math.round(p.x * 100) / 100; p.y = Math.round(p.y * 100) / 100; store(); }
+  };
+  const sync = () => {
+    ui.tg.hidden = pre !== "tri"; ui.snap.hidden = pre === "tri";
+    drag = dragPoints(pre === "tri" ? [e1, e2] : [a, e1, e2], () => m, false);
+  };
+  const apply = (k) => {
+    const [p, q, r] = PRE[k];
+    Object.assign(e1, { x: p[0], y: p[1] }); Object.assign(e2, { x: q[0], y: q[1] }); Object.assign(a, { x: r[0], y: r[1] });
+    store();
+  };
+
+  function rows(T) {
+    const tri = pre === "tri", n1 = tri ? "AB" : "e₁", n2 = tri ? "AC" : "e₂", t = ang();
+    const r = [[n1, vc(e1)], [n2, vc(e2)], ["夹角", t.toFixed(1) + "°" + (Math.abs(t - 90) < .05 ? " · 垂直" : "")]];
+    if (!ok()) { r.push(["状态", "共线 · 不能作为基底", T.blue]); return r; }
+    const { v } = vec(), s = solve(v);
+    if (tri) r.push(["图中", "D 为 BC 中点 · AE = ⅓AC · G 为重心"]);
+    else r.push(["a", vc(a)]);
+    r.push(["x", fx(s.x)], ["y", fx(s.y)], ["式子", (tri ? tgt : "a") + " = " + formula(s.x, s.y, n1, n2), T.blue]);
+    return r;
+  }
+
+  return {
+    text: "任选两个不共线的向量 e₁、e₂ 作基底，平面内任何向量 a 都能唯一地写成 a = x e₁ + y e₂。几何上就是沿 e₁、e₂ 的方向画一张斜网格，a 的终点落在哪个格点，(x, y) 就是多少。基底一旦共线，网格塌成一条线，就无法表示整个平面。",
+    points: [
+      "基底必须不共线",
+      "分解唯一：a = x e₁ + y e₂ 中的 x、y 只有一组",
+      "同一向量在不同基底下系数不同",
+      "正交分解是特例：单位正交基底下的系数就是坐标",
+    ],
+    gk: [
+      "常在三角形、平行四边形中选两条边为基底表示其他向量，再用「系数唯一」列方程求参数。",
+      "易错：零向量不能作基底。",
+      "易错：基底不一定垂直。",
+    ],
+    mount(ctrl, read) {
+      ui.pre = chips([{ v: "orth", l: "正交基底" }, { v: "skew", l: "斜基底" }, { v: "tri", l: "三角形中线" }], pre, (v) => { pre = v; apply(v); sync(); });
+      ui.tg = chips(["AD", "BE", "AG"], tgt, (v) => (tgt = v));
+      ui.snap = toggle("吸附整数系数", snap, (v) => {
+        snap = v;
+        if (v && ok()) { cx = Math.round(cx); cy = Math.round(cy); Object.assign(a, comb(cx, cy)); }
+      });
+      rd = readout(); key = "";
+      ctrl.append(ui.pre, ui.tg, ui.snap);
+      read.append(rd);
+      store(); sync();
+    },
+    unmount() { rd = null; },
+    pointer(e, type, x, y) { return drag && drag(e, type, x, y); },
+    draw(c, w, h) {
+      const T = theme(), font = getComputedStyle(document.body).fontFamily, tri = pre === "tri", good = ok();
+      m = drawAxes(c, { x: 0, y: 0, w, h }, tri ? [-2, 6] : [-6, 6], tri ? [-2.5, 4] : [-4.5, 4.5], { equal: true, grid: !good });
+      const { X, Y } = m;
+      const ar = (p, q, col, lab, wd, dash) => {
+        c.save(); if (dash) c.setLineDash([6, 5]);
+        arrow(c, X(p.x), Y(p.y), X(q.x), Y(q.y), col, lab, wd); c.restore();
+      };
+      const txt = (s, x, y, col, align, size) => {
+        c.save(); c.font = "600 " + (size || 14) + "px " + font; c.textAlign = align || "left"; c.textBaseline = "middle";
+        c.lineWidth = 4; c.strokeStyle = T.bg; c.strokeText(s, x, y); c.fillStyle = col; c.fillText(s, x, y); c.restore();
+      };
+      const dot = (p, col, lab, r) => {
+        c.beginPath(); c.arc(X(p.x), Y(p.y), r || 6, 0, 7); c.fillStyle = col; c.fill();
+        c.lineWidth = 2; c.strokeStyle = T.bg; c.stroke();
+        if (lab) txt(lab, X(p.x) + 9, Y(p.y) - 12, col);
+      };
+      const poly = (ps, close) => { c.beginPath(); ps.forEach((p, i) => (i ? c.lineTo(X(p.x), Y(p.y)) : c.moveTo(X(p.x), Y(p.y)))); if (close) c.closePath(); };
+
+      if (good) {
+        /* 斜网格：覆盖可视区的两族平行线 */
+        const cs = [[m.x0, m.y0], [m.x1, m.y0], [m.x0, m.y1], [m.x1, m.y1]].map(([x, y]) => solve({ x, y }));
+        const xa = Math.min(...cs.map((p) => p.x)), xb = Math.max(...cs.map((p) => p.x));
+        const ya = Math.min(...cs.map((p) => p.y)), yb = Math.max(...cs.map((p) => p.y));
+        let st = 0.5;
+        while ((xb - xa + yb - ya) / st > 240) st *= 2;
+        c.save(); c.strokeStyle = T.fg; c.lineWidth = 1;
+        [false, true].forEach((int) => {
+          c.globalAlpha = int ? .16 : .06; c.beginPath();
+          for (let k = Math.ceil(xa / st) * st; k <= xb; k += st) if ((Math.abs(k - Math.round(k)) < 1e-9) === int) {
+            const p = comb(k, ya), q = comb(k, yb); c.moveTo(X(p.x), Y(p.y)); c.lineTo(X(q.x), Y(q.y));
+          }
+          for (let k = Math.ceil(ya / st) * st; k <= yb; k += st) if ((Math.abs(k - Math.round(k)) < 1e-9) === int) {
+            const p = comb(xa, k), q = comb(xb, k); c.moveTo(X(p.x), Y(p.y)); c.lineTo(X(q.x), Y(q.y));
+          }
+          c.stroke();
+        });
+        c.restore();
+      }
+      if (tri) {
+        const A = O, D = comb(1 / 2, 1 / 2), E = comb(0, 1 / 3), G = comb(1 / 3, 1 / 3);
+        c.save(); c.strokeStyle = T.fg; c.lineWidth = 1.5; c.globalAlpha = .55; poly([A, e1, e2], true); c.stroke(); c.restore();
+        dot(A, T.fg, "A"); dot(D, T.sub, "D", 4); dot(E, T.sub, "E", 4); dot(G, T.sub, "G", 4);
+      }
+      const n1 = tri ? "AB" : "e₁", n2 = tri ? "AC" : "e₂";
+      if (good) {
+        const { S, E, v } = vec(), s = solve(v);
+        const P1 = { x: S.x + s.x * e1.x, y: S.y + s.x * e1.y }, P2 = { x: S.x + s.y * e2.x, y: S.y + s.y * e2.y };
+        c.save(); c.fillStyle = T.teal; c.globalAlpha = .08; poly([S, P1, E, P2], true); c.fill();
+        c.globalAlpha = .35; c.setLineDash([3, 4]); c.strokeStyle = T.sub; c.lineWidth = 1; poly([S, P2, E]); c.stroke(); c.restore();
+        const lab = (k, n) => { const s2 = coef(k); return s2 === "0" ? null : (s2 === "1" ? "" : s2 === "−1" ? "−" : s2) + n; };
+        ar(S, P1, T.blue, lab(s.x, n1), 2, true);
+        ar(P1, E, T.red, lab(s.y, n2), 2, true);
+        ar(S, E, T.teal, tri ? tgt : "a", 4.5);
+      }
+      ar(O, e1, T.blue, tri ? null : "e₁"); ar(O, e2, T.red, tri ? null : "e₂");
+      dot(e1, T.blue, tri ? "B" : null); dot(e2, T.red, tri ? "C" : null);
+      if (!tri && good) dot(a, T.teal);
+      if (!tri && !good) { ar(O, a, T.teal, "a", 4.5); dot(a, T.teal); }
+      if (!good) txt("e₁ 与 e₂ 共线，不能作为基底", w / 2, h / 2 - 40, T.fg, "center", 16);
+      txt(tri ? "拖动 B、C 改变三角形" : "拖动 e₁、e₂、a 的终点", 12, 20, T.sub, "left", 13);
+
+      if (rd) {
+        const r = rows(T), k = JSON.stringify(r);
+        if (k !== key) { key = k; rd.update(r); }
+      }
+    },
+  };
+})();
+CH[2].ready = true;
+
+/* ---------- 第 4 章 坐标运算 ---------- */
+MODS[3] = (() => {
+  const A = { x: -2, y: -1 }, B = { x: 3, y: 2 }, a = { x: 2, y: 1 }, b = { x: -1, y: 2 }, O = { x: 0, y: 0 };
+  const pa = { x: 3, y: 1 }, pb = { x: 1, y: 3 }, dA = { x: -3, y: -1 }, dB = { x: 3, y: 2 }, dC = { x: 0, y: 3 };
+  const ALL = [A, B, a, b, pa, pb, dA, dB, dC];
+  let mode = "coord", snap = true, lam = 2, mu = 1, ld = 1, cen = false, m = null, drag = null, rd = null, key = "";
+  const ui = {};
+  const cl = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const f = (v) => String(+(+v).toFixed(2)).replace("-", "−");
+  const vc = (x, y) => "(" + x + ", " + y + ")";
+  const pv = (p) => vc(f(p.x), f(p.y));
+  const pr = (v) => (v < 0 ? "(" + f(v) + ")" : f(v));
+  /* 分数：分母不超过 12，否则小数 */
+  const fr = (v) => {
+    const s = v < 0 ? "−" : "", u = Math.abs(v);
+    for (let q = 1; q <= 12; q++) {
+      const p = Math.round(u * q);
+      if (Math.abs(u - p / q) < 1e-6) return p ? s + p + (q > 1 ? "/" + q : "") : "0";
+    }
+    return f(v);
+  };
+  const det = () => pa.x * pb.y - pb.x * pa.y;
+  const par = () => Math.abs(det()) < 1e-6;
+  const green = () => (document.documentElement.classList.contains("dark") ? "#30d158" : "#17834a");
+  const divP = () => ({ x: (dA.x + ld * dB.x) / (1 + ld), y: (dA.y + ld * dB.y) / (1 + ld) });
+  const fit = (p) => {
+    if (m) {
+      const lo = (v) => (snap ? Math.ceil(v) : v), hi = (v) => (snap ? Math.floor(v) : v);
+      p.x = cl(p.x, lo(m.x0 + .3), hi(m.x1 - .3)); p.y = cl(p.y, lo(m.y0 + .3), hi(m.y1 - .3));
+    }
+    if (!snap) { p.x = Math.round(p.x * 100) / 100; p.y = Math.round(p.y * 100) / 100; }
+  };
+  /* 关掉吸附时，b 靠近 a 所在直线就吸上去 */
+  const magnet = () => {
+    const l2 = pa.x * pa.x + pa.y * pa.y;
+    if (snap || Math.abs(det()) / Math.sqrt(l2) > .15) return;
+    const k = (pb.x * pa.x + pb.y * pa.y) / l2; pb.x = k * pa.x; pb.y = k * pa.y;
+  };
+  ALL.forEach((p) => {
+    p.px = p.x; p.py = p.y;
+    p.onmove = (q) => {
+      fit(q);
+      if ((q === a || q === pa) && !q.x && !q.y) { q.x = q.px; q.y = q.py; }
+      if (q === pb) magnet();
+      q.px = q.x; q.py = q.y;
+    };
+  });
+  const sync = () => {
+    ui.lam.hidden = ui.mu.hidden = mode !== "op";
+    ui.ld.hidden = ui.mid.hidden = ui.cen.hidden = mode !== "div";
+    const P = { coord: [A, B], op: [a, b], par: [pa, pb], div: cen ? [dA, dB, dC] : [dA, dB] }[mode];
+    drag = dragPoints(P, () => m, snap ? 1 : false);
+  };
+
+  function rows(T) {
+    if (mode === "coord") {
+      const dx = B.x - A.x, dy = B.y - A.y;
+      return [
+        ["A", pv(A)], ["B", pv(B)],
+        ["x_B−x_A", f(B.x) + " − " + pr(A.x) + " = " + f(dx)],
+        ["y_B−y_A", f(B.y) + " − " + pr(A.y) + " = " + f(dy)],
+        ["AB", "(x_B−x_A, y_B−y_A) = " + vc(f(dx), f(dy)), T.blue],
+      ];
+    }
+    if (mode === "op") {
+      const la = { x: lam * a.x, y: lam * a.y }, mb = { x: mu * b.x, y: mu * b.y }, s = { x: la.x + mb.x, y: la.y + mb.y };
+      return [
+        ["a", pv(a)], ["b", pv(b)],
+        ["λa", f(lam) + "·" + pv(a) + " = " + pv(la)],
+        ["μb", f(mu) + "·" + pv(b) + " = " + pv(mb)],
+        ["和 λa+μb", vc(f(la.x) + " + " + pr(mb.x), f(la.y) + " + " + pr(mb.y)) + " = " + pv(s), T.blue],
+      ];
+    }
+    if (mode === "par") {
+      const ok = par(), d = ok ? 0 : det();
+      const r = [
+        ["a", vc(fr(pa.x), fr(pa.y))], ["b", vc(fr(pb.x), fr(pb.y))],
+        ["x₁y₂−x₂y₁", f(pa.x) + "×" + pr(pb.y) + " − " + pr(pb.x) + "×" + pr(pa.y) + " = " + f(d)],
+        ["结论", ok ? "= 0 · a ∥ b" : (d > 0 ? "> 0" : "< 0") + " · a 与 b 不平行", ok ? T.blue : null],
+      ];
+      if (ok) r.push(["b = ka", "k = " + fr((pb.x * pa.x + pb.y * pa.y) / (pa.x * pa.x + pa.y * pa.y))]);
+      return r;
+    }
+    const P = divP(), s = 1 + ld;
+    const sub = (k) => "(" + f(dA[k]) + " + " + pr(ld) + "×" + pr(dB[k]) + ") / " + pr(s) + " = " + fr(P[k]);
+    const r = [
+      ["A", pv(dA)], ["B", pv(dB)],
+      ["λ", f(ld) + (ld === 1 ? " · 中点" : ld === 0 ? " · P 与 A 重合" : ld > 0 ? " · 内分" : " · 外分")],
+      ["x_P", sub("x")], ["y_P", sub("y")],
+      ["P", vc(fr(P.x), fr(P.y)), T.blue],
+    ];
+    if (cen) {
+      const g = (k) => "(" + f(dA[k]) + " + " + pr(dB[k]) + " + " + pr(dC[k]) + ") / 3 = " + fr((dA[k] + dB[k] + dC[k]) / 3);
+      r.push(["C", pv(dC)], ["x_G", g("x")], ["y_G", g("y")],
+        ["G", vc(fr((dA.x + dB.x + dC.x) / 3), fr((dA.y + dB.y + dC.y) / 3)), T.blue]);
+    }
+    return r;
+  }
+
+  return {
+    text: "取 x 轴、y 轴上的单位向量 i、j 作基底，a = x i + y j，就记作 a=(x, y)。从此向量运算变成数的运算：加减对应坐标相加减，数乘对应坐标都乘 λ；AB 的坐标是「终点减起点」。两个向量平行，当且仅当 x₁y₂ − x₂y₁ = 0。",
+    points: [
+      "AB = (x₂−x₁, y₂−y₁)",
+      "a±b = (x₁±x₂, y₁±y₂)，λa = (λx₁, λy₁)",
+      "a∥b ⇔ x₁y₂−x₂y₁ = 0",
+      "中点 ((x₁+x₂)/2, (y₁+y₂)/2)",
+      "重心 ((x₁+x₂+x₃)/3, (y₁+y₂+y₃)/3)",
+    ],
+    gk: [
+      "坐标法是向量题的「万能钥匙」，选填常用建系把几何问题化为计算。",
+      "易错：平行条件是交叉相乘相减，不要写成 x₁x₂−y₁y₂（那是另一回事）。",
+      "易错：AB 是终点减起点。",
+    ],
+    mount(ctrl, read) {
+      ui.mode = chips([{ v: "coord", l: "坐标表示" }, { v: "op", l: "运算" }, { v: "par", l: "平行判定" }, { v: "div", l: "定比分点" }],
+        mode, (v) => { mode = v; sync(); });
+      ui.lam = slider("λ", -3, 3, .5, lam, f, (v) => (lam = v));
+      ui.mu = slider("μ", -3, 3, .5, mu, f, (v) => (mu = v));
+      ui.ld = slider("λ（AP = λPB）", -3, 3, .5, ld, f, (v) => {
+        if (v === -1) { v = ld > -1 ? -1.5 : -.5; ui.ld.set(v); }
+        ld = v;
+      });
+      ui.mid = button("中点 λ = 1", () => { ld = 1; ui.ld.set(1); }, true);
+      ui.cen = toggle("三角形重心", cen, (v) => { cen = v; sync(); });
+      ui.snap = toggle("整数吸附", snap, (v) => {
+        snap = v;
+        if (v) ALL.forEach((p) => {
+          p.x = Math.round(p.x); p.y = Math.round(p.y);
+          if ((p === a || p === pa) && !p.x && !p.y) p.x = 1;
+          p.px = p.x; p.py = p.y;
+        });
+        sync();
+      });
+      rd = readout(); key = "";
+      ctrl.append(ui.mode, ui.lam, ui.mu, ui.ld, ui.mid, ui.cen, ui.snap);
+      read.append(rd);
+      sync();
+    },
+    unmount() { rd = null; },
+    pointer(e, type, x, y) { return drag && drag(e, type, x, y); },
+    draw(c, w, h) {
+      const T = theme(), font = getComputedStyle(document.body).fontFamily, G = green();
+      m = drawAxes(c, { x: 0, y: 0, w, h }, [-6, 6], [-4.5, 4.5], { equal: true });
+      const { X, Y } = m;
+      const ar = (p, q, col, lab, wd, dash) => {
+        c.save(); if (dash) c.setLineDash([6, 5]);
+        arrow(c, X(p.x), Y(p.y), X(q.x), Y(q.y), col, lab, wd); c.restore();
+      };
+      const seg = (p, q, col, wd, alpha, dash) => {
+        c.save(); if (dash) c.setLineDash([5, 5]); c.globalAlpha = alpha || 1;
+        c.strokeStyle = col; c.lineWidth = wd; c.lineCap = "round";
+        c.beginPath(); c.moveTo(X(p.x), Y(p.y)); c.lineTo(X(q.x), Y(q.y)); c.stroke(); c.restore();
+      };
+      const txt = (s, x, y, col, align, size) => {
+        c.save(); c.font = "600 " + (size || 14) + "px " + font; c.textAlign = align || "left"; c.textBaseline = "middle";
+        c.lineWidth = 4; c.strokeStyle = T.bg; c.strokeText(s, x, y); c.fillStyle = col; c.fillText(s, x, y); c.restore();
+      };
+      const dot = (p, col, lab, r) => {
+        c.beginPath(); c.arc(X(p.x), Y(p.y), r || 6, 0, 7); c.fillStyle = col; c.fill();
+        c.lineWidth = 2; c.strokeStyle = T.bg; c.stroke();
+        if (lab) txt(lab, X(p.x) + 9, Y(p.y) - 12, col);
+      };
+      const fade = (al, fn) => { c.save(); c.globalAlpha = al; fn(); c.restore(); };
+      let hint = "";
+
+      if (mode === "coord") {
+        const K = { x: B.x, y: A.y }, up = B.y >= A.y, right = B.x >= A.x;
+        fade(.5, () => { ar(O, A, T.fg, "OA", 2); ar(O, B, T.fg, "OB", 2); });
+        if (B.x !== A.x) {
+          ar(A, K, T.blue, null, 2, true);
+          txt("x_B−x_A = " + f(B.x - A.x), X((A.x + K.x) / 2), Y(A.y) + (up ? 16 : -16), T.blue, "center", 13);
+        }
+        if (B.y !== A.y) {
+          ar(K, B, T.red, null, 2, true);
+          txt("y_B−y_A = " + f(B.y - A.y), X(K.x) + (right ? 10 : -10), Y((K.y + B.y) / 2), T.red, right ? "left" : "right", 13);
+        }
+        ar(A, B, T.teal, "AB", 4);
+        dot(A, T.fg, "A" + pv(A)); dot(B, T.fg, "B" + pv(B));
+        hint = "拖动 A、B · AB = 终点 − 起点";
+      } else if (mode === "op") {
+        const la = { x: lam * a.x, y: lam * a.y }, S = { x: la.x + mu * b.x, y: la.y + mu * b.y };
+        fade(.35, () => { ar(O, a, T.blue, "a", 2); ar(O, b, T.red, "b", 2); });
+        ar(O, la, T.blue, "λa", 3.5); ar(la, S, T.red, "μb", 3.5); ar(O, S, T.teal, "λa+μb", 4.5);
+        dot(a, T.blue); dot(b, T.red);
+        hint = "拖动 a、b 的终点 · λa 与 μb 首尾相接";
+      } else if (mode === "par") {
+        const ok = par(), d = ok ? 0 : det(), k = 40 / Math.hypot(pa.x, pa.y);
+        seg({ x: -pa.x * k, y: -pa.y * k }, { x: pa.x * k, y: pa.y * k }, ok ? G : T.fg, ok ? 2 : 1.5, ok ? .8 : .3, !ok);
+        ar(O, pa, T.blue, "a", 3.5); ar(O, pb, ok ? G : T.red, "b", 3.5);
+        dot(pa, T.blue); dot(pb, ok ? G : T.red);
+        if (ok) txt("a ∥ b", X(pb.x) + 10, Y(pb.y) - 16, G, "left", 15);
+        /* 仪表条：x₁y₂−x₂y₁ 的正负与大小，满格 ±20 */
+        const gw = Math.min(w - 48, 320), gx = (w - gw) / 2, gy = 62, mid = gx + gw / 2, v = (cl(d, -20, 20) / 20) * (gw / 2);
+        c.save();
+        c.globalAlpha = .1; c.fillStyle = T.fg; c.fillRect(gx, gy, gw, 10); c.globalAlpha = 1;
+        c.fillStyle = ok ? G : d > 0 ? T.blue : T.red; c.fillRect(Math.min(mid, mid + v), gy, Math.abs(v), 10);
+        c.strokeStyle = T.fg; c.lineWidth = 2; c.beginPath(); c.moveTo(mid, gy - 5); c.lineTo(mid, gy + 15); c.stroke();
+        c.restore();
+        txt("x₁y₂−x₂y₁ = " + f(d), mid, gy - 14, ok ? G : T.fg, "center", 13);
+        txt("−", gx, gy + 24, T.sub, "left", 13); txt("0", mid, gy + 26, T.sub, "center", 12); txt("+", gx + gw, gy + 24, T.sub, "right", 13);
+        hint = ok ? "b 的终点落在 a 所在直线上" : "拖动 a、b · b 的终点要落在虚线上才平行";
+      } else {
+        const P = divP(), col = ld >= 0 ? T.teal : T.gold, d = { x: dB.x - dA.x, y: dB.y - dA.y }, L = Math.hypot(d.x, d.y);
+        if (L) { const k = 40 / L; seg({ x: dA.x - d.x * k, y: dA.y - d.y * k }, { x: dA.x + d.x * k, y: dA.y + d.y * k }, T.fg, 1.5, .2); }
+        if (cen) {
+          const g = { x: (dA.x + dB.x + dC.x) / 3, y: (dA.y + dB.y + dC.y) / 3 }, V = [dA, dB, dC];
+          V.forEach((p, i) => {
+            const q = V[(i + 1) % 3], r = V[(i + 2) % 3];
+            seg(p, q, T.purple, 1.5, .7);
+            seg(p, { x: (q.x + r.x) / 2, y: (q.y + r.y) / 2 }, T.purple, 1, .45, true);
+          });
+          dot(dC, T.fg, "C"); dot(g, T.purple, "G");
+        }
+        seg(dA, dB, T.fg, 2, .7);
+        ar(dA, P, col, "AP", 2.5); ar(P, dB, col, "PB", 2.5);
+        dot(dA, T.fg, "A"); dot(dB, T.fg, "B"); dot(P, col);
+        /* P 的标签放在 AP、PB 标签的另一侧；外分时沿直线向外 */
+        const sx = X(dB.x) - X(dA.x), sy = Y(dB.y) - Y(dA.y), sl = Math.hypot(sx, sy) || 1;
+        let ox = sy / sl, oy = -sx / sl;
+        if (ld < 0) {
+          const mx = X(P.x) - (X(dA.x) + X(dB.x)) / 2, my = Y(P.y) - (Y(dA.y) + Y(dB.y)) / 2, ml = Math.hypot(mx, my) || 1;
+          ox = mx / ml; oy = my / ml;
+        }
+        txt("P" + vc(fr(P.x), fr(P.y)), X(P.x) + ox * 20, Y(P.y) + oy * 20, col, ox > .35 ? "left" : ox < -.35 ? "right" : "center");
+        hint = ld >= 0 ? "λ > 0：P 内分 AB（青）" : "λ < 0：P 外分 AB（金）";
+      }
+      txt(hint, 12, 20, T.sub, "left", 13);
+
+      if (rd) {
+        const r = rows(T), k = JSON.stringify(r);
+        if (k !== key) { key = k; rd.update(r); }
+      }
+    },
+  };
+})();
+CH[3].ready = true;
+
+/* ---------- 第 5 章 数量积与投影 ---------- */
+MODS[4] = (() => {
+  const a = { x: 4, y: 1 }, b = { x: 2, y: 3 };
+  let mode = "geo", snap = true, spin = null, m = null, drag = null, rd = null, key = "";
+  const ui = {};
+  const cl = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const f = (v) => String(+(+v).toFixed(2)).replace("-", "−");
+  const c4 = (v) => (Math.abs(v) < 5e-5 ? 0 : v).toFixed(4).replace("-", "−");
+  const pr = (v) => (v < 0 ? "(" + f(v) + ")" : f(v));
+  const pv = (p) => "(" + f(p.x) + ", " + f(p.y) + ")";
+  const len = (p) => Math.hypot(p.x, p.y);
+  const dotp = () => a.x * b.x + a.y * b.y;
+  const isPerp = () => Math.abs(dotp()) < 1e-6;
+  /* 从 a 到 b 的有向角，0°–360° */
+  const phi = () => { const g = Math.atan2(a.x * b.y - a.y * b.x, dotp()) * 180 / Math.PI; return g < 0 ? g + 360 : g; };
+  const fit = (p) => {
+    if (m) {
+      const lo = (v) => (snap ? Math.ceil(v) : v), hi = (v) => (snap ? Math.floor(v) : v);
+      p.x = cl(p.x, lo(m.x0 + .3), hi(m.x1 - .3)); p.y = cl(p.y, lo(m.y0 + .3), hi(m.y1 - .3));
+    }
+    if (!snap) { p.x = Math.round(p.x * 100) / 100; p.y = Math.round(p.y * 100) / 100; }
+  };
+  /* 垂直判定且关掉吸附时，b 靠近 a 的垂线就吸上去 */
+  const magnet = () => {
+    if (snap || mode !== "perp") return;
+    const la = len(a), lb = len(b);
+    if (!lb || Math.abs(dotp()) / (la * lb) > .03) return;
+    const k = (b.y * a.x - b.x * a.y) / (la * la); b.x = -a.y * k; b.y = a.x * k;
+  };
+  [a, b].forEach((p) => {
+    p.px = p.x; p.py = p.y;
+    p.onmove = (q) => {
+      fit(q);
+      if (!q.x && !q.y) { q.x = q.px; q.y = q.py; }
+      if (q === b) magnet();
+      q.px = q.x; q.py = q.y;
+    };
+  });
+  const mkDrag = () => (drag = dragPoints([a, b], () => m, snap ? 1 : false));
+  /* 结束旋转：restore 回到起点，否则停在当前位置 */
+  const endSpin = (restore) => {
+    if (!spin) return;
+    if (restore) { b.x = spin.bx; b.y = spin.by; }
+    else if (snap) { b.x = Math.round(b.x); b.y = Math.round(b.y); if (!b.x && !b.y) b.x = 1; }
+    spin = null; b.px = b.x; b.py = b.y;
+  };
+
+  function rows(T) {
+    const la = len(a), lb = len(b), d = dotp(), cs = cl(d / (la * lb), -1, 1), th = Math.acos(cs) * 180 / Math.PI;
+    const k = d / (la * la), P = { x: k * a.x, y: k * a.y };
+    const coord = mode === "coord"
+      ? f(a.x) + "×" + pr(b.x) + " + " + pr(a.y) + "×" + pr(b.y) + " = " + f(a.x * b.x) + " + " + pr(a.y * b.y) + " = " + f(d)
+      : "x₁x₂ + y₁y₂ = " + f(d);
+    const r = [
+      ["a", pv(a), T.blue], ["b", pv(b)],
+      ["|a|", la.toFixed(2)], ["|b|", lb.toFixed(2)],
+      ["θ", th.toFixed(2) + "°"], ["cosθ", c4(cs)],
+      ["a·b 几何", "|a||b|cosθ = " + la.toFixed(2) + "×" + lb.toFixed(2) + "×" + c4(cs) + " = " + f(la * lb * cs), T.blue],
+      ["a·b 坐标", coord, T.blue],
+      ["投影向量", "(a·b/|a|²)·a = " + pv(P)],
+      ["|b|cosθ", f(d / la)],
+    ];
+    if (mode === "perp") r.push(["判定", isPerp() ? "a·b = 0 · a ⊥ b" : "a·b ≠ 0 · a 与 b 不垂直", isPerp() ? T.blue : null]);
+    else r.push(["符号", isPerp() ? "a·b = 0 · θ = 90°" : d > 0 ? (cs > 1 - 1e-9 ? "a·b > 0 · θ = 0°，同向" : "a·b > 0 · θ 为锐角")
+      : cs < -1 + 1e-9 ? "a·b < 0 · θ = 180°，反向" : "a·b < 0 · θ 为钝角"]);
+    return r;
+  }
+
+  return {
+    text: "a·b = |a||b|cosθ，结果是一个数。把 b 投到 a 的方向上，得到投影向量 (|b|cosθ)·(a/|a|)；数量积就是 |a| 乘以这个投影的「有向长度」：θ 为锐角时为正，直角时为 0，钝角时为负。坐标形式 a·b = x₁x₂ + y₁y₂。",
+    points: [
+      "a·b = |a||b|cosθ = x₁x₂ + y₁y₂",
+      "a ⊥ b ⇔ a·b = 0",
+      "|a| = √(a·a)",
+      "cosθ = a·b / (|a||b|)",
+      "b 在 a 上的投影向量 = (a·b/|a|²)·a",
+    ],
+    gk: [
+      "新高考常考求夹角、模长、投影向量。",
+      "易错：a·b < 0 不等于 θ 为钝角，还要排除 θ = 180°。",
+      "易错：投影向量是向量，不是数。",
+      "易错：数量积不满足结合律，(a·b)c ≠ a(b·c)。",
+    ],
+    mount(ctrl, read) {
+      ui.mode = chips([{ v: "geo", l: "几何定义" }, { v: "coord", l: "坐标计算" }, { v: "perp", l: "垂直判定" }],
+        mode, (v) => { mode = v; magnet(); });
+      ui.spin = button("旋转 b", () => {
+        endSpin(true);
+        spin = { t0: performance.now() / 1000, bx: b.x, by: b.y, r: len(b), g0: Math.atan2(b.y, b.x), g0d: phi(), p: 0 };
+      }, true);
+      ui.snap = toggle("整数吸附", snap, (v) => {
+        snap = v; endSpin(true);
+        if (v) [a, b].forEach((p) => { p.x = Math.round(p.x); p.y = Math.round(p.y); if (!p.x && !p.y) p.x = 1; p.px = p.x; p.py = p.y; });
+        mkDrag();
+      });
+      rd = readout(); key = "";
+      ctrl.append(ui.mode, ui.spin, ui.snap);
+      read.append(rd);
+      mkDrag();
+    },
+    unmount() { endSpin(true); rd = null; },
+    pointer(e, type, x, y) {
+      const r = drag && drag(e, type, x, y);
+      if (r && type === "down") endSpin(false);
+      return r;
+    },
+    draw(c, w, h, t) {
+      const T = theme(), font = getComputedStyle(document.body).fontFamily;
+      if (spin) {
+        const p = (t - spin.t0) / 6;
+        if (p >= 1) endSpin(true);
+        else if (p >= 0) { const g = spin.g0 + 2 * Math.PI * p; b.x = spin.r * Math.cos(g); b.y = spin.r * Math.sin(g); spin.p = p; }
+      }
+      m = drawAxes(c, { x: 0, y: 0, w, h }, [-6, 6], [-4.5, 4.5], { equal: true });
+      const { X, Y } = m, X0 = X(0), Y0 = Y(0);
+      const la = len(a), d = dotp(), s = d / la, ux = a.x / la, uy = a.y / la, nx = -uy, ny = ux;
+      const F = { x: s * ux, y: s * uy }, perp = isPerp(), hi = perp && mode === "perp", L = 40;
+      const seg = (p, q, col, wd, alpha, dash) => {
+        c.save(); if (dash) c.setLineDash([5, 5]); c.globalAlpha = alpha || 1;
+        c.strokeStyle = col; c.lineWidth = wd; c.lineCap = "round";
+        c.beginPath(); c.moveTo(X(p.x), Y(p.y)); c.lineTo(X(q.x), Y(q.y)); c.stroke(); c.restore();
+      };
+      const txt = (str, x, y, col, align, size) => {
+        c.save(); c.font = "600 " + (size || 14) + "px " + font; c.textAlign = align || "left"; c.textBaseline = "middle";
+        c.lineWidth = 4; c.strokeStyle = T.bg; c.strokeText(str, x, y); c.fillStyle = col; c.fillText(str, x, y); c.restore();
+      };
+      const dot = (p, col) => {
+        c.beginPath(); c.arc(X(p.x), Y(p.y), 6, 0, 7); c.fillStyle = col; c.fill();
+        c.lineWidth = 2; c.strokeStyle = T.bg; c.stroke();
+      };
+
+      /* a 所在直线；垂直判定时画出与 a 垂直的方向 */
+      seg({ x: -ux * L, y: -uy * L }, { x: ux * L, y: uy * L }, T.fg, 1, .25);
+      if (mode === "perp") seg({ x: -nx * L, y: -ny * L }, { x: nx * L, y: ny * L }, perp ? T.teal : T.fg, perp ? 2 : 1.5, perp ? .9 : .45, true);
+
+      /* 宽 |a|、高为投影有向长度的矩形，面积 = a·b */
+      if (Math.abs(s) > 1e-6) {
+        const col = s > 0 ? T.teal : T.red, Hh = { x: nx * s, y: ny * s };
+        const R = [{ x: 0, y: 0 }, a, { x: a.x + Hh.x, y: a.y + Hh.y }, Hh];
+        c.save(); c.beginPath(); R.forEach((p, i) => (i ? c.lineTo(X(p.x), Y(p.y)) : c.moveTo(X(p.x), Y(p.y)))); c.closePath();
+        c.globalAlpha = .16; c.fillStyle = col; c.fill(); c.globalAlpha = .6; c.strokeStyle = col; c.lineWidth = 1; c.stroke(); c.restore();
+        /* 标在矩形远离原点的那条边外侧，避开 b */
+        const lab = "a·b = " + f(d); c.font = "600 14px " + font;
+        const lw = c.measureText(lab).width + 8, lx = X(a.x + Hh.x / 2) + ux * 10, ly = Y(a.y + Hh.y / 2) - uy * 10;
+        txt(lab, ux >= 0 ? Math.min(lx, w - lw) : Math.max(lx - lw, 8), ly, col, "left", 14);
+      }
+
+      /* b 终点到 a 所在直线的垂线，垂足处直角标记 */
+      if (Math.hypot(b.x - F.x, b.y - F.y) > 1e-6) {
+        seg(b, F, T.sub, 1.5, 1, true);
+        const bx = X(b.x) - X(F.x), by = Y(b.y) - Y(F.y), bl = Math.hypot(bx, by) || 1;
+        const sg = s > 1e-6 ? -1 : 1, ex = sg * ux, ey = -sg * uy, vx = bx / bl, vy = by / bl, q = hi ? 14 : 9;
+        c.save(); c.strokeStyle = hi ? T.teal : T.sub; c.lineWidth = hi ? 2.5 : 1.2; c.beginPath();
+        c.moveTo(X(F.x) + ex * q, Y(F.y) + ey * q); c.lineTo(X(F.x) + (ex + vx) * q, Y(F.y) + (ey + vy) * q);
+        c.lineTo(X(F.x) + vx * q, Y(F.y) + vy * q); c.stroke(); c.restore();
+      }
+
+      /* 投影向量（金色粗箭头） */
+      if (Math.abs(s) > 1e-6) arrow(c, X0, Y0, X(F.x), Y(F.y), T.gold, null, 6);
+
+      /* 夹角弧与 θ */
+      const A0 = Math.atan2(a.y, a.x), dA = Math.atan2(a.x * b.y - a.y * b.x, d), th = Math.abs(dA) * 180 / Math.PI;
+      if (!hi && th > .05) {
+        c.save(); c.strokeStyle = T.fg; c.lineWidth = 1.5; c.beginPath(); c.arc(X0, Y0, 24, -A0, -A0 - dA, dA > 0); c.stroke(); c.restore();
+      }
+      const bis = A0 + dA / 2;
+      txt("θ = " + +th.toFixed(1) + "°", X0 + Math.cos(bis) * 48, Y0 - Math.sin(bis) * 48, hi ? T.teal : T.fg, "center", 13);
+
+      arrow(c, X0, Y0, X(a.x), Y(a.y), T.blue, "a", 3);
+      arrow(c, X0, Y0, X(b.x), Y(b.y), T.red, "b", 3);
+      dot(a, T.blue); dot(b, T.red);
+      if (hi) txt("a ⊥ b", X(b.x) + 10, Y(b.y) - 16, T.teal, "left", 15);
+
+      const hint = mode === "geo" ? "金色为投影向量 · 矩形面积 = a·b" : mode === "coord" ? "a·b = x₁x₂ + y₁y₂ · 见读数代入"
+        : perp ? "a·b = 0，b 在 a 的垂线上" : "把 b 拖到虚线上，使 a·b = 0";
+      txt(hint, 12, 20, T.sub, "left", 13);
+
+      /* 小图：a·b 随 θ 变化（θ 为 a 到 b 的有向角） */
+      const pw = Math.min(220, w * .46), ph = Math.min(112, h * .28), px = w - pw - 10, py = h - ph - 10;
+      const ix = px + 10, iw = pw - 20, iy = py + 26, ih = ph - 36;
+      const PX = (g) => ix + (g / 360) * iw, PY = (v) => iy + ih / 2 - (v * ih) / 2;
+      c.save();
+      c.globalAlpha = .94; c.fillStyle = T.bg; c.fillRect(px, py, pw, ph); c.globalAlpha = 1;
+      c.strokeStyle = T.grid; c.lineWidth = 1; c.strokeRect(px + .5, py + .5, pw - 1, ph - 1);
+      c.strokeStyle = T.axis; c.globalAlpha = .5; c.beginPath();
+      c.moveTo(ix, PY(0)); c.lineTo(ix + iw, PY(0)); c.moveTo(PX(180), iy); c.lineTo(PX(180), iy + ih); c.stroke(); c.globalAlpha = 1;
+      const curve = (g0, g1, col, wd, al) => {
+        c.save(); c.globalAlpha = al; c.strokeStyle = col; c.lineWidth = wd; c.lineCap = "round"; c.beginPath();
+        let prev = -1;
+        for (let k = 0; k <= 120; k++) {
+          const g = g0 + ((g1 - g0) * k) / 120, gm = ((g % 360) + 360) % 360, yy = PY(Math.cos((gm * Math.PI) / 180));
+          if (gm < prev) c.moveTo(PX(gm), yy); else c.lineTo(PX(gm), yy);
+          prev = gm;
+        }
+        c.stroke(); c.restore();
+      };
+      curve(0, 360, T.sub, 1.2, .6);
+      if (spin) curve(spin.g0d, spin.g0d + 360 * spin.p, T.blue, 2.5, 1);
+      const g = phi(), gx = PX(g), gy = PY(cl(d / (la * len(b)), -1, 1));
+      c.beginPath(); c.arc(gx, gy, 4.5, 0, 7); c.fillStyle = d >= 0 ? T.teal : T.red; c.fill();
+      c.restore();
+      txt("a·b = |a||b|cosθ", ix, py + 13, T.sub, "left", 12);
+      txt("0°", ix, iy + ih + 1, T.sub, "left", 12);
+      txt("360°", ix + iw, iy + ih + 1, T.sub, "right", 12);
+      txt(f(d), gx + (gx > ix + iw / 2 ? -8 : 8), gy + (gy > iy + ih / 2 ? -10 : 10), d >= 0 ? T.teal : T.red, gx > ix + iw / 2 ? "right" : "left", 12);
+
+      if (rd) {
+        const r = rows(T), k = JSON.stringify(r);
+        if (k !== key) { key = k; rd.update(r); }
+      }
+    },
+  };
+})();
+CH[4].ready = true;
+
+/* ---------- 第 6 章 极化恒等式 ---------- */
+MODS[5] = (() => {
+  /* 扩展位：新模式写成 POL_EX[v] = { pts, rows(T), draw(c, m, T, H) }，再 push 进 POL_MODES（下次加「动点最值」） */
+  const POL_EX = {};
+  const POL_MODES = [{ v: "para", l: "平行四边形" }, { v: "tri", l: "三角形中点" }];
+  /* ---- 模式「动点最值」：P 约束在轨迹上，t∈[0,1] 为轨迹参数 ---- */
+  (() => {
+    const r3 = Math.sqrt(3), N = 240;
+    const lerp = (p, q, s) => ({ x: p.x + (q.x - p.x) * s, y: p.y + (q.y - p.y) * s });
+    const along = (vs, t) => { const n = vs.length - 1, k = Math.min(n - 1, Math.floor(t * n)); return lerp(vs[k], vs[k + 1], t * n - k); };
+    const O = { x: 0, y: 0 };
+    const sq = [{ x: -1, y: -1 }, { x: 1, y: -1 }, { x: 1, y: 1 }, { x: -1, y: 1 }];
+    const tri = [{ x: 0, y: r3 }, { x: -1, y: 0 }, { x: 1, y: 0 }];
+    const cA = { x: -r3 / 2, y: -.5 }, cB = { x: r3 / 2, y: -.5 };
+    const PRE = [
+      { l: "① 正方形", q: "边长 2 的正方形 ABCD，P 在四条边上，求 PA·PC", u: "A", v: "C", c: "O",
+        U: sq[0], V: sq[2], closed: true, cen: O, outline: [...sq, sq[0]], vs: sq.map((p, i) => [p, "ABCD"[i]]),
+        path: (t) => along([...sq, sq[0]], t), id: "PO² − 2", rng: "[1, √2]", ans: "PA·PC ∈ [−1, 0]", lo: "−1", hi: "0" },
+      { l: "② 圆与弦", q: "半径 1 的圆 O，弦 AB = √3 固定，P 在圆上，求 PA·PB", u: "A", v: "B", c: "M",
+        U: cA, V: cB, closed: true, cen: O, vs: [[O, "O"], [cA, "A"], [cB, "B"]],
+        path: (t) => ({ x: Math.cos(2 * Math.PI * t), y: Math.sin(2 * Math.PI * t) }),
+        id: "PM² − 3/4", rng: "[1/2, 3/2]", ans: "PA·PB ∈ [−1/2, 3/2]", lo: "−1/2", hi: "3/2" },
+      { l: "③ 正三角形", q: "边长 2 的正三角形 ABC，P 在边 BC 上，求 PB·PC", u: "B", v: "C", c: "M",
+        U: tri[1], V: tri[2], closed: false, cen: { x: 0, y: r3 / 3 }, outline: [...tri, tri[0]], vs: tri.map((p, i) => [p, "ABC"[i]]),
+        path: (t) => lerp(tri[1], tri[2], t), id: "PM² − 1", rng: "[0, 1]", ans: "PB·PC ∈ [−1, 0]", lo: "−1", hi: "0" },
+    ];
+    const g = (p, s) => dt(sub(s.U, p), sub(s.V, p));
+    const CV = [];
+    const curve = (k) => CV[k] || (CV[k] = Array.from({ length: N + 1 }, (_, i) => g(PRE[k].path(i / N), PRE[k])));
+    let pi = 0, t = .3, play = null, held = false, map = null, box = null, btn = null;
+
+    /* 拖动：取轨迹上离指针最近的参数 */
+    const near = (s, x, y) => {
+      let bt = t, bd = Infinity;
+      for (let i = 0; i <= 960; i++) { const p = s.path(i / 960), d = Math.hypot(map.X(p.x) - x, map.Y(p.y) - y); if (d < bd) { bd = d; bt = i / 960; } }
+      return [bt, bd];
+    };
+    const live = () => mod === MODS[5] && mode === "dyn" && map;
+    cv.addEventListener("pointerdown", (e) => {
+      if (!live()) return;
+      const [x, y] = pt(e), [nt, d] = near(PRE[pi], x, y);
+      if (d <= (e.pointerType === "touch" ? 24 : 14)) { held = true; play = null; t = nt; }
+    });
+    cv.addEventListener("pointermove", (e) => { if (held && live()) { const [x, y] = pt(e); t = near(PRE[pi], x, y)[0]; } });
+    ["pointerup", "pointercancel"].forEach((n) => cv.addEventListener(n, () => (held = false)));
+
+    /* 本模式的控件：预设题芯片 + 播放；离开本模式时隐藏，并收起整数吸附 */
+    const sync = () => {
+      if (box) box.style.display = mode === "dyn" ? "" : "none";
+      if (ui.snap) ui.snap.style.display = mode === "dyn" ? "none" : "";
+    };
+    const ctl = () => {
+      if (!ui.mode || (box && box.parentNode === ui.mode.parentNode)) return;
+      box = el("div");
+      const pc = chips(PRE.map((s, i) => ({ v: i, l: s.l })), pi, (v) => { pi = v; t = .3; play = null; });
+      const pb = button("播放", () => { play = play == null ? performance.now() : null; }, true);
+      btn = pb.btn; box.append(pc, pb);
+      ui.mode.parentNode.append(box);
+      if (!ui.mode.dyn) { ui.mode.dyn = 1; ui.mode.addEventListener("click", sync); }
+      sync();
+    };
+
+    POL_EX.dyn = {
+      pts: [],
+      rows(T) {
+        const s = PRE[pi], p = s.path(t), M = lerp(s.U, s.V, .5), pm = len(sub(M, p)), AB = sub(s.V, s.U), r2 = dt(AB, AB) / 4;
+        const PA = sub(s.U, p), PB = sub(s.V, p), pp = "P" + s.u + "·P" + s.v;
+        return [
+          ["题目", s.q, T.fg],
+          ["P", pv(p), T.fg],
+          [pp + " 直接", f(PA.x) + "×" + f(PB.x) + " + " + f(PA.y) + "×" + f(PB.y) + " = " + f(dt(PA, PB)), T.blue],
+          ["P" + s.c + "² − " + s.u + s.v + "²/4", f(pm * pm) + " − " + f(r2) + " = " + f(pm * pm - r2), T.blue],
+          ["化简", pp + " = " + s.id, T.fg],
+          ["P" + s.c + " 取值范围", "P" + s.c + " ∈ " + s.rng, T.fg],
+          ["答案", s.ans, T.blue],
+        ];
+      },
+      draw(c, _m, T, K) {
+        ctl();
+        const s = PRE[pi], ys = curve(pi);
+        if (play != null) { const k = (performance.now() - play) / 4000; t = Math.min(1, Math.max(0, k)); if (k >= 1) play = null; }
+        if (btn) { const lb = play != null ? "暂停" : "播放"; if (btn.textContent !== lb) btn.textContent = lb; }
+        c.fillStyle = T.bg; c.fillRect(0, 0, W, H);
+        const mp = (map = drawAxes(c, { x: 0, y: 0, w: W, h: H }, [-2, 4.6], [-1.8, 2.4], { equal: true, step: .5, labelStep: 1 }));
+        const X = (p) => mp.X(p.x), Y = (p) => mp.Y(p.y);
+        const line = (ps, col, wd, al) => {
+          c.save(); c.globalAlpha = al || 1; c.strokeStyle = col; c.lineWidth = wd; c.lineJoin = c.lineCap = "round";
+          c.beginPath(); ps.forEach((p, i) => (i ? c.lineTo(X(p), Y(p)) : c.moveTo(X(p), Y(p)))); c.stroke(); c.restore();
+        };
+        const dot = (x, y, col, r, hollow) => {
+          c.beginPath(); c.arc(x, y, r || 6, 0, 7); c.fillStyle = hollow ? T.bg : col; c.fill();
+          c.lineWidth = 2; c.strokeStyle = hollow ? col : T.bg; c.stroke();
+        };
+        const lab = (p, str, col) => {
+          const d = sub(p, s.cen), n = len(d), ox = n > 1e-6 ? (d.x / n) * 18 : -14, oy = n > 1e-6 ? (-d.y / n) * 18 : 14;
+          K.txt(str, X(p) + ox, Y(p) + oy, col, "center", 15);
+        };
+        const tr = []; for (let i = 0; i <= N; i++) tr.push(s.path(i / N));
+        if (s.outline) line(s.outline, T.sub, 1.5);
+        line(tr, T.blue, 7, .22);
+        const p = s.path(t), M = lerp(s.U, s.V, .5);
+        line([s.U, s.V], T.fg, 2.5);
+        arrow(c, X(p), Y(p), X(s.U), Y(s.U), T.blue, "P" + s.u, 3);
+        arrow(c, X(p), Y(p), X(s.V), Y(s.V), T.red, "P" + s.v, 3);
+        arrow(c, X(p), Y(p), X(M), Y(M), T.gold, "P" + s.c, 3.5);
+        s.vs.forEach(([q, n]) => { dot(X(q), Y(q), T.fg, 5); lab(q, n, T.fg); });
+        dot(X(M), Y(M), T.gold); lab({ x: M.x, y: M.y - .01 }, s.c, T.gold);
+        dot(X(p), Y(p), T.blue, 8); K.txt("P", X(p) + 12, Y(p) - 14, T.blue, "left", 15);
+        K.txt("P" + s.u + "·P" + s.v + " = P" + s.c + "² − " + s.u + s.v + "²/4", 12, 42, T.fg, "left", 14);
+
+        /* 角落小图：数量积随轨迹参数 t 的曲线 */
+        const bx = Math.max(mp.X(1.7), W * .5), bw = Math.min(W - 12 - bx, 300), by = 56, bh = Math.min(H * .42, bw * .66, 200);
+        if (bw > 130 && bh > 90) {
+          c.save(); c.fillStyle = T.bg; c.strokeStyle = T.grid; c.lineWidth = 1; c.beginPath();
+          if (c.roundRect) c.roundRect(bx, by, bw, bh, 12); else c.rect(bx, by, bw, bh);
+          c.fill(); c.stroke(); c.restore();
+          const lo = Math.min(...ys), hi = Math.max(...ys), pad = (hi - lo) * .18 || 1;
+          const ix = bx + 40, iw = bw - 56, iy = by + 30, ih = bh - 52;
+          const gx = (u) => ix + u * iw, gy = (v) => iy + ih - ((v - lo + pad) / (hi - lo + 2 * pad)) * ih;
+          K.txt("P" + s.u + "·P" + s.v + " 随 t 变化", bx + 12, by + 15, T.fg, "left", 12);
+          c.save(); c.strokeStyle = T.axis; c.lineWidth = 1; c.beginPath(); c.moveTo(ix, iy + ih); c.lineTo(ix + iw, iy + ih);
+          if (lo <= 0 && hi >= 0) { c.setLineDash([3, 4]); c.moveTo(ix, gy(0)); c.lineTo(ix + iw, gy(0)); }
+          c.stroke(); c.restore();
+          K.txt("0", ix, iy + ih + 11, T.sub, "center", 12); K.txt("1", ix + iw, iy + ih + 11, T.sub, "center", 12);
+          K.txt("t", ix + iw / 2, iy + ih + 11, T.sub, "center", 12);
+          K.txt(s.hi, ix - 8, gy(hi), T.fg, "right", 12); K.txt(s.lo, ix - 8, gy(lo), T.fg, "right", 12);
+          c.save(); c.strokeStyle = T.blue; c.lineWidth = 2; c.lineJoin = "round"; c.beginPath();
+          ys.forEach((v, i) => (i ? c.lineTo(gx(i / N), gy(v)) : c.moveTo(gx(i / N), gy(v)))); c.stroke(); c.restore();
+          let sl = false, sh = false;
+          ys.forEach((v, i) => {
+            if (s.closed && i === N) return;
+            const isLo = Math.abs(v - lo) < 1e-9, isHi = Math.abs(v - hi) < 1e-9;
+            if (!isLo && !isHi) return;
+            dot(gx(i / N), gy(v), T.fg, 4, true);
+            if (isLo && !sl) { sl = true; K.txt("最小 " + s.lo, gx(i / N), gy(v) + 14, T.fg, "center", 12); }
+            if (isHi && !sh) { sh = true; K.txt("最大 " + s.hi, Math.max(gx(i / N), ix + 26), gy(v) - 13, T.fg, "center", 12); }
+          });
+          const cy = gy(g(p, s));
+          c.save(); c.strokeStyle = T.blue; c.globalAlpha = .4; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(gx(t), iy + ih); c.lineTo(gx(t), cy); c.stroke(); c.restore();
+          dot(gx(t), cy, T.blue, 5);
+        }
+        return "拖动 P（约束在轨迹上）或按「播放」· 金色为 P" + s.c;
+      },
+    };
+    POL_MODES.push({ v: "dyn", l: "动点最值" });
+  })();
+  const a = { x: 4, y: 1 }, b = { x: 1, y: 3 }, A = { x: -3, y: -1 }, B = { x: 3, y: -1 }, P = { x: 1, y: 3 };
+  let mode = "para", snap = true, m = null, drag = null, rd = null, key = "";
+  const ui = {};
+  const cl = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const f = (v) => String(+(Math.abs(v) < 5e-7 ? 0 : v).toFixed(2)).replace("-", "−");
+  const pv = (p) => "(" + f(p.x) + ", " + f(p.y) + ")";
+  const sub = (p, q) => ({ x: p.x - q.x, y: p.y - q.y });
+  const dt = (p, q) => p.x * q.x + p.y * q.y;
+  const len = (p) => Math.hypot(p.x, p.y);
+  const mid = () => ({ x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 });
+  const fit = (p) => {
+    if (m) {
+      const lo = (v) => (snap ? Math.ceil(v) : v), hi = (v) => (snap ? Math.floor(v) : v);
+      p.x = cl(p.x, lo(m.x0 + .3), hi(m.x1 - .3)); p.y = cl(p.y, lo(m.y0 + .3), hi(m.y1 - .3));
+    }
+    if (!snap) { p.x = Math.round(p.x * 100) / 100; p.y = Math.round(p.y * 100) / 100; }
+  };
+  /* 关掉吸附时，P 靠近圆就吸到圆上 */
+  const onmove = (p) => {
+    fit(p);
+    if (snap || p !== P) return;
+    const M = mid(), r = len(sub(B, A)) / 2, d = len(sub(P, M));
+    if (r > 0 && d > 0 && Math.abs(d - r) < .08) { P.x = M.x + ((P.x - M.x) * r) / d; P.y = M.y + ((P.y - M.y) * r) / d; }
+  };
+  [a, b, A, B, P].forEach((p) => (p.onmove = onmove));
+  const mkDrag = () => {
+    const pts = POL_EX[mode] ? POL_EX[mode].pts : mode === "para" ? [a, b] : [A, B, P];
+    drag = dragPoints(pts, () => m, snap ? 1 : false);
+  };
+
+  function rows(T) {
+    if (POL_EX[mode]) return POL_EX[mode].rows(T);
+    if (mode === "para") {
+      const s = { x: a.x + b.x, y: a.y + b.y }, d = sub(a, b), s2 = dt(s, s), d2 = dt(d, d), q = (s2 - d2) / 4, ab = dt(a, b);
+      return [
+        ["a", pv(a)], ["b", pv(b)],
+        ["|a+b|²", f(s2)], ["|a−b|²", f(d2)],
+        ["a·b", "x₁x₂ + y₁y₂ = " + f(ab), T.blue],
+        ["¼(|a+b|²−|a−b|²)", "¼(" + f(s2) + " − " + f(d2) + ") = " + f(q), T.blue],
+        ["比较", f(ab) + " = " + f(q) + " · 两者相等"],
+      ];
+    }
+    const M = mid(), PA = sub(A, P), PB = sub(B, P), pm = len(sub(M, P)), r = len(sub(B, A)) / 2, dd = dt(PA, PB);
+    const on = r > 0 && Math.abs(dd) < 1e-6;
+    return [
+      ["A", pv(A)], ["B", pv(B)], ["P", pv(P)], ["M", pv(M)],
+      ["PM", pm.toFixed(2)], ["AB/2", r.toFixed(2)],
+      ["PA·PB 直接", f(PA.x) + "×" + f(PB.x) + " + " + f(PA.y) + "×" + f(PB.y) + " = " + f(dd), T.blue],
+      ["PM² − AB²/4", f(pm * pm) + " − " + f(r * r) + " = " + f(pm * pm - r * r), T.blue],
+      ["位置", on ? "P 在圆上 · PA·PB = 0，∠APB = 90°" : dd < 0 ? "P 在圆内 · PA·PB < 0" : "P 在圆外 · PA·PB > 0", on ? T.blue : null],
+    ];
+  }
+
+  return {
+    text: "(a+b)² − (a−b)² = 4a·b，所以 a·b = ¼[(a+b)² − (a−b)²]。放到三角形里：M 是 AB 中点，则 PA·PB = PM² − ¼AB²。AB 固定时，数量积只取决于 P 到中点 M 的距离——PM 最短，PA·PB 就最小。动点数量积的最值题，由此变成求距离的最值。",
+    points: ["a·b = ¼[(a+b)² − (a−b)²]", "PA·PB = PM² − AB²/4", "求最值 ⇒ 求 PM 的最值"],
+    gk: [
+      "选填压轴常见「动点数量积范围」，极化恒等式把它化为距离问题。",
+      "易错：AB 必须是定长线段，M 是 AB 的中点。",
+    ],
+    mount(ctrl, read) {
+      ui.mode = chips(POL_MODES, mode, (v) => { mode = v; mkDrag(); });
+      ui.snap = toggle("整数吸附", snap, (v) => {
+        snap = v;
+        if (v) [a, b, A, B, P].forEach((p) => { p.x = Math.round(p.x); p.y = Math.round(p.y); });
+        mkDrag();
+      });
+      rd = readout(); key = "";
+      ctrl.append(ui.mode, ui.snap);
+      read.append(rd);
+      mkDrag();
+    },
+    unmount() { rd = null; },
+    pointer(e, type, x, y) { return drag && drag(e, type, x, y); },
+    draw(c, w, h) {
+      const T = theme(), font = getComputedStyle(document.body).fontFamily;
+      m = drawAxes(c, { x: 0, y: 0, w, h }, [-6, 6], [-4.5, 4.5], { equal: true });
+      const { X, Y } = m;
+      const seg = (p, q, col, wd, dash) => {
+        c.save(); if (dash) c.setLineDash([5, 5]); c.strokeStyle = col; c.lineWidth = wd; c.lineCap = "round";
+        c.beginPath(); c.moveTo(X(p.x), Y(p.y)); c.lineTo(X(q.x), Y(q.y)); c.stroke(); c.restore();
+      };
+      const txt = (str, x, y, col, align, size) => {
+        c.save(); c.font = "600 " + (size || 14) + "px " + font; c.textAlign = align || "left"; c.textBaseline = "middle";
+        c.lineWidth = 4; c.strokeStyle = T.bg; c.strokeText(str, x, y); c.fillStyle = col; c.fillText(str, x, y); c.restore();
+      };
+      const dot = (p, col, lab) => {
+        c.beginPath(); c.arc(X(p.x), Y(p.y), 6, 0, 7); c.fillStyle = col; c.fill();
+        c.lineWidth = 2; c.strokeStyle = T.bg; c.stroke();
+        if (lab) txt(lab, X(p.x) + 10, Y(p.y) - 14, col, "left", 15);
+      };
+      const ar = (p, q, col, lab, wd) => arrow(c, X(p.x), Y(p.y), X(q.x), Y(q.y), col, lab, wd);
+      const H = { seg, txt, dot, ar, font };
+      let hint;
+      if (POL_EX[mode]) hint = POL_EX[mode].draw(c, m, T, H);
+      else if (mode === "para") {
+        const O = { x: 0, y: 0 }, S = { x: a.x + b.x, y: a.y + b.y };
+        c.save(); c.beginPath(); [O, a, S, b].forEach((p, i) => (i ? c.lineTo(X(p.x), Y(p.y)) : c.moveTo(X(p.x), Y(p.y))));
+        c.closePath(); c.globalAlpha = .07; c.fillStyle = T.fg; c.fill(); c.restore();
+        seg(a, S, T.sub, 1.5, true); seg(b, S, T.sub, 1.5, true);
+        ar(O, S, T.teal, "a+b", 4); ar(b, a, T.purple, "a−b", 4);
+        ar(O, a, T.blue, "a", 3); ar(O, b, T.red, "b", 3);
+        dot(a, T.blue); dot(b, T.red);
+        hint = "a·b = ¼(|a+b|² − |a−b|²) · 拖动 a、b";
+      } else {
+        const M = mid(), r = len(sub(B, A)) / 2, R = r * m.sx, cx = X(M.x), cy = Y(M.y);
+        const dd = dt(sub(A, P), sub(B, P)), on = r > 0 && Math.abs(dd) < 1e-6;
+        /* 圆外淡青、圆内淡红：两次填充 */
+        c.save(); c.globalAlpha = .1; c.fillStyle = T.teal; c.beginPath(); c.rect(0, 0, w, h);
+        c.moveTo(cx + R, cy); c.arc(cx, cy, R, 0, Math.PI * 2); c.fill("evenodd");
+        c.fillStyle = T.red; c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.fill();
+        c.globalAlpha = .7; c.setLineDash([5, 5]); c.strokeStyle = T.sub; c.lineWidth = 1.2; c.stroke(); c.restore();
+        seg(A, B, T.fg, 2);
+        ar(P, A, T.blue, "PA", 3); ar(P, B, T.red, "PB", 3); ar(P, M, T.gold, "PM", 3.5);
+        if (on) {
+          const px = X(P.x), py = Y(P.y), u = [X(A.x) - px, Y(A.y) - py], v = [X(B.x) - px, Y(B.y) - py];
+          const lu = Math.hypot(...u) || 1, lv = Math.hypot(...v) || 1, q = 13;
+          c.save(); c.strokeStyle = T.fg; c.lineWidth = 2; c.beginPath();
+          c.moveTo(px + (u[0] / lu) * q, py + (u[1] / lu) * q);
+          c.lineTo(px + (u[0] / lu + v[0] / lv) * q, py + (u[1] / lu + v[1] / lv) * q);
+          c.lineTo(px + (v[0] / lv) * q, py + (v[1] / lv) * q); c.stroke(); c.restore();
+        }
+        dot(A, T.fg, "A"); dot(B, T.fg, "B"); dot(M, T.gold, "M"); dot(P, T.blue, "P");
+        hint = on ? "P 在圆上：∠APB = 90°，PA·PB = 0" : "圆内 PA·PB < 0（淡红）· 圆外 PA·PB > 0（淡青）";
+        txt("PA·PB = PM² − AB²/4", 12, 42, T.fg, "left", 14);
+      }
+      txt(hint || "", 12, 20, T.sub, "left", 13);
+
+      if (rd) {
+        const r = rows(T), k = JSON.stringify(r);
+        if (k !== key) { key = k; rd.update(r); }
+      }
+    },
+  };
+})();
+CH[5].ready = true;
+
+/* ---------- 第 7 章 等和线 ---------- */
+MODS[6] = (() => {
+  const r3 = Math.sqrt(3), O = { x: 0, y: 0 }, A = { x: 3, y: 0 }, B = { x: 1, y: 2 }, P = { x: 3, y: 2 }, C = { x: 3, y: 3 };
+  const cl = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const f = (v) => String(+(Math.abs(v) < 5e-7 ? 0 : v).toFixed(2)).replace("-", "−");
+  const pv = (p) => "(" + f(p.x) + ", " + f(p.y) + ")";
+  const sub = (p, q) => ({ x: p.x - q.x, y: p.y - q.y });
+  const crs = (p, q) => p.x * q.y - p.y * q.x;
+  const sc = (p, k) => ({ x: p.x * k, y: p.y * k });
+  const fr = (v) => {
+    for (let d = 1; d <= 12; d++) { const n = Math.round(v * d); if (Math.abs(v * d - n) < 1e-6) return (n < 0 ? "−" : "") + Math.abs(n) + (d > 1 ? "/" + d : ""); }
+    return f(v);
+  };
+  const solve = (p, a, b) => { const d = crs(a, b); return Math.abs(d) < 1e-6 ? null : { l: crs(p, b) / d, u: crs(a, p) / d }; };
+  const arc = (t, g) => ({ x: Math.cos(t * g), y: Math.sin(t * g) });
+  /* 预设题：数值已用坐标逐点核对（扇形 max 2 于 60°；线段 BC 默认 [1, 9/4]；圆 ±√3/3） */
+  const PRE = {
+    fan: { q: "OA = OB = 1，∠AOB = 120°，P 在弧 AB 上运动，求 λ+μ 的最大值", A: { x: 1, y: 0 }, B: { x: -.5, y: r3 / 2 },
+      view: [[-1.7, 1.9], [-.8, 1.8]], dur: 4000, path: (t) => arc(t, (2 * Math.PI) / 3), rng: () => [1, 2],
+      rt: () => "λ+μ ∈ [1, 2]", ans: () => "最大值 2，P 为弧 AB 中点（∠AOP = 60°）" },
+    seg: { q: "A(2, 0)、B(1, 2)，△OAB 外一点 C（可拖动），P 在线段 BC 上运动，求 λ+μ 的范围", A: { x: 2, y: 0 }, B: { x: 1, y: 2 },
+      view: [[-1.2, 4.6], [-1.2, 4.2]], dur: 4000, path: (t) => ({ x: 1 + (C.x - 1) * t, y: 2 + (C.y - 2) * t }),
+      rng: () => { const z = solve(C, PRE.seg.A, PRE.seg.B), k = z.l + z.u; return [Math.min(1, k), Math.max(1, k)]; },
+      rt: () => { const [lo, hi] = PRE.seg.rng(); return "λ+μ ∈ [" + fr(lo) + ", " + fr(hi) + "]"; },
+      ans: () => { const z = solve(C, PRE.seg.A, PRE.seg.B); return "B 端 λ+μ = 1，C 端 λ+μ = " + fr(z.l + z.u) + "；两条等和线夹出范围"; } },
+    circ: { q: "A(2, 0)、B(1, √3)，P 在以 O 为圆心、半径 1 的圆上，求 λ+μ 的范围", A: { x: 2, y: 0 }, B: { x: 1, y: r3 },
+      view: [[-2.4, 3.2], [-2.2, 2.6]], dur: 6000, path: (t) => arc(t, 2 * Math.PI), rng: () => [-1 / r3, 1 / r3],
+      rt: () => "λ+μ ∈ [−√3/3, √3/3]", ans: () => "O 到 AB 距离 √3，圆半径 1，|k| ≤ 1/√3 = √3/3；异侧取负" },
+  };
+  let mode = "free", t = .3, play = null, held = null, dist = false, m = null, drag = null, rd = null, key = "", box = null, btn = null;
+  const fit = (p) => {
+    if (m) { p.x = cl(p.x, m.x0 + .2, m.x1 - .2); p.y = cl(p.y, m.y0 + .2, m.y1 - .2); }
+    const g = p === C ? 2 : 10; p.x = Math.round(p.x * g) / g; p.y = Math.round(p.y * g) / g;
+  };
+  [A, B, P, C].forEach((p) => (p.onmove = fit));
+  const mkDrag = () => (drag = dragPoints(mode === "free" ? [A, B, P] : mode === "seg" ? [C] : [], () => m, mode === "seg" ? .5 : .1));
+  const sync = () => { if (box) box.style.display = mode === "free" ? "none" : ""; };
+  /* 约束拖动：取轨迹上离指针最近的参数（同第 6 章「动点最值」） */
+  const near = (x, y) => {
+    const s = PRE[mode]; let bt = t, bd = Infinity;
+    for (let i = 0; i <= 720; i++) { const p = s.path(i / 720), d = Math.hypot(m.X(p.x) - x, m.Y(p.y) - y); if (d < bd) { bd = d; bt = i / 720; } }
+    return [bt, bd];
+  };
+
+  function rows(T) {
+    const s = PRE[mode], a = s ? s.A : A, b = s ? s.B : B, p = s ? s.path(t) : P, z = solve(p, a, b), r = [];
+    if (s) r.push(["题目", s.q, T.fg]);
+    r.push(["A", pv(a), T.fg], ["B", pv(b), T.fg]);
+    if (mode === "seg") r.push(["C", pv(C), T.fg]);
+    r.push(["P", pv(p), T.fg]);
+    if (!z) return r.concat([["λ、μ", "O、A、B 共线，OA、OB 不能作基底", T.blue]]);
+    const k = z.l + z.u, D = sub(b, a), ratio = Math.abs(crs(p, D) / crs(a, D));
+    r.push(["λ", f(z.l), T.fg], ["μ", f(z.u), T.fg],
+      [s ? "当前 λ+μ" : "λ+μ", f(z.l) + " + " + f(z.u) + " = " + f(k), T.blue],
+      ["d₂/d₁", f(ratio) + " = |λ+μ|", T.blue]);
+    if (s) r.push(["范围", s.rt(), T.blue], ["答案", s.ans(), T.blue]);
+    else r.push(["位置", Math.abs(k - 1) < 1e-6 ? "P 在直线 AB 上（k = 1）" : Math.abs(k) < 1e-6 ? "P 在过 O 的平行线上（k = 0）"
+      : k < 0 ? "P 与 AB 在 O 的异侧，k 取负" : "P 与 AB 在 O 的同侧，k 取正", T.fg]);
+    return r;
+  }
+
+  return {
+    text: "OP = λOA + μOB。λ+μ = 1 时，P 在直线 AB 上；λ+μ = k 时，P 在一条与 AB 平行的直线上，它到 O 的距离是 AB 到 O 距离的 |k| 倍。这一族平行线叫「等和线」。求 λ+μ 的最值，就是看 P 能到达的区域里，哪条等和线离 O 最远、最近。",
+    points: ["OP = λOA + μOB，λ+μ = k ⇔ P 在与 AB 平行、距离比为 |k| 的直线上", "k = 1 为直线 AB，k = 0 为过 O 的平行线", "与 AB 同侧取正，异侧取负"],
+    gk: ["选填常见「求 λ+μ 的最值/范围」，等和线比建系更快。", "易错：P 和 AB 在 O 的异侧时，k 为负。"],
+    mount(ctrl, read) {
+      const opts = [{ v: "free", l: "自由拖动" }, { v: "fan", l: "扇形" }, { v: "seg", l: "线段 BC" }, { v: "circ", l: "圆" }];
+      const pc = chips(opts, mode, (v) => { mode = v; t = v === "fan" ? .3 : v === "seg" ? .5 : .1; play = null; held = null; mkDrag(); sync(); });
+      box = button("播放", () => { play = play == null ? performance.now() : null; }, true); btn = box.btn;
+      ctrl.append(pc, box, toggle("显示距离比", dist, (v) => (dist = v)));
+      rd = readout(); key = ""; read.append(rd); mkDrag(); sync();
+    },
+    unmount() { rd = null; play = null; held = null; },
+    pointer(e, type, x, y) {
+      if (!m || !drag) return false;
+      if (type === "down") {
+        held = null;
+        if (drag(e, "down", x, y)) { held = "pt"; return true; }
+        if (PRE[mode]) { const [nt, d] = near(x, y); if (d <= (e.pointerType === "touch" ? 24 : 14)) { held = "path"; play = null; t = nt; return true; } }
+        return false;
+      }
+      if (type === "move") { if (held === "pt") return drag(e, "move", x, y); if (held === "path") { t = near(x, y)[0]; return true; } return false; }
+      drag(e, "up", x, y); const was = !!held; held = null; return was;
+    },
+    draw(c, w, h) {
+      const T = theme(), font = getComputedStyle(document.body).fontFamily, s = PRE[mode], a = s ? s.A : A, b = s ? s.B : B;
+      if (play != null && s) { const k = (performance.now() - play) / s.dur; t = cl(k, 0, 1); if (k >= 1) play = null; }
+      if (btn) { const lb = play != null ? "暂停" : "播放"; if (btn.textContent !== lb) btn.textContent = lb; }
+      const vw = s ? s.view : [[-5, 5], [-4, 4]];
+      m = drawAxes(c, { x: 0, y: 0, w, h }, vw[0], vw[1], { equal: true, step: s ? .5 : 1, labelStep: 1 });
+      const { X, Y } = m, p = s ? s.path(t) : P, D = sub(b, a), z = solve(p, a, b);
+      const seg = (u, v, col, wd, dash, al) => {
+        c.save(); c.globalAlpha = al || 1; if (dash) c.setLineDash([6, 5]); c.strokeStyle = col; c.lineWidth = wd; c.lineCap = "round";
+        c.beginPath(); c.moveTo(X(u.x), Y(u.y)); c.lineTo(X(v.x), Y(v.y)); c.stroke(); c.restore();
+      };
+      const txt = (str, x, y, col, align, size) => {
+        c.save(); c.font = "600 " + (size || 14) + "px " + font; c.textAlign = align || "left"; c.textBaseline = "middle";
+        c.lineWidth = 4; c.strokeStyle = T.bg; c.strokeText(str, x, y); c.fillStyle = col; c.fillText(str, x, y); c.restore();
+      };
+      const dot = (q, col, lab, r) => {
+        c.beginPath(); c.arc(X(q.x), Y(q.y), r || 6, 0, 7); c.fillStyle = col; c.fill(); c.lineWidth = 2; c.strokeStyle = T.bg; c.stroke();
+        if (lab) txt(lab, X(q.x) + 10, Y(q.y) - 14, col, "left", 15);
+      };
+      const poly = (ps, col, wd, al) => {
+        c.save(); c.globalAlpha = al || 1; c.strokeStyle = col; c.lineWidth = wd; c.lineJoin = c.lineCap = "round";
+        c.beginPath(); ps.forEach((q, i) => (i ? c.lineTo(X(q.x), Y(q.y)) : c.moveTo(X(q.x), Y(q.y)))); c.stroke(); c.restore();
+      };
+      /* 等和线 λ+μ = k：过 kA、方向 AB，裁到视窗内，在一端标注 */
+      const clip = (q) => {
+        let t0 = -1e9, t1 = 1e9;
+        [[q.x, D.x, m.x0, m.x1], [q.y, D.y, m.y0, m.y1]].forEach(([q0, d0, lo, hi]) => {
+          if (Math.abs(d0) < 1e-12) { if (q0 < lo || q0 > hi) { t0 = 1; t1 = 0; } return; }
+          let u = (lo - q0) / d0, v = (hi - q0) / d0; if (u > v) [u, v] = [v, u]; t0 = Math.max(t0, u); t1 = Math.min(t1, v);
+        });
+        return t0 < t1 ? [t0, t1] : null;
+      };
+      const eq = (k, col, wd, al, lab, other, dash) => {
+        const q = sc(a, k), r = clip(q); if (!r) return;
+        const at = (tt) => ({ x: q.x + D.x * tt, y: q.y + D.y * tt }), P0 = at(r[0]), P1 = at(r[1]);
+        seg(P0, P1, col, wd, dash, al);
+        const px = Math.hypot(D.x, D.y) * m.sx; if (!lab || (r[1] - r[0]) * px < 140) return;
+        const dx = X(P1.x) - X(P0.x), hiEnd = Math.abs(dx) > .5 ? dx > 0 : Y(P1.y) < Y(P0.y);
+        const e1 = hiEnd !== !!other, te = e1 ? r[1] - 56 / px : r[0] + 56 / px, L = at(te);
+        txt(lab, X(L.x), Y(L.y), col, "center", 12);
+      };
+      if (s) {
+        const tr = []; for (let i = 0; i <= 200; i++) tr.push(s.path(i / 200));
+        if (mode === "fan") { seg(O, a, T.sub, 1.2); seg(O, b, T.sub, 1.2); }
+        if (mode === "seg") poly([O, a, b, O], T.sub, 1.2);
+        poly(tr, T.blue, 7, .22); if (mode !== "circ") poly(tr, T.blue, 1.5, .8);
+      }
+      if (z) {
+        const k = z.l + z.u, L = sc(a, z.l), M = sc(b, z.u);
+        for (let j = -2; j <= 3; j++) eq(j, j === 1 ? T.fg : T.sub, j === 1 ? 2.5 : 1, j === 1 ? 1 : .6, "λ+μ=" + String(j).replace("-", "−"));
+        if (s) s.rng().forEach((v) => eq(v, T.teal, 1.5, .9, null, false, true));
+        eq(k, T.gold, 2.5, 1, "λ+μ = " + f(k), true);
+        seg(O, L, T.blue, 2, true); seg(O, M, T.red, 2, true); seg(L, p, T.red, 1.2, true, .7); seg(M, p, T.blue, 1.2, true, .7);
+        txt("λOA", X(L.x), Y(L.y) + 16, T.blue, "center", 12); txt("μOB", X(M.x) - 8, Y(M.y) + 14, T.red, "right", 12);
+        if (dist) {
+          const F1 = sub(a, sc(D, (a.x * D.x + a.y * D.y) / (D.x * D.x + D.y * D.y))), F2 = sc(F1, k);
+          const sx = X(F1.x) - X(0), sy = Y(F1.y) - Y(0), sl = Math.hypot(sx, sy) || 1, nx = (-sy / sl) * 5, ny = (sx / sl) * 5;
+          const off = (q, n) => ({ x: m.invX(X(q.x) + n * nx), y: m.invY(Y(q.y) + n * ny) });
+          seg(off(O, 1), off(F1, 1), T.fg, 3); dot(F1, T.fg, null, 4); txt("d₁", X(F1.x) / 2 + X(0) / 2 + nx * 4, Y(F1.y) / 2 + Y(0) / 2 + ny * 4, T.fg, "center", 13);
+          if (Math.abs(k) > 1e-6) { seg(off(O, -1), off(F2, -1), T.gold, 3); dot(F2, T.gold, null, 4); txt("d₂", X(F2.x) / 2 + X(0) / 2 - nx * 4, Y(F2.y) / 2 + Y(0) / 2 - ny * 4, T.gold, "center", 13); }
+          txt("d₂/d₁ = " + f(Math.abs(k)) + " = |λ+μ|", 12, 64, T.fg, "left", 14);
+        }
+      }
+      arrow(c, X(0), Y(0), X(a.x), Y(a.y), T.blue, "", 3); arrow(c, X(0), Y(0), X(b.x), Y(b.y), T.red, "", 3);
+      arrow(c, X(0), Y(0), X(p.x), Y(p.y), T.fg, "", 2.5);
+      dot(a, T.blue, "A"); dot(b, T.red, "B"); if (mode === "seg") dot(C, T.fg, "C"); dot(p, T.fg, "P", 7);
+      const hint = !z ? "O、A、B 共线：OA、OB 不能作基底，拖开 A 或 B"
+        : s ? "拖动 P（约束在轨迹上）或按「播放」" + (mode === "seg" ? " · C 可拖动" : "") + " · 青色虚线夹出范围"
+        : "拖动 A、B、P · 金线为过 P 的等和线";
+      txt(hint, 12, 20, T.sub, "left", 13);
+      txt("OP = λOA + μOB，λ+μ = k", 12, 42, T.fg, "left", 14);
+      if (rd) { const r = rows(T), kk = JSON.stringify(r); if (kk !== key) { key = kk; rd.update(r); } }
+    },
+  };
+})();
+CH[6].ready = true;
+
+/* ---------- 第 8 章 三角形四心（第一部分：四心 + 欧拉线） ---------- */
+MODS[7] = (() => {
+  const A = { x: -3, y: -2 }, B = { x: 4, y: -2 }, C = { x: 0, y: 3 };
+  /* 模式数组：下次在此追加「奔驰定理」 */
+  const HEART_MODES = [
+    { v: "cen", l: "重心" }, { v: "cir", l: "外心" }, { v: "inc", l: "内心" },
+    { v: "ort", l: "垂心" }, { v: "eul", l: "欧拉线" }, { v: "ben", l: "奔驰定理" },
+  ];
+  const f = (v) => String(+(Math.abs(v) < 5e-7 ? 0 : v).toFixed(2)).replace("-", "−");
+  const pv = (p) => "(" + f(p.x) + ", " + f(p.y) + ")";
+  const sub = (p, q) => ({ x: p.x - q.x, y: p.y - q.y }), add = (p, q) => ({ x: p.x + q.x, y: p.y + q.y });
+  const sc = (p, k) => ({ x: p.x * k, y: p.y * k }), dt = (p, q) => p.x * q.x + p.y * q.y;
+  const crs = (p, q) => p.x * q.y - p.y * q.x, len = (p) => Math.hypot(p.x, p.y);
+  const un = (p) => { const l = len(p) || 1; return { x: p.x / l, y: p.y / l }; };
+  let mode = "cen", snap = true, m = null, drag = null, rd = null, key = "", anim = null;
+  const ui = {};
+  const fit = (p) => {
+    if (m) { p.x = Math.max(m.x0 + .4, Math.min(m.x1 - .4, p.x)); p.y = Math.max(m.y0 + .4, Math.min(m.y1 - .4, p.y)); }
+    if (snap) { p.x = Math.round(p.x); p.y = Math.round(p.y); }
+  };
+  [A, B, C].forEach((p) => (p.onmove = fit));
+  const mkDrag = () => (drag = dragPoints([A, B, C], () => m, snap ? 1 : .1));
+  /* 四心：G=(A+B+C)/3；O 由两条中垂线交点；I=(aA+bB+cC)/(a+b+c)；H=A+B+C−2O */
+  function geo() {
+    const a = len(sub(B, C)), b = len(sub(C, A)), c = len(sub(A, B));
+    const ar = crs(sub(B, A), sub(C, A)) / 2;
+    if (Math.abs(ar) < 1e-9) return null;
+    const G = sc(add(add(A, B), C), 1 / 3);
+    const d = 2 * crs(sub(B, A), sub(C, A));
+    const sq = (p) => p.x * p.x + p.y * p.y;
+    const ux = (sq(A) * (B.y - C.y) + sq(B) * (C.y - A.y) + sq(C) * (A.y - B.y)) / d;
+    const uy = (sq(A) * (C.x - B.x) + sq(B) * (A.x - C.x) + sq(C) * (B.x - A.x)) / d;
+    const O = { x: ux, y: uy }, s = a + b + c;
+    const I = sc(add(add(sc(A, a), sc(B, b)), sc(C, c)), 1 / s);
+    const H = sub(add(add(A, B), C), sc(O, 2));
+    return { a, b, c, G, O, I, H, R: len(sub(A, O)), r: Math.abs(ar) / (s / 2), area: Math.abs(ar),
+      obtuse: Math.max(a, b, c) ** 2 > (a * a + b * b + c * c) - Math.max(a, b, c) ** 2 + 1e-9 };
+  }
+  const foot = (P, U, V) => { const u = un(sub(V, U)); return add(U, sc(u, dt(sub(P, U), u))); };
+  /* 奔驰定理：P 的重心坐标 (u,v,w) = (S_A,S_B,S_C)/S，P = (xA+yB+zC)/(x+y+z) */
+  const P = { x: 1 / 3, y: -1 / 3 };
+  let coef = [1, 1, 1], animP = null, dragP = null;
+  const bary = (Q) => { const S = crs(sub(B, A), sub(C, A));
+    return [crs(sub(B, Q), sub(C, Q)) / S, crs(sub(C, Q), sub(A, Q)) / S, crs(sub(A, Q), sub(B, Q)) / S]; };
+  const fromB = (k) => sc(add(add(sc(A, k[0]), sc(B, k[1])), sc(C, k[2])), 1 / (k[0] + k[1] + k[2]));
+  const keepIn = (Q) => { if (!geo()) return; const p = fromB(bary(Q).map((t) => Math.max(.04, t))); Q.x = p.x; Q.y = p.y; };
+  P.onmove = keepIn;
+  const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+  const ratio = (k) => {
+    for (let d = 1; d <= 30; d++) {
+      const r = k.map((t) => Math.round(t * d));
+      if (r.every((n, i) => n > 0 && Math.abs(k[i] - n / d) < .002)) { const g = gcd(gcd(r[0], r[1]), r[2]); return r.map((n) => n / g).join(" : "); }
+    }
+    const mn = Math.min(...k); return "≈ " + k.map((t) => f(t / mn)).join(" : ");
+  };
+  const moveP = (k) => { coef = k; if (ui.sl) ui.sl.forEach((s, i) => s.set(Math.max(1, Math.min(5, Math.round(k[i])))));
+    if (geo()) animP = { t0: performance.now(), from: { x: P.x, y: P.y }, to: fromB(k) }; };
+
+  function rows(T) {
+    const g = geo();
+    if (!g) return [["提示", "A、B、C 共线，构不成三角形，拖开一点", T.blue]];
+    const r = [["A", pv(A), T.fg], ["B", pv(B), T.fg], ["C", pv(C), T.fg]];
+    if (mode === "cen") {
+      const s = add(add(sub(A, g.G), sub(B, g.G)), sub(C, g.G));
+      r.push(["重心 G", pv(g.G), T.blue], ["GA+GB+GC", pv(s), T.blue], ["中线比", "AG : GD = 2 : 1", T.fg]);
+    } else if (mode === "cir") {
+      r.push(["外心 O", pv(g.O), T.blue], ["|OA|", f(len(sub(A, g.O))), T.fg], ["|OB|", f(len(sub(B, g.O))), T.fg],
+        ["|OC|", f(len(sub(C, g.O))), T.fg], ["外接圆半径 R", f(g.R), T.blue],
+        ["位置", g.obtuse ? "钝角三角形：O 落在三角形外部" : "锐角（或直角）：O 在内部或斜边中点", T.blue]);
+    } else if (mode === "inc") {
+      const s = add(add(sc(sub(A, g.I), g.a), sc(sub(B, g.I), g.b)), sc(sub(C, g.I), g.c));
+      r.push(["内心 I", pv(g.I), T.blue], ["a = |BC|", f(g.a), T.fg], ["b = |CA|", f(g.b), T.fg], ["c = |AB|", f(g.c), T.fg],
+        ["a·IA+b·IB+c·IC", pv(s), T.blue], ["内切圆半径 r", f(g.r), T.fg]);
+    } else if (mode === "ort") {
+      const HA = sub(A, g.H), HB = sub(B, g.H), HC = sub(C, g.H);
+      r.push(["垂心 H", pv(g.H), T.blue], ["HA·HB", f(dt(HA, HB)), T.fg], ["HB·HC", f(dt(HB, HC)), T.fg],
+        ["HC·HA", f(dt(HC, HA)), T.fg], ["结论", "三值相等 ⇒ H 为垂心", T.blue],
+        ["位置", g.obtuse ? "钝角三角形：H 落在三角形外部" : "锐角三角形：H 在内部", T.blue]);
+    } else if (mode === "ben") {
+      const k = bary(P), s = k.map((t) => t * g.area);
+      const sum = [A, B, C].reduce((acc, Q, i) => add(acc, sc(sub(Q, P), s[i])), { x: 0, y: 0 });
+      r.push(["P", pv(P), T.fg], ["S_A = S△PBC", s[0].toFixed(2), T.blue], ["S_B = S△PCA", s[1].toFixed(2), T.blue],
+        ["S_C = S△PAB", s[2].toFixed(2), T.blue], ["S_A : S_B : S_C", ratio(k), T.blue],
+        ["S_A·PA+S_B·PB+S_C·PC", pv(sum), T.blue], ["系数 x : y : z", coef.map(f).join(" : "), T.fg],
+        ["S△PBC / S△ABC", f(k[0]), T.fg]);
+    } else {
+      const og = len(sub(g.G, g.O)), gh = len(sub(g.H, g.G));
+      r.push(["外心 O", pv(g.O), T.blue], ["重心 G", pv(g.G), T.blue], ["垂心 H", pv(g.H), T.blue],
+        ["内心 I", pv(g.I), T.fg], ["|OG|", f(og), T.fg], ["|GH|", f(gh), T.fg],
+        ["OG : GH", og < 1e-6 ? "四心重合（正三角形）" : "1 : " + f(gh / og), T.blue]);
+    }
+    return r;
+  }
+
+  return {
+    text: "三角形的四个「心」都有干净的向量刻画。重心 G 是三条中线的交点，GA+GB+GC = 0，且 G = (A+B+C)/3；外心 O 是三边中垂线的交点，|OA| = |OB| = |OC|；内心 I 是三条角平分线的交点，a·IA + b·IB + c·IC = 0；垂心 H 是三条高的交点，HA·HB = HB·HC = HC·HA。更妙的是，O、G、H 永远共线（欧拉线），且 OG : GH = 1 : 2；正三角形时四心重合。",
+    points: ["重心 G = (A+B+C)/3，GA+GB+GC = 0", "外心到三顶点等距：|OA| = |OB| = |OC|",
+      "内心 a·IA + b·IB + c·IC = 0（a、b、c 为对边长）", "垂心 HA·HB = HB·HC = HC·HA",
+      "欧拉线：O、G、H 共线，OG : GH = 1 : 2", "正三角形时四心合一",
+      "奔驰定理：S_A·PA + S_B·PB + S_C·PC = 0（S_A = S△PBC 等）",
+      "xPA + yPB + zPC = 0 ⇒ S_A : S_B : S_C = x : y : z，且 S△PBC / S△ABC = x/(x+y+z)"],
+    gk: ["选填常给一个向量式让你判断是哪个心：OA·OB = OB·OC = OC·OA ⇒ 垂心；(AB/|AB| + AC/|AC|) 的方向过内心。",
+      "易错：外心和垂心可能落在三角形外（钝角三角形）。",
+      "常见题：PA + 2PB + 3PC = 0，求 S△PBC : S△ABC。由奔驰定理 S_A : S_B : S_C = 1 : 2 : 3，答案 1 : 6。"],
+    mount(ctrl, read) {
+      ui.mode = chips(HEART_MODES, mode, (v) => { mode = v; ui.eq.hidden = v !== "eul"; ui.ben.hidden = v !== "ben"; });
+      ui.sl = ["x", "y", "z"].map((n, i) => slider(n, 1, 5, 1, Math.max(1, Math.min(5, Math.round(coef[i]))), null,
+        () => (coef = ui.sl.map((s) => +s.input.value))));
+      ui.ben = el("div"); ui.ben.hidden = mode !== "ben";
+      ui.ben.append(...ui.sl, button("按系数定位 P", () => moveP(coef), true),
+        chips([{ v: "g", l: "1:1:1 重心" }, { v: "i", l: "a:b:c 内心" }, { v: "t", l: "1:2:3" }], null, (v) => {
+          const g = geo(); if (!g) return;
+          moveP(v === "g" ? [1, 1, 1] : v === "i" ? [g.a, g.b, g.c] : [1, 2, 3]);
+        }));
+      dragP = dragPoints([P], () => m, .05);
+      ui.eq = button("变成正三角形", () => {
+        const g = geo(); if (!g) return;
+        const R = (len(sub(A, g.G)) + len(sub(B, g.G)) + len(sub(C, g.G))) / 3;
+        const th = Math.atan2(A.y - g.G.y, A.x - g.G.x), dir = crs(sub(B, A), sub(C, A)) > 0 ? 1 : -1;
+        const to = [0, 1, 2].map((i) => ({ x: g.G.x + R * Math.cos(th + dir * i * 2 * Math.PI / 3), y: g.G.y + R * Math.sin(th + dir * i * 2 * Math.PI / 3) }));
+        anim = { t0: performance.now(), from: [A, B, C].map((p) => ({ x: p.x, y: p.y })), to };
+      }, true);
+      ui.eq.hidden = mode !== "eul";
+      ui.snap = toggle("整数吸附", snap, (v) => { snap = v; if (v) [A, B, C].forEach(fit); mkDrag(); });
+      rd = readout(); key = "";
+      ctrl.append(ui.mode, ui.eq, ui.ben, ui.snap); read.append(rd); mkDrag();
+    },
+    unmount() { rd = null; anim = null; animP = null; },
+    pointer(e, type, x, y) { if (anim || animP) return false;
+      if (mode === "ben" && dragP && dragP(e, type, x, y)) return true; return drag && drag(e, type, x, y); },
+    draw(c, w, h) {
+      const T = theme(), font = getComputedStyle(document.body).fontFamily;
+      if (anim) {
+        const k = Math.min(1, (performance.now() - anim.t0) / 900), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        [A, B, C].forEach((p, i) => { p.x = anim.from[i].x + (anim.to[i].x - anim.from[i].x) * e; p.y = anim.from[i].y + (anim.to[i].y - anim.from[i].y) * e; });
+        if (k >= 1) { anim = null; if (snap) [A, B, C].forEach(fit); }
+      }
+      if (animP) {
+        const k = Math.min(1, (performance.now() - animP.t0) / 800), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        P.x = animP.from.x + (animP.to.x - animP.from.x) * e; P.y = animP.from.y + (animP.to.y - animP.from.y) * e;
+        if (k >= 1) animP = null;
+      } else if (mode === "ben") keepIn(P);
+      m = drawAxes(c, { x: 0, y: 0, w, h }, [-6, 6], [-4.5, 4.5], { equal: true });
+      const { X, Y } = m, g = geo();
+      const seg = (u, v, col, wd, dash, al) => {
+        c.save(); c.globalAlpha = al || 1; if (dash) c.setLineDash([6, 5]); c.strokeStyle = col; c.lineWidth = wd || 1.5; c.lineCap = "round";
+        c.beginPath(); c.moveTo(X(u.x), Y(u.y)); c.lineTo(X(v.x), Y(v.y)); c.stroke(); c.restore();
+      };
+      const line = (P, d, col, wd, dash, al) => { const k = 40; seg(sub(P, sc(d, k)), add(P, sc(d, k)), col, wd, dash, al); };
+      const txt = (str, x, y, col, align, size) => {
+        c.save(); c.font = "600 " + (size || 13) + "px " + font; c.textAlign = align || "left"; c.textBaseline = "middle";
+        c.lineWidth = 4; c.strokeStyle = T.bg; c.strokeText(str, x, y); c.fillStyle = col; c.fillText(str, x, y); c.restore();
+      };
+      const dot = (q, col, lab, r) => {
+        c.beginPath(); c.arc(X(q.x), Y(q.y), r || 6, 0, 7); c.fillStyle = col; c.fill(); c.lineWidth = 2; c.strokeStyle = T.bg; c.stroke();
+        if (lab) txt(lab, X(q.x) + 10, Y(q.y) - 14, col, "left", 15);
+      };
+      const circle = (q, R, col, wd, al) => {
+        c.save(); c.globalAlpha = al || 1; c.strokeStyle = col; c.lineWidth = wd || 1.5;
+        c.beginPath(); c.arc(X(q.x), Y(q.y), R * m.sx, 0, 7); c.stroke(); c.restore();
+      };
+      seg(A, B, T.fg, 2); seg(B, C, T.fg, 2); seg(C, A, T.fg, 2);
+      if (g) {
+        const V = [A, B, C], mid = [sc(add(B, C), .5), sc(add(C, A), .5), sc(add(A, B), .5)];
+        if (mode === "cen") {
+          V.forEach((P, i) => seg(P, mid[i], T.gold, 2));
+          mid.forEach((P) => dot(P, T.gold, null, 4));
+          dot(g.G, T.blue, "G", 7);
+          /* 角落里把 GA、GB、GC 首尾相接：回到起点即和为 0 */
+          const s = Math.min(34, m.sx * .8), ax = w - 128, ay = h - 70;
+          let px = ax, py = ay;
+          const cols = [T.blue, T.red, T.teal];
+          V.forEach((P, i) => { const v = sub(P, g.G), nx = px + v.x * s, ny = py - v.y * s;
+            arrow(c, px, py, nx, ny, cols[i], "GABC"[0] + "ABC"[i], 2); px = nx; py = ny; });
+          c.beginPath(); c.arc(ax, ay, 4, 0, 7); c.fillStyle = T.gold; c.fill();
+          txt("首尾相接回到起点：GA+GB+GC = 0", w - 12, h - 14, T.gold, "right", 13);
+        } else if (mode === "cir") {
+          circle(g.O, g.R, T.blue, 2, .35);
+          V.forEach((P, i) => { const d = un(sub(V[(i + 2) % 3], V[(i + 1) % 3])); line(mid[i], { x: -d.y, y: d.x }, T.teal, 1.4, true, .9); });
+          V.forEach((P) => seg(g.O, P, T.blue, 1.4, true, .8));
+          mid.forEach((P) => dot(P, T.teal, null, 4));
+          dot(g.O, T.blue, "O", 7);
+          if (g.obtuse) txt("钝角三角形：外心 O 在三角形外部", 12, 42, T.gold, "left", 13);
+        } else if (mode === "inc") {
+          circle(g.I, g.r, T.teal, 2, .9);
+          V.forEach((P, i) => {
+            const U = V[(i + 1) % 3], W = V[(i + 2) % 3], d = un(add(un(sub(U, P)), un(sub(W, P))));
+            const t = crs(sub(U, P), sub(W, U)) / crs(d, sub(W, U));
+            seg(P, add(P, sc(d, t)), T.gold, 1.8, false, .95);
+          });
+          V.forEach((P) => dot(foot(g.I, P, V[(V.indexOf(P) + 1) % 3]), T.teal, null, 4));
+          dot(g.I, T.blue, "I", 7);
+        } else if (mode === "ort") {
+          V.forEach((P, i) => { const U = V[(i + 1) % 3], W = V[(i + 2) % 3], F = foot(P, U, W);
+            seg(P, F, T.gold, 1.8); seg(U, W, T.gold, 1.2, true, .5); seg(F, g.H, T.gold, 1.2, true, .6); dot(F, T.gold, null, 4); });
+          V.forEach((P) => seg(g.H, P, T.blue, 1.4, true, .8));
+          dot(g.H, T.blue, "H", 7);
+          if (g.obtuse) txt("钝角三角形：垂心 H 在三角形外部", 12, 42, T.gold, "left", 13);
+        } else if (mode === "ben") {
+          const k = bary(P), pal = [T.blue, T.red, T.gold], tri = [[P, B, C], [P, C, A], [P, A, B]], nm = ["S_A", "S_B", "S_C"];
+          tri.forEach((t, i) => { c.save(); c.globalAlpha = .18; c.fillStyle = pal[i]; c.beginPath();
+            t.forEach((q, j) => c[j ? "lineTo" : "moveTo"](X(q.x), Y(q.y))); c.closePath(); c.fill(); c.restore(); });
+          V.forEach((Q, i) => seg(P, Q, pal[i], 1.6, false, .9));
+          tri.forEach((t, i) => { const o = sc(add(add(t[0], t[1]), t[2]), 1 / 3);
+            txt(nm[i] + " = " + (k[i] * g.area).toFixed(2), X(o.x), Y(o.y), T.fg, "center", 12); });
+          dot(P, T.blue, "P", 7);
+          /* 角落：S_A·PA、S_B·PB、S_C·PC 首尾相接，回到起点 */
+          const vs = V.map((Q, i) => sc(sub(Q, P), k[i] * g.area)), s = 46 / (Math.max(...vs.map(len)) || 1);
+          const pts = [{ x: 0, y: 0 }];
+          vs.forEach((v) => { const l = pts[pts.length - 1]; pts.push({ x: l.x + v.x * s, y: l.y - v.y * s }); });
+          const xs = pts.map((q) => q.x), ys = pts.map((q) => q.y);
+          const ox = w - 96 - (Math.min(...xs) + Math.max(...xs)) / 2, oy = h - 96 - (Math.min(...ys) + Math.max(...ys)) / 2;
+          vs.forEach((v, i) => arrow(c, ox + pts[i].x, oy + pts[i].y, ox + pts[i + 1].x, oy + pts[i + 1].y, pal[i], "", 2.5));
+          c.beginPath(); c.arc(ox, oy, 4, 0, 7); c.fillStyle = T.blue; c.fill();
+          txt("S_A·PA+S_B·PB+S_C·PC = 0", w - 12, h - 14, T.fg, "right", 13);
+          txt("拖动 P（限制在三角形内部）· 蓝/红/金 = S_A/S_B/S_C", 12, 42, T.fg, "left", 13);
+        } else {
+          circle(g.I, g.r, T.teal, 1.2, .35); circle(g.O, g.R, T.blue, 1.2, .25);
+          if (len(sub(g.H, g.O)) > 1e-4) line(g.O, un(sub(g.H, g.O)), T.purple, 2.2, false, .95);
+          seg(g.O, g.G, T.blue, 3, false, .9); seg(g.G, g.H, T.gold, 3, false, .9);
+          dot(g.I, T.teal, "I", 5); dot(g.O, T.blue, "O", 7); dot(g.G, T.gold, "G", 7); dot(g.H, T.purple, "H", 7);
+          txt(len(sub(g.G, g.O)) < 1e-4 ? "四心重合：正三角形" : "欧拉线：O、G、H 共线，OG : GH = 1 : 2", 12, 42, T.purple, "left", 14);
+        }
+      }
+      dot(A, T.fg, "A", 6); dot(B, T.fg, "B", 6); dot(C, T.fg, "C", 6);
+      txt("拖动 A、B、C 改变三角形", 12, 20, T.sub, "left", 13);
+      if (rd) { const r = rows(T), k = JSON.stringify(r); if (k !== key) { key = k; rd.update(r); } }
+    },
+  };
+})();
+CH[7].ready = true;
+
+/* ---------- 第 9 章 随堂检测（6 题 31 分） ---------- */
+MODS[8] = (() => {
+  const Q = [
+    { t: "单选", p: 5, stem: "已知 a=(1,2)，b=(m,−1)，且 a⊥b，则 m=", opts: ["A. −2", "B. 2", "C. 1/2", "D. −1/2"], ans: "B",
+      sol: "用坐标形式的数量积（6.3.5）：a⊥b ⇔ a·b=0。即 1·m+2·(−1)=0，得 m=2。易与共线条件 1·(−1)−2m=0（给出 m=−1/2）混淆，垂直看数量积、共线看交叉相乘。" },
+    { t: "单选", p: 5, stem: "在 △ABC 中，D 为 BC 中点，E 为 AD 中点，则 BE =", opts: ["A. ¾AB − ¼AC", "B. −¾AB + ¼AC", "C. ¼AB − ¾AC", "D. −¼AB + ¾AC"], ans: "B",
+      sol: "用基底 AB、AC 作线性分解（6.2 与 6.3.1）。AD=½(AB+AC)，AE=½AD=¼(AB+AC)，故 BE=AE−AB=¼AB+¼AC−AB=−¾AB+¼AC。统一起点是化简的关键。" },
+    { t: "单选", p: 5, stem: "已知 |a|=2，|b|=1，a 与 b 的夹角为 60°，则 |a−2b| =", opts: ["A. 1", "B. 2", "C. √3", "D. 2√3"], ans: "B",
+      sol: "求模先平方（6.2.4）：|a−2b|²=|a|²−4a·b+4|b|²=4−4·2·1·cos60°+4=4，故 |a−2b|=2。a·b=|a||b|cosθ=1，别漏掉系数 2 要平方。" },
+    { t: "单选", p: 5, stem: "已知向量 a=(3,4)，b=(1,0)，则 a 在 b 上的投影向量为", opts: ["A. (3,0)", "B. (1,0)", "C. (4,0)", "D. (0,3)"], ans: "A",
+      sol: "投影向量公式（6.3.5）：(a·b/|b|²)b。这里 a·b=3，|b|²=1，所以投影向量为 3b=(3,0)。投影向量是向量、投影数量是 3，二者不要混淆。" },
+    { t: "多选", p: 5, multi: true, stem: "设 O 为 △ABC 所在平面内一点，下列说法正确的是", opts: ["A. 若 OA+OB+OC=0，则 O 是重心", "B. 若 |OA|=|OB|=|OC|，则 O 是内心", "C. 若 OA·OB=OB·OC=OC·OA，则 O 是垂心", "D. 若 OA+2OB+3OC=0，则 S△OBC : S△ABC = 1 : 6"], ans: "ACD",
+      sol: "四心的向量刻画（第 8 章）：A 是重心的充要条件；B 错，到三顶点等距的是外心，内心是 a·IA+b·IB+c·IC=0；C 由 OA·OB−OB·OC=OB·(OA−OC)=OB·CA=0 得 OB⊥CA，同理另两组，故为垂心；D 由奔驰定理 S_A:S_B:S_C=1:2:3，S△OBC/S△ABC=1/6。部分选对得 2 分，错选 0 分。" },
+    { t: "填空", p: 6, fill: true, stem: "边长为 2 的正方形 ABCD 中，P 是边上的动点，则 PA·PC 的最小值为 ______。", ans: "−1",
+      sol: "用极化恒等式（第 6 章）：AC 中点即正方形中心 O，PA·PC=PO²−|AC|²/4=PO²−2。P 在边上时 PO 最小为边心距 1（取在各边中点），故最小值为 1−2=−1。" },
+  ];
+  const TOT = Q.reduce((s, q) => s + q.p, 0), blank = () => Q.map((q) => (q.multi ? [] : q.fill ? "" : null));
+  let qi = 0, pick = blank(), done = Q.map(() => false), got = Q.map(() => 0);
+  let rd = null, key = "", box = null, nav = null, m = null, foc = "A", anim = null, ring = null, holdP = false;
+  const Ps = { t: 0.72 };               /* 第 6 题：P 在正方形边上的参数（0~4，沿 A→B→C→D→A） */
+  const sq = [{ x: -1, y: -1 }, { x: 1, y: -1 }, { x: 1, y: 1 }, { x: -1, y: 1 }];
+  const Pat = (t) => { t = ((t % 4) + 4) % 4; const i = Math.floor(t), k = t - i, u = sq[i], v = sq[(i + 1) % 4];
+    return { x: u.x + (v.x - u.x) * k, y: u.y + (v.y - u.y) * k }; };
+  const sub = (p, q) => ({ x: p.x - q.x, y: p.y - q.y }), add = (p, q) => ({ x: p.x + q.x, y: p.y + q.y });
+  const sc = (p, k) => ({ x: p.x * k, y: p.y * k }), dt = (p, q) => p.x * q.x + p.y * q.y;
+  const score = (i) => {
+    const q = Q[i], v = pick[i];
+    if (q.fill) return String(v).trim().replace(/−/g, "-").replace(/\s/g, "") === "-1" ? q.p : 0;
+    if (q.multi) { if (!v.length || v.some((L) => !q.ans.includes(L))) return 0; return v.length === q.ans.length ? q.p : 2; }
+    return v === q.ans ? q.p : 0;
+  };
+  const total = () => got.reduce((a, b) => a + b, 0), allDone = () => done.every(Boolean);
+  const DR = () => (document.documentElement.classList.contains("dark") ? "#ff7b72" : "#a3161a"); /* 判错：深红 */
+
+  function paint() {
+    if (!box) return;
+    nav.textContent = "";
+    Q.forEach((q, i) => {
+      const b = el("button", null, String(i + 1));
+      if (i === qi) b.classList.add("on");
+      if (done[i] && i !== qi) { b.style.color = got[i] > 0 ? "var(--blue)" : DR(); b.style.fontWeight = "600"; }
+      b.onclick = () => { qi = i; paint(); };
+      nav.append(b);
+    });
+    box.textContent = "";
+    const q = Q[qi];
+    const h = el("p", null, "第 " + (qi + 1) + " 题 · " + q.t + " · " + q.p + " 分" + (q.multi ? "（部分选对得 2 分，错选 0 分）" : ""));
+    h.style.cssText = "margin:0 0 6px;font-size:13px;color:var(--sub)";
+    const s = el("p", null, q.stem); s.style.cssText = "margin:0 0 10px;font-size:15px;line-height:1.75";
+    box.append(h, s);
+    if (q.opts) q.opts.forEach((o, k) => {
+      const L = "ABCD"[k], b = el("button", "pill", o);
+      b.style.cssText = "display:block;width:100%;text-align:left;margin:6px 0;min-height:44px;padding:10px 14px;line-height:1.5";
+      const sel = q.multi ? pick[qi].includes(L) : pick[qi] === L;
+      if (sel) b.classList.add("primary");
+      if (done[qi]) {
+        b.disabled = true;
+        if (q.ans.includes(L)) { b.classList.remove("primary"); b.style.background = "var(--sel)"; b.style.color = "var(--blue)"; }
+        else if (sel) { b.classList.remove("primary"); b.style.background = "var(--soft)"; b.style.color = DR(); }
+      }
+      b.onclick = () => {
+        if (done[qi]) return;
+        if (q.multi) { const a = pick[qi], j = a.indexOf(L); j < 0 ? a.push(L) : a.splice(j, 1); } else pick[qi] = L;
+        foc = L; paint();
+      };
+      box.append(b);
+    });
+    if (q.fill) {
+      const i2 = el("input"); i2.type = "text"; i2.value = pick[qi]; i2.placeholder = "输入答案，如 −1";
+      i2.setAttribute("aria-label", "第 6 题答案");
+      i2.style.cssText = "width:100%;min-height:44px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--soft);color:var(--fg);font:15px var(--mono)";
+      i2.disabled = done[qi];
+      if (done[qi]) i2.style.color = got[qi] ? "var(--blue)" : DR();
+      i2.oninput = () => (pick[qi] = i2.value);
+      box.append(i2);
+    }
+    const act = el("button", "pill primary", done[qi] ? (qi < 5 ? "下一题" : allDone() ? "看成绩" : "回到未答题") : "提交");
+    act.style.cssText = "display:block;width:100%;margin:12px 0 0;min-height:44px";
+    act.onclick = () => {
+      if (!done[qi]) {
+        const q2 = Q[qi], empty = q2.fill ? !String(pick[qi]).trim() : q2.multi ? !pick[qi].length : !pick[qi];
+        if (empty) return;
+        done[qi] = true; got[qi] = score(qi);
+        if (qi === 5) anim = { t0: performance.now(), from: Ps.t, to: Math.round(Ps.t * 2) / 2 || 0.5 };
+      } else if (!allDone()) { qi = done.findIndex((d, i) => !d && i > qi); if (qi < 0) qi = done.findIndex((d) => !d); }
+      else if (qi < 5) qi++;
+      paint();
+    };
+    box.append(act);
+    if (done[qi]) {
+      const ok = got[qi] === q.p, mine = q.fill ? pick[qi] : q.multi ? pick[qi].slice().sort().join("") : pick[qi];
+      const r = el("p", null, (ok ? "答对 · 得 " + q.p + " 分" : got[qi] > 0 ? "部分正确 · 得 " + got[qi] + " 分" : "答错 · 得 0 分") + "　你的答案 " + (mine || "—") + "　正确答案 " + q.ans);
+      r.style.cssText = "margin:12px 0 4px;font-size:14px;font-weight:600;color:" + (got[qi] > 0 ? "var(--blue)" : DR());
+      const sol = el("p", null, q.sol); sol.style.cssText = "margin:0;font-size:14px;line-height:1.7;color:var(--fg)"; box.append(r, sol);
+    }
+    key = "";
+  }
+
+  function rows(T) {
+    const n = done.filter(Boolean).length;
+    const r = [["进度", n + " / 6 题", T.fg], ["本题", "第 " + (qi + 1) + " 题 · " + Q[qi].t + " · " + Q[qi].p + " 分", T.fg],
+      ["当前得分", total() + " / " + TOT, T.blue]];
+    if (done[qi]) r.push(["本题得分", got[qi] + " / " + Q[qi].p, got[qi] > 0 ? T.blue : DR()]);
+    if (allDone()) r.push(["结果", "全部完成 · 得分率 " + Math.round((total() / TOT) * 100) + "%", T.blue]);
+    return r;
+  }
+
+  return {
+    text: "六道题，共 31 分，覆盖本章的坐标运算、线性分解、数量积求模、投影向量、三角形四心与极化恒等式。右侧选好答案后点「提交」，画布会同步演示答案的几何图形，解析指出所用方法与对应章节。全部完成后画布中央给出成绩环。",
+    points: ["垂直看数量积为 0，共线看交叉相乘为 0", "线性分解先统一起点，再换成基底", "求模先平方：|a−2b|²=|a|²−4a·b+4|b|²",
+      "投影向量 = (a·b/|b|²)b，是向量不是数", "四心：等距为外心，向量和为零为重心", "极化恒等式 PA·PC = PO² − |AC|²/4"],
+    gk: ["新高考 I 卷平面向量常考 1 单选 + 1 多选或填空，分值 10 分左右，侧重数量积与几何意义。",
+      "多选题错选 0 分，宁可少选：把握不准的选项先放下。",
+      "填空题的最值问题优先考虑极化恒等式或建系坐标化。"],
+    mount(ctrl, read) {
+      nav = el("div", "chips"); box = el("div");
+      ctrl.append(nav, box);
+      rd = readout(); read.append(rd);
+      paint();
+    },
+    unmount() { rd = null; box = null; nav = null; anim = null; ring = null; holdP = false; },
+    pointer(e, type, x, y) {
+      if (ring && type === "down" && x >= ring.x && x <= ring.x + ring.w && y >= ring.y && y <= ring.y + ring.h) {
+        pick = blank(); done = Q.map(() => false); got = Q.map(() => 0); qi = 0; Ps.t = 0.72; anim = null; ring = null; paint(); return true;
+      }
+      if (qi !== 5 || done[5] || !m) return false;
+      if (type === "down") holdP = true;
+      if (!holdP) return false;
+      if (type === "up") { holdP = false; return true; }
+      const p = { x: m.invX(x), y: m.invY(y) };
+      let best = 1e9, bt = Ps.t;
+      for (let t = 0; t < 4; t += 0.01) { const q = Pat(t), d = Math.hypot(q.x - p.x, q.y - p.y); if (d < best) { best = d; bt = t; } }
+      Ps.t = bt; return true;
+    },
+    draw(c, w, h) {
+      const T = theme(), font = getComputedStyle(document.body).fontFamily;
+      const R = [[[-3, 3], [-2.5, 2.5]], [[-4, 4], [-3, 3]], [[-1, 3], [-1.5, 2.5]], [[-1, 5], [-1, 5]], [[-5, 5], [-3.5, 3.5]], [[-2.2, 2.2], [-2, 2]]];
+      const grid = qi === 0 || qi === 3;
+      m = drawAxes(c, { x: 0, y: 0, w, h }, R[qi][0], R[qi][1], { equal: true, grid, axes: grid });
+      const X = m.X, Y = m.Y;
+      const txt = (s, x, y, col, align, size) => { c.save(); c.font = "600 " + (size || 13) + "px " + font; c.textAlign = align || "left"; c.textBaseline = "middle";
+        c.lineWidth = 4; c.strokeStyle = T.bg; c.strokeText(s, x, y); c.fillStyle = col; c.fillText(s, x, y); c.restore(); };
+      const seg = (u, v, col, wd, dash, al) => { c.save(); c.globalAlpha = al || 1; if (dash) c.setLineDash([6, 5]); c.strokeStyle = col; c.lineWidth = wd || 1.6; c.lineCap = "round";
+        c.beginPath(); c.moveTo(X(u.x), Y(u.y)); c.lineTo(X(v.x), Y(v.y)); c.stroke(); c.restore(); };
+      const dot = (q, col, lab, r) => { c.beginPath(); c.arc(X(q.x), Y(q.y), r || 6, 0, 7); c.fillStyle = col; c.fill(); c.lineWidth = 2; c.strokeStyle = T.bg; c.stroke();
+        if (lab) txt(lab, X(q.x) + 10, Y(q.y) - 14, col, "left", 15); };
+      const ar = (u, v, col, lab, wd) => arrow(c, X(u.x), Y(u.y), X(v.x), Y(v.y), col, lab, wd);
+      const fill3 = (pts, col) => { c.save(); c.globalAlpha = .18; c.fillStyle = col; c.beginPath(); pts.forEach((q, j) => c[j ? "lineTo" : "moveTo"](X(q.x), Y(q.y))); c.closePath(); c.fill(); c.restore(); };
+      const O = { x: 0, y: 0 }, d6 = done[qi];
+      if (qi === 0) {
+        const a = { x: 1, y: 2 }, mv = d6 ? 2 : { A: -2, B: 2, C: .5, D: -.5 }[pick[0]] != null ? { A: -2, B: 2, C: .5, D: -.5 }[pick[0]] : 1;
+        const b = { x: mv, y: -1 };
+        ar(O, a, T.blue, "a"); ar(O, b, T.red, "b");
+        if (d6) { const ua = { x: a.x / Math.hypot(a.x, a.y), y: a.y / Math.hypot(a.x, a.y) }, ub = { x: b.x / Math.hypot(b.x, b.y), y: b.y / Math.hypot(b.x, b.y) };
+          const s = .45, p1 = sc(ua, s), p2 = sc(ub, s), p3 = add(p1, p2);
+          seg(p1, p3, T.blue, 1.6); seg(p2, p3, T.blue, 1.6);
+          txt("a·b = 1·2 + 2·(−1) = 0 ⇒ m = 2", 12, 22, T.blue, "left", 14); }
+        else txt("选择 m 后提交，图中 b 随之改变", 12, 22, T.fg, "left", 13);
+      } else if (qi === 1) {
+        const A = { x: -3, y: -1.6 }, B = { x: 3, y: -1.6 }, C = { x: .6, y: 2.6 };
+        const D = sc(add(B, C), .5), E = sc(add(A, D), .5);
+        seg(A, B, T.fg, 2); seg(B, C, T.fg, 2); seg(C, A, T.fg, 2); seg(A, D, T.fg, 1.4, true, .7);
+        dot(A, T.fg, "A"); dot(B, T.fg, "B"); dot(C, T.fg, "C"); dot(D, T.fg, "D", 5); dot(E, T.blue, "E", 6);
+        ar(B, E, T.blue, "BE", 3);
+        if (d6) { const v1 = sc(sub(B, A), -.75), P1 = add(B, v1);
+          ar(B, P1, T.red, "−¾AB", 2); ar(P1, E, T.gold, "¼AC", 2);
+          txt("BE = AE − AB = ¼(AB+AC) − AB = −¾AB + ¼AC", 12, 22, T.blue, "left", 14); }
+        else txt("D 为 BC 中点，E 为 AD 中点", 12, 22, T.fg, "left", 13);
+      } else if (qi === 2) {
+        const a = { x: 2, y: 0 }, b = { x: .5, y: Math.sqrt(3) / 2 }, b2 = sc(b, 2), r = sub(a, b2);
+        ar(O, a, T.blue, "a"); ar(O, b, T.red, "b"); ar(O, b2, T.red, "2b", 2);
+        ar(b2, a, T.gold, "a−2b", 3); seg(O, a, T.sub, 1, true, .5);
+        txt("60°", X(.42), Y(.16), T.fg, "left", 13);
+        if (d6) txt("|a−2b|² = 4 − 4a·b + 4 = 4 − 4 + 4 = 4 ⇒ |a−2b| = 2", 12, 22, T.blue, "left", 14);
+        else txt("|a|=2，|b|=1，夹角 60°", 12, 22, T.fg, "left", 13);
+      } else if (qi === 3) {
+        const a = { x: 3, y: 4 }, b = { x: 1, y: 0 }, pr = { x: 3, y: 0 };
+        seg(O, { x: 4.6, y: 0 }, T.sub, 1.2, true, .6);
+        ar(O, a, T.blue, "a"); ar(O, b, T.red, "b");
+        if (d6) { ar(O, pr, T.gold, "(3,0)", 3); seg(a, pr, T.sub, 1.4, true, .8); dot(pr, T.gold, null, 5);
+          const s = .3; seg({ x: 3 - s, y: 0 }, { x: 3 - s, y: s }, T.gold, 1.4); seg({ x: 3 - s, y: s }, { x: 3, y: s }, T.gold, 1.4);
+          txt("(a·b/|b|²)b = 3b = (3,0)", 12, 22, T.blue, "left", 14); }
+        else txt("把 a 垂直投到 b 所在直线上", 12, 22, T.fg, "left", 13);
+      } else if (qi === 4) {
+        const A = { x: -3.2, y: -2 }, B = { x: 3.2, y: -2 }, C = { x: .4, y: 2.6 };
+        seg(A, B, T.fg, 2); seg(B, C, T.fg, 2); seg(C, A, T.fg, 2);
+        const G = sc(add(add(A, B), C), 1 / 3), sqn = (p) => p.x * p.x + p.y * p.y;
+        const dd = 2 * ((B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x));
+        const Oc = { x: (sqn(A) * (B.y - C.y) + sqn(B) * (C.y - A.y) + sqn(C) * (A.y - B.y)) / dd,
+          y: (sqn(A) * (C.x - B.x) + sqn(B) * (A.x - C.x) + sqn(C) * (B.x - A.x)) / dd };
+        const H = sub(add(add(A, B), C), sc(Oc, 2)), P = sc(add(add(A, sc(B, 2)), sc(C, 3)), 1 / 6);
+        const f4 = d6 ? foc : foc, show = pick[4].length ? (pick[4].includes(f4) ? f4 : pick[4][pick[4].length - 1]) : f4;
+        if (show === "A") { [A, B, C].forEach((Pt, i) => seg(Pt, sc(add([B, C, A][i], [C, A, B][i]), .5), T.sub, 1.4, true, .7)); dot(G, T.blue, "G 重心", 7);
+          txt("OA+OB+OC=0 ⇔ O 为重心 ✓", 12, 22, T.blue, "left", 14); }
+        else if (show === "B") { c.save(); c.globalAlpha = .3; c.strokeStyle = T.blue; c.lineWidth = 2; c.beginPath();
+          c.arc(X(Oc.x), Y(Oc.y), Math.hypot(A.x - Oc.x, A.y - Oc.y) * m.sx, 0, 7); c.stroke(); c.restore();
+          [A, B, C].forEach((Pt) => seg(Oc, Pt, T.blue, 1.4, true, .8)); dot(Oc, T.red, "O 外心", 7);
+          txt("到三顶点等距的是外心，不是内心 ✗", 12, 22, DR(), "left", 14); }
+        else if (show === "C") { dot(H, T.blue, "H 垂心", 7); [A, B, C].forEach((Pt) => seg(H, Pt, T.blue, 1.4, true, .8));
+          txt("OB·(OA−OC)=OB·CA=0 ⇒ OB⊥CA，故为垂心 ✓", 12, 22, T.blue, "left", 14); }
+        else { fill3([P, B, C], T.blue); [A, B, C].forEach((Pt) => seg(P, Pt, T.blue, 1.5, false, .9)); dot(P, T.blue, "O", 7);
+          txt("S_A : S_B : S_C = 1 : 2 : 3 ⇒ S△OBC : S△ABC = 1 : 6 ✓", 12, 22, T.blue, "left", 14); }
+        dot(A, T.fg, "A", 5); dot(B, T.fg, "B", 5); dot(C, T.fg, "C", 5);
+        if (!d6) txt("点选选项，图形随之切换", 12, 42, T.fg, "left", 13);
+      } else {
+        if (anim) { const k = Math.min(1, (performance.now() - anim.t0) / 800), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+          Ps.t = anim.from + (anim.to - anim.from) * e; if (k >= 1) anim = null; }
+        const A = sq[0], B = sq[1], C2 = sq[2], D = sq[3], P = Pat(Ps.t);
+        seg(A, B, T.fg, 2); seg(B, C2, T.fg, 2); seg(C2, D, T.fg, 2); seg(D, A, T.fg, 2);
+        seg(A, C2, T.sub, 1.2, true, .7); seg(B, D, T.sub, 1.2, true, .4);
+        dot(A, T.fg, "A", 5); dot(B, T.fg, "B", 5); dot(C2, T.fg, "C", 5); dot(D, T.fg, "D", 5); dot(O, T.fg, "O", 5);
+        ar(P, A, T.blue, "PA", 2.4); ar(P, C2, T.blue, "PC", 2.4); seg(P, O, T.red, 1.6, true);
+        dot(P, T.red, "P", 6);
+        const v = dt(sub(A, P), sub(C2, P)), po = Math.hypot(P.x, P.y);
+        txt("PO = " + po.toFixed(2) + "　PA·PC = PO² − 2 = " + v.toFixed(2), 12, 22, d6 ? T.blue : T.fg, "left", 14);
+        if (d6) txt("PO 最小为 1（P 在边中点），最小值 −1", 12, 44, T.blue, "left", 14);
+        else txt("拖动 P 沿正方形边移动", 12, 44, T.fg, "left", 13);
+      }
+      ring = null;
+      if (allDone()) {
+        c.save(); c.globalAlpha = .93; c.fillStyle = T.bg; c.fillRect(0, 0, w, h); c.restore();
+        const cx = w / 2, cy = h / 2 - 18, rr = Math.min(76, h / 5);
+        c.save(); c.lineWidth = 12; c.lineCap = "round";
+        c.strokeStyle = T.grid; c.beginPath(); c.arc(cx, cy, rr, 0, 7); c.stroke();
+        c.strokeStyle = T.blue; c.beginPath(); c.arc(cx, cy, rr, -Math.PI / 2, -Math.PI / 2 + (total() / TOT) * 2 * Math.PI); c.stroke(); c.restore();
+        c.save(); c.textAlign = "center"; c.textBaseline = "middle";
+        c.fillStyle = T.fg; c.font = "600 " + Math.round(rr * .55) + "px ui-monospace,Menlo,monospace";
+        c.fillText(total() + " / " + TOT, cx, cy - 4);
+        c.fillStyle = T.sub; c.font = "13px " + font; c.fillText("总分 " + TOT + " 分", cx, cy + rr * .42); c.restore();
+        ring = { x: cx - 70, y: cy + rr + 26, w: 140, h: 44 };
+        c.save(); c.fillStyle = T.blue; c.beginPath();
+        if (c.roundRect) c.roundRect(ring.x, ring.y, ring.w, ring.h, 22); else c.rect(ring.x, ring.y, ring.w, ring.h);
+        c.fill(); c.fillStyle = "#fff"; c.font = "600 15px " + font; c.textAlign = "center"; c.textBaseline = "middle";
+        c.fillText("再做一遍", cx, ring.y + 22); c.restore();
+      }
+      if (rd) { const r = rows(T), k2 = JSON.stringify(r); if (k2 !== key) { key = k2; rd.update(r); } }
+    },
+  };
+})();
+CH[8].ready = true;
+
+/* ---------- start ---------- */
+go(fromHash() ?? 0);
+resize();
+</script>
+</body>
+</html>
