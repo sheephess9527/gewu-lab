@@ -446,6 +446,116 @@
         .x-app, .x-app * , .x-app *::before { transition: none !important; animation: none !important; }
       }
     </style>
+    <style>
+      /* Phone & tablet layer: desktop (≥1024px) untouched */
+      .x-chbtn, .x-mtools, .x-mbar { display: none; }
+      .x-sheet[hidden] { display: none; }
+      .x-sheet { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; justify-content: flex-end; }
+      .x-sheet__bg { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.32); opacity: 0; transition: opacity var(--x-t); }
+      .x-sheet__panel {
+        position: relative; max-height: 70vh; overflow-y: auto; overscroll-behavior: contain; background: var(--x-solid);
+        border-radius: 20px 20px 0 0; box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.16);
+        padding: 8px max(12px, env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+        transform: translateY(100%); transition: transform var(--x-t);
+      }
+      .x-sheet.open .x-sheet__bg { opacity: 1; }
+      .x-sheet.open .x-sheet__panel { transform: none; }
+      .x-sheet__grab { width: 36px; height: 5px; border-radius: 980px; background: var(--x-track); margin: 0 auto 4px; }
+      .x-sheet__head { display: flex; justify-content: space-between; align-items: center; padding: 0 0 4px 12px; }
+      .x-sheet__head h2 { font: 600 17px/1.3 var(--ui); }
+      .x-sheet__head button { min-width: 44px; min-height: 44px; padding: 0 12px; border: 0; background: none; color: var(--x-accent-ink); font: 500 16px var(--ui); cursor: pointer; }
+      .x-sheet__list button {
+        display: flex; align-items: center; gap: 14px; width: 100%; min-height: 52px; padding: 0 12px; border: 0; border-radius: 14px;
+        background: none; color: var(--x-text); font: 400 16px/1.4 var(--ui); text-align: left; cursor: pointer;
+      }
+      .x-sheet__list button + button { margin-top: 2px; }
+      .x-sheet__list button span { font: 13px var(--mono); color: var(--x-sub); min-width: 22px; }
+      .x-sheet__list button.on { background: var(--x-accent-soft); color: var(--x-accent-ink); font-weight: 600; }
+      .x-sheet__list button.on span { color: var(--x-accent-ink); }
+
+      /* note moved into the content flow (JS does this ≤1023px) */
+      .x-panel .x-note {
+        position: static; max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0;
+        background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+      }
+      .x-panel .x-note h2 { font: 600 20px/1.35 var(--ui); }
+      .x-panel .x-note h2 button { display: none; }
+      .x-panel .x-note p { font-size: 16px; line-height: 1.7; margin-top: 8px; }
+      .x-panel .x-note p.x-src7 { font: 13px/1.6 var(--mono); }
+
+      @media (min-width: 768px) and (max-width: 1023px) {
+        .x-app { grid-template-columns: 200px minmax(0, 1fr); grid-template-rows: 56px minmax(0, 55vh) minmax(0, 1fr); }
+        .x-side { grid-column: 1; grid-row: 2 / 4; }
+        .x-stage { grid-column: 2; grid-row: 2; touch-action: auto; }
+        .x-stage canvas { touch-action: none; }
+        .x-panel { grid-column: 2; grid-row: 3; margin: 12px; padding: 20px; }
+      }
+
+      @media (max-width: 767px) {
+        html, body { overflow-x: hidden; }
+        .x-app {
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: calc(52px + env(safe-area-inset-top)) 52vh minmax(0, 1fr);
+          grid-template-rows: calc(52px + env(safe-area-inset-top)) 52svh minmax(0, 1fr);
+        }
+        /* top bar: back · title · chapters */
+        .x-top {
+          display: grid; grid-template-columns: minmax(44px, 1fr) auto minmax(max-content, 1fr); align-items: center; gap: 6px;
+          padding: env(safe-area-inset-top) max(8px, env(safe-area-inset-right)) 0 max(4px, env(safe-area-inset-left));
+        }
+        .x-brand { display: contents; }
+        .x-back { grid-column: 1; justify-self: start; width: 44px; height: 44px; min-width: 44px; padding: 0; justify-content: center; }
+        .x-brand b {
+          grid-column: 2; text-align: center; white-space: nowrap; overflow: visible; text-overflow: clip;
+          font-size: clamp(14px, 4.5vw, 17px);
+        }
+        .x-prog, .x-tools, .x-side, .x-handle { display: none; }
+        .x-chbtn {
+          display: inline-flex; grid-column: 3; justify-self: end; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px;
+          border: 0; border-radius: 980px; background: var(--x-chip); color: var(--x-text); font: 500 15px var(--ui); white-space: nowrap; cursor: pointer;
+        }
+        .x-chbtn span { font: 13px var(--mono); color: var(--x-accent-ink); }
+        /* stage: upper half, never covered */
+        .x-stage { grid-row: 2; touch-action: auto; border-bottom: 0.5px solid var(--x-line); }
+        .x-stage canvas { touch-action: none; }
+        /* content area */
+        .x-panel {
+          grid-row: 3; position: static; transform: none; max-height: none; margin: 0; border: 0; border-radius: 0; box-shadow: none;
+          background: var(--x-solid); -webkit-backdrop-filter: none; backdrop-filter: none; overflow-y: auto; overscroll-behavior: contain;
+          padding: 20px max(16px, env(safe-area-inset-right)) calc(96px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+        }
+        .x-mtools { display: flex; gap: 8px; margin: 16px 0 0; }
+        .x-mtools button {
+          flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; border: 0;
+          border-radius: 980px; background: var(--x-soft); color: var(--x-text); font: 500 15px var(--ui); cursor: pointer;
+        }
+        .x-mtools svg { width: 18px; height: 18px; flex: none; }
+        .x-panel .x-wait { margin-top: 16px; font-size: 16px; line-height: 1.7; }
+        .x-h { margin: 28px 0 10px; }
+        .x-h:first-child { margin-top: 28px; }
+        .x-sl { margin-bottom: 8px; }
+        .x-sl label { display: flex; justify-content: space-between; align-items: baseline; }
+        .x-app input[type="range"] { height: 44px; }
+        .x-sw { min-height: 48px; }
+        .x-stats small, .x-tb7 table { font-size: 13px; }
+        /* bottom prev / next */
+        .x-mbar {
+          display: flex; gap: 12px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 8;
+          padding: 10px max(16px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+          background: var(--x-top); border-top: 0.5px solid var(--x-line);
+          -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+        }
+        .x-mbar button {
+          flex: 1; min-height: 44px; border: 0; border-radius: 980px; background: var(--x-soft); color: var(--x-text);
+          font: 500 15px var(--ui); cursor: pointer;
+        }
+        .x-mbar .x-nx { background: var(--x-accent); color: #fff; }
+        :root[data-theme="dark"] .x-mbar .x-nx,
+        :root[data-theme="dark"] .x-app .x-fns button.on,
+        :root[data-theme="dark"] .x-app #play3, :root[data-theme="dark"] .x-app #play5,
+        :root[data-theme="dark"] .x-app #step7, :root[data-theme="dark"] .x-app #play8 { color: #000; }
+      }
+    </style>
   </head>
   <body>
     <div class="page" id="top">
@@ -463,6 +573,7 @@
             <button class="x-ib x-hide-m" id="resetView" title="重置视角 (R)" aria-label="重置视角">R</button>
             <button class="x-ib x-hide-m" id="full" title="全屏 (F)" aria-label="全屏">F</button>
           </div>
+          <button class="x-chbtn" id="chBtn" type="button" aria-haspopup="dialog" aria-controls="sheet">章节 <span id="chCount">01/08</span></button>
         </header>
         <nav class="x-side" id="side" aria-label="章节"></nav>
         <main class="x-stage" id="stage">
@@ -501,6 +612,10 @@
         </main>
         <aside class="x-panel" id="panel">
           <button class="x-handle" id="handle">控制面板</button>
+          <div class="x-mtools">
+            <button type="button" id="mReset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>重置视角</button>
+            <button type="button" id="mTheme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><span id="mThemeT">深色</span></button>
+          </div>
           <p class="x-wait">本章演示即将上线，先去第 1 章「图像变换」看看吧。</p>
           <div class="x-ctl">
             <p class="x-h">基本函数 f(x)</p>
@@ -804,6 +919,18 @@
             <label class="x-sw">坐标标签<input type="checkbox" id="showLabels8" checked /></label>
           </div>
         </aside>
+        <nav class="x-mbar" aria-label="翻章">
+          <button type="button" id="mPrev">‹ 上一章</button>
+          <button type="button" id="mNext" class="x-nx">下一章 ›</button>
+        </nav>
+        <div class="x-sheet" id="sheet" role="dialog" aria-modal="true" aria-label="章节列表" hidden>
+          <div class="x-sheet__bg" id="sheetBg"></div>
+          <div class="x-sheet__panel">
+            <div class="x-sheet__grab"></div>
+            <div class="x-sheet__head"><h2>章节</h2><button type="button" id="sheetClose">完成</button></div>
+            <div class="x-sheet__list" id="sheetList"></div>
+          </div>
+        </div>
       </div>
     </div>
     <script src="hark.js"></script>
@@ -831,6 +958,8 @@
 
         var $ = function (id) { return document.getElementById(id); };
         var app = $("app"), cv = $("cv"), ctx = cv.getContext("2d"), stage = $("stage");
+        var flowMq = window.matchMedia("(max-width: 1023px)");
+        function noteOnStage() { return stage.contains($("note")); }
         var st = { ch: 0, fn: 0, h: 0, k: 0, a: 1, b: 1, orig: true, guide: true, labels: true, ea: 2, t: 1 };
         var view = { cx: 0, cy: 0, s: 50 }, dirty = true, W = 0, H = 0, dpr = 1;
         var C = {};
@@ -842,6 +971,11 @@
           b.onclick = function () { go(i); };
           $("side").appendChild(b);
           $("segs").appendChild(document.createElement("i"));
+          var sb = document.createElement("button");
+          sb.type = "button";
+          sb.innerHTML = "<span>" + String(i + 1).padStart(2, "0") + "</span>" + name;
+          sb.onclick = function () { go(i); closeSheet(); };
+          $("sheetList").appendChild(sb);
         });
         FN.forEach(function (f, i) {
           var b = document.createElement("button");
@@ -864,6 +998,9 @@
           [].forEach.call($("side").children, function (b, j) { b.classList.toggle("on", j === st.ch); if (j === st.ch && b.scrollIntoView) b.scrollIntoView({ block: "nearest", inline: "nearest" }); });
           [].forEach.call($("segs").children, function (s, j) { s.classList.toggle("on", j <= st.ch); });
           $("count").textContent = String(st.ch + 1).padStart(2, "0") + " / 08";
+          $("chCount").textContent = String(st.ch + 1).padStart(2, "0") + "/08";
+          [].forEach.call($("sheetList").children, function (b, j) { b.classList.toggle("on", j === st.ch); if (j === st.ch) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); });
+          if (flowMq.matches) $("panel").scrollTop = 0;
           $("noteTitle").textContent = CH[st.ch];
           $("soonName").textContent = "第 " + (st.ch + 1) + " 章「" + CH[st.ch] + "」正在制作中";
           app.classList.toggle("is-soon", st.ch > 7);
@@ -950,7 +1087,7 @@
         var MONO = "12px ui-monospace, Menlo, monospace";
         function lay3() {
           var sr = stage.getBoundingClientRect(), nr = $("note").getBoundingClientRect();
-          var nb = nr.height ? nr.bottom - sr.top : 0, bot = W < 768 ? 80 : 28;
+          var nb = nr.height && noteOnStage() ? nr.bottom - sr.top : 0, bot = flowMq.matches ? 16 : W < 768 ? 80 : 28;
           var top = nb + 16, avail = H - top - bot, R = Math.min(avail / 2.5, W * 0.14, 150), cy;
           if (R < 46) { R = Math.max(30, Math.min((H - bot) / 3, W * 0.14, 150)); cy = (H - bot) / 2 + 12; }
           else cy = top + avail / 2;
@@ -1249,7 +1386,7 @@
         function fit6() { var F = F6[s6.fn]; v6.s = (W - 64) / (F.r[1] - F.r[0]); v6.cx = (F.r[0] + F.r[1]) / 2; v6.w = W; dirty = true; }
         function lay6() {
           var sr = stage.getBoundingClientRect(), nr = $("note").getBoundingClientRect();
-          var nb = nr.height ? nr.bottom - sr.top : 0, bot = W < 768 ? 76 : 16, gap = 30, top = nb + 12;
+          var nb = nr.height && noteOnStage() ? nr.bottom - sr.top : 0, bot = flowMq.matches ? 16 : W < 768 ? 76 : 16, gap = 30, top = nb + 12;
           var ph = (H - top - bot - gap) / 2;
           if (ph < 100) { top = 12; ph = (H - top - bot - gap) / 2; }
           var F = F6[s6.fn];
@@ -1828,8 +1965,47 @@
           var root = document.documentElement, next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
           root.setAttribute("data-theme", next);
           try { localStorage.setItem("hark-theme", next); } catch (e) {}
-          readColors();
+          readColors(); syncThemeBtn();
         }
+        function syncThemeBtn() { $("mThemeT").textContent = document.documentElement.getAttribute("data-theme") === "dark" ? "浅色" : "深色"; }
+        // phone/tablet: note joins the content flow, chapter sheet, bottom bar
+        function placeNote() {
+          var note = $("note"), panel = $("panel");
+          if (flowMq.matches && note.parentNode !== panel) {
+            panel.insertBefore(note, panel.firstChild);
+            note.classList.remove("closed"); $("noteToggle").textContent = "收起";
+          } else if (!flowMq.matches && note.parentNode !== stage) {
+            stage.insertBefore(note, stage.querySelector(".x-soon"));
+          }
+          dirty = true;
+        }
+        var sheetTimer = null;
+        function openSheet() {
+          var sh = $("sheet"); clearTimeout(sheetTimer); sh.hidden = false; void sh.offsetHeight; sh.classList.add("open");
+          var on = $("sheetList").querySelector(".on"); if (on) { on.scrollIntoView({ block: "nearest" }); on.focus({ preventScroll: true }); }
+        }
+        function closeSheet() {
+          var sh = $("sheet"); if (sh.hidden) return; sh.classList.remove("open");
+          sheetTimer = setTimeout(function () { sh.hidden = true; }, rm ? 0 : 300);
+          $("chBtn").focus({ preventScroll: true });
+        }
+        $("chBtn").onclick = openSheet;
+        $("sheetBg").onclick = closeSheet;
+        $("sheetClose").onclick = closeSheet;
+        $("mPrev").onclick = function () { go(st.ch - 1); };
+        $("mNext").onclick = function () { go(st.ch + 1); };
+        var mResetT = null;
+        $("mReset").onclick = function () {
+          var b = this, svg = b.querySelector("svg");
+          resetView();
+          b.textContent = ""; b.appendChild(svg); b.appendChild(document.createTextNode("已重置"));
+          b.setAttribute("aria-live", "polite");
+          clearTimeout(mResetT);
+          mResetT = setTimeout(function () { b.lastChild.textContent = "重置视角"; }, 1200);
+        };
+        $("mTheme").onclick = toggleTheme;
+        if (flowMq.addEventListener) flowMq.addEventListener("change", function () { placeNote(); resize(); });
+        else if (flowMq.addListener) flowMq.addListener(function () { placeNote(); resize(); });
         function fullscreen() {
           if (document.fullscreenElement) document.exitFullscreen();
           else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {});
@@ -1851,6 +2027,7 @@
         $("resetExp").onclick = function () { st.ea = 2; st.t = 1; sync2(); };
         document.addEventListener("keydown", function (e) {
           if (e.metaKey || e.ctrlKey || e.altKey) return;
+          if (!$("sheet").hidden) { if (e.key === "Escape") closeSheet(); return; }
           if (e.target.tagName === "INPUT" && (e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
           var k = e.key.toLowerCase();
           if (e.key === "ArrowLeft") go(st.ch - 1);
@@ -1867,6 +2044,7 @@
         // theme: default light unless dark was saved
         try { document.documentElement.setAttribute("data-theme", localStorage.getItem("hark-theme") === "dark" ? "dark" : "light"); } catch (e) {}
         var n0 = parseInt(location.hash.slice(1), 10);
+        syncThemeBtn(); placeNote();
         resize(); readColors(); resetView(); sync(); sync2(); sync3(); sync4(); sync5(); sync6(); reset7(); sync8(); go(n0 >= 1 && n0 <= 8 ? n0 - 1 : 0);
         requestAnimationFrame(loop);
       })();
