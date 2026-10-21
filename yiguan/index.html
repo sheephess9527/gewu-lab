@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><script src="../lib/labfix-2d.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>衣冠中国 · 格物实验室</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--sel:#e8f1fc;--selfg:#0058b0;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--sel:rgba(41,151,255,.18);--selfg:#6cb6ff;--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--shadow:0 0 0 1px rgba(255,255,255,.08)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.back b{font-size:22px;font-weight:400;margin-right:4px}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);font-size:14px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}
+html.dark .pill.primary,html.dark .chips button.on{color:#000}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc button,.sheet button.it{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px;align-items:center}
+.toc button:hover{background:var(--btn2)}
+.toc button.on,.sheet button.it.on{background:var(--sel);color:var(--selfg);font-weight:600}
+.toc .mono,.sheet .mono{font-size:13px;color:var(--sub)}.on .mono{color:var(--selfg)!important}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 20px}
+.explain{flex:none}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.etext{margin:8px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.explain.collapsed .etext,.explain.collapsed .book{display:none}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;color:var(--sub);min-height:32px}
+.cwrap{flex:1;min-height:0;position:relative;border-radius:22px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:none}
+.sec h3{font-size:13px;color:var(--sub);font-weight:600;letter-spacing:0;margin:0 0 8px}
+.ctrls{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;font-size:14px}.sl output{font-family:var(--mono);color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}.chips button.on{background:var(--blue);color:#fff}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;min-height:36px;border:0;background:none;padding:0;width:100%}
+.tg i{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.tg.on i{background:#34c759}.tg.on i::after{left:20px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+.points ul{margin:0;padding-left:18px}.points li{margin:4px 0}
+.gk a{color:var(--blue);text-decoration:none;font-size:14px}
+.mdark{display:none}
+.soon{color:var(--sub);font-size:14px;margin:0}
+/* sheet */
+.mask{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;max-height:70vh;overflow:auto;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .prog{display:none}.app{display:block;height:auto}.toc{display:none}
+ .stage{padding:12px}.cwrap{order:-1;flex:none;height:56vh}
+ .explain .fold{display:none}.explain.collapsed .etext,.explain.collapsed .book{display:block}.etext{max-height:none;overflow:visible}
+ .panel{border:0;padding:0 12px 24px}
+}
+@media (min-width:1024px){.chbtn{display:none}}
+/* phone */
+@media (max-width:767px){
+ .top{height:calc(52px + env(safe-area-inset-top));gap:6px;padding-left:4px;padding-right:8px}
+ .back{width:44px;justify-content:center}.back span{display:none}.back b{margin:0}
+ .tname{flex:1;font-size:16px}.tbtns{display:none}.chbtn{margin-left:0;padding:0 12px}
+ .stage{padding:0;gap:0}.cwrap{height:52vh;border-radius:0;box-shadow:none;border-bottom:1px solid var(--line)}
+ .explain{background:none;box-shadow:none;padding:16px 16px 4px}.ehead h2{font-size:20px}.etext{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(84px + env(safe-area-inset-bottom))}
+ input[type=range]{height:44px}.chips button,.tg{min-height:44px}
+ .mdark{display:block;align-self:flex-start;min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
+  <div class="tname">衣冠中国 · AttireLab</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 09</span></div>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button><button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chnum">01/09</span></button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h2 id="ctitle"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="etext" id="ctext"></p>
+    </section>
+    <div class="cwrap" id="cwrap"><canvas id="cv"></canvas></div>
+  </main>
+  <aside class="panel">
+    <section class="card sec" id="ctrlSec"><h3>控件</h3><div class="ctrls" id="ctrl"></div></section>
+    <section class="card sec" id="readSec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec points" id="ptSec"><h3>要点</h3><div id="pts"></div></section>
+    <section class="card sec gk" id="gkSec"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mask" id="mask" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><div id="slist"></div></div>
+<div class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></div>
+<script>
+const CH=[
+{n:"上衣下裳与深衣",book:"统编版《中外历史纲要（上）》第 1–2 课 · 选择性必修1 第 1 课（礼制）",ready:false},
+{n:"胡服骑射",book:"纲要（上）第 2 课 诸侯纷争与变法运动",ready:false},
+{n:"唐代官服：以色辨品",book:"纲要（上）第 6–7 课 · 选择性必修1 第 1 课",ready:false},
+{n:"宋代官服与幞头",book:"纲要（上）第 9–11 课",ready:false},
+{n:"明代补子：文禽武兽",book:"纲要（上）第 13 课",ready:false},
+{n:"清代顶戴与补服",book:"纲要（上）第 13–14 课",ready:false},
+{n:"服饰里的民族交融",book:"纲要（上）第 5、10 课 · 选择性必修1 第 11 课",ready:false},
+{n:"近代服饰变迁",book:"纲要（上）第 19–21 课 · 选择性必修2 第 15 课",ready:false},
+{n:"随堂检测",book:"浙江选考 中国古代服饰与制度",ready:false}];
+/* ---------- 人物绘制工具 ---------- */
+// figure(ctx,x,y,h,o)：(x,y)=脚底中心，h=人物总高(px)，头身比约 1:6.5。figureLabel(ctx,x1,y1,x2,y2,text,color) 画引线+标签，color 可为 "blue"|"gold"|"red"。
+function shade(c,k){const m=/^#([0-9a-f]{6})$/i.exec(c||"");if(!m)return c;const n=parseInt(m[1],16);
+ const f=v=>Math.round(k<0?v*(1+k):v+(255-v)*k);return"#"+[n>>16,n>>8&255,n&255].map(v=>f(v).toString(16).padStart(2,"0")).join("")}
+const FIG_DEF={shenyi:["#5b6e8c","wide","silk"],yuanling:["#8a3b3b","narrow","leather"],jiaoling:["#4f7a6a","wide","silk"],pao:["#7a4fa0","narrow","jade"],hufu:["#9c6b3e","narrow","leather"],
+ qing:["#2f4a6b","horse","silk"],zhongshan:["#4a5560","narrow","none"],qipao:["#3f6f8f","narrow","none"],changshan:["#6b6f5a","narrow","none"]};
+function figure(ctx,x,y,h,o){o=o||{};const T=theme(),R=FIG_DEF[o.robe]?o.robe:"jiaoling",D=FIG_DEF[R],u=h/6.5,top=y-h,PI=Math.PI,
+ col=o.robeColor||D[0],sl=o.sleeve||D[1],bt=o.belt||D[2],hat=o.hat||(R==="qing"?"dingdai":R==="hufu"?"hood":"none"),
+ tr=o.trousers!=null?o.trousers:/hufu|zhongshan/.test(R),bo=o.boots!=null?o.boots:tr&&R!=="zhongshan"||R==="qing",
+ skin="#f1d6bd",hair="#2a2a2e",lw=Math.max(1,h/220),ink=T.axis,bc=shade(col,-.35),
+ hy=top+.62*u,sy=top+1.32*u,wy=top+2.95*u,hemY={hufu:top+4.35*u,zhongshan:top+3.75*u}[R]||y-.26*u,
+ hemW={shenyi:1.3,jiaoling:1.2,qipao:.74,changshan:1,qing:1.05,pao:1.08,yuanling:1.08,hufu:1,zhongshan:.9}[R]*u,
+ waW=(R==="qipao"?.55:R==="zhongshan"?.82:.72)*u,shW=.95*u,bul=(R==="shenyi"?.16:.05)*u;
+ const P=(f,fill,st)=>{ctx.beginPath();f();if(fill){ctx.fillStyle=fill;ctx.fill()}if(st!==0){ctx.strokeStyle=st||ink;ctx.lineWidth=lw;ctx.stroke()}},
+  mir=f=>[-1,1].forEach(s=>{ctx.save();ctx.translate(x,0);ctx.scale(s,1);f(s);ctx.restore()}),
+  E=(cx,cy,rx,ry,r)=>ctx.ellipse(cx,cy,rx,ry,r||0,0,2*PI),
+  band=(w,c,f)=>{ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();f();ctx.stroke()};
+ ctx.save();ctx.lineJoin=ctx.lineCap="round";
+ // 花翎、风帽（在身后）
+ if(hat==="dingdai"&&o.feather){P(()=>E(x+.55*u,hy-.1*u,.13*u,.75*u,-.5),"#3d7a5c");P(()=>E(x+.78*u,hy+.42*u,.07*u,.1*u,-.5),"#2a4f8f",0)}
+ if(hat==="hood")P(()=>E(x,hy+.02*u,.5*u,.6*u),shade(col,-.2));
+ // 腿、靴、鞋
+ if(tr)mir(()=>P(()=>{ctx.moveTo(-.46*u,wy+.5*u);ctx.lineTo(-.04*u,wy+.5*u);ctx.lineTo(-.08*u,y-.2*u);ctx.lineTo(-.4*u,y-.2*u);ctx.closePath()},R==="zhongshan"?col:shade(col,-.3)));
+ mir(()=>bo?P(()=>{ctx.moveTo(-.4*u,y-(tr?1:.45)*u);ctx.lineTo(-.08*u,y-(tr?1:.45)*u);ctx.lineTo(-.06*u,y);ctx.quadraticCurveTo(-.5*u,y+.02*u,-.46*u,y-.2*u);ctx.closePath()},"#2b2420")
+  :P(()=>E(-.25*u,y-.08*u,.2*u,.09*u),"#2b2420"));
+ P(()=>ctx.rect(x-.13*u,hy+.3*u,.26*u,sy-hy-.3*u),skin);
+ // 衣身
+ const hemPath=()=>{ctx.lineTo(-hemW,hemY);ctx.quadraticCurveTo(-hemW*.5,hemY+bul,0,hemY+bul)};
+ mir(()=>{const pth=c=>{ctx.beginPath();ctx.moveTo(c?1:0,sy-.1*u);ctx.lineTo(-.3*u,sy-.14*u);ctx.quadraticCurveTo(-shW,sy-.06*u,-shW*.92,sy+.3*u);
+   if(R==="qipao"){ctx.quadraticCurveTo(-waW-.05*u,wy-.4*u,-waW,wy);ctx.quadraticCurveTo(-.86*u,wy+1.1*u,-hemW,hemY);ctx.quadraticCurveTo(-hemW*.5,hemY+bul,0,hemY+bul)}
+   else{ctx.quadraticCurveTo(-waW-.1*u,wy-.5*u,-waW,wy);hemPath()}if(c){ctx.lineTo(1,hemY+bul);ctx.closePath()}};
+  pth(1);ctx.fillStyle=col;ctx.fill();
+  if(o.skirtColor){ctx.beginPath();ctx.moveTo(-waW,wy);hemPath();ctx.lineTo(1,hemY+bul);ctx.lineTo(1,wy);ctx.closePath();ctx.fillStyle=o.skirtColor;ctx.fill();
+   for(let k=1;k<4;k++)P(()=>{ctx.moveTo(-waW*k/4,wy+.1*u);ctx.lineTo(-hemW*k/4,hemY+bul*.9)},null,shade(o.skirtColor,-.25))}
+  if(/shenyi|jiaoling/.test(R))band(.16*u,bc,()=>{ctx.moveTo(-hemW+.05*u,hemY-.06*u);ctx.quadraticCurveTo(-hemW*.5,hemY+bul-.06*u,0,hemY+bul-.06*u)});
+  if(/qipao|pao/.test(R))P(()=>{ctx.moveTo(-hemW*.9,hemY);ctx.lineTo(-hemW*.84,hemY-1*u)},null);
+  pth(0);ctx.strokeStyle=ink;ctx.lineWidth=lw;ctx.stroke()});
+ if(R==="qing")P(()=>{ctx.moveTo(x,hemY+bul);ctx.lineTo(x,hemY-.8*u)},null);
+ // 纹样
+ if(o.pattern==="cloud")[[-.42,2.2],[.38,3.5],[-.3,4.5],[.42,5.3]].forEach(([a,b])=>{const cx=x+a*u,cy=top+b*u;if(cy<hemY-.1*u)
+  band(lw*1.4,shade(col,.35),()=>{ctx.arc(cx,cy,.11*u,PI,2*PI);ctx.arc(cx+.2*u,cy,.09*u,PI,2*PI);ctx.moveTo(cx-.15*u,cy+.04*u);ctx.lineTo(cx+.32*u,cy+.04*u)})});
+ if(o.pattern==="dragon"){const yb=Math.min(hemY-.3*u,top+5.4*u);band(.08*u,"#d6a83a",()=>{ctx.moveTo(x-.45*u,sy+.75*u);
+  ctx.bezierCurveTo(x+.7*u,sy+1.2*u,x-.8*u,(sy+yb)/2,x+.2*u,(sy+yb)/2+.3*u);ctx.quadraticCurveTo(x+.6*u,yb,x-.1*u,yb)});
+  P(()=>E(x-.5*u,sy+.7*u,.1*u,.08*u),"#d6a83a",0)}
+ // 领
+ if(/shenyi|jiaoling/.test(R)){band(.16*u,bc,()=>{ctx.moveTo(x-.26*u,sy-.14*u);ctx.lineTo(x+.08*u,sy+.45*u)});
+  band(.16*u,bc,()=>{ctx.moveTo(x+.26*u,sy-.14*u);ctx.quadraticCurveTo(x+.1*u,sy+.4*u,x-.62*u,sy+1.15*u)})}
+ else if(/yuanling|pao/.test(R)){band(.1*u,bc,()=>E(x,sy-.06*u,.3*u,.17*u));P(()=>{ctx.moveTo(x-.28*u,sy);ctx.lineTo(x-.55*u,sy+.12*u)},null)}
+ else if(R==="hufu"){mir(()=>P(()=>{ctx.moveTo(-.3*u,sy-.12*u);ctx.lineTo(0,sy+.55*u);ctx.lineTo(-.34*u,sy+.38*u);ctx.closePath()},shade(col,.3)));
+  P(()=>{ctx.moveTo(x,sy+.55*u);ctx.lineTo(x,hemY)},null)}
+ else if(R==="zhongshan"){mir(()=>{P(()=>{ctx.moveTo(-.24*u,sy-.2*u);ctx.lineTo(0,sy+.3*u);ctx.lineTo(-.3*u,sy+.15*u);ctx.closePath()},shade(col,.2));
+   P(()=>ctx.rect(-.62*u,sy+.55*u,.36*u,.32*u),null);P(()=>ctx.rect(-.68*u,wy+.1*u,.42*u,.4*u),null)});
+  P(()=>{ctx.moveTo(x,sy+.3*u);ctx.lineTo(x,hemY)},null);for(let k=0;k<5;k++)P(()=>E(x,sy+.45*u+k*(hemY-sy-.6*u)/4,.04*u,.04*u),bc,0)}
+ else{band(lw,ink,()=>{ctx.moveTo(x+.05*u,sy-.08*u);ctx.quadraticCurveTo(x,sy+.5*u,x-.7*u,sy+.62*u)});
+  [[.02,.15],[-.25,.5],[-.6,.62]].forEach(([a,b])=>P(()=>E(x+a*u,sy+b*u,.04*u,.04*u),bc,0));
+  if(R!=="qing")P(()=>ctx.rect(x-.22*u,sy-.36*u,.44*u,.3*u),col)}
+ // 腰带
+ if(bt!=="none"){const bw=waW+.06*u,c=o.beltColor||{silk:"#d9c48c",leather:"#3b2a1e",jade:"#3b2a1e"}[bt]||"#3b2a1e";P(()=>ctx.rect(x-bw,wy-.09*u,2*bw,.18*u),c);
+  if(bt==="silk")[-.12,.1].forEach(a=>P(()=>ctx.rect(x+a*u,wy,.08*u,1.3*u),c));
+  if(bt==="leather")P(()=>ctx.rect(x-.08*u,wy-.11*u,.16*u,.22*u),"#c9a34a");
+  if(bt==="jade")for(let k=-2;k<=2;k++)P(()=>ctx.rect(x+k*.26*u-.07*u,wy-.06*u,.14*u,.12*u),"#cfe3d4",0)}
+ // 补子
+ if(o.buzi){const bz=o.buzi,bx=x,by=sy+.95*u,bcol=bz.color||"#2b3a55",mc=/^#[0-9a-f]{6}$/i.test(bcol)?shade(bcol,.62):"#e6c46a";
+  P(()=>ctx.rect(bx-.5*u,by-.5*u,u,u),bcol);P(()=>ctx.rect(bx-.43*u,by-.43*u,.86*u,.86*u),null,mc);
+  if(bz.motif==="beast"){P(()=>{E(bx-.02*u,by+.02*u,.24*u,.12*u);ctx.moveTo(bx+.34*u,by-.1*u);ctx.arc(bx+.25*u,by-.1*u,.09*u,0,2*PI)},mc,0);
+   band(.05*u,mc,()=>{[-.18,-.08,.08,.18].forEach(a=>{ctx.moveTo(bx+a*u,by+.08*u);ctx.lineTo(bx+a*u,by+.3*u)});ctx.moveTo(bx-.24*u,by);ctx.quadraticCurveTo(bx-.4*u,by-.05*u,bx-.34*u,by-.25*u)})}
+  else{P(()=>{E(bx-.02*u,by+.06*u,.19*u,.1*u,-.35);ctx.moveTo(bx+.26*u,by-.22*u);ctx.arc(bx+.2*u,by-.22*u,.06*u,0,2*PI);
+   ctx.moveTo(bx-.16*u,by+.1*u);ctx.lineTo(bx-.4*u,by+.34*u);ctx.lineTo(bx-.28*u,by+.38*u);ctx.closePath();ctx.moveTo(bx-.06*u,by+.02*u);ctx.lineTo(bx+.04*u,by-.3*u);ctx.lineTo(bx+.12*u,by+.02*u);ctx.closePath()},mc,0);
+   band(.05*u,mc,()=>{ctx.moveTo(bx+.13*u,by);ctx.lineTo(bx+.2*u,by-.2*u)})}}
+ // 袖与手
+ const hY=top+(sl==="horse"?3.92:3.7)*u;
+ mir(()=>{if(sl==="wide"){P(()=>{ctx.moveTo(-.55*u,sy-.12*u);ctx.quadraticCurveTo(-1.2*u,sy-.06*u,-1.3*u,sy+.6*u);ctx.quadraticCurveTo(-1.62*u,top+3.6*u,-1.5*u,top+4.35*u);
+   ctx.quadraticCurveTo(-1.2*u,top+4.6*u,-.86*u,top+4.3*u);ctx.quadraticCurveTo(-.8*u,top+3.4*u,-.72*u,sy+1*u);ctx.closePath()},col);
+   band(.14*u,bc,()=>{ctx.moveTo(-1.46*u,top+4.36*u);ctx.quadraticCurveTo(-1.2*u,top+4.54*u,-.9*u,top+4.27*u)});return}
+  P(()=>{ctx.moveTo(-.55*u,sy-.12*u);ctx.quadraticCurveTo(-1.05*u,sy-.06*u,-1.08*u,sy+.4*u);ctx.lineTo(-1.14*u,top+3.55*u);ctx.lineTo(-.8*u,top+3.55*u);ctx.lineTo(-.7*u,sy+.95*u);ctx.closePath()},col);
+  P(()=>E(-.97*u,hY,.13*u,.16*u),skin);
+  if(sl==="horse")P(()=>{ctx.moveTo(-.8*u,top+3.45*u);ctx.lineTo(-1.14*u,top+3.45*u);ctx.quadraticCurveTo(-1.3*u,top+3.72*u,-1.18*u,top+3.86*u);ctx.quadraticCurveTo(-.95*u,top+3.78*u,-.72*u,top+3.86*u);ctx.closePath()},shade(col,.28))});
+ // 头、发、脸
+ P(()=>E(x,hy,.34*u,.43*u),skin);
+ if(hat!=="hood")P(()=>{o.queue?ctx.ellipse(x,hy-.14*u,.3*u,.32*u,0,PI,2*PI):ctx.ellipse(x,hy-.04*u,.36*u,.42*u,0,PI,2*PI);ctx.closePath()},hair,0);
+ else band(.1*u,shade(col,-.2),()=>ctx.arc(x,hy+.02*u,.42*u,PI*1.05,PI*1.95));
+ const er=Math.max(1.2,.04*u);[-1,1].forEach(s=>{P(()=>E(x+s*.13*u,hy+.08*u,er,er*1.15),hair,0);band(Math.max(1,.03*u),hair,()=>{ctx.moveTo(x+s*.07*u,hy-.04*u);ctx.lineTo(x+s*.19*u,hy-.06*u)})});
+ // 冠帽
+ if(hat==="none"&&!o.queue)P(()=>E(x,hy-.5*u,.14*u,.12*u),hair,0);
+ if(hat==="guan"){band(lw,ink,()=>{ctx.moveTo(x-.3*u,hy+.05*u);ctx.lineTo(x-.2*u,hy+.42*u);ctx.moveTo(x+.3*u,hy+.05*u);ctx.lineTo(x+.2*u,hy+.42*u)});
+  P(()=>{ctx.moveTo(x-.14*u,hy-.38*u);ctx.lineTo(x-.18*u,hy-.72*u);ctx.lineTo(x+.18*u,hy-.72*u);ctx.lineTo(x+.14*u,hy-.38*u);ctx.closePath()},"#4a3b2a");
+  band(.04*u,"#c9a34a",()=>{ctx.moveTo(x-.32*u,hy-.55*u);ctx.lineTo(x+.32*u,hy-.55*u)})}
+ if(hat==="futou"||hat==="wusha"){const wl=(o.wing!=null?o.wing:hat==="futou"?.5:.45)*(hat==="futou"?1.6:1)*u,wyy=hy-.36*u;
+  if(hat==="futou")mir(()=>P(()=>ctx.rect(-.3*u-wl,wyy-.03*u,wl,.06*u),hair));else mir(()=>P(()=>E(-.36*u-wl/2,wyy-.04*u,wl/2,.11*u,.15),hair));
+  P(()=>{if(hat==="futou"){ctx.moveTo(x-.37*u,hy-.12*u);ctx.lineTo(x-.37*u,hy-.4*u);ctx.arc(x-.14*u,hy-.48*u,.17*u,PI,0);ctx.arc(x+.14*u,hy-.48*u,.17*u,PI,0);ctx.lineTo(x+.37*u,hy-.12*u)}
+   else{ctx.moveTo(x-.38*u,hy-.12*u);ctx.lineTo(x-.38*u,hy-.48*u);ctx.lineTo(x-.27*u,hy-.48*u);ctx.arc(x,hy-.6*u,.27*u,PI,0);ctx.lineTo(x+.38*u,hy-.48*u);ctx.lineTo(x+.38*u,hy-.12*u)}
+   ctx.quadraticCurveTo(x,hy-.26*u,x-.37*u,hy-.12*u)},hair)}
+ if(hat==="dingdai"){P(()=>{ctx.moveTo(x-.58*u,hy-.18*u);ctx.quadraticCurveTo(x,hy-.34*u,x+.58*u,hy-.18*u);ctx.quadraticCurveTo(x+.2*u,hy-.6*u,x,hy-.78*u);ctx.quadraticCurveTo(x-.2*u,hy-.6*u,x-.58*u,hy-.18*u)},"#2f2a2a");
+  band(lw,"#b8332b",()=>{for(let k=-3;k<=3;k++){ctx.moveTo(x,hy-.76*u);ctx.lineTo(x+k*.12*u,hy-.32*u+Math.abs(k)*.03*u)}});
+  P(()=>E(x,hy-.86*u,.09*u,.09*u),o.bead||"#c0362c")}
+ // 清辫
+ if(o.queue)band(.1*u,hair,()=>{ctx.moveTo(x+.22*u,hy+.25*u);ctx.quadraticCurveTo(x+.5*u,sy+.2*u,x+.42*u,wy-.15*u)});
+ ctx.restore()}
+function figureLabel(ctx,x1,y1,x2,y2,text,color){const T=theme(),r=x2>=x1,c={blue:T.blue,gold:T.goldText,red:T.redText}[color]||T.fg;ctx.save();
+ ctx.strokeStyle=T.sub;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.lineTo(x2+(r?14:-14),y2);ctx.stroke();
+ ctx.fillStyle=T.sub;ctx.beginPath();ctx.arc(x1,y1,2.5,0,2*Math.PI);ctx.fill();ctx.fillStyle=c;ctx.font="13px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ ctx.textAlign=r?"left":"right";ctx.textBaseline="middle";ctx.fillText(text,x2+(r?18:-18),y2);ctx.restore()}
+const MODS=[];// MODS[i]={text,points,gk,mount(ctrlEl,readEl),draw(ctx,w,h,t),pointer(e,type,x,y),unmount()}
+/* ---------- 第 1 章 上衣下裳与深衣 ---------- */
+CH[0].ready=true;
+const YG1_BASE="华夏服饰最早的基本形制是“上衣下裳”，后出现上下连属的“深衣”；交领右衽、宽袍大袖。西周礼制下，衣冠成为身份和等级的标志。";
+// 人物尺寸：在可用宽 cw 内，高约画布高 75%
+function yg1Size(cw,h){const fh=Math.min(.75*h,Math.max(140,(cw-200)*1.9));return{fh,u:fh/6.5,y:h/2+fh/2}}
+// 上衣下裳人物；sep 为上下拉开的总距离(px)；side：标注方向（0 两侧，-1 全左，1 全右）
+function yg1DrawYishang(ctx,x,y,fh,w,h,sep,side){const u=fh/6.5,top=y-fh,sy=top+1.32*u,wy=top+2.95*u,d=sep/2,
+  o={robe:"jiaoling",robeColor:"#2b2f3a",skirtColor:"#a8632e",hat:"guan"};
+ const sp=dy=>{ctx.beginPath();[-1,1].forEach(s=>{const X=v=>x+s*v*u;ctx.moveTo(X(-.55),sy-.12*u+dy);ctx.quadraticCurveTo(X(-1.2),sy-.06*u+dy,X(-1.3),sy+.6*u+dy);
+  ctx.quadraticCurveTo(X(-1.62),top+3.6*u+dy,X(-1.52),top+4.42*u+dy);ctx.quadraticCurveTo(X(-1.2),top+4.68*u+dy,X(-.84),top+4.36*u+dy);ctx.quadraticCurveTo(X(-.8),top+3.4*u+dy,X(-.72),sy+u+dy);ctx.closePath()})};
+ ctx.save();ctx.beginPath();ctx.rect(0,wy,w,h-wy);ctx.clip();sp(d);ctx.rect(0,0,w,h);ctx.clip("evenodd");ctx.translate(0,d);figure(ctx,x,y,fh,o);ctx.restore();
+ ctx.save();ctx.beginPath();ctx.rect(0,0,w,wy);ctx.clip();ctx.translate(0,-d);figure(ctx,x,y,fh,o);ctx.restore();
+ ctx.save();sp(-d);ctx.clip();ctx.translate(0,-d);figure(ctx,x,y,fh,o);ctx.restore();
+ const L=side||-1,R=side||1;
+ figureLabel(ctx,x+.12*u,sy+.3*u-d,x+R*1.9*u,sy-.25*u-d,"交领右衽","gold");
+ figureLabel(ctx,x-.45*u,sy+.95*u-d,x+L*2*u,sy+.6*u-d,"上衣（象天·玄）","blue");
+ figureLabel(ctx,x+.45*u,wy+1.3*u+d,x+R*2*u,wy+1.6*u+d,"下裳（象地·纁）","red")}
+// 深衣人物；p 为缝合线动画进度 0–1
+function yg1DrawShenyi(ctx,x,y,fh,p,side){const T=theme(),u=fh/6.5,top=y-fh,sy=top+1.32*u,wy=top+2.95*u;
+ figure(ctx,x,y,fh,{robe:"shenyi",robeColor:"#2c4f5c",hat:"guan"});
+ if(p>0){const x0=x-.85*u,x1=x0+1.7*u*Math.min(1,p);ctx.save();ctx.strokeStyle=T.gold;ctx.lineWidth=Math.max(1.5,u*.06);
+  ctx.setLineDash([u*.12,u*.08]);ctx.beginPath();ctx.moveTo(x0,wy+.12*u);ctx.lineTo(x1,wy+.12*u);ctx.stroke();ctx.restore()}
+ const L=side||-1,R=side||1;
+ figureLabel(ctx,x-.35*u,wy+.12*u,x+L*2*u,wy+.5*u,"衣裳相连","gold");
+ figureLabel(ctx,x+.35*u,wy+1.2*u,x+R*2*u,wy+1.5*u,"续衽钩边","blue");
+ figureLabel(ctx,x-1.25*u,sy+1.3*u,x+L*2.1*u,sy+.4*u,"宽袖");
+ figureLabel(ctx,x+.5*u,wy-.02*u,x+R*2*u,wy-.5*u,"大带","red")}
+const YG1_MODES=[
+ {name:"上衣下裳",text:"上衣下裳：上衣象天，取玄色；下裳象地，取纁色。拖动滑块把两部分拉开，看清“衣”与“裳”本是两件。",
+  read:S=>[["模式","上衣下裳"],["形制","上衣、下裳分开裁制，交领右衽"],["象征","上玄下纁，象天地之色"]],
+  ctrl:(box,S)=>box.append(slider("上下分开",0,1,.01,S.sep,v=>v.toFixed(2),v=>{S.sep=v})),
+  draw(ctx,w,h,t,S){const z=yg1Size(w,h);yg1DrawYishang(ctx,w/2,z.y,z.fh,w,h,S.sep*.12*h)}},
+ {name:"深衣",text:"深衣：把上衣与下裳缝合为一体，“被体深邃”，故名深衣。打开“并排对比”，对照两种形制。",
+  read:S=>[["模式","深衣"],["形制","上下连属，续衽钩边，宽袖系大带"],["象征","规矩绳权衡，合乎礼度"]],
+  ctrl:(box,S)=>box.append(toggle("并排对比",S.cmp,v=>{S.cmp=v})),
+  enter:S=>{S.t0=null},
+  draw(ctx,w,h,t,S){if(S.t0==null)S.t0=t;const p=(t-S.t0)/.8;
+   if(S.cmp){const z=yg1Size(w/2,h);yg1DrawYishang(ctx,w/4,z.y,z.fh,w,h,0,-1);yg1DrawShenyi(ctx,w*3/4,z.y,z.fh,p,1)}
+   else{const z=yg1Size(w,h);yg1DrawShenyi(ctx,w/2,z.y,z.fh,p)}}}];
+MODS[0]={text:YG1_BASE,
+ points:["上衣下裳是华夏服饰最早的基本形制","深衣上下连属，春秋战国至汉代流行","交领右衽是华夏服饰的重要特征","西周礼乐制度下，服饰纹样与等级对应，“明贵贱、辨等列”"],
+ gk:"统编版纲要（上）第 1–2 课（西周礼乐制度、宗法制）；浙江选考常以服饰、器物为史料考查礼制等级与民族交融。",
+ S:null,
+ mount(ctrl,read){const S=this.S={mode:0,sep:0,cmp:false,t0:null},n=YG1_MODES.length,sub=el("div"),ro=readout();
+  const set=i=>{S.mode=Math.max(0,Math.min(n-1,i));const M=YG1_MODES[S.mode];sub.innerHTML="";M.ctrl&&M.ctrl(sub,S);M.enter&&M.enter(S);
+   ro.update(M.read(S));const ct=$("ctext");if(ct)ct.innerHTML=YG1_BASE+(M.text?"<br><br>"+M.text:"")};
+  ctrl.append(chips(YG1_MODES.map((m,i)=>({label:(i+1)+" "+m.name,value:i})),0,set),sub);read.append(ro);set(0)},
+ draw(ctx,w,h,t){const S=this.S;if(!S)return;YG1_MODES[S.mode].draw(ctx,w,h,t,S)},
+ unmount(){this.S=null}};
+const yg1Ro=S=>{const r=document.querySelector("dl.ro");r&&r.update(YG1_MODES[S.mode].read(S))},
+ YG1_ZW=["日","月","星","山","龙","华","宗","藻","火","米","黼","黻"],YG1_ZWN=["日","月","星辰","山","龙","华虫","宗彝","藻","火","粉米","黼","黻"],
+ YG1_RK=[["天子",12,"十二"],["公",9,"九"],["侯伯",7,"七"],["子男",5,"五"],["卿大夫",3,"三"]],
+ YG1_ZP=[[-.55,1.55],[.55,1.55],[-.95,2],[.95,2],[-.3,3.5],[.3,3.5],[-.3,4.3],[.3,4.3],[-.75,5.3],[-.25,5.3],[.25,5.3],[.75,5.3]];
+YG1_MODES.push(
+ {name:"交领右衽",text:"交领右衽：衣领相交，衣襟向右掩，是华夏服饰的重要特征。切换“右衽 / 左衽”，比较衣襟方向。",
+  read:S=>[["模式","交领右衽"],["衣襟",S.zuo?"左衽：衣襟向左掩":"右衽：衣襟向右掩"],["含义",S.zuo?"古代北方游牧民族服饰常见":"华夏服饰传统"],
+   ["《论语》","“微管仲，吾其被发左衽矣”",theme().redText],["意义","“衣冠”被视为文化认同的标志"]],
+  ctrl:(box,S)=>box.append(chips([{label:"右衽",value:false},{label:"左衽",value:true}],!!S.zuo,v=>{S.zuo=v;yg1Ro(S)})),
+  draw(ctx,w,h,t,S){const z=yg1Size(w,h),x=w/2,u=z.fh/6.5,sy=z.y-z.fh+1.32*u;
+   ctx.save();if(S.zuo){ctx.translate(x,0);ctx.scale(-1,1);ctx.translate(-x,0)}
+   figure(ctx,x,z.y,z.fh,{robe:"jiaoling",robeColor:"#e8dcc0",hat:"guan"});ctx.restore();
+   figureLabel(ctx,x+(S.zuo?.18:-.18)*u,sy+.5*u,x+2*u,sy-.1*u,S.zuo?"左衽：衣襟向左掩":"右衽：衣襟向右掩",S.zuo?"red":"gold")}},
+ {name:"冕服与等级",text:"冕服与等级：天子十二章，公以下依次递减。切换等级，看衣上章纹的数量变化。",
+  read:S=>{const r=YG1_RK[S.rank||0];return[["模式","冕服与等级"],["等级",r[0]],["章纹数",r[1]+" 章"],["章目",YG1_ZWN.slice(0,r[1]).join("、")],["原则","衣冠有别，以别尊卑"]]},
+  ctrl:(box,S)=>box.append(chips(YG1_RK.map((r,i)=>({label:r[0]+" "+r[2]+"章",value:i})),S.rank||0,i=>{S.rank=i;S.r0=null;yg1Ro(S)})),
+  enter:S=>{S.r0=null},
+  draw(ctx,w,h,t,S){if(S.r0==null)S.r0=t;const z=yg1Size(w,h),x=w/2,u=z.fh/6.5,top=z.y-z.fh,n=YG1_RK[S.rank||0][1],r=Math.min(.025*h,.22*u);
+   figure(ctx,x,z.y,z.fh,{robe:"shenyi",robeColor:"#1f1c22",hat:"guan"});
+   for(let i=0;i<n;i++){const p=Math.max(0,Math.min(1,(t-S.r0-i*.06)/.3));if(!p)continue;
+    const k=p<1?1+2.70158*Math.pow(p-1,3)+1.70158*Math.pow(p-1,2):1,[a,b]=YG1_ZP[i];
+    ctx.save();ctx.translate(x+a*u,top+b*u);ctx.scale(k,k);ctx.beginPath();ctx.arc(0,0,r,0,2*Math.PI);ctx.fillStyle="#c9a34a";ctx.fill();
+    ctx.lineWidth=1;ctx.strokeStyle="#8a6d2a";ctx.stroke();ctx.fillStyle="#1f1c22";ctx.font="600 "+Math.round(r*1.1)+"px 'PingFang SC','Noto Sans SC',serif";
+    ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(YG1_ZW[i],0,r*.05);ctx.restore()}}});
+/* ---------- 第 2 章 胡服骑射 ---------- */
+CH[1].ready=true;
+const YG2_ACTS=[
+ ["前 307 年 · 赵武灵王下令","北方林胡、楼烦骑兵来去迅疾、机动灵活；赵国仍以战车为主，车兵笨重，难以应对。赵武灵王决意推行“胡服骑射”。"],
+ ["公子成反对","“中国者，衣服之所施也……今王舍此而袭远方之服”——保守派认为改穿胡服就是背弃华夏礼制。"],
+ ["推行改革","赵武灵王力排众议，下令推行胡服：宽袍大袖改为短衣窄袖、长裤皮靴，便于骑射。"],
+ ["赵国强盛","赵国组建骑兵，灭中山国，拓地至河套，一跃成为战国强国。"]],
+ YG2_NO="①②③④",YG2_FONT="px -apple-system,'PingFang SC','Noto Sans SC',sans-serif",
+ YG2_BARS=[["骑马便利",20,95],["射箭灵活",30,90],["礼制认同",90,35]];
+function yg2Wrap(ctx,s,mw){const L=[];let ln="";for(const c of s){if(ln&&ctx.measureText(ln+c).width>mw){L.push(ln);ln=c}else ln+=c}if(ln)L.push(ln);return L}
+MODS[1]={text:"战国时期赵武灵王推行“胡服骑射”，学习北方游牧民族的服饰和骑射技术，赵国由此强盛。这是华夏族主动吸收少数民族文化的典型事例，服饰变化背后是军事制度变革与民族交融。",
+ points:["前 307 年赵武灵王推行胡服骑射","改宽袍大袖为短衣窄袖、长裤皮靴，便于骑射","建立骑兵，赵国国力增强","体现华夏与北方民族的交流交融，“变法图强”是战国时代特征"],
+ gk:"统编版纲要（上）第 2 课「诸侯纷争与变法运动」；浙江选考常以服饰变化考查民族交融与战国变法。",
+ S:null,
+ mount(ctrl,read){const M=this,S=M.S={p:0,act:-1,anim:false,a0:null,flash:false,tm:null};
+  M.ro=readout();M.sl=slider("改装 0–1",0,1,.01,0,v=>v.toFixed(2),v=>{S.p=v;S.anim=false;M.upd()});
+  ctrl.append(M.sl,chips(YG2_ACTS.map((a,i)=>({label:YG2_NO[i]+" "+a[0],value:i})),-1,i=>{S.act=i;clearTimeout(S.tm);S.flash=false;S.anim=false;
+   if(i===1){S.flash=true;S.tm=setTimeout(()=>{S.flash=false},2400)}
+   if(i===2){S.p=0;S.a0=null;S.anim=true;M.sl.set(0)}
+   M.upd()}));
+  read.append(M.ro);M.upd()},
+ upd(){const S=this.S;if(!S)return;const T=theme(),hu=S.p>=.5;
+  this.ro.update([["服装形制",hu?"胡服：短衣窄袖、长裤皮靴、革带":"中原宽袍：深衣宽袖、大带、戴冠",hu?T.goldText:T.blue],
+   ["改装程度",Math.round(S.p*100)+"%"],["当前幕",S.act<0?"未开始（点击故事按钮）":YG2_NO[S.act]+" "+YG2_ACTS[S.act][0]]])},
+ draw(ctx,w,h,t){const S=this.S;if(!S)return;const T=theme();
+  if(S.anim){if(S.a0==null)S.a0=t;S.p=Math.min(1,(t-S.a0)/1.5);this.sl.set(S.p);this.upd();if(S.p>=1)S.anim=false}
+  // 旁白卡
+  let top=16;
+  if(S.act>=0){const A=YG2_ACTS[S.act],cw=Math.min(w-32,560),cx=(w-cw)/2;ctx.save();ctx.font="13"+YG2_FONT;
+   const L=yg2Wrap(ctx,A[1],cw-28),ch=36+L.length*19;
+   ctx.fillStyle=T.bg;ctx.strokeStyle=T.axis;ctx.lineWidth=1;ctx.globalAlpha=.94;ctx.beginPath();
+   ctx.roundRect?ctx.roundRect(cx,12,cw,ch,12):ctx.rect(cx,12,cw,ch);ctx.fill();ctx.globalAlpha=.35;ctx.stroke();ctx.globalAlpha=1;
+   ctx.textBaseline="top";ctx.textAlign="left";ctx.font="600 13"+YG2_FONT;ctx.fillStyle=T.goldText;ctx.fillText(YG2_NO[S.act]+" "+A[0],cx+14,24);
+   ctx.font="13"+YG2_FONT;ctx.fillStyle=S.act===1?T.redText:T.fg;L.forEach((s,i)=>ctx.fillText(s,cx+14,44+i*19));ctx.restore();top=12+ch+14}
+  // 人物交叉淡入淡出
+  const bh=3*26+16,fh=Math.max(80,Math.min(h-top-bh-12,(w-230)*1.6)),x=w/2,y=top+fh,u=fh/6.5,sy=y-fh+1.32*u,wy=y-fh+2.95*u,p=S.p;
+  ctx.save();ctx.globalAlpha=1-p;if(p<1)figure(ctx,x,y,fh,{robe:"shenyi",sleeve:"wide",belt:"silk",hat:"guan",robeColor:"#24525c"});ctx.restore();
+  ctx.save();ctx.globalAlpha=p;if(p>0)figure(ctx,x,y,fh,{robe:"hufu",sleeve:"narrow",trousers:true,boots:true,belt:"leather",robeColor:"#a0612b"});ctx.restore();
+  [[.15,"宽袖→窄袖",x-1.15*u,sy+1.3*u,-1,sy+.6*u,"blue"],[.35,"长裳→长裤",x+.3*u,wy+2.2*u,1,wy+2*u,"blue"],
+   [.55,"履→皮靴",x-.3*u,y-.15*u,-1,y-.5*u,"gold"],[.75,"大带→革带（带钩）",x+.4*u,wy,1,wy-.6*u,"gold"]]
+   .forEach(g=>{if(p>=g[0])figureLabel(ctx,g[2],g[3],x+g[4]*1.9*u,g[5],g[1],g[6])});
+  // 能力条
+  const bw=Math.min(380,w-32),bx=(w-bw)/2,tx=bx+76,tw=bw-76-44;
+  YG2_BARS.forEach((b,i)=>{const yy=h-bh+8+i*26,v=b[1]+(b[2]-b[1])*p,red=i===2;ctx.save();
+   ctx.font="13"+YG2_FONT;ctx.textBaseline="middle";ctx.textAlign="left";ctx.fillStyle=red?T.redText:T.fg;ctx.fillText(b[0],bx,yy+5);
+   ctx.fillStyle=T.grid;ctx.fillRect(tx,yy,tw,10);
+   if(red&&S.flash)ctx.globalAlpha=.3+.7*Math.abs(Math.sin(t*7));
+   ctx.fillStyle=red?T.red:T.blue;ctx.fillRect(tx,yy,tw*v/100,10);ctx.globalAlpha=1;
+   ctx.textAlign="right";ctx.fillStyle=red?T.redText:T.blue;ctx.fillText(Math.round(v),bx+bw,yy+5);ctx.restore()})},
+ unmount(){const S=this.S;if(S){clearTimeout(S.tm);S.anim=false}this.S=null}};
+/* ---------- 第 3 章 唐代官服：以色辨品 ---------- */
+CH[2].ready=true;
+const YG3_CN="〇一二三四五六七八九",YG3_F="px -apple-system,'PingFang SC','Noto Sans SC',sans-serif",
+ YG3_C=["#c08a1e","#5b2a7a","#5b2a7a","#5b2a7a","#a3282c","#cf4b3e","#2f6b3c","#5e9a5a","#2a4f8a","#4f7fb8","#e9e4d8"],
+ YG3_CC=["赭黄","紫","紫","紫","深绯","浅绯","深绿","浅绿","深青","浅青","白"],
+ YG3_OPT=["三品以上","四五品","六七品","八九品"],
+ YG3_WHY=["紫袍金鱼袋 → 三品以上","绯袍银鱼袋 → 四五品","绿袍银带 → 六七品","青袍鍮石带 → 八九品"],
+ YG3_GRP=[["紫",1,3],["绯",4,5],["绿",6,7],["青",8,9]];
+const yg3Grp=r=>r<=3?0:r<=5?1:r<=7?2:3;
+// r：0=皇帝，1–9=品级，10=庶人
+function yg3Info(r){const off=r>=1&&r<=9;return{name:r===0?"皇帝":r===10?"庶人":YG3_CN[r]+"品",color:YG3_C[r],cname:YG3_CC[r]+(r===0?"（皇帝专用）":""),
+ belt:r===0?"玉带":r<=3?"金玉带":r<=5?"金带":r<=7?"银带":r<=9?"鍮石带":"革带（无官带）",bt:r<=3?"jade":"leather",
+ bc:r<=3?null:r<=5?"#c9a34a":r<=7?"#b9bec6":r<=9?"#9a7b45":"#3b2a1e",
+ fish:off&&r<=3?"#d9a92e":off&&r<=5?"#c4c8cf":null,fname:off&&r<=3?"金鱼袋":off&&r<=5?"银鱼袋":"无"}}
+// 画一位官员；返回人物几何
+function yg3Draw(ctx,x,y,fh,r){const I=yg3Info(r),u=fh/6.5,wy=y-fh+2.95*u,T=theme();
+ figure(ctx,x,y,fh,{robe:"yuanling",robeColor:I.color,hat:"futou",wing:.15,belt:I.bt,beltColor:I.bc});
+ if(I.fish){const fx=x+.62*u,fy=wy+.55*u;ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=Math.max(1,fh/220);
+  ctx.beginPath();ctx.moveTo(fx,wy+.09*u);ctx.lineTo(fx,fy-.17*u);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(fx,fy,.07*u,.17*u,0,0,2*Math.PI);ctx.moveTo(fx,fy+.14*u);ctx.lineTo(fx-.09*u,fy+.3*u);ctx.lineTo(fx+.09*u,fy+.3*u);ctx.closePath();
+  ctx.fillStyle=I.fish;ctx.fill();ctx.stroke();ctx.restore()}
+ return{I,u,top:y-fh,wy}}
+MODS[2]={text:"唐代以服色区分官员品级，“紫、绯、绿、青”由高到低，配以不同腰带与鱼袋。“品色衣”制度使等级一目了然，也影响了宋、明官服和东亚诸国。",
+ points:["唐代官服以颜色辨品：三品以上紫，五品以上绯，七品以上绿，九品以上青","黄色成为皇帝专用色","幞头、圆领袍是唐代男子常服的典型形制，吸收了北方民族服饰元素","服饰制度是官僚等级制度的外在表现"],
+ gk:"统编版纲要（上）第 6–7 课；选择性必修1 第 1 课「中国古代政治制度的形成与发展」；浙江选考常用“青衫”“紫袍”诗句（如白居易“江州司马青衫湿”）作史料。",
+ S:null,
+ mount(ctrl,read){const M=this,S=M.S={mode:0,r:3,q:null,w:0};M.ro=readout();M.sub=el("div");
+  M.sl=slider("品级 1–9",1,9,1,3,v=>YG3_CN[v]+"品",v=>{S.r=v;M.upd()});
+  const bx=el("div");bx.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px";
+  bx.append(button("皇帝",()=>{S.r=0;M.upd()}),button("庶人",()=>{S.r=10;M.upd()}));M.bx=bx;
+  M.mc=chips([{label:"A 品级滑块",value:0},{label:"B 朝会队列",value:1},{label:"C 猜品级",value:2}],0,i=>M.setMode(i));
+  ctrl.append(M.mc,M.sub);read.append(M.ro);M.setMode(0)},
+ setMode(i){const M=this,S=M.S;S.mode=i;M.sub.innerHTML="";
+  if(i===0){if(S.r>=1&&S.r<=9)M.sl.set(S.r);M.sub.append(M.sl,M.bx)}
+  if(i===2){S.q={r:1,ans:-1,ok:false,score:0,n:0};M.newQ()}
+  M.upd()},
+ newQ(){const q=this.S.q;q.r=1+Math.floor(Math.random()*9);q.ans=-1;this.qUI();this.upd()},
+ qUI(){const M=this,q=M.S.q,b=el("div");b.style.cssText="display:flex;gap:8px;flex-wrap:wrap";M.sub.innerHTML="";
+  if(q.ans<0)YG3_OPT.forEach((o,i)=>b.append(button(o,()=>{q.ans=i;q.ok=i===yg3Grp(q.r);if(q.ok)q.score++;q.n++;M.qUI();M.upd()})));
+  else if(q.n<5)b.append(button("下一题",()=>M.newQ(),true));
+  else b.append(button("再来一轮",()=>{q.score=0;q.n=0;M.newQ()},true));
+  M.sub.append(b)},
+ upd(){const S=this.S;if(!S)return;const T=theme(),q=S.q,qz=S.mode===2&&q;
+  if(qz&&q.ans<0){this.ro.update([["品级","？"],["服色","？"],["腰带","？"],["鱼袋","？"],["得分",q.score+"/5（第 "+(q.n+1)+" 题）",T.blue]]);return}
+  const I=yg3Info(qz?q.r:S.r),rows=[["品级",I.name],["服色",I.cname,T.goldText],["腰带",I.belt],["鱼袋",I.fname,I.fish?T.redText:null]];
+  if(qz)rows.push(["得分",q.score+"/5",T.blue]);this.ro.update(rows)},
+ draw(ctx,w,h,t){const S=this.S;if(!S)return;const T=theme();S.w=w;ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";
+  if(S.mode===0){const z=yg1Size(w,h),x=w/2,g=yg3Draw(ctx,x,z.y,z.fh,S.r),u=g.u,hy=g.top+.62*u,sy=g.top+1.32*u,wy=g.wy;
+   figureLabel(ctx,x+.25*u,hy-.5*u,x+1.9*u,hy-.75*u,"幞头（软脚）","blue");
+   figureLabel(ctx,x-.25*u,sy+.02*u,x-1.9*u,sy-.4*u,"圆领","blue");
+   figureLabel(ctx,x-.5*u,wy+1.6*u,x-2*u,wy+1.9*u,"袍色："+g.I.cname,"gold");
+   figureLabel(ctx,x+.3*u,wy,x+2*u,wy-.45*u,"腰带："+g.I.belt,"gold");
+   if(g.I.fish)figureLabel(ctx,x+.62*u,wy+.55*u,x+2*u,wy+.95*u,"鱼袋："+g.I.fname,"red")}
+  else if(S.mode===1){const sw=w/9,fh=Math.max(60,Math.min(h*.58,sw*2.2)),y=h/2+fh/2-10;
+   ctx.font="13"+YG3_F;ctx.fillStyle=T.fg;ctx.fillText("按品级从左到右排列 · 点击人物放大查看",w/2,Math.max(16,y-fh-18));
+   for(let i=1;i<=9;i++){const x=(i-.5)*sw,on=i===S.r;yg3Draw(ctx,x,y,fh,i);
+    ctx.font=(on?"600 ":"")+"13"+YG3_F;ctx.fillStyle=on?T.blue:T.fg;ctx.fillText(YG3_CN[i]+"品",x,y+16);
+    if(on){ctx.fillStyle=T.blue;ctx.fillRect(x-14,y+27,28,2)}}
+   ctx.font="13"+YG3_F;ctx.fillStyle=T.goldText;
+   YG3_GRP.forEach(([n,a,b])=>{const x1=(a-1)*sw+6,x2=b*sw-6,yy=y+44;ctx.strokeStyle=T.axis;ctx.lineWidth=1;ctx.beginPath();
+    ctx.moveTo(x1,yy-6);ctx.lineTo(x1,yy);ctx.lineTo(x2,yy);ctx.lineTo(x2,yy-6);ctx.stroke();ctx.fillText(n,(x1+x2)/2,yy+14)})}
+  else if(S.q){const q=S.q,fh=Math.max(100,Math.min(h-90,(w-40)*1.8));yg3Draw(ctx,w/2,h-14,fh,q.r);
+   ctx.font="600 15"+YG3_F;let msg,c;
+   if(q.ans<0){msg="这位官员是几品？看袍色、腰带与鱼袋";c=T.fg}
+   else if(q.ok){msg="答对！"+YG3_WHY[yg3Grp(q.r)];c=T.blue}
+   else{msg="✗ 答错："+YG3_WHY[yg3Grp(q.r)];c=T.redText}
+   const tw=ctx.measureText(msg).width,ox=q.ans>=0&&q.ok?14:0;ctx.fillStyle=c;ctx.fillText(msg,w/2+ox,26);
+   if(ox){const cx=w/2-tw/2-6,cy=26;ctx.fillStyle="#2f8f4e";ctx.beginPath();ctx.arc(cx,cy,10,0,2*Math.PI);ctx.fill();
+    ctx.strokeStyle="#fff";ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(cx-5,cy);ctx.lineTo(cx-1,cy+4);ctx.lineTo(cx+5,cy-4);ctx.stroke()}
+   if(q.n>=5&&q.ans>=0){ctx.font="13"+YG3_F;ctx.fillStyle=T.goldText;ctx.fillText("本轮得分 "+q.score+"/5",w/2,50)}}
+  ctx.restore()},
+ pointer(e,type,x,y){const S=this.S;if(!S||S.mode!==1||type!=="down")return false;
+  const i=Math.max(0,Math.min(8,Math.floor(x/(S.w/9))))+1;S.r=i;this.mc.children[0].click();return true},
+ unmount(){this.S=null}};
+CH[3].ready=true;
+const YG4_C=["#5b2a7a","#a3282c","#2f6b3c"],YG4_N=["紫","绯","绿"],YG4_R=["四品以上","六品以上","九品以上"];
+const yg4Hat=v=>v<.35?"软脚幞头（唐，两脚下垂）":v<.7?"展脚渐长（五代过渡）":"直脚幞头（宋，平直长展脚）";
+// 画一位宋代官员；v=展脚 0–1，fx=方心曲领
+function yg4Draw(ctx,x,y,fh,o){const u=fh/6.5,top=y-fh,hy=top+.62*u,sy=top+1.32*u,wy=y-fh+2.95*u,v=o.v,wl=(.1+1.3*v)*1.6*u;
+ figure(ctx,x,y,fh,{robe:"yuanling",robeColor:o.color,hat:"futou",wing:.1+1.3*v,belt:"leather",beltColor:"#3b2a1e"});
+ if(v<.4){const a=1-v/.4;ctx.save();ctx.globalAlpha=a;ctx.strokeStyle="#1f1b18";ctx.lineWidth=Math.max(1.5,.07*u);ctx.lineCap="round";
+  [-1,1].forEach(s=>{ctx.beginPath();ctx.moveTo(x+s*.3*u,hy-.42*u);ctx.quadraticCurveTo(x+s*.62*u,hy-.2*u,x+s*.52*u,hy+.6*u);ctx.stroke()});ctx.restore()}
+ if(o.fx){const T=theme();ctx.save();ctx.strokeStyle="#ffffff";ctx.lineWidth=Math.max(1.5,.05*u);ctx.beginPath();ctx.arc(x,sy+.12*u,.26*u,0,2*Math.PI);ctx.stroke();
+  ctx.fillStyle="#ffffff";ctx.strokeStyle=T.axis;ctx.lineWidth=1;ctx.fillRect(x-.08*u,sy+.4*u,.16*u,.16*u);ctx.strokeRect(x-.08*u,sy+.4*u,.16*u,.16*u);ctx.restore()}
+ return{u,top,hy,sy,wy,wl}}
+MODS[3]={text:"宋代官服沿袭唐代品色衣制度，元丰改制后简化为紫、绯、绿三等；直脚幞头成为宋代官帽的标志。服饰制度的变化背后，是宋代“官、职、差遣”分离与重文轻武的政治特点。",
+ points:["宋代官员常服为圆领袍、直脚幞头，朝服加方心曲领","元丰改制后服色简化为紫、绯、绿三等","“借紫”“借绯”体现服色与实际职务（差遣）挂钩","宋代加强中央集权，官职差遣分离，服饰制度亦随之调整"],
+ gk:"统编版纲要（上）第 9 课「两宋的政治和军事」；浙江选考常以宋画（如《清明上河图》）、文物考查宋代社会与制度。",
+ S:null,
+ mount(ctrl,read){const M=this,S=M.S={mode:0,v:1,g:0,b:false};M.ro=readout();M.sub=el("div");
+  M.sl=slider("幞头展脚长度 0–1",0,1,.01,1,v=>v.toFixed(2),v=>{S.v=v;M.upd()});
+  M.gc=chips(YG4_R.map((r,i)=>({label:r+" "+YG4_N[i],value:i})),0,i=>{S.g=i;M.upd()});
+  M.tg=toggle("借紫 / 借绯",false,b=>{S.b=b;M.upd()});const tw=el("div");tw.style.cssText="margin-top:10px";tw.append(M.tg);M.tw=tw;
+  M.mc=chips([{label:"A 展脚幞头",value:0},{label:"B 宋代服色",value:1},{label:"C 唐宋对比",value:2}],0,i=>M.setMode(i));
+  ctrl.append(M.mc,M.sub);read.append(M.ro);M.setMode(0)},
+ setMode(i){const M=this;M.S.mode=i;M.sub.innerHTML="";if(i===0)M.sub.append(M.sl);if(i===1)M.sub.append(M.gc,M.tw);M.upd()},
+ col(){const S=this.S,k=S.b&&S.g>0?S.g-1:S.g;return{k,color:YG4_C[k],name:S.b&&S.g>0?"借"+YG4_N[k]+"（本品应服"+YG4_N[S.g]+"）":YG4_N[S.g]+"（"+YG4_R[S.g]+"）"}},
+ upd(){const S=this.S;if(!S)return;const T=theme(),c=this.col();let rows;
+  if(S.mode===0)rows=[["模式","A 展脚幞头"],["幞头形制",yg4Hat(S.v),T.blue],["服色等级",c.name,T.goldText],["要点","直脚幞头成为宋代官帽的标志"]];
+  else if(S.mode===1)rows=[["模式","B 宋代服色"],["幞头形制",yg4Hat(1)],["服色等级",c.name,T.goldText],["要点",S.b?"赐服、借服制度：服色与差遣挂钩":"元丰改制：紫、绯、绿三等",S.b?T.redText:T.blue]];
+  else rows=[["模式","C 唐宋对比"],["幞头形制","唐软脚 → 宋直脚",T.blue],["服色等级","唐四等（紫绯绿青）→ 宋三等（紫绯绿）",T.goldText],["要点","服饰变化折射宋代官制调整"]];
+  this.ro.update(rows)},
+ draw(ctx,w,h,t){const S=this.S;if(!S)return;const T=theme();ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";
+  if(S.mode<2){const z=yg1Size(w,h),x=w/2,c=this.col(),v=S.mode===0?S.v:1,g=yg4Draw(ctx,x,z.y,z.fh,{v,color:c.color,fx:true}),u=g.u;
+   if(S.mode===0){ctx.font="13"+YG3_F;ctx.fillStyle=T.goldText;ctx.fillText("传说宋太祖为防止朝会时官员交头接耳而加长展脚",w/2,18);
+    ctx.fillText("（民间说法，可作史料辨析）",w/2,36);
+    const lx=x-.3*u-Math.max(.2*u,g.wl*.7);figureLabel(ctx,lx,g.hy-.36*u,lx-.3*u,g.hy-1*u,"展脚","blue")}
+   else{ctx.font="13"+YG3_F;ctx.fillStyle=S.b?T.redText:T.fg;ctx.fillText(S.b?"官阶不足而任要职，可“借服”":"元丰改制后：四品以上紫 · 六品以上绯 · 九品以上绿",w/2,18)}
+   figureLabel(ctx,x+.28*u,g.sy+.15*u,x+2*u,g.sy-.2*u,"方心曲领","blue");
+   figureLabel(ctx,x-.5*u,g.wy+1.6*u,x-2*u,g.wy+1.9*u,"袍："+YG4_N[c.k],"gold");
+   figureLabel(ctx,x+.3*u,g.wy,x+2*u,g.wy-.45*u,"革带","gold")}
+  else{const fh=Math.max(110,Math.min(h*.68,w*.42)),y=h-34,xl=w*.27,xr=w*.73,m=w/2;
+   yg4Draw(ctx,xl,y,fh,{v:0,color:YG4_C[0],fx:false});const g=yg4Draw(ctx,xr,y,fh,{v:1,color:YG4_C[0],fx:true}),u=g.u;
+   ctx.font="600 14"+YG3_F;ctx.fillStyle=T.fg;ctx.fillText("唐 · 软脚幞头 · 品色衣紫",xl,y+16);ctx.fillText("宋 · 直脚幞头 · 方心曲领",xr,y+16);
+   figureLabel(ctx,xr-.3*u-g.wl*.9,g.hy-.36*u,m,g.hy-.95*u,"① 幞头展脚","red");
+   figureLabel(ctx,xr-.2*u,g.sy+.2*u,m,g.sy+.35*u,"② 方心曲领","red");
+   figureLabel(ctx,xr-.6*u,g.wy+1.4*u,m,g.wy+1.85*u,"③ 服色等级简化为三等","red")}
+  ctx.restore()},
+ pointer(){return false},
+ unmount(){this.S=null}};
+CH[4].ready=true;
+const YG5_W=["仙鹤","锦鸡","孔雀","云雁","白鹇","鹭鸶","鸂鶒","黄鹂","鹌鹑"],YG5_M=["狮子","狮子","虎","豹","熊","彪","彪","犀牛","海马"],
+ YG5_PC=["绯","青","绿"],YG5_PH=["#a3282c","#2a4f8a","#2f6b3c"],YG5_PR=["一至四品","五至七品","八九品"];
+const yg5P=g=>g<=4?0:g<=7?1:2,yg5Name=(c,g)=>(c?YG5_M:YG5_W)[g-1];
+// 补子方框：海水江崖 + 红日 + 禽/兽剪影；(cx,cy)=中心，s=边长
+function yg5Box(ctx,cx,cy,s,civ,g){const k=s/11,P=Math.PI,i=g-1;ctx.save();ctx.translate(cx,cy);
+ ctx.fillStyle="#1f2a44";ctx.fillRect(-s/2,-s/2,s,s);ctx.strokeStyle="#c9a24a";ctx.lineWidth=Math.max(2,s*.025);ctx.strokeRect(-s/2,-s/2,s,s);
+ ctx.beginPath();ctx.rect(-s/2,-s/2,s,s);ctx.clip();ctx.scale(k,k);ctx.lineCap="round";ctx.lineJoin="round";
+ const E=(x,y,rx,ry,c,r)=>{ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(x,y,rx,ry,r||0,0,2*P);ctx.fill()},
+  L=(p,c,w)=>{ctx.strokeStyle=c;ctx.lineWidth=w||.15;ctx.beginPath();ctx.moveTo(p[0],p[1]);for(let j=2;j<p.length;j+=2)ctx.lineTo(p[j],p[j+1]);ctx.stroke()},
+  F=(p,c)=>{ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(p[0],p[1]);for(let j=2;j<p.length;j+=2)ctx.lineTo(p[j],p[j+1]);ctx.fill()};
+ E(-3.7,-3.7,.85,.85,"#d2422e");
+ for(let j=0;j<3;j++){ctx.strokeStyle="#6f9bd1";ctx.lineWidth=.18;ctx.beginPath();for(let x=-5.6;x<=5.6;x+=.1)ctx.lineTo(x,4.2+j*.5+Math.sin(x*2.2+j)*.15);ctx.stroke()}
+ F([-1.6,5.6,-.9,3.2,-.2,3.7,.5,2.8,1.5,5.6],"#6f7f78");
+ ctx.translate(0,-.7);
+ const B=(c,nl,ll,a,hc)=>{a=a==null?1.2:a;const hx=.9+nl*Math.cos(a),hy=-.4-nl*Math.sin(a);
+  if(ll){L([-.2,.7,-.2,.7+ll],"#c9a24a",.14);L([.3,.7,.4,.7+ll],"#c9a24a",.14)}
+  E(0,0,1.5,.85,c);L([.9,-.3,hx,hy],c,.45);E(hx,hy,.42,.38,hc||c);F([hx+.35,hy-.12,hx+1,hy+.05,hx+.35,hy+.15],"#e0b040");return[hx,hy]};
+ const Q=(c,b)=>{b=b||1;[-1.4,-.8,.9,1.5].forEach(x=>L([x,.6,x,2.4],c,.45));E(0,.3,2.1*b,1.05*b,c);L([-2,0,-2.8,-.8,-3.2,-1.2],c,.25);
+  E(2.1,-.5,.8,.72,c);E(2.75,-.3,.35,.28,shade(c,-.2));E(2.3,-.75,.1,.1,"#1d1d1f")};
+ const stripes=()=>{for(let x=-1.4;x<=1.4;x+=.55)L([x,-.6,x+.25,.4],"#1d1d1f",.18)};
+ if(!civ){const sc=[1,1,1,1,1,1,.8,.75,.85][i];ctx.scale(sc,sc);let h;
+  if(i===0){E(-1.5,.1,.7,.45,"#222");h=B("#f3efe6",1.7,2.4);E(h[0],h[1]-.35,.2,.15,"#d2422e")}
+  else if(i===1){L([-1.2,0,-3,.6,-5,1.8],"#d2702a",.35);L([-1.2,.2,-3.2,1.1,-5,2.6],"#e6b422",.25);B("#d98b2b",.6,.9,1.3,"#e6b422")}
+  else if(i===2){ctx.fillStyle="#2d7d6e";ctx.beginPath();ctx.moveTo(-.8,0);ctx.arc(-.8,0,3.6,P*.6,P*1.45);ctx.fill();
+   for(let a=.68;a<1.45;a+=.12){E(-.8+3*Math.cos(P*a),3*Math.sin(P*a),.32,.32,"#e0b040");E(-.8+3*Math.cos(P*a),3*Math.sin(P*a),.15,.15,"#1f4f8a")}B("#2a6fa0",1,1)}
+  else if(i===3){B("#a08a6a",2.2,.6,.35,"#5a4a3a");E(-.2,-.2,1.1,.5,"#7a6a52",-.2)}
+  else if(i===4){L([-1.2,0,-3.5,.8,-5.2,2.2],"#f3efe6",.45);h=B("#f3efe6",.5,.9,1.2,"#1d1d1f");E(h[0]+.1,h[1],.2,.2,"#d2422e")}
+  else if(i===5){h=B("#f3efe6",1.3,2.6,1.1);L([h[0]-.2,h[1]-.2,h[0]-1.4,h[1]+.3],"#f3efe6",.08)}
+  else if(i===6){B("#7a5a9a",.5,0,1.3,"#3f8a6a");L([-2,1,2,1],"#6f9bd1",.15)}
+  else if(i===7){h=B("#e6b422",.4,.6);L([h[0]-.4,h[1],h[0]+.3,h[1]],"#1d1d1f",.15);E(-1.5,.1,.6,.3,"#1d1d1f")}
+  else{E(0,.1,1.6,1.25,"#8a6a45");B("#8a6a45",.1,.5);[[-.8,-.3],[0,.3],[.6,-.2],[-.3,.7]].forEach(p=>E(p[0],p[1],.12,.12,"#f3efe6"))}}
+ else{if(i<=1){E(2,-.5,1.3,1.25,"#b8742a");Q("#e0ad4a");E(-3.2,-1.3,.35,.35,"#b8742a")}
+  else if(i===2){Q("#d98a2b");stripes()}
+  else if(i===3){Q("#e0b85a");[[-1.2,0],[-.4,-.3],[.4,.2],[1.1,-.2],[-.6,.6],[.6,.7]].forEach(p=>E(p[0],p[1],.2,.2,"#3a2a1e"))}
+  else if(i===4){E(1.6,-1.2,.32,.32,"#5a4434");E(2.6,-1.2,.32,.32,"#5a4434");Q("#5a4434",1.15)}
+  else if(i<=6){Q("#d98a2b");stripes();F([-.6,-.8,.6,-.8,-1.4,-2.8],"#f3efe6")}
+  else if(i===7){Q("#8b8d94",1.1);F([2.9,-.55,3.6,-1.6,3.1,-.4],"#f3efe6")}
+  else{Q("#e8e2d4");E(2.6,-.9,1,.45,"#e8e2d4",-.6);L([1.6,-1.1,1,-.4,.4,-.6],"#c9a24a",.3);
+   for(let x=-2;x<=2;x+=1){ctx.strokeStyle="#f3efe6";ctx.lineWidth=.15;ctx.beginPath();ctx.arc(x,2.7,.4,P,2*P);ctx.stroke()}}}
+ ctx.restore()}
+MODS[4]={text:"明代官员常服为乌纱帽、盘领袍，胸背缀“补子”：文官绣禽，取其文采；武官绣兽，取其威猛。补子以图案区分品级，是明代等级制度最直观的标志，清代沿用并加以变化。",
+ points:["明代补子制度：文官用禽、武官用兽","一品文官仙鹤、一品武官狮子","袍色：一至四品绯、五至七品青、八九品绿","补子体现明代君主专制与官僚等级制度的严密"],
+ gk:"统编版纲要（上）第 13 课「从明朝建立到清军入关」；浙江选考常以补子、乌纱帽等器物图片作史料考查明代政治。",
+ S:null,
+ mount(ctrl,read){const M=this,S=M.S={civ:0,g:1,game:null};M.ro=readout();M.note=el("p");M.note.style.cssText="margin:8px 0 0;font-size:12px;line-height:1.5";
+  M.note.textContent="“衣冠禽兽”本指文禽武兽的官服，明代中后期才逐渐转为贬义（可作史料辨析）";
+  M.cc=chips([{label:"文官",value:0},{label:"武官",value:1}],0,v=>{S.civ=v;M.exit()});
+  M.sl=slider("品级 1–9",1,9,1,1,v=>YG3_CN[v]+"品",v=>{S.g=v;M.exit()});
+  M.gb=button("认补子",()=>M.start(),true);M.quiz=el("div");const bw=el("div");bw.style.cssText="margin-top:10px";bw.append(M.gb);
+  ctrl.append(M.cc,M.sl,bw,M.quiz);read.append(M.ro,M.note);M.upd()},
+ exit(){this.S.game=null;this.quiz.innerHTML="";this.gb.textContent="认补子";this.upd()},
+ start(){this.S.game={n:0,sc:0,last:""};this.gb.textContent="重新开始";this.next()},
+ next(){const M=this,G=M.S.game;M.quiz.innerHTML="";
+  if(G.n>=5){G.q=null;M.gb.textContent="再来一次";M.upd();return}
+  G.q={civ:Math.random()<.5?0:1,g:1+Math.floor(Math.random()*9)};G.a={c:null,g:null};
+  const w=el("div");w.style.cssText="margin-top:10px";
+  w.append(chips([{label:"文官",value:0},{label:"武官",value:1}],-1,v=>{G.a.c=v;M.judge()}),
+   chips([1,2,3,4,5,6,7,8,9].map(i=>({label:YG3_CN[i]+"品",value:i})),-1,v=>{G.a.g=v;M.judge()}));
+  M.quiz.append(w);M.upd()},
+ judge(){const M=this,G=M.S.game,a=G.a,q=G.q;if(!q||a.c==null||a.g==null)return;
+  const ok=a.c===q.civ&&yg5Name(a.c,a.g)===yg5Name(q.civ,q.g);G.n++;if(ok)G.sc++;G.ok=ok;
+  G.last=(ok?"答对：":"答错：")+(q.civ?"武官":"文官")+YG3_CN[q.g]+"品 · "+yg5Name(q.civ,q.g);M.next()},
+ upd(){const S=this.S;if(!S)return;const T=theme(),G=S.game;let rows;this.note.style.color=T.goldText;
+  if(G){rows=[["认补子",G.q?"第 "+(G.n+1)+" / 5 题：选文/武和品级":"完成！",T.blue],["得分",G.sc+" / 5",T.goldText]];if(G.last)rows.push(["上一题",G.last,G.ok?T.blue:T.redText])}
+  else{const p=yg5P(S.g);rows=[["文/武",S.civ?"武官（绣兽，取其威猛）":"文官（绣禽，取其文采）"],["品级",YG3_CN[S.g]+"品",T.blue],
+   ["补子图案",yg5Name(S.civ,S.g),T.blue],["袍色",YG5_PC[p]+"（"+YG5_PR[p]+"）",T.goldText]]}
+  this.ro.update(rows)},
+ draw(ctx,w,h,t){const S=this.S;if(!S)return;const T=theme(),G=S.game;ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";
+  if(G){const s=Math.min(h*.62,w*.7);
+   if(G.q){yg5Box(ctx,w/2,h/2+8,s,G.q.civ,G.q.g);ctx.font="600 14"+YG3_F;ctx.fillStyle=T.fg;ctx.fillText("认补子 · 第 "+(G.n+1)+" / 5 题",w/2,h/2+8-s/2-16)}
+   else{ctx.font="600 22"+YG3_F;ctx.fillStyle=T.fg;ctx.fillText("得分 "+G.sc+" / 5",w/2,h/2-12);ctx.font="14"+YG3_F;ctx.fillStyle=T.blue;ctx.fillText("点「再来一次」重新挑战",w/2,h/2+18)}}
+  else{const p=yg5P(S.g),fh=Math.max(120,Math.min(h*.76,w*.75)),u=fh/6.5,fx=w*.28,fy=h/2+fh/2+6,s=Math.min(h*.45,w*.38),bx=w*.7,by=h*.47;
+   figure(ctx,fx,fy,fh,{robe:"yuanling",robeColor:YG5_PH[p],hat:"wusha",buzi:{color:"#1f2a44"}});
+   yg5Box(ctx,bx,by,s,S.civ,S.g);
+   figureLabel(ctx,fx+.4*u,fy-fh+2.27*u,bx-s/2-6,by,"补子","blue");
+   ctx.font="13"+YG3_F;ctx.fillStyle=T.fg;ctx.fillText("文官绣禽 · 武官绣兽",w/2,18);
+   ctx.font="600 15"+YG3_F;ctx.fillText((S.civ?"武官":"文官")+YG3_CN[S.g]+"品 · "+yg5Name(S.civ,S.g),bx,by+s/2+20);
+   ctx.font="13"+YG3_F;ctx.fillStyle=T.goldText;ctx.fillText("袍色："+YG5_PC[p]+"（"+YG5_PR[p]+"）",bx,by+s/2+40)}
+  ctx.restore()},
+ pointer(){return false},
+ unmount(){this.S=null}};
+/* ---------- 第 6 章 清代服饰：顶戴与剃发易服 ---------- */
+CH[5].ready=true;
+const YG6_B=[["红宝石","#c0362c"],["珊瑚","#e05a3a"],["蓝宝石","#2a4fb8"],["青金石","#3a5f9a"],["水晶","#e8eef5",1],["砗磲","#f4f1ea",1],["素金","#c9a24a"],["阴纹镂花金","#c9a24a",0,"#6b4a12"],["阳纹镂花金","#c9a24a",0,"#f6e7b0"]],
+ YG6_E=["单眼","双眼","三眼"],YG6_M=["剃发易服","顶戴花翎","明清对比"];
+// 顶珠描边/花纹 + 多眼花翎 + 对开补子线（叠加在 figure 之上）
+function yg6Over(ctx,x,y,fh,g,eyes,split){const u=fh/6.5,hy=y-fh+.62*u,T=theme(),b=YG6_B[g-1];ctx.save();
+ if(g){if(b[2]){ctx.strokeStyle=T.axis;ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(x,hy-.86*u,.09*u,0,2*Math.PI);ctx.stroke()}
+  if(b[3]){ctx.fillStyle=b[3];[[-.04,-.03],[.04,-.03],[0,.04],[0,-.06]].forEach(p=>{ctx.beginPath();ctx.arc(x+p[0]*u,hy-.86*u+p[1]*u,Math.max(1,.018*u),0,2*Math.PI);ctx.fill()})}}
+ for(let k=1;k<eyes;k++){const t=.25-k*.3,cx=x+.55*u+t*u*.479,cy=hy-.1*u+t*u*.878;ctx.fillStyle="#2a4f8f";ctx.beginPath();ctx.ellipse(cx,cy,.07*u,.1*u,-.5,0,2*Math.PI);ctx.fill();
+  ctx.fillStyle="#d6a83a";ctx.beginPath();ctx.arc(cx,cy,.03*u,0,2*Math.PI);ctx.fill()}
+ if(split){const by=y-fh+2.27*u;ctx.strokeStyle=T.bg;ctx.lineWidth=Math.max(2,.06*u);ctx.beginPath();ctx.moveTo(x,by-.52*u);ctx.lineTo(x,by+.52*u);ctx.stroke()}
+ ctx.restore()}
+MODS[5]={text:"清军入关后推行剃发易服，以服饰发式作为政治臣服的标志，遭到汉族强烈抵制。清代官员以顶戴、花翎、补子区分等级，服饰既延续了明代等级制度，又带有满族骑射传统（马蹄袖）。",
+ points:["1645 年清廷颁布剃发令，强制剃发易服","顶戴的顶珠颜色区分官员品级，花翎为恩赏","马蹄袖、马褂体现满族骑射文化","服饰政策是清朝强化统治与民族关系的缩影"],
+ gk:"统编版纲要（上）第 13–14 课；浙江选考常以清代官服、辫子图像为史料考查清朝统治政策。",
+ S:null,
+ mount(ctrl,read){const M=this,S=M.S={m:0,yr:1644,g:1,civ:0,fe:false,eyes:1};M.ro=readout();M.sub=el("div");
+  M.note=el("p");M.note.style.cssText="margin:8px 0 0;font-size:12px;line-height:1.5";
+  ctrl.append(chips(YG6_M.map((l,i)=>({label:l,value:i})),0,v=>{S.m=v;M.build()}),M.sub);read.append(M.ro,M.note);M.build()},
+ build(){const M=this,S=M.S;M.sub.innerHTML="";
+  if(S.m===0)M.sub.append(slider("1644 → 1660",1644,1660,1,S.yr,v=>v+" 年",v=>{S.yr=v;M.upd()}));
+  else if(S.m===1){const w=el("div");w.style.cssText="margin-top:10px";
+   M.sub.append(chips([1,2,3,4,5,6,7,8,9].map(i=>({label:YG3_CN[i]+"品",value:i})),S.g,v=>{S.g=v;M.upd()}),
+    chips([{label:"文官",value:0},{label:"武官",value:1}],S.civ,v=>{S.civ=v;M.upd()}),w);
+   w.append(toggle("赏戴花翎",S.fe,v=>{S.fe=v;M.upd()}),chips(YG6_E.map((l,i)=>({label:l,value:i+1})),S.eyes,v=>{S.eyes=v;M.upd()}))}
+  M.upd()},
+ upd(){const S=this.S;if(!S)return;const T=theme(),b=YG6_B[S.g-1],p=(S.yr-1644)/16;let rows;this.note.style.color=T.goldText;
+  if(S.m===0){rows=[["模式","剃发易服"],["年份",S.yr+" 年",T.blue],["顶珠","—"],["发式",p<.5?"束发（明制）":p<.8?"剃发留辫 · 金钱鼠尾":"剃发留辫 · 辫子渐粗",p<.5?T.fg:T.redText]];
+   this.note.textContent="汉族强烈抵制（江阴、嘉定），后形成“男从女不从、生从死不从”等折中现象"}
+  else if(S.m===1){rows=[["模式","顶戴花翎"],["品级",(S.civ?"武官":"文官")+YG3_CN[S.g]+"品",T.blue],["顶珠",b[0],T.goldText],["发式","剃发留辫"],
+   ["补子",yg5Name(S.civ,S.g)+"（"+(S.civ?"武兽":"文禽")+"）",T.blue]];if(S.fe)rows.push(["花翎",YG6_E[S.eyes-1]+"花翎 · 花翎为皇帝赏赐的荣誉",T.goldText]);
+   this.note.textContent="清代补子较明代小，且为对襟分开（马褂对襟，补子随之一分为二）"}
+  else{rows=[["模式","明清对比"],["品级/年份","明 · 清"],["顶珠","明无 · 清以顶珠分品",T.goldText],["发式","束发 vs 剃发留辫",T.blue]];
+   this.note.textContent="三处差异：发式、冠帽（乌纱帽 vs 顶戴）、补子（整块 vs 对开）"}
+  this.ro.update(rows)},
+ draw(ctx,w,h,t){const S=this.S;if(!S)return;const T=theme(),F=YG3_F;ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";
+  const fh=Math.max(120,Math.min(h*.7,w*.7)),u=fh/6.5,fy=h/2+fh/2+14,M_={robe:"yuanling",robeColor:"#a3282c",hat:"wusha",buzi:{color:"#1f2a44"}},
+   Q=(g,fe,civ)=>({robe:"qing",robeColor:"#2f3a55",hat:"dingdai",queue:true,bead:YG6_B[g-1][1],feather:fe,buzi:{color:"#1f2a44",motif:civ?"beast":"bird"}});
+  if(S.m===0){const p=(S.yr-1644)/16,x=w/2,top=fy-fh;
+   ctx.font="600 14"+F;ctx.fillStyle=T.redText;ctx.fillText("1645 年剃发令：“留头不留发，留发不留头”",w/2,16);
+   ctx.font="12"+F;ctx.fillStyle=T.goldText;ctx.fillText("汉族强烈抵制（江阴、嘉定），后形成“男从女不从、生从死不从”等折中现象",w/2,36);
+   ctx.save();ctx.globalAlpha=1-p;if(p<1)figure(ctx,x,fy,fh,{robe:"yuanling",robeColor:"#5b6e8c",hat:"wusha"});ctx.restore();
+   ctx.save();ctx.globalAlpha=p;if(p>0){figure(ctx,x,fy,fh,{robe:"qing",robeColor:"#2f4a6b",hat:"none",queue:true});
+    const hy=top+.62*u,wy=top+2.95*u;ctx.strokeStyle="#2a2a2e";ctx.lineCap="round";ctx.lineWidth=(.06+.1*p)*u;ctx.beginPath();ctx.moveTo(x+.22*u,hy+.25*u);ctx.quadraticCurveTo(x+.5*u,top+1.52*u,x+.42*u,wy-.15*u);ctx.stroke()}ctx.restore();
+   const q=p>=.5;figureLabel(ctx,x-.2*u,top+.25*u,x-1.9*u,top+.4*u,q?"剃发留辫"+(p<.8?"（金钱鼠尾）":""):"束发","red");
+   figureLabel(ctx,x+1*u,top+3.6*u,x+1.9*u,top+3.9*u,q?"马蹄袖（箭袖）":"宽袖","blue");
+   figureLabel(ctx,x-.3*u,top+1.4*u,x-1.9*u,top+1.8*u,q?"圆领对襟马褂":"交领/圆领","gold");
+   ctx.font="600 15"+F;ctx.fillStyle=T.fg;ctx.fillText(S.yr+" 年 · "+(q?"清制":"明制"),w/2,fy+14)}
+  else if(S.m===1){const fx=w*.3,s=Math.min(h*.36,w*.3),bx=w*.72,by=h*.46,b=YG6_B[S.g-1];
+   figure(ctx,fx,fy,fh,Q(S.g,S.fe,S.civ));yg6Over(ctx,fx,fy,fh,S.g,S.fe?S.eyes:0,1);
+   yg5Box(ctx,bx,by,s,S.civ,S.g);ctx.strokeStyle=T.bg;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(bx,by-s/2);ctx.lineTo(bx,by+s/2);ctx.stroke();
+   figureLabel(ctx,fx,fy-fh+.62*u-.86*u,fx-1.3*u,fy-fh+.1*u,"顶珠："+b[0],"gold");
+   figureLabel(ctx,fx+.4*u,fy-fh+2.27*u,bx-s/2-6,by,"补子（对开）","blue");
+   if(S.fe)figureLabel(ctx,fx+.7*u,fy-fh+.9*u,fx+1.6*u,fy-fh+.2*u,YG6_E[S.eyes-1]+"花翎","red");
+   ctx.font="13"+F;ctx.fillStyle=T.fg;ctx.fillText("顶珠分品 · 花翎恩赏 · 补子沿用文禽武兽",w/2,18);
+   ctx.font="600 15"+F;ctx.fillText((S.civ?"武官":"文官")+YG3_CN[S.g]+"品 · "+yg5Name(S.civ,S.g),bx,by+s/2+20);
+   ctx.font="12"+F;ctx.fillStyle=T.goldText;ctx.fillText("清代补子较明代小，且为对襟分开",bx,by+s/2+40);if(S.fe){ctx.fillStyle=T.redText;ctx.fillText("花翎为皇帝赏赐的荣誉",bx,by+s/2+58)}}
+  else{const f2=Math.min(fh,w*.5),u2=f2/6.5,y2=h/2+f2/2+14,t2=y2-f2,lx=w*.3,rx=w*.7;
+   figure(ctx,lx,y2,f2,M_);figure(ctx,rx,y2,f2,Q(1,false,0));yg6Over(ctx,rx,y2,f2,1,0,1);
+   ctx.font="600 14"+F;ctx.fillStyle=T.fg;ctx.fillText("明 · 文官常服",lx,18);ctx.fillText("清 · 文官补服",rx,18);
+   [[t2+.25*u2,"发式：束发 / 剃发留辫","red"],[t2-.15*u2,"冠帽：乌纱帽 / 顶戴","gold"],[t2+2.27*u2,"补子：整块 / 对开","blue"]].forEach(([yy,tx,c],i)=>{
+    const ly=t2+(i===2?2.27:i*.0+(i?-.3:.9))*u2+(i===2?0:0);ctx.save();ctx.strokeStyle=T.sub;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(lx+.45*u2,yy);ctx.lineTo(rx-.45*u2,yy);ctx.stroke();ctx.restore();
+    ctx.font="13"+F;ctx.fillStyle={red:T.redText,gold:T.goldText,blue:T.blue}[c];ctx.fillText(tx,w/2,yy-10)})}
+  ctx.restore()},
+ pointer(){return false},
+ unmount(){this.S=null}};
+/* ---------- 第 7 章 服饰里的民族交融：衣橱时间轴 ---------- */
+CH[6].ready=true;
+const YG7=[
+ {n:"战国",ev:"赵武灵王“胡服骑射”",f:[{d:1,e:"窄袖·短衣·裤·靴"}],L:{robe:"shenyi",hat:"guan"},R:{robe:"hufu"},el:"窄袖、长裤、皮靴"},
+ {n:"魏晋南北朝",ev:"北魏孝文帝改革“易汉服”；胡床、裤褶南北流行",f:[{d:-1,e:"汉服（易汉服）"},{d:1,e:"胡床·裤褶"}],L:{robe:"jiaoling"},R:{robe:"hufu",robeColor:"#6b5a3e"},el:"汉服 / 胡床、裤褶"},
+ {n:"隋唐",ev:"圆领袍、幞头、乌皮靴吸收胡服元素；唐代女子着胡服、骑马",f:[{d:1,e:"圆领袍·幞头·乌皮靴"},{d:1,e:"女着胡服·骑马"}],L:{robe:"yuanling",hat:"futou"},R:{robe:"hufu",robeColor:"#a0523a"},el:"圆领袍、幞头、乌皮靴"},
+ {n:"辽宋金元",ev:"辽“北面官国服、南面官汉服”；元代“质孙服”（一色衣）",f:[{d:-1,e:"南面官着汉服"},{d:1,e:"质孙服（一色衣）"}],L:{robe:"yuanling",hat:"futou",robeColor:"#3d5a80"},R:{robe:"pao",robeColor:"#7a4fa0"},el:"国服与汉服并行、质孙服"},
+ {n:"明清",ev:"清代满族服饰流行，后成为近代中国常见服饰",f:[{d:1,e:"马蹄袖·马褂·旗袍"}],L:{robe:"yuanling",hat:"wusha"},R:{robe:"qing",hat:"dingdai"},el:"马蹄袖、马褂、旗袍"}];
+MODS[6]={text:"中国服饰的发展史，也是一部民族交融史。从胡服骑射、孝文帝易服，到唐代圆领袍、清代马褂旗袍，各民族服饰相互吸收，共同塑造了中华服饰文化。",
+ points:["胡服骑射：华夏吸收北方民族服饰","孝文帝改革：鲜卑贵族改穿汉服","唐代服饰兼容并蓄，体现开放包容","清代满族服饰影响深远，旗袍、马褂成为近代常服","民族交融是双向的，各民族共同缔造了中华文明"],
+ gk:"纲要（上）第 5、10 课 · 选择性必修1 第 11 课「中国古代的民族关系与对外交往」；浙江选考常以服饰史料考查民族交融的双向性。",
+ S:null,
+ mount(ctrl,read){const M=this,S=M.S={i:0,t0:null,only:false,vis:new Set([0]),tm:null};M.ro=readout();
+  M.sl=slider("时代 1–5",1,5,1,1,v=>v+" · "+YG7[v-1].n,v=>{M.stop();M.go(v-1)});
+  M.ab=button("自动播放",()=>{if(S.tm){M.stop();return}if(S.i>=4){S.vis=new Set();M.go(0)}M.ab.textContent="暂停";
+   S.tm=setInterval(()=>{if(S.i>=4){M.stop();return}M.go(S.i+1)},2500)},true);
+  const w=el("div");w.style.cssText="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center";
+  w.append(M.ab,toggle("只看交流方向",false,v=>{S.only=v}));ctrl.append(M.sl,w);read.append(M.ro);M.upd()},
+ stop(){const S=this.S;if(S&&S.tm){clearInterval(S.tm);S.tm=null}if(this.ab)this.ab.textContent="自动播放"},
+ go(i){const S=this.S;S.i=i;S.t0=null;S.vis.add(i);this.sl.set(i+1);this.upd()},
+ cnt(){let a=0,b=0;this.S.vis.forEach(k=>YG7[k].f.forEach(f=>f.d>0?a++:b++));return[a,b]},
+ upd(){const S=this.S;if(!S)return;const T=theme(),E=YG7[S.i],[a,b]=this.cnt(),ds=new Set(E.f.map(f=>f.d)),
+   sp=(t,c)=>`<span style="color:${c}">${t}</span>`,dir=[ds.has(1)?sp("胡→汉",T.blue):"",ds.has(-1)?sp("汉→胡",T.goldText):""].filter(Boolean).join(" · ");
+  this.ro.update([["时代",(S.i+1)+" · "+E.n],["事件",E.ev],["交流方向",dir],["典型元素",E.el],
+   ["吸收北方元素",a+" 项",T.blue],["吸收中原元素",b+" 项",T.goldText],["结论",a&&b?"交流是双向的":"继续播放，观察方向",a&&b?T.redText:T.fg]])},
+ nodes(w){const p=Math.max(36,w*.08);return YG7.map((_,k)=>p+k*(w-2*p)/4)},
+ draw(ctx,w,h,t){const S=this.S;if(!S)return;const T=theme(),F=YG3_F,E=YG7[S.i],nx=this.nodes(w),nar=w<560;
+  if(S.t0==null)S.t0=t;const el_=t-S.t0;ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";
+  // 时间轴
+  const ty=20;ctx.strokeStyle=T.sub;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(nx[0],ty);ctx.lineTo(nx[4],ty);ctx.stroke();
+  ctx.strokeStyle=T.blue;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(nx[0],ty);ctx.lineTo(nx[S.i],ty);ctx.stroke();
+  nx.forEach((x,k)=>{const on=k===S.i;ctx.beginPath();ctx.arc(x,ty,on?8:6,0,2*Math.PI);ctx.fillStyle=k<=S.i?T.blue:T.bg;ctx.fill();ctx.strokeStyle=T.blue;ctx.lineWidth=2;ctx.stroke();
+   ctx.font=(on?"600 13":"12")+F;ctx.fillStyle=on?T.blue:T.fg;ctx.fillText(YG7[k].n,x,ty+(nar&&k%2?34:18))});
+  // 人物
+  const top=nar?78:60,fh=Math.max(90,Math.min(h-top-110,nar?w*.42:h*.62)),fy=h-26,lx=w*(nar?.18:.22),rx=w*(nar?.82:.78),u=fh/6.5;
+  ctx.save();ctx.globalAlpha=S.only?.15:1;figure(ctx,lx,fy,fh,E.L);figure(ctx,rx,fy,fh,E.R);ctx.restore();
+  ctx.font="600 13"+F;ctx.fillStyle=T.fg;ctx.fillText("中原 / 汉族",lx,fy+14);ctx.fillText("北方 / 少数民族",rx,fy+14);
+  // 双向箭头
+  const ay=fy-fh*.55,ax1=lx+1.3*u,ax2=rx-1.3*u,ds=new Set(E.f.map(f=>f.d));
+  ctx.strokeStyle=T.sub;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(ax1,ay);ctx.lineTo(ax2,ay);ctx.stroke();
+  [[ax1,1,T.blue],[ax2,-1,T.goldText]].forEach(([x,s,c])=>{const on=ds.has(s);ctx.fillStyle=on?c:T.sub;const k=on?11:7;
+   ctx.beginPath();ctx.moveTo(x,ay);ctx.lineTo(x+s*k*1.3,ay-k*.7);ctx.lineTo(x+s*k*1.3,ay+k*.7);ctx.closePath();ctx.fill()});
+  ctx.font="12"+F;ctx.fillStyle=T.blue;ctx.fillText("胡→汉",(ax1+ax2)/2-(nar?0:40),ay+16+(nar?0:0));
+  ctx.fillStyle=T.goldText;ctx.fillText("汉→胡",(ax1+ax2)/2+(nar?0:40),ay+(nar?32:16));
+  // 交流元素标签飞行（每个 0.8 秒，依次）
+  E.f.forEach((f,k)=>{const p=Math.max(0,Math.min(1,(el_-k*.9)/.8)),q=1-Math.pow(1-p,3),sx=f.d>0?rx:lx,dx=f.d>0?lx:rx,c=f.d>0?T.blue:T.goldText;
+   if(p<=0)return;const fs=nar?12:14;ctx.font="600 "+fs+F;const tx=(f.d>0?"← ":"")+f.e+(f.d>0?"":" →"),tw=ctx.measureText(tx).width+16,
+    x=Math.max(tw/2+4,Math.min(w-tw/2-4,sx+(dx-sx)*q)),y=ay-24-k*(fs+16);
+   ctx.save();ctx.globalAlpha=Math.min(1,p*3);ctx.fillStyle=T.bg;ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.beginPath();ctx.rect(x-tw/2,y-fs*.8,tw,fs*1.6);ctx.fill();ctx.stroke();
+   ctx.fillStyle=c;ctx.fillText(tx,x,y);ctx.restore()});
+  if(S.i===4&&el_>.9){ctx.font="12"+F;ctx.fillStyle=T.redText;ctx.fillText("→ 后成为近代中国常见服饰",lx,ay-24-(nar?28:30)-14)}
+  ctx.restore()},
+ pointer(e,type,x,y){if(type!=="down"||!this.S||y>70)return false;const nx=this.nodes(this.W||cv.clientWidth),sp=(nx[1]-nx[0])/2;
+  const k=nx.findIndex(v=>Math.abs(v-x)<sp);if(k<0)return false;this.stop();this.go(k);return true},
+ unmount(){this.stop();this.S=null}};
+CH[7].ready=true;
+const Y8Q=c=>({robe:"qing",robeColor:c,hat:"none",queue:true}),Y8Z=c=>({robe:"zhongshan",robeColor:c}),Y8C=(c,q)=>({robe:"changshan",robeColor:c,queue:!!q}),
+ Y8F=c=>({robe:"qipao",robeColor:c}),Y8A=(c,s)=>({robe:"jiaoling",robeColor:c,skirtColor:s});
+const YG8=[
+ {y:1840,e:"晚清",n:"男子长袍马褂、脑后留辫；女子穿袄裙。",m:"长袍马褂、辫子；袄裙",b:"清朝统治，传统社会",w:"清初“剃发易服”后形成的服饰与礼俗长期延续",d:5,dv:"中",
+  P:[Y8Q("#2f4a6b"),Y8Q("#5a4a3a"),Y8A("#8a3b3b","#3f6f8f"),Y8C("#6b6f5a",1)],L:["长袍马褂","长袍马褂","袄裙","长袍·辫子"]},
+ {y:1898,e:"维新",n:"少数留学生、新军开始穿西装、军服；康有为上《请断发易服改元折》，主张“断发易服”。",m:"长袍马褂为主，少数西装、军服",b:"戊戌变法，西学东渐",w:"维新派学习西方、变法图强，以易服表示革新",d:5.5,dv:"中",
+  P:[Y8Q("#2f4a6b"),Y8Q("#5a4a3a"),Y8Z("#2b2f3a"),Y8Z("#4b5a3a")],L:["长袍马褂","长袍马褂","留学生西装","新军军服"]},
+ {y:1912,e:"民国",n:"剪辫！民国初年剪辫易服；1912 年《服制》颁布，西装与长衫并存。",m:"西装、长衫并存；剪辫",b:"辛亥革命，中华民国成立",w:"辛亥革命推翻帝制、移风易俗，体现民主共和观念",d:7,dv:"上升",
+  P:[Y8Z("#2b2f3a"),Y8C("#6b6f5a"),Y8A("#3f6f8f","#2b2f3a"),Y8C("#5a4a3a")],L:["西装","长衫","袄裙","长衫"]},
+ {y:1929,e:"民国",n:"中山装流行（1929 年《服制条例》定为礼服之一）；女子穿改良旗袍。",m:"中山装、改良旗袍",b:"国民政府时期，城市生活近代化",w:"民主革命思想传播，中西文化交融，城市经济发展",d:7.5,dv:"较高",
+  P:[Y8Z("#4a5560"),Y8F("#3f6f8f"),Y8C("#6b6f5a"),Y8Z("#2b2f3a")],L:["中山装","改良旗袍","长衫","西装"]},
+ {y:1950,e:"新中国初期",n:"中山装、列宁装流行，色彩以“蓝、灰、绿”为主。",m:"中山装、列宁装（蓝、灰、绿）",b:"新中国成立初期",w:"崇尚朴素节俭，工农形象受推崇，物资较为匮乏",d:4,dv:"下降",
+  P:[Y8Z("#3b5b8a"),Y8Z("#6b6f73"),Y8Z("#5a6b3e"),Y8Z("#3b5b8a")],L:["中山装","列宁装","列宁装","中山装"]},
+ {y:1966,e:"“文革”",n:"绿军装盛行，颜色统一为军绿色——服饰单一化。",m:"绿军装",b:"“文化大革命”时期",w:"政治运动渗入日常生活，个性表达受到压抑",d:1.5,dv:"最低",
+  P:[Y8Z("#5b6b3a"),Y8Z("#5b6b3a"),Y8Z("#5b6b3a"),Y8Z("#5b6b3a")],L:["绿军装","绿军装","绿军装","绿军装"]},
+ {y:1980,e:"改革开放",n:"喇叭裤、西装重新流行，色彩丰富起来。",m:"喇叭裤、西装、连衣裙",b:"改革开放",w:"改革开放、思想解放、经济发展",d:8,dv:"高",
+  P:[Y8Z("#2b2f3a"),Y8Z("#b0473a"),Y8F("#c0507a"),Y8Z("#3f7f8f")],L:["西装","喇叭裤","连衣裙","夹克"]},
+ {y:1990,e:"多元时代",n:"多元化、个性化：衣着从“统一”走向“多样”。",m:"西装、休闲装、运动服、时装",b:"社会主义市场经济建设",w:"市场经济发展，对外开放扩大，人们追求个性与时尚",d:10,dv:"最高",
+  P:[Y8F("#8e6bd8"),Y8Z("#2a6fb0"),Y8C("#c06030"),Y8Z("#3a8a6a")],L:["时装","西装","休闲装","运动服"]}];
+MODS[7]={text:"近代以来，服饰随社会变革而变化：辛亥革命后剪辫易服、中山装和旗袍流行；新中国成立后服饰趋于朴素统一；改革开放后服饰日益多样化。服饰变迁是社会生活变迁的缩影，反映了政治变革、思想解放和经济发展。",
+ points:["民国初年剪辫易服、移风易俗，体现民主共和观念","中山装、旗袍成为民国时期代表性服饰","新中国初期服饰朴素、单一","改革开放后服饰多样化、个性化","社会生活变迁受政治、经济、思想观念共同影响"],
+ gk:"纲要（上）第 19–21 课 · 选择性必修2 第 15 课「衣食住行与社会生活的变迁」；浙江选考常以老照片、广告为材料考查社会生活变迁及其原因。",
+ S:null,
+ mount(ctrl,read){const M=this,S=M.S={i:0,pv:-1,t0:null,why:false,tm:null};M.ro=readout();
+  M.sl=slider("年份 1840–1990",1840,1990,1,1840,v=>v+"",v=>{M.stop();let k=0;YG8.forEach((n,j)=>{if(Math.abs(n.y-v)<Math.abs(YG8[k].y-v))k=j});M.go(k)});
+  M.ab=button("自动播放",()=>{if(S.tm){M.stop();return}if(S.i>=7)M.go(0);M.ab.textContent="暂停";
+   S.tm=setInterval(()=>{if(S.i>=7){M.stop();return}M.go(S.i+1)},2000)},true);
+  const w=el("div");w.style.cssText="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center";
+  w.append(M.ab,toggle("显示背后的原因",false,v=>{S.why=v}));ctrl.append(M.sl,w);read.append(M.ro);M.upd()},
+ stop(){const S=this.S;if(S&&S.tm){clearInterval(S.tm);S.tm=null}if(this.ab)this.ab.textContent="自动播放"},
+ go(i){const S=this.S;this.sl.set(YG8[i].y);if(i===S.i)return;S.pv=S.i;S.i=i;S.t0=null;this.upd()},
+ upd(){const S=this.S;if(!S)return;const T=theme(),E=YG8[S.i],lo=S.i===5;
+  this.ro.update([["年份",E.y+" · "+E.e,T.blue],["主要服饰",E.m],["社会背景",E.b],["多样度",E.dv+(lo?"（服饰单一化）":""),lo?T.redText:T.blue]])},
+ wrap(ctx,s,mw){const r=[];let l="";for(const c of s){if(l&&ctx.measureText(l+c).width>mw){r.push(l);l=c}else l+=c}if(l)r.push(l);return r},
+ draw(ctx,w,h,t){const S=this.S;if(!S)return;const T=theme(),F=YG3_F,E=YG8[S.i],nar=w<560;
+  if(S.t0==null)S.t0=t;const el_=t-S.t0,p=Math.min(1,el_/.6);ctx.save();ctx.textBaseline="middle";ctx.textAlign="left";
+  // 旁白卡
+  const cw=nar?Math.min(170,w*.5):200,chh=nar?58:74,bx=12,by=12,bw=nar?w-24:w-cw-40,fs=nar?12:13,lh=fs+6;
+  ctx.font=fs+F;const ln=this.wrap(ctx,E.n,bw-24),wl=S.why?this.wrap(ctx,"原因："+E.w,bw-24):[],bh=34+(ln.length+wl.length)*lh;
+  ctx.fillStyle=T.bg;ctx.strokeStyle=T.sub;ctx.lineWidth=1;ctx.beginPath();ctx.rect(bx,by,bw,bh);ctx.fill();ctx.stroke();
+  ctx.font="600 "+(fs+1)+F;ctx.fillStyle=T.blue;ctx.fillText(E.y+" · "+E.e,bx+12,by+17);
+  ctx.font=fs+F;ctx.fillStyle=T.fg;ln.forEach((s,k)=>ctx.fillText(s,bx+12,by+30+lh/2+k*lh));
+  ctx.fillStyle=T.goldText;wl.forEach((s,k)=>ctx.fillText(s,bx+12,by+30+lh/2+(ln.length+k)*lh));
+  // 多样度柱状图
+  const cx=w-12-cw,cy=nar?by+bh+10:by,ah=chh-34,sw=cw/8;ctx.font="12"+F;ctx.fillStyle=T.fg;ctx.fillText("服饰多样度",cx,cy+8);
+  YG8.forEach((n,k)=>{const x=cx+k*sw+sw*.2,bh2=Math.max(2,n.d/10*ah),b0=cy+20+ah;ctx.globalAlpha=k===S.i||k===5?1:.4;
+   ctx.fillStyle=k===5?T.red:k===S.i?T.blue:T.sub;ctx.fillRect(x,b0-bh2,sw*.6,bh2);ctx.globalAlpha=1;ctx.textAlign="center";
+   ctx.fillStyle=k===5?T.redText:k===S.i?T.blue:T.fg;ctx.fillText(String(n.y).slice(2),x+sw*.3,b0+8);
+   if(k===5)ctx.fillText("最低",x+sw*.3,b0-bh2-8);ctx.textAlign="left"});
+  // 街景
+  const gy=h-34,topY=(nar?cy+chh:by+Math.max(bh,chh))+14,fh=Math.max(70,Math.min(gy-topY-44,nar?(w/4)/.62:(w*.2)/.6,300)),u=fh/6.5;
+  ctx.globalAlpha=.14;ctx.fillStyle=T.sub;[[.02,.16,.5],[.2,.14,.72],[.36,.18,.45],[.56,.12,.8],[.7,.17,.55],[.86,.13,.66]].forEach(([a,b,c],k)=>{
+   const x=w*a,ww=w*b,hh=fh*c*1.1;ctx.fillRect(x,gy-hh,ww,hh);if(k%2===0){ctx.beginPath();ctx.moveTo(x-4,gy-hh);ctx.lineTo(x+ww/2,gy-hh-hh*.25);ctx.lineTo(x+ww+4,gy-hh);ctx.fill()}});
+  ctx.globalAlpha=.1;ctx.fillRect(0,gy,w,h-gy);ctx.globalAlpha=1;ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(w,gy);ctx.stroke();
+  // 人物（交叉淡入淡出）
+  const X=k=>nar?w*(k+.5)/4:w*(.2+.2*k),PV=S.pv>=0?YG8[S.pv]:null;
+  for(let k=0;k<4;k++){if(PV&&p<1){ctx.save();ctx.globalAlpha=1-p;figure(ctx,X(k),gy,fh,PV.P[k]);ctx.restore()}
+   ctx.save();ctx.globalAlpha=p;figure(ctx,X(k),gy,fh,E.P[k]);ctx.textAlign="center";ctx.font="12"+F;ctx.fillStyle=T.fg;ctx.fillText(E.L[k],X(k),gy+16);ctx.restore();
+   // 剪辫：辫子飞出画布
+   if(PV&&PV.P[k].queue&&!E.P[k].queue){const q=Math.min(1,el_/1.4);if(q<1){const hy=gy-fh+.62*u;ctx.save();
+    ctx.translate(X(k)+.22*u+q*q*w*.8,hy+.25*u-q*h*.9);ctx.rotate(q*5);ctx.strokeStyle="#2a2a2e";ctx.lineWidth=Math.max(2,.12*u);ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(.28*u,1.1*u,.2*u,2.2*u);ctx.stroke();ctx.restore()}}}
+  // 节点标注
+  ctx.font="12"+F;const ay=gy-fh-30;
+  if(S.i===3){ctx.globalAlpha=p;const ax=Math.max(8,X(0)-fh*.2);ctx.fillStyle=T.blue;ctx.fillText("四个口袋：国之四维 · 五粒纽扣：五权分立",ax,ay);
+   ctx.fillText("袖口三粒：三民主义",ax,ay+16);ctx.fillStyle=T.goldText;ctx.fillText("（流行说法）",ax+ctx.measureText("袖口三粒：三民主义 ").width,ay+16);ctx.globalAlpha=1}
+  if(S.i===5){ctx.textAlign="center";ctx.fillStyle=T.redText;ctx.font="600 13"+F;ctx.fillText("服饰单一化",w/2,ay+8)}
+  ctx.restore()},
+ pointer(){return false},
+ unmount(){this.stop();this.S=null}};
+/* ---------- 第 9 章 随堂检测 ---------- */
+CH[8].ready=true;
+const Y9U=h=>h/6.5,
+ Y9F3=(g,x,y,h)=>{figure(g,x,y,h,{robe:"yuanling",robeColor:"#6b3fa0",hat:"futou",wing:.15,belt:"jade"});const u=Y9U(h),wy=y-h+2.95*u,fx=x+.62*u,fy=wy+.55*u;
+  g.save();g.strokeStyle=theme().axis;g.lineWidth=1;g.beginPath();g.moveTo(fx,wy+.09*u);g.lineTo(fx,fy-.17*u);g.stroke();
+  g.fillStyle="#d9a92e";g.beginPath();g.ellipse(fx,fy,.08*u,.19*u,0,0,2*Math.PI);g.fill();g.stroke();g.restore()},
+ Y9F5=(g,x,y,h)=>figure(g,x,y,h,{robe:"yuanling",robeColor:"#a3282c",hat:"wusha",buzi:{color:"#1f2a44",motif:"bird"}}),
+ Y9F6=(g,x,y,h)=>figure(g,x,y,h,{robe:"qing",robeColor:"#2f3a55",hat:"dingdai",queue:true,buzi:{color:"#1f2a44",motif:"bird"}});
+const Y9Q=[
+ {q:"“上衣下裳”“交领右衽”等服饰规范与西周哪一制度关系最密切（ ）",o:["分封制","礼乐制度","郡县制","科举制"],a:1,c:1,x:"西周礼乐制度规定不同等级的服饰，“明贵贱、辨等列”。"},
+ {q:"赵武灵王推行“胡服骑射”，主要目的是（ ）",o:["推动民族交融","改革礼制","建立骑兵、增强军事实力","削弱贵族"],a:2,c:2,x:"胡服便于骑射，客观上促进了民族交融，但主要目的是强兵。"},
+ {f:Y9F3,q:"图中这位身穿紫袍、佩金鱼袋的唐代官员，品级最可能是（ ）",o:["三品以上","五品","七品","九品"],a:0,c:3,x:"唐代三品以上服紫、佩金鱼袋。"},
+ {m:"座中泣下谁最多？江州司马青衫湿。<br>——白居易《琵琶行》",q:"诗中“青衫”反映当时诗人（ ）",o:["品级较低","已被罢官","身为皇亲","为武官"],a:0,c:3,x:"唐代八九品服青，青衫代表低品官员。"},
+ {f:Y9F5,q:"图中明代官员胸前补子为仙鹤，据此判断他是（ ）",o:["一品武官","一品文官","九品文官","皇帝"],a:1,c:5,x:"明代补子文禽武兽，一品文官仙鹤。"},
+ {f:Y9F6,q:"图中清代官员留辫、戴顶戴。清初强制推行剃发易服，其实质是（ ）",o:["改善生活习俗","以服饰发式作为政治臣服的标志","推广满族骑射技术","促进商品经济"],a:1,c:6,x:"剃发令以发式服饰强制汉族臣服，激起强烈反抗。"},
+ {q:"从胡服骑射、孝文帝改穿汉服到清代旗袍马褂流行，这一系列现象说明（ ）",o:["少数民族服饰优于汉族","民族交融是双向的","服饰完全由政治决定","中原文化逐渐衰落"],a:1,c:7,x:"各民族服饰相互吸收，共同构成中华服饰文化。"},
+ {m:"1912 年民国政府颁布《服制》，社会上剪辫易服之风盛行；20 世纪 80 年代喇叭裤、西装流行。",q:"这些变化共同反映了（ ）",o:["服饰变化完全取决于经济","社会变革推动社会生活变迁","传统服饰彻底消失","西方文化全面取代中国文化"],a:1,c:8,x:"辛亥革命与改革开放两次社会变革都带来了服饰变迁。"}];
+const Y9CSS=":root{--x-red:#c0362c;--x-redbg:rgba(192,54,44,.08);--x-gold:#9a6a00}html.dark{--x-red:#ff7b72;--x-redbg:rgba(255,99,105,.14);--x-gold:#f0b847}"+
+ ".x-quiz{position:absolute;inset:0;overflow:auto;background:var(--card);padding:20px 24px 28px;color:var(--fg)}.x-in{max-width:640px;margin:0 auto}"+
+ ".x-qd{display:flex;gap:8px;justify-content:center;margin-bottom:10px}.x-qd i{width:10px;height:10px;border-radius:50%;background:var(--line)}.x-qd i.ok{background:var(--blue)}.x-qd i.no{background:var(--x-red)}.x-qd i.cur{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--blue)}"+
+ ".x-qn{margin:0;text-align:center;font:13px var(--mono);color:var(--x-gold)}.x-qf{display:block;width:100%;height:136px;margin-top:8px}"+
+ ".x-qm{margin:12px 0 0;padding:10px 14px;border-left:3px solid var(--x-gold);background:var(--btn2);border-radius:0 12px 12px 0;line-height:1.7}"+
+ ".x-qq{margin:12px 0 14px;font-weight:600;font-size:16px;line-height:1.6}.x-qo{display:grid;gap:10px}"+
+ ".x-qo button{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;min-height:48px;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--card);white-space:normal;line-height:1.5;overflow-wrap:anywhere}"+
+ ".x-qo button b{font-family:var(--mono);flex:none}.x-qo button span{flex:1}.x-qo button em{font-style:normal;font-weight:600;flex:none}.x-qo button:disabled{cursor:default;opacity:1}"+
+ ".x-qo .ok{background:var(--sel);border-color:var(--blue);color:var(--blue)}.x-qo .no{background:var(--x-redbg);border-color:var(--x-red);color:var(--x-red)}"+
+ ".x-qx{margin:14px 0 0;padding:12px 14px;border-radius:14px;background:var(--btn2);line-height:1.7}.x-qx b{color:var(--x-gold)}"+
+ ".x-qa{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.x-qa .pill{display:inline-flex;align-items:center;justify-content:center;min-height:44px;text-decoration:none;color:var(--fg)}.x-qa .pill.primary{color:#fff}html.dark .x-qa .pill.primary{color:#000}"+
+ ".x-sc{text-align:center;font:600 52px/1.1 var(--mono);color:var(--blue);margin:10px 0 4px}.x-st{text-align:center;margin:0}.x-wl{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:8px}"+
+ ".x-wl a{display:flex;gap:10px;align-items:center;min-height:44px;padding:8px 14px;border-radius:14px;background:var(--x-redbg);color:var(--x-red);text-decoration:none}"+
+ "@media(max-width:1023px){.cwrap.x-on{height:auto}.cwrap.x-on #cv{display:none}.x-quiz{position:static;padding:16px}}";
+const Y9S={i:0,ans:Array(8).fill(-1),t0:0,t1:0,done:false};
+MODS[8]={text:"8 道选考风格单选，覆盖本实验 1–8 章，答完可跳回对应章节复习。",
+ gk:"浙江选考 中国古代服饰与制度、社会生活变迁。",
+ mount(ctrl,read){const M=this;if(!$("x-quiz-css")){const s=el("style",null,Y9CSS);s.id="x-quiz-css";document.head.append(s)}
+  if(!Y9S.t0)Y9S.t0=Date.now();M.ro=readout();read.append(M.ro);
+  M.box=el("div","x-quiz");M.box.setAttribute("aria-live","polite");$("cwrap").classList.add("x-on");$("cwrap").append(M.box);
+  ctrl.append(button("重做",()=>M.reset()));
+  M.box.onclick=e=>{const t=e.target.closest("[data-o],[data-act]");if(!t)return;const S=Y9S;
+   if(t.dataset.o!=null){if(S.ans[S.i]>=0)return;S.ans[S.i]=+t.dataset.o;if(S.ans.every(v=>v>=0))S.t1=Date.now();M.render()}
+   else if(t.dataset.act==="next"){if(S.i<7)S.i++;else S.done=true;M.render();M.box.scrollTop=0}
+   else if(t.dataset.act==="redo")M.reset()};
+  M.render()},
+ reset(){Object.assign(Y9S,{i:0,ans:Array(8).fill(-1),t0:Date.now(),t1:0,done:false});this.render();this.box.scrollTop=0},
+ render(){const S=Y9S,M=this,n=S.ans.filter(v=>v>=0).length,ok=S.ans.filter((v,k)=>v===Y9Q[k].a).length,T=theme();
+  M.ro.update([["已答",n+" / 8"],["正确",ok+"",T.blue],["正确率",n?Math.round(ok/n*100)+"%":"—",n?T.blue:null]]);
+  const dots='<div class="x-qd" aria-hidden="true">'+Y9Q.map((q,k)=>`<i class="${S.ans[k]<0?"":S.ans[k]===q.a?"ok":"no"}${!S.done&&k===S.i?" cur":""}"></i>`).join("")+"</div>";
+  if(S.done){const sec=Math.round(((S.t1||Date.now())-S.t0)/1000),wr=Y9Q.map((q,k)=>[q,k]).filter(([q,k])=>S.ans[k]!==q.a);
+   M.box.innerHTML=`<div class="x-in">${dots}<p class="x-qn">检测结果</p><p class="x-sc">${ok}/8</p><p class="x-st">用时 <b style="color:var(--blue)">${Math.floor(sec/60)} 分 ${String(sec%60).padStart(2,"0")} 秒</b></p>`+
+    (wr.length?`<ul class="x-wl">${wr.map(([q,k])=>`<li><a href="#${q.c}">第 ${k+1} 题 ✗ · 复习第 ${q.c} 章「${CH[q.c-1].n}」</a></li>`).join("")}</ul>`:`<p class="x-st" style="color:var(--blue);margin-top:12px">全部正确 ✓</p>`)+
+    `<div class="x-qa" style="justify-content:center"><button class="pill primary" data-act="redo">重做</button></div></div>`;return}
+  const Q=Y9Q[S.i],a=S.ans[S.i],done=a>=0;
+  M.box.innerHTML=`<div class="x-in">${dots}<p class="x-qn">第 ${S.i+1} / 8 题</p>${Q.f?'<canvas class="x-qf" role="img" aria-label="题图人物插图"></canvas>':""}`+
+   (Q.m?`<blockquote class="x-qm">材料：${Q.m}</blockquote>`:"")+`<p class="x-qq">${S.i+1}. ${Q.q}</p><div class="x-qo">`+
+   Q.o.map((o,k)=>{const c=done?(k===Q.a?"ok":k===a?"no":""):"";return`<button data-o="${k}" class="${c}"${done?" disabled":""}><b>${"ABCD"[k]}</b><span>${o}</span><em>${c==="ok"?"✓":c==="no"?"✗":""}</em></button>`}).join("")+"</div>"+
+   (done?`<p class="x-qx"><b>${a===Q.a?"回答正确 · ":"正确答案 "+"ABCD"[Q.a]+" · "}解析</b> ${Q.x}</p><div class="x-qa"><a class="pill" href="#${Q.c}">回到第 ${Q.c} 章</a><button class="pill primary" data-act="next">${S.i<7?"下一题":"查看结果"}</button></div>`:"")+"</div>"},
+ draw(){const c=this.box&&this.box.querySelector(".x-qf"),Q=Y9Q[Y9S.i];if(!c||Y9S.done||!Q.f)return;
+  const d=Math.min(window.devicePixelRatio||1,3),cw=Math.max(1,c.clientWidth),ch=136;
+  if(c.width!==Math.round(cw*d)){c.width=Math.round(cw*d);c.height=ch*d}const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,cw,ch);Q.f(g,cw/2,ch-8,120)},
+ pointer(){return false},
+ unmount(){if(this.box)this.box.remove();this.box=null;$("cwrap").classList.remove("x-on")}};
+const $=id=>document.getElementById(id),pad=i=>String(i+1).padStart(2,"0");
+let cur=0,mod=null,W=0,H=0,DPR=1;
+const cv=$("cv"),ctx=cv.getContext("2d");
+/* ---------- theme ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function isDark(){return document.documentElement.classList.contains("dark")}
+function theme(){return isDark()
+ ?{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e2a336",teal:"#2ec4b6",purple:"#b197fc",goldText:"#f0b847",redText:"#ff7b72"}
+ :{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.05)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"}}
+function setDark(d){document.documentElement.classList.toggle("dark",d);store.set("yiguan-dark",d?"1":"0");$("dark").textContent=$("mdark").textContent=d?"浅色":"深色"}
+setDark(store.get("yiguan-dark")==="1");
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||fmtNum;const w=el("div","sl"),l=el("label"),o=el("output"),i=el("input");
+ l.append(document.createTextNode(label),o);i.type="range";Object.assign(i,{min,max,step,value:val});i.setAttribute("aria-label",label);o.textContent=fmt(+val);
+ i.oninput=()=>{o.textContent=fmt(+i.value);onchange&&onchange(+i.value)};w.append(l,i);
+ w.set=v=>{i.value=v;o.textContent=fmt(+v)};return w}
+function chips(options,val,onchange){const w=el("div","chips");const bs=options.map(op=>{const o=typeof op==="object"?op:{label:op,value:op};const b=el("button",o.value===val?"on":"",o.label);
+ b.onclick=()=>{bs.forEach(x=>x.classList.remove("on"));b.classList.add("on");onchange&&onchange(o.value)};w.append(b);return b});return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" primary":""),label);b.onclick=onclick;return b}
+function toggle(label,val,onchange){const b=el("button","tg"+(val?" on":""),"<span>"+label+"</span><i></i>");b.setAttribute("role","switch");b.setAttribute("aria-checked",!!val);
+ b.onclick=()=>{val=!val;b.classList.toggle("on",val);b.setAttribute("aria-checked",val);onchange&&onchange(val)};return b}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML=rs.map(r=>`<dt>${r[0]}</dt><dd style="${r[2]?"color:"+r[2]:""}">${r[1]}</dd>`).join("")};d.update(rows||[]);return d}
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){if(!isFinite(v))return v>0?"∞":v<0?"−∞":"—";const e=1e-6,s=v<0?"−":"",a=Math.abs(v);
+ if(Math.abs(a-Math.round(a))<e)return(Math.round(a)===0?"":s)+Math.round(a);
+ for(let d=2;d<=12;d++){const n=a*d;if(Math.abs(n-Math.round(n))<e)return s+Math.round(n)+"/"+d}
+ for(const r of[2,3,5,6,7,10,11,13,14,15]){const q=Math.sqrt(r);for(let d=1;d<=6;d++){const k=a*d/q;if(Math.abs(k-Math.round(k))<e&&Math.round(k)>0){const K=Math.round(k);return s+(K===1?"":K)+"√"+r+(d>1?"/"+d:"")}}}
+ return s+a.toFixed(2)}
+function drawAxes(ctx,box,xr,yr,opts){opts=Object.assign({equal:true,grid:true,ticks:true,step:1,labels:true},opts);const T=theme();
+ let[x0,x1]=xr,[y0,y1]=yr,sx=box.w/(x1-x0),sy=box.h/(y1-y0);
+ if(opts.equal){const s=Math.min(sx,sy),cx=(x0+x1)/2,cy=(y0+y1)/2;sx=sy=s;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)*sx,Y=y=>box.y+box.h-(y-y0)*sy,invX=p=>x0+(p-box.x)/sx,invY=p=>y0+(box.y+box.h-p)/sy;
+ let st=opts.step;while(st*sx<22)st*=2;
+ ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();ctx.lineWidth=1;
+ if(opts.grid){ctx.strokeStyle=T.grid;ctx.beginPath();for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st){ctx.moveTo(X(x),box.y);ctx.lineTo(X(x),box.y+box.h)}for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st){ctx.moveTo(box.x,Y(y));ctx.lineTo(box.x+box.w,Y(y))}ctx.stroke()}
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,Y(0));ctx.lineTo(box.x+box.w,Y(0));ctx.moveTo(X(0),box.y);ctx.lineTo(X(0),box.y+box.h);ctx.stroke();
+ if(opts.labels){ctx.fillStyle=T.sub;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";
+  for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st)if(Math.abs(x)>1e-9)ctx.fillText(fmtNum(x),X(x),Y(0)+4);
+  ctx.textAlign="right";ctx.textBaseline="middle";for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st)if(Math.abs(y)>1e-9)ctx.fillText(fmtNum(y),X(0)-5,Y(y));
+  ctx.textBaseline="top";ctx.fillText("O",X(0)-4,Y(0)+4);ctx.font="italic 13px "+getComputedStyle(document.body).fontFamily;ctx.fillStyle=T.fg;
+  ctx.fillText("x",box.x+box.w-4,Y(0)+4);ctx.textAlign="left";ctx.fillText("y",X(0)+6,box.y+4)}
+ ctx.restore();return{X,Y,invX,invY,s:sx,box,xr:[x0,x1],yr:[y0,y1]}}
+function drawLine(ctx,map,A,B,C,color,width,dashed){if(Math.abs(A)<1e-12&&Math.abs(B)<1e-12)return;const[x0,x1]=map.xr,[y0,y1]=map.yr,b=map.box;let p,q;
+ if(Math.abs(B)>=Math.abs(A)){p=[x0,-(A*x0+C)/B];q=[x1,-(A*x1+C)/B]}else{p=[-(B*y0+C)/A,y0];q=[-(B*y1+C)/A,y1]}
+ ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.setLineDash(dashed?[6,5]:[]);
+ ctx.beginPath();ctx.moveTo(map.X(p[0]),map.Y(p[1]));ctx.lineTo(map.X(q[0]),map.Y(q[1]));ctx.stroke();ctx.restore()}
+function drawCircle(ctx,map,cx,cy,r,color,width,fill){const b=map.box;ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.beginPath();ctx.arc(map.X(cx),map.Y(cy),Math.max(0,r*map.s),0,Math.PI*2);
+ if(fill){ctx.fillStyle=fill;ctx.fill()}if(width!==0){ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.stroke()}ctx.restore()}
+function dragPoints(points,map,snap){const M=()=>typeof map==="function"?map():map;const h=function(e,type,x,y){const m=M();if(!m)return false;
+ if(type==="down"){const R=e&&e.pointerType==="touch"?22:12;let best=-1,bd=R;points.forEach((p,i)=>{if(p.fixed)return;const d=Math.hypot(m.X(p.x)-x,m.Y(p.y)-y);if(d<=bd){bd=d;best=i}});h.active=best;return best>=0}
+ if(type==="move"&&h.active>=0){const p=points[h.active];let nx=m.invX(x),ny=m.invY(y);if(snap){nx=Math.round(nx/snap)*snap;ny=Math.round(ny/snap)*snap}
+  nx=Math.min(m.xr[1],Math.max(m.xr[0],nx));ny=Math.min(m.yr[1],Math.max(m.yr[0],ny));p.x=+nx.toFixed(6);p.y=+ny.toFixed(6);p.onmove&&p.onmove(p);h.onmove&&h.onmove(p,h.active);return true}
+ if(type==="up"){const was=h.active>=0;h.active=-1;return was}return false};h.active=-1;return h}
+function wrapText(ctx,text,x,y,maxW,lh){let line="";for(const ch of String(text)){if(ch==="\n"){ctx.fillText(line,x,y);line="";y+=lh;continue}
+ const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);line=ch;y+=lh}else line=t}if(line)ctx.fillText(line,x,y);return y+lh}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+/* ---------- placeholder ---------- */
+function drawSoon(ctx,w,h){const T=theme(),cw=Math.min(320,w-40),ch=150,x=(w-cw)/2,y=(h-ch)/2;
+ ctx.save();ctx.shadowColor="rgba(0,0,0,.08)";ctx.shadowBlur=24;ctx.shadowOffsetY=4;ctx.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(ctx,x,y,cw,ch,22);ctx.fill();ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.blue;ctx.font="13px ui-monospace,Menlo,monospace";ctx.fillText("CHAPTER "+pad(cur),w/2,y+38);
+ ctx.fillStyle=T.fg;ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText("即将上线",w/2,y+72);
+ ctx.fillStyle=T.sub;ctx.font="14px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText(CH[cur].n,w/2,y+108)}
+/* ---------- canvas loop ---------- */
+function resize(){const r=$("cwrap").getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);frame(performance.now())}
+function frame(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H);
+ try{mod&&mod.draw?mod.draw(ctx,W,H,t/1000):drawSoon(ctx,W,H)}catch(err){console.error(err)}}
+function loop(t){frame(t);requestAnimationFrame(loop)}
+new ResizeObserver(resize).observe($("cwrap"));window.addEventListener("resize",resize);
+function ptr(type){return e=>{if(!mod||!mod.pointer)return;const r=cv.getBoundingClientRect();
+ if(type==="down")try{cv.setPointerCapture(e.pointerId)}catch(_){}mod.pointer(e,type,e.clientX-r.left,e.clientY-r.top)}}
+cv.addEventListener("pointerdown",ptr("down"));cv.addEventListener("pointermove",ptr("move"));cv.addEventListener("pointerup",ptr("up"));cv.addEventListener("pointercancel",ptr("up"));
+/* ---------- chapters ---------- */
+function list(host,cls){host.innerHTML="";CH.forEach((c,i)=>{const b=el("button",cls,`<span class="mono">${pad(i)}</span><span>${c.n}</span>`);b.onclick=()=>{go(i);closeSheet()};host.append(b)})}
+list($("toc"),"");list($("slist"),"it");
+$("segs").innerHTML=CH.map(()=>"<i></i>").join("");
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod.unmount()}catch(e){console.error(e)}
+ cur=i;const c=CH[i],m=c.ready&&MODS[i]?MODS[i]:null;mod=m;
+ $("ctitle").textContent=pad(i)+"  "+c.n;$("cbook").textContent=c.book;$("ctext").innerHTML=m?m.text||"":"本章交互实验即将上线，敬请期待。";
+ const ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";$("pts").innerHTML="";$("gk").innerHTML="";
+ if(m){m.mount&&m.mount(ctrl,read);$("pts").innerHTML=m.points?"<ul>"+[].concat(m.points).map(p=>"<li>"+p+"</li>").join("")+"</ul>":"";$("gk").innerHTML=m.gk||""}
+ $("ctrlSec").hidden=!ctrl.children.length;$("readSec").hidden=!read.children.length;$("ptSec").hidden=!$("pts").innerHTML;$("gkSec").hidden=!$("gk").innerHTML;
+ if(!m){$("ctrlSec").hidden=false;ctrl.innerHTML='<p class="soon">本章控件即将上线。</p>'}
+ document.querySelectorAll("#toc button,#slist button").forEach(b=>{const on=+b.querySelector(".mono").textContent-1===i;b.classList.toggle("on",on);on?b.setAttribute("aria-current","true"):b.removeAttribute("aria-current")});
+ document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
+ $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+/* ---------- controls ---------- */
+$("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
+$("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("explain").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+function openSheet(){$("mask").hidden=$("sheet").hidden=false;const on=$("slist").querySelector(".on");on&&on.scrollIntoView({block:"nearest"})}
+function closeSheet(){$("mask").hidden=$("sheet").hidden=true}
+$("chbtn").onclick=openSheet;$("mask").onclick=closeSheet;
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"&&t.type!=="range"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable))return;
+ if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+go(fromHash());requestAnimationFrame(loop);
+</script>
+</body>
+</html>
