@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>统一与分裂 · 格物实验室</title>
+<script src="../lib/three-0.147.0/three.min.js"></script>
+<script src="../lib/three-0.147.0/OrbitControls.js"></script>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--sel:#e8f1fc;--selfg:#0058b0;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--sel:rgba(41,151,255,.18);--selfg:#6cb6ff;--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--shadow:0 0 0 1px rgba(255,255,255,.08)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.back b{font-size:22px;font-weight:400;margin-right:4px}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);font-size:14px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}
+html.dark .pill.primary,html.dark .chips button.on{color:#000}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc button,.sheet button.it{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px;align-items:center}
+.toc button:hover{background:var(--btn2)}
+.toc button.on,.sheet button.it.on{background:var(--sel);color:var(--selfg);font-weight:600}
+.toc .mono,.sheet .mono{font-size:13px;color:var(--sub)}.on .mono{color:var(--selfg)!important}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 20px}
+.explain{flex:none}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.etext{margin:8px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.explain.collapsed .etext,.explain.collapsed .book{display:none}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;color:var(--sub);min-height:32px}
+.cwrap{flex:1;min-height:0;position:relative;border-radius:22px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.cwrap canvas{position:absolute;inset:0}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:none}
+.sec h3{font-size:13px;color:var(--sub);font-weight:600;letter-spacing:0;margin:0 0 8px}
+.ctrls{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;font-size:14px}.sl output{font-family:var(--mono);color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}.chips button.on{background:var(--blue);color:#fff}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;min-height:36px;border:0;background:none;padding:0;width:100%}
+.tg i{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.tg.on i{background:#34c759}.tg.on i::after{left:20px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+.points ul{margin:0;padding-left:18px}.points li{margin:4px 0}
+.gk a{color:var(--blue);text-decoration:none;font-size:14px}
+.mdark{display:none}
+.soon{color:var(--sub);font-size:14px;margin:0}
+/* sheet */
+.mask{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;max-height:70vh;overflow:auto;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .prog{display:none}.app{display:block;height:auto}.toc{display:none}
+ .stage{padding:12px}.cwrap{order:-1;flex:none;height:56vh}
+ .explain .fold{display:none}.explain.collapsed .etext,.explain.collapsed .book{display:block}.etext{max-height:none;overflow:visible}
+ .panel{border:0;padding:0 12px 24px}
+}
+@media (min-width:1024px){.chbtn{display:none}}
+/* phone */
+@media (max-width:767px){
+ .top{height:calc(52px + env(safe-area-inset-top));gap:6px;padding-left:4px;padding-right:8px}
+ .back{width:44px;justify-content:center}.back span{display:none}.back b{margin:0}
+ .tname{flex:1;font-size:16px}.tbtns{display:none}.chbtn{margin-left:0;padding:0 12px}
+ .stage{padding:0;gap:0}.cwrap{height:52vh;border-radius:0;box-shadow:none;border-bottom:1px solid var(--line)}
+ .explain{background:none;box-shadow:none;padding:16px 16px 4px}.ehead h2{font-size:20px}.etext{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(84px + env(safe-area-inset-bottom))}
+ input[type=range]{height:44px}.chips button,.tg{min-height:44px}
+ .mdark{display:block;align-self:flex-start;min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
+  <div class="tname">统一与分裂 · UnityLab</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 09</span></div>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button><button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chnum">01/09</span></button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h2 id="ctitle"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="etext" id="ctext"></p>
+    </section>
+    <div class="cwrap" id="cwrap"><canvas id="gl" hidden></canvas><canvas id="cv"></canvas></div>
+  </main>
+  <aside class="panel">
+    <section class="card sec" id="ctrlSec"><h3>控件</h3><div class="ctrls" id="ctrl"></div></section>
+    <section class="card sec" id="readSec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec points" id="ptSec"><h3>要点</h3><div id="pts"></div></section>
+    <section class="card sec gk" id="gkSec"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mask" id="mask" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><div id="slist"></div></div>
+<div class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></div>
+<script>
+const CH=[
+{n:"分合长河：两千年的节奏",book:"统编版《中外历史纲要（上）》第 1–4 单元",ready:false},
+{n:"孝文帝改革：一场主动的交融",book:"纲要（上）第 5 课",ready:false},
+{n:"从南北朝到隋：589 年的统一",book:"纲要（上）第 5–6 课",ready:false},
+{n:"唐由盛转衰：藩镇怎样坐大",book:"纲要（上）第 6 课",ready:false},
+{n:"从五代十国到北宋：陈桥到纳土",book:"纲要（上）第 9 课",ready:false},
+{n:"宋辽夏金：和战之间的往来",book:"纲要（上）第 10 课",ready:false},
+{n:"民族政权的制度创造",book:"纲要（上）第 10、13 课 · 选择性必修1 第 1 课",ready:false},
+{n:"统一的力量：经济、交通、认同、制度",book:"纲要（上）第 1–4 单元综合",ready:false},
+{n:"随堂检测",book:"浙江选考 统一多民族国家的发展",ready:false}];
+/* ---------- 3D stage (three r147)：GL3() 返回 {THREE,renderer,scene,camera,controls,root} ---------- */
+let G3=null,G3fail=false;
+function GL3(){if(G3)return G3;if(G3fail||!window.THREE)return null;
+ const T=window.THREE,cvs=document.getElementById("gl");let renderer;
+ try{renderer=new T.WebGLRenderer({canvas:cvs,antialias:true,alpha:true})}catch(e){console.error(e);G3fail=true;return null}
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setClearColor(0x000000,0);
+ renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+ const scene=new T.Scene(),camera=new T.PerspectiveCamera(45,1,0.1,2000);camera.position.set(0,8,14);
+ let controls=null;if(T.OrbitControls){controls=new T.OrbitControls(camera,cvs);controls.enableDamping=true;controls.dampingFactor=.08}
+ const hemi=new T.HemisphereLight(0xffffff,0x8899aa,.75),sun=new T.DirectionalLight(0xffffff,.8);
+ sun.position.set(6,12,8);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
+ Object.assign(sun.shadow.camera,{left:-15,right:15,top:15,bottom:-15,near:.5,far:60});sun.shadow.camera.updateProjectionMatrix();
+ const root=new T.Group();scene.add(hemi,sun,root);
+ G3={THREE:T,renderer,scene,camera,controls,root};gl3Size();return G3}
+function gl3Size(){if(!G3)return;G3.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));G3.renderer.setSize(W,H,false);
+ G3.camera.aspect=W/H;G3.camera.updateProjectionMatrix()}
+function gl3Clear(){if(!G3)return;const r=G3.root;
+ r.traverse(o=>{o.geometry&&o.geometry.dispose();[].concat(o.material||[]).forEach(m=>{for(const k in m){const v=m[k];v&&v.isTexture&&v.dispose()}m.dispose()})});
+ r.clear();G3.camera.position.set(0,8,14);if(G3.controls){G3.controls.target.set(0,0,0);G3.controls.update()}}
+function gl3Mode(on){$("gl").hidden=!on;cv.style.pointerEvents=on&&!!GL3()?"none":""}
+function gl3Render(){if(!G3)return;G3.controls&&G3.controls.update();G3.renderer.render(G3.scene,G3.camera)}
+function project(v){if(!G3)return{x:0,y:0,visible:false};const p=new G3.THREE.Vector3(v.x,v.y,v.z).project(G3.camera);
+ return{x:(p.x+1)/2*W,y:(1-p.y)/2*H,visible:p.z>-1&&p.z<1&&Math.abs(p.x)<=1&&Math.abs(p.y)<=1}}
+function drawNo3D(c,w,h){const T=theme(),cw=Math.min(340,w-32),ch=140,x=(w-cw)/2,y=(h-ch)/2,F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ c.save();c.shadowColor="rgba(0,0,0,.08)";c.shadowBlur=24;c.shadowOffsetY=4;c.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(c,x,y,cw,ch,22);c.fill();c.restore();
+ c.textAlign="center";c.textBaseline="middle";c.fillStyle=T.redText;c.font="13px ui-monospace,Menlo,monospace";c.fillText("WEBGL",w/2,y+36);
+ c.fillStyle=T.fg;c.font="600 16px "+F;wrapText(c,"3D 引擎未能加载，请检查网络后刷新",w/2,y+72,cw-40,24);
+ c.fillStyle=T.sub;c.font="14px "+F;c.fillText(CH[cur].n,w/2,y+ch-26)}
+/* ---------- 三维中国沙盘（多章复用）：x=(lon−105)*0.4，z=(35−lat)*0.4，东 +x，南 +z ---------- */
+const COAST=[[107.9,21.5],[108.5,21.6],[109.6,21.5],[110.4,21.2],[111.6,21.6],[113.1,22.1],[114.2,22.3],[115.4,22.7],[116.7,23.4],[118.1,24.5],[119.0,25.3],[119.6,26.0],[120.2,26.9],[120.9,28.0],[121.5,28.7],[121.9,29.9],[121.0,30.6],[121.9,31.4],[120.9,32.6],[120.3,34.0],[119.4,34.7],[119.6,35.5],[120.4,36.1],[121.0,36.6],[122.1,37.4],[121.4,37.5],[120.3,37.6],[118.9,37.7],[118.0,38.3],[117.7,39.0],[118.5,39.2],[119.6,39.9],[121.0,40.8],[122.2,40.7],[121.6,38.9],[123.0,39.6],[124.4,40.1]];
+const KOREA=[[124.4,40.1],[125.0,39.6],[125.3,37.7],[126.4,36.9],[126.3,34.6],[127.6,34.7],[129.3,35.2],[129.4,36.5],[128.4,38.6],[129.7,41.0],[130.7,42.3],[132,43]];
+const LAND=[[100,18],[106,18],[105.8,19],[106.6,20.4]].concat(COAST,KOREA,[[132,44],[100,44]]);
+const TAIWAN=[[121.0,25.3],[121.9,25.0],[121.6,24.0],[121.0,22.6],[120.8,21.9],[120.3,22.5],[120.1,23.3],[120.3,24.3],[120.8,25.0]];
+const HAINAN=[[110.3,20.1],[111.0,19.6],[110.5,18.7],[109.6,18.2],[108.7,18.5],[108.6,19.3],[109.2,19.9],[109.7,20.0]];
+const YANGTZE=[[100.5,28.5],[104,29],[106.5,29.6],[108.5,30.8],[111.3,30.7],[113,29.6],[114.3,30.6],[116,29.8],[117.6,30.9],[118.8,32.1],[119.4,32.2],[121.0,31.8],[121.9,31.4]];
+const YELLOW=[[101,36],[103.8,36],[105.5,37.5],[106.5,39.5],[108,40.6],[110.5,40.3],[110.5,36.5],[110.2,34.6],[113.5,34.9],[116.5,36.3],[118.9,37.7]];
+const SB={land:.08};// 陆地厚度；底座顶面 y=0
+function toXZ(lon,lat){return{x:(lon-105)*.4,z:(35-lat)*.4}}
+function sbExtrude(T,pts,h,mat){// 经纬度多边形 → 自 y=0 向上挤出 h
+ const s=new T.Shape(pts.map(p=>{const q=toXZ(p[0],p[1]);return new T.Vector2(q.x,-q.z)})),g=new T.ExtrudeGeometry(s,{depth:h,bevelEnabled:false});
+ g.rotateX(-Math.PI/2);const m=new T.Mesh(g,mat);m.castShadow=m.receiveShadow=true;return m}
+function chinaBase(G,o){const T=G.THREE;o=Object.assign({thick:.45,r:.7},o);const grp=new T.Group();G.root.add(grp);
+ const x0=-3,x1=11.8,y0=-7.6,y1=4.4,r=o.r,s=new T.Shape();// 圆角板：shape 的 y = −z
+ s.moveTo(x0+r,y0);s.lineTo(x1-r,y0);s.quadraticCurveTo(x1,y0,x1,y0+r);s.lineTo(x1,y1-r);s.quadraticCurveTo(x1,y1,x1-r,y1);
+ s.lineTo(x0+r,y1);s.quadraticCurveTo(x0,y1,x0,y1-r);s.lineTo(x0,y0+r);s.quadraticCurveTo(x0,y0,x0+r,y0);
+ const bg=new T.ExtrudeGeometry(s,{depth:o.thick,bevelEnabled:true,bevelThickness:.04,bevelSize:.04,bevelSegments:2});bg.rotateX(-Math.PI/2);bg.translate(0,-o.thick-.04,0);
+ const dk=isDark(),base=new T.Mesh(bg,[new T.MeshStandardMaterial({color:dk?0x1d3347:0xa9cde6,roughness:.95}),new T.MeshStandardMaterial({color:0xa88d68,roughness:.9})]);
+ base.receiveShadow=true;grp.add(base);
+ const landM=new T.MeshStandardMaterial({color:dk?0x4a4436:0xefe3c8,roughness:.92}),olM=new T.LineBasicMaterial({color:0x8a7353});
+ [LAND,TAIWAN,HAINAN].forEach(p=>{grp.add(sbExtrude(T,p,SB.land,landM));
+  grp.add(new T.LineLoop(new T.BufferGeometry().setFromPoints(p.map(q=>{const v=toXZ(q[0],q[1]);return new T.Vector3(v.x,SB.land+.006,v.z)})),olM))});
+ const rivM=new T.MeshStandardMaterial({color:0x0071e3,roughness:.6});
+ [YANGTZE,YELLOW].forEach(p=>{const c=new T.CatmullRomCurve3(p.map(q=>{const v=toXZ(q[0],q[1]);return new T.Vector3(v.x,SB.land+.01,v.z)}));
+  grp.add(new T.Mesh(new T.TubeGeometry(c,p.length*12,.035,6,false),rivM))});
+ return{group:grp,toXZ}}
+function regionMesh(G,pts,color,h){const T=G.THREE,m=sbExtrude(T,pts,1,new T.MeshStandardMaterial({color,transparent:true,opacity:.55,roughness:.7,depthWrite:false}));
+ m.castShadow=false;m.position.y=SB.land+.004;m.scale.y=Math.max(h||0,1e-4);m.visible=(h||0)>.002;m.userData={name:"",h:h||0};G.root.add(m);return m}
+function setRegionHeight(m,h,ms){ms=ms==null?700:ms;const a=m.scale.y<.001?0:m.scale.y,t0=performance.now(),id={};m.userData.h=h;m.userData.tw=id;
+ const st=t=>{if(m.userData.tw!==id)return;const k=ms>0?Math.min(1,Math.max(0,(t-t0)/ms)):1,e=k<.5?2*k*k:1-Math.pow(2-2*k,2)/2,v=a+(h-a)*e;
+  m.scale.y=Math.max(v,1e-4);m.visible=v>.002;if(k<1)requestAnimationFrame(st)};st(t0);if(ms>0)requestAnimationFrame(st)}
+function cityPin(G,name,lon,lat,color){const T=G.THREE,q=toXZ(lon,lat),g=new T.Group(),mat=new T.MeshStandardMaterial({color:color==null?0xc0362c:color,roughness:.5});
+ const post=new T.Mesh(new T.CylinderGeometry(.025,.025,.36,10),mat);post.position.y=.18;const ball=new T.Mesh(new T.SphereGeometry(.08,16,12),mat);ball.position.y=.4;
+ post.castShadow=ball.castShadow=true;g.add(post,ball);g.position.set(q.x,SB.land,q.z);
+ g.userData={name,lon,lat,top:{x:q.x,y:SB.land+.52,z:q.z}};G.root.add(g);return g}// 标签：各章用 project(pin.userData.top) 在 2D 层书写
+const MODS=[];// MODS[i]={text,points,gk,use3d,mount(ctrlEl,readEl),draw(ctx,w,h,t),pointer(e,type,x,y),unmount()}
+/* ---------- 第 1 章：王朝长河（三维时间带） ---------- */
+CH[0].ready=true;
+MODS[0]=(()=>{
+ const A=-770,B=1912,S=40/(B-A),X=y=>(y-A)*S-20,RW=3,GOLD=0xc9a24a,PAL=[0x6f9bd1,0x5fb3b0,0xc28e5c,0x8fa98a,0xa58cc9,0xd49a8a,0x9aa7b4];
+ const P=[// [时段,起,止,并立政权,统一]
+  ["春秋战国",-770,-221,["秦","楚","齐","燕","韩","赵","魏"]],["秦",-221,-207,["秦"],1],["楚汉之争",-206,-202,["西楚","汉"]],
+  ["西汉",-202,8,["西汉"],1],["新",9,23,["新"],1],["东汉",25,220,["东汉"],1],["三国",220,280,["魏","蜀","吴"]],["西晋",280,316,["西晋"],1],
+  ["东晋十六国",317,420,["东晋","前赵","后赵","前秦","后燕","北凉"]],["南北朝",420,589,["南朝：宋→齐→梁→陈","北朝：北魏→东西魏→北齐北周"]],
+  ["隋",589,618,["隋"],1],["唐",618,907,["唐"],1],["五代十国",907,979,["五代","吴/南唐","吴越","前后蜀","南汉","闽","楚","北汉"]],
+  ["北宋·辽·西夏",960,1127,["北宋","辽","西夏"]],["南宋·金·西夏",1127,1234,["南宋","金","西夏"]],["南宋·蒙古",1234,1279,["南宋","蒙古"]],
+  ["元",1279,1368,["元"],1],["明",1368,1644,["明"],1],["清",1644,1912,["清"],1]];
+ const UNI=P.filter(p=>p[4]).reduce((s,p)=>s+Math.max(0,Math.min(p[2],B)-Math.max(p[1],-221)),0),SHARE=Math.round(UNI/(B+221)*100);
+ const CL={fg:"#1d1d1f",gold:"#9a6a00",red:"#c0362c",blue:"#0071e3"},F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ let G=null,raf=0,blocks=[],labels=[],ticks=[],boat=null,ring=null,year=A,bx=X(A),sl=null,rd=null,pb=null;
+ const fy=y=>y<0?"前 "+(-y)+" 年":y+" 年";
+ function periodAt(y){let p=P[0];for(const q of P)if(q[1]<=y)p=q;return p}
+ function stripe(T,len){const c=document.createElement("canvas");c.width=c.height=64;const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,64,64);
+  g.strokeStyle="rgba(70,40,0,.5)";g.lineWidth=7;for(let k=-64;k<=128;k+=16){g.beginPath();g.moveTo(k,64);g.lineTo(k+64,0);g.stroke()}
+  const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(Math.max(1,len/.5),1);return t}
+ function build(){const T=G.THREE,R=G.root,add=(geo,mat,x,y,z)=>{const m=new T.Mesh(geo,mat);m.position.set(x,y,z);m.receiveShadow=true;R.add(m);return m};
+  add(new T.BoxGeometry(42,.3,4.6),new T.MeshStandardMaterial({color:0xcdb594,roughness:.95}),0,-.15,0);
+  add(new T.BoxGeometry(41.4,.04,3.3),new T.MeshStandardMaterial({color:0xbfdcf0,roughness:.3,transparent:true,opacity:.85}),0,.02,0);
+  P.forEach((p,i)=>{const nx=P[i+1],b=nx&&nx[1]<p[2]?nx[1]:p[2],n=p[3].length,w=RW/n,segs=p[0]==="唐"?[[p[1],755,0],[755,b,1]]:[[p[1],b,0]];
+   segs.forEach(([a,e,str])=>{const len=(e-a)*S,cx=X((a+e)/2);
+    p[3].forEach((nm,j)=>{const mat=new T.MeshStandardMaterial({color:p[4]?GOLD:PAL[(i+j)%PAL.length],roughness:.6,map:str?stripe(T,len):null});
+     const m=add(new T.BoxGeometry(Math.max(len-.03,.04),.6,w*.9),mat,cx,.34,-RW/2+w*(j+.5));m.userData={u:!!p[4]};blocks.push(m);
+     labels.push({x:cx,y:.8,z:m.position.z,t:str?"安史之乱后藩镇割据":nm,c:p[4]?(str?"red":"gold"):"fg"})})})});
+  const tm=new T.MeshStandardMaterial({color:0x6b5a44});
+  for(let y=-600;y<=1800;y+=200){add(new T.BoxGeometry(.05,.03,.35),tm,X(y),.01,1.95);ticks.push({x:X(y),y:0,z:2.45,t:y<0?"前"+(-y):y===0?"公元":String(y)})}
+  boat=new T.Group();const cone=new T.Mesh(new T.ConeGeometry(.22,.5,24),new T.MeshStandardMaterial({color:0xffd27a,emissive:0xffb020,emissiveIntensity:.8}));
+  cone.rotation.x=Math.PI;cone.position.y=.25;
+  ring=new T.Mesh(new T.RingGeometry(.34,.48,40),new T.MeshBasicMaterial({color:0x7cc4ff,transparent:true,opacity:.7,side:T.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;
+  boat.add(cone,ring,new T.PointLight(0xffd27a,.8,4));boat.position.set(bx,.8,0);R.add(boat)}
+ function setYear(y){year=y;sl&&sl.set(y);const p=periodAt(y),u=!!p[4],T=theme(),tail=p[0]==="北宋·辽·西夏"&&y<979;
+  rd&&rd.update([["当前年份",fy(y)],["所处时段",p[0]+(tail?"（北汉至 979 年）":"")],["并立政权数",p[3].length+(tail?" + 北汉":"")],["状态",u?"统一":"分裂",u?T.goldText:T.redText]])}
+ function stop(){cancelAnimationFrame(raf);raf=0;if(pb)pb.textContent="自动漂流"}
+ function play(){if(year>=B)setYear(A);const t0=performance.now()-(year-A)/(B-A)*25000;pb.textContent="暂停";
+  const step=t=>{const y=Math.min(B,Math.round(A+(t-t0)/25000*(B-A)));setYear(y);if(y<B)raf=requestAnimationFrame(step);else stop()};raf=requestAnimationFrame(step)}
+ function onlyUni(v){blocks.forEach(m=>{if(m.userData.u)return;Object.assign(m.material,{transparent:v,opacity:v?.22:1,depthWrite:!v});m.material.needsUpdate=true})}
+ return{use3d:true,
+  text:"沿着这条长河漂流两千六百多年：金色是统一王朝，彩色并排的是同时并立的政权。中国历史上统一是主流；分裂时期也孕育着民族交融与区域开发，而分裂之后，总会走向更高层次的统一。",
+  points:["秦朝首次建立统一多民族的中央集权国家。","三国两晋南北朝是民族交融的重要时期，为隋唐统一奠基。","辽宋夏金是第二次民族政权并立，元朝实现空前大统一。","清朝巩固和发展了统一多民族国家，奠定今日版图基础。"],
+  gk:"<p style=\"margin:0 0 6px;font-size:14px\">纲要（上）第 1–4 单元主题。</p><p style=\"margin:0;font-size:14px\">浙江选考常考：「统一与分裂的原因与影响」「民族交融」。</p>",
+  mount(c,r){G=GL3();year=A;bx=X(A);
+   sl=slider("年份",A,B,1,A,fy,v=>{stop();setYear(v)});
+   pb=button("自动漂流",()=>raf?stop():play(),true);pb.style.minHeight="44px";
+   c.append(sl,chips([{label:"春秋战国",value:-770},{label:"三国两晋南北朝",value:220},{label:"五代辽宋夏金",value:907},{label:"元明清",value:1279}],null,v=>{stop();setYear(v)}),
+    toggle("只亮统一时段",false,onlyUni),pb);
+   const T=theme(),bar=el("div","",`<p style="margin:12px 0 6px;font-size:14px">前 221 年至 1912 年，统一时段约占 <b style="color:${T.goldText}">${SHARE}%</b>（${UNI} / ${B+221} 年）</p>`+
+    `<div style="height:8px;border-radius:4px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${SHARE}%;background:#c9a24a"></i></div>`+
+    `<p style="margin:6px 0 0;font-size:13px;color:var(--sub)">计为统一：秦汉（含新）、西晋、隋唐、元明清。</p>`);
+   rd=readout();r.append(rd,bar);
+   if(G){build();G.camera.position.set(bx,10.76,9.02);if(G.controls){G.controls.target.set(bx,0,0);G.controls.update()}else G.camera.lookAt(bx,0,0)}
+   setYear(A)},
+  draw(c,w,h,t){if(!G||!boat)return;const tx=X(year),dx=(tx-bx)*.1;bx+=dx;
+   boat.position.set(bx,.8+Math.sin(t*2)*.05,0);ring.scale.setScalar(1+.15*Math.sin(t*3));ring.material.opacity=.5+.25*Math.sin(t*3);
+   if(G.controls){G.controls.target.x+=dx;G.camera.position.x+=dx}else{G.camera.position.x+=dx;G.camera.lookAt(bx,0,0)}
+   c.save();c.textAlign="center";c.textBaseline="middle";c.lineJoin="round";
+   const txt=(s,p,col,font)=>{const q=project(p);if(!q.visible)return;c.font=font;c.lineWidth=4;c.strokeStyle="rgba(255,255,255,.9)";c.strokeText(s,q.x,q.y);c.fillStyle=CL[col];c.fillText(s,q.x,q.y)};
+   labels.forEach(l=>{if(Math.abs(l.x-bx)<=12)txt(l.t,l,l.c,"600 12px "+F)});
+   ticks.forEach(k=>txt(k.t,k,"blue","12px ui-monospace,Menlo,monospace"));
+   const p=periodAt(year);txt(fy(year)+" · "+p[0],{x:bx,y:1.6,z:0},p[4]?"gold":"red","600 14px "+F);
+   c.restore()},
+  unmount(){stop();gl3Clear();G=null;boat=ring=null;blocks=[];labels=[];ticks=[];sl=rd=pb=null}}})();
+/* ---------- 第 2 章：孝文帝改革（三维沙盘） ---------- */
+CH[1].ready=true;
+MODS[1]=(()=>{
+ const CL={fg:"#1d1d1f",gold:"#9a6a00",red:"#c0362c",blue:"#0071e3"},F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const WEI=[[97,42],[120,42],[122,38],[119,34],[116,32],[110,32],[104,33],[98,36]],OCHRE=0xc9a06a,JADE=0x3fa58a;
+ const R=[// [按钮名, 旁白标题, 旁白说明]
+  ["① 迁都洛阳（494）","494 年 · 迁都洛阳","离开保守势力集中的平城，靠近中原文化中心"],
+  ["② 改穿汉服","易服 · 改穿汉服","禁止鲜卑服装，官民改穿汉人服饰"],
+  ["③ 朝廷说汉语","断北语 · 朝廷说汉语","朝堂之上禁用鲜卑语，官员改说汉语"],
+  ["④ 改汉姓（拓跋→元）","改汉姓 · 拓跋→元","皇族拓跋氏改姓元，鲜卑贵族改用汉姓"],
+  ["⑤ 鼓励鲜卑与汉族通婚","通婚 · 鲜卑与汉族联姻","鼓励鲜卑贵族与汉族士族通婚，血缘交融"],
+  ["⑥ 汉族官制律令 · 均田制 · 三长制（太和年间）","太和年间 · 官制律令与均田、三长","采用汉族官制律令，推行均田制和三长制，加速封建化"]];
+ let G=null,on=[],tgs=[],host=null,rd=null,bars=null,region=null,pc=null,pl=null,rings=[],boxGeo=null,arc=null,timers=[],autoOn=false,card=null,ab=null;
+ const now=()=>performance.now();
+ function clearTimers(){timers.forEach(clearTimeout);timers=[];autoOn=false;if(ab)ab.textContent="一键推演"}
+ function build(){const T=G.THREE;chinaBase(G);region=regionMesh(G,WEI,OCHRE,.3);region.userData.name="北魏";
+  pc=cityPin(G,"平城",113.3,40.1,0x9a6a00);pl=cityPin(G,"洛阳",112.45,34.62,0x0071e3);pc.userData.tgt=pl.userData.tgt=1;
+  boxGeo=new T.BoxGeometry(.09,.09,.09);
+  const c=toXZ(113,37);G.camera.position.set(c.x+.6,8.2,c.z+7.2);
+  if(G.controls){G.controls.target.set(c.x,0,c.z);G.controls.update()}else G.camera.lookAt(c.x,0,c.z)}
+ function pinTop(p){return{x:p.position.x,y:SB.land+.52*p.scale.y,z:p.position.z}}
+ function makeArc(){const T=G.THREE,a=pinTop(pc),b=pinTop(pl),A=new T.Vector3(a.x,a.y,a.z),B=new T.Vector3(b.x,b.y,b.z),M=A.clone().lerp(B,.5);M.y+=1.6;
+  const curve=new T.QuadraticBezierCurve3(A,M,B),grp=new T.Group(),N=64;
+  const core=new T.Mesh(new T.TubeGeometry(curve,N,.03,6,false),new T.MeshBasicMaterial({color:0xffb020}));
+  const glow=new T.Mesh(new T.TubeGeometry(curve,N,.08,8,false),new T.MeshBasicMaterial({color:0xffd27a,transparent:true,opacity:.3,depthWrite:false}));
+  const head=new T.Mesh(new T.ConeGeometry(.09,.24,16),new T.MeshStandardMaterial({color:0xffb020,emissive:0xff9000,emissiveIntensity:.8}));
+  const dotM=new T.MeshStandardMaterial({color:0xffe2a0,emissive:0xffc040,emissiveIntensity:1}),dots=[];
+  for(let i=0;i<5;i++){const d=new T.Mesh(new T.SphereGeometry(.045,10,8),dotM);dots.push(d);grp.add(d)}
+  grp.add(core,glow,head);G.root.add(grp);arc={grp,curve,core,glow,head,dots,N,t0:now(),done:false};arcStep()}
+ function arcStep(){if(!arc)return;const T=G.THREE,k=Math.min(1,(now()-arc.t0)/1200),seg=Math.floor(k*arc.N);
+  arc.core.geometry.setDrawRange(0,seg*6*6);arc.glow.geometry.setDrawRange(0,seg*8*6);
+  const p=arc.curve.getPoint(k),tg=arc.curve.getTangent(k);arc.head.position.copy(p);arc.head.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),tg.normalize());
+  arc.dots.forEach((d,i)=>{const u=k-.06*(i+1);d.visible=u>0&&k<1;if(u>0)d.position.copy(arc.curve.getPoint(u))});
+  if(k>=1&&!arc.done){arc.done=true;pl.userData.tgt=2;pc.userData.tgt=.5}}
+ function dropArc(){if(!arc)return;arc.grp.traverse(o=>{o.geometry&&o.geometry.dispose();o.material&&o.material.dispose()});G.root.remove(arc.grp);arc=null;pl.userData.tgt=pc.userData.tgt=1}
+ function addRing(n){const T=G.THREE,q=pl.position,m=new T.MeshStandardMaterial({color:[0x0071e3,0x3fa58a,0xc9a24a][n%3],roughness:.6}),g=new T.Group(),cnt=6+n*2,r=.22+n*.13;
+  for(let i=0;i<cnt;i++){const a=i/cnt*Math.PI*2+n*.4,b=new T.Mesh(boxGeo,m);b.position.set(Math.cos(a)*r,.045,Math.sin(a)*r);b.castShadow=true;g.add(b)}
+  g.position.set(q.x,SB.land,q.z);g.scale.y=.01;g.userData.t0=now();G.root.add(g);rings.push(g)}
+ function popRing(){const g=rings.pop();if(!g)return;g.children[0]&&g.children[0].material.dispose();G.root.remove(g)}
+ function set(i,v){if(!!on[i]===v)return;on[i]=v;const n=on.filter(Boolean).length;
+  if(G){if(v)addRing(n);else popRing();
+   if(i===0){if(v)makeArc();else dropArc()}
+   const T=G.THREE;region.material.color.copy(new T.Color(OCHRE).lerp(new T.Color(JADE),n/6))}
+  if(v)card={i,t0:now()};update()}
+ function update(){const n=on.filter(Boolean).length,fuse=Math.round(n*100/6),dis=Math.min(100,8+(on[0]?42:0)+(n-(on[0]?1:0))*9),all=n===6,T=theme();
+  rd&&rd.update([["已选改革",n+" / 6"],["交融度",fuse,T.blue],["六镇不满值",dis,dis>=50?T.redText:T.goldText]]);
+  if(bars)bars.innerHTML=[["交融度",fuse,"#0071e3"],["代价 · 北方六镇鲜卑贵族不满",dis,"#c0362c"]].map(b=>
+   `<p style="margin:10px 0 4px;font-size:13px;color:var(--sub)">${b[0]}</p><div style="height:8px;border-radius:4px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${b[1]}%;background:${b[2]};transition:width .5s"></i></div>`).join("")+
+   (all?`<p style="margin:12px 0 0;font-size:14px;font-weight:600;color:${T.redText}">523 年六镇起兵 → 北魏分裂为东魏、西魏</p>`:
+    `<p style="margin:12px 0 0;font-size:13px;color:var(--sub)">${on[0]?"迁都后，留守北方六镇的鲜卑贵族地位下降，不满上升。":"点亮改革，观察交融与代价。"}</p>`)}
+ function makeToggles(){host.innerHTML="";tgs=R.map((r,i)=>{const b=toggle(r[0],false,v=>set(i,v));b.style.minHeight="44px";host.append(b);return b})}
+ function reset(){clearTimers();for(let i=5;i>=0;i--)set(i,false);card=null;makeToggles();update()}
+ function auto(){if(autoOn){clearTimers();return}reset();autoOn=true;ab.textContent="停止推演";
+  R.forEach((_,i)=>timers.push(setTimeout(()=>{tgs[i]&&!on[i]&&tgs[i].click();if(i===5){autoOn=false;ab.textContent="一键推演"}},300+i*1200)))}
+ function txt(c,s,p,col,font){const q=project(p);if(!q.visible)return;c.font=font;c.lineWidth=4;c.strokeStyle="rgba(255,255,255,.92)";c.strokeText(s,q.x,q.y);c.fillStyle=CL[col];c.fillText(s,q.x,q.y)}
+ return{use3d:true,
+  text:"北魏孝文帝主动推行汉化改革，加速了北方民族交融，促进了北魏的封建化；改革也触动鲜卑旧贵族利益，埋下六镇之乱的伏笔。民族交融为隋唐统一奠定了基础。",
+  points:["孝文帝改革的措施：迁都洛阳、易服、说汉语、改汉姓、通婚、采用汉族官制。","经济上推行均田制、三长制（冯太后、孝文帝时期）。","意义：促进民族交融和北魏封建化，为隋唐统一奠基。","局限：引发保守势力不满，六镇起兵后北魏分裂。"],
+  gk:"<p style=\"margin:0 0 6px;font-size:14px\">统编版纲要（上）第 5 课「三国两晋南北朝的政权更迭与民族交融」。</p><p style=\"margin:0;font-size:14px\">浙江选考常考：改革措施与“民族交融”的史料辨析。</p>",
+  mount(c,r){G=GL3();on=[false,false,false,false,false,false];rings=[];arc=null;card=null;
+   host=el("div","");host.style.cssText="display:grid;gap:8px";
+   ab=button("一键推演",auto,true);ab.style.minHeight="44px";const rb=button("重置",reset);rb.style.minHeight="44px";
+   const row=el("div","");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px";row.append(ab,rb);
+   c.append(el("p","",'<span style="font-size:13px;color:var(--sub)">改革清单 · 逐项点亮</span>'),host,row);
+   rd=readout();bars=el("div","");r.append(rd,bars);
+   if(G)build();makeToggles();update()},
+  draw(c,w,h,t){if(!G||!pc)return;const tn=now();
+   [pc,pl].forEach(p=>{const s=p.scale.y+(p.userData.tgt-p.scale.y)*.08;p.scale.set(1,s,1)});
+   rings.forEach(g=>{const k=Math.min(1,(tn-g.userData.t0)/600);g.scale.y=Math.max(.01,1-Math.pow(1-k,3))});
+   if(arc){arcStep();arc.head.visible=true}
+   c.save();c.textAlign="center";c.textBaseline="middle";c.lineJoin="round";
+   const a=pinTop(pc),b=pinTop(pl);
+   txt(c,"平城（今大同）",{x:a.x,y:a.y+.22,z:a.z},"gold","600 13px "+F);
+   txt(c,"洛阳",{x:b.x,y:b.y+.22,z:b.z},"blue","600 14px "+F);
+   const m=toXZ(104,38.5);txt(c,"北魏（示意）",{x:m.x,y:.5,z:m.z},on.every(Boolean)?"red":"fg","600 13px "+F);
+   if(arc&&!arc.done){const p=arc.head.position;txt(c,"迁都 494",{x:p.x,y:p.y+.25,z:p.z},"gold","600 12px "+F)}
+   if(card){const age=tn-card.t0,life=autoOn?1e9:3600;if(age>life)card=null;else{
+    const al=Math.min(1,age/250,(life-age)/400),cw=Math.min(560,w-32),ch=70,x=(w-cw)/2,y=14,r=R[card.i];c.globalAlpha=al;
+    c.save();c.shadowColor="rgba(0,0,0,.12)";c.shadowBlur=20;c.shadowOffsetY=4;c.fillStyle="rgba(255,255,255,.94)";rrect(c,x,y,cw,ch,16);c.fill();c.restore();
+    c.lineWidth=3;c.strokeStyle="rgba(255,255,255,.9)";
+    c.font="600 20px "+F;c.strokeText(r[1],w/2,y+24);c.fillStyle=card.i===0?CL.blue:CL.gold;c.fillText(r[1],w/2,y+24);
+    c.font="14px "+F;c.strokeText(r[2],w/2,y+50);c.fillStyle=CL.fg;c.fillText(r[2],w/2,y+50);c.globalAlpha=1}}
+   c.restore()},
+  unmount(){clearTimers();gl3Clear();G=null;pc=pl=region=arc=card=boxGeo=null;rings=[];tgs=[];host=rd=bars=ab=null}}})();
+/* ---------- 第 3 章：从南北朝到隋（故事关卡 · 三维沙盘） ---------- */
+CH[2].ready=true;
+MODS[2]=(()=>{
+ const CL={fg:"#1d1d1f",gold:"#9a6a00",red:"#c0362c",blue:"#0071e3"},F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const QI=[[110,41],[120,41],[122,37],[119,33],[115,32],[111,34],[110,38]],ZHOU=[[95,40],[110,41],[110,38],[111,34],[112,31],[107,28],[102,28],[97,33]],
+  CHEN=[[112,31],[115,32],[119,33],[122,31],[121,25],[116,22],[110,21],[108,24],[109,28]],BG=0x7f93a8,OCH=0xc9a06a,JADE=0x3fa58a,GOLD=0xc9a24a;
+ const S=[// [年份, 标题, 说明, 并立政权, 统一]
+  ["534–557 年","东西对峙，南北并立","北魏分裂为东魏、西魏，后分别被北齐、北周取代；557 年陈朝建立","北齐 · 北周 · 陈",0],
+  ["577 年","北周灭北齐","周武帝整顿府兵、灭佛扩充兵源财源，东进灭齐，统一北方","北周 · 陈",0],
+  ["581 年","杨坚代周建隋","杨坚取代北周建立隋朝，定都大兴城（长安）","隋 · 陈",0],
+  ["588–589 年","隋灭陈","晋王杨广为统帅，三路大军渡江，合围建康","隋 · 陈",0],
+  ["589 年","南北重归统一","结束西晋末年以来近三百年的分裂局面","隋",1]];
+ const BD=[["民族交融","北方民族融合"],["江南开发","南北经济差距缩小"],["北强南弱","隋国力强"],["人心思定","长期战乱后渴望统一"]],DUR=[3000,4200,3800,7600,6500];
+ let G=null,s=0,t0=0,qi=null,zh=null,ch=null,pins={},glow=null,arrows=[],tm=[],at=0,autoOn=false,fallen=false,absorbed=false,blinkT=0,badgeT=0,cam=null,rd=null,ab=null;
+ const now=()=>performance.now(),later=(ms,f)=>tm.push(setTimeout(f,ms));
+ function build(){const T=G.THREE;chinaBase(G);
+  qi=regionMesh(G,QI,BG,0);zh=regionMesh(G,ZHOU,OCH,0);ch=regionMesh(G,CHEN,JADE,0);
+  [qi,zh,ch].forEach(m=>m.userData.c=new T.Color(m.material.color));
+  [["长安",108.9,34.3],["邺",114.4,36.3],["建康",118.8,32.05],["广陵",119.4,32.4],["庐江",117.3,31.3],["永安",109.5,31.0]].forEach(p=>{const g=cityPin(G,p[0],p[1],p[2],p[0]==="长安"?0x9a6a00:p[0]==="建康"?0xc0362c:0x6b5a44);g.userData.tgt=1;pins[p[0]]=g});
+  glow=new T.Mesh(new T.SphereGeometry(.2,20,14),new T.MeshBasicMaterial({color:0xffd27a,transparent:true,opacity:.5,depthWrite:false}));glow.visible=false;G.root.add(glow)}
+ function setCam(n){if(!G)return;const T=G.THREE,c=n===3?toXZ(115.5,31.6):toXZ(110.5,32.5),o=n===3?[.4,5.4,5]:[.6,10,9];
+  cam={t:new T.Vector3(c.x,0,c.z),p:new T.Vector3(c.x+o[0],o[1],c.z+o[2]),until:now()+1800}}
+ function arrow(pts,color,ms,delay,label,lp){const T=G.THREE,vs=pts.map(p=>{const q=toXZ(p[0],p[1]);return new T.Vector3(q.x,SB.land+(p[2]||.18),q.z)});
+  const curve=new T.CatmullRomCurve3(vs),N=90,grp=new T.Group(),core=new T.Mesh(new T.TubeGeometry(curve,N,.035,6,false),new T.MeshBasicMaterial({color}));
+  const head=new T.Mesh(new T.ConeGeometry(.08,.22,16),new T.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.5}));
+  grp.add(core,head);grp.visible=false;G.root.add(grp);arrows.push({grp,curve,core,head,N,t0:now()+delay,ms,label,lp})}
+ function dropArrows(){arrows.forEach(a=>{a.grp.traverse(o=>{o.geometry&&o.geometry.dispose();o.material&&o.material.dispose()});G&&G.root.remove(a.grp)});arrows=[]}
+ function col(m,hex,instant){m.userData.c.setHex(hex);if(instant)m.material.color.setHex(hex)}
+ function upd(){if(!rd)return;const T=theme(),u=S[s][4];
+  rd.update([["幕次",(s+1)+" / 5"],["年份",S[s][0]],["当前幕",S[s][1]],["并立政权",s===3&&fallen?"隋（陈亡）":S[s][3]],["局势",u?"统一":"分裂",u?T.goldText:T.redText]])}
+ function show(n){tm.forEach(clearTimeout);tm=[];s=Math.max(0,Math.min(4,n));t0=now();fallen=absorbed=false;blinkT=badgeT=0;upd();
+  if(!G)return;dropArrows();setCam(s);const H=setRegionHeight;
+  pins["长安"].userData.tgt=s>=2?2.2:1;pins["建康"].userData.tgt=1;pins["建康"].visible=true;glow.visible=s>=2;
+  col(ch,s===4?GOLD:JADE,true);
+  if(s===0){col(qi,BG,true);col(zh,OCH,true);[qi,zh,ch].forEach(m=>{H(m,0,0);H(m,.3,1000)})}
+  else if(s===1){col(qi,BG,true);col(zh,OCH,true);[qi,zh,ch].forEach(m=>H(m,.3,0));
+   arrow([[108.9,34.3,.45],[111.6,35.6,1.3],[114.4,36.3,.45]],0xc0362c,1300,200,"周武帝东进",.5);
+   later(1600,()=>H(qi,0,500));later(2200,()=>{col(qi,OCH,true);absorbed=true;H(qi,.3,800)})}
+  else if(s===2){col(qi,OCH,true);col(zh,OCH,true);col(qi,GOLD);col(zh,GOLD);[qi,zh,ch].forEach(m=>H(m,.3,0));H(qi,.36,1500);H(zh,.36,1500)}
+  else if(s===3){col(qi,GOLD,true);col(zh,GOLD,true);[qi,zh].forEach(m=>H(m,.36,0));H(ch,.3,0);
+   arrow([[119.4,32.4,.35],[119.7,32.3,.6],[119.45,32.2,.35],[118.85,32.07,.3]],0xc0362c,1200,300,"贺若弼 · 广陵渡江攻京口",0);
+   arrow([[117.3,31.3,.35],[117.9,31.6,.7],[118.5,31.65,.35],[118.78,31.98,.3]],0xc0362c,1200,1700,"韩擒虎 · 庐江渡江夺采石",0);
+   arrow([[109.5,31.0],[111.3,30.7],[113,29.6],[114.3,30.6],[116,29.8],[117.6,30.9],[118.75,32.0]],0x0071e3,1600,3100,"杨素水军 · 永安顺江东下",.35);
+   later(4900,()=>{blinkT=now()});later(6200,()=>{fallen=true;pins["建康"].userData.tgt=.25;H(ch,0,900);upd()})}
+  else{col(qi,GOLD,true);col(zh,GOLD,true);H(qi,.36,0);H(zh,.36,0);H(ch,0,0);H(ch,.36,900);
+   later(1000,()=>[qi,zh,ch].forEach(m=>H(m,.75,3200)));badgeT=now()+1400}}
+ function stopAuto(){clearTimeout(at);at=0;autoOn=false;if(ab)ab.textContent="自动播放"}
+ function auto(){if(autoOn){stopAuto();return}autoOn=true;ab.textContent="停止播放";show(s>=4?0:s);
+  const step=()=>{if(s>=4){stopAuto();return}at=setTimeout(()=>{show(s+1);step()},DUR[s])};step()}
+ function wrap(c,str,mw){const out=[];let l="";for(const k of str){if(c.measureText(l+k).width>mw&&l){out.push(l);l=k}else l+=k}out.push(l);return out}
+ function txt(c,str,p,color,font){const q=project(p);if(!q.visible)return;c.font=font;c.lineWidth=4;c.strokeStyle="rgba(255,255,255,.92)";c.strokeText(str,q.x,q.y);c.fillStyle=CL[color];c.fillText(str,q.x,q.y)}
+ function flat(c,str,x,y,color,font){c.font=font;c.lineWidth=3;c.strokeStyle="rgba(255,255,255,.9)";c.strokeText(str,x,y);c.fillStyle=CL[color];c.fillText(str,x,y)}
+ function at3(lon,lat,y){const q=toXZ(lon,lat);return{x:q.x,y,z:q.z}}
+ function pinTop(p,dy){return{x:p.position.x,y:SB.land+.52*p.scale.y+(dy||.2),z:p.position.z}}
+ return{use3d:true,
+  text:"南北朝后期北强南弱；北周灭北齐统一北方，杨坚代周建隋，589 年隋灭陈，结束了西晋末年以来近三百年的分裂局面。统一建立在长期民族交融和江南开发的基础上。",
+  points:["577 年北周灭北齐，统一北方。","581 年杨坚建隋。","589 年隋灭陈，南北重归统一。","统一的条件：民族交融、江南开发、北强南弱、人心思定。"],
+  gk:"<p style=\"margin:0 0 6px;font-size:14px\">统编版纲要（上）第 5–6 课。</p><p style=\"margin:0;font-size:14px\">浙江选考常考：隋统一的条件与意义。</p>",
+  mount(c,r){G=GL3();pins={};arrows=[];tm=[];autoOn=false;
+   const pb=button("上一幕",()=>{stopAuto();show(s-1)}),nb=button("下一幕",()=>{stopAuto();show(s+1)},true);ab=button("自动播放",auto);
+   [pb,nb,ab].forEach(b=>b.style.minHeight="44px");
+   const row=el("div","");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap";row.append(pb,nb,ab);
+   c.append(el("p","",'<span style="font-size:13px;color:var(--sub)">故事关卡 · 5 幕</span>'),row);
+   rd=readout();r.append(rd);
+   if(G){build();setCam(0);G.camera.position.copy(cam.p);if(G.controls){G.controls.target.copy(cam.t);G.controls.update()}else G.camera.lookAt(cam.t)}
+   show(0)},
+  draw(c,w,h,t){if(!G||!qi)return;const tn=now();
+   if(cam&&tn<cam.until){G.camera.position.lerp(cam.p,.07);if(G.controls)G.controls.target.lerp(cam.t,.07);else G.camera.lookAt(cam.t)}
+   [qi,zh,ch].forEach(m=>m.material.color.lerp(m.userData.c,.04));
+   Object.values(pins).forEach(p=>{const k=p.scale.y+(p.userData.tgt-p.scale.y)*.08;p.scale.set(1,k,1)});
+   const jk=pins["建康"];jk.visible=!(blinkT&&!fallen&&Math.sin((tn-blinkT)/70)>0);
+   const ca=pins["长安"];if(glow.visible){glow.position.set(ca.position.x,SB.land+.4*ca.scale.y,ca.position.z);glow.material.opacity=.35+.25*Math.sin(t*4);glow.scale.setScalar(1+.15*Math.sin(t*4))}
+   arrows.forEach(a=>{const k=Math.min(1,(tn-a.t0)/a.ms);a.grp.visible=k>0;if(k<=0)return;
+    a.core.geometry.setDrawRange(0,Math.floor(k*a.N)*36);const p=a.curve.getPoint(k);a.head.position.copy(p);
+    a.head.quaternion.setFromUnitVectors(new G.THREE.Vector3(0,1,0),a.curve.getTangent(k).normalize())});
+   c.save();c.textAlign="center";c.textBaseline="middle";c.lineJoin="round";
+   const f12="600 12px "+F,f13="600 13px "+F,f15="600 15px "+F,hy=m=>SB.land+m.scale.y+.25;
+   if(s===0){txt(c,"东魏 → 北齐",at3(116,37.5,hy(qi)),"fg",f13);txt(c,"西魏 → 北周",at3(103,35,hy(zh)),"fg",f13)}
+   else if(s===1){if(absorbed)txt(c,"北周（统一北方）",at3(110,37,hy(zh)),"fg",f15);else{txt(c,"北齐",at3(116,37.5,hy(qi)),"fg",f13);txt(c,"北周",at3(103,35,hy(zh)),"fg",f13)}}
+   else if(s<4)txt(c,"隋",at3(106,37,hy(zh)),"gold","600 18px "+F);
+   else txt(c,"隋 · 南北重归统一",at3(110,32,hy(zh)+.2),"gold","600 18px "+F);
+   if(s<3||(s===3&&!fallen))txt(c,s===0?"陈（557）":"陈",at3(114,26,hy(ch)),"fg",f13);
+   Object.values(pins).forEach(p=>{const n=p.userData.name;if(!p.visible)return;
+    if(n==="长安")txt(c,s>=2?"隋 · 都大兴城（长安）":"长安",pinTop(p),s>=2?"gold":"fg",s>=2?f15:f13);
+    else if(n==="邺")txt(c,"邺",pinTop(p),"fg",f13);
+    else if(n==="建康")txt(c,"建康",pinTop(p),s===3&&fallen?"red":"fg",f13);
+    else if(s===3)txt(c,n==="永安"?"永安（白帝城）":n,pinTop(p),"fg",f12)});
+   if(s===3){txt(c,"京口",at3(119.6,32.15,.3),"fg",f12);txt(c,"采石",at3(118.3,31.55,.3),"fg",f12);
+    if(fallen)txt(c,"陈后主被俘，陈亡",pinTop(jk,.55),"red","600 16px "+F)}
+   arrows.forEach(a=>{if(tn<a.t0)return;const p=a.curve.getPoint(a.lp);txt(c,a.label,{x:p.x,y:p.y+.28,z:p.z},a.head.material.color.getHex()===0x0071e3?"blue":"red",f12)});
+   // 旁白卡片
+   const sc=S[s],cw=Math.min(600,w-24),x=(w-cw)/2,y=12;c.font="14px "+F;
+   const ln=s===3&&fallen?"陈后主被俘，陈亡。":sc[2],lines=wrap(c,ln,cw-28).slice(0,2),chh=62+lines.length*20,al=Math.min(1,(tn-t0)/300);
+   c.globalAlpha=al;c.save();c.shadowColor="rgba(0,0,0,.12)";c.shadowBlur=20;c.shadowOffsetY=4;c.fillStyle="rgba(255,255,255,.94)";rrect(c,x,y,cw,chh,16);c.fill();c.restore();
+   flat(c,sc[0],w/2,y+18,"blue","13px ui-monospace,Menlo,monospace");
+   flat(c,sc[1],w/2,y+42,s===2||s===4?"gold":"red","600 20px "+F);
+   lines.forEach((l,i)=>flat(c,l,w/2,y+68+i*20,s===3&&fallen?"red":"fg","14px "+F));c.globalAlpha=1;
+   // 统一的条件徽章
+   if(s===4&&badgeT){const cols=w<560?2:4,gap=8,bw=(Math.min(640,w-24)-gap*(cols-1))/cols,bh=54,rows=4/cols,bx0=(w-(bw*cols+gap*(cols-1)))/2,by0=h-16-rows*bh-(rows-1)*gap;
+    BD.forEach((b,i)=>{const lit=tn>badgeT+i*800,bx=bx0+(i%cols)*(bw+gap),by=by0+Math.floor(i/cols)*(bh+gap);
+     c.globalAlpha=lit?1:.45;c.save();if(lit){c.shadowColor="rgba(201,162,74,.55)";c.shadowBlur=16}c.fillStyle="rgba(255,255,255,.95)";rrect(c,bx,by,bw,bh,14);c.fill();c.restore();
+     c.lineWidth=lit?2:1;c.strokeStyle=lit?"#c9a24a":"rgba(0,0,0,.15)";rrect(c,bx,by,bw,bh,14);c.stroke();
+     flat(c,b[0],bx+bw/2,by+19,lit?"gold":"fg","600 15px "+F);flat(c,b[1],bx+bw/2,by+38,"fg","12px "+F)});c.globalAlpha=1}
+   c.restore()},
+  unmount(){stopAuto();tm.forEach(clearTimeout);tm=[];[qi,zh,ch].forEach(m=>{if(m)m.userData.tw={}});arrows=[];gl3Clear();
+   G=null;qi=zh=ch=glow=cam=null;pins={};rd=ab=null}}})();
+/* ---------- 第 4 章：唐由盛转衰 · 藩镇怎样坐大（三维沙盘） ---------- */
+CH[3].ready=true;
+MODS[3]=(()=>{
+ const CL={fg:"#1d1d1f",gold:"#9a6a00",red:"#c0362c",blue:"#0071e3"},F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const TW=[["范阳",116.4,39.9,9.1],["平卢",120.4,41.6,3.75],["河东",112.5,37.9,5.5],["朔方",106.3,38.1,6.5],["河西",102.6,37.9,7.3],["陇右",101.8,36.5,7.5],["剑南",104.1,30.7,3.1],["岭南",113.3,23.1,1.5]];
+ const WS=TW.reduce((s,t)=>s+t[3],0),PW=[["掌军权",0xc0362c],["掌民政",0x0071e3],["掌财权",0xc9a24a]],
+  SPLIT=[0x6f9bd1,0x5fb3b0,0xc28e5c,0x8fa98a,0xa58cc9,0xd49a8a,0x3fa58a,0xb07a3a],BASE=0x7f93a8,DRED=0x8f2a22,K=.13;
+ let G=null,cols=[],cen=null,pins={},pw=[false,false,false],mode=0,phase=0,ev0=0,split=false,blink=0,arr=null,glow=null,tm=[],host=null,sl=null,rd=null,bar=null,msg=null;
+ const now=()=>performance.now(),later=(ms,f)=>tm.push(setTimeout(f,ms)),nP=()=>pw.filter(Boolean).length,troops=()=>({b:15+34*mode,c:30-22*mode});
+ const modeName=()=>mode<.34?"府兵制（兵农合一）":mode>.66?"募兵制（职业兵）":"府兵制瓦解 → 募兵制";
+ function column(lon,lat,color){const T=G.THREE,q=toXZ(lon,lat),g=new T.Group(),geo=new T.CylinderGeometry(.09,.09,1,20);geo.translate(0,.5,0);
+  const m=new T.Mesh(geo,new T.MeshStandardMaterial({color,roughness:.55}));m.castShadow=true;m.scale.y=.01;g.add(m);g.position.set(q.x,SB.land,q.z);G.root.add(g);
+  return{g,m,h:.01,th:.3,w:1,tw:1,rings:[]}}
+ function build(){const T=G.THREE;chinaBase(G);
+  pins.ca=cityPin(G,"长安",108.9,34.3,0x9a6a00);pins.ly=cityPin(G,"洛阳",112.45,34.62,0x0071e3);
+  cols=TW.map(t=>{const c=column(t[1],t[2],BASE);c.name=t[0];c.wt=t[3]/WS;
+   PW.forEach(p=>{const r=new T.Mesh(new T.TorusGeometry(.17,.035,10,32),new T.MeshStandardMaterial({color:p[1],roughness:.4}));r.rotation.x=-Math.PI/2;r.visible=false;c.g.add(r);c.rings.push(r)});return c});
+  cen=column(109.45,34.05,0x9a6a00);cen.name="中央禁军";
+  glow=new T.Mesh(new T.SphereGeometry(1,24,16),new T.MeshBasicMaterial({color:0xff5a3c,transparent:true,opacity:0,depthWrite:false}));glow.visible=false;G.root.add(glow);
+  const c=toXZ(111,32.5);G.camera.position.set(c.x+.5,10.5,c.z+9);if(G.controls){G.controls.target.set(c.x,0,c.z);G.controls.update()}else G.camera.lookAt(c.x,0,c.z)}
+ function apply(){const {b,c}=troops(),n=nP();
+  cols.forEach((k,i)=>{k.th=Math.max(.08,b*k.wt*K);k.tw=1+.35*n;k.rings.forEach((r,j)=>r.visible=pw[j]);
+   if(!(phase&&i<3&&!split))k.m.material.color.setHex(split?SPLIT[i]:n===3?DRED:BASE)});
+  if(cen)cen.th=c*K;upd()}
+ function upd(){if(!rd)return;const T=theme(),{b,c}=troops(),n=nP(),idx=Math.round(b/(b+c)*100),names=PW.filter((_,i)=>pw[i]).map(p=>p[0].slice(1));
+  rd.update([["兼领权力",n+" / 3"+(n?"（"+names.join("、")+"）":"")],["兵制",modeName()],["边镇兵力","约 "+Math.round(b)+" 万",T.redText],["中央兵力","约 "+Math.round(c)+" 万",T.goldText],["局势",split?"藩镇割据":"统一",split?T.redText:T.goldText]]);
+  bar.innerHTML=`<p style="margin:12px 0 6px;font-size:14px">外重内轻指数 <b style="color:${idx>50?T.redText:T.goldText}">${idx}</b>（边镇兵力占比 %）</p>`+
+   `<div style="height:8px;border-radius:4px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${idx}%;background:${idx>50?"#c0362c":"#9a6a00"};transition:width .3s"></i></div>`+
+   (n===3?`<p style="margin:12px 0 0;font-size:14px;font-weight:600;color:${T.redText}">军、政、财合一 → 地方割据的条件形成</p>`:"")+
+   `<p style="margin:8px 0 0;font-size:13px;color:var(--sub)">府兵端：边镇 15 万 / 中央 30 万；募兵端：边镇 49 万 / 中央 8 万（天宝元年边兵约四十九万）。</p>`}
+ function makeArrow(){const T=G.THREE,vs=[[116.4,39.9,1.6],[114.6,37.4,1.5],[112.45,34.62,.6],[110.7,34.9,1.0],[108.9,34.3,.6]].map(p=>{const q=toXZ(p[0],p[1]);return new T.Vector3(q.x,SB.land+p[2],q.z)});
+  const curve=new T.CatmullRomCurve3(vs),N=120,grp=new T.Group(),core=new T.Mesh(new T.TubeGeometry(curve,N,.04,6,false),new T.MeshBasicMaterial({color:0xc0362c}));
+  const head=new T.Mesh(new T.ConeGeometry(.1,.26,16),new T.MeshStandardMaterial({color:0xc0362c,emissive:0xc0362c,emissiveIntensity:.6}));
+  grp.add(core,head);grp.visible=false;G.root.add(grp);arr={grp,curve,core,head,N,t0:now()+700,ms:2000}}
+ function dropArrow(){if(!arr)return;arr.grp.traverse(o=>{o.geometry&&o.geometry.dispose();o.material&&o.material.dispose()});G&&G.root.remove(arr.grp);arr=null}
+ function fire(){if(phase)return;const T=theme();
+  if(nP()<3||mode<.99){msg.textContent="先让藩镇坐大：打开三项兼领，并把兵制拉到募兵端。";msg.style.color=T.redText;return}
+  msg.textContent="安禄山身兼范阳、平卢、河东三镇节度使，起兵南下。";msg.style.color=T.redText;phase=1;ev0=now();
+  if(G){[0,1,2].forEach(i=>{const m=cols[i].m.material;m.color.setHex(0xc0362c);m.emissive.setHex(0xc0362c);m.emissiveIntensity=.6});glow.visible=true;makeArrow()}
+  later(2800,()=>{blink=now()});later(4400,()=>{blink=0});
+  later(4800,()=>{split=true;if(G)[0,1,2].forEach(i=>cols[i].m.material.emissive.setHex(0));glow&&(glow.visible=false);apply()})}
+ function makeToggles(){host.innerHTML="";PW.forEach((p,i)=>{const b=toggle(p[0]+"（节度使兼领）",false,v=>{pw[i]=v;apply()});b.style.minHeight="44px";host.append(b)})}
+ function reset(){tm.forEach(clearTimeout);tm=[];phase=0;split=false;blink=0;
+  if(G){dropArrow();glow.visible=false;cols.forEach(k=>k.m.material.emissive.setHex(0))}
+  pw=[false,false,false];mode=0;sl&&sl.set(0);if(msg)msg.textContent="";makeToggles();apply()}
+ function txt(c,s,p,col,font){const q=project(p);if(!q.visible)return;c.font=font;c.lineWidth=4;c.strokeStyle="rgba(255,255,255,.92)";c.strokeText(s,q.x,q.y);c.fillStyle=CL[col];c.fillText(s,q.x,q.y)}
+ function flat(c,s,x,y,col,font){c.font=font;c.lineWidth=3;c.strokeStyle="rgba(255,255,255,.9)";c.strokeText(s,x,y);c.fillStyle=CL[col];c.fillText(s,x,y)}
+ function wrap(c,str,mw){const out=[];let l="";for(const k of str){if(c.measureText(l+k).width>mw&&l){out.push(l);l=k}else l+=k}out.push(l);return out}
+ const top=(k,dy)=>({x:k.g.position.x,y:SB.land+k.h+(dy||0),z:k.g.position.z});
+ return{use3d:true,
+  text:"唐朝中期，府兵制瓦解、改行募兵制，节度使逐渐集军、政、财权于一身，形成“外重内轻”局面。安史之乱成为唐朝由盛转衰的转折点，此后藩镇割据、宦官专权、朋党之争，907 年唐亡，进入五代十国。",
+  points:["节度使兼掌军政财权，募兵制使士兵依附将领。","外重内轻是安史之乱的重要原因。","安史之乱是唐由盛转衰的转折点。","唐后期藩镇割据，最终导致五代十国分裂。"],
+  gk:"<p style=\"margin:0 0 6px;font-size:14px\">统编版纲要（上）第 6 课。</p><p style=\"margin:0;font-size:14px\">浙江选考常考安史之乱的原因（节度使权力过大、外重内轻）与影响（藩镇割据、经济重心南移加速）。</p>",
+  mount(c,r){G=GL3();cols=[];cen=null;pins={};tm=[];arr=null;phase=0;split=false;blink=0;pw=[false,false,false];mode=0;
+   host=el("div","");host.style.cssText="display:grid;gap:8px";
+   sl=slider("兵制",0,100,1,0,v=>v<34?"府兵制":v>66?"募兵制":"过渡",v=>{mode=v/100;apply()});
+   const ends=el("p","",'<span style="font-size:13px;color:var(--sub)">左：府兵制（兵农合一，轮番宿卫）<br>右：募兵制（职业兵，长期隶属将领）</span>');ends.style.margin="4px 0 0";
+   const eb=button("755 · 安史之乱",fire,true),rb=button("重置",reset);[eb,rb].forEach(b=>b.style.minHeight="44px");
+   const row=el("div","");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px";row.append(eb,rb);
+   msg=el("p","");msg.style.cssText="margin:8px 0 0;font-size:14px;font-weight:600";
+   c.append(el("p","",'<span style="font-size:13px;color:var(--sub)">节度使是否兼领</span>'),host,sl,ends,row,msg);
+   rd=readout();bar=el("div","");r.append(rd,bar);
+   if(G)build();makeToggles();apply()},
+  draw(c,w,h,t){if(!G||!cen)return;const tn=now();
+   cols.concat([cen]).forEach(k=>{k.h+=(k.th-k.h)*.08;k.w+=(k.tw-k.w)*.08;k.m.scale.set(k.w,Math.max(k.h,.01),k.w);
+    let n=0;k.rings.forEach(r=>{if(!r.visible)return;r.position.y=k.h+.05+n*.09;r.scale.setScalar(k.w);n++});k.rh=n*.09});
+   const bl=!!(blink&&Math.sin((tn-blink)/70)>0);cen.g.visible=pins.ca.visible=!bl;
+   if(glow.visible){const p=[0,1,2].map(i=>cols[i].g.position),gx=(p[0].x+p[1].x+p[2].x)/3,gz=(p[0].z+p[1].z+p[2].z)/3;
+    glow.position.set(gx,.9,gz);glow.scale.setScalar(1.6+.15*Math.sin(t*4));glow.material.opacity=Math.min(.28,(tn-ev0)/2000)*(.8+.2*Math.sin(t*4))}
+   if(arr){const k=Math.min(1,(tn-arr.t0)/arr.ms);arr.grp.visible=k>0;if(k>0){arr.core.geometry.setDrawRange(0,Math.floor(k*arr.N)*36);
+    arr.head.position.copy(arr.curve.getPoint(k));arr.head.quaternion.setFromUnitVectors(new G.THREE.Vector3(0,1,0),arr.curve.getTangent(k).normalize())}}
+   c.save();c.textAlign="center";c.textBaseline="middle";c.lineJoin="round";const f12="600 12px "+F,f13="600 13px "+F;
+   const live=phase&&!split;
+   cols.forEach((k,i)=>txt(c,k.name,top(k,(k.rh||0)+.2),split||(live&&i<3)?"red":"fg",f12));
+   txt(c,"中央禁军 "+Math.round(troops().c)+" 万",top(cen,.22),"gold",f13);
+   const ca=pins.ca.userData.top,ly=pins.ly.userData.top;
+   txt(c,"长安",{x:ca.x-.25,y:ca.y+.15,z:ca.z},"gold",f13);txt(c,"洛阳",{x:ly.x,y:ly.y+.18,z:ly.z},"blue",f13);
+   if(live&&glow.visible)txt(c,"安禄山 · 身兼三镇节度使",{x:glow.position.x,y:2.6,z:glow.position.z},"red","600 15px "+F);
+   if(arr&&live&&tn>arr.t0){const p=arr.head.position;txt(c,"范阳 → 洛阳 → 长安",{x:p.x,y:p.y+.32,z:p.z},"red",f12)}
+   if(split){const m=toXZ(110,30);txt(c,"藩镇割据",{x:m.x,y:.6,z:m.z},"red","600 18px "+F)}
+   if(phase){const cw=Math.min(600,w-24),x=(w-cw)/2,y=12;c.font="14px "+F;
+    const lines=wrap(c,"755 年 安禄山、史思明起兵，763 年乱平，但河朔三镇等藩镇割据局面形成",cw-28).slice(0,3),chh=48+lines.length*20;
+    c.globalAlpha=Math.min(1,(tn-ev0)/300);c.save();c.shadowColor="rgba(0,0,0,.12)";c.shadowBlur=20;c.shadowOffsetY=4;c.fillStyle="rgba(255,255,255,.94)";rrect(c,x,y,cw,chh,16);c.fill();c.restore();
+    flat(c,"755 年 · 安史之乱",w/2,y+22,"red","600 18px "+F);lines.forEach((l,i)=>flat(c,l,w/2,y+48+i*20,"fg","14px "+F));c.globalAlpha=1}
+   c.restore()},
+  unmount(){tm.forEach(clearTimeout);tm=[];arr=null;gl3Clear();G=null;cols=[];cen=glow=null;pins={};phase=0;split=false;blink=0;host=sl=rd=bar=msg=null}}})();
+/* ---------- 第 5 章：从五代十国到北宋 · 陈桥到纳土（故事关卡 · 三维沙盘） ---------- */
+CH[4].ready=true;
+MODS[4]=(()=>{
+ const CL={fg:"#1d1d1f",gold:"#9a6a00",red:"#c0362c",blue:"#0071e3"},F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const RG={zy:[[105,36],[112,40],[118,39],[121,37],[119,34],[116,32],[112,31],[107,32]],liao:[[105,42],[112,40],[118,39],[121,40],[124,42],[124,44],[110,44]],
+  yy:[[112,40],[118,39],[117,38.5],[113,38.6]],bh:[[110.5,39],[113,38.6],[113.5,36.5],[111,36]],hs:[[102,33],[107,32],[109,29],[104,28],[101,30]],
+  jh:[[109,29],[112,31],[114,29],[113,25],[109,26]],nt:[[114,29],[116,32],[119,33],[119.5,30],[117,27],[115,26]],wy:[[119.5,30],[122,31],[121.5,28],[119,27],[117,27]],
+  nh:[[108,24],[113,25],[117,24],[116,22],[110,21]]};
+ const BG=0x7f93a8,LITE=0xa9c2dc,DG=0x9a6a00,LIAO=0x5a5f66,SOFT={bh:0xa58cc9,hs:0x8fa98a,jh:0xc28e5c,nt:0x5fb3b0,wy:0x6f9bd1,nh:0xd49a8a},HT={yy:.34,bh:.34};
+ const NM={liao:"辽（契丹）",yy:"燕云十六州",bh:"北汉",hs:"后蜀",jh:"荆湖（南平·楚）",nt:"南唐",wy:"吴越",nh:"南汉"};
+ const S=[// [年份, 标题, 说明, 并立政权, 统一]
+  ["907 年","朱温灭唐，五代十国","唐亡，中原五代更替频繁，南方诸国并立、相对安定","约 10 个",0],
+  ["936 年","石敬瑭割让燕云十六州","北方门户洞开，中原失去长城屏障","约 10 个",0],
+  ["954–959 年","周世宗柴荣改革","整顿禁军，北伐收复部分失地","8 个（不含辽）",0],
+  ["960 年","陈桥兵变","赵匡胤黄袍加身，建立北宋，都开封","8 个（不含辽）",0],
+  ["961 年","杯酒释兵权","强干弱枝：解除禁军将领兵权，文臣知州，设通判，财归转运使","8 个（不含辽）",0],
+  ["963–979 年","先南后北","先取荆湖、后蜀、南汉、南唐，再图北方","8 个（不含辽）",0],
+  ["979–1005 年","北宋与辽对峙","统一了中原和南方，但燕云十六州始终在辽手中","2 个（宋、辽）",1]];
+ const SEQ=[["jh",963,6],["hs",965,5],["nh",971,4],["nt",975,3],["wy",978,2],["bh",979,1]],DUR=[3500,4200,4000,4500,5000,7000,7000];
+ let G=null,s=0,t0=0,M={},pins={},edge=null,glow=null,arrows=[],tm=[],at=0,autoOn=false,k6=0,blinkT=0,flashT=0,dyT=0,cam=null,rd=null,ab=null;
+ const now=()=>performance.now(),later=(ms,f)=>tm.push(setTimeout(f,ms)),H=setRegionHeight;
+ function build(){const T=G.THREE;chinaBase(G);
+  Object.keys(RG).forEach(k=>{const m=regionMesh(G,RG[k],k==="liao"?LIAO:SOFT[k]||BG,0);m.userData.c=new T.Color(m.material.color);m.userData.name=k;M[k]=m});
+  edge=new T.LineSegments(new T.EdgesGeometry(M.yy.geometry),new T.LineBasicMaterial({color:0xc0362c,transparent:true}));M.yy.add(edge);
+  [["kf","开封",114.35,34.8,0x9a6a00],["cq","陈桥驿",114.45,35.0,0x6b5a44],["hz","杭州",120.2,30.25,0x6b5a44],["jl","金陵",118.8,32.05,0x6b5a44],["ty","太原",112.5,37.9,0x6b5a44]]
+   .forEach(p=>{const g=cityPin(G,p[1],p[2],p[3],p[4]);g.userData.tgt=1;pins[p[0]]=g});
+  glow=new T.Mesh(new T.SphereGeometry(.16,20,14),new T.MeshBasicMaterial({color:0xffd27a,transparent:true,opacity:.5,depthWrite:false}));glow.visible=false;G.root.add(glow)}
+ function setCam(n){if(!G)return;const T=G.THREE,f=n===3||n===4,c=f?toXZ(114.4,34.9):n===6?toXZ(114.5,37):toXZ(112,32.5),o=f?[.3,3.4,3.2]:n===6?[.5,7,7]:[.6,10.5,9.5];
+  cam={t:new T.Vector3(c.x,0,c.z),p:new T.Vector3(c.x+o[0],o[1],c.z+o[2]),until:now()+1800}}
+ function arrow(pts,color,ms,delay,label,lp){const T=G.THREE,vs=pts.map(p=>{const q=toXZ(p[0],p[1]);return new T.Vector3(q.x,SB.land+(p[2]||.18),q.z)});
+  const curve=new T.CatmullRomCurve3(vs),N=90,grp=new T.Group(),core=new T.Mesh(new T.TubeGeometry(curve,N,.03,6,false),new T.MeshBasicMaterial({color}));
+  const head=new T.Mesh(new T.ConeGeometry(.07,.2,16),new T.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.5}));
+  grp.add(core,head);grp.visible=false;G.root.add(grp);arrows.push({grp,curve,core,head,N,t0:now()+delay,ms,label,lp,col:color===0xc0362c?"red":"gold"})}
+ function dropArrows(){arrows.forEach(a=>{a.grp.traverse(o=>{o.geometry&&o.geometry.dispose();o.material&&o.material.dispose()});G&&G.root.remove(a.grp)});arrows=[]}
+ function col(m,hex,instant){m.userData.c.setHex(hex);if(instant)m.material.color.setHex(hex)}
+ function pinCol(p,hex){p.children[0].material.color.setHex(hex)}
+ const merged=k=>s===6||(s===5&&SEQ.findIndex(q=>q[0]===k)<k6&&SEQ.some(q=>q[0]===k));
+ function upd(){if(!rd)return;const T=theme(),done=s===6||(s===5&&k6>=6),yr=s===5&&k6?SEQ[k6-1][1]+" 年":S[s][0];
+  const cnt=s===5&&k6?SEQ[k6-1][2]+(k6>=6?" 个（北宋，北邻辽）":" 个"):S[s][3];
+  const rows=[["幕次",(s+1)+" / 7"],["年份",yr],["并立政权",cnt],["局势",done?"局部统一":"分裂",done?T.goldText:T.redText]];
+  if(s===4)rows.push(["兵权","收归中央",T.goldText]);rd.update(rows)}
+ function show(n){tm.forEach(clearTimeout);tm=[];s=Math.max(0,Math.min(6,n));t0=now();k6=0;blinkT=flashT=dyT=0;upd();
+  if(!G)return;dropArrows();setCam(s);
+  Object.keys(M).forEach(k=>{const m=M[k],h=HT[k]||.3;
+   const c=k==="zy"?(s<2?BG:s===2?LITE:DG):k==="liao"?LIAO:k==="yy"?(s<1?BG:LIAO):s===6?DG:SOFT[k];col(m,c,true);
+   if(s===0){H(m,0,0);H(m,h,1000)}else H(m,s===6&&k!=="yy"&&k!=="liao"?.3:h,0)});
+  pins.kf.userData.tgt=s>=3?1.8:1;pins.cq.userData.tgt=s===3?1.6:1;pins.hz.userData.tgt=s===6?1.6:1;pinCol(pins.hz,s===6?DG:0x6b5a44);glow.visible=s===3;
+  if(s===1){col(M.yy,BG,true);later(300,()=>{col(M.yy,LIAO);blinkT=now()})}
+  else if(s===2){col(M.zy,BG,true);col(M.zy,LITE);H(M.zy,.36,1500);later(1600,()=>{flashT=now()})}
+  else if(s===3){col(M.zy,LITE,true);col(M.zy,DG);arrow([[114.45,35.0,.5],[114.42,34.92,.75],[114.36,34.82,.5]],0xc9a24a,900,600,"",0)}
+  else if(s===5)SEQ.forEach((q,i)=>later(300+i*800,()=>{const m=M[q[0]];H(m,.02,350);
+   later(400,()=>{col(m,DG,true);H(m,.3,400)});if(q[0]==="wy"){pinCol(pins.hz,DG);pins.hz.userData.tgt=1.6}k6=i+1;upd()}));
+  else if(s===6){arrow([[114.35,34.8,.4],[115.4,37.4,1.1],[116.3,39.7,.5],[115.1,37.6,.85],[114.6,35.3,.4]],0xc0362c,2200,400,"979 高梁河之战 · 宋军败退",.4);
+   later(2600,()=>H(M.liao,.6,1500));later(4200,()=>{dyT=now()})}}
+ function stopAuto(){clearTimeout(at);at=0;autoOn=false;if(ab)ab.textContent="自动播放"}
+ function auto(){if(autoOn){stopAuto();return}autoOn=true;ab.textContent="停止播放";show(s>=6?0:s);
+  const step=()=>{if(s>=6){stopAuto();return}at=setTimeout(()=>{show(s+1);step()},DUR[s])};step()}
+ function wrap(c,str,mw){const out=[];let l="";for(const k of str){if(c.measureText(l+k).width>mw&&l){out.push(l);l=k}else l+=k}out.push(l);return out}
+ function txt(c,str,p,color,font){const q=project(p);if(!q.visible)return;c.font=font;c.lineWidth=4;c.strokeStyle="rgba(255,255,255,.92)";c.strokeText(str,q.x,q.y);c.fillStyle=CL[color];c.fillText(str,q.x,q.y)}
+ function flat(c,str,x,y,color,font){c.font=font;c.lineWidth=3;c.strokeStyle="rgba(255,255,255,.9)";c.strokeText(str,x,y);c.fillStyle=CL[color];c.fillText(str,x,y)}
+ function ctr(k){const p=RG[k],q=toXZ(p.reduce((a,v)=>a+v[0],0)/p.length,p.reduce((a,v)=>a+v[1],0)/p.length);return{x:q.x,y:SB.land+M[k].scale.y+.22,z:q.z}}
+ function pinTop(p,dy,dx){return{x:p.position.x+(dx||0),y:SB.land+.52*p.scale.y+(dy||.2),z:p.position.z}}
+ return{use3d:true,
+  text:"唐亡后进入五代十国，中原王朝更替频繁，南方相对安定、经济持续发展。960 年赵匡胤发动陈桥兵变建立北宋，采取“先南后北”方针，基本结束了五代十国的分裂局面，并以“强干弱枝”防止藩镇割据重演。",
+  points:["五代十国是唐后期藩镇割据的延续。","石敬瑭割燕云十六州，影响宋辽关系。","960 年北宋建立，“先南后北”结束五代十国的分裂。","吴越纳土归宋，体现南方经济文化保全与统一趋势。","宋初加强中央集权：杯酒释兵权、文臣知州、设通判、转运使。"],
+  gk:"<p style=\"margin:0 0 6px;font-size:14px\">统编版纲要（上）第 9 课「两宋的政治和军事」。</p><p style=\"margin:0;font-size:14px\">浙江选考常考北宋加强中央集权的措施及其利弊；吴越国与杭州是浙江本地史料常客。</p>",
+  mount(c,r){G=GL3();M={};pins={};arrows=[];tm=[];autoOn=false;s=0;
+   const pb=button("上一幕",()=>{stopAuto();show(s-1)}),nb=button("下一幕",()=>{stopAuto();show(s+1)},true);ab=button("自动播放",auto);
+   [pb,nb,ab].forEach(b=>b.style.minHeight="44px");
+   const row=el("div","");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap";row.append(pb,nb,ab);
+   c.append(el("p","",'<span style="font-size:13px;color:var(--sub)">故事关卡 · 7 幕</span>'),row);
+   rd=readout();r.append(rd);
+   if(G){build();setCam(0);G.camera.position.copy(cam.p);if(G.controls){G.controls.target.copy(cam.t);G.controls.update()}else G.camera.lookAt(cam.t)}
+   show(0)},
+  draw(c,w,h,t){if(!G||!M.zy)return;const tn=now();
+   if(cam&&tn<cam.until){G.camera.position.lerp(cam.p,.07);if(G.controls)G.controls.target.lerp(cam.t,.07);else G.camera.lookAt(cam.t)}
+   Object.values(M).forEach(m=>m.material.color.lerp(m.userData.c,.05));
+   Object.values(pins).forEach(p=>{const k=p.scale.y+(p.userData.tgt-p.scale.y)*.08;p.scale.set(1,k,1)});
+   const bl=blinkT&&tn-blinkT<1800;M.yy.material.opacity=bl?(Math.sin((tn-blinkT)/80)>0?.85:.2):.55;
+   edge.material.opacity=flashT&&tn-flashT<1000?(Math.sin((tn-flashT)/60)>0?1:.1):1;
+   if(glow.visible){const p=pins.cq;glow.position.set(p.position.x,SB.land+.4*p.scale.y,p.position.z);glow.material.opacity=.35+.25*Math.sin(t*4);glow.scale.setScalar(1+.2*Math.sin(t*4))}
+   arrows.forEach(a=>{const k=Math.min(1,(tn-a.t0)/a.ms);a.grp.visible=k>0;if(k<=0)return;
+    a.core.geometry.setDrawRange(0,Math.floor(k*a.N)*36);a.head.position.copy(a.curve.getPoint(k));
+    a.head.quaternion.setFromUnitVectors(new G.THREE.Vector3(0,1,0),a.curve.getTangent(k).normalize())});
+   c.save();c.textAlign="center";c.textBaseline="middle";c.lineJoin="round";
+   const f12="600 12px "+F,f13="600 13px "+F,f15="600 15px "+F,near=s===3||s===4;
+   if(M.zy.scale.y>.05)txt(c,s<2?"五代（中原王朝）":s===2?"后周":"北宋",ctr("zy"),s>=3?"gold":"fg",s>=3?"600 18px "+F:f15);
+   Object.keys(NM).forEach(k=>{if(near||M[k].scale.y<.05||(k!=="yy"&&k!=="liao"&&merged(k)))return;txt(c,NM[k],ctr(k),k==="yy"?"red":"fg",k==="yy"?f13:f12)});
+   if(s===5&&k6>=5)txt(c,"吴越纳土归宋（978）",pinTop(pins.hz,.5),"gold",f13);
+   const kf=pins.kf,cq=pins.cq;
+   txt(c,s>=3?"开封（北宋都城）":"开封",pinTop(kf,.2,near?-.3:0),"gold",near?f15:f13);
+   if(near)txt(c,"陈桥驿",pinTop(cq,.2,.28),s===3?"gold":"fg",f13);
+   if(!near){txt(c,"杭州",pinTop(pins.hz),s===6||(s===5&&k6>=5)?"gold":"fg",f12);txt(c,"金陵",pinTop(pins.jl),"fg",f12);txt(c,"太原",pinTop(pins.ty),"fg",f12)}
+   arrows.forEach(a=>{if(!a.label||tn<a.t0)return;const p=a.curve.getPoint(a.lp);txt(c,a.label,{x:p.x+.6,y:p.y+.3,z:p.z},a.col,f12)});
+   if(s===6&&dyT){const m=toXZ(115,38);txt(c,"1005 澶渊之盟（下一章详讲）",{x:m.x,y:1.2,z:m.z+1},"blue",f13)}
+   if(s===4){const q=project(pinTop(kf,.6)),age=(tn-t0)/1000;if(q.visible&&age<3.4){// 杯酒释兵权：将领收拢后消失
+     const k=Math.min(1,Math.max(0,(age-.6)/1.6)),e=1-Math.pow(1-k,3),al=age<2.6?1:Math.max(0,1-(age-2.6)/.8);c.globalAlpha=al;
+     for(let i=0;i<5;i++){const a=i/5*Math.PI*2-Math.PI/2,r=70*(1-e)+6,x=q.x+Math.cos(a)*r,y=q.y+Math.sin(a)*r*.6;
+      c.beginPath();c.arc(x,y,7,0,Math.PI*2);c.fillStyle="#c0362c";c.fill();c.lineWidth=2;c.strokeStyle="rgba(255,255,255,.95)";c.stroke()}
+     flat(c,"禁军将领",q.x,q.y-56,"red",f12);c.globalAlpha=1}
+    if(age>=3)txt(c,"兵权收归中央",pinTop(kf,.7),"gold",f15)}
+   // 旁白卡片
+   const sc=S[s],cw=Math.min(600,w-24),x=(w-cw)/2,y=12;c.font="14px "+F;
+   const ln=s===5&&k6>=6?"979 年灭北汉，五代十国分裂局面基本结束":s===5&&k6>=5?"吴越王钱俶纳土归宋，杭州免遭兵火":sc[2];
+   const lines=wrap(c,ln,cw-28).slice(0,2),chh=62+lines.length*20;c.globalAlpha=Math.min(1,(tn-t0)/300);
+   c.save();c.shadowColor="rgba(0,0,0,.12)";c.shadowBlur=20;c.shadowOffsetY=4;c.fillStyle="rgba(255,255,255,.94)";rrect(c,x,y,cw,chh,16);c.fill();c.restore();
+   flat(c,sc[0],w/2,y+18,"blue","13px ui-monospace,Menlo,monospace");
+   flat(c,sc[1],w/2,y+42,s<2?"red":"gold","600 20px "+F);
+   lines.forEach((l,i)=>flat(c,l,w/2,y+68+i*20,s===5&&k6>=5?"gold":"fg","14px "+F));c.globalAlpha=1;
+   c.restore()},
+  unmount(){stopAuto();tm.forEach(clearTimeout);tm=[];Object.values(M).forEach(m=>{m.userData.tw={}});arrows=[];gl3Clear();
+   G=null;M={};pins={};edge=glow=cam=null;rd=ab=null;k6=blinkT=flashT=dyT=0}}})();
+/* ---------- 第 6 章：宋辽夏金，和战之间的往来（岁币与榷场粒子流） ---------- */
+CH[5].ready=true;
+MODS[5]=(()=>{
+ const CL={fg:"#1d1d1f",gold:"#9a6a00",red:"#c0362c",blue:"#0071e3"},F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const RG={song:[[100,33],[105,36],[112,39],[118,38.6],[121,37],[122,31],[120,25],[116,22],[109,21],[104,24],[99,28]],
+  liao:[[105,42],[112,39],[118,38.6],[121,40],[125,41],[126,44],[110,44]],xx:[[97,39],[105,42],[107,38],[106,36],[103,36],[98,37]],
+  ns:[[100,33],[106.5,34.2],[110,33],[115,33],[119.5,33.5],[121,32],[120,25],[116,22],[109,21],[104,24],[99,28]],
+  jin:[[105,36],[106.5,34.2],[110,33],[115,33],[119.5,33.5],[122,37],[126,44],[110,44],[105,40]]};
+ const RC={song:0x9a6a00,liao:0x5a5f66,xx:0xb7793a,ns:0x9a6a00,jin:0x9fb4c8},NM={song:"北宋",liao:"辽",xx:"西夏",ns:"南宋",jin:"金"};
+ const SILV=0xeef2f7,SILK=0xf3dc8a,TEA=0x8fae6b,BLUE=0x0071e3,OCH=0xb7793a,BORDER=[[106.5,34.2],[110,33],[115,33],[119.5,33.5]];
+ const SC=[
+  {t:"1005 澶渊之盟",who:"北宋—辽",rg:["song","liao","xx"],nar:"宋辽约为兄弟之国，此后百余年间基本和平",sb:"银 10 万两 · 绢 20 万匹",
+   gd:"宋→辽 茶、丝绸、瓷器、书籍；辽→宋 马、羊、皮毛",tri:{a:[114.35,34.8],b:[118.9,41.6],c:[SILV,SILK],lab:"岁币 银 10 万两 · 绢 20 万匹"},
+   pin:["雄州（榷场）",116.1,39.0],tr:{a:[115.9,37.6],b:[116.3,40.4],o:"宋→辽 茶·丝绸·瓷器·书籍",i:"辽→宋 马·羊·皮毛"},sw:[117,38.8],cam:[114.5,37.5]},
+  {t:"1044 庆历和议",who:"北宋—西夏",rg:["song","liao","xx"],nar:"宋夏议和，宋每年给夏“岁赐”，西北边境重开榷场",sb:"银 7.2 万两 · 绢 15.3 万匹 · 茶 3 万斤",
+   gd:"宋→夏 茶、丝织品；夏→宋 青盐、马、骆驼",tri:{a:[114.35,34.8],b:[106.2,38.5],c:[SILV,SILK,TEA],lab:"岁赐 银 7.2 万两 · 绢 15.3 万匹 · 茶 3 万斤"},
+   pin:["保安军（榷场）",108.6,37.0],tr:{a:[109.8,35.7],b:[107.5,38.3],o:"宋→夏 茶·丝织品",i:"夏→宋 青盐·马·骆驼"},sw:[106.4,37.2],cam:[110,36.5]},
+  {t:"1141 绍兴和议",who:"南宋—金",rg:["ns","jin"],nar:"东以淮水、西以大散关为界，南宋向金称臣",sb:"银 25 万两 · 绢 25 万匹",
+   gd:"宋→金 茶、丝织品、瓷器；金→宋 马、毛皮、药材",tri:{a:[120.2,30.25],b:[116.4,39.9],c:[SILV,SILK],lab:"岁贡 银 25 万两 · 绢 25 万匹"},
+   pin:["盱眙（榷场）",118.5,33.0],tr:{a:[118.7,31.8],b:[118.3,34.3],o:"宋→金 茶·丝织品·瓷器",i:"金→宋 马·毛皮·药材"},sw:[112.5,33.2],cam:[115,34]}];
+ let G=null,s=0,war=0,showT=true,showR=true,M={},pins=[],flows=[],border=null,cam=null,rd=null,ph=0,last=0,trC=null,ouC=null,inC=null;
+ const now=()=>performance.now();
+ function V(x,y,z){return new G.THREE.Vector3(x,y,z)}
+ function arc(a,b,h,off){const p=toXZ(a[0],a[1]),q=toXZ(b[0],b[1]),dx=q.x-p.x,dz=q.z-p.z,L=Math.hypot(dx,dz),nx=-dz/L,nz=dx/L,y=SB.land+.4;
+  return new G.THREE.QuadraticBezierCurve3(V(p.x,y,p.z),V((p.x+q.x)/2+nx*off,y+L*h,(p.z+q.z)/2+nz*off),V(q.x,y,q.z))}
+ function flow(curve,color,kind,n){const T=G.THREE,grp=new T.Group(),sp=[];
+  grp.add(new T.Mesh(new T.TubeGeometry(curve,48,kind==="t"?.03:.02,6,false),new T.MeshBasicMaterial({color,transparent:true,opacity:.25,depthWrite:false})));
+  const g=new T.SphereGeometry(kind==="t"?.06:.05,10,8),m=new T.MeshBasicMaterial({color});
+  for(let j=0;j<n;j++){const o=new T.Mesh(g,m);grp.add(o);sp.push(o)}G.root.add(grp);flows.push({grp,curve,kind,sp});return curve}
+ function dropFlows(){flows.forEach(f=>{f.grp.traverse(o=>{o.geometry&&o.geometry.dispose();o.material&&o.material.dispose()});G&&G.root.remove(f.grp)});flows=[]}
+ function build(){const T=G.THREE;chinaBase(G);
+  Object.keys(RG).forEach(k=>{const m=regionMesh(G,RG[k],RC[k],0);m.userData.name=k;M[k]=m});
+  pins=SC.map(x=>{const p=cityPin(G,x.pin[0],x.pin[1],x.pin[2],0x0071e3);p.visible=false;return p});
+  const bc=new T.CatmullRomCurve3(BORDER.map(p=>{const q=toXZ(p[0],p[1]);return V(q.x,SB.land+.36,q.z)}),false,"catmullrom",0);
+  border=new T.Mesh(new T.TubeGeometry(bc,60,.03,6,false),new T.MeshBasicMaterial({color:0xc0362c}));border.visible=false;G.root.add(border)}
+ function upd(){if(!rd)return;const T=theme(),x=SC[s],w=war>=.5;
+  rd.update([["场景",x.t+"（"+x.who+"）"],["岁币",x.sb,T.goldText],["主要贸易品",x.gd],["局面",w?"战争 · 军费激增、边境贸易中断":"和平 · 岁币与榷场照常",w?T.redText:T.goldText]])}
+ function show(n){s=n;ph=0;upd();if(!G)return;const x=SC[s],T=G.THREE;
+  Object.keys(M).forEach(k=>setRegionHeight(M[k],x.rg.includes(k)?.25:0,600));
+  pins.forEach((p,i)=>p.visible=i===s);border.visible=s===2;dropFlows();
+  trC=null;x.tri.c.forEach((c,i,a)=>{const cv=flow(arc(x.tri.a,x.tri.b,.22,(i-(a.length-1)/2)*.22),c,"t",16);if(i===0)trC=cv});
+  ouC=flow(arc(x.tr.a,x.tr.b,.14,.14),BLUE,"r",9);inC=flow(arc(x.tr.b,x.tr.a,.14,.14),OCH,"r",9);
+  const c=toXZ(x.cam[0],x.cam[1]);cam={t:V(c.x,0,c.z),p:V(c.x+.4,7.2,c.z+6.8),until:now()+1800}}
+ function txt(c,str,p,color,font){const q=project(p);if(!q.visible)return;c.font=font;c.lineWidth=4;c.strokeStyle="rgba(255,255,255,.92)";c.strokeText(str,q.x,q.y);c.fillStyle=CL[color];c.fillText(str,q.x,q.y)}
+ function flat(c,str,x,y,color,font){c.font=font;c.lineWidth=3;c.strokeStyle="rgba(255,255,255,.9)";c.strokeText(str,x,y);c.fillStyle=CL[color];c.fillText(str,x,y)}
+ function ctr(k){const p=RG[k],q=toXZ(p.reduce((a,v)=>a+v[0],0)/p.length,p.reduce((a,v)=>a+v[1],0)/p.length);return{x:q.x,y:SB.land+M[k].scale.y+.2,z:q.z}}
+ function swords(c,x,y,al){c.save();c.translate(x,y);c.globalAlpha=al;c.lineCap="round";
+  [-1,1].forEach(sg=>{c.save();c.rotate(sg*Math.PI/4);[[6,"rgba(255,255,255,.95)"],[3,"#c0362c"]].forEach(([lw,st])=>{c.lineWidth=lw;c.strokeStyle=st;c.beginPath();
+   c.moveTo(0,-20);c.lineTo(0,10);c.moveTo(-7,10);c.lineTo(7,10);c.moveTo(0,10);c.lineTo(0,18);c.stroke()});c.restore()});c.restore()}
+ function wrap(c,str,mw){const out=[];let l="";for(const k of str){if(c.measureText(l+k).width>mw&&l){out.push(l);l=k}else l+=k}out.push(l);return out}
+ return{use3d:true,
+  text:"辽宋夏金时期，各政权之间既有战争也有和议。宋通过岁币换取和平，各方在边境设立榷场互市，经济文化交流密切，加深了民族交融，为元朝统一奠定基础。",
+  points:["1005 年澶渊之盟：宋辽约为兄弟，宋每年给辽银、绢。","1044 年庆历和议：宋夏议和，宋给夏“岁赐”。","1141 年绍兴和议：宋金东以淮水、西以大散关为界。","榷场贸易促进了经济交流与民族交融。","评价岁币要辩证：既有屈辱的一面，也有换取长期和平、促进交流的一面。"],
+  gk:"<p style=\"margin:0 0 6px;font-size:14px\">统编版纲要（上）第 10 课「辽夏金元的统治」。</p><p style=\"margin:0;font-size:14px\">浙江选考常考澶渊之盟的评价，以及民族政权并立时期的交流交融。</p>",
+  mount(c,r){G=GL3();M={};pins=[];flows=[];s=0;war=0;showT=showR=true;ph=0;last=now();
+   c.append(chips(SC.map((x,i)=>({label:x.t,value:i})),0,v=>show(v)),toggle("显示岁币",true,v=>{showT=v}),toggle("显示榷场贸易",true,v=>{showR=v}),
+    slider("战争还是和议",0,1,.01,0,v=>(v<.5?"和议 ":"战争 ")+v.toFixed(2),v=>{war=v;upd()}));
+   rd=readout();r.append(rd,el("p","",'<span style="font-size:13px;color:var(--sub)">岁币不足北宋财政收入的 2%，远低于战争军费（示意比较）</span>'));
+   if(G){build();show(0);G.camera.position.copy(cam.p);if(G.controls){G.controls.target.copy(cam.t);G.controls.update()}else G.camera.lookAt(cam.t)}else show(0)},
+  draw(c,w,h,t){if(!G||!border)return;const tn=now(),dt=Math.min(.1,(tn-last)/1000),x=SC[s],wr=war>=.5;last=tn;
+   if(cam&&tn<cam.until){G.camera.position.lerp(cam.p,.07);if(G.controls)G.controls.target.lerp(cam.t,.07);else G.camera.lookAt(cam.t)}
+   ph+=dt*(wr?0:1-war*2)*.13;
+   flows.forEach(f=>{f.grp.visible=f.kind==="t"?showT:showR;const n=f.sp.length,sp=f.kind==="t"?1:1.5;
+    f.sp.forEach((o,j)=>o.position.copy(f.curve.getPoint((ph*sp+j/n)%1)))});
+   c.save();c.textAlign="center";c.textBaseline="middle";c.lineJoin="round";
+   const f12="600 12px "+F,f13="600 13px "+F,f16="600 16px "+F;
+   x.rg.forEach(k=>{if(M[k].scale.y>.05)txt(c,NM[k],ctr(k),k==="song"||k==="ns"?"gold":"fg",f16)});
+   const p=pins[s];txt(c,x.pin[0],{x:p.position.x,y:SB.land+.72,z:p.position.z},"blue",f13);
+   if(showT&&trC){const m=trC.getPoint(.5);txt(c,x.tri.lab,{x:m.x,y:m.y+.3,z:m.z},"gold",f13)}
+   if(showR){const a=ouC.getPoint(.22),b=inC.getPoint(.22);txt(c,x.tr.o,{x:a.x+1.3,y:a.y,z:a.z},"blue",f12);txt(c,x.tr.i,{x:b.x+1.2,y:b.y,z:b.z},"fg",f12)}
+   if(s===2){const q=toXZ(110,33);txt(c,"淮河—大散关 界线",{x:q.x,y:SB.land+.6,z:q.z+.35},"red",f13)}
+   if(wr){const q=toXZ(x.sw[0],x.sw[1]),pp=project({x:q.x,y:SB.land+.5,z:q.z});
+    if(pp.visible){swords(c,pp.x,pp.y,Math.sin(t*7)>0?1:.35);flat(c,"军费激增、边境贸易中断",pp.x,pp.y+34,"red",f13)}}
+   const cw=Math.min(600,w-24),bx=(w-cw)/2,by=12,ln=wr?"战端一开：军费激增、边境贸易中断，粒子流停止":x.nar;c.font="14px "+F;
+   const lines=wrap(c,ln,cw-28).slice(0,2),chh=50+lines.length*20;
+   c.save();c.shadowColor="rgba(0,0,0,.12)";c.shadowBlur=20;c.shadowOffsetY=4;c.fillStyle="rgba(255,255,255,.94)";rrect(c,bx,by,cw,chh,16);c.fill();c.restore();
+   flat(c,x.t+" · "+x.who,w/2,by+20,wr?"red":"gold","600 18px "+F);
+   lines.forEach((l,i)=>flat(c,l,w/2,by+46+i*20,wr?"red":"fg","14px "+F));
+   c.restore()},
+  unmount(){Object.values(M).forEach(m=>{m.userData.tw={}});flows=[];gl3Clear();
+   G=null;M={};pins=[];border=cam=rd=trC=ouC=inC=null;war=0}}})();
+CH[6].ready=true;
+MODS[6]=(()=>{
+ const F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",now=()=>performance.now(),cl=v=>Math.max(0,Math.min(1,v)),ez=v=>v<.5?2*v*v:1-Math.pow(-2*v+2,2)/2;
+ const LINE="rgba(128,128,128,.4)",BOXF="rgba(128,128,128,.06)",OCH="#b7793a",TEAL="#0a9396";
+ let md=0,rd=null,host=null,it=[],sel=-1,cnt=[0,0],msg=null,perm=[],grp=0,mig=0,sy=0,dn=null,L3=null;
+ const HD=Array.from({length:500},()=>[Math.random(),Math.random()]);
+ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+ function wrap(c,str,mw){const out=[];let l="";for(const k of str){if(c.measureText(l+k).width>mw&&l){out.push(l);l=k}else l+=k}out.push(l);return out}
+ function tx(c,s,x,y,col,font,al){c.font=font;c.fillStyle=col;c.textAlign=al||"center";c.fillText(s,x,y)}
+ const mk=(n,k,note)=>({n,k,note,o:false}),chain=()=>[mk("路",[mk("府",[mk("州",[mk("县")])])])];
+ const ROOT=mk("皇帝",[mk("中书省",[mk("腹里",null,"中书省直辖：今河北、山东、山西等"),...["岭北","辽阳","河南江北","陕西","四川","甘肃","云南","江浙","江西","湖广"].map(p=>mk(p+"行省",chain()))],"总领全国政务，下设各行省"),
+  mk("宣政院",null,"管理吐蕃地区，今西藏正式纳入中央管辖"),mk("枢密院",null,"掌管军事"),mk("御史台",null,"负责监察")]);
+ function walk(n,v){n.o=v;n.k&&n.k.forEach(c=>walk(c,v))}
+ function flat(n,d,out){out.push({n,d});if(n.o&&n.k)n.k.forEach(c=>flat(c,d+1,out));return out}
+ function upd(){if(!rd)return;const T=theme(),r=[["当前模式",["辽 · 南北面官","金 · 猛安谋克","元 · 行省制度"][md]],["制度名称",["南北面官制","猛安谋克制","行省制度（设宣政院、澎湖巡检司）"][md],T.blue],["核心特点",["因俗而治","军政合一","中央集权、多民族统一"][md],T.goldText]];
+  if(md===0)r.push(["归类进度",(cnt[0]+cnt[1])+" / 8"]);rd.update(r)}
+ /* 模式 1 辽 · 南北面官 */
+ function reset1(){it=shuffle([0,0,0,0,1,1,1,1]).map(k=>({k,placed:false,slot:0,t0:0,fx:0,fy:0,sh:0}));sel=-1;cnt=[0,0];msg=null;upd()}
+ function L1(w,h){const cols=w<480?4:8,cell=(w-24)/cols,r=Math.max(14,Math.min(24,cell/2-8)),rh=2*r+26,ic=it.map((_,i)=>({x:12+cell*(i%cols+.5),y:14+r+Math.floor(i/cols)*rh})),
+  by=14+Math.ceil(8/cols)*rh,bw=Math.min(150,(w-36)/2),ot=by+50,ob=h-36;
+  return{r,ic,by,btn:[{x:w/2-bw-6,y:by,w:bw,h:38},{x:w/2+6,y:by,w:bw,h:38}],off:[{x:12,y:ot,w:w/2-20,h:ob-ot},{x:w/2+8,y:ot,w:w/2-20,h:ob-ot}]}}
+ function slot(o,j,r){return{x:o.x+o.w*(.25+.5*(j%2)),y:o.y+o.h*(.5+.28*Math.floor(j/2)),r:Math.max(10,Math.min(r,o.w/4-6,o.h*.12))}}
+ function assign(i,side){const o=it[i];sel=-1;if(o.k===side){const L=L1(W,H);Object.assign(o,{placed:true,slot:cnt[side]++,t0:now(),fx:L.ic[i].x,fy:L.ic[i].y})}
+  else{o.sh=now();msg={t:now(),s:"归类有误："+(o.k?"汉族农民应归南面官（汉制）":"契丹牧民应归北面官（国制）")}}upd()}
+ function icon(c,x,y,r,k){c.save();c.translate(x,y);c.fillStyle=k?TEAL:OCH;c.beginPath();c.arc(0,0,r,0,7);c.fill();const u=r/10;c.strokeStyle=c.fillStyle="#fff";c.lineWidth=Math.max(1.2,r*.08);c.lineCap="round";
+  if(!k){c.beginPath();c.moveTo(-7.5*u,3.5*u);c.lineTo(-4*u,-4.5*u);c.lineTo(-.5*u,3.5*u);c.closePath();c.fill();c.beginPath();c.ellipse(4*u,0,3*u,1.6*u,0,0,7);c.fill();
+   c.beginPath();c.moveTo(6.5*u,-.5*u);c.lineTo(8*u,-4.5*u);c.moveTo(2*u,1*u);c.lineTo(1.6*u,4.5*u);c.moveTo(6*u,1*u);c.lineTo(6.2*u,4.5*u);c.stroke()}
+  else{c.strokeRect(-7.5*u,-3.5*u,7*u,7*u);c.beginPath();c.moveTo(-4*u,-3.5*u);c.lineTo(-4*u,3.5*u);c.moveTo(-7.5*u,0);c.lineTo(-.5*u,0);c.stroke();
+   c.beginPath();c.moveTo(3*u,5.5*u);c.quadraticCurveTo(4*u,-2*u,7.5*u,-5.5*u);c.stroke();for(let q=0;q<4;q++){c.beginPath();c.ellipse(3.9*u+q*.95*u,2*u-q*2.1*u,.9*u,1.5*u,.5,0,7);c.fill()}}
+  c.restore()}
+ function draw1(c,w,h,T,tn){const L=L1(w,h),TT=[["北面官","以国制治契丹（宫帐、部族、属国）",T.goldText],["南面官","以汉制待汉人（州县、租赋）",T.blue]];
+  L.off.forEach((o,i)=>{c.fillStyle=BOXF;rrect(c,o.x,o.y,o.w,o.h,14);c.fill();c.strokeStyle=sel>=0?T.blue:LINE;c.lineWidth=1;c.stroke();
+   tx(c,TT[i][0],o.x+o.w/2,o.y+20,TT[i][2],"600 15px "+F);c.font="13px "+F;wrap(c,TT[i][1],o.w-16).forEach((l,j)=>tx(c,l,o.x+o.w/2,o.y+40+j*17,T.fg,"13px "+F))});
+  c.strokeStyle=T.axis;c.lineWidth=1.5;c.beginPath();c.moveTo(w/2,L.off[0].y-6);c.lineTo(w/2,L.off[0].y+L.off[0].h+6);c.stroke();
+  it.forEach((o,i)=>{let p=L.ic[i],r=L.r;
+   if(o.placed){const s=slot(L.off[o.k],o.slot,L.r),a=ez(cl((tn-o.t0)/600));p={x:o.fx+(s.x-o.fx)*a,y:o.fy+(s.y-o.fy)*a};r=L.r+(s.r-L.r)*a;icon(c,p.x,p.y,r,o.k);
+    if(a>=1){c.fillStyle=T.bg;c.beginPath();c.arc(p.x+r*.75,p.y-r*.75,9,0,7);c.fill();tx(c,"✓",p.x+r*.75,p.y-r*.75+1,T.blue,"700 13px "+F)}return}
+   const e=tn-o.sh,sh=o.sh&&e<500?Math.sin(e/25)*7*(1-e/500):0;icon(c,p.x+sh,p.y,r,o.k);
+   if(sh||i===sel){c.strokeStyle=sh?T.redText:T.blue;c.lineWidth=3;c.beginPath();c.arc(p.x+sh,p.y,r+4,0,7);c.stroke()}
+   tx(c,o.k?"汉族农民":"契丹牧民",p.x,p.y+r+15,T.fg,"12px "+F)});
+  if(sel>=0)L.btn.forEach((b,i)=>{c.strokeStyle=T.blue;c.lineWidth=1.5;rrect(c,b.x,b.y,b.w,b.h,19);c.stroke();tx(c,i?"归入南面官 →":"← 归入北面官",b.x+b.w/2,b.y+b.h/2,T.blue,"600 14px "+F)});
+  else if(msg&&tn-msg.t<1800){c.font="600 13px "+F;wrap(c,msg.s,w-24).forEach((l,j)=>tx(c,l,w/2,L.by+12+j*17,T.redText,"600 13px "+F))}
+  if(cnt[0]+cnt[1]===8)tx(c,"因俗而治：一国两制的早期形态",w/2,h-16,T.goldText,"600 15px "+F);else tx(c,"点选人物，再点左 / 右官署归类",w/2,h-16,T.fg,"13px "+F)}
+ function ptr1(x,y){if(cnt[0]+cnt[1]===8)return false;const L=L1(W,H),In=b=>x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h;
+  if(sel>=0){for(let i=0;i<2;i++)if(In(L.btn[i])||In(L.off[i])){assign(sel,i);return true}}
+  for(let i=0;i<8;i++)if(!it[i].placed&&Math.hypot(L.ic[i].x-x,L.ic[i].y-y)<L.r+8){sel=sel===i?-1:i;return true}sel=-1;return false}
+ /* 模式 2 金 · 猛安谋克 */
+ function reset2(){perm=shuffle([...Array(3000).keys()]);grp=mig=0}
+ function draw2(c,w,h,T,tn){const gap=w<500?8:14,s=(Math.min(w,900)-24-4*gap)/100,FW=100*s+4*gap,x0=(w-FW)/2,y0=84,sp=FW/100,bt=Math.max(y0+30*s+gap+44,h*.58),bb=h-12;
+  const a=grp?ez(cl((tn-grp)/1600)):0,b=grp?ez(cl((tn-grp-1900)/1000)):0,m=mig?ez(cl((tn-mig)/1600)):0,g=gap*(1-b*.6),bw=20*s+g,bh=15*s+g,MW=100*s+4*g,fx=(w-MW)/2,FH=30*s+g,dy=m*((bt+bb)/2-(y0+FH/2));
+  c.fillStyle="rgba(10,147,150,.07)";c.fillRect(12,bt,w-24,bb-bt);c.fillStyle=TEAL;c.globalAlpha=.55;HD.forEach(p=>c.fillRect(14+p[0]*(w-30),bt+22+p[1]*(bb-bt-30),2,2));c.globalAlpha=1;
+  tx(c,"中原 · 汉族农耕区",18,bt+16,T.fg,"13px "+F,"left");tx(c,"女真故地",x0,y0-12,T.fg,"12px "+F,"left");
+  c.fillStyle="#c98a12";const z=Math.max(1.2,s*.78);
+  for(let i=0;i<3000;i++){const cell=perm[i],sx=x0+(cell%100)*sp,sy=y0+((cell/100)|0)*sp*.95,k=(i/300)|0,j=i%300,tX=fx+(k%5)*bw+(j%20)*s,tY=y0+((k/5)|0)*bh+((j/20)|0)*s;
+   c.fillRect(sx+(tX-sx)*a,sy+(tY-sy)*a+dy,z,z)}
+  if(a>0){c.globalAlpha=a;c.strokeStyle="#e0b100";c.lineWidth=1.5;for(let k=0;k<10;k++)c.strokeRect(fx+(k%5)*bw-2,y0+((k/5)|0)*bh-2+dy,20*s+3,15*s+3);c.globalAlpha=1}
+  if(b>0){c.globalAlpha=b;c.strokeStyle="#9a6a00";c.lineWidth=2.5;rrect(c,fx-7,y0-7+dy,MW-g+13,FH-g+13,6);c.stroke();tx(c,"猛安（10 谋克 · 3000 户）",fx+MW-g+6,y0-14+dy,T.goldText,"600 13px "+F,"right");c.globalAlpha=1}
+  tx(c,a>=1?"三百户为一谋克，十谋克为一猛安":"3000 户女真人户（每个小方块 = 1 户）",w/2,22,a>=1?T.goldText:T.fg,(a>=1?"600 ":"")+"14px "+F);
+  if(b>=1)tx(c,"平时生产，战时出征：军政合一",w/2,46,T.blue,"600 14px "+F);
+  if(m>0){c.globalAlpha=m;tx(c,"迁入中原，与汉族杂居",w/2,bb-12,T.redText,"600 14px "+F);c.globalAlpha=1}}
+ /* 模式 3 元 · 行省制度 */
+ function draw3(c,w,h,T){const wide=w>=640,sw=wide?Math.min(240,w*.3):0,SEN="行省制度是中国古代地方行政制度的重大变革，奠定了明清省制和今天省级区划的基础";
+  c.font="600 14px "+F;const sl=wrap(c,SEN,w-24),fh=sl.length*20+14+(wide?0:46),top=8,bot=h-fh,ind=w<480?14:22,rows=flat(ROOT,0,[]);let y=0;
+  rows.forEach(r=>{r.x=12+r.d*ind;c.font="13px "+F;const note=r.n===ROOT&&!r.n.o?"点击节点逐级展开":r.n.note;r.nl=note?wrap(c,note,w-sw-r.x-30):[];r.y=y;r.hh=26+r.nl.length*18+6;y+=r.hh});
+  sy=Math.max(0,Math.min(sy,y-(bot-top)));L3={top,bot,rows,sw};
+  c.save();c.beginPath();c.rect(0,top,w-sw,bot-top);c.clip();c.translate(0,top-sy);c.textBaseline="middle";
+  rows.forEach(r=>{const n=r.n;if(r.d){c.strokeStyle=LINE;c.lineWidth=1;c.beginPath();c.moveTo(r.x-ind+5,r.y-6);c.lineTo(r.x-ind+5,r.y+13);c.lineTo(r.x-3,r.y+13);c.stroke()}
+   const col=n.k?T.blue:n.n==="宣政院"?T.goldText:T.fg;if(n.k)tx(c,n.o?"▾":"▸",r.x+5,r.y+13,T.blue,"14px "+F);
+   tx(c,n.n,r.x+16,r.y+13,col,(r.d<2?"600 ":"")+(r.d?"15px ":"16px ")+F,"left");r.nl.forEach((l,j)=>tx(c,l,r.x+16,r.y+31+j*18,T.fg,"13px "+F,"left"))});
+  c.restore();c.textBaseline="middle";
+  const pb=wide?{x:w-sw,y:12,w:sw-12,h:66}:{x:12,y:bot+4,w:w-24,h:36};c.strokeStyle=T.redText;c.lineWidth=1.5;c.setLineDash([5,4]);rrect(c,pb.x,pb.y,pb.w,pb.h,10);c.stroke();c.setLineDash([]);
+  if(wide){tx(c,"澎湖巡检司",pb.x+pb.w/2,pb.y+22,T.redText,"600 15px "+F);tx(c,"管辖澎湖、琉球（台湾）",pb.x+pb.w/2,pb.y+46,T.fg,"13px "+F)}
+  else tx(c,"澎湖巡检司：管辖澎湖、琉球（台湾）",w/2,pb.y+18,T.redText,"600 13px "+F);
+  sl.forEach((l,j)=>tx(c,l,w/2,h-fh+(wide?0:46)+14+j*20,T.goldText,"600 14px "+F))}
+ function ptr3(type,x,y){if(type==="down"){dn={y,sy0:sy,mv:false};return true}if(!dn)return false;
+  if(type==="move"){if(Math.abs(y-dn.y)>6)dn.mv=true;if(dn.mv)sy=dn.sy0-(y-dn.y);return true}
+  const was=dn;dn=null;if(was.mv||!L3||x>W-L3.sw||y<L3.top||y>L3.bot)return true;const yy=y-L3.top+sy,r=L3.rows.find(r=>yy>=r.y&&yy<r.y+r.hh);if(r&&r.n.k)r.n.o=!r.n.o;return true}
+ function setMode(v){md=v;sel=-1;dn=null;host.innerHTML="";
+  if(v===0)host.append(button("重新打乱",reset1));
+  if(v===1)host.append(button("编组",()=>{if(!grp)grp=now()},true),button("南迁",()=>{if(!grp){grp=now();mig=now()+3000}else if(!mig)mig=now()}),button("复位",reset2));
+  if(v===2)host.append(button("全部展开",()=>walk(ROOT,true)),button("全部收起",()=>{walk(ROOT,false);sy=0}));upd()}
+ return{use3d:false,
+  text:"辽、西夏、金、元等少数民族政权在吸收中原制度的同时，保留了本民族特色：辽实行南北面官制，金推行猛安谋克制，元朝创立行省制度、设宣政院和澎湖巡检司，巩固了多民族国家的统一。",
+  points:["辽：南北面官制，“因俗而治”。","金：猛安谋克制，军政合一。","元：行省制度，加强中央对地方的管辖。","元设宣政院管理西藏、设澎湖巡检司管辖澎湖和台湾。","民族政权的制度创新促进了民族交融和统一多民族国家的发展。"],
+  gk:"<p style=\"margin:0 0 6px;font-size:14px\">统编版纲要（上）第 10 课「辽夏金元的统治」、选择性必修1 第 17 课。</p><p style=\"margin:0;font-size:14px\">浙江选考高频：元朝行省制度的作用、“因俗而治”。</p>",
+  mount(c,r){gl3Clear();reset1();reset2();walk(ROOT,false);sy=0;host=el("div","");host.style.cssText="display:flex;flex-wrap:wrap;gap:8px";
+   c.append(chips([{label:"辽 · 南北面官",value:0},{label:"金 · 猛安谋克",value:1},{label:"元 · 行省制度",value:2}],0,setMode),host);rd=readout();r.append(rd);setMode(0)},
+  draw(c,w,h){const T=theme(),tn=now();c.save();c.textBaseline="middle";c.lineJoin="round";if(md===0)draw1(c,w,h,T,tn);else if(md===1)draw2(c,w,h,T,tn);else draw3(c,w,h,T);c.restore()},
+  pointer(e,type,x,y){if(md===0)return type==="down"?ptr1(x,y):false;if(md===2)return ptr3(type,x,y);return false},
+  unmount(){grp=mig=0;it.forEach(o=>{o.t0=o.sh=0});msg=null;dn=null;sel=-1;rd=host=L3=null}}})();
+/* ---------- 第 8 章：统一的力量（统一拔河 · 三维沙盘） ---------- */
+CH[7].ready=true;
+MODS[7]=(()=>{
+ const CL={fg:"#1d1d1f",gold:"#9a6a00",red:"#c0362c",blue:"#0071e3"},F="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+ const CAN={// 每条线按漕粮流向（南 → 北）排列；pin：[名,经,纬,中心,标签方位]
+  sui:{name:"隋大运河",tag:"以洛阳为中心，北抵涿郡，南达余杭",lines:[
+    [[120.2,30.25],[120.6,31.3],[119.45,32.2],[119.4,32.4],[118.5,33.3],[114.35,34.8],[112.45,34.62]],
+    [[112.45,34.62],[115.5,39.0],[116.4,39.9]],[[119.4,32.4],[119.0,33.6]]],
+   pins:[["洛阳",112.45,34.62,1,0],["涿郡",116.4,39.9,0,0],["余杭",120.2,30.25,0,1],["江都",119.4,32.4,0,-1],["开封",114.35,34.8,0,0],
+    ["泗州",118.5,33.3,0,-1],["山阳（淮安）",119.0,33.6,0,-1],["镇江",119.45,32.2,0,1],["苏州",120.6,31.3,0,1]]},
+  yuan:{name:"元京杭大运河",tag:"截弯取直，不再绕道洛阳",lines:[[[120.2,30.25],[119.4,32.4],[119.0,33.6],[116.6,35.4],[115.7,36.85],[116.4,39.9]]],
+   pins:[["大都",116.4,39.9,1,0],["临清",115.7,36.85,0,-1],["济宁",116.6,35.4,0,-1],["淮安",119.0,33.6,0,1],["扬州",119.4,32.4,0,1],["杭州",120.2,30.25,0,1]]}};
+ const REG=[[[103,35],[119.4,35],[120.4,36.1],[122.1,37.4],[118.9,37.7],[117.7,39],[121,40.8],[122,44],[103,44]],
+  [[110,29.2],[120.9,28],[121.5,28.7],[121.9,29.9],[121,30.6],[121.9,31.4],[120.9,32.6],[120.3,34],[119.4,35],[110,35]],
+  [[100.5,25],[110,25],[110,35],[103,35],[100.5,33]],
+  [[106,22],[108.5,21.6],[111.6,21.6],[114.2,22.3],[116.7,23.4],[118.1,24.5],[119.6,26],[120.9,28],[110,29.2],[110,25],[106,25]]],
+  RC=[0x6f9bd1,0xc28e5c,0x8fa98a,0xa58cc9],RH=[.36,.5,.42,.3];
+ const NAMES=["经济联系（南北互补、运河漕运）","交通网络（驿道、运河、海运）","文化认同（儒学、汉字、科举）","中央制度（郡县制、行省制）","割据力量（藩镇、豪强、民族矛盾）"];
+ const PRE=[["秦汉",[60,65,70,85,30],"秦首创郡县制、书同文、车同轨；汉独尊儒术，“大一统”观念深入人心。"],
+  ["南北朝",[35,30,60,40,80],"政权并立、战乱频仍，但民族交融与江南开发正为再统一积蓄力量。"],
+  ["隋唐",[70,75,75,80,30],"隋开大运河、创科举，唐承隋制，南北重归一体。"],
+  ["五代十国",[50,40,65,30,85],"藩镇割据演变为政权林立，但南北经济联系并未中断。"],
+  ["元明清",[85,85,80,90,20],"元修京杭大运河、创行省制，明清沿用，统一多民族国家巩固发展。"]];
+ const CON=["统一力量占上风：经济、交通、认同、制度合力维系大一统。","统一力量与割据势力相持，局势随时可能转向。","割据力量压倒统一力量，国家碎裂为多个政权并立。"];
+ let G=null,land=null,land0=null,GOLD=null,cg=null,curves=[],pins=[],regs=[],v=[50,50,50,50,50],canal="sui",coh=50,knot=50,st=-1,lt=0,sls=[],rd=null,nar=null;
+ function disp(o){o.traverse(m=>{m.geometry&&m.geometry.dispose();m.material&&[].concat(m.material).forEach(x=>x.dispose())})}
+ function build(){const T=G.THREE,b=chinaBase(G);land=b.group.children[1];land0=land.material.color.clone();GOLD=new T.Color(0xd9b14f);
+  REG.forEach((p,i)=>regs.push(regionMesh(G,p,RC[i],0)));setCanal(canal)}
+ function setCanal(k){canal=k;if(!G){upd();return}const T=G.THREE;
+  if(cg){disp(cg);G.root.remove(cg)}pins.forEach(p=>{disp(p);G.root.remove(p)});pins=[];curves=[];cg=new T.Group();G.root.add(cg);
+  const tm=new T.MeshStandardMaterial({color:0x0071e3,roughness:.4,emissive:0x0040a0,emissiveIntensity:.25}),
+   pg=new T.SphereGeometry(.045,10,8),pm=new T.MeshStandardMaterial({color:0xffd27a,emissive:0xffb020,emissiveIntensity:.9});
+  CAN[k].lines.forEach(L=>{const c=new T.CatmullRomCurve3(L.map(q=>{const p=toXZ(q[0],q[1]);return new T.Vector3(p.x,SB.land+.05,p.z)}),false,"centripetal");
+   cg.add(new T.Mesh(new T.TubeGeometry(c,L.length*24,.055,8,false),tm));const len=c.getLength(),n=Math.max(4,Math.round(len*4)),dots=[];
+   for(let i=0;i<n;i++){const m=new T.Mesh(pg,pm);m.userData.f=i/n;cg.add(m);dots.push(m)}curves.push({c,len,dots})});
+  CAN[k].pins.forEach(p=>{const g=cityPin(G,p[0],p[1],p[2],p[3]?0xc9a24a:0x2a6fb8);g.userData.hub=!!p[3];g.userData.side=p[4];pins.push(g)});upd()}
+ function upd(){const u=(v[0]+v[1]+v[2]+v[3])/4;coh=Math.round((u+100-v[4])/2);const s=coh>=60?0:coh>=45?1:2;
+  if(s!==st){st=s;regs.forEach((m,i)=>setRegionHeight(m,s===2?RH[i]:s===1?.05:0))}
+  const T=theme(),col=[T.goldText,T.blue,T.redText][s];
+  rd&&rd.update([["凝聚度",coh+" / 100",col],["局势",["统一","分裂边缘","分裂"][s],col],["当前运河",CAN[canal].name],["结论",CON[s]]])}
+ function txt(c,s,x,y,col,font){c.font=font;c.lineWidth=4;c.strokeStyle="rgba(255,255,255,.92)";c.strokeText(s,x,y);c.fillStyle=CL[col];c.fillText(s,x,y)}
+ return{use3d:true,
+  text:"中国历史上虽有分裂，但统一始终是主流。经济联系的加强、交通网络的完善、以儒学为核心的文化认同和中央集权的制度，是推动统一、维护统一的根本力量。隋朝开凿大运河、元朝修通京杭大运河，正是南北联系日益紧密的象征。",
+  points:["统一是中国历史发展的主流和趋势。","隋大运河以洛阳为中心，元京杭大运河截弯取直。","经济重心南移使南北经济互补更加紧密。","文化认同（“大一统”观念）是统一的精神纽带。","郡县制—行省制等制度维系中央对地方的管辖。"],
+  gk:"<p style=\"margin:0 0 6px;font-size:14px\">统编版纲要（上）第 6、10 课及“中华文明的突破与发展”单元。</p><p style=\"margin:0;font-size:14px\">浙江选考常考：大运河的作用、统一多民族国家巩固的因素。</p>",
+  mount(c,r){G=GL3();v=[50,50,50,50,50];canal="sui";st=-1;knot=50;lt=0;regs=[];pins=[];curves=[];cg=null;land=null;
+   c.append(chips([{label:"隋大运河",value:"sui"},{label:"元京杭大运河",value:"yuan"}],"sui",setCanal));
+   sls=NAMES.map((n,i)=>slider(n,0,100,1,50,x=>String(x),x=>{v[i]=x;upd()}));
+   const rev=el("p","",`<span style="font-size:13px;color:${CL.red}">反向力量 · 拉向分裂</span>`);rev.style.margin="10px 0 0";
+   const lab=el("p","",'<span style="font-size:13px">历史预设</span>');lab.style.margin="12px 0 6px";
+   nar=el("p","");nar.style.cssText="margin:8px 0 0;font-size:14px;min-height:20px";
+   c.append(...sls.slice(0,4),rev,sls[4],lab,chips(PRE.map((p,i)=>({label:p[0],value:i})),null,i=>{v=PRE[i][1].slice();sls.forEach((s,j)=>s.set(v[j]));
+    nar.innerHTML=`<b style="color:${CL.gold}">${PRE[i][0]}</b>：${PRE[i][2]}`;upd()}),nar);
+   rd=readout();r.append(rd);
+   if(G){build();G.camera.position.set(4.6,7,7.6);if(G.controls){G.controls.target.set(4.6,0,.4);G.controls.update()}else G.camera.lookAt(4.6,0,.4)}
+   upd()},
+  draw(c,w,h,t){if(!G||!land)return;const dt=lt?Math.min(.05,t-lt):0;lt=t;const sp=.15+v[0]/100*1.35;
+   curves.forEach(o=>o.dots.forEach(m=>{m.userData.f=((m.userData.f||0)+dt*sp/(o.len||1))%1;if(!(m.userData.f>=0&&m.userData.f<=1))m.userData.f=0;const p=o.c.getPointAt(m.userData.f);if(!p)return;m.position.set(p.x,p.y+.05,p.z)}));
+   knot+=(coh-knot)*.08;land.material.color.lerpColors(land0,GOLD,Math.max(0,Math.min(1,(knot-55)/30))*.75);
+   c.save();c.textBaseline="middle";c.lineJoin="round";
+   pins.forEach(p=>{const u=p.userData,q=project(u.top);if(!q.visible)return;c.textAlign=u.side>0?"left":u.side<0?"right":"center";
+    txt(c,u.name,q.x+u.side*10,q.y-(u.side?16:8),u.hub?"gold":"fg",(u.hub?"600 14px ":"12px ")+F);
+    if(u.hub){const a=CAN[canal].pins.find(x=>x[3]),z=toXZ(canal==="sui"?a[1]:116.6,canal==="sui"?a[2]:35.4),qq=project({x:z.x,y:1.15,z:z.z});
+     c.textAlign="center";if(qq.visible)txt(c,CAN[canal].tag,qq.x,qq.y,"blue","600 13px "+F)}});
+   const x0=64,x1=w-64,y=h-34,kx=x0+(1-knot/100)*(x1-x0),xa=x0+.4*(x1-x0),xb=x0+.55*(x1-x0);
+   c.fillStyle="rgba(255,255,255,.85)";rrect(c,10,h-72,w-20,62,14);c.fill();
+   c.textAlign="center";txt(c,"统一",37,y,"gold","600 15px "+F);txt(c,"分裂",w-37,y,"red","600 15px "+F);
+   c.setLineDash([4,4]);c.lineWidth=1.5;[[xa,CL.gold],[xb,CL.red]].forEach(([x,s])=>{c.strokeStyle=s;c.beginPath();c.moveTo(x,y-14);c.lineTo(x,y+14);c.stroke()});c.setLineDash([]);
+   c.lineCap="round";c.lineWidth=5;c.strokeStyle="#b08a55";c.beginPath();for(let x=x0;x<=x1;x+=6){const yy=y+Math.sin(x*.08+t*3)*1.2;x===x0?c.moveTo(x,yy):c.lineTo(x,yy)}c.stroke();
+   c.lineWidth=5;c.strokeStyle=CL.gold;c.beginPath();c.moveTo(x0,y);c.lineTo(Math.min(kx,x0+18),y);c.stroke();c.strokeStyle=CL.red;c.beginPath();c.moveTo(x1,y);c.lineTo(Math.max(kx,x1-18),y);c.stroke();
+   const kc=knot>=60?CL.gold:knot>=45?CL.blue:CL.red;c.fillStyle=kc;c.strokeStyle="#fff";c.lineWidth=2;c.beginPath();c.arc(kx,y,9,0,Math.PI*2);c.fill();c.stroke();
+   txt(c,"凝聚度 "+Math.round(knot),kx,y-21,knot>=60?"gold":knot>=45?"blue":"red","600 12px "+F);
+   c.restore()},
+  unmount(){regs.forEach(m=>{m.userData.tw=null});gl3Clear();G=land=land0=GOLD=cg=rd=nar=null;curves=[];pins=[];regs=[];sls=[]}}})();
+/* ---------- 第 9 章：随堂检测（2D / DOM） ---------- */
+CH[8].ready=true;
+MODS[8]=(()=>{
+ const Q=[
+  {q:"北魏孝文帝迁都洛阳的主要目的是（ ）",o:["躲避柔然侵扰","加强对中原的控制、推动汉化改革","发展对外贸易","便于镇压六镇起兵"],a:1,x:"迁都洛阳是为了摆脱鲜卑旧贵族势力，加强对黄河流域的统治，推进改革。",c:2},
+  {q:"下列不属于隋朝实现统一条件的是（ ）",o:["北方民族交融","江南经济开发","北强南弱的形势","科举制的推行"],a:3,x:"科举制创立于隋统一之后，是统一的结果而非条件。",c:3},
+  {q:"唐玄宗时期“外重内轻”的局面是指（ ）",o:["节度使掌握的兵力远超中央","对外战争多于内政","宰相权力大于皇帝","赋税主要来自边疆"],a:0,x:"天宝年间边镇兵约四十九万，中央兵力薄弱。",c:4},
+  {m:"安史之乱后，河北诸镇“自署文武将吏，不供贡赋”。",q:"这反映了（ ）",o:["中央集权加强","民族矛盾激化","藩镇割据局面形成","经济重心南移完成"],a:2,x:"自署官吏、不纳赋税是藩镇割据的表现。",c:4},
+  {q:"960 年北宋建立后统一南方，其中以“纳土归宋”方式和平归附、使杭州免遭战火的政权是（ ）",o:["南唐","吴越","后蜀","南汉"],a:1,x:"978 年吴越王钱俶纳土归宋。",c:5},
+  {q:"关于 1005 年澶渊之盟，下列评价最恰当的是（ ）",o:["标志北宋统一全国","使宋辽之间维持了百余年的和平，促进了经济交流","宋朝从此不再输送财物","辽朝向宋称臣"],a:1,x:"宋辽约为兄弟之国，宋每年给辽岁币；此后边境榷场贸易繁荣。",c:6},
+  {q:"元朝行省制度的历史作用不包括（ ）",o:["加强了中央对地方的管辖","巩固了统一多民族国家","奠定了明清省制的基础","彻底消除了地方割据的可能"],a:3,x:"“彻底消除”说法绝对化。",c:7},
+  {m:"隋大运河“以洛阳为中心”，元京杭大运河“截弯取直、不再绕道洛阳”。",q:"这一变化主要反映了（ ）",o:["南北交通被阻断","政治中心东移北移，经济重心南移","海运完全取代漕运","洛阳经济超过江南"],a:1,x:"元都大都，粮赋仰给江南，运河直接沟通大都与江南。",c:8}];
+ const L="ABCD",CSS=`.xq{position:absolute;inset:0;overflow-y:auto;background:var(--card);color:var(--fg);padding:20px 18px 28px;font:15px/1.65 var(--sans)}
+.xq-in{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.xq-dots{display:flex;gap:8px;justify-content:center}.xq-dots i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--line);background:transparent}
+.xq-dots i.ok{background:#0071e3;border-color:#0071e3}.xq-dots i.bad{background:#c0362c;border-color:#c0362c}.xq-dots i.cur{border-color:#9a6a00;box-shadow:0 0 0 2px rgba(154,106,0,.25)}
+.xq-no{font:13px var(--mono);color:#9a6a00;margin:0}.xq-q{font-size:17px;font-weight:600;margin:0}
+.xq-m{margin:0;padding:10px 14px;border-left:3px solid #9a6a00;background:rgba(154,106,0,.07);border-radius:0 12px 12px 0}.xq-m b{color:#9a6a00;font-weight:600}
+.xq-os{display:flex;flex-direction:column;gap:10px}
+.xq-o{display:flex;gap:10px;align-items:flex-start;width:100%;min-height:48px;text-align:left;padding:11px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--btn2);white-space:normal;word-break:break-word;line-height:1.5}
+.xq-o:disabled{cursor:default}.xq-o .k{font-weight:600;flex:none}.xq-o .t{flex:1}.xq-o .s{flex:none;font-weight:700}
+.xq-o.ok{background:rgba(0,113,227,.12);border-color:#0071e3;color:#0071e3}.xq-o.bad{background:rgba(192,54,44,.1);border-color:#c0362c;color:#c0362c}
+html.dark .xq-o.ok{color:#2997ff;border-color:#2997ff}html.dark .xq-o.bad{color:#ff7b72;border-color:#ff7b72}
+.xq-x{margin:0;padding:12px 14px;border-radius:14px;background:var(--btn2)}.xq-x b{font-weight:600}
+.xq-row{display:flex;flex-wrap:wrap;gap:10px}.xq-row a{text-decoration:none;display:inline-flex;align-items:center}
+.xq-big{font-size:44px;font-weight:600;color:#0071e3;margin:0;letter-spacing:-.02em}html.dark .xq-big{color:#2997ff}
+.xq-ul{margin:0;padding-left:20px}.xq-ul a{color:#0071e3}html.dark .xq-ul a{color:#2997ff}`;
+ let host=null,rd=null,i=0,ans=[],t0=0,t1=0;
+ const T=()=>theme(),ok=()=>ans.filter((v,k)=>v===Q[k].a).length,done=()=>ans.filter(v=>v!=null).length;
+ function upd(){if(!rd)return;const n=done(),c=ok();rd.update([["已答",n+" / 8"],["正确",c+"",T().blue],["正确率",n?Math.round(c/n*100)+"%":"—",T().goldText]])}
+ function dots(){return'<div class="xq-dots" aria-label="答题进度">'+Q.map((q,k)=>`<i class="${ans[k]==null?(k===i?"cur":""):ans[k]===q.a?"ok":"bad"}"></i>`).join("")+"</div>"}
+ function fmtT(ms){const s=Math.round(ms/1000);return(s>=60?Math.floor(s/60)+" 分 ":"")+s%60+" 秒"}
+ function render(){if(!host)return;const box=host.firstChild;box.innerHTML="";
+  if(i>=Q.length){if(!t1)t1=performance.now();const wr=Q.map((q,k)=>k).filter(k=>ans[k]!==Q[k].a);
+   box.innerHTML=dots()+`<p class="xq-no">检测完成</p><p class="xq-big">${ok()} / 8</p><p style="margin:0">用时 ${fmtT(t1-t0)}</p>`+
+    (wr.length?`<p class="xq-q">错题与对应章节</p><ul class="xq-ul">${wr.map(k=>`<li>第 ${k+1} 题 → <a href="#${Q[k].c}">第 ${Q[k].c} 章 ${CH[Q[k].c-1].n}</a></li>`).join("")}</ul>`:`<p style="margin:0;color:${T().goldText};font-weight:600">全部答对！</p>`);
+   const r=el("div","xq-row");r.append(button("重做",reset,true));box.append(r);upd();return}
+  const q=Q[i],a=ans[i];box.innerHTML=dots()+`<p class="xq-no">第 ${i+1} 题 / 共 8 题</p>`+(q.m?`<p class="xq-m"><b>材料</b>　${q.m}</p>`:"")+`<p class="xq-q">${q.q}</p>`;
+  const os=el("div","xq-os");q.o.forEach((t,k)=>{const b=el("button","xq-o",`<span class="k">${L[k]}</span><span class="t">${t}</span><span class="s"></span>`);
+   if(a!=null){b.disabled=true;if(k===q.a){b.classList.add("ok");b.querySelector(".s").textContent="✓"}else if(k===a){b.classList.add("bad");b.querySelector(".s").textContent="✗"}}
+   b.onclick=()=>{if(ans[i]!=null)return;ans[i]=k;upd();render()};os.append(b)});box.append(os);
+  if(a!=null){box.append(el("p","xq-x",`<b style="color:${a===q.a?T().blue:T().redText}">${a===q.a?"回答正确":"回答错误，正确答案 "+L[q.a]}</b><br><b>解析</b>　${q.x}`));
+   const r=el("div","xq-row"),lk=el("a","pill","回到第 "+q.c+" 章");lk.href="#"+q.c;r.append(lk,button(i<7?"下一题":"查看结果",()=>{i++;render()},true));box.append(r)}
+  host.scrollTop=0}
+ function reset(){i=0;ans=[];t0=performance.now();t1=0;upd();render()}
+ return{use3d:false,
+  text:"8 道选考风格单选，覆盖本实验 1–8 章，答完可跳回对应章节复习。",
+  points:["一题一屏，点选后立即判对错并给出解析。","每题解析下方可跳回对应章节复习。","结束页给出得分、用时与错题章节。"],
+  gk:"<p style=\"margin:0 0 6px;font-size:14px\">浙江选考 统一与分裂、民族交融专题。</p>",
+  mount(c,r){gl3Clear();host=el("div","xq");host.append(el("style","",CSS),el("div","xq-in"));host.insertBefore(host.lastChild,host.firstChild);$("cwrap").append(host);
+   rd=readout();r.append(rd);c.append(button("重做",reset));reset()},
+  draw(){},
+  unmount(){host&&host.remove();host=rd=null}}})();
+/* ---------- 各章交互：即将上线 ---------- */
+const $=id=>document.getElementById(id),pad=i=>String(i+1).padStart(2,"0");
+let cur=0,mod=null,W=0,H=0,DPR=1;
+const cv=$("cv"),ctx=cv.getContext("2d");
+/* ---------- theme ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function isDark(){return document.documentElement.classList.contains("dark")}
+function theme(){return isDark()
+ ?{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e2a336",teal:"#2ec4b6",purple:"#b197fc",goldText:"#f0b847",redText:"#ff7b72"}
+ :{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.05)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"}}
+function setDark(d){document.documentElement.classList.toggle("dark",d);store.set("fenhe-dark",d?"1":"0");$("dark").textContent=$("mdark").textContent=d?"浅色":"深色"}
+setDark(store.get("fenhe-dark")==="1");
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||fmtNum;const w=el("div","sl"),l=el("label"),o=el("output"),i=el("input");
+ l.append(document.createTextNode(label),o);i.type="range";Object.assign(i,{min,max,step,value:val});i.setAttribute("aria-label",label);o.textContent=fmt(+val);
+ i.oninput=()=>{o.textContent=fmt(+i.value);onchange&&onchange(+i.value)};w.append(l,i);
+ w.set=v=>{i.value=v;o.textContent=fmt(+v)};return w}
+function chips(options,val,onchange){const w=el("div","chips");const bs=options.map(op=>{const o=typeof op==="object"?op:{label:op,value:op};const b=el("button",o.value===val?"on":"",o.label);
+ b.onclick=()=>{bs.forEach(x=>x.classList.remove("on"));b.classList.add("on");onchange&&onchange(o.value)};w.append(b);return b});return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" primary":""),label);b.onclick=onclick;return b}
+function toggle(label,val,onchange){const b=el("button","tg"+(val?" on":""),"<span>"+label+"</span><i></i>");b.setAttribute("role","switch");b.setAttribute("aria-checked",!!val);
+ b.onclick=()=>{val=!val;b.classList.toggle("on",val);b.setAttribute("aria-checked",val);onchange&&onchange(val)};return b}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML=rs.map(r=>`<dt>${r[0]}</dt><dd style="${r[2]?"color:"+r[2]:""}">${r[1]}</dd>`).join("")};d.update(rows||[]);return d}
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){if(!isFinite(v))return v>0?"∞":v<0?"−∞":"—";const e=1e-6,s=v<0?"−":"",a=Math.abs(v);
+ if(Math.abs(a-Math.round(a))<e)return(Math.round(a)===0?"":s)+Math.round(a);
+ for(let d=2;d<=12;d++){const n=a*d;if(Math.abs(n-Math.round(n))<e)return s+Math.round(n)+"/"+d}
+ for(const r of[2,3,5,6,7,10,11,13,14,15]){const q=Math.sqrt(r);for(let d=1;d<=6;d++){const k=a*d/q;if(Math.abs(k-Math.round(k))<e&&Math.round(k)>0){const K=Math.round(k);return s+(K===1?"":K)+"√"+r+(d>1?"/"+d:"")}}}
+ return s+a.toFixed(2)}
+function drawAxes(ctx,box,xr,yr,opts){opts=Object.assign({equal:true,grid:true,ticks:true,step:1,labels:true},opts);const T=theme();
+ let[x0,x1]=xr,[y0,y1]=yr,sx=box.w/(x1-x0),sy=box.h/(y1-y0);
+ if(opts.equal){const s=Math.min(sx,sy),cx=(x0+x1)/2,cy=(y0+y1)/2;sx=sy=s;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)*sx,Y=y=>box.y+box.h-(y-y0)*sy,invX=p=>x0+(p-box.x)/sx,invY=p=>y0+(box.y+box.h-p)/sy;
+ let st=opts.step;while(st*sx<22)st*=2;
+ ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();ctx.lineWidth=1;
+ if(opts.grid){ctx.strokeStyle=T.grid;ctx.beginPath();for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st){ctx.moveTo(X(x),box.y);ctx.lineTo(X(x),box.y+box.h)}for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st){ctx.moveTo(box.x,Y(y));ctx.lineTo(box.x+box.w,Y(y))}ctx.stroke()}
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,Y(0));ctx.lineTo(box.x+box.w,Y(0));ctx.moveTo(X(0),box.y);ctx.lineTo(X(0),box.y+box.h);ctx.stroke();
+ if(opts.labels){ctx.fillStyle=T.sub;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";
+  for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st)if(Math.abs(x)>1e-9)ctx.fillText(fmtNum(x),X(x),Y(0)+4);
+  ctx.textAlign="right";ctx.textBaseline="middle";for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st)if(Math.abs(y)>1e-9)ctx.fillText(fmtNum(y),X(0)-5,Y(y));
+  ctx.textBaseline="top";ctx.fillText("O",X(0)-4,Y(0)+4);ctx.font="italic 13px "+getComputedStyle(document.body).fontFamily;ctx.fillStyle=T.fg;
+  ctx.fillText("x",box.x+box.w-4,Y(0)+4);ctx.textAlign="left";ctx.fillText("y",X(0)+6,box.y+4)}
+ ctx.restore();return{X,Y,invX,invY,s:sx,box,xr:[x0,x1],yr:[y0,y1]}}
+function drawLine(ctx,map,A,B,C,color,width,dashed){if(Math.abs(A)<1e-12&&Math.abs(B)<1e-12)return;const[x0,x1]=map.xr,[y0,y1]=map.yr,b=map.box;let p,q;
+ if(Math.abs(B)>=Math.abs(A)){p=[x0,-(A*x0+C)/B];q=[x1,-(A*x1+C)/B]}else{p=[-(B*y0+C)/A,y0];q=[-(B*y1+C)/A,y1]}
+ ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.setLineDash(dashed?[6,5]:[]);
+ ctx.beginPath();ctx.moveTo(map.X(p[0]),map.Y(p[1]));ctx.lineTo(map.X(q[0]),map.Y(q[1]));ctx.stroke();ctx.restore()}
+function drawCircle(ctx,map,cx,cy,r,color,width,fill){const b=map.box;ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.beginPath();ctx.arc(map.X(cx),map.Y(cy),Math.max(0,r*map.s),0,Math.PI*2);
+ if(fill){ctx.fillStyle=fill;ctx.fill()}if(width!==0){ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.stroke()}ctx.restore()}
+function dragPoints(points,map,snap){const M=()=>typeof map==="function"?map():map;const h=function(e,type,x,y){const m=M();if(!m)return false;
+ if(type==="down"){const R=e&&e.pointerType==="touch"?22:12;let best=-1,bd=R;points.forEach((p,i)=>{if(p.fixed)return;const d=Math.hypot(m.X(p.x)-x,m.Y(p.y)-y);if(d<=bd){bd=d;best=i}});h.active=best;return best>=0}
+ if(type==="move"&&h.active>=0){const p=points[h.active];let nx=m.invX(x),ny=m.invY(y);if(snap){nx=Math.round(nx/snap)*snap;ny=Math.round(ny/snap)*snap}
+  nx=Math.min(m.xr[1],Math.max(m.xr[0],nx));ny=Math.min(m.yr[1],Math.max(m.yr[0],ny));p.x=+nx.toFixed(6);p.y=+ny.toFixed(6);p.onmove&&p.onmove(p);h.onmove&&h.onmove(p,h.active);return true}
+ if(type==="up"){const was=h.active>=0;h.active=-1;return was}return false};h.active=-1;return h}
+function wrapText(ctx,text,x,y,maxW,lh){let line="";for(const ch of String(text)){if(ch==="\n"){ctx.fillText(line,x,y);line="";y+=lh;continue}
+ const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);line=ch;y+=lh}else line=t}if(line)ctx.fillText(line,x,y);return y+lh}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+/* ---------- placeholder ---------- */
+function drawSoon(ctx,w,h){const T=theme(),cw=Math.min(320,w-40),ch=150,x=(w-cw)/2,y=(h-ch)/2;
+ ctx.save();ctx.shadowColor="rgba(0,0,0,.08)";ctx.shadowBlur=24;ctx.shadowOffsetY=4;ctx.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(ctx,x,y,cw,ch,22);ctx.fill();ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.blue;ctx.font="13px ui-monospace,Menlo,monospace";ctx.fillText("CHAPTER "+pad(cur),w/2,y+38);
+ ctx.fillStyle=T.fg;ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText("即将上线",w/2,y+72);
+ ctx.fillStyle=T.sub;ctx.font="14px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText(CH[cur].n,w/2,y+108)}
+/* ---------- canvas loop ---------- */
+function resize(){const r=$("cwrap").getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);gl3Size();frame(performance.now())}
+function frame(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);const d3=!!(mod&&mod.use3d);
+ if(d3&&!GL3()){ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H);drawNo3D(ctx,W,H);return}
+ if(d3)gl3Render();else{ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H)}
+ try{mod&&mod.draw?mod.draw(ctx,W,H,t/1000):(!d3&&drawSoon(ctx,W,H))}catch(err){console.error(err)}}
+function loop(t){frame(t);requestAnimationFrame(loop)}
+new ResizeObserver(resize).observe($("cwrap"));window.addEventListener("resize",resize);
+function ptr(type){return e=>{if(!mod||!mod.pointer)return;const r=cv.getBoundingClientRect();
+ if(type==="down")try{cv.setPointerCapture(e.pointerId)}catch(_){}mod.pointer(e,type,e.clientX-r.left,e.clientY-r.top)}}
+cv.addEventListener("pointerdown",ptr("down"));cv.addEventListener("pointermove",ptr("move"));cv.addEventListener("pointerup",ptr("up"));cv.addEventListener("pointercancel",ptr("up"));
+/* ---------- chapters ---------- */
+function list(host,cls){host.innerHTML="";CH.forEach((c,i)=>{const b=el("button",cls,`<span class="mono">${pad(i)}</span><span>${c.n}</span>`);b.onclick=()=>{go(i);closeSheet()};host.append(b)})}
+list($("toc"),"");list($("slist"),"it");
+$("segs").innerHTML=CH.map(()=>"<i></i>").join("");
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod.unmount()}catch(e){console.error(e)}
+ gl3Clear();
+ cur=i;const c=CH[i],m=c.ready&&MODS[i]?MODS[i]:null;mod=m;
+ $("ctitle").textContent=pad(i)+"  "+c.n;$("cbook").textContent=c.book;$("ctext").innerHTML=m?m.text||"":"本章交互实验即将上线，敬请期待。";
+ const ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";$("pts").innerHTML="";$("gk").innerHTML="";
+ if(m){m.mount&&m.mount(ctrl,read);$("pts").innerHTML=m.points?"<ul>"+[].concat(m.points).map(p=>"<li>"+p+"</li>").join("")+"</ul>":"";$("gk").innerHTML=m.gk||""}
+ gl3Mode(!!(m&&m.use3d));
+ $("ctrlSec").hidden=!ctrl.children.length;$("readSec").hidden=!read.children.length;$("ptSec").hidden=!$("pts").innerHTML;$("gkSec").hidden=!$("gk").innerHTML;
+ if(!m){$("ctrlSec").hidden=false;ctrl.innerHTML='<p class="soon">本章控件即将上线。</p>'}
+ document.querySelectorAll("#toc button,#slist button").forEach(b=>{const on=+b.querySelector(".mono").textContent-1===i;b.classList.toggle("on",on);on?b.setAttribute("aria-current","true"):b.removeAttribute("aria-current")});
+ document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
+ $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+/* ---------- controls ---------- */
+$("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
+$("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("explain").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+function openSheet(){$("mask").hidden=$("sheet").hidden=false;const on=$("slist").querySelector(".on");on&&on.scrollIntoView({block:"nearest"})}
+function closeSheet(){$("mask").hidden=$("sheet").hidden=true}
+$("chbtn").onclick=openSheet;$("mask").onclick=closeSheet;
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"&&t.type!=="range"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable))return;
+ if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+go(fromHash());requestAnimationFrame(loop);
+</script>
+</body>
+</html>
