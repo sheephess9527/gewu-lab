@@ -360,54 +360,133 @@
         .x-panel { padding: 16px 12px; }
       }
 
-      /* 手机端 */
-      @media (max-width: 767px) {
+      /* 手机 / 平板（≤1023px）：iOS 式单栏布局；桌面端不受影响 */
+      .x-mchap, .x-mtools, .x-scrim, .x-mnav { display: none; }
+      @media (max-width: 1023px) {
+        .x-app { height: 100vh; height: 100dvh; }
+        /* 顶栏：‹ · 实验名 · 章节 */
         .x-top {
-          height: auto; display: grid; grid-template-columns: auto minmax(0, 1fr);
-          grid-template-areas: "back tools" "name prog"; column-gap: 12px; row-gap: 0;
-          padding: max(2px, env(safe-area-inset-top)) 12px 6px;
+          height: calc(52px + env(safe-area-inset-top)); display: grid; grid-template-areas: none;
+          grid-template-columns: minmax(44px, 1fr) auto minmax(44px, 1fr); align-items: center; column-gap: 8px; row-gap: 0;
+          padding: env(safe-area-inset-top) max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
+          z-index: 20;
         }
         .x-brand { display: contents; }
-        .x-back { grid-area: back; }
-        .x-tools { grid-area: tools; justify-self: end; gap: 0; }
-        .x-name { grid-area: name; align-self: center; padding-left: 0; border-left: 0; font-size: 16px; }
-        .x-brand small { display: none; }
-        .x-prog { grid-area: prog; gap: 10px; }
-        .x-seg { min-width: 40px; }
-        .x-chaps { width: 100%; padding: 8px 12px; gap: 6px; border-bottom: 0.5px solid var(--line); background: var(--bg1); scrollbar-width: none; }
-        .x-chaps::-webkit-scrollbar { display: none; }
-        .x-chaps.x-closed { display: none; }
-        .x-chap {
-          display: flex; align-items: center; gap: 6px; border-bottom: 0; margin: 0;
-          border-radius: var(--pill); padding: 0 14px; min-height: 40px; background: var(--fill2);
+        .x-back {
+          grid-column: 1; grid-area: auto; justify-self: start; justify-content: center; width: 44px; height: 44px;
+          padding: 0; font-size: 32px; font-weight: 300; line-height: 1;
         }
-        .x-chap b { display: inline; }
-        .x-chap span { font-size: 14px; }
-        .x-chap.on { background: var(--sel); }
-        .x-chaps { align-items: center; min-height: 56px; }
-        .x-chap { min-height: 44px; }
-        .x-over { top: 12px; left: 12px; right: 12px; max-width: none; max-height: calc(100% - 24px); padding: 16px 18px 12px; border-radius: 20px; }
-        .x-over h1 { font-size: 19px; }
+        .x-back-t { display: none; }
+        .x-name {
+          grid-column: 2; grid-area: auto; padding: 0; border: 0; overflow: visible; text-overflow: clip; text-align: center;
+          font-size: clamp(14px, 4.4vw, 17px);
+        }
+        .x-name small, .x-brand small { display: none; }
+        .x-prog, .x-tools { display: none; }
+        .x-mchap {
+          grid-column: 3; justify-self: end; display: inline-flex; align-items: center; gap: 6px;
+          min-height: 44px; min-width: 44px; padding: 0 14px; border: 0; border-radius: var(--pill);
+          background: var(--fill2); color: var(--ink); font-size: 14px; font-weight: 500; white-space: nowrap;
+        }
+        .x-mchap span { font-family: var(--mono); font-size: 13px; color: var(--acc-t); font-variant-numeric: tabular-nums; }
+        .x-mchap:active { background: var(--fill2-h); }
+
+        /* 画布在上，内容在下 */
+        .x-body { flex-direction: column; flex: 1; min-height: 0; }
+        .x-stage { flex: none; min-height: 220px; height: 52vh; height: 52svh; }
+        #scene { touch-action: none; }
         .x-tip { display: none; }
-        .x-panel {
-          border-top: 0.5px solid var(--line); border-left: 0; padding: 4px 12px 16px; padding-bottom: max(16px, env(safe-area-inset-bottom));
-          background: var(--bg2); border-radius: 24px 24px 0 0; box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.05);
-          transition: max-height var(--t) var(--ease);
+        .x-panel, .x-panel.down {
+          flex: 1; width: 100%; min-height: 0; max-height: none; overflow-x: hidden; overflow-y: auto;
+          overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+          border: 0; border-top: 0.5px solid var(--line); border-radius: 0; box-shadow: none; background: var(--bg1);
+          padding: 20px max(16px, env(safe-area-inset-right)) calc(92px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
         }
-        .x-panel.down { max-height: 56px; }
-        .x-drawer-h { height: 52px; }
+        .x-panel > * { max-width: 680px; margin-left: auto; margin-right: auto; }
+        .x-drawer-h { display: none; }
+
+        /* 原讲解浮层，移入内容区顶部 */
+        .x-over, .x-over.min {
+          position: static; max-width: none; max-height: none; overflow: visible; padding: 0; margin-bottom: 16px;
+          background: none; border: 0; border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+        }
+        .x-over h1 { font-size: 20px; font-weight: 600; line-height: 1.3; margin: 0 0 4px; }
+        .x-over p, .x-over.min p { display: block; font-size: 16px; line-height: 1.7; color: var(--ink); margin: 0 0 10px; }
+        .x-over .x-src, .x-over.min .x-src { display: block; font-size: 13px; line-height: 1.5; color: var(--gold-t); margin: 0 0 12px; }
+        .x-over .x-src.x-hide, .x-over.min .x-src.x-hide { display: none; }
+        .x-fold { display: none; }
+
+        /* 重置视角 / 深色 */
+        .x-mtools { display: flex; gap: 8px; margin-bottom: 20px; }
+        .x-mtools button {
+          flex: 1; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+          border: 0; border-radius: var(--pill); background: var(--fill2); color: var(--ink); font-size: 14px; font-weight: 500;
+        }
+        .x-mtools button:active { background: var(--fill2-h); }
+
+        /* 文字不小于 13px */
+        .x-pc, .x-tag8, .x-chap b, .x-gk, .x-card p.x-gk { font-size: 13px; }
+        .x-panel [style*="font-size:12"] { font-size: 13px !important; }
+        #bk9 text, .x-s6 text { font-size: 13px; }
+        .x-toggle { min-height: 48px; }
         .x-card { padding: 14px 16px; border-radius: 18px; }
+
+        /* 深色模式：蓝底按钮用更深的蓝，保证白字清楚 */
+        html[data-theme="dark"] div.x-list > button.on,
+        html[data-theme="dark"] #play5, html[data-theme="dark"] #play7,
+        html[data-theme="dark"] #next10, html[data-theme="dark"] #redo10 { background: #0a66d0; }
+
+        /* 章节列表：底部升起的 sheet */
+        .x-chaps, .x-chaps.x-closed {
+          position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: block;
+          width: 100%; max-width: 680px; min-height: 0; max-height: 70vh; max-height: 70dvh; margin: 0 auto;
+          overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+          padding: 8px max(12px, env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+          border: 0; border-radius: 20px 20px 0 0; background: var(--panel); box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.18);
+          transform: translateY(105%); visibility: hidden;
+          transition: transform var(--t) var(--ease), visibility 0s linear var(--t);
+        }
+        .x-chaps.x-sheet { transform: none; visibility: visible; transition: transform var(--t) var(--ease), visibility 0s; }
+        .x-chaps::before { content: ""; display: block; width: 36px; height: 5px; border-radius: 3px; background: var(--track); margin: 0 auto 10px; }
+        .x-chap {
+          display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; margin: 0 0 2px; padding: 8px 14px;
+          border: 0; border-radius: 12px; background: transparent; white-space: normal; text-align: left;
+        }
+        .x-chap b { display: inline; flex: none; width: 24px; }
+        .x-chap span { font-size: 16px; }
+        .x-chap.on { background: var(--sel); }
+        .x-scrim {
+          display: block; position: fixed; inset: 0; z-index: 35; background: rgba(0, 0, 0, 0.32);
+          opacity: 0; visibility: hidden; transition: opacity var(--t) var(--ease), visibility 0s linear var(--t);
+        }
+        .x-scrim.on { opacity: 1; visibility: visible; transition: opacity var(--t) var(--ease), visibility 0s; }
+
+        /* 底部 上一章 / 下一章 */
+        .x-mnav {
+          display: flex; gap: 10px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+          padding: 10px max(16px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+          background: var(--glass); border-top: 0.5px solid var(--line);
+          -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+        }
+        .x-mnav button {
+          flex: 1; min-height: 44px; border: 0; border-radius: var(--pill); background: var(--fill2); color: var(--ink);
+          font-size: 15px; font-weight: 600;
+        }
+        .x-mnav .x-pri { background: #0071e3; color: #fff; }
+        html[data-theme="dark"] .x-mnav .x-pri { background: #0a66d0; }
+        .x-mnav button:active { transform: scale(.98); }
+        .x-mnav button:disabled { opacity: .4; }
       }
 
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; scroll-behavior: auto !important; }
       }
     </style>
-  </head>
+  <style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
   <body>
     <div class="x-app">
       <header class="x-top">
-        <div class="x-brand"><a class="x-back" href="../" aria-label="返回格物实验室门户">‹ 格物实验室</a><span class="x-name">水循环三维沙盘<small> · WaterCycle</small></span></div>
+        <div class="x-brand"><a class="x-back" href="../" aria-label="返回格物实验室门户">‹<span class="x-back-t"> 格物实验室</span></a><span class="x-name">水循环三维沙盘<small> · WaterCycle</small></span></div>
         <div class="x-prog">
           <div class="x-seg" id="seg"></div>
           <div class="x-count" id="count">01 / 11</div>
@@ -420,6 +499,7 @@
           <button class="x-ic" id="reset" title="重置视角 (R)" aria-label="重置视角">R</button>
           <button class="x-ic" id="full" title="全屏 (F)" aria-label="全屏">F</button>
         </div>
+        <button class="x-mchap" id="mChap" aria-controls="chaps" aria-expanded="false" aria-haspopup="dialog">章节 <span id="mCount">01/11</span></button>
       </header>
       <div class="x-body">
         <nav class="x-chaps" id="chaps" aria-label="章节"></nav>
@@ -437,10 +517,19 @@
         </div>
         <aside class="x-panel" id="panel">
           <div class="x-drawer-h"><button id="drawer">▲ 控制面板</button></div>
+          <div class="x-mtools" id="mTools">
+            <button id="mReset" type="button"><span aria-hidden="true">⟲</span> 重置视角</button>
+            <button id="mTheme" type="button"><span aria-hidden="true">◐</span> <span id="mThemeT">深色</span></button>
+          </div>
           <div id="panelBody"></div>
         </aside>
       </div>
     </div>
+    <div class="x-scrim" id="scrim" aria-hidden="true"></div>
+    <nav class="x-mnav" aria-label="翻章">
+      <button id="mPrev" type="button">‹ 上一章</button>
+      <button id="mNext" type="button" class="x-pri">下一章 ›</button>
+    </nav>
 
     <script type="application/json" id="water-data">
       [
@@ -489,7 +578,7 @@
         {"n":"径流入海","v":36,"c":"#2EC4B6","a":[1.5,1.2,3.6],"b":[-4.5,1.2,3.6],"o":[0,0.7,0],"k":1}],
        "eq":{"oP":398,"oE":434,"lP":107,"lE":71,"V":36,"R":36}}
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+    <script src="../vendor/three@0.149.0/three.min.js"></script>
     <script src="chart.js"></script>
     <script>
       /* ---------- data ---------- */
@@ -515,7 +604,7 @@
           bs[k].classList.toggle("on", k === cur);
           ss[k].classList.toggle("on", k <= cur);
         }
-        if (window.innerWidth < 768) bs[cur].scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+        if (window.innerWidth < 1024) chaps.scrollTop = Math.max(0, bs[cur].offsetTop - chaps.clientHeight / 2);
         document.getElementById("count").textContent = String(cur + 1).padStart(2, "0") + " / 11";
         document.getElementById("ovTitle").textContent = CH[cur].t;
         var src = document.getElementById("ovSrc");
@@ -2195,6 +2284,47 @@
           btn.textContent = closed ? "目录 ▾" : "目录";
           setTimeout(function () { dispatchEvent(new Event("resize")); }, 320);
         };
+      })();
+
+      /* 手机 / 平板外壳：讲解移入内容区、章节 sheet、底部翻章栏 */
+      (function () {
+        var mq = matchMedia("(max-width: 1023px)");
+        var over = document.getElementById("over"), stage = over.parentNode, tip = stage.querySelector(".x-tip");
+        var panel = document.getElementById("panel"), tools = document.getElementById("mTools");
+        var nav = document.getElementById("chaps"), scrim = document.getElementById("scrim"), btn = document.getElementById("mChap");
+        var prev = document.getElementById("mPrev"), next = document.getElementById("mNext"), n = CH.length;
+
+        function place() {
+          if (mq.matches) { if (over.parentNode !== panel) panel.insertBefore(over, tools); }
+          else { if (over.parentNode !== stage) stage.insertBefore(over, tip); close(); }
+          dispatchEvent(new Event("resize"));
+        }
+        function open() {
+          nav.classList.add("x-sheet"); scrim.classList.add("on"); btn.setAttribute("aria-expanded", "true");
+          var b = nav.children[cur]; if (b) nav.scrollTop = Math.max(0, b.offsetTop - nav.clientHeight / 2);
+        }
+        function close() { nav.classList.remove("x-sheet"); scrim.classList.remove("on"); btn.setAttribute("aria-expanded", "false"); }
+        function sync() {
+          document.getElementById("mCount").textContent = String(cur + 1).padStart(2, "0") + "/" + n;
+          prev.disabled = cur <= 0; next.disabled = cur >= n - 1;
+          document.getElementById("mThemeT").textContent = root.getAttribute("data-theme") === "dark" ? "浅色" : "深色";
+        }
+        function toTop() { panel.scrollTop = 0; }
+
+        btn.onclick = function () { nav.classList.contains("x-sheet") ? close() : open(); };
+        scrim.onclick = close;
+        addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+        nav.addEventListener("click", function (e) { if (mq.matches && e.target.closest(".x-chap")) { close(); toTop(); setTimeout(sync, 0); } });
+        prev.onclick = function () { go(cur - 1); toTop(); sync(); };
+        next.onclick = function () { go(cur + 1); toTop(); sync(); };
+        document.getElementById("mReset").onclick = function () { resetView(); };
+        document.getElementById("mTheme").onclick = function () { toggleTheme(); sync(); };
+        document.getElementById("theme").addEventListener("click", sync);
+        addEventListener("hashchange", function () { setTimeout(sync, 0); });
+        addEventListener("keydown", function () { setTimeout(sync, 0); });
+
+        if (mq.addEventListener) mq.addEventListener("change", place); else mq.addListener(place);
+        place(); sync();
       })();
     </script>
   </body>
