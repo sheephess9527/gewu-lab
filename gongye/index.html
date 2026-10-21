@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><script src="../lib/labfix-2d.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>工业革命 · 格物实验室</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--sel:#e8f1fc;--selfg:#0058b0;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--sel:rgba(41,151,255,.18);--selfg:#6cb6ff;--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--shadow:0 0 0 1px rgba(255,255,255,.08)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.back b{font-size:22px;font-weight:400;margin-right:4px}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);font-size:14px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}
+html.dark .pill.primary,html.dark .chips button.on{color:#000}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc button,.sheet button.it{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px;align-items:center}
+.toc button:hover{background:var(--btn2)}
+.toc button.on,.sheet button.it.on{background:var(--sel);color:var(--selfg);font-weight:600}
+.toc .mono,.sheet .mono{font-size:13px;color:var(--sub)}.on .mono{color:var(--selfg)!important}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 20px}
+.explain{flex:none}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.etext{margin:8px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.explain.collapsed .etext,.explain.collapsed .book{display:none}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;color:var(--sub);min-height:32px}
+.cwrap{flex:1;min-height:0;position:relative;border-radius:22px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:none}
+.sec h3{font-size:13px;color:var(--sub);font-weight:600;letter-spacing:0;margin:0 0 8px}
+.ctrls{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;font-size:14px}.sl output{font-family:var(--mono);color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}.chips button.on{background:var(--blue);color:#fff}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;min-height:36px;border:0;background:none;padding:0;width:100%}
+.tg i{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.tg.on i{background:#34c759}.tg.on i::after{left:20px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+.points ul{margin:0;padding-left:18px}.points li{margin:4px 0}
+.gk a{color:var(--blue);text-decoration:none;font-size:14px}
+.mdark{display:none}
+.soon{color:var(--sub);font-size:14px;margin:0}
+/* sheet */
+.mask{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;max-height:70vh;overflow:auto;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .prog{display:none}.app{display:block;height:auto}.toc{display:none}
+ .stage{padding:12px}.cwrap{order:-1;flex:none;height:56vh}
+ .explain .fold{display:none}.explain.collapsed .etext,.explain.collapsed .book{display:block}.etext{max-height:none;overflow:visible}
+ .panel{border:0;padding:0 12px 24px}
+}
+@media (min-width:1024px){.chbtn{display:none}}
+/* phone */
+@media (max-width:767px){
+ .top{height:calc(52px + env(safe-area-inset-top));gap:6px;padding-left:4px;padding-right:8px}
+ .back{width:44px;justify-content:center}.back span{display:none}.back b{margin:0}
+ .tname{flex:1;font-size:16px}.tbtns{display:none}.chbtn{margin-left:0;padding:0 12px}
+ .stage{padding:0;gap:0}.cwrap{height:52vh;border-radius:0;box-shadow:none;border-bottom:1px solid var(--line)}
+ .explain{background:none;box-shadow:none;padding:16px 16px 4px}.ehead h2{font-size:20px}.etext{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(84px + env(safe-area-inset-bottom))}
+ input[type=range]{height:44px}.chips button,.tg{min-height:44px}
+ .mdark{display:block;align-self:flex-start;min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
+  <div class="tname">工业革命 · IndustryLab</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 09</span></div>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button><button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chnum">01/09</span></button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h2 id="ctitle"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="etext" id="ctext"></p>
+    </section>
+    <div class="cwrap" id="cwrap"><canvas id="cv"></canvas></div>
+  </main>
+  <aside class="panel">
+    <section class="card sec" id="ctrlSec"><h3>控件</h3><div class="ctrls" id="ctrl"></div></section>
+    <section class="card sec" id="readSec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec points" id="ptSec"><h3>要点</h3><div id="pts"></div></section>
+    <section class="card sec gk" id="gkSec"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mask" id="mask" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><div id="slist"></div></div>
+<div class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></div>
+<script>
+const CH=[
+{n:"一台珍妮机引发的连锁反应",book:"《中外历史纲要（下）》第 10 课",ready:false},
+{n:"蒸汽机：动力的革命",book:"第 10 课",ready:false},
+{n:"从手工工场到工厂",book:"第 10 课 · 选择性必修2 第 5 课",ready:false},
+{n:"交通革命：世界变小了",book:"第 10 课 · 选择性必修2 第 12 课",ready:false},
+{n:"城市化与工人的处境",book:"第 10 课 · 选择性必修2 第 11 课",ready:false},
+{n:"马克思主义的诞生",book:"第 11 课",ready:false},
+{n:"第二次工业革命：电与内燃机",book:"第 10 课",ready:false},
+{n:"世界市场与殖民体系",book:"第 12 课",ready:false},
+{n:"随堂检测",book:"浙江选考 工业革命与世界变革",ready:false}];
+/* ---------- industry drawing tools ---------- */
+const ISANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+// 文字：只用 T.fg / T.blue / T.goldText / T.redText，带浅色描边
+function itext(ctx,s,x,y,col,al,font){const T=theme();ctx.save();ctx.font=font||"13px "+ISANS;ctx.textAlign=al||"left";ctx.textBaseline="middle";
+ ctx.lineJoin="round";ctx.lineWidth=3;ctx.strokeStyle=T.bg;ctx.strokeText(s,x,y);ctx.fillStyle=col||T.fg;ctx.fillText(s,x,y);ctx.restore()}
+function gear(ctx,x,y,r,teeth,angle,color){const n=Math.max(4,teeth|0),ri=r*0.8,st=Math.PI*2/n;ctx.save();ctx.beginPath();
+ for(let i=0;i<n;i++){const a=angle+i*st;[[ri,a],[r,a+st*0.15],[r,a+st*0.45],[ri,a+st*0.6]].forEach(([rr,aa],k)=>{const px=x+rr*Math.cos(aa),py=y+rr*Math.sin(aa);i||k?ctx.lineTo(px,py):ctx.moveTo(px,py)})}
+ ctx.closePath();ctx.moveTo(x+r*0.25,y);ctx.arc(x,y,r*0.25,0,Math.PI*2,true);ctx.fillStyle=color||theme().fg;ctx.fill("evenodd");
+ ctx.beginPath();ctx.arc(x,y,ri*0.62,0,Math.PI*2);ctx.strokeStyle=theme().bg;ctx.globalAlpha=.35;ctx.lineWidth=Math.max(1,r*0.06);ctx.stroke();ctx.restore()}
+function belt(ctx,x1,y1,r1,x2,y2,r2,t,color){const dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy);if(d<=Math.abs(r1-r2)+1e-6)return;
+ const th=Math.atan2(dy,dx),ph=Math.acos((r1-r2)/d),a=th+ph,b=th-ph;ctx.save();ctx.beginPath();
+ ctx.moveTo(x1+r1*Math.cos(a),y1+r1*Math.sin(a));ctx.lineTo(x2+r2*Math.cos(a),y2+r2*Math.sin(a));ctx.arc(x2,y2,r2,a,b,true);
+ ctx.lineTo(x1+r1*Math.cos(b),y1+r1*Math.sin(b));ctx.arc(x1,y1,r1,b,a,true);ctx.closePath();
+ ctx.strokeStyle=color||theme().fg;ctx.lineWidth=4;ctx.lineJoin="round";ctx.stroke();
+ ctx.setLineDash([6,10]);ctx.lineDashOffset=-(t||0)*40;ctx.strokeStyle=theme().bg;ctx.lineWidth=1.5;ctx.globalAlpha=.8;ctx.stroke();ctx.restore()}
+function smoke(ctx,x,y,t,amount){const n=Math.max(1,Math.round(6*(amount==null?1:amount)));ctx.save();ctx.fillStyle=isDark()?"#8e8e93":"#9a9a9f";
+ for(let i=0;i<n;i++){const p=((t||0)*0.35+i/n)%1,px=x+Math.sin(p*6+i*1.7)*6+p*26,py=y-p*90,rr=3+p*14;
+  ctx.globalAlpha=(1-p)*0.5;ctx.beginPath();ctx.arc(px,py,rr,0,Math.PI*2);ctx.fill()}ctx.restore()}
+function factory(ctx,x,y,w,h,o){o=o||{};const T=theme(),col=o.color||(isDark()?"#48484a":"#3a3a3c"),n=Math.max(2,Math.round(w/44)),tw=w/n,th=Math.min(h*0.35,tw*0.6),tops=[];
+ ctx.save();ctx.fillStyle=col;const nc=o.chimneys|0,cw=Math.max(6,w*0.06);
+ for(let i=0;i<nc;i++){const cx=x+w*(i+1)/(nc+1)-cw/2,ch=h*0.9;ctx.fillRect(cx,y-ch,cw,ch);tops.push({x:cx+cw/2,y:y-ch})}
+ ctx.beginPath();ctx.moveTo(x,y+h);ctx.lineTo(x,y);for(let i=0;i<n;i++){ctx.lineTo(x+i*tw,y-th);ctx.lineTo(x+(i+1)*tw,y)}ctx.lineTo(x+w,y+h);ctx.closePath();ctx.fill();
+ const cols=Math.max(2,Math.round(w/26)),rows=Math.max(1,Math.round(h/34)),gw=w/cols,gh=h/rows,lit=o.lit==null?0:o.lit,tot=cols*rows;
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const k=r*cols+c,on=((k*7)%tot)/tot<lit-1e-9;
+  ctx.fillStyle=on?"#f2c14e":(isDark()?"#2c2c2e":"#5a5a5e");ctx.fillRect(x+c*gw+gw*0.25,y+r*gh+gh*0.25,gw*0.5,gh*0.45)}
+ ctx.restore();return tops}
+function worker(ctx,x,y,h,color){const hr=h*0.11,sw=Math.max(1.5,h*0.08),hy=y-h+hr,ny=hy+hr,hip=y-h*0.42;ctx.save();
+ ctx.strokeStyle=ctx.fillStyle=color||theme().fg;ctx.lineWidth=sw;ctx.lineCap="round";
+ ctx.beginPath();ctx.arc(x,hy,hr,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(x,ny+sw*0.3);ctx.lineTo(x,hip);
+ ctx.moveTo(x-h*0.18,ny+h*0.28);ctx.lineTo(x,ny+h*0.1);ctx.lineTo(x+h*0.18,ny+h*0.28);
+ ctx.moveTo(x-h*0.14,y);ctx.lineTo(x,hip);ctx.lineTo(x+h*0.14,y);ctx.stroke();ctx.restore()}
+function barChart(ctx,x,y,w,h,data,o){o=o||{};const T=theme(),n=data.length;if(!n)return;const max=o.max||Math.max(...data)||1,
+ cols=o.colors||[T.blue],labs=o.labels||[],lh=labs.length?18:0,ph=h-lh-16,gw=w/n,bw=gw*0.6;ctx.save();
+ data.forEach((v,i)=>{const bh=Math.max(0,Math.min(1,v/max))*ph,bx=x+i*gw+(gw-bw)/2,by=y+16+ph-bh;
+  ctx.fillStyle=cols[i%cols.length];rrect(ctx,bx,by,bw,bh,Math.min(3,bw/2,bh/2));ctx.fill();
+  itext(ctx,fmtNum(v),bx+bw/2,by-8,T.fg,"center","12px ui-monospace,Menlo,monospace");
+  if(labs[i]!=null)itext(ctx,String(labs[i]),bx+bw/2,y+h-lh/2,T.fg,"center","12px "+ISANS)});
+ ctx.strokeStyle=T.axis;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y+16+ph+.5);ctx.lineTo(x+w,y+16+ph+.5);ctx.stroke();ctx.restore()}
+const MODS=[];// MODS[i]={text,points,gk,mount(ctrlEl,readEl),draw(ctx,w,h,t),pointer(e,type,x,y),unmount()}
+CH[0].ready=true;
+MODS[0]=(()=>{
+ const INV=[
+  {y:1733,n:"飞梭",p:"约翰·凯伊",fix:"织布速度提高约一倍",neck:"纱不够用（“纱荒”）",tag:"纱荒",b:[40,85]},
+  {y:1765,n:"珍妮纺纱机",p:"哈格里夫斯",fix:"一人同时纺 8 根纱，缓解纱荒",neck:"靠人力摇动，需要更大动力",tag:"缺动力",b:[110,90]},
+  {y:1769,n:"水力纺纱机",p:"阿克莱特",fix:"用水力驱动，纺纱有了更大动力",neck:"依赖河流，工厂只能建在河边",tag:"限河边",b:[140,95]},
+  {y:1779,n:"骡机",p:"克隆普顿",fix:"纺出的纱又细又结实",neck:"纱多了，织布又跟不上",tag:"织布慢",b:[180,100]},
+  {y:1785,n:"水力织布机",p:"卡特赖特",fix:"织布机械化，追上纺纱",neck:"需要不受地点限制的动力",tag:"缺动力",b:[175,195]},
+  {y:1785,n:"改良蒸汽机",p:"瓦特",fix:"蒸汽动力用于纺织，工厂可以建在城市",neck:"—（连锁反应走向动力革命）",tag:"",b:[260,250]}];
+ const NUM="①②③④⑤⑥",CON="工业革命首先从棉纺织业开始；生产需求推动技术发明，一项发明引起连锁反应。";
+ let step=0,timer=null,lit=[],ro=null,bars=[40,40];
+ const tgt=()=>step?INV[step-1].b:[40,40],now=()=>performance.now()/1000;
+ function upd(){if(!ro)return;const T=theme(),c=step?INV[step-1]:null;
+  ro.update(c?[["当前发明",NUM[step-1]+" "+c.n],["年份",c.y+" 年"],["发明者",c.p],["解决了什么",c.fix],["新瓶颈",c.neck,T.redText]]
+   :[["当前发明","—"],["年份","—"],["发明者","—"],["解决了什么","—"],["新瓶颈","手工纺织，效率低",T.redText]])}
+ function stop(){if(timer){clearInterval(timer);timer=null}}
+ function adv(){if(step<6){lit[step]=now();step++;upd()}if(step>=6)stop()}
+ function reset(){stop();step=0;lit=[];upd()}
+ function run(){stop();if(step>=6)reset();adv();timer=setInterval(adv,1200)}
+ function icon(ctx,i,x,y,w,h,t,on){const T=theme(),cx=x+w/2,cy=y+h/2,s=Math.min(w,h),tt=on?t:0;ctx.save();
+  ctx.strokeStyle=ctx.fillStyle=T.fg;ctx.lineWidth=1.2;
+  if(i===0){ctx.globalAlpha=.5;ctx.beginPath();for(let k=0;k<5;k++){const ly=y+h*(0.2+k*0.15);ctx.moveTo(x+w*0.05,ly);ctx.lineTo(x+w*0.95,ly)}ctx.stroke();ctx.globalAlpha=1;
+   const px=cx+Math.sin(tt*4)*w*0.3;ctx.fillStyle=T.gold;ctx.beginPath();ctx.ellipse(px,cy,s*0.22,s*0.09,0,0,Math.PI*2);ctx.fill()}
+  else if(i===1){const r=Math.max(4,Math.min(w/10,h/5));for(let k=0;k<8;k++)gear(ctx,x+w*((k%4)+0.5)/4,cy+(k<4?-1:1)*h*0.24,r,8,tt*3*(k%2?1:-1),k%2?T.blue:T.fg)}
+  else if(i===2){const R=s*0.4,wx=cx-w*0.12,a=tt*1.5;ctx.lineWidth=2;ctx.beginPath();ctx.arc(wx,cy,R,0,Math.PI*2);ctx.stroke();
+   ctx.beginPath();for(let k=0;k<8;k++){const q=a+k*Math.PI/4;ctx.moveTo(wx,cy);ctx.lineTo(wx+R*1.15*Math.cos(q),cy+R*1.15*Math.sin(q))}ctx.stroke();
+   ctx.strokeStyle=T.blue;ctx.beginPath();for(let k=0;k<2;k++){const ly=y+h-3-k*6;for(let xx=x;xx<=x+w;xx+=3){const yy=ly+Math.sin(xx/6-tt*4)*1.5;xx===x?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy)}}ctx.stroke();
+   ctx.fillStyle=T.fg;ctx.fillRect(cx+w*0.22,cy-h*0.2,w*0.22,h*0.45)}
+  else if(i===3){const fx=x+w*0.12,mx=x+w*(0.6+0.25*Math.sin(tt*1.6));ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(fx,y+h*0.1);ctx.lineTo(fx,y+h*0.9);ctx.moveTo(mx,y+h*0.1);ctx.lineTo(mx,y+h*0.9);ctx.stroke();
+   ctx.lineWidth=1;ctx.strokeStyle=T.blue;ctx.beginPath();for(let k=0;k<6;k++){const ly=y+h*(0.18+k*0.13);ctx.moveTo(fx,ly);ctx.lineTo(mx,ly)}ctx.stroke()}
+  else if(i===4){const r1=s*0.26,r2=s*0.17,x1=cx-w*0.22,x2=cx+w*0.22,y2=cy-h*0.08;belt(ctx,x1,cy,r1+2,x2,y2,r2+2,tt,T.fg);
+   gear(ctx,x1,cy,r1,10,tt*2,T.fg);gear(ctx,x2,y2,r2,8,-tt*3,T.blue)}
+  else{const cyx=x+w*0.08,cw=w*0.22,ch=h*0.7,cy0=y+h*0.15,pz=cy0+ch*(0.3+0.25*Math.sin(tt*4));ctx.lineWidth=2;ctx.strokeRect(cyx,cy0,cw,ch);
+   ctx.fillRect(cyx+2,pz,cw-4,5);const fx=x+w*0.5,fy=cy,fr=s*0.28,q=tt*4;ctx.beginPath();ctx.moveTo(cyx+cw/2,pz);ctx.lineTo(fx+fr*0.7*Math.cos(q),fy+fr*0.7*Math.sin(q));ctx.stroke();
+   ctx.beginPath();ctx.arc(fx,fy,fr,0,Math.PI*2);ctx.stroke();const kx=x+w*0.78,kw=Math.max(6,w*0.1);ctx.fillRect(kx,y+h*0.05,kw,h*0.95);if(on)smoke(ctx,kx+kw/2,y+h*0.05,t,0.8)}
+  ctx.restore()}
+ function card(ctx,i,x,y,w,h,t){const T=theme(),v=INV[i],on=i<step,cur=i===step-1,a=lit[i]!=null?Math.min(1,(t-lit[i])/0.35):0,sc=on?1+0.06*Math.sin(Math.PI*a):1;
+  ctx.save();ctx.translate(x+w/2,y+h/2);ctx.scale(sc,sc);ctx.translate(-x-w/2,-y-h/2);ctx.globalAlpha=on?1:0.45;
+  rrect(ctx,x,y,w,h,14);ctx.fillStyle=isDark()?"#2c2c2e":"#f5f5f7";ctx.fill();ctx.lineWidth=cur?2.5:1;ctx.strokeStyle=cur?T.blue:on?T.fg:T.axis;ctx.stroke();
+  rrect(ctx,x,y,w,h,14);ctx.clip();
+  itext(ctx,NUM[i]+" "+v.y,x+10,y+18,T.blue,"left","12px ui-monospace,Menlo,monospace");
+  itext(ctx,v.n,x+10,y+37,T.fg,"left","600 14px "+ISANS);itext(ctx,v.p,x+10,y+55,T.fg,"left","12px "+ISANS);
+  icon(ctx,i,x+8,y+66,w-16,Math.max(26,h-74),t,on);ctx.restore()}
+ function pill(ctx,x,y,s,t0,t){const T=theme(),f="600 12px "+ISANS;ctx.save();ctx.font=f;const pw=ctx.measureText(s).width+16,a=Math.min(1,Math.max(0,(t-t0)/0.3)),yy=y-(1-a)*8;
+  ctx.globalAlpha=a;rrect(ctx,x,yy-11,pw,22,11);ctx.fillStyle=T.bg;ctx.fill();ctx.strokeStyle=T.red;ctx.lineWidth=1.5;ctx.stroke();itext(ctx,s,x+8,yy,T.redText,"left",f);ctx.restore()}
+ function arrow(ctx,x1,y1,x2,y2,on){const T=theme(),a=Math.atan2(y2-y1,x2-x1);ctx.save();ctx.strokeStyle=ctx.fillStyle=on?T.fg:T.axis;ctx.lineWidth=on?2:1.2;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2-6*Math.cos(a),y2-6*Math.sin(a));ctx.stroke();ctx.beginPath();ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-8*Math.cos(a-0.45),y2-8*Math.sin(a-0.45));ctx.lineTo(x2-8*Math.cos(a+0.45),y2-8*Math.sin(a+0.45));ctx.closePath();ctx.fill();ctx.restore()}
+ return{
+  text:"18 世纪 60 年代，工业革命首先在英国棉纺织业展开。飞梭提高了织布效率，造成“纱荒”，珍妮纺纱机应运而生；此后纺与织交替领先，不断催生新机器，最终对动力提出要求，改良蒸汽机登上历史舞台。",
+  points:["工业革命首先从英国棉纺织业开始","珍妮机的发明是工业革命开始的标志（统编版表述：“1765 年……珍妮机”）","发明多来自工匠的实践经验","技术发明之间存在连锁反应",
+   "英国率先工业革命的条件：资本（殖民掠夺、海外贸易）、劳动力（圈地运动）、市场、技术、政治前提（君主立宪）"],
+  gk:"统编版《中外历史纲要（下）》第 10 课「影响世界的工业革命」；浙江选考常考工业革命的条件与特点。",
+  mount(ctrl,read){step=0;lit=[];bars=[40,40];ctrl.append(button("推倒第一块",run,true),button("下一步",()=>{stop();adv()}),button("重置",reset));ro=readout([]);read.append(ro);upd()},
+  unmount(){stop();ro=null},
+  draw(ctx,w,h,t){const T=theme(),side=w>=620,cwid=side?150:0,concH=w<500?60:40,chartH=side?0:118,ax=12,aw=w-24-(side?cwid+20:0),top=26,ah=h-top-concH-chartH-8;
+   let gap=22,cw=(aw-5*gap)/6,ch;const grid=cw<100,pos=[];
+   if(!grid){cw=Math.min(170,cw);ch=Math.max(110,Math.min(190,ah));const x0=ax+(aw-6*cw-5*gap)/2,y0=top+Math.max(0,(ah-ch)/2);for(let i=0;i<6;i++)pos.push([x0+i*(cw+gap),y0])}
+   else{const gv=30;cw=Math.min(230,(aw-gap)/2);ch=Math.max(100,Math.min(170,(ah-2*gv)/3));const x0=ax+(aw-2*cw-gap)/2,y0=top+Math.max(0,(ah-3*ch-2*gv)/2);
+    for(let i=0;i<6;i++){const r=i>>1,c=r%2?1-(i%2):i%2;pos.push([x0+c*(cw+gap),y0+r*(ch+gv)])}}
+   for(let i=0;i<5;i++){const[x1,y1]=pos[i],[x2,y2]=pos[i+1],on=i<step;
+    if(Math.abs(y1-y2)<1)x2>x1?arrow(ctx,x1+cw+3,y1+ch/2,x2-3,y2+ch/2,on):arrow(ctx,x1-3,y1+ch/2,x2+cw+3,y2+ch/2,on);
+    else arrow(ctx,x1+cw*0.8,y1+ch+3,x2+cw*0.8,y2-3,on)}
+   for(let i=0;i<6;i++)card(ctx,i,pos[i][0],pos[i][1],cw,ch,t);
+   if(step>=1&&step<6)pill(ctx,pos[step][0]+6,pos[step][1]-4,"瓶颈！"+INV[step-1].tag,lit[step-1],t);
+   const g=tgt();bars=bars.map((v,k)=>v+(g[k]-v)*0.08);
+   const st=step===0?"手工水平":g[0]<g[1]-10?"织布领先 → 缺纱":g[0]>g[1]+10?"纺纱领先 → 织不完":"大体平衡",sc=Math.abs(g[0]-g[1])>10?T.redText:T.goldText;
+   let bx,by,bw,bh;if(side){bw=cwid;bx=w-12-bw;bh=Math.min(320,h-top-concH-20);by=top+Math.max(0,(h-top-concH-bh)/2);
+    itext(ctx,"纺纱 vs 织布",bx+bw/2,by+6,T.fg,"center","600 13px "+ISANS);itext(ctx,st,bx+bw/2,by+26,sc,"center","12px "+ISANS);by+=38;bh-=38}
+   else{bw=Math.min(280,w-24);bx=(w-bw)/2;by=h-concH-chartH;bh=chartH-8;
+    itext(ctx,"纺纱 vs 织布：",bx+bw/2,by+6,T.fg,"right","600 13px "+ISANS);itext(ctx,st,bx+bw/2,by+6,sc,"left","12px "+ISANS);by+=16;bh-=16}
+   barChart(ctx,bx,by,bw,bh,bars.map(Math.round),{max:280,colors:[T.blue,T.gold],labels:["纺纱产量","织布需求"]});
+   if(step>=6){ctx.save();ctx.globalAlpha=Math.min(1,Math.max(0,(t-lit[5]-0.4)/0.6));ctx.font="600 14px "+ISANS;ctx.fillStyle=T.goldText;ctx.textAlign="center";ctx.textBaseline="middle";
+    wrapText(ctx,CON,w/2,h-concH+(w<660?12:20),w-24,18);ctx.restore()}}};
+})();
+CH[1].ready=true;
+MODS[1]=(()=>{
+ let cond=false,rot=false,loc=0,fx=0,ph=0,lt=null,ro=null,alive=false;
+ const LOC=v=>v<50?"河边（水力）":"城市 / 煤矿旁（蒸汽）";
+ function upd(){if(!ro)return;const T=theme();ro.update([
+  ["机型",cond?"瓦特改良蒸汽机（1765 分离式冷凝器）":"纽科门蒸汽机（1712）"],
+  ["效率",cond?"耗煤约 25%（示意），气缸保持高温，活塞快":"耗煤 100%，气缸反复冷热，活塞慢",cond?T.blue:T.redText],
+  ["运动方式",rot?"旋转（联动式 + 齿轮转换，1782–1785）":"往复（只能抽水）",rot?T.blue:T.fg],
+  ["工厂位置",loc<50?"河边水车旁（受地理限制）":"城市 / 煤矿旁：动力不再受地理限制",loc<50?T.redText:T.blue]])}
+ function engine(ctx,bx,by,bw,bh,t){const T=theme(),dk=isDark(),metal=dk?"#636366":"#3a3a3c",s=Math.max(.3,Math.min(bw/460,(bh-44)/260)),ox=bx+(bw-460*s)/2,oy=by+44,M=(a,b)=>[ox+a*s,oy+b*s];
+  const a=0.24*Math.sin(ph),ly=40-75*Math.sin(a),ry=40+75*Math.sin(a),pz=ly+75,hot=cond?1:0.5+0.5*Math.sin(ph);
+  itext(ctx,cond?"瓦特改良蒸汽机（分离式冷凝器）":"纽科门蒸汽机（1712）",bx+8,by+12,T.fg,"left","600 13px "+ISANS);
+  ctx.save();ctx.font="12px "+ISANS;const s1="耗煤量：纽科门 100%",w1=ctx.measureText(s1).width;ctx.restore();
+  itext(ctx,s1,bx+8,by+30,cond?T.fg:T.redText,"left","12px "+ISANS);itext(ctx," / 瓦特 约 25%（示意）",bx+8+w1,by+30,cond?T.blue:T.fg,"left","12px "+ISANS);
+  ctx.save();ctx.translate(ox,oy);ctx.scale(s,s);ctx.lineCap="round";ctx.lineJoin="round";
+  for(let k=0;k<5;k++){const fh=10+7*Math.abs(Math.sin(t*(cond?11:7)+k*1.9)),f0=18+k*13;ctx.fillStyle=T.gold;ctx.beginPath();ctx.moveTo(f0,254);ctx.lineTo(f0+6,254-fh);ctx.lineTo(f0+12,254);ctx.fill();
+   ctx.fillStyle=T.red;ctx.beginPath();ctx.moveTo(f0+3,254);ctx.lineTo(f0+6,254-fh*0.55);ctx.lineTo(f0+9,254);ctx.fill()}
+  ctx.fillStyle=metal;rrect(ctx,10,170,80,66,22);ctx.fill();
+  ctx.strokeStyle=metal;ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(80,190);ctx.lineTo(135,190);ctx.lineTo(135,170);ctx.stroke();
+  ctx.fillStyle=dk?"#d1d1d6":"#e5e5ea";const sp=cond?1.2:0.5;for(let i=0;i<7;i++){const d=((t*sp+i/7)%1)*73,px=d<55?80+d:135,py=d<55?190:190-(d-55);ctx.beginPath();ctx.arc(px,py,2.6,0,Math.PI*2);ctx.fill()}
+  ctx.globalAlpha=.15+.35*hot;ctx.fillStyle=T.red;ctx.fillRect(115,90,40,80);ctx.globalAlpha=(1-hot)*.4;ctx.fillStyle=T.blue;ctx.fillRect(115,90,40,80);ctx.globalAlpha=1;
+  ctx.strokeStyle=metal;ctx.lineWidth=3;ctx.strokeRect(115,90,40,80);ctx.fillStyle=metal;ctx.fillRect(117,pz,36,8);ctx.beginPath();ctx.moveTo(135,pz);ctx.lineTo(135,ly);ctx.stroke();
+  if(!cond){ctx.strokeStyle=T.blue;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(98,150);ctx.lineTo(115,150);ctx.stroke();
+   if(Math.sin(ph)<0){ctx.fillStyle=T.blue;for(let k=0;k<6;k++){ctx.beginPath();ctx.arc(120+k*6,pz+12+((t*60+k*9)%(158-pz-12)),1.8,0,Math.PI*2);ctx.fill()}}}
+  else{ctx.strokeStyle=metal;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(155,160);ctx.lineTo(182,160);ctx.lineTo(182,196);ctx.stroke();ctx.fillStyle=T.blue;rrect(ctx,168,195,28,38,6);ctx.fill()}
+  ctx.fillStyle=metal;ctx.fillRect(206,40,8,196);ctx.strokeStyle=metal;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(135,ly);ctx.lineTo(285,ry);ctx.stroke();
+  ctx.fillStyle=T.gold;ctx.beginPath();ctx.arc(210,40,5,0,Math.PI*2);ctx.fill();
+  const MX=[360,398,436];
+  if(rot){const px=300+20*Math.cos(ph),py=170+20*Math.sin(ph),ma=ph*14/11;
+   belt(ctx,300,170,14,MX[0],215,11,t*(cond?2:1),metal);belt(ctx,MX[0],215,11,MX[1],215,11,t*(cond?2:1),metal);belt(ctx,MX[1],215,11,MX[2],215,11,t*(cond?2:1),metal);
+   gear(ctx,300,170,40,16,ph,metal);ctx.strokeStyle=T.fg;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(285,ry);ctx.lineTo(px,py);ctx.stroke();
+   MX.forEach((x,k)=>{gear(ctx,x,215,11,8,ma*(k%2?-1:1),T.blue)})}
+  else{ctx.strokeStyle=T.fg;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(285,ry);ctx.lineTo(285,ry+150);ctx.stroke();ctx.fillStyle=metal;ctx.fillRect(273,222,24,16);
+   ctx.globalAlpha=.25;MX.forEach(x=>gear(ctx,x,215,11,8,0,metal));ctx.globalAlpha=1}
+  ctx.globalAlpha=rot?1:.3;ctx.strokeStyle=metal;ctx.lineWidth=1.5;MX.forEach(x=>{ctx.strokeRect(x-12,166,24,32);ctx.beginPath();for(let k=0;k<4;k++){ctx.moveTo(x-7+k*4.7,170);ctx.lineTo(x-7+k*4.7,190)}ctx.stroke()});
+  ctx.restore();
+  const L=(s0,p,col,al)=>itext(ctx,s0,M(p[0],p[1])[0],M(p[0],p[1])[1],col||T.fg,al||"center","12px "+ISANS);
+  L("锅炉",[50,204]);L("蒸汽",[107,178]);L("气缸",[112,100],T.fg,"right");L("横梁（摇杆）",[210,20]);
+  if(cond)L("冷凝器",[182,246],T.blue);else L("冷水喷入",[96,138],T.blue,"right");
+  if(rot){L("飞轮",[300,224]);L("纺纱机",[398,246])}else L("往复：抽水",[285,250])}
+ function scene(ctx,bx,by,bw,bh,t){const T=theme(),dk=isDark(),gy=by+bh-30,rw=bw*0.16,near=fx<0.5;
+  itext(ctx,"工厂选址",bx+8,by+12,T.fg,"left","600 13px "+ISANS);
+  itext(ctx,loc<50?"工厂只能建在河边":"动力不再受地理限制",bx+8,by+30,loc<50?T.redText:T.blue,"left","600 12px "+ISANS);
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(bx,gy+.5);ctx.lineTo(bx+bw,gy+.5);ctx.stroke();
+  ctx.fillStyle=T.blue;ctx.globalAlpha=.22;ctx.fillRect(bx+4,gy-2,rw,12);ctx.globalAlpha=1;ctx.strokeStyle=T.blue;ctx.lineWidth=1.5;ctx.beginPath();
+  for(let k=0;k<2;k++)for(let xx=0;xx<=rw;xx+=3){const yy=gy+1+k*5+Math.sin(xx/6-t*3)*1.2;xx?ctx.lineTo(bx+4+xx,yy):ctx.moveTo(bx+4+xx,yy)}ctx.stroke();
+  const wr=Math.max(10,Math.min(22,bh*0.12)),wx=bx+4+rw+wr,wy=gy-wr,wa=near?t*1.5:0;ctx.strokeStyle=T.fg;ctx.lineWidth=2;ctx.beginPath();ctx.arc(wx,wy,wr,0,Math.PI*2);
+  for(let k=0;k<8;k++){const q=wa+k*Math.PI/4;ctx.moveTo(wx,wy);ctx.lineTo(wx+wr*Math.cos(q),wy+wr*Math.sin(q))}ctx.stroke();
+  const ux=bx+bw*0.8,uw=(bw*0.2-6)/4,bhh=Math.min(90,bh*0.4);ctx.fillStyle=dk?"#48484a":"#8e8e93";[.55,.85,.65,1].forEach((k,i)=>ctx.fillRect(ux+i*uw+1,gy-bhh*k,uw-2,bhh*k));
+  ctx.fillStyle=T.fg;ctx.beginPath();ctx.moveTo(ux-28,gy);ctx.lineTo(ux-17,gy-12);ctx.lineTo(ux-6,gy);ctx.fill();ctx.restore();
+  const fw=Math.min(90,bw*0.24),fh=Math.min(40,bh*0.2),x0=wx+wr+6,x1=ux-fw-34,fxp=x0+(x1-x0)*fx;
+  const tops=factory(ctx,fxp,gy-fh,fw,fh,{chimneys:2,lit:fx>0.5?0.8:0.3});if(fx>0.5)tops.forEach(p=>smoke(ctx,p.x,p.y,t,fx));
+  itext(ctx,"河边（水力）",bx+4,gy+16,T.blue,"left","12px "+ISANS);itext(ctx,"城市 / 煤矿旁（蒸汽）",bx+bw-4,gy+16,T.fg,"right","12px "+ISANS)}
+ function chart(ctx,bx,by,bw,bh){const T=theme(),hw=(bw-16)/2;
+  itext(ctx,"英国煤产量（万吨）",bx,by+8,T.fg,"left","600 12px "+ISANS);itext(ctx,"铁产量（千吨）",bx+hw+16,by+8,T.fg,"left","600 12px "+ISANS);
+  itext(ctx,"示意数据",bx+bw,by+8,T.goldText,"right","12px "+ISANS);
+  barChart(ctx,bx,by+18,hw,bh-18,[300,1000,5000],{max:5000,colors:[isDark()?"#8e8e93":"#3a3a3c"],labels:[1700,1800,1850]});
+  barChart(ctx,bx+hw+16,by+18,hw,bh-18,[17,2000],{max:2000,colors:[theme().gold],labels:[1740,1850]})}
+ return{
+  text:"1785 年，瓦特改良的蒸汽机投入使用，提供了更加便利的动力，推动了机器的普及和发展。人类社会由此进入“蒸汽时代”。蒸汽动力摆脱了对水力、风力和畜力的依赖，工厂可以集中建在城市。",
+  points:["瓦特改良蒸汽机（分离式冷凝器、联动式），1785 年投入使用","人类进入“蒸汽时代”","蒸汽机推动煤炭、冶金、机器制造业发展","动力革命使工厂摆脱地理限制，促进城市化","科学与技术开始结合（瓦特与格拉斯哥大学的联系）"],
+  gk:"统编版《中外历史纲要（下）》第 10 课；浙江选考常考蒸汽机的意义（“蒸汽时代”）、第一次工业革命的特点（工匠发明为主）。",
+  mount(ctrl,read){cond=false;rot=false;loc=0;fx=0;ph=0;lt=null;alive=true;
+   ctrl.append(toggle("分离式冷凝器（瓦特 1765）",cond,v=>{cond=v;upd()}),toggle("联动式（双向）+ 齿轮转换（1782–1785）",rot,v=>{rot=v;upd()}),
+    slider("工厂选址",0,100,1,loc,LOC,v=>{loc=v;upd()}));ro=readout([]);read.append(ro);upd()},
+  unmount(){alive=false;ro=null;lt=null},
+  draw(ctx,w,h,t){if(!alive)return;const dt=lt==null?0:Math.min(.05,t-lt);lt=t;ph+=dt*(cond?4.2:1.6);fx+=(loc/100-fx)*.08;
+   const side=w>=640,chH=Math.min(130,Math.max(100,h*0.24)),m=12,top=8,av=h-chH-top-12;
+   if(side){const ew=(w-2*m)*0.58;engine(ctx,m,top,ew,av,t);scene(ctx,m+ew+16,top,w-2*m-ew-16,av,t)}
+   else{const eh=av*0.6;engine(ctx,m,top,w-2*m,eh,t);scene(ctx,m,top+eh+6,w-2*m,av-eh-6,t)}
+   chart(ctx,m,h-chH-4,w-2*m,chH)}};
+})();
+CH[2].ready=true;
+MODS[2]=(()=>{
+ let yr=1750,rel=false,d0=null,timer=null,ro=null,alive=false;
+ const now=()=>performance.now()/1000,S=()=>(yr-1750)/100,stage=()=>yr<1765?0:yr<1779?1:2,
+  ORG=()=>yr<1771?"手工工场（工场手工业）为主":yr<1830?"工厂兴起（1771 阿克莱特克隆福德工厂）":"工厂成为主要生产组织形式",
+  CLS=()=>yr<1771?"工场主与雇工":yr<1830?"工业资产阶级与无产阶级逐渐形成":"工业资产阶级与无产阶级两大对立阶级形成",
+  EFF=["手工 1×","珍妮机 约 8×（示意）","骡机工厂 约 100×（示意）"];
+ const dp=()=>d0==null?0:Math.min(1,(now()-d0)/6),clk=p=>{const m=Math.round((5+14*p)*60);return Math.floor(m/60)+":"+String(m%60).padStart(2,"0")};
+ function upd(){if(!ro)return;const T=theme(),r=[["年份",yr+" 年"],["生产组织形式",ORG(),yr<1771?T.fg:T.blue],["效率倍数",EFF[stage()],T.blue],["社会阶级",CLS(),yr<1771?T.fg:T.goldText]];
+  if(d0!=null)r.push(["工厂时钟",clk(dp())],["劳动时间","工作 14 小时左右，童工、女工普遍（示意）",T.redText],["工厂纪律","按时上下班、罚款制度",T.redText]);ro.update(r)}
+ function stop(){if(timer){clearInterval(timer);timer=null}}
+ function day(){stop();d0=now();upd();timer=setInterval(()=>{upd();if(dp()>=1)stop()},200)}
+ function wrapC(ctx,s,x,y,mw,col){ctx.save();ctx.font="12px "+ISANS;ctx.fillStyle=col;ctx.textBaseline="middle";ctx.textAlign="left";const e=wrapText(ctx,s,x,y,mw,16);ctx.restore();return e}
+ function wheel(ctx,x,y,r,a,col){ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+  for(let k=0;k<6;k++){const q=a+k*Math.PI/3;ctx.moveTo(x,y);ctx.lineTo(x+r*Math.cos(q),y+r*Math.sin(q))}ctx.moveTo(x,y);ctx.lineTo(x,y+r+5);ctx.stroke();ctx.restore()}
+ function shop(ctx,x,y,w,h,t){const T=theme(),s=S();
+  itext(ctx,"手工工场（工场手工业）",x+8,y+12,T.fg,"left","600 13px "+ISANS);
+  let sy=y+30;if(rel)sy=wrapC(ctx,"工场主雇工人，分工协作但仍靠手工",x+8,sy,w-16,T.fg);
+  const fy=y+h-22,sh=fy-sy;if(sh<30)return;ctx.save();ctx.globalAlpha=1-0.6*s;
+  ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.strokeRect(x+6,sy,w-12,sh);
+  const cw=(w-24)/3,rh=(sh-8)/2,wh=Math.min(34,rh*0.62),wr=Math.max(4,Math.min(wh*0.4,cw*0.2));
+  for(let i=0;i<6;i++){const c=i%3,r=i/3|0,cx=x+12+cw*(c+0.5),by=sy+4+rh*(r+1);
+   worker(ctx,cx-wr-3,by,wh,T.fg);wheel(ctx,cx+wr*0.7,by-wr-5,wr,t*0.7+i,T.fg)}
+  ctx.restore();itext(ctx,"手摇纺车 · 各自手工 · 速度慢",x+w/2,y+h-10,T.redText,"center","12px "+ISANS)}
+ function mill(ctx,x,y,w,h,t){const T=theme(),s=S(),metal=isDark()?"#8e8e93":"#3a3a3c",n=2+Math.round(6*s),p=dp();
+  itext(ctx,"工厂",x+8,y+12,T.fg,"left","600 13px "+ISANS);
+  let sy=y+30;
+  if(rel){worker(ctx,x+w-42,y+24,22,T.gold);ctx.fillStyle=T.gold;ctx.fillRect(x+w-47,y-1,10,5);worker(ctx,x+w-18,y+24,22,T.red);
+   sy=wrapC(ctx,"资本家拥有机器，工人出卖劳动力；",x+8,sy,w-60,T.fg);const f="12px "+ISANS;ctx.save();ctx.font=f;const a="工业资产阶级",b="与",c="无产阶级",wa=ctx.measureText(a).width,wb=ctx.measureText(b).width,wc=ctx.measureText(c).width;ctx.restore();
+   itext(ctx,a,x+8,sy,T.goldText,"left",f);itext(ctx,b,x+8+wa,sy,T.fg,"left",f);itext(ctx,c,x+8+wa+wb,sy,T.redText,"left",f);itext(ctx,"形成",x+8+wa+wb+wc,sy,T.fg,"left",f);sy+=16}
+  const fy=y+h-8,sh=fy-sy;if(sh<40)return;
+  const fw=(w-16)*(0.5+0.5*s),bh=Math.max(12,sh*0.16),bty=sy+sh*0.26;
+  factory(ctx,x+8,bty,fw,bh,{chimneys:1+Math.round(2*s),lit:0.3+0.6*s}).forEach(q=>smoke(ctx,q.x,q.y,t,0.3+0.5*s));
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x+4,fy+.5);ctx.lineTo(x+w-4,fy+.5);ctx.stroke();ctx.restore();
+  const gr=Math.max(8,Math.min(22,sh*0.13)),ex=x+12+gr,ey=fy-gr-14;
+  ctx.fillStyle=metal;rrect(ctx,x+8,ey+gr*0.4,gr*2,fy-ey-gr*0.4,4);ctx.fill();
+  const ax=ex+gr+12,sp=(x+w-8-ax)/n,mr=Math.max(4,Math.min(11,sp*0.22)),M=[];for(let i=0;i<n;i++)M.push(ax+sp*(i+0.3));
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1;M.forEach(mx=>ctx.strokeRect(mx-mr-2,ey-mr-2,mr*2+4,fy-ey+mr+2));ctx.restore();
+  belt(ctx,ex,ey,gr*0.6,M[0],ey,mr,t*2,metal);for(let i=0;i<n-1;i++)belt(ctx,M[i],ey,mr,M[i+1],ey,mr,t*2,metal);
+  gear(ctx,ex,ey,gr,14,t*1.5,metal);M.forEach((mx,i)=>gear(ctx,mx,ey,mr,8,t*3*(i%2?-1:1),T.blue));
+  itext(ctx,"蒸汽机",ex,ey-gr-9,T.fg,"center","12px "+ISANS);
+  const wh=Math.max(14,Math.min(30,sh*0.3)),door=x+w-4;
+  M.forEach((mx,i)=>{const tx=mx+sp*0.55,e=d0==null?1:Math.max(0,Math.min(1,(p-0.012*i)/0.1)),hh=i%3===2?wh*0.7:wh;
+   if(d0!=null&&e<=0)return;worker(ctx,door+(tx-door)*e,fy,hh,T.fg)})}
+ function clock(ctx,x,y,t){const T=theme(),p=dp(),hr=5+14*p,r=18,cx=x+r+2,cy=y+r+4;
+  ctx.save();ctx.fillStyle=T.bg;ctx.strokeStyle=T.fg;ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.lineCap="round";
+  const ha=(hr%12)/12*Math.PI*2-Math.PI/2,ma=(hr%1)*Math.PI*2-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*0.5*Math.cos(ha),cy+r*0.5*Math.sin(ha));
+  ctx.moveTo(cx,cy);ctx.lineTo(cx+r*0.8*Math.cos(ma),cy+r*0.8*Math.sin(ma));ctx.stroke();ctx.restore();
+  const tx=cx+r+12,tm=clk(p);itext(ctx,tm,tx,y+8,T.fg,"left","600 15px ui-monospace,Menlo,monospace");
+  if(p<0.08||(p>=1&&now()-d0<6.8))itext(ctx,"当！钟响"+(p<1?"，上工":"，下工"),tx+64,y+8,T.goldText,"left","600 12px "+ISANS);
+  itext(ctx,"工作 14 小时左右，童工、女工普遍（示意）",tx,y+26,T.redText,"left","600 12px "+ISANS);
+  itext(ctx,"工厂纪律：按时上下班、罚款制度",tx,y+42,T.redText,"left","12px "+ISANS)}
+ return{
+  text:"工业革命使机器生产取代手工劳动，工厂取代手工工场成为主要的生产组织形式。1771 年，阿克莱特在克隆福德建立了第一家使用水力纺纱机的工厂，常被视为近代工厂的开端。工厂制度带来了生产效率的飞跃，也带来严格的劳动纪律和恶劣的劳动条件；社会日益分裂为工业资产阶级和无产阶级两大对立阶级。",
+  points:["工厂制度确立：机器生产代替手工劳动","生产效率大幅提高，资本主义最终战胜封建主义","工业资产阶级和无产阶级两大对立阶级形成","工人工作时间长、条件恶劣，童工女工普遍","工人运动兴起（下一章、第 5 章详讲）"],
+  gk:"统编版《中外历史纲要（下）》第 10 课 · 选择性必修2 第 5 课「工业革命与工厂制度」；浙江选考常考工厂制度的影响、社会结构变化。",
+  mount(ctrl,read){yr=1750;rel=false;d0=null;alive=true;
+   ctrl.append(slider("年份",1750,1850,1,yr,v=>v+" 年",v=>{yr=v;upd()}),button("工厂的一天",day,true),toggle("生产关系",rel,v=>{rel=v}));
+   ro=readout([]);read.append(ro);upd()},
+  unmount(){stop();alive=false;ro=null;d0=null},
+  draw(ctx,w,h,t){if(!alive)return;const T=theme(),m=12,dayH=d0!=null?58:0,chH=Math.min(120,Math.max(96,h*0.2)),top=8+dayH,av=h-chH-top-10;
+   if(d0!=null)clock(ctx,m,6,t);
+   if(w>=600){const pw=(w-2*m-14)/2;shop(ctx,m,top,pw,av,t);mill(ctx,m+pw+14,top,pw,av,t);
+    ctx.save();ctx.strokeStyle=T.grid;ctx.beginPath();ctx.moveTo(w/2+.5,top);ctx.lineTo(w/2+.5,top+av);ctx.stroke();ctx.restore()}
+   else{const ph=(av-10)/2;shop(ctx,m,top,w-2*m,ph,t);mill(ctx,m,top+ph+10,w-2*m,ph,t)}
+   const bw=Math.min(380,w-24),bx=(w-bw)/2,by=h-chH-4,st=stage();
+   itext(ctx,"人均日产纱量（示意倍数）",bx+bw/2,by+6,T.fg,"center","600 12px "+ISANS);
+   barChart(ctx,bx,by+14,bw,chH-14,[1,8,100],{max:100,colors:[0,1,2].map(k=>k===st?T.blue:(isDark()?"#636366":"#c7c7cc")),labels:["手工","珍妮机","骡机工厂"]})}};
+})();
+CH[3].ready=true;
+MODS[3]=(()=>{
+ let yr=1800,imp=false,i0=null,r0=null,timer=null,ro=null,alive=false;
+ const now=()=>performance.now()/1000,el=()=>r0==null?0:now()-r0,
+  lerp=(P,x)=>{if(x<=P[0][0])return P[0][1];for(let i=1;i<P.length;i++)if(x<=P[i][0]){const a=P[i-1],b=P[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])}return P[P.length-1][1]},
+  DAYS=[[1800,730],[1830,600],[1850,330],[1872,80],[1900,60]],RAIL=[[1800,0],[1825,40],[1830,100],[1850,10000],[1900,30000]],
+  days=()=>lerp(DAYS,yr),km=()=>Math.round(lerp(RAIL,yr)/10)*10,
+  fd=d=>d>=365?"约 "+String(+(d/365).toFixed(1))+" 年":"约 "+Math.round(d)+" 天",
+  metal=()=>isDark()?"#d1d1d6":"#3a3a3c",
+  IMP=["原料与产品运输更快更便宜","人员流动加快、城市化加速","世界市场联系更紧密","殖民扩张更便利"];
+ function puffs(ctx,x,y,t){ctx.save();ctx.fillStyle=isDark()?"#8e8e93":"#aeaeb2";for(let i=0;i<3;i++){const p=(t*0.8+i/3)%1;ctx.globalAlpha=0.7*(1-p);ctx.beginPath();ctx.arc(x-p*16,y-p*12,2+p*4,0,Math.PI*2);ctx.fill()}ctx.restore()}
+ function cart(ctx,x,y,t,mv){const c=metal();ctx.save();ctx.fillStyle=c;ctx.strokeStyle=c;ctx.lineWidth=1.5;
+  rrect(ctx,x-30,y-15,16,10,2);ctx.fill();ctx.beginPath();ctx.ellipse(x-6,y-10,6,3.5,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.moveTo(x-1,y-12);ctx.lineTo(x+2,y-17);ctx.stroke();const k=mv?Math.sin(t*14)*2:0;
+  ctx.beginPath();ctx.moveTo(x-9,y-7);ctx.lineTo(x-10+k,y);ctx.moveTo(x-3,y-7);ctx.lineTo(x-2-k,y);ctx.moveTo(x-14,y-10);ctx.lineTo(x-12,y-10);ctx.stroke();
+  [x-26,x-18].forEach(wx=>{ctx.beginPath();ctx.arc(wx,y-3,3,0,Math.PI*2);ctx.stroke()});ctx.restore()}
+ function train(ctx,x,y,t,mv){const T=theme();ctx.save();ctx.fillStyle=T.blue;rrect(ctx,x-30,y-13,22,8,2);ctx.fill();ctx.fillRect(x-34,y-18,8,13);ctx.fillRect(x-12,y-19,4,7);
+  ctx.strokeStyle=metal();ctx.lineWidth=1.5;[x-29,x-21,x-12].forEach(wx=>{ctx.beginPath();ctx.arc(wx,y-3,3,0,Math.PI*2);ctx.stroke()});ctx.restore();if(mv)puffs(ctx,x-10,y-22,t)}
+ function hull(ctx,x,y,col){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x-32,y-8);ctx.lineTo(x,y-8);ctx.lineTo(x-6,y);ctx.lineTo(x-28,y);ctx.closePath();ctx.fill()}
+ function sail(ctx,x,y){const c=metal();ctx.save();hull(ctx,x,y,c);ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x-16,y-8);ctx.lineTo(x-16,y-30);ctx.stroke();
+  ctx.fillStyle=isDark()?"#8e8e93":"#c7c7cc";ctx.beginPath();ctx.moveTo(x-15,y-29);ctx.lineTo(x-4,y-11);ctx.lineTo(x-15,y-11);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(x-17,y-26);ctx.lineTo(x-27,y-11);ctx.lineTo(x-17,y-11);ctx.closePath();ctx.fill();ctx.restore()}
+ function steam(ctx,x,y,t,mv){const T=theme();ctx.save();hull(ctx,x,y,T.blue);ctx.fillStyle=T.blue;ctx.fillRect(x-24,y-14,14,6);ctx.fillStyle=metal();ctx.fillRect(x-19,y-22,4,8);ctx.restore();if(mv)puffs(ctx,x-17,y-25,t)}
+ const LAND={title:"陆路赛道 · 约 50 km（1830 利物浦—曼彻斯特铁路）",a:"利物浦",b:"曼彻斯特",u:"小时",tot:5,sc:1.2,
+   v:[{n:"马车",s:"约 10 km/h",d:6,r:"用时 约 5 小时",ic:cart},{n:"火车",s:"约 40–50 km/h",d:1.8,r:"用时 约 1.5 小时（火箭号）",ic:train}]},
+  SEA={title:"海路赛道 · 约 5500 km（1838 汽船横渡大西洋）",a:"英国 · 利物浦",b:"美国 · 纽约",u:"天",tot:35,sc:6/35,sea:1,
+   v:[{n:"帆船",s:"30–40 天",d:6,r:"用时 约 35 天",ic:sail},{n:"汽船",s:"1838 · 约 15 天",d:6*15/35,r:"用时 约 15 天",ic:steam}]};
+ function upd(){if(!ro)return;const T=theme(),e=el(),r=[["交通工具","马车 / 火车「火箭号」（史蒂芬孙）· 帆船 / 汽船（1807 富尔顿「克莱蒙特号」）"],["速度","马车约 10 km/h · 火车约 40–50 km/h",T.blue]];
+  r.push(["用时",r0==null?"陆路：马车约 5 小时 vs 火车约 1.5 小时；海路：帆船约 35 天 vs 汽船约 15 天":"陆路已过 "+Math.min(5,e/1.2).toFixed(1)+" 小时 · 海路已过 "+Math.round(Math.min(35,e*35/6))+" 天",T.blue]);
+  r.push(["年份",yr+" 年"],["铁路里程","英国约 "+km().toLocaleString()+" km（示意）",T.blue],["环游世界",fd(days())]);
+  if(yr>=1872)r.push(["1872","凡尔纳《八十天环游地球》：文学作品，可作史料辨析",T.goldText]);ro.update(r)}
+ function stop(){if(timer){clearInterval(timer);timer=null}}
+ function race(){stop();r0=now();upd();timer=setInterval(()=>{upd();if(el()>6.3)stop()},200)}
+ function lane(ctx,x,y,w,h,o,t){const T=theme(),e=el(),x0=x+76,x1=x+w-8,rows=[y+h*0.55,y+h*0.9];
+  if(o.sea){ctx.save();ctx.fillStyle=isDark()?"rgba(41,151,255,.08)":"rgba(0,113,227,.06)";rrect(ctx,x0-4,y+20,x1-x0+8,h-18,8);ctx.fill();ctx.restore();itext(ctx,"大西洋",(x0+x1)/2,y+30,T.blue,"center","12px "+ISANS)}
+  itext(ctx,o.title,x+4,y+8,T.fg,"left","600 13px "+ISANS);
+  itext(ctx,o.a,x0,y+30,T.fg,"left","12px "+ISANS);itext(ctx,o.b,x1,y+30,T.fg,"right","12px "+ISANS);
+  if(r0!=null)itext(ctx,"已过 "+(o.u==="天"?Math.round(Math.min(o.tot,e/o.sc)):Math.min(o.tot,e/o.sc).toFixed(1))+" "+o.u,x1,y+8,T.blue,"right","12px ui-monospace,Menlo,monospace");
+  o.v.forEach((v,i)=>{const ly=rows[i],p=Math.min(1,e/v.d),px=x0+34+(x1-x0-34)*p;
+   ctx.save();ctx.strokeStyle=T.axis;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(x0,ly+.5);ctx.lineTo(x1,ly+.5);ctx.stroke();ctx.restore();
+   itext(ctx,v.n,x+4,ly-14,T.fg,"left","600 12px "+ISANS);itext(ctx,v.s,x+4,ly+1,T.fg,"left","12px "+ISANS);
+   v.ic(ctx,px,ly,t,r0!=null&&p<1);if(r0!=null&&p>=1)itext(ctx,v.r,px-40,ly-12,T.blue,"right","600 12px "+ISANS)})}
+ function cards(ctx,x,y,w,h){const T=theme(),cols=w>=440?2:1,gw=(w-6*(cols-1))/cols,ch=Math.min(28,(h-6*(4/cols-1))/(4/cols));
+  IMP.forEach((s,k)=>{const a=Math.max(0,Math.min(1,(now()-i0-0.35*k)/0.3));if(a<=0)return;const cx=x+(k%cols)*(gw+6),cy=y+Math.floor(k/cols)*(ch+6);
+   ctx.save();ctx.globalAlpha=a;ctx.translate(cx+gw/2,cy+ch/2);ctx.scale(0.9+0.1*a,0.9+0.1*a);ctx.fillStyle=isDark()?"rgba(255,255,255,.08)":"rgba(0,0,0,.05)";rrect(ctx,-gw/2,-ch/2,gw,ch,8);ctx.fill();
+   itext(ctx,(k+1)+" · "+s,-gw/2+10,0,k===3?T.redText:T.fg,"left",(k===3?"600 ":"")+"12px "+ISANS);ctx.restore()})}
+ function world(ctx,x,y,w,h){const T=theme(),d=days(),side=w>h*1.3,cw=side?w*0.5:w,chH=side?h-28:Math.min(120,Math.max(90,h*0.32)),gh=side?h-24:h-chH-24;
+  itext(ctx,"世界缩小 · "+yr+" 年",x+4,y+8,T.fg,"left","600 13px "+ISANS);
+  const rm=Math.max(10,Math.min(cw/2-8,(gh-50)/2)),r=rm*Math.max(0.25,Math.sqrt(d/730)),cx=x+cw/2,cy=y+24+rm+4;
+  ctx.save();ctx.fillStyle=isDark()?"rgba(41,151,255,.1)":"rgba(0,113,227,.07)";ctx.strokeStyle=T.blue;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.lineWidth=1;ctx.globalAlpha=0.5;[0.35,0.7].forEach(f=>{ctx.beginPath();ctx.ellipse(cx,cy,r*f,r,0,0,Math.PI*2);ctx.stroke()});ctx.beginPath();ctx.moveTo(cx-r,cy);ctx.lineTo(cx+r,cy);ctx.stroke();ctx.restore();
+  ctx.save();ctx.setLineDash([3,4]);ctx.strokeStyle=T.axis;ctx.beginPath();ctx.arc(cx,cy,rm,0,Math.PI*2);ctx.stroke();ctx.restore();
+  let ty=cy+rm+14;itext(ctx,"环游世界 "+fd(d)+(yr>1872?"（示意）":""),cx,ty,T.blue,"center","600 12px "+ISANS);
+  if(yr>=1872){itext(ctx,"1872 凡尔纳《八十天环游地球》",cx,ty+16,T.fg,"center","12px "+ISANS);itext(ctx,"文学作品，可作史料辨析",cx,ty+31,T.goldText,"center","12px "+ISANS)}
+  const bx=side?x+cw+8:x+8,bw=side?w-cw-16:w-16,by=side?y+24:y+h-chH;
+  itext(ctx,"英国铁路里程（km，示意）",bx+bw/2,by+4,T.fg,"center","600 12px "+ISANS);
+  barChart(ctx,bx,by+12,bw,chH-12,[100,10000,30000],{max:30000,colors:[1830,1850,1900].map(Y=>yr>=Y?T.blue:(isDark()?"#636366":"#c7c7cc")),labels:["1830","1850","1900"]})}
+ return{
+  text:"工业革命推动了交通运输的革命：1807 年富尔顿的汽船试航成功，1825 年英国建成第一条铁路，史蒂芬孙的蒸汽机车投入运营。火车与汽船大大缩短了时空距离，加强了世界各地的联系。",
+  points:["1807 年富尔顿发明汽船","1814 年史蒂芬孙发明蒸汽机车，1825 年第一条铁路通车","交通革命缩短了时空距离，推动城市化与世界市场形成","交通工具的进步也被用于殖民扩张","交通方式变化深刻改变了人们的生活方式（选择性必修2 第 12 课）"],
+  gk:"统编版《中外历史纲要（下）》第 10 课 · 选择性必修2 第 12 课「水陆交通的变迁」；浙江选考常考交通革命与社会生活变迁。",
+  mount(ctrl,read){yr=1800;imp=false;i0=null;r0=null;alive=true;
+   ctrl.append(button("开赛",race,true),slider("年份",1800,1900,1,yr,v=>v+" 年",v=>{yr=v;upd()}),toggle("交通革命的影响",imp,v=>{imp=v;i0=v?now():null}));
+   ro=readout([]);read.append(ro);upd()},
+  unmount(){stop();alive=false;ro=null;r0=null;i0=null;imp=false},
+  draw(ctx,w,h,t){if(!alive)return;const T=theme(),m=12,wide=w>=600,rw=wide?(w-2*m-16)*0.62:w-2*m,rh=wide?h-16:(h-24)*0.58,
+    ch=imp?(rw>=440?62:136):0,lh=Math.max(80,(rh-ch-12)/2);
+   lane(ctx,m,8,rw,lh,LAND,t);lane(ctx,m,8+lh+6,rw,lh,SEA,t);if(imp)cards(ctx,m,8+2*lh+14,rw,ch);
+   if(wide){ctx.save();ctx.strokeStyle=T.grid;ctx.beginPath();ctx.moveTo(m+rw+8.5,8);ctx.lineTo(m+rw+8.5,h-8);ctx.stroke();ctx.restore();world(ctx,m+rw+16,8,w-2*m-rw-16,h-16)}
+   else world(ctx,m,8+rh+8,w-2*m,h-rh-16)}};
+})();
+CH[4].ready=true;
+MODS[4]=(()=>{
+ let yr=1760,ill=false,ref=false,i0=null,view=0,sel=-1,lit=[],ro=null,alive=false,hits=[],jb=null;
+ const now=()=>performance.now()/1000,
+  lerp=(P,x)=>{if(x<=P[0][0])return P[0][1];for(let i=1;i<P.length;i++)if(x<=P[i][0]){const a=P[i-1],b=P[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])}return P[P.length-1][1]},
+  POP=[[1760,1.7],[1801,7.5],[1850,30]],URB=[[1750,20],[1851,50]],S=()=>(yr-1760)/90,
+  pop=()=>{const p=lerp(POP,yr);return p<10?p.toFixed(1):String(Math.round(p))},urb=()=>Math.round(lerp(URB,yr)),
+  rnd=k=>{const v=Math.sin(k*127.1+311.7)*43758.5453;return v-Math.floor(v)},
+  ILL=["住房拥挤（贫民窟）","污水横流","霍乱流行（1832、1848）","空气污染","平均寿命短"],
+  EV=[{y:"1811—1816",s:"卢德运动",n:"英国卢德运动",d:"工人捣毁机器——把机器当作敌人，自发斗争",ic:0},
+   {y:"1831、1834",s:"里昂起义",n:"法国里昂工人起义",d:"丝织工人两次起义，喊出“工作着生活，或者战斗着死去”",ic:1},
+   {y:"1836—1848",s:"宪章运动",n:"英国宪章运动",d:"多次递交全国请愿书，要求普选权",ic:2},
+   {y:"1844",s:"西里西亚起义",n:"德意志西里西亚纺织工人起义",d:"纺织工人反抗工厂主的残酷剥削",ic:1}],
+  YE=[[1760,"手工工场为主，城市尚小"],[1771,"工厂兴起，人口涌入城市"],[1811,"卢德运动兴起"],[1830,"利物浦—曼彻斯特铁路通车"],[1832,"霍乱流行"],[1833,"英国《工厂法》"],[1836,"宪章运动开始"],[1848,"霍乱再起 ·《公共卫生法》"]],
+  all3=()=>lit[1]&&lit[2]&&lit[3];
+ function upd(){if(!ro)return;const T=theme(),ev=sel>=0?EV[sel].y+" "+EV[sel].n:YE.filter(e=>e[0]<=yr).pop()[1];
+  ro.update([["年份",yr+" 年"],["曼彻斯特人口","约 "+pop()+" 万"+(yr>1801?"（示意）":""),T.blue],["城市人口比例","约 "+urb()+"%（英国）",T.blue],["当前事件",ev,sel>=0?T.blue:T.fg]])}
+ function wrapC(ctx,s,x,y,mw,col,f){ctx.save();ctx.font=f||"12px "+ISANS;ctx.fillStyle=col;ctx.textBaseline="middle";ctx.textAlign="left";const e=wrapText(ctx,s,x,y,mw,16);ctx.restore();return e}
+ function tag(ctx,s,x,y,col,stroke,a){const f="12px "+ISANS;ctx.save();ctx.font=f;const pw=ctx.measureText(s).width+16;ctx.globalAlpha=a==null?1:a;rrect(ctx,x,y-11,pw,22,11);ctx.fillStyle=theme().bg;ctx.fill();
+  ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();itext(ctx,s,x+8,y,col,"left",f);ctx.restore();return pw}
+ function city(ctx,x,y,w,h,t){const T=theme(),s=S(),gy=y+h-6,hc=isDark()?["#636366","#48484a"]:["#48484a","#6e6e73"];
+  ctx.save();rrect(ctx,x,y,w,h,12);ctx.clip();ctx.fillStyle=isDark()?"rgba(41,151,255,.06)":"rgba(0,113,227,.05)";ctx.fillRect(x,y,w,h);
+  ctx.fillStyle="rgba(120,120,125,"+(0.4*s).toFixed(3)+")";ctx.fillRect(x,y,w,h);
+  const nf=1+Math.round(3*s),fw=Math.min(80,w*0.16),fh=Math.min(46,h*0.16);
+  for(let i=0;i<nf;i++){const fx=x+w*(0.08+0.23*i);factory(ctx,fx,gy-fh,fw,fh,{chimneys:1+(i%2),lit:0.3+0.6*s}).forEach(q=>smoke(ctx,q.x,q.y,t+i*0.7,0.3+0.7*s))}
+  const n=Math.round(10+70*s);for(let k=0;k<n;k++){const hw=9+rnd(k)*10,hh=(8+rnd(k+99)*14)*(0.8+0.5*s),hx=x+4+rnd(k+7)*(w-hw-8),by=gy-(k%3)*2;
+   ctx.fillStyle=hc[k%2];ctx.fillRect(hx,by-hh,hw,hh);ctx.beginPath();ctx.moveTo(hx-1,by-hh);ctx.lineTo(hx+hw/2,by-hh-hw*0.45);ctx.lineTo(hx+hw+1,by-hh);ctx.closePath();ctx.fill()}
+  ctx.restore();ctx.save();ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(x,gy+.5);ctx.lineTo(x+w,gy+.5);ctx.stroke();ctx.restore();
+  itext(ctx,"曼彻斯特的变迁 · "+yr+" 年",x+10,y+14,T.fg,"left","600 13px "+ISANS);
+  itext(ctx,"人口 约 "+pop()+" 万"+(yr>1801?"（示意）":""),x+10,y+34,T.blue,"left","600 14px "+ISANS);
+  const cw=Math.min(220,w*0.42),cx=x+w-cw-8,chH=Math.min(120,Math.max(90,h*0.36)),u=urb();
+  itext(ctx,"英国城市人口比例（%）",cx+cw/2,y+12,T.fg,"center","600 12px "+ISANS);
+  barChart(ctx,cx,y+20,cw,chH-12,[20,u,50],{max:60,colors:[isDark()?"#636366":"#c7c7cc",T.blue,T.gold],labels:["1750",String(yr),"1851"]});
+  itext(ctx,"1851 年英国城市人口",x+w-10,y+chH+18,T.goldText,"right","600 12px "+ISANS);itext(ctx,"超过农村人口",x+w-10,y+chH+34,T.goldText,"right","600 12px "+ISANS);
+  let ly=y+58;if(ref){tag(ctx,"1833《工厂法》：限制童工工时",x+10,ly,T.blue,T.blue);tag(ctx,"1848《公共卫生法》",x+10,ly+28,T.blue,T.blue);ly+=56}
+  if(ill&&i0!=null){const cols=w>=700?3:2,gw=(w-20)/cols,y0=Math.max(ly+6,y+chH+52);
+   ILL.forEach((s0,k)=>{const a=Math.max(0,Math.min(1,(now()-i0-0.45*k)/0.3));if(a<=0)return;const c=k%cols,r=Math.floor(k/cols),px=x+10+c*gw,py=y0+r*30-(1-a)*6;
+    ctx.save();ctx.globalAlpha=a;ctx.fillStyle=T.bg;ctx.strokeStyle=T.red;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(px+10,py,10,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
+    itext(ctx,"!",px+10,py,T.redText,"center","600 13px "+ISANS);tag(ctx,s0,px+24,py,k===4?T.redText:T.fg,T.red,a)})}}
+ function icon(ctx,k,x,y,s,t){const T=theme();ctx.save();ctx.strokeStyle=ctx.fillStyle=T.fg;ctx.lineWidth=2;ctx.lineCap="round";
+  if(k===0){gear(ctx,x+s*0.38,y+s*0.68,s*0.26,9,t*0.5,isDark()?"#8e8e93":"#3a3a3c");const a=-0.9+0.8*Math.abs(Math.sin(t*3)),px=x+s*0.92,py=y+s*0.9,L=s*0.62;
+   const hx=px+L*Math.cos(Math.PI+a),hy=py+L*Math.sin(Math.PI+a);ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(hx,hy);ctx.stroke();ctx.save();ctx.translate(hx,hy);ctx.rotate(a);ctx.fillRect(-4,-9,8,18);ctx.restore()}
+  else if(k===2){ctx.lineWidth=1.5;ctx.strokeRect(x+s*0.2,y+2,s*0.6,s-4);ctx.beginPath();ctx.ellipse(x+s/2,y+2,s*0.32,3,0,0,Math.PI*2);ctx.ellipse(x+s/2,y+s-2,s*0.32,3,0,0,Math.PI*2);ctx.stroke();
+   ctx.globalAlpha=.5;ctx.beginPath();for(let i=1;i<6;i++){const ly=y+i*s/6.5+4;ctx.moveTo(x+s*0.28,ly);ctx.lineTo(x+s*0.72,ly)}ctx.stroke()}
+  else{worker(ctx,x+s*0.4,y+s,s*0.8,T.fg);const fx=x+s*0.62,wv=Math.sin(t*4)*2;ctx.beginPath();ctx.moveTo(fx,y+s*0.55);ctx.lineTo(fx,y+2);ctx.stroke();ctx.fillStyle=T.red;
+   ctx.beginPath();ctx.moveTo(fx,y+2);ctx.quadraticCurveTo(fx+s*0.2,y+2+wv,fx+s*0.36,y+4);ctx.lineTo(fx+s*0.36,y+s*0.24);ctx.quadraticCurveTo(fx+s*0.2,y+s*0.22+wv,fx,y+s*0.22);ctx.closePath();ctx.fill()}
+  ctx.restore()}
+ function tl(ctx,x,y,w,h,t){const T=theme(),ay=y+48,x0=x+48,sp=(w-96)/3;
+  itext(ctx,"工人运动时间轴 · 点击节点",x+4,y+10,T.fg,"left","600 13px "+ISANS);itext(ctx,"三大工人运动 "+[1,2,3].filter(i=>lit[i]).length+"/3",x+w-4,y+10,T.blue,"right","12px "+ISANS);
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+8,ay);ctx.lineTo(x+w-8,ay);ctx.stroke();ctx.restore();
+  EV.forEach((e,i)=>{const nx=x0+sp*i,on=!!lit[i];hits.push({x:nx,y:ay,i});
+   ctx.save();ctx.beginPath();ctx.arc(nx,ay,9,0,Math.PI*2);ctx.fillStyle=on?(i?T.blue:T.fg):T.bg;ctx.fill();ctx.lineWidth=i===sel?3:1.5;ctx.strokeStyle=i===sel?T.gold:on?T.blue:T.axis;ctx.stroke();ctx.restore();
+   itext(ctx,e.y,nx,ay-20,T.fg,"center","12px ui-monospace,Menlo,monospace");itext(ctx,e.s,nx,ay+22,on?T.blue:T.fg,"center","600 12px "+ISANS)});
+  let cy=ay+42;
+  if(sel>=0){const e=EV[sel],ch=72;ctx.save();rrect(ctx,x,cy,w,ch,12);ctx.fillStyle=isDark()?"rgba(255,255,255,.07)":"rgba(0,0,0,.04)";ctx.fill();ctx.restore();
+   icon(ctx,e.ic,x+10,cy+12,48,t);itext(ctx,e.y+" · "+e.n,x+70,cy+16,T.blue,"left","600 13px "+ISANS);
+   const ey=wrapC(ctx,e.d,x+70,cy+36,w-82,T.fg);if(sel===2)itext(ctx,"要求普选权",x+70,Math.min(cy+ch-8,ey),T.goldText,"left","600 12px "+ISANS);cy+=ch+12}
+  else{itext(ctx,"点击节点：从自发的卢德运动，到三大工人运动",x+4,cy+8,T.fg,"left","12px "+ISANS);cy+=26}
+  if(all3()){cy=wrapC(ctx,"无产阶级作为独立的政治力量登上历史舞台",x+4,cy+6,w-8,T.goldText,"600 14px "+ISANS);
+   itext(ctx,"呼唤科学理论的指导 →",x+4,cy+8,T.fg,"left","12px "+ISANS);ctx.save();ctx.font="600 12px "+ISANS;const bw=ctx.measureText("第 6 章 马克思主义的诞生").width+24;ctx.restore();
+   const bx=Math.min(x+150,x+w-bw-4),by=w<420?cy+22:cy-10;jb={x:bx,y:by,w:bw,h:36};rrect(ctx,bx,by,bw,36,18);ctx.save();ctx.strokeStyle=T.blue;ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+   itext(ctx,"第 6 章 马克思主义的诞生",bx+12,by+18,T.blue,"left","600 12px "+ISANS)}}
+ function day(ctx,x,y,w,h,t){const T=theme(),by=y+48,bw=w-16,bx=x+8,X=hr=>bx+bw*hr/24,seg=[[0,5,"睡眠"],[5,6,""],[6,20,"做工 约 14 小时"],[20,24,"回贫民窟"]];
+  itext(ctx,"工人的一天（示意）",x+4,y+10,T.fg,"left","600 13px "+ISANS);
+  seg.forEach(([a,b,l],i)=>{ctx.save();ctx.fillStyle=i===2?T.red:(isDark()?"#48484a":"#d1d1d6");ctx.globalAlpha=i===2?0.25:1;ctx.fillRect(X(a),by,X(b)-X(a)-1,26);ctx.restore();
+   if(l)itext(ctx,l,(X(a)+X(b))/2,by+13,i===2?T.redText:T.fg,"center",(i===2?"600 ":"")+"12px "+ISANS)});
+  [0,5,6,12,20,24].forEach(hr=>itext(ctx,hr+":00",X(hr),by+40,T.fg,"center","12px ui-monospace,Menlo,monospace"));
+  const p=(t%12)/12*24;ctx.save();ctx.strokeStyle=T.blue;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X(p),by-6);ctx.lineTo(X(p),by+32);ctx.stroke();ctx.restore();
+  let ly=by+66;ly=wrapC(ctx,"5 点起床赶工，工厂纪律严苛、迟到罚款；工资微薄，童工、女工普遍",x+4,ly,w-8,T.redText);wrapC(ctx,"住在拥挤潮湿的地下室和贫民窟，缺少清洁饮水",x+4,ly,w-8,T.fg)}
+ return{
+  text:"工业革命推动了城市化：工厂集中、人口涌入城市，1851 年英国城市人口首次超过农村。城市迅速扩张也带来住房拥挤、环境污染、疾病流行等“城市病”。工人生活困苦，从捣毁机器的卢德运动发展到三大工人运动，无产阶级登上政治舞台。",
+  points:["工业革命推动城市化，英国 1851 年城市人口超过农村","城市问题：住房、卫生、污染、贫富分化","工人运动由自发到自觉：卢德运动 → 三大工人运动","三大工人运动标志无产阶级作为独立政治力量登上历史舞台","政府逐步立法改善劳动与卫生条件"],
+  gk:"统编版《中外历史纲要（下）》第 10–11 课 · 选择性必修2 第 11 课「近代以来的城市化进程」；浙江选考常考城市化与工人运动。",
+  mount(ctrl,read){yr=1760;ill=false;ref=false;i0=null;view=0;sel=-1;lit=[];jb=null;alive=true;
+   ctrl.append(slider("年份",1760,1850,1,yr,v=>v+" 年",v=>{yr=v;upd()}),toggle("城市病",ill,v=>{ill=v;i0=v?now():null}),toggle("改革回应",ref,v=>{ref=v}),
+    chips([{label:"工人运动",value:0},{label:"工人的一天",value:1}],0,v=>{view=v;jb=null}));
+   ro=readout([]);read.append(ro);upd()},
+  unmount(){alive=false;ro=null;i0=null;ill=false;sel=-1;hits=[];jb=null},
+  pointer(e,type,x,y){if(type!=="down"||!alive)return false;
+   if(jb&&x>=jb.x&&x<=jb.x+jb.w&&y>=jb.y-4&&y<=jb.y+jb.h+4){location.hash="#6";return true}
+   if(view===0)for(const n of hits)if(Math.hypot(n.x-x,n.y-y)<=22){sel=n.i;if(!lit[n.i])lit[n.i]=now();upd();return true}return false},
+  draw(ctx,w,h,t){if(!alive)return;hits=[];jb=null;const T=theme(),m=12,th=Math.min(h*0.55,Math.max(250,h*0.42)),ch=h-th-24;
+   city(ctx,m,8,w-2*m,ch,t);ctx.save();ctx.strokeStyle=T.grid;ctx.beginPath();ctx.moveTo(m,ch+16.5);ctx.lineTo(w-m,ch+16.5);ctx.stroke();ctx.restore();
+   view===0?tl(ctx,m,ch+24,w-2*m,th-4,t):day(ctx,m,ch+24,w-2*m,th-4,t)}};
+})();
+CH[5].ready=true;
+MODS[5]=(()=>{
+ let nec=6,sel=-1,ev=-1,m0=null,ro=null,alive=false,hits=[],paths=[];
+ const now=()=>performance.now()/1000,cl=v=>Math.max(0,Math.min(1,v)),
+  SRC=[{n:"①德国古典哲学",p:"黑格尔辩证法 · 费尔巴哈唯物主义",o:"辩证唯物主义和历史唯物主义",c:"blue"},
+   {n:"②英国古典政治经济学",p:"亚当·斯密、李嘉图的劳动价值论",o:"剩余价值学说",c:"teal"},
+   {n:"③英法空想社会主义",p:"圣西门、傅立叶、欧文",o:"科学社会主义",c:"purple",note:"欧文的新和谐公社实验失败"},
+   {n:"现实之泉",p:"工业革命使资本主义矛盾暴露 + 三大工人运动",o:"呼唤科学理论的指导",c:"gold"}],
+  EV=[{y:"1848",s:"《宣言》",n:"《共产党宣言》发表",d:"“全世界无产者，联合起来！”"},{y:"1864",s:"第一国际",n:"第一国际成立",d:"国际工人协会在伦敦成立，马克思参与领导"},
+   {y:"1867",s:"《资本论》",n:"《资本论》第一卷出版",d:"系统阐述剩余价值学说"},{y:"1871",s:"巴黎公社",n:"巴黎公社",d:"第一次无产阶级建立政权的尝试，存在 72 天"}],
+  rate=()=>Math.round((12-nec)/nec*100),prog=i=>m0==null?0:cl((now()-m0-i*0.9)/0.9),
+  bz=(P,p)=>{const q=1-p;return[q*q*q*P[0][0]+3*q*q*p*P[1][0]+3*q*p*p*P[2][0]+p*p*p*P[3][0],q*q*q*P[0][1]+3*q*q*p*P[1][1]+3*q*p*p*P[2][1]+p*p*p*P[3][1]]};
+ function upd(){if(!ro)return;const T=theme(),s=sel>=0?SRC[sel]:null;
+  ro.update([["选中来源",s?s.n.replace(/^[①②③]/,""):"—",s?T.blue:T.fg],["核心内容",s?(sel<3?"→ ":"")+s.o:"—",s?T.blue:T.fg],
+   ["当前事件",ev>=0?EV[ev].y+" "+EV[ev].n:"—",ev===0?T.goldText:ev>=0?T.blue:T.fg],["剩余价值率",(12-nec)+" / "+nec+" = "+rate()+"%",T.redText]])}
+ function wrapC(ctx,s,x,y,mw,col,f){ctx.save();ctx.font=f||"12px "+ISANS;ctx.fillStyle=col;ctx.textBaseline="middle";ctx.textAlign="left";const e=wrapText(ctx,s,x,y,mw,16);ctx.restore();return e}
+ function river(ctx,x,y,w,h,t){const T=theme(),dh=h-76,cx=x+w*0.5,ex=x+w-6,cy=y+dh*0.6,fx=cx+(ex-cx)*0.3;
+  paths=[0.2,0.5,0.8].map(k=>{const sy=y+18+(dh-30)*k;return[[x+6,sy],[x+w*0.3,sy],[x+w*0.34,cy],[cx,cy]]});
+  paths.push([[fx,y+30],[fx,y+dh*0.3],[fx,cy-30],[fx,cy-4]]);
+  const k=[0,1,2,3].filter(i=>prog(i)>=1).length,done=k===4;
+  ctx.save();ctx.lineCap="round";ctx.strokeStyle=T.blue;ctx.globalAlpha=0.12+0.12*k;ctx.lineWidth=10+5*k;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(ex,cy);ctx.stroke();
+  if(!k){ctx.globalAlpha=1;ctx.strokeStyle=T.axis;ctx.lineWidth=1;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(cx,cy-6);ctx.lineTo(ex,cy-6);ctx.moveTo(cx,cy+6);ctx.lineTo(ex,cy+6);ctx.stroke()}ctx.restore();
+  paths.forEach((P,i)=>{const col=T[SRC[i].c],on=sel<0||sel===i,a=prog(i);ctx.save();ctx.lineCap="round";ctx.strokeStyle=col;
+   ctx.globalAlpha=on?0.45:0.15;ctx.lineWidth=sel===i?12:8;ctx.beginPath();ctx.moveTo(...P[0]);ctx.bezierCurveTo(...P[1],...P[2],...P[3]);ctx.stroke();
+   if(a>0){ctx.globalAlpha=1;ctx.lineWidth=4;ctx.beginPath();for(let s=0;s<=20;s++){const q=bz(P,a*s/20);s?ctx.lineTo(...q):ctx.moveTo(...q)}ctx.stroke()}
+   ctx.fillStyle=col;ctx.globalAlpha=on?1:0.3;for(let j=0;j<6;j++){const q=bz(P,(t*0.25+j/6+i*0.11)%1);ctx.beginPath();ctx.arc(q[0],q[1],2.6,0,Math.PI*2);ctx.fill()}
+   if(a>=1){ctx.globalAlpha=1;for(let j=0;j<5;j++){const p=(t*0.18+j/5+i*0.05)%1;ctx.beginPath();ctx.arc(cx+p*(ex-cx),cy+(i-1.5)*4,2.4,0,Math.PI*2);ctx.fill()}}ctx.restore();
+   const tc=sel===i?T.blue:T.fg,f=(sel===i?"600 ":"")+"12px "+ISANS;
+   if(i<3){itext(ctx,SRC[i].n,x+6,P[0][1]-14,tc,"left",f);if(SRC[i].note)itext(ctx,SRC[i].note,x+6,P[0][1]+14,T.redText,"left","12px "+ISANS)}
+   else itext(ctx,"现实之泉 ↓ 工人运动呼唤理论",fx-4,y+14,tc,fx-x>w*0.55?"center":"left",f)});
+  itext(ctx,k?"马克思主义":"主河（待汇流）",ex,cy-20,k?T.blue:T.fg,"right","600 12px "+ISANS);
+  if(done){const al=cl((now()-m0-3.6)/0.5);ctx.save();ctx.globalAlpha=al;itext(ctx,"1848 年 2 月《共产党宣言》发表",ex,cy+26,T.goldText,"right","600 13px "+ISANS);
+   itext(ctx,"标志马克思主义诞生",ex,cy+44,T.goldText,"right","600 12px "+ISANS);ctx.restore()}
+  const by=y+dh+6,bh=h-dh-6;ctx.save();rrect(ctx,x,by,w,bh,12);ctx.fillStyle=isDark()?"rgba(255,255,255,.07)":"rgba(0,0,0,.04)";ctx.fill();ctx.restore();
+  if(sel>=0){const s=SRC[sel];itext(ctx,s.n,x+10,by+16,T.blue,"left","600 13px "+ISANS);const ly=wrapC(ctx,s.p,x+10,by+34,w-20,T.fg);
+   itext(ctx,(sel<3?"→ 发展为：":"→ ")+s.o,x+10,Math.min(by+bh-12,ly+2),T.blue,"left","600 12px "+ISANS)}
+  else{wrapC(ctx,"点击任一支流查看来源；按「汇流」，看四股水流汇成马克思主义",x+10,by+20,w-20,T.fg);itext(ctx,"三个来源 + 现实之泉",x+10,by+bh-14,T.blue,"left","12px "+ISANS)}}
+ function work(ctx,x,y,w,h,t){const T=theme(),bx=x+8,bw=w-16,by=y+40,X=hr=>bx+bw*hr/12,sur=12-nec;
+  itext(ctx,"剩余价值是怎么来的？",x+4,y+10,T.fg,"left","600 13px "+ISANS);itext(ctx,"工作日 12 小时（示意）",x+w-4,y+10,T.fg,"right","12px "+ISANS);
+  ctx.save();ctx.globalAlpha=0.25;ctx.fillStyle=T.blue;ctx.fillRect(X(0),by,X(nec)-X(0)-1,30);ctx.fillStyle=T.red;ctx.fillRect(X(nec),by,X(12)-X(nec),30);ctx.restore();
+  itext(ctx,"必要 "+nec+" 小时",(X(0)+X(nec))/2,by+15,T.blue,"center","600 12px "+ISANS);itext(ctx,"剩余 "+sur+" 小时",(X(nec)+X(12))/2,by+15,T.redText,"center","600 12px "+ISANS);
+  [0,nec,12].forEach(hr=>itext(ctx,String(hr),X(hr),by+42,T.fg,"center","12px ui-monospace,Menlo,monospace"));
+  const p=(t%6)/6*12;ctx.save();ctx.strokeStyle=p<nec?T.blue:T.red;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X(p),by-6);ctx.lineTo(X(p),by+36);ctx.stroke();ctx.restore();
+  let ly=by+64;ly=wrapC(ctx,"必要劳动：创造相当于工资的价值",x+4,ly,w-8,T.blue);ly=wrapC(ctx,"剩余劳动：创造剩余价值，被资本家无偿占有",x+4,ly,w-8,T.redText);
+  ly=wrapC(ctx,"剩余价值率 = 剩余劳动 / 必要劳动 = "+sur+" / "+nec+" = "+rate()+"%",x+4,ly+4,w-8,T.redText,"600 13px "+ISANS);
+  wrapC(ctx,"马克思揭示了资本主义剥削的秘密（注：简化示意）",x+4,ly+4,w-8,T.fg)}
+ function tl(ctx,x,y,w,h){const T=theme(),ay=y+44,x0=x+40,sp=(w-80)/3;itext(ctx,"马克思主义的传播 · 点击节点",x+4,y+8,T.fg,"left","600 13px "+ISANS);
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+8,ay);ctx.lineTo(x+w-8,ay);ctx.stroke();ctx.restore();
+  EV.forEach((e,i)=>{const nx=x0+sp*i;hits.push({x:nx,y:ay,i});ctx.save();ctx.beginPath();ctx.arc(nx,ay,8,0,Math.PI*2);ctx.fillStyle=i===ev?(i?T.blue:T.gold):T.bg;ctx.fill();
+   ctx.lineWidth=1.5;ctx.strokeStyle=i===ev?T.gold:T.axis;ctx.stroke();ctx.restore();
+   itext(ctx,e.y,nx,ay-18,T.fg,"center","12px ui-monospace,Menlo,monospace");itext(ctx,e.s,nx,ay+20,i===ev?T.blue:T.fg,"center","600 12px "+ISANS)});
+  const cy=ay+34;if(ev>=0){const e=EV[ev];ctx.save();rrect(ctx,x,cy,w,h-(cy-y),12);ctx.fillStyle=isDark()?"rgba(255,255,255,.07)":"rgba(0,0,0,.04)";ctx.fill();ctx.restore();
+   itext(ctx,e.y+" · "+e.n,x+10,cy+14,ev===0?T.goldText:T.blue,"left","600 13px "+ISANS);wrapC(ctx,e.d,x+10,cy+32,w-20,T.fg)}
+  else itext(ctx,"1848 →  1864 → 1867 → 1871：从理论诞生到第一次夺权尝试",x+4,cy+10,T.fg,"left","12px "+ISANS)}
+ return{
+  text:"19 世纪 40 年代，资本主义社会矛盾日益暴露，工人运动蓬勃发展，迫切需要科学理论的指导。马克思和恩格斯批判继承德国古典哲学、英国古典政治经济学和空想社会主义，1848 年发表《共产党宣言》，标志着马克思主义的诞生。",
+  points:["马克思主义诞生的条件：社会历史条件（工业革命、工人运动）、理论来源（三大来源）","1848 年《共产党宣言》发表标志马克思主义诞生","马克思主义三个组成部分：哲学、政治经济学、科学社会主义","剩余价值学说揭示了资本主义剥削的本质","1871 年巴黎公社是无产阶级建立政权的第一次伟大尝试"],
+  gk:"统编版《中外历史纲要（下）》第 11 课「马克思主义的诞生与传播」；浙江选考高频：马克思主义诞生的背景、《共产党宣言》的意义。",
+  mount(ctrl,read){nec=6;sel=-1;ev=-1;m0=null;alive=true;
+   ctrl.append(button("汇流",()=>{m0=now()},true),button("重置",()=>{m0=null;sel=-1;ev=-1;upd()}),
+    slider("必要劳动时间",4,8,0.5,nec,v=>v+" 小时",v=>{nec=v;upd()}));ro=readout([]);read.append(ro);upd()},
+  unmount(){alive=false;m0=null;ro=null;hits=[];paths=[]},
+  pointer(e,type,x,y){if(type!=="down"||!alive)return false;
+   for(const n of hits)if(Math.hypot(n.x-x,n.y-y)<=22){ev=n.i;upd();return true}
+   for(let i=0;i<paths.length;i++)for(let s=0;s<=24;s++){const q=bz(paths[i],s/24);if(Math.hypot(q[0]-x,q[1]-y)<=16){sel=i;upd();return true}}return false},
+  draw(ctx,w,h,t){if(!alive)return;hits=[];const T=theme(),m=12,tlH=124,H1=h-tlH-20;
+   if(w>=720){const rw=(w-2*m)*0.6;river(ctx,m,8,rw,H1,t);work(ctx,m+rw+16,8,w-2*m-rw-16,H1,t)}
+   else{const wh=200,rh=Math.max(220,H1-wh-10);river(ctx,m,8,w-2*m,rh,t);work(ctx,m,rh+18,w-2*m,wh,t)}
+   ctx.save();ctx.strokeStyle=T.grid;ctx.beginPath();ctx.moveTo(m,h-tlH-7.5);ctx.lineTo(w-m,h-tlH-7.5);ctx.stroke();ctx.restore();
+   tl(ctx,m,h-tlH,w-2*m,tlH-6)}};
+})();
+CH[6].ready=true;
+MODS[6]=(()=>{
+ let yr=1860,elec=false,tbl=false,m0=null,ro=null,alive=false,last=-1,shown=0;
+ const now=()=>performance.now()/1000,cl=v=>Math.max(0,Math.min(1,v)),ease=p=>p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2,
+  INV=[{y:1866,n:"发电机",p:"西门子（德）",d:"机械能转化为电能，电力成为新能源"},{y:1876,n:"电话",p:"贝尔（美）",d:"声音沿电线远距离即时传送"},
+   {y:1879,n:"白炽灯",p:"爱迪生（美）",d:"电灯照明普及，城市的夜晚被点亮"},{y:1882,n:"输电网与电车",p:"爱迪生电站 · 西门子电车",d:"电力远距离输送，电车走上街头"},
+   {y:1885,n:"汽车",p:"本茨（1885）、戴姆勒（1886）",d:"内燃机驱动的汽车诞生，推动石油工业"},{y:1903,n:"飞机",p:"莱特兄弟（美）",d:"人类首次实现有动力的飞行"}],
+  T2=[["开始时间","18 世纪 60 年代","19 世纪 70 年代"],["主要国家","英国为主","多国同时进行，美、德领先"],["发明者","工匠为主","科学家与技术结合，实验室"],
+   ["标志","改良蒸汽机","电力广泛应用"],["组织形式","工厂","垄断组织：卡特尔、托拉斯"],["新兴产业","纺织、冶金、交通","电力、化学、石油、汽车"]],
+  HS=[.55,.8,.45,.7,.95,.6,.5,.85,.65,.75,.4,.9,.58,.72];
+ const idx=()=>{let k=-1;INV.forEach((v,i)=>{if(v.y<=yr)k=i});return k};
+ function wr(ctx,s,x,y,mw,col,f,lh){ctx.save();ctx.font=f||"12px "+ISANS;ctx.fillStyle=col;ctx.textBaseline="middle";ctx.textAlign="left";const e=wrapText(ctx,s,x,y,mw,lh||16);ctx.restore();return e}
+ function upd(){if(!ro)return;const T=theme(),k=idx();
+  ro.update([["年份",yr+" 年",T.blue],["最新发明",k>=0?INV[k].y+" "+INV[k].n:"—（煤气灯时代）",k>=0?T.goldText:T.fg],
+   ["主要能源",yr<1866?"煤炭 · 蒸汽":yr<1885?"煤炭 + 电力":"电力 + 石油（内燃机）",T.fg],["组织形式",m0!=null?"垄断组织：卡特尔、托拉斯":"工厂（自由竞争）",m0!=null?T.redText:T.fg]])}
+ function city(ctx,x,y,w,h,t){const T=theme(),gy=y+h-26,lit=yr<1879?0:cl((yr-1878)/24),n=Math.max(6,Math.round(w/58)),bw=w/n,tops=[];
+  ctx.save();rrect(ctx,x,y,w,h,14);ctx.clip();ctx.fillStyle="#1f2a44";ctx.fillRect(x,y,w,h);
+  for(let i=0;i<n;i++){const bh=(gy-y-60)*HS[i%HS.length],bx=x+i*bw+2,by=gy-bh;tops.push([bx+bw/2-2,by]);ctx.fillStyle="#141a2b";ctx.fillRect(bx,by,bw-4,bh);
+   const rows=Math.floor((bh-8)/16),cw=(bw-4)/3;for(let r=0;r<rows;r++)for(let c=0;c<3;c++){const on=((i*31+r*7+c*13)%97)/97<lit;
+    ctx.fillStyle=on?"#f2c14e":"#2b3550";ctx.fillRect(bx+c*cw+cw*.3,by+8+r*16,cw*.4,8)}}
+  if(yr>=1876){ctx.strokeStyle="rgba(160,190,255,.6)";ctx.lineWidth=1;for(let i=0;i+1<tops.length;i++){const[a,b]=tops[i],[c,d]=tops[i+1];ctx.beginPath();ctx.moveTo(a,b);ctx.quadraticCurveTo((a+c)/2,Math.max(b,d)+14,c,d);ctx.stroke()}}
+  ctx.fillStyle="#3a3a3c";ctx.fillRect(x,gy,w,y+h-gy);
+  for(let lx=x+35;lx<x+w;lx+=70){ctx.fillStyle="#6e6e73";ctx.fillRect(lx-1,gy-16,2,16);ctx.fillStyle="#f2c14e";ctx.globalAlpha=yr<1879?1:.6;ctx.beginPath();ctx.arc(lx,gy-18,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
+  if(yr>=1882){ctx.fillStyle="#8e8e93";for(let px=x+10;px<x+w;px+=80)ctx.fillRect(px-1.5,gy-36,3,36);ctx.strokeStyle="#8e8e93";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,gy-34);ctx.lineTo(x+w,gy-34);ctx.stroke();
+   const tx=x+((t*38)%(w+80))-40;ctx.fillStyle=T.gold;rrect(ctx,tx-20,gy-10,40,14,3);ctx.fill();ctx.strokeStyle=T.gold;ctx.beginPath();ctx.moveTo(tx,gy-10);ctx.lineTo(tx+6,gy-34);ctx.stroke()}
+  const car=(cx,cy,col)=>{ctx.fillStyle=col;rrect(ctx,cx-12,cy-9,24,7,2);ctx.fill();ctx.fillRect(cx-5,cy-14,10,5);ctx.fillStyle="#0b0b0c";[-7,7].forEach(d=>{ctx.beginPath();ctx.arc(cx+d,cy-2,3,0,Math.PI*2);ctx.fill()})};
+  if(yr>=1885)car(x+((t*55+90)%(w+60))-30,y+h-3,T.red);if(yr>=1886)car(x+w-((t*45)%(w+60))+30,y+h-3,"#e5e5ea");
+  if(yr>=1903){const px=x+((t*50)%(w+100))-50,py=y+44+Math.sin(t)*4;ctx.strokeStyle="#e5e5ea";ctx.lineWidth=2;ctx.beginPath();
+   ctx.moveTo(px-16,py);ctx.lineTo(px+16,py);ctx.moveTo(px-14,py-7);ctx.lineTo(px+14,py-7);ctx.moveTo(px-6,py-7);ctx.lineTo(px-6,py);ctx.moveTo(px+6,py-7);ctx.lineTo(px+6,py);ctx.moveTo(px-24,py-3);ctx.lineTo(px+20,py-3);ctx.stroke()}
+  ctx.restore();itext(ctx,"一座城市的夜晚",x+10,y+14,T.fg,"left","600 13px "+ISANS);itext(ctx,yr+" 年",x+10,y+34,T.blue,"left","600 16px ui-monospace,Menlo,monospace");
+  const k=idx();if(k!==last){if(k>last)shown=now();last=k}
+  if(k>=0){const v=INV[k],a=cl((now()-shown)/0.35),cw=Math.min(230,w*0.58),cx=x+w-cw-8,cy=y+8;ctx.save();ctx.globalAlpha=a;ctx.translate(cx+cw,cy);ctx.scale(.9+.1*a,.9+.1*a);ctx.translate(-cx-cw,-cy);
+   rrect(ctx,cx,cy,cw,74,12);ctx.fillStyle=T.bg;ctx.globalAlpha=a*.94;ctx.fill();ctx.globalAlpha=a;ctx.strokeStyle=T.gold;ctx.lineWidth=1.5;ctx.stroke();
+   itext(ctx,v.y+" · "+v.n,cx+10,cy+14,T.goldText,"left","600 13px "+ISANS);itext(ctx,v.p,cx+10,cy+32,T.fg,"left","12px "+ISANS);wr(ctx,v.d,cx+10,cy+50,cw-20,T.fg);ctx.restore()}
+  else itext(ctx,"街上只有零星的煤气灯",x+10,y+54,T.goldText,"left","12px "+ISANS)}
+ function panel(ctx,x,y,w,h){const T=theme();ctx.save();rrect(ctx,x,y,w,h,12);ctx.fillStyle=isDark()?"rgba(255,255,255,.07)":"rgba(0,0,0,.04)";ctx.fill();ctx.restore();
+  if(tbl){itext(ctx,"两次工业革命对比",x+10,y+14,T.fg,"left","600 13px "+ISANS);const c0=w*0.22,c1=(w-c0-20)/2,X=[x+10,x+10+c0,x+10+c0+c1],rh=(h-32)/7;
+   [["项目",T.fg],["第一次",T.goldText],["第二次",T.blue]].forEach((c,i)=>itext(ctx,c[0],X[i],y+30+rh/2,c[1],"left","600 12px "+ISANS));
+   T2.forEach((r,j)=>{const ry=y+30+rh*(j+1);ctx.save();ctx.strokeStyle=T.grid;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x+8,ry);ctx.lineTo(x+w-8,ry);ctx.stroke();ctx.restore();
+    r.forEach((s,i)=>{const lines=Math.ceil(s.length*12/(c1-8));wr(ctx,s,X[i],ry+rh/2-(Math.min(lines,3)-1)*7,(i?c1:c0)-8,i===0?T.fg:i===1?T.goldText:T.blue,i?"12px "+ISANS:"600 12px "+ISANS,14)})});return}
+  itext(ctx,"新能源 · 新动力",x+10,y+14,T.fg,"left","600 13px "+ISANS);itext(ctx,elec?"电气时代 ▶":"◀ 蒸汽时代",x+w-10,y+14,T.blue,"right","12px "+ISANS);
+  const lw=(w-30)*0.44,lx=x+10,rx=lx+lw+10,rw=w-30-lw,iy=y+52;
+  ctx.save();ctx.globalAlpha=elec?.35:1;gear(ctx,lx+18,iy,14,10,now()*(elec?0:1),"#8e8e93");smoke(ctx,lx+40,iy-6,now(),.5);
+  let ly=itext(ctx,"蒸汽时代",lx,iy+30,T.goldText,"left","600 13px "+ISANS)||iy+50;["能源：煤炭","动力：蒸汽机","笨重，需要锅炉","动力难以远距离传输"].forEach(s=>{ly=wr(ctx,"· "+s,lx,ly,lw,T.fg)});ctx.restore();
+  ctx.save();ctx.globalAlpha=elec?1:.35;ctx.fillStyle=T.gold;ctx.beginPath();[[10,-16],[0,2],[8,2],[-2,18],[2,-2],[-6,-2]].forEach((p,i)=>i?ctx.lineTo(rx+16+p[0],iy+p[1]):ctx.moveTo(rx+16+p[0],iy+p[1]));ctx.closePath();ctx.fill();
+  ctx.strokeStyle=T.blue;ctx.lineWidth=2;ctx.beginPath();ctx.arc(rx+48,iy,11,0,Math.PI*2);ctx.stroke();
+  ly=iy+30;itext(ctx,"电气时代",rx,ly,T.blue,"left","600 13px "+ISANS);ly+=20;["发电机（1866 西门子）、电动机","可远距离输电"].forEach(s=>{ly=wr(ctx,"· "+s,rx,ly,rw,T.fg)});
+  itext(ctx,"内燃机",rx,ly+2,T.blue,"left","600 13px "+ISANS);ly+=22;["汽油 / 柴油，轻便高效","→ 汽车、飞机、石油工业"].forEach(s=>{ly=wr(ctx,"· "+s,rx,ly,rw,T.fg)});ctx.restore()}
+ function trust(ctx,x,y,w,h,t){const T=theme(),p=m0==null?0:cl((now()-m0)/2.6),e=ease(cl(p/0.85)),fy=y+48;itext(ctx,"小实验 · 垄断的形成",x+4,y+10,T.fg,"left","600 13px "+ISANS);
+  if(p<1)for(let i=0;i<8;i++){const bx=x+w*(i+.5)/8,tg=x+w*(i<4?.3:.7),fx=bx+(tg-bx)*e+Math.sin(t*3+i)*3*(1-p);ctx.save();ctx.globalAlpha=1-cl((p-.8)/.2);ctx.fillStyle=T.blue;
+   ctx.fillRect(fx-9,fy-6,18,14);ctx.beginPath();ctx.moveTo(fx-9,fy-6);ctx.lineTo(fx-3,fy-12);ctx.lineTo(fx+3,fy-6);ctx.lineTo(fx+9,fy-12);ctx.lineTo(fx+9,fy-6);ctx.fill();ctx.restore()}
+  const s=cl((p-.8)/.2);if(s>0)[.3,.7].forEach((k,i)=>{const cx=x+w*k,bw=Math.min(120,w*.34)*s;ctx.save();ctx.globalAlpha=s;rrect(ctx,cx-bw/2,fy-16,bw,32,8);ctx.fillStyle=T.blue;ctx.globalAlpha=.18*s;ctx.fill();
+   ctx.globalAlpha=s;ctx.strokeStyle=T.blue;ctx.lineWidth=1.5;ctx.stroke();itext(ctx,"托拉斯",cx,fy,T.blue,"center","600 13px "+ISANS);if(!i)itext(ctx,"如：美国标准石油公司",cx,fy+28,T.fg,"center","12px "+ISANS);ctx.restore()});
+  if(p>=1)wr(ctx,"生产和资本高度集中 → 垄断组织 → 帝国主义（向外扩张）",x+4,y+h-22,w-8,T.redText,"600 12px "+ISANS);
+  else itext(ctx,m0==null?"8 家小企业自由竞争 · 按「竞争 → 兼并」":"竞争激烈，大企业兼并小企业……",x+4,y+h-14,T.fg,"left","12px "+ISANS)}
+ return{
+  text:"19 世纪 70 年代起，第二次工业革命兴起，人类进入“电气时代”。电力、内燃机的发明和广泛使用，推动了电力、化工、石油、汽车等新兴工业的发展；科学与技术紧密结合；生产集中导致垄断组织出现，主要资本主义国家逐渐过渡到帝国主义阶段。",
+  points:["第二次工业革命以电力的广泛应用为标志，人类进入“电气时代”","内燃机推动汽车、飞机和石油工业","科学与技术紧密结合，在多国同时进行，美、德走在前列","垄断组织出现，资本主义向帝国主义过渡","世界市场最终形成（第 8 章）"],
+  gk:"统编版《中外历史纲要（下）》第 10 课；浙江选考高频：两次工业革命的对比、第二次工业革命的特点。",
+  mount(ctrl,read){yr=1860;elec=false;tbl=false;m0=null;last=-1;alive=true;
+   const tb=button("两次工业革命对比",()=>{tbl=!tbl;tb.classList.toggle("primary",tbl)});
+   ctrl.append(slider("年份",1860,1910,1,yr,v=>v+" 年",v=>{yr=v;upd()}),toggle("新能源·新动力：电气时代",elec,v=>{elec=v;tbl=false;tb.classList.remove("primary")}),tb,
+    button("竞争 → 兼并",()=>{m0=now();upd()},true),button("重置",()=>{m0=null;upd()}));ro=readout([]);read.append(ro);upd()},
+  unmount(){alive=false;m0=null;ro=null;last=-1},
+  pointer(){return false},
+  draw(ctx,w,h,t){if(!alive)return;const m=12,mh=w>=720?104:118,H1=h-mh-20;
+   if(w>=720){const cw=(w-2*m)*0.58;city(ctx,m,8,cw,H1,t);panel(ctx,m+cw+14,8,w-2*m-cw-14,H1)}
+   else{const ch=Math.max(190,H1*0.5);city(ctx,m,8,w-2*m,ch,t);panel(ctx,m,ch+18,w-2*m,Math.max(250,H1-ch-10))}
+   trust(ctx,m,h-mh-4,w-2*m,mh,t)}};
+})();
+CH[7].ready=true;
+MODS[7]=(()=>{
+ let yr=1780,ind=false,chn=false,p0=null,ro=null,alive=false,S=1,ox=0,oy=0;
+ const now=()=>performance.now()/1000,cl=v=>Math.max(0,Math.min(1,v)),sx=v=>ox+v*S,sy=v=>oy+v*S,
+  R={UK:{x:430,y:150,w:140,h:90,n:"英国 / 西欧"},NA:{x:100,y:110,w:190,h:120,n:"北美"},LA:{x:200,y:340,w:130,h:160,n:"拉美"},AF:{x:470,y:340,w:150,h:170,n:"非洲"},
+   IN:{x:690,y:290,w:110,h:90,n:"印度"},CN:{x:800,y:150,w:150,h:100,n:"中国"},AU:{x:830,y:430,w:130,h:80,n:"澳洲"}},
+  IMP=[["IN","棉花"],["NAS","棉花"],["AU","羊毛"],["CN","茶叶"],["NA","粮食"]],EXP=["NA","LA","IN","CN","AF","AU"],
+  AFP=[[0,0,.5,.38],[.5,0,1,.48],[0,.38,.45,.75],[.45,.48,1,.8],[0,.75,.6,1],[.6,.8,1,1]],
+  ST=[[1500,"早期殖民","掠夺"],[1800,"工业资本","商品输出"],[1870,"金融资本","资本输出"],[1900,"瓜分世界","殖民体系形成"]];
+ const sv=()=>cl((yr-1780)/120),split=()=>p0!=null,stage=()=>split()||yr>=1885?3:yr<1800?0:yr<1870?1:2,
+  WAY=()=>yr<1800?"掠夺（早期殖民）":yr<1870?"商品输出（工业资本）":"资本输出（金融资本）",
+  UKS=()=>yr<1820?"工业革命进行中，优势初显":yr<=1870?"“世界工厂”：工业产量约占世界 1/3、贸易约 1/4（1850 前后，示意）":"仍为头号殖民帝国，工业地位被美、德赶超",
+  AREAS=()=>{const a=["北美","拉美","印度"];if(yr>=1788)a.push("澳洲");if(yr>=1840)a.push("中国");if(split()||yr>=1885)a.push("非洲（被瓜分）");return a.join("、")},
+  C=k=>{if(k==="NAS")return[sx(255),sy(212)];const r=R[k];return[sx(r.x+r.w/2),sy(r.y+r.h/2)]};
+ function wr(ctx,s,x,y,mw,col,f,lh){ctx.save();ctx.font=f||"12px "+ISANS;ctx.fillStyle=col;ctx.textBaseline="middle";ctx.textAlign="left";const e=wrapText(ctx,s,x,y,mw,lh||16);ctx.restore();return e}
+ function upd(){if(!ro)return;const T=theme(),k=stage();
+  ro.update([["年份",yr+" 年",T.blue],["殖民方式",WAY(),k===0?T.fg:k===1?T.blue:T.goldText],["英国地位",UKS(),yr>=1820&&yr<=1870?T.blue:T.fg],["被卷入地区",AREAS(),split()?T.redText:T.fg]])}
+ function flow(ctx,a,b,col,s,t,lab,lc){const[x1,y1]=a,[x2,y2]=b,dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy)||1,cx=(x1+x2)/2-dy/d*.12*d,cy=(y1+y2)/2+dx/d*.12*d,
+   Q=u=>[(1-u)*(1-u)*x1+2*(1-u)*u*cx+u*u*x2,(1-u)*(1-u)*y1+2*(1-u)*u*cy+u*u*y2];
+  ctx.save();ctx.strokeStyle=ctx.fillStyle=col;ctx.globalAlpha=.35+.25*s;ctx.lineWidth=1+3.5*s;ctx.lineCap="round";ctx.beginPath();
+  for(let i=0;i<=20;i++){const p=Q(.2+.6*i/20);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])}ctx.stroke();
+  const e=Q(.8),f=Q(.77),an=Math.atan2(e[1]-f[1],e[0]-f[0]),hs=6+4*s;ctx.beginPath();ctx.moveTo(e[0]+Math.cos(an)*hs,e[1]+Math.sin(an)*hs);
+  ctx.lineTo(e[0]+Math.cos(an+2.4)*hs,e[1]+Math.sin(an+2.4)*hs);ctx.lineTo(e[0]+Math.cos(an-2.4)*hs,e[1]+Math.sin(an-2.4)*hs);ctx.closePath();ctx.fill();
+  ctx.globalAlpha=.9;const n=Math.round(1+9*s);for(let i=0;i<n;i++){const p=Q(.2+.6*((t*.22+i/n)%1));ctx.beginPath();ctx.arc(p[0],p[1],2+1.4*s,0,Math.PI*2);ctx.fill()}
+  ctx.restore();if(lab){const m=Q(.5);itext(ctx,lab,m[0],m[1]-10,lc,"center","12px "+ISANS)}}
+ function note(ctx,ax,ay,lines,mx,my,mw){const T=theme(),cw=Math.min(220,mw*.62);ctx.save();ctx.font="12px "+ISANS;
+  const hh=lines.reduce((a,l)=>a+Math.max(1,Math.ceil(ctx.measureText(l[0]).width/(cw-20)))*16,0)+14;ctx.restore();
+  const x=Math.max(mx,Math.min(mx+mw-cw,ax-cw)),y=Math.max(my,ay-hh-6);ctx.save();rrect(ctx,x,y,cw,hh,10);ctx.fillStyle=T.bg;ctx.globalAlpha=.95;ctx.fill();
+  ctx.globalAlpha=1;ctx.strokeStyle=T.red;ctx.lineWidth=1.5;ctx.stroke();ctx.restore();let ly=y+15;lines.forEach(l=>{ly=wr(ctx,l[0],x+10,ly,cw-20,l[1],l[2])})}
+ function map(ctx,mx,my,mw,mh,t){const T=theme(),dk=isDark(),s=sv(),k=split()?cl((now()-p0)/1.2):0;S=Math.min(mw/1000,mh/560);ox=mx+(mw-1000*S)/2;oy=my+(mh-560*S)/2;
+  ctx.save();rrect(ctx,mx,my,mw,mh,14);ctx.fillStyle=dk?"rgba(41,151,255,.06)":"rgba(0,113,227,.04)";ctx.fill();ctx.restore();
+  Object.keys(R).forEach(key=>{const r=R[key],x=sx(r.x),y=sy(r.y),w=r.w*S,h=r.h*S,hot=(key==="IN"&&ind)||(key==="CN"&&chn);ctx.save();rrect(ctx,x,y,w,h,Math.max(6,18*S));
+   ctx.fillStyle=key==="UK"?(dk?"rgba(41,151,255,.22)":"rgba(0,113,227,.14)"):(dk?"rgba(255,255,255,.12)":"rgba(0,0,0,.08)");ctx.fill();
+   if(key==="AF"&&k>0)AFP.forEach((q,i)=>{const g=3*k;rrect(ctx,x+q[0]*w+g,y+q[1]*h+g,(q[2]-q[0])*w-2*g,(q[3]-q[1])*h-2*g,4);
+    ctx.fillStyle=[T.red,T.blue,T.gold,T.teal,T.purple,"#8e8e93"][i];ctx.globalAlpha=.6*k;ctx.fill()});
+   ctx.globalAlpha=1;if(key==="UK"||hot){rrect(ctx,x,y,w,h,Math.max(6,18*S));ctx.strokeStyle=key==="UK"?T.blue:T.red;ctx.lineWidth=1.5;ctx.stroke()}ctx.restore();
+   itext(ctx,r.n,x+w/2,key==="UK"?y+12:y+h/2,key==="UK"?T.blue:hot||(key==="AF"&&k>0)?T.redText:T.fg,"center","600 12px "+ISANS)});
+  const u=R.UK,fw=70*S,tops=factory(ctx,sx(u.x+u.w/2)-fw/2,sy(u.y+u.h)-30*S,fw,22*S,{chimneys:2,lit:.3+.7*s});tops.forEach(p=>smoke(ctx,p.x,p.y,t,.3+.7*s));
+  const lb=w=>mw>=520;IMP.forEach(([f,l])=>flow(ctx,C(f),C("UK"),T.gold,s,t,lb()?l:"",T.goldText));EXP.forEach(k2=>flow(ctx,C("UK"),C(k2),T.blue,s,t+.5));
+  itext(ctx,"输入：原料 →",sx(u.x+u.w/2),sy(u.y+u.h)+12,T.goldText,"center","12px "+ISANS);itext(ctx,"输出：棉布 · 机器 · 钢铁 →",sx(u.x+u.w/2),sy(u.y+u.h)+30,T.blue,"center","12px "+ISANS);
+  if(k>0)itext(ctx,"1884—1885 柏林会议 · 瓜分非洲",sx(R.AF.x+R.AF.w/2),Math.min(sy(R.AF.y+R.AF.h)+12,my+mh-10),T.redText,"center","600 12px "+ISANS);
+  itext(ctx,"世界工厂的进出口",mx+10,my+14,T.fg,"left","600 13px "+ISANS);itext(ctx,yr+" 年",mx+10,my+34,T.blue,"left","600 16px ui-monospace,Menlo,monospace");
+  if(yr>=1820&&yr<=1870)itext(ctx,"工业产量≈世界 1/3 · 贸易≈1/4（示意）",mx+10,my+54,T.blue,"left","12px "+ISANS);
+  if(chn){const c=R.CN;note(ctx,sx(c.x+c.w),sy(c.y),[["1840 鸦片战争 · 1842《南京条约》五口通商",T.redText,"600 12px "+ISANS],["→ 逐步沦为原料产地和商品市场",T.redText],["联系：近代中国（另一个实验）",T.blue]],mx,my,mw)}
+  if(ind){const c=R.IN;note(ctx,sx(c.x+c.w),sy(c.y),[["手工纺织业被英国机制棉布冲垮",T.redText,"600 12px "+ISANS],["→ 由棉布出口国变为原棉出口国",T.redText]],mx,my,mw)}}
+ function band(ctx,x,y,w,h){const T=theme(),k=stage(),ay=y+44,x0=x+44,sp=(w-88)/3;itext(ctx,"殖民体系形成",x+4,y+10,T.fg,"left","600 13px "+ISANS);
+  ctx.save();ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x0,ay);ctx.lineTo(x0+3*sp,ay);ctx.stroke();ctx.restore();
+  ST.forEach((s,i)=>{const nx=x0+i*sp,on=i===k,last=i===3;ctx.save();ctx.beginPath();ctx.arc(nx,ay,on?7:5,0,Math.PI*2);
+   if(i<=k){ctx.fillStyle=on?(last?T.red:T.blue):T.fg;ctx.fill()}else{ctx.fillStyle=T.bg;ctx.fill();ctx.strokeStyle=T.axis;ctx.lineWidth=1.5;ctx.stroke()}ctx.restore();
+   itext(ctx,last?"19 世纪末":String(s[0]),nx,ay-18,T.fg,"center","12px ui-monospace,Menlo,monospace");itext(ctx,s[1],nx,ay+18,T.fg,"center","12px "+ISANS);
+   itext(ctx,s[2],nx,ay+36,on?(last?T.redText:T.blue):T.fg,"center",(on?"600 ":"")+"12px "+ISANS)});
+  if(k===3)wr(ctx,"19 世纪末 20 世纪初帝国主义瓜分世界狂潮 → 世界殖民体系最终形成",x+4,ay+60,w-8,T.redText,"600 12px "+ISANS);
+  else itext(ctx,"按「瓜分非洲」或把年份拖到 1885 以后",x+4,ay+60,T.fg,"left","12px "+ISANS)}
+ function chart(ctx,x,y,w,h){const T=theme(),px=x+10,pw=w-20,py=y+30,ph=h-56,X=v=>px+pw*(v-1780)/120,
+   A=v=>.9/(1+Math.exp((v-1820)/8))+.05,B=v=>.9/(1+Math.exp(-(v-1830)/10))+.05;
+  ctx.save();rrect(ctx,x,y,w,h,12);ctx.fillStyle=isDark()?"rgba(255,255,255,.07)":"rgba(0,0,0,.04)";ctx.fill();ctx.restore();
+  itext(ctx,"印度棉布的命运（示意）",x+10,y+14,T.fg,"left","600 13px "+ISANS);
+  [[A,T.red],[B,T.blue]].forEach(([fn,col])=>{[[1900,.25],[yr,1]].forEach(([e,al])=>{ctx.save();ctx.strokeStyle=col;ctx.globalAlpha=al;ctx.lineWidth=2;ctx.beginPath();
+   for(let v=1780;v<=e;v+=2){const yy=py+ph*(1-fn(v));v===1780?ctx.moveTo(X(v),yy):ctx.lineTo(X(v),yy)}ctx.stroke();ctx.restore()})});
+  ctx.save();ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(px,py+ph+.5);ctx.lineTo(px+pw,py+ph+.5);ctx.stroke();ctx.restore();
+  itext(ctx,"↓ 印度棉布出口",px+4,py+6,T.redText,"left","12px "+ISANS);itext(ctx,"↑ 英国棉布输入印度",px+pw-4,py+6,T.blue,"right","12px "+ISANS);
+  itext(ctx,"1780",px,y+h-12,T.fg,"left","12px ui-monospace,Menlo,monospace");itext(ctx,"1900",px+pw,y+h-12,T.fg,"right","12px ui-monospace,Menlo,monospace")}
+ return{
+  text:"工业革命使英国成为“世界工厂”。西方国家以廉价工业品打开亚非拉市场，掠夺原料，把广大地区变为原料产地和商品市场。随着第二次工业革命和帝国主义瓜分世界，资本主义世界市场和殖民体系最终形成。",
+  points:["第一次工业革命后英国成为“世界工厂”","亚非拉地区沦为西方的原料产地和商品市场，传统经济遭到破坏","殖民方式由掠夺、商品输出发展到资本输出","19 世纪末 20 世纪初世界殖民体系与资本主义世界市场最终形成","殖民扩张客观上也把近代生产方式带到殖民地（“双重使命”，可辩证分析）"],
+  gk:"统编版《中外历史纲要（下）》第 12 课「资本主义世界殖民体系的形成」；浙江选考高频：世界市场形成的过程、殖民扩张的影响。",
+  mount(ctrl,read){yr=1780;ind=false;chn=false;p0=null;alive=true;
+   ctrl.append(slider("年份",1780,1900,1,yr,v=>v+" 年",v=>{yr=v;upd()}),toggle("印度的遭遇",ind,v=>{ind=v}),toggle("中国被卷入",chn,v=>{chn=v}),
+    button("瓜分非洲",()=>{p0=now();upd()},true),button("重置",()=>{p0=null;upd()}));ro=readout([]);read.append(ro);upd()},
+  unmount(){alive=false;p0=null;ro=null},
+  pointer(){return false},
+  draw(ctx,w,h,t){if(!alive)return;const m=12,wide=w>=720,ch=112,bh=126+(ind&&!wide?ch+10:0),mh=h-bh-24;
+   map(ctx,m,8,w-2*m,Math.max(160,mh),t);const by=8+Math.max(160,mh)+12;
+   if(wide&&ind){const bw=(w-2*m)*.6;band(ctx,m,by,bw-10,126);chart(ctx,m+bw,by,w-2*m-bw,ch)}
+   else{band(ctx,m,by,w-2*m,126);if(ind)chart(ctx,m,by+136,w-2*m,ch)}}};
+})();
+CH[8].ready=true;
+MODS[8]=(()=>{
+ const L="ABCD",Q=[
+  ["工业革命首先在英国棉纺织业开始，其标志性发明是（ ）","",["飞梭","珍妮纺纱机","水力纺纱机","改良蒸汽机"],1,"1765 年哈格里夫斯发明珍妮机，标志工业革命开始。",1],
+  ["瓦特改良蒸汽机的最重要意义是（ ）","",["使纺织业实现机械化","提供了更便利的动力，人类进入“蒸汽时代”","推动了电力的应用","促进了科学与技术的结合"],1,"蒸汽机为机器提供了不受地理限制的动力。",2],
+  ["工业革命后，工厂取代手工工场成为主要生产组织形式，这带来的社会变化是（ ）","",["封建等级制度强化","工业资产阶级和无产阶级两大对立阶级形成","农业人口大幅增加","贫富差距消失"],1,"工厂制度使社会日益分裂为两大对立阶级。",3],
+  ["1825 年英国第一条铁路通车、1807 年汽船试航成功，这些变化的主要影响是（ ）","",["使殖民扩张停止","缩短了时空距离，加强了各地区的联系","使人们不再需要马车","导致工业革命结束"],1,"交通革命缩短时空距离，推动世界市场形成。",4],
+  ["1851 年英国城市人口首次超过农村人口，同时出现住房拥挤、疾病流行等问题。这说明（ ）","",["城市化只有消极影响","工业化推动城市化，也带来“城市病”","英国政府放弃了城市管理","农业已完全消失"],1,"城市化是工业化的结果，城市问题随之出现。",5],
+  ["1848 年《共产党宣言》发表的意义是（ ）","",["标志着无产阶级第一次建立政权","标志着马克思主义的诞生","标志着第一国际成立","标志着社会主义制度的建立"],1,"《共产党宣言》发表标志马克思主义诞生；第一次建立政权是 1871 年巴黎公社。",6],
+  ["与第一次工业革命相比，第二次工业革命的突出特点是（ ）","",["发明主要来自工匠的经验","首先在英国一国进行","科学与技术紧密结合，在多国同时进行","以蒸汽机广泛应用为标志"],2,"第二次工业革命以电力为标志，科学与技术结合、多国同时进行。",7],
+  ["这反映了（ ）","19 世纪中期，英国机制棉布大量输入印度，印度由棉布出口国变为原棉出口国。",["印度工业化完成","殖民地沦为宗主国的原料产地和商品市场","英印贸易平等互利","世界市场尚未形成"],1,"工业革命后，亚非拉被卷入资本主义世界市场，沦为原料产地和商品市场。",8]];
+ const CSS=`.xq{position:absolute;inset:0;overflow:auto;background:var(--card);padding:20px;display:flex;flex-direction:column;gap:14px;color:var(--fg)}
+.xq .xd{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.xq .xd i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.xq .xd i.ok{background:var(--blue)}.xq .xd i.bad{background:#c0362c}.xq .xd i.cur{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--blue)}
+.xq p{margin:0}.xq .xn{font:13px var(--mono);color:var(--blue)}.xq .xs{font-size:17px;font-weight:600;line-height:1.6}
+.xq blockquote{margin:0;padding:10px 14px;border-left:3px solid #9a6a00;background:var(--btn2);border-radius:0 12px 12px 0;line-height:1.7}
+.xq blockquote b{display:block;font-size:13px;color:#9a6a00}html.dark .xq blockquote{border-color:#f0b847}html.dark .xq blockquote b{color:#f0b847}
+.xq .xo{display:flex;flex-direction:column;gap:10px}
+.xq .xo button{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;white-space:normal;word-break:break-word;min-height:48px;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--btn2);font-size:16px;line-height:1.5;color:var(--fg)}
+.xq .xo button b{flex:none;font-family:var(--mono)}.xq .xo button span{flex:1;min-width:0}.xq .xo button em{flex:none;font-style:normal;font-weight:600}
+.xq .xo button:disabled{cursor:default;opacity:1;color:var(--fg)}
+.xq .xo button.ok{background:var(--sel);border-color:var(--blue);color:var(--blue)}
+.xq .xo button.no{background:rgba(192,54,44,.08);border-color:#c0362c;color:#c0362c}
+html.dark .xq .xo button.no{background:rgba(255,123,114,.14);border-color:#ff7b72;color:#ff7b72}
+.xq .xa{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px;line-height:1.7}
+.xq .y{color:var(--blue);font-weight:600}.xq .n{color:#c0362c;font-weight:600}html.dark .xq .n{color:#ff7b72}
+.xq .xb{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}.xq .xb .pill{min-height:44px}
+.xq .xr{font:600 44px var(--mono);color:var(--blue);text-align:center}.xq .xt{text-align:center}
+.xq .xw{border:0;background:none;padding:10px 0;min-height:44px;text-align:left;color:var(--blue);font-size:15px;width:100%;border-bottom:1px solid var(--line)}
+@media (max-width:767px){.xq{padding:16px}.xq .xb .pill{flex:1}}`;
+ let i=0,pick=[],t0=0,t1=0,box=null,ro=null;
+ function upd(){if(!ro)return;const n=pick.filter(p=>p!=null).length,k=pick.filter((p,j)=>p===Q[j][3]).length;
+  ro.update([["已答",n+" / "+Q.length],["正确",k,theme().blue],["正确率",n?Math.round(k/n*100)+"%":"—"]])}
+ function reset(){i=0;pick=[];t0=Date.now();t1=0;render()}
+ function render(){if(!box)return;const done=i>=Q.length;
+  let h=`<div class="xd" aria-label="进度">${Q.map((q,k)=>`<i class="${pick[k]==null?"":pick[k]===q[3]?"ok":"bad"}${k===i?" cur":""}"></i>`).join("")}</div>`;
+  if(done){const k=pick.filter((p,j)=>p===Q[j][3]).length,s=Math.round(((t1||Date.now())-t0)/1000),wr=Q.map((q,j)=>j).filter(j=>pick[j]!==Q[j][3]);
+   h+=`<p class="xn" style="text-align:center">检测完成</p><p class="xr">${k}/${Q.length}</p><p class="xt">用时 ${Math.floor(s/60)} 分 ${s%60} 秒</p>`+
+    (wr.length?`<p class="n">错题对应章节</p><div>${wr.map(j=>`<button class="xw" data-go="${Q[j][5]}">第 ${j+1} 题 → 第 ${Q[j][5]} 章 ${CH[Q[j][5]-1].n}</button>`).join("")}</div>`:`<p class="y xt">全部正确！</p>`)+
+    `<div class="xb"><button class="pill primary" data-redo>重做</button></div>`}
+  else{const q=Q[i],p=pick[i],a=p!=null;
+   h+=`<p class="xn">第 ${i+1} 题 / ${Q.length}</p>`+(q[1]?`<blockquote><b>材料</b>${q[1]}</blockquote>`:"")+`<p class="xs">${q[0]}</p><div class="xo">`+
+    q[2].map((o,k)=>{const c=a&&k===q[3]?"ok":a&&k===p?"no":"";return `<button data-k="${k}" ${a?"disabled":""} class="${c}"><b>${L[k]}</b><span>${o}</span>${c==="ok"?"<em>✓</em>":c==="no"?"<em>✗</em>":""}</button>`}).join("")+"</div>";
+   if(a)h+=`<div class="xa"><p class="${p===q[3]?"y":"n"}">${p===q[3]?"回答正确":"回答错误"} · 正确答案 ${L[q[3]]}</p><p>${q[4]}</p>
+    <div class="xb"><button class="pill" data-go="${q[5]}">回到第 ${q[5]} 章</button><button class="pill primary" data-next>${i===Q.length-1?"查看结果":"下一题"}</button></div></div>`}
+  box.innerHTML=h;upd()}
+ function click(e){const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.k!=null&&pick[i]==null){pick[i]=+b.dataset.k;render()}
+  else if(b.dataset.go)location.hash="#"+b.dataset.go;
+  else if(b.hasAttribute("data-next")){i++;if(i>=Q.length)t1=Date.now();render();box.scrollTop=0}
+  else if(b.hasAttribute("data-redo")){reset();box.scrollTop=0}}
+ return{
+  text:"8 道选考风格单选，覆盖本实验 1–8 章，答完可跳回对应章节复习。",
+  points:["一题一屏，点选即判，下方给出解析","答错可点「回到第 N 章」复习对应实验","结束页显示得分、用时与错题章节"],
+  gk:"浙江选考 工业革命与世界变革",
+  mount(ctrl,read){if(!document.getElementById("xq-css")){const s=el("style");s.id="xq-css";s.textContent=CSS;document.head.append(s)}
+   if(!t0)t0=Date.now();box=el("div","xq");box.onclick=click;$("cwrap").append(box);
+   ctrl.append(button("重做",()=>{reset();box.scrollTop=0}));ro=readout([]);read.append(ro);render()},
+  unmount(){box&&box.remove();box=null;ro=null},
+  draw(){}};
+})();
+const $=id=>document.getElementById(id),pad=i=>String(i+1).padStart(2,"0");
+let cur=0,mod=null,W=0,H=0,DPR=1;
+const cv=$("cv"),ctx=cv.getContext("2d");
+/* ---------- theme ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function isDark(){return document.documentElement.classList.contains("dark")}
+function theme(){return isDark()
+ ?{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e2a336",teal:"#2ec4b6",purple:"#b197fc",goldText:"#f0b847",redText:"#ff7b72"}
+ :{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.05)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"}}
+function setDark(d){document.documentElement.classList.toggle("dark",d);store.set("gongye-dark",d?"1":"0");$("dark").textContent=$("mdark").textContent=d?"浅色":"深色"}
+setDark(store.get("gongye-dark")==="1");
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||fmtNum;const w=el("div","sl"),l=el("label"),o=el("output"),i=el("input");
+ l.append(document.createTextNode(label),o);i.type="range";Object.assign(i,{min,max,step,value:val});i.setAttribute("aria-label",label);o.textContent=fmt(+val);
+ i.oninput=()=>{o.textContent=fmt(+i.value);onchange&&onchange(+i.value)};w.append(l,i);
+ w.set=v=>{i.value=v;o.textContent=fmt(+v)};return w}
+function chips(options,val,onchange){const w=el("div","chips");const bs=options.map(op=>{const o=typeof op==="object"?op:{label:op,value:op};const b=el("button",o.value===val?"on":"",o.label);
+ b.onclick=()=>{bs.forEach(x=>x.classList.remove("on"));b.classList.add("on");onchange&&onchange(o.value)};w.append(b);return b});return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" primary":""),label);b.onclick=onclick;return b}
+function toggle(label,val,onchange){const b=el("button","tg"+(val?" on":""),"<span>"+label+"</span><i></i>");b.setAttribute("role","switch");b.setAttribute("aria-checked",!!val);
+ b.onclick=()=>{val=!val;b.classList.toggle("on",val);b.setAttribute("aria-checked",val);onchange&&onchange(val)};return b}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML=rs.map(r=>`<dt>${r[0]}</dt><dd style="${r[2]?"color:"+r[2]:""}">${r[1]}</dd>`).join("")};d.update(rows||[]);return d}
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){if(!isFinite(v))return v>0?"∞":v<0?"−∞":"—";const e=1e-6,s=v<0?"−":"",a=Math.abs(v);
+ if(Math.abs(a-Math.round(a))<e)return(Math.round(a)===0?"":s)+Math.round(a);
+ for(let d=2;d<=12;d++){const n=a*d;if(Math.abs(n-Math.round(n))<e)return s+Math.round(n)+"/"+d}
+ for(const r of[2,3,5,6,7,10,11,13,14,15]){const q=Math.sqrt(r);for(let d=1;d<=6;d++){const k=a*d/q;if(Math.abs(k-Math.round(k))<e&&Math.round(k)>0){const K=Math.round(k);return s+(K===1?"":K)+"√"+r+(d>1?"/"+d:"")}}}
+ return s+a.toFixed(2)}
+function drawAxes(ctx,box,xr,yr,opts){opts=Object.assign({equal:true,grid:true,ticks:true,step:1,labels:true},opts);const T=theme();
+ let[x0,x1]=xr,[y0,y1]=yr,sx=box.w/(x1-x0),sy=box.h/(y1-y0);
+ if(opts.equal){const s=Math.min(sx,sy),cx=(x0+x1)/2,cy=(y0+y1)/2;sx=sy=s;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)*sx,Y=y=>box.y+box.h-(y-y0)*sy,invX=p=>x0+(p-box.x)/sx,invY=p=>y0+(box.y+box.h-p)/sy;
+ let st=opts.step;while(st*sx<22)st*=2;
+ ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();ctx.lineWidth=1;
+ if(opts.grid){ctx.strokeStyle=T.grid;ctx.beginPath();for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st){ctx.moveTo(X(x),box.y);ctx.lineTo(X(x),box.y+box.h)}for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st){ctx.moveTo(box.x,Y(y));ctx.lineTo(box.x+box.w,Y(y))}ctx.stroke()}
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,Y(0));ctx.lineTo(box.x+box.w,Y(0));ctx.moveTo(X(0),box.y);ctx.lineTo(X(0),box.y+box.h);ctx.stroke();
+ if(opts.labels){ctx.fillStyle=T.sub;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";
+  for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st)if(Math.abs(x)>1e-9)ctx.fillText(fmtNum(x),X(x),Y(0)+4);
+  ctx.textAlign="right";ctx.textBaseline="middle";for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st)if(Math.abs(y)>1e-9)ctx.fillText(fmtNum(y),X(0)-5,Y(y));
+  ctx.textBaseline="top";ctx.fillText("O",X(0)-4,Y(0)+4);ctx.font="italic 13px "+getComputedStyle(document.body).fontFamily;ctx.fillStyle=T.fg;
+  ctx.fillText("x",box.x+box.w-4,Y(0)+4);ctx.textAlign="left";ctx.fillText("y",X(0)+6,box.y+4)}
+ ctx.restore();return{X,Y,invX,invY,s:sx,box,xr:[x0,x1],yr:[y0,y1]}}
+function drawLine(ctx,map,A,B,C,color,width,dashed){if(Math.abs(A)<1e-12&&Math.abs(B)<1e-12)return;const[x0,x1]=map.xr,[y0,y1]=map.yr,b=map.box;let p,q;
+ if(Math.abs(B)>=Math.abs(A)){p=[x0,-(A*x0+C)/B];q=[x1,-(A*x1+C)/B]}else{p=[-(B*y0+C)/A,y0];q=[-(B*y1+C)/A,y1]}
+ ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.setLineDash(dashed?[6,5]:[]);
+ ctx.beginPath();ctx.moveTo(map.X(p[0]),map.Y(p[1]));ctx.lineTo(map.X(q[0]),map.Y(q[1]));ctx.stroke();ctx.restore()}
+function drawCircle(ctx,map,cx,cy,r,color,width,fill){const b=map.box;ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.beginPath();ctx.arc(map.X(cx),map.Y(cy),Math.max(0,r*map.s),0,Math.PI*2);
+ if(fill){ctx.fillStyle=fill;ctx.fill()}if(width!==0){ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.stroke()}ctx.restore()}
+function dragPoints(points,map,snap){const M=()=>typeof map==="function"?map():map;const h=function(e,type,x,y){const m=M();if(!m)return false;
+ if(type==="down"){const R=e&&e.pointerType==="touch"?22:12;let best=-1,bd=R;points.forEach((p,i)=>{if(p.fixed)return;const d=Math.hypot(m.X(p.x)-x,m.Y(p.y)-y);if(d<=bd){bd=d;best=i}});h.active=best;return best>=0}
+ if(type==="move"&&h.active>=0){const p=points[h.active];let nx=m.invX(x),ny=m.invY(y);if(snap){nx=Math.round(nx/snap)*snap;ny=Math.round(ny/snap)*snap}
+  nx=Math.min(m.xr[1],Math.max(m.xr[0],nx));ny=Math.min(m.yr[1],Math.max(m.yr[0],ny));p.x=+nx.toFixed(6);p.y=+ny.toFixed(6);p.onmove&&p.onmove(p);h.onmove&&h.onmove(p,h.active);return true}
+ if(type==="up"){const was=h.active>=0;h.active=-1;return was}return false};h.active=-1;return h}
+function wrapText(ctx,text,x,y,maxW,lh){let line="";for(const ch of String(text)){if(ch==="\n"){ctx.fillText(line,x,y);line="";y+=lh;continue}
+ const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);line=ch;y+=lh}else line=t}if(line)ctx.fillText(line,x,y);return y+lh}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+/* ---------- placeholder ---------- */
+function drawSoon(ctx,w,h){const T=theme(),cw=Math.min(320,w-40),ch=150,x=(w-cw)/2,y=(h-ch)/2;
+ ctx.save();ctx.shadowColor="rgba(0,0,0,.08)";ctx.shadowBlur=24;ctx.shadowOffsetY=4;ctx.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(ctx,x,y,cw,ch,22);ctx.fill();ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.blue;ctx.font="13px ui-monospace,Menlo,monospace";ctx.fillText("CHAPTER "+pad(cur),w/2,y+38);
+ ctx.fillStyle=T.fg;ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText("即将上线",w/2,y+72);
+ ctx.fillStyle=T.sub;ctx.font="14px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText(CH[cur].n,w/2,y+108)}
+/* ---------- canvas loop ---------- */
+function resize(){const r=$("cwrap").getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);frame(performance.now())}
+function frame(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H);
+ try{mod&&mod.draw?mod.draw(ctx,W,H,t/1000):drawSoon(ctx,W,H)}catch(err){console.error(err)}}
+function loop(t){frame(t);requestAnimationFrame(loop)}
+new ResizeObserver(resize).observe($("cwrap"));window.addEventListener("resize",resize);
+function ptr(type){return e=>{if(!mod||!mod.pointer)return;const r=cv.getBoundingClientRect();
+ if(type==="down")try{cv.setPointerCapture(e.pointerId)}catch(_){}mod.pointer(e,type,e.clientX-r.left,e.clientY-r.top)}}
+cv.addEventListener("pointerdown",ptr("down"));cv.addEventListener("pointermove",ptr("move"));cv.addEventListener("pointerup",ptr("up"));cv.addEventListener("pointercancel",ptr("up"));
+/* ---------- chapters ---------- */
+function list(host,cls){host.innerHTML="";CH.forEach((c,i)=>{const b=el("button",cls,`<span class="mono">${pad(i)}</span><span>${c.n}</span>`);b.onclick=()=>{go(i);closeSheet()};host.append(b)})}
+list($("toc"),"");list($("slist"),"it");
+$("segs").innerHTML=CH.map(()=>"<i></i>").join("");
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod.unmount()}catch(e){console.error(e)}
+ cur=i;const c=CH[i],m=c.ready&&MODS[i]?MODS[i]:null;mod=m;
+ $("ctitle").textContent=pad(i)+"  "+c.n;$("cbook").textContent=c.book;$("ctext").innerHTML=m?m.text||"":"本章交互实验即将上线，敬请期待。";
+ const ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";$("pts").innerHTML="";$("gk").innerHTML="";
+ if(m){m.mount&&m.mount(ctrl,read);$("pts").innerHTML=m.points?"<ul>"+[].concat(m.points).map(p=>"<li>"+p+"</li>").join("")+"</ul>":"";$("gk").innerHTML=m.gk||""}
+ $("ctrlSec").hidden=!ctrl.children.length;$("readSec").hidden=!read.children.length;$("ptSec").hidden=!$("pts").innerHTML;$("gkSec").hidden=!$("gk").innerHTML;
+ if(!m){$("ctrlSec").hidden=false;ctrl.innerHTML='<p class="soon">本章控件即将上线。</p>'}
+ document.querySelectorAll("#toc button,#slist button").forEach(b=>{const on=+b.querySelector(".mono").textContent-1===i;b.classList.toggle("on",on);on?b.setAttribute("aria-current","true"):b.removeAttribute("aria-current")});
+ document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
+ $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+/* ---------- controls ---------- */
+$("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
+$("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("explain").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+function openSheet(){$("mask").hidden=$("sheet").hidden=false;const on=$("slist").querySelector(".on");on&&on.scrollIntoView({block:"nearest"})}
+function closeSheet(){$("mask").hidden=$("sheet").hidden=true}
+$("chbtn").onclick=openSheet;$("mask").onclick=closeSheet;
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"&&t.type!=="range"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable))return;
+ if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+go(fromHash());requestAnimationFrame(loop);
+</script>
+</body>
+</html>
