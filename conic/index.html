@@ -378,6 +378,51 @@
       @media (max-width: 400px) {
         .x-count { display: none; }
       }
+      /* chapter 9 quiz */
+      .x-quiz { display: flex; flex-direction: column; gap: 18px; }
+      .x-q { display: flex; flex-direction: column; gap: 8px; padding-bottom: 18px; border-bottom: 0.5px solid var(--x-line); }
+      .x-qhead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0; font-size: 13px; color: var(--x-ink2); }
+      .x-qhead b { font: 600 15px var(--sans); color: var(--x-ink); }
+      .x-qtext { margin: 0; font-size: 15px; line-height: 1.65; color: var(--x-ink); }
+      .x-opts { display: flex; flex-direction: column; gap: 8px; }
+      .x-opt {
+        display: flex; align-items: flex-start; gap: 10px; width: 100%; min-height: 44px; box-sizing: border-box;
+        padding: 10px 14px; border: 1.5px solid transparent; border-radius: 12px; cursor: pointer; text-align: left;
+        background: var(--x-fill); color: var(--x-ink); font: 400 15px/1.5 var(--sans);
+        transition: background .3s var(--x-ease), border-color .3s var(--x-ease);
+      }
+      .x-opt b { flex: 0 0 auto; font: 500 13px/22px var(--x-mono); color: var(--x-ink2); }
+      .x-opt:hover:not(:disabled) { background: var(--x-fill2); }
+      .x-opt.sel { border-color: var(--x-blue); }
+      .x-opt.sel b { color: var(--x-blue); }
+      .x-opt:disabled { cursor: default; }
+      .x-opt.right { border-color: var(--x-teal-ink); color: var(--x-teal-ink); }
+      .x-opt.right b, .x-opt.miss b { color: var(--x-teal-ink); }
+      .x-opt.wrong { border-color: var(--x-red-ink); color: var(--x-red-ink); }
+      .x-opt.wrong b { color: var(--x-red-ink); }
+      .x-opt.miss { border-color: var(--x-teal-ink); border-style: dashed; }
+      .x-fill { display: flex; gap: 8px; }
+      .x-fill input {
+        flex: 1 1 auto; min-width: 0; min-height: 44px; box-sizing: border-box; padding: 0 14px;
+        border: 1.5px solid transparent; border-radius: 12px; background: var(--x-fill); color: var(--x-ink); font: 400 16px var(--x-mono);
+      }
+      .x-fill input:focus { outline: none; border-color: var(--x-blue); }
+      .x-btn:disabled { opacity: .45; cursor: default; }
+      .x-fb { margin: 2px 0 0; font-size: 14px; outline: none; }
+      .x-part { color: var(--x-gold-ink); }
+      .x-why { margin: 0; font-size: 14px; line-height: 1.65; color: var(--x-ink2); }
+      .x-qprog { margin: 0; font-size: 14px; color: var(--x-ink2); }
+      .x-qprog b { color: var(--x-ink); font-weight: 600; }
+      .x-score { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 16px; background: var(--x-fill); }
+      .x-score p { margin: 0; font-size: 14px; color: var(--x-ink2); }
+      .x-score__fig { font: 400 15px var(--x-mono); }
+      .x-score__fig b { font: 600 34px/1.1 var(--sans); letter-spacing: -0.02em; color: var(--x-ink); }
+      .x-score .x-btn { align-self: flex-start; margin-top: 6px; min-height: 44px; }
+      @media (max-width: 1023px) {
+        .x-qtext { font-size: 16px; }
+        .x-opt { font-size: 16px; }
+        .x-score .x-btn, .x-q .x-row .x-btn { align-self: stretch; width: 100%; }
+      }
       /* ===== Phone & tablet (≤1023px): iOS-style app layout. Desktop untouched. ===== */
       .x-chbtn, .x-mtools, .x-dock { display: none; }
       .x-sheet[hidden] { display: none; }
@@ -574,8 +619,8 @@
             k: ["椭圆：F₁ 发出 → 汇聚到 <em>F₂</em>", "抛物线：F 发出 → <em>平行于对称轴</em>", "双曲线：反向延长线过 <em>另一焦点</em>", "光源离开焦点 → 反射光<em>不再汇聚</em>", "<b>高考链接：</b>光学性质本质是<em>切线与焦半径夹角相等</em>，常用于求切线方程或角平分线问题；易错：双曲线是<em>反向延长线</em>过另一焦点。"] },
           { t: "直线与圆锥曲线", p: ['<span class="x-book">教材：人教A版 选择性必修第一册·第三章 圆锥曲线的方程（3.1–3.3 直线与圆锥曲线的位置关系）</span>', "把直线方程 y = kx + m 代入曲线方程，消去 y，得到关于 x 的方程 Ax² + Bx + C = 0。", "二次项系数 A ≠ 0 时用判别式判断：Δ &gt; 0 相交，Δ = 0 相切，Δ &lt; 0 相离。A = 0 时只有一个交点，但不是相切。", "相交时由韦达定理得弦长 |AB| = √(1 + k²)·|x₁ − x₂|；点差法得中点弦斜率关系 k<sub>AB</sub>·k<sub>OM</sub> = −b²/a²。"],
             k: ["联立消元：代入后得 <em>Ax² + Bx + C = 0</em>", "<em>A ≠ 0</em> 时：<em>Δ &gt; 0</em> 相交 · <em>Δ = 0</em> 相切 · <em>Δ &lt; 0</em> 相离", "韦达定理：<em>x₁ + x₂ = −B/A</em>，<em>x₁x₂ = C/A</em>", "弦长 <em>|AB| = √(1 + k²)·|x₁ − x₂|</em>", "点差法：椭圆 <em>k<sub>AB</sub> · k<sub>OM</sub> = −b²/a²</em>，双曲线 <em>= b²/a²</em>", "<b>高考链接：</b>解析几何大题必考<em>“设而不求+韦达定理”</em>，弦长、中点弦、定点定值是高频；易错：联立后先验证<em>二次项系数是否为零</em>，并保证 <em>Δ&gt;0</em>。"] },
-          { t: "随堂检测", soon: true, p: ["4–6 道单选题，覆盖截线、焦点、离心率、光学性质与判别式；作答后立即显示对错与解析，最后给出得分。"],
-            k: ["先回顾前 8 章要点，再来作答"] }
+          { t: "随堂检测", p: ['<span class="x-book">教材：人教A版 选择性必修第一册·第三章 圆锥曲线的方程</span>', "6 道题，新高考 I 卷风格：单选 4 道、多选 1 道、填空 1 道，满分 31 分。每题作答后立即显示对错与解析，最后给出得分。", "画布中是同一坐标系下的椭圆、双曲线、抛物线，可对照作答。"],
+            k: ["截线：<em>β &gt; α</em> 椭圆 · <em>β = α</em> 抛物线 · <em>β &lt; α</em> 双曲线", "椭圆定义 <em>|PF₁| + |PF₂| = 2a</em>；过焦点的弦与另一焦点构成的三角形周长 <em>4a</em>", "<em>e = c/a</em>：椭圆 e 越大越扁", "双曲线 <em>x²/a² − y²/b² = 1</em> 的渐近线 <em>y = ±(b/a)x</em>", "抛物线 <em>y² = 2px</em>：焦点弦 <em>|AB| = x₁ + x₂ + p</em>；平行于轴的光线反射后过焦点", "联立后 <em>A ≠ 0</em>：<em>Δ = 0</em> 相切", "计分：单选 5 分；多选 6 分，全对满分、每选对一项 2 分、有错 0 分；填空 5 分"] }
         ];
         var S = {
           0: { b: 60, d: 1.2, dirty: true },
@@ -585,8 +630,39 @@
           4: { p: 2, t: 2, dir: 1, play: true },
           5: { e: 0.6, th: 1.0, play: true, sweep: false, sdir: 1 },
           6: { k: 0, lx: -4, ly: 0, n: 16, u: 0 },
-          7: { c: 0, k: 0.5, m: 1, v: false, t: 1 }
+          7: { c: 0, k: 0.5, m: 1, v: false, t: 1 },
+          8: { r: {}, sel: {}, txt: "" }
         };
+        /* chapter 9 quiz */
+        var QZ = [
+          { k: "单选", pts: 5, q: "已知圆锥的半顶角（母线与轴的夹角）α = 30°。用一个不过顶点的平面截这个圆锥，若截面与圆锥的轴所成的角 β = 45°，则截线是",
+            o: ["圆", "椭圆", "抛物线", "双曲线"], a: 1,
+            x: "β = 45° &gt; α = 30° 且 β ≠ 90°，截面只截到一个圆锥并与所有母线相交，截线是椭圆；e = cos 45° / cos 30° = √6/3 ≈ 0.82 &lt; 1。" },
+          { k: "单选", pts: 5, q: "已知 F₁、F₂ 是椭圆 x²/25 + y²/16 = 1 的两个焦点，过 F₁ 的直线交椭圆于 A、B 两点，则 △ABF₂ 的周长为",
+            o: ["10", "16", "20", "26"], a: 2,
+            x: "|AF₁| + |AF₂| = |BF₁| + |BF₂| = 2a = 10，且 |AB| = |AF₁| + |BF₁|，所以周长为 4a = 20。16 是焦点三角形 PF₁F₂ 的周长 2a + 2c。" },
+          { k: "单选", pts: 5, q: "下列椭圆中，形状最扁的是",
+            o: ["x²/4 + y²/3 = 1", "x²/2 + y² = 1", "x²/9 + y²/8 = 1", "x²/16 + y²/4 = 1"], a: 3,
+            x: "e = c/a 越大越扁。四个离心率依次为 1/2、√2/2 ≈ 0.71、1/3、√3/2 ≈ 0.87，D 最大。" },
+          { k: "单选", pts: 5, q: "双曲线 x²/9 − y²/16 = 1 的渐近线方程是",
+            o: ["y = ±(3/4)x", "y = ±(4/3)x", "y = ±(16/9)x", "y = ±(5/3)x"], a: 1,
+            x: "焦点在 x 轴上，渐近线 y = ±(b/a)x，a = 3、b = 4，得 y = ±(4/3)x；也可令 x²/9 − y²/16 = 0 直接得到。5/3 是离心率 c/a。" },
+          { k: "多选", pts: 6, q: "已知抛物线 C：y² = 8x 的焦点为 F，下列说法正确的是",
+            o: ["F 的坐标为 (2, 0)", "一束平行于 x 轴的光线射入 C 的开口内，经 C 反射后必经过点 F", "过 F 且垂直于 x 轴的弦（通径）长为 4", "过 F 的直线交 C 于 A(x₁, y₁)、B(x₂, y₂)，若 x₁ + x₂ = 6，则 |AB| = 10"], a: [0, 1, 3],
+            x: "2p = 8，p = 4：F(2, 0)，通径长 2p = 8，C 错。光学性质：平行于轴的光线反射后过焦点，B 对。焦点弦 |AB| = x₁ + x₂ + p = 6 + 4 = 10，D 对。" },
+          { k: "填空", pts: 5, q: "若直线 y = x + m（m &gt; 0）与椭圆 x²/4 + y² = 1 相切，则 m = ______。",
+            v: Math.sqrt(5), ans: "√5",
+            x: "代入得 5x² + 8mx + 4m² − 4 = 0，相切 ⇔ Δ = 64m² − 80(m² − 1) = 0，得 m² = 5；又 m &gt; 0，所以 m = √5 ≈ 2.236。" }
+        ];
+        var QTOT = QZ.reduce(function (t, q) { return t + q.pts; }, 0);
+        function evalAns(str) {
+          var s = String(str).replace(/\s/g, "").replace(/^m[=＝]/i, "").replace(/根号|sqrt/gi, "√")
+            .replace(/×/g, "*").replace(/÷/g, "/").replace(/（/g, "(").replace(/）/g, ")").replace(/．/g, ".");
+          s = s.replace(/√(\d+(?:\.\d+)?)/g, "S($1)").replace(/√\(/g, "S(");
+          if (!s || !/^[\dS().+\-*/]+$/.test(s)) return NaN;
+          s = s.replace(/(\d|\))(?=S|\()/g, "$1*");
+          try { var v = Function("S", "return (" + s + ");")(Math.sqrt); return typeof v === "number" ? v : NaN; } catch (e) { return NaN; }
+        }
         /* chapter 7 curves: A x² + C y² + D x + E = 0 */
         var CURV = [
           { A: 1 / 25, C: 1 / 9, D: 0, E: -1, f1: [-4, 0], f2: [4, 0], eq: "x²/25 + y²/9 = 1",
@@ -611,7 +687,7 @@
 
         function readCol() {
           var cs = getComputedStyle(root);
-          ["acc", "acc2", "red", "ink", "ink2", "line", "line2"].forEach(function (k) { col[k] = cs.getPropertyValue("--x-" + k).trim(); });
+          ["acc", "acc2", "red", "ink", "ink2", "line", "line2", "blue"].forEach(function (k) { col[k] = cs.getPropertyValue("--x-" + k).trim(); });
         }
         function resize() {
           var r = cv.parentNode.getBoundingClientRect();
@@ -622,7 +698,7 @@
           if (cur === 0) { if (T3) T3.home(); return; }
           if (cur === 1) { if (DB) DB.home(); return; }
           var m = Math.min(W, H) || 600, mob = W < 1024 && innerWidth < 1024;
-          var span = { 2: 11, 3: 13, 4: 12, 5: 16 }[cur] || 12;
+          var span = { 2: 11, 3: 13, 4: 12, 5: 16, 8: 15 }[cur] || 12;
           view.s = m / span; view.x = cur === 4 ? -2 * view.s : 0; view.y = mob ? 30 : 0;
           if (cur === 5) view.x = -1.5 * view.s;
           if (cur === 7 && S[7].c === 2) view.x = -2.5 * view.s;
@@ -1103,6 +1179,30 @@
               }
             }
             return o;
+          },
+          8: function () {
+            var i, u, r5 = Math.sqrt(5), pe = [], pp = [];
+            if (show.aux) { line(-20, -10 * r5, 20, 10 * r5, col.ink2, 1, [6, 5]); line(-20, 10 * r5, 20, -10 * r5, col.ink2, 1, [6, 5]); }
+            for (i = 0; i <= 240; i++) { u = Math.PI * 2 * i / 240; pe.push([3 * Math.cos(u), 2 * Math.sin(u)]); }
+            path(pe, col.acc, 2.4);
+            [1, -1].forEach(function (sg) { var ph = []; for (var j = 0; j <= 160; j++) { var w = -2.4 + 4.8 * j / 160; ph.push([sg * 2 * Math.cosh(w), r5 * Math.sinh(w)]); } path(ph, col.acc2, 2.4); });
+            for (i = 0; i <= 200; i++) { u = -9 + 18 * i / 200; pp.push([u * u / 4, u]); }
+            path(pp, col.blue, 2.4);
+            if (show.labels) {
+              var tag = function (txt, x, y, c, al, dx, dy) {
+                ctx.font = "600 14px -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif";
+                var px = X(x) + dx, py = Y(y) + dy, w = ctx.measureText(txt).width + 12;
+                var lx = al === "right" ? px - w : al === "center" ? px - w / 2 : px;
+                ctx.fillStyle = root.getAttribute("data-theme") === "light" ? "rgba(255,255,255,.88)" : "rgba(0,0,0,.72)";
+                ctx.fillRect(lx, py - 11, w, 22);
+                ctx.fillStyle = c; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText(txt, lx + 6, py);
+              };
+              tag("椭圆 x²/9 + y²/4 = 1", 0, -2, col.acc, "center", 0, 20);
+              tag("双曲线 x²/4 − y²/5 = 1", -2 * Math.cosh(1.1), -r5 * Math.sinh(1.1), col.acc2, "right", -10, 0);
+              tag("抛物线 y² = 4x", 6.25, 5, col.blue, "left", 10, 0);
+            }
+            dot(0, 0, col.ink2, 3);
+            return "<b>椭圆</b> x²/9 + y²/4 = 1　e = √5/3 ≈ <b>0.75</b><br><b>双曲线</b> x²/4 − y²/5 = 1　e = <b>1.5</b><br><b>抛物线</b> y² = 4x　e = <b>1</b><br>虚线为双曲线的渐近线 y = ±(√5/2)x";
           }
         };
 
@@ -1125,6 +1225,76 @@
         }
         function row(items) { var r = document.createElement("div"); r.className = "x-row x-ctl"; items.forEach(function (i) { r.appendChild(i); }); return r; }
         function playBtn(s) { var b = btn(s.play ? "暂停动点" : "播放动点", function () { s.play = !s.play; b.textContent = s.play ? "暂停动点" : "播放动点"; }); return b; }
+
+        function quiz(c, s) {
+          var L = "ABCD", wrap = document.createElement("div"); wrap.className = "x-quiz";
+          function qHTML(i) {
+            var q = QZ[i], r = s.r[i], h = '<p class="x-qhead"><b>第 ' + (i + 1) + ' 题</b><span>' + q.k + " · " + q.pts + " 分</span></p><p class=\"x-qtext\">" + q.q + "</p>";
+            if (q.k === "填空") {
+              h += '<div class="x-fill"><input type="text" id="qf' + i + '" autocomplete="off" spellcheck="false" aria-label="第 ' + (i + 1) + ' 题答案" placeholder="如 √3/2 或 0.866"' + (r ? ' disabled value="' + String(r.pick).replace(/"/g, "&quot;") + '"' : ' value="' + String(s.txt).replace(/"/g, "&quot;") + '"') + ">" +
+                (r ? "" : '<button class="x-btn" type="button" data-sub="' + i + '">提交</button>') + "</div>";
+            } else {
+              var multi = q.k === "多选", sel = s.sel[i] || [];
+              h += '<div class="x-opts">' + q.o.map(function (o, j) {
+                var cls = "x-opt", isA = multi ? q.a.indexOf(j) >= 0 : q.a === j, picked = r ? (multi ? r.pick.indexOf(j) >= 0 : r.pick === j) : sel.indexOf(j) >= 0;
+                if (r) { if (picked && isA) cls += " right"; else if (picked) cls += " wrong"; else if (isA) cls += " miss"; }
+                else if (picked) cls += " sel";
+                return '<button class="' + cls + '" type="button" data-q="' + i + '" data-o="' + j + '"' + (r ? " disabled" : "") + (multi && !r ? ' aria-pressed="' + picked + '"' : "") + "><b>" + L[j] + "</b><span>" + o + "</span></button>";
+              }).join("") + "</div>";
+              if (multi && !r) h += '<div class="x-row"><button class="x-btn" type="button" data-sub="' + i + '"' + (sel.length ? "" : " disabled") + ">提交（可多选）</button></div>";
+            }
+            if (r) {
+              var st = r.pts === q.pts ? ["x-ok", "✓ 正确"] : r.pts > 0 ? ["x-part", "◐ 部分正确"] : ["x-no", "✗ 错误"];
+              var key = q.k === "填空" ? q.ans : q.k === "多选" ? q.a.map(function (j) { return L[j]; }).join("") : L[q.a];
+              h += '<p class="x-fb ' + st[0] + '" role="status"><b>' + st[1] + "　+" + r.pts + " 分</b>" + (r.pts === q.pts ? "" : "　答案 " + key) + '</p><p class="x-why">' + q.x + "</p>";
+            }
+            return h;
+          }
+          function scoreHTML() {
+            var n = Object.keys(s.r).length, pts = 0, ok = 0;
+            Object.keys(s.r).forEach(function (k) { pts += s.r[k].pts; if (s.r[k].pts === QZ[k].pts) ok++; });
+            if (n < QZ.length) return '<p class="x-qprog">已作答 <b>' + n + "</b> / " + QZ.length + "　当前得分 <b>" + pts + "</b></p>";
+            return '<div class="x-score" role="status"><p>得分</p><p class="x-score__fig"><b>' + pts + "</b> / " + QTOT + '</p><p>全对 ' + ok + " / " + QZ.length + " 题" + (pts === QTOT ? "，满分！" : "，回看红色题目的解析再试一次。") + '</p><button class="x-btn" type="button" data-again="1">再做一次</button></div>';
+          }
+          var arts = QZ.map(function (q, i) { var a = document.createElement("article"); a.className = "x-q"; a.innerHTML = qHTML(i); wrap.appendChild(a); return a; });
+          var foot = document.createElement("div"); foot.className = "x-qfoot"; foot.innerHTML = scoreHTML(); wrap.appendChild(foot);
+          function grade(i, pick) {
+            var q = QZ[i], pts = 0;
+            if (q.k === "单选") pts = pick === q.a ? q.pts : 0;
+            else if (q.k === "多选") {
+              var bad = pick.some(function (j) { return q.a.indexOf(j) < 0; });
+              pts = bad ? 0 : pick.length === q.a.length ? q.pts : pick.length * 2;
+            } else pts = Math.abs(evalAns(pick) - q.v) < 0.005 ? q.pts : 0;
+            s.r[i] = { pick: pick, pts: pts };
+            arts[i].innerHTML = qHTML(i); foot.innerHTML = scoreHTML();
+            var fb = arts[i].querySelector(".x-fb"); if (fb) { fb.setAttribute("tabindex", "-1"); fb.focus({ preventScroll: true }); }
+          }
+          function submitFill(i) {
+            var inp = $("qf" + i), v = inp.value.trim();
+            if (!v) { inp.focus(); return; }
+            s.txt = ""; grade(i, v);
+          }
+          wrap.addEventListener("click", function (e) {
+            var b = e.target.closest("button"); if (!b || b.disabled) return;
+            if (b.dataset.again) { s.r = {}; s.sel = {}; s.txt = ""; buildPanel(); $("panel").scrollTop = 0; var f = $("ctls").querySelector(".x-opt"); if (f) f.focus({ preventScroll: true }); return; }
+            if (b.dataset.sub !== undefined) {
+              var k = +b.dataset.sub;
+              if (QZ[k].k === "填空") submitFill(k);
+              else grade(k, (s.sel[k] || []).slice().sort());
+              return;
+            }
+            var i = +b.dataset.q, j = +b.dataset.o;
+            if (QZ[i].k === "多选") {
+              var sel = s.sel[i] = s.sel[i] || [], p = sel.indexOf(j);
+              if (p >= 0) sel.splice(p, 1); else sel.push(j);
+              arts[i].innerHTML = qHTML(i);
+              var nb = arts[i].querySelector('[data-o="' + j + '"]'); if (nb) nb.focus({ preventScroll: true });
+            } else grade(i, j);
+          });
+          wrap.addEventListener("input", function (e) { if (e.target.id && e.target.id.indexOf("qf") === 0) s.txt = e.target.value; });
+          wrap.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.id && e.target.id.indexOf("qf") === 0) { e.preventDefault(); submitFill(+e.target.id.slice(2)); } });
+          c.appendChild(wrap);
+        }
 
         function buildPanel() {
           var c = $("ctls"), s = S[cur]; c.innerHTML = "";
@@ -1188,9 +1358,12 @@
             c.appendChild(sw("竖直线 x = t", s, "v"));
             c.appendChild(slider("t8", "竖直线位置 t", -4, 6, 0.01, s, "t"));
             var tip8 = document.createElement("p"); tip8.className = "x-key"; tip8.textContent = "滑块靠近相切位置时会自动吸附；相切时直线变为金色。"; c.appendChild(tip8);
+          } else if (cur === 8) {
+            quiz(c, s);
           } else {
             c.innerHTML = '<p class="x-key">本章的交互演示<em>即将上线</em>，先阅读舞台左上角的讲解与下方要点。</p>';
           }
+          $("controls").querySelector("h2").textContent = cur === 8 ? "随堂检测" : "控制";
           $("keys").innerHTML = CH[cur].k.map(function (k) { return '<p class="x-key">' + k + "</p>"; }).join("");
         }
 
@@ -1242,6 +1415,7 @@
         document.addEventListener("keydown", function (e) {
           if (e.metaKey || e.ctrlKey || e.altKey) return;
           var t = e.target, typing = t && (t.type === "range" || t.tagName === "INPUT" || t.tagName === "TEXTAREA");
+          if (t && (t.tagName === "TEXTAREA" || (t.tagName === "INPUT" && t.type === "text"))) return;
           if (e.key === "ArrowRight" && !typing) go(cur + 1);
           else if (e.key === "ArrowLeft" && !typing) go(cur - 1);
           else if (e.key === "t" || e.key === "T") toggleTheme();
