@@ -1995,6 +1995,7 @@
         if (close) ctx.closePath();
       }
       function label(t, p, o) {
+        if (!Array.isArray(p)) return;
         var q = proj(p), c = pal(); o = o || {};
         ctx.font = xFont(o.font || "12px system-ui, sans-serif"); ctx.textAlign = o.align || "center"; ctx.textBaseline = "middle";
         ctx.lineWidth = 3; ctx.strokeStyle = c.halo; ctx.lineJoin = "round";
@@ -2066,6 +2067,7 @@
             if (state.show.note) L.silk.notes.forEach(function (n) { label(n.t, n.ll, { color: c.silk, font: "600 12px system-ui, sans-serif" }); });
           }
           if (L.arrows && !state.qw) L.arrows.forEach(function (ar) {
+            if (!ar.pts || ar.pts.length < 2) return;
             var col = ar.color || "#C07CCF", n = ar.pts.length;
             ctx.strokeStyle = c.halo; ctx.lineWidth = 5; ctx.lineJoin = "round"; path(ar.pts); ctx.stroke();
             ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.setLineDash([10, 6]); ctx.lineDashOffset = RM.matches ? 0 : -((now || 0) / 30) % 16;
@@ -2075,6 +2077,7 @@
             if (state.show.note && ar.t && ar.at) label(ar.t, ar.at, { color: col, font: "600 13px system-ui, sans-serif" });
           });
           if (L.migs && state.show.mig) L.migs.forEach(function (m) {
+            if (!m.pts || m.pts.length < 2) return;
             ctx.strokeStyle = c.halo; ctx.lineWidth = 4; ctx.lineJoin = "round"; path(m.pts); ctx.stroke();
             ctx.strokeStyle = m.c; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.lineDashOffset = RM.matches ? 0 : -((now || 0) / 40) % 10;
             ctx.stroke(); ctx.setLineDash([]); ctx.lineDashOffset = 0;
@@ -2096,12 +2099,14 @@
             label(bt, unproj(W / 2, H - 56), { color: c.ink, font: '600 16px "Noto Serif SC","Songti SC",serif' });
           }
           if (L.seaLines && state.show.note) L.seaLines.forEach(function (sl) {
+            if (!sl.pts || sl.pts.length < 2) return;
             ctx.strokeStyle = c.halo; ctx.lineWidth = 4; ctx.lineJoin = "round"; path(sl.pts); ctx.stroke();
             ctx.strokeStyle = c.silk; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.stroke(); ctx.setLineDash([]);
             arrowHead(sl.pts[sl.pts.length - 2], sl.pts[sl.pts.length - 1], c.silk);
             label(sl.t, sl.at, { color: c.silk, font: "600 12px system-ui, sans-serif" });
           });
           if (L.battles && state.show.battle) L.battles.forEach(function (b) {
+            if (!Array.isArray(b.ll)) return;
             var q = proj(b.ll), on = state.pop === b;
             ctx.beginPath(); ctx.arc(q[0], q[1], on ? 10 : 8, 0, 7); ctx.fillStyle = b.tr ? "#F2B544" : "#e5484d"; ctx.fill();
             ctx.lineWidth = 2; ctx.strokeStyle = c.halo; ctx.stroke();
@@ -2146,6 +2151,7 @@
           GEO.relief.forEach(function (r) { if (r.name && r.at) label(r.name, r.at, { font: "italic 12px system-ui, sans-serif" }); });
           GEO.rivers.forEach(function (r) { if (r.name && r.at) label(r.name, r.at, { color: c.river, font: "12px system-ui, sans-serif" }); });
           if (L) L.notes.forEach(function (n) {
+            if (!Array.isArray(n.ll)) return;
             if (n.sea) return label(n.t, n.ll, { font: "italic 12px " + "serif", color: c.river });
             if (!n.big) { var q = proj(n.ll); ctx.fillStyle = c.ink; ctx.beginPath(); ctx.arc(q[0], q[1], 2.5, 0, 7); ctx.fill(); }
             label(n.t, n.ll, n.big ? { font: "500 13px system-ui, sans-serif", color: c.ink } : { dx: 6, align: "left", dy: -8 });
@@ -2201,7 +2207,7 @@
         if (!ptr[e.pointerId]) return; var p = ptr[e.pointerId]; delete ptr[e.pointerId]; last = null;
         if (moved < 6 && !pts().length) {
           var L = layer(), ll = unproj(p[0], p[1]), hit = null, bh = null;
-          if (L && L.battles && state.show.battle) L.battles.forEach(function (b) { var q = proj(b.ll); if (Math.hypot(q[0] - p[0], q[1] - p[1]) < 16) bh = b; });
+          if (L && L.battles && state.show.battle) L.battles.forEach(function (b) { if (!Array.isArray(b.ll)) return; var q = proj(b.ll); if (Math.hypot(q[0] - p[0], q[1] - p[1]) < 16) bh = b; });
           if (!bh && !state.un && !state.mo) bh = canalHit(p);
           if (bh || state.pop) showPop(bh === state.pop ? null : bh);
           if (bh) return;
@@ -2389,12 +2395,17 @@
       ];
       var QZ_GK = "高考链接：疆域与边疆管理机构（都护府、宣政院、都司、伊犁将军、驻藏大臣）是浙江历史选考高频考点，常用历史地图作情境。";
       var QS = { i: 0, picks: [] };
+      var QZ_MQ = matchMedia("(max-width: 1023px)");
+      QZ_MQ.addEventListener("change", function () {
+        var el = $("over-text"); if (!el || state.qz == null) return;
+        el.textContent = el.textContent.replace(/读图后在(右侧|下方)作答/, "读图后在" + (QZ_MQ.matches ? "下方" : "右侧") + "作答");
+      });
       function qzEnter(morph) {
         var q = QZ[QS.i], old = state.qz;
         state.qz = q.k; state.sel = null; state.fl = null; showPop(null);
         state.mo = morph && old != null && old !== q.k && !RM.matches ? { A: LAYERS[old], B: LAYERS[q.k], t0: performance.now() } : null;
         $("over-title").textContent = "随堂检测 · " + (q.bonus ? "加分题" : "第 " + (QS.i + 1) + " 题");
-        $("over-text").textContent = "地图已切换到「" + CH[q.k].name + "」。读图后在右侧作答，答完地图会演示答案。";
+        $("over-text").textContent = "地图已切换到「" + CH[q.k].name + "」。读图后在" + (QZ_MQ.matches ? "下方" : "右侧") + "作答，答完地图会演示答案。";
         if (morph) resetView(false); dirty = true;
       }
       function qzScore() { var s = 0, b = 0; QS.picks.forEach(function (p, k) { if (p === QZ[k].right) QZ[k].bonus ? b++ : s++; }); return { s: s, b: b }; }
