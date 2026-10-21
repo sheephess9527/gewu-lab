@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-theme="light">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#fbfbfd" />
     <title>格物实验室 · 疆域变迁</title>
     <link rel="stylesheet" href="hark.css" />
@@ -410,7 +410,127 @@
         *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; scroll-behavior: auto !important; }
       }
     </style>
-  </head>
+    <style>
+      /* ===== 手机 / 平板（≤1023px）：顶栏 · 地图 · 时间轴 · 内容区 · 底部翻章（桌面不受影响） ===== */
+      [hidden] { display: none !important; }
+      .x-mch, .x-mhead, .x-mnav, .x-sheet { display: none; }
+      @media (max-width: 1023px) {
+        .x-app, .x-app.x-toc-off {
+          --x-map-h: 52vh;
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: calc(52px + env(safe-area-inset-top)) var(--x-map-h) auto minmax(0, 1fr);
+          grid-template-areas: "top" "stage" "bar" "panel";
+        }
+        @supports (height: 1svh) { .x-app, .x-app.x-toc-off { --x-map-h: 52svh; } }
+
+        /* 顶栏：‹ 返回 · 实验名 · 章节 */
+        .x-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+          flex-wrap: nowrap; height: auto; min-width: 0;
+          padding: env(safe-area-inset-top) max(6px, env(safe-area-inset-right)) 0 max(6px, env(safe-area-inset-left)); }
+        .x-prog, .x-toc, .x-tools, .x-brand span, .x-chs { display: none; }
+        .x-back { order: 0; justify-self: start; width: 44px; height: 44px; min-width: 44px; padding: 0; margin: 0; justify-content: center; }
+        .x-back span { display: none; }
+        .x-back b { font-size: 32px; margin-top: -4px; }
+        .x-brand { order: 0; display: block; min-width: 0; min-height: 0; padding: 0; border-left: 0; text-align: center; }
+        .x-brand b { display: block; font-size: clamp(15px, 4.6vw, 17px); white-space: nowrap; overflow: visible; text-overflow: clip; }
+        .x-mch { display: inline-flex; justify-self: end; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px;
+          border: 0; border-radius: 980px; background: var(--x-fill); color: var(--x-blue-ink); font: 500 15px/1 var(--x-sans); white-space: nowrap; }
+        .x-mch span { font: 13px/1 var(--x-mono); color: var(--x-ink-2); }
+        .x-mch:active { transform: scale(.97); }
+
+        /* 地图：不被卡片遮挡，只有地图吃掉手势 */
+        .x-stage { grid-area: stage; }
+        #map { touch-action: none; }
+
+        /* 时间轴：地图正下方一行，可横滑 */
+        .x-bar { grid-area: bar; gap: 0; padding: 2px max(4px, env(safe-area-inset-right)) 6px max(4px, env(safe-area-inset-left)); }
+        .x-ticks { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .x-ticks::-webkit-scrollbar { display: none; }
+        .x-tick { flex: 0 0 58px; min-width: 58px; min-height: 52px; padding-top: 8px; }
+        .x-tick::before { top: 13px; }
+        .x-tick em { font-size: 13px; }
+        .x-bar__meta { margin: 0; font-size: 13px; line-height: 1.4; padding: 0 8px; }
+
+        /* 内容区：取代浮层讲解与底部抽屉 */
+        .x-panel { grid-area: panel; position: relative; left: auto; right: auto; bottom: auto; z-index: auto;
+          transform: none; transition: none; max-height: none; border-radius: 0; border: 0;
+          background: var(--x-bg-1); box-shadow: inset 0 0.5px 0 var(--x-line-2);
+          backdrop-filter: none; -webkit-backdrop-filter: none;
+          overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+          padding: 16px max(16px, env(safe-area-inset-right)) calc(92px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+        .x-drawer__btn { display: none; }
+        .x-mhead { display: block; }
+        .x-mhead, #panel-body { max-width: 720px; margin-left: auto; margin-right: auto; }
+        .x-panel .x-card, :root[data-theme="light"] .x-panel .x-card { background: var(--x-card); box-shadow: var(--x-shadow), 0 0 0 0.5px var(--x-line); }
+        .x-panel .x-over { position: static; max-width: none; padding: 0; margin: 0; border: 0; border-radius: 0;
+          background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+        .x-panel .x-over h2 { font: 600 20px/1.3 var(--x-sans); margin: 0 0 8px; }
+        .x-panel .x-over p { font-size: 16px; line-height: 1.7; color: var(--x-ink); margin: 0; }
+        .x-panel .x-over .x-over__src { font-size: 13px !important; line-height: 1.6; margin-top: 8px; }
+        .x-panel .x-over.min p, .x-panel .x-over.min .x-over__src { display: block; }
+        .x-panel #fold { display: none; }
+        .x-panel .x-note { position: static; margin: 10px 0 0; padding: 0; border-radius: 0; background: none; box-shadow: none;
+          backdrop-filter: none; -webkit-backdrop-filter: none; text-align: left; font: 13px/1.5 var(--x-sans); color: var(--x-ink-2); }
+        .x-mtools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .x-mt { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border: 0; border-radius: 980px;
+          background: var(--x-fill); color: var(--x-ink); font: 500 15px/1 var(--x-sans); }
+        .x-mt svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .x-mt:active { transform: scale(.97); }
+        .x-mhead + #panel-body { margin-top: 16px; }
+        /* 文字不小于 13px */
+        .x-panel small, .x-tag, .x-fig span, .x-pol small, .x-qz__ctx, .x-soon, .x-tl b { font-size: 13px !important; }
+        .x-pop { width: min(260px, calc(100vw - 32px)); }
+
+        /* 底部翻章栏 */
+        .x-mnav { display: flex; gap: 10px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 15;
+          padding: 10px max(16px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+          background: var(--x-glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+          box-shadow: inset 0 0.5px 0 var(--x-line-2); }
+        .x-mnav button { flex: 1; min-height: 48px; border: 0; border-radius: 980px; background: var(--x-fill); color: var(--x-ink);
+          font: 600 16px/1 var(--x-sans); transition: transform var(--x-dur) var(--x-ease), opacity var(--x-dur) var(--x-ease); }
+        .x-mnav #mnext { background: #0071e3; color: #ffffff; }
+        .x-mnav button:active { transform: scale(.97); }
+        .x-mnav button[disabled] { opacity: .4; cursor: not-allowed; }
+
+        /* 章节列表：底部升起的 sheet */
+        .x-sheet { display: block; position: fixed; inset: 0; z-index: 40; }
+        .x-sheet__scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, .35); opacity: 0; transition: opacity var(--x-dur) var(--x-ease); }
+        .x-sheet__panel { position: absolute; left: 0; right: 0; bottom: 0; max-width: 720px; margin: 0 auto;
+          max-height: 70vh; display: flex; flex-direction: column; background: var(--x-panel);
+          border-radius: 20px 20px 0 0; box-shadow: 0 -8px 32px rgba(0, 0, 0, .18);
+          padding-bottom: env(safe-area-inset-bottom); transform: translateY(100%); transition: transform var(--x-dur) var(--x-ease); }
+        @supports (height: 1svh) { .x-sheet__panel { max-height: 70svh; } }
+        .x-sheet.open .x-sheet__scrim { opacity: 1; }
+        .x-sheet.open .x-sheet__panel { transform: none; }
+        .x-sheet__head { position: relative; display: flex; align-items: center; justify-content: space-between;
+          padding: 14px max(8px, env(safe-area-inset-right)) 4px max(20px, env(safe-area-inset-left)); }
+        .x-sheet__head::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 5px; margin-left: -18px;
+          border-radius: 980px; background: var(--x-fill-2); }
+        .x-sheet__head h2 { margin: 0; font: 600 17px/1.3 var(--x-sans); }
+        .x-sheet__close { width: 44px; height: 44px; border: 0; border-radius: 980px; background: var(--x-fill); color: var(--x-ink-2); font-size: 22px; line-height: 1; }
+        .x-sheet__list { list-style: none; margin: 0; padding: 4px max(12px, env(safe-area-inset-right)) 16px max(12px, env(safe-area-inset-left));
+          overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+        .x-sheet__list button { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; align-items: center; gap: 10px;
+          width: 100%; min-height: 52px; padding: 8px 12px; border: 0; border-radius: 12px; background: transparent; color: var(--x-ink); text-align: left; }
+        .x-sheet__list b { font: 13px/1 var(--x-mono); color: var(--x-ink-2); font-weight: 400; }
+        .x-sheet__list span { font: 500 16px/1.35 var(--x-sans); }
+        .x-sheet__list em { font: 13px/1.2 var(--x-mono); font-style: normal; color: var(--x-ink-2); white-space: nowrap; }
+        .x-sheet__list button:active { background: var(--x-hover); }
+        .x-sheet__list button.on { background: var(--x-blue-soft); }
+        .x-sheet__list button.on b, .x-sheet__list button.on span, .x-sheet__list button.on em { color: var(--x-blue-ink); }
+        .x-sheet__list button.on span { font-weight: 600; }
+      }
+      @media (max-width: 767px) and (max-height: 700px) {
+        .x-app, .x-app.x-toc-off { --x-map-h: 50vh; }
+        @supports (height: 1svh) { .x-app, .x-app.x-toc-off { --x-map-h: 50svh; } }
+      }
+      @media (min-width: 768px) and (max-width: 1023px) {
+        .x-app, .x-app.x-toc-off { --x-map-h: 55vh; }
+        @supports (height: 1svh) { .x-app, .x-app.x-toc-off { --x-map-h: 55svh; } }
+        .x-tick { flex: 1 0 58px; }
+      }
+    </style>
+  <style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
   <body>
     <div class="x-app" id="top">
       <header class="x-top">
@@ -428,6 +548,7 @@
           <button class="x-btn" id="reset" aria-label="重置视角（R）">R</button>
           <button class="x-btn" id="full" aria-label="全屏（F）">F</button>
         </div>
+        <button class="x-mch" id="mch" aria-haspopup="dialog" aria-controls="sheet" aria-expanded="false">章节 <span id="mcount">01/17</span></button>
       </header>
 
       <nav class="x-chs" id="chs" aria-label="章节"></nav>
@@ -450,8 +571,32 @@
 
       <aside class="x-panel" id="panel" aria-label="本章控制面板">
         <button class="x-drawer__btn" id="drawer">▲ 本章面板</button>
+        <div class="x-mhead" id="mhead">
+          <div id="m-over"></div>
+          <div class="x-mtools">
+            <button class="x-mt" id="m-reset" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v5h5" /></svg>重置视角</button>
+            <button class="x-mt" id="m-theme" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg><span>深色</span></button>
+          </div>
+          <div id="m-note"></div>
+        </div>
         <div id="panel-body"></div>
       </aside>
+    </div>
+
+    <nav class="x-mnav" aria-label="切换章节">
+      <button id="mprev" type="button">‹ 上一章</button>
+      <button id="mnext" type="button">下一章 ›</button>
+    </nav>
+
+    <div class="x-sheet" id="sheet" hidden>
+      <div class="x-sheet__scrim" id="sheet-scrim" aria-hidden="true"></div>
+      <div class="x-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <div class="x-sheet__head">
+          <h2 id="sheet-title">全部章节</h2>
+          <button class="x-sheet__close" id="sheet-close" type="button" aria-label="关闭章节列表">×</button>
+        </div>
+        <ol class="x-sheet__list" id="sheet-list"></ol>
+      </div>
     </div>
 
     <script src="hark.js"></script>
@@ -2309,6 +2454,7 @@
         $("panel-body").innerHTML = panelHTML(i); buildChart();
         $("prev").disabled = i === 0; $("next").disabled = i === N - 1;
         if (!fromHash) history.replaceState(null, "", "#" + (i + 1));
+        if (window.xMobileSync) window.xMobileSync(i);
         resetView(false); dirty = true;
       }
       function fromHash() { var n = parseInt(location.hash.slice(1), 10); return n >= 1 && n <= N ? n - 1 : 0; }
@@ -2347,6 +2493,63 @@
       try { if (localStorage.getItem("hark-theme") === "light") root.setAttribute("data-theme", "light"); } catch (e) {}
       var started = false;
       resize(); go(fromHash(), true); started = true; resetView(true); requestAnimationFrame(loop);
+    </script>
+    <script>
+      /* ---------- 手机 / 平板外壳：讲解进内容区、章节 sheet、底部翻章 ---------- */
+      (function () {
+        var MQ = matchMedia("(max-width: 1023px)"), over = $("over"), note = document.querySelector(".x-note"), stage = document.querySelector(".x-stage");
+        var sheet = $("sheet"), list = $("sheet-list"), mch = $("mch"), openT = 0;
+        function place() {
+          if (MQ.matches) {
+            if (over.parentNode !== $("m-over")) { over.classList.remove("min"); $("m-over").appendChild(over); $("m-note").appendChild(note); }
+          } else if (over.parentNode !== stage) {
+            stage.insertBefore(over, cv.nextSibling); stage.insertBefore(note, over.nextSibling);
+          }
+        }
+        list.innerHTML = CH.map(function (c, i) {
+          var when = c.y != null && c.tick ? c.tick.replace("前", "前 ") + " 年" : "";
+          return '<li><button type="button" data-i="' + i + '"><b>' + pad(i + 1) + "</b><span>" + esc(c.name) + "</span><em>" + when + "</em></button></li>";
+        }).join("");
+        function openSheet() {
+          clearTimeout(openT); sheet.hidden = false; mch.setAttribute("aria-expanded", "true");
+          requestAnimationFrame(function () { requestAnimationFrame(function () { sheet.classList.add("open"); }); });
+          var cur = list.querySelector("button.on");
+          if (cur) { cur.focus({ preventScroll: true }); cur.scrollIntoView({ block: "center" }); }
+        }
+        function closeSheet() {
+          if (sheet.hidden) return;
+          sheet.classList.remove("open"); mch.setAttribute("aria-expanded", "false");
+          openT = setTimeout(function () { sheet.hidden = true; }, RM.matches ? 0 : 320);
+          mch.focus({ preventScroll: true });
+        }
+        mch.onclick = openSheet;
+        $("sheet-scrim").onclick = closeSheet;
+        $("sheet-close").onclick = closeSheet;
+        list.addEventListener("click", function (e) { var b = e.target.closest("button[data-i]"); if (b) { closeSheet(); go(+b.dataset.i); } });
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
+        $("mprev").onclick = function () { go(state.ch - 1); };
+        $("mnext").onclick = function () { go(state.ch + 1); };
+        $("m-reset").onclick = function () { resetView(false); };
+        $("m-theme").onclick = toggleTheme;
+        function themeLabel() {
+          var dark = root.getAttribute("data-theme") === "dark", b = $("m-theme");
+          b.setAttribute("aria-pressed", dark); b.querySelector("span").textContent = dark ? "浅色" : "深色";
+          b.querySelector("path").setAttribute("d", dark ? "M12 4V2m0 20v-2m8-8h2M2 12h2m13.7-5.7 1.4-1.4M4.9 19.1l1.4-1.4m0-11.4L4.9 4.9m14.2 14.2-1.4-1.4M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" : "M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z");
+        }
+        new MutationObserver(themeLabel).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+        window.xMobileSync = function (i) {
+          $("mcount").textContent = pad(i + 1) + "/" + N;
+          $("mprev").disabled = i === 0; $("mnext").disabled = i === N - 1;
+          [].forEach.call(list.querySelectorAll("button"), function (b, k) { b.classList.toggle("on", k === i); if (k === i) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); });
+          if (!MQ.matches) return;
+          $("panel").scrollTop = 0;
+          var tk = $("ticks"), t = tk.children[i];
+          if (t) { var cr = tk.getBoundingClientRect(), tr = t.getBoundingClientRect(); tk.scrollTo({ left: tk.scrollLeft + tr.left - cr.left - (cr.width - tr.width) / 2, behavior: started && !RM.matches ? "smooth" : "auto" }); }
+        };
+        if (MQ.addEventListener) MQ.addEventListener("change", function () { place(); if (!MQ.matches) closeSheet(); });
+        else MQ.addListener(place);
+        place(); themeLabel(); xMobileSync(state.ch);
+      })();
     </script>
   </body>
 </html>
