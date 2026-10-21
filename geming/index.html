@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><script src="../lib/labfix-2d.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>资产阶级革命与制度 · 格物实验室</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--sel:#e8f1fc;--selfg:#0058b0;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--sel:rgba(41,151,255,.18);--selfg:#6cb6ff;--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--shadow:0 0 0 1px rgba(255,255,255,.08)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.back b{font-size:22px;font-weight:400;margin-right:4px}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);font-size:14px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}
+html.dark .pill.primary,html.dark .chips button.on{color:#000}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc button,.sheet button.it{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px;align-items:center}
+.toc button:hover{background:var(--btn2)}
+.toc button.on,.sheet button.it.on{background:var(--sel);color:var(--selfg);font-weight:600}
+.toc .mono,.sheet .mono{font-size:13px;color:var(--sub)}.on .mono{color:var(--selfg)!important}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 20px}
+.explain{flex:none}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.etext{margin:8px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.explain.collapsed .etext,.explain.collapsed .book{display:none}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;color:var(--sub);min-height:32px}
+.cwrap{flex:1;min-height:0;position:relative;border-radius:22px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:none}
+.sec h3{font-size:13px;color:var(--sub);font-weight:600;letter-spacing:0;margin:0 0 8px}
+.ctrls{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;font-size:14px}.sl output{font-family:var(--mono);color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}.chips button.on{background:var(--blue);color:#fff}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;min-height:36px;border:0;background:none;padding:0;width:100%}
+.tg i{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.tg.on i{background:#34c759}.tg.on i::after{left:20px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+.points ul{margin:0;padding-left:18px}.points li{margin:4px 0}
+.gk a{color:var(--blue);text-decoration:none;font-size:14px}
+.mdark{display:none}
+.soon{color:var(--sub);font-size:14px;margin:0}
+/* sheet */
+.mask{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;max-height:70vh;overflow:auto;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .prog{display:none}.app{display:block;height:auto}.toc{display:none}
+ .stage{padding:12px}.cwrap{order:-1;flex:none;height:56vh}
+ .explain .fold{display:none}.explain.collapsed .etext,.explain.collapsed .book{display:block}.etext{max-height:none;overflow:visible}
+ .panel{border:0;padding:0 12px 24px}
+}
+@media (min-width:1024px){.chbtn{display:none}}
+/* phone */
+@media (max-width:767px){
+ .top{height:calc(52px + env(safe-area-inset-top));gap:6px;padding-left:4px;padding-right:8px}
+ .back{width:44px;justify-content:center}.back span{display:none}.back b{margin:0}
+ .tname{flex:1;font-size:16px}.tbtns{display:none}.chbtn{margin-left:0;padding:0 12px}
+ .stage{padding:0;gap:0}.cwrap{height:52vh;border-radius:0;box-shadow:none;border-bottom:1px solid var(--line)}
+ .explain{background:none;box-shadow:none;padding:16px 16px 4px}.ehead h2{font-size:20px}.etext{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(84px + env(safe-area-inset-bottom))}
+ input[type=range]{height:44px}.chips button,.tg{min-height:44px}
+ .mdark{display:block;align-self:flex-start;min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
+  <div class="tname">资产阶级革命与制度 · RevoLab</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 09</span></div>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button><button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chnum">01/09</span></button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h2 id="ctitle"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="etext" id="ctext"></p>
+    </section>
+    <div class="cwrap" id="cwrap"><canvas id="cv"></canvas></div>
+  </main>
+  <aside class="panel">
+    <section class="card sec" id="ctrlSec"><h3>控件</h3><div class="ctrls" id="ctrl"></div></section>
+    <section class="card sec" id="readSec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec points" id="ptSec"><h3>要点</h3><div id="pts"></div></section>
+    <section class="card sec gk" id="gkSec"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mask" id="mask" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><div id="slist"></div></div>
+<div class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></div>
+<script>
+const CH=[
+{n:"英国：权力天平向议会倾斜",book:"《中外历史纲要（下）》第 9 课 · 选择性必修1 第 3 课",ready:false},
+{n:"美国 1787 年宪法：三权制衡",book:"第 9 课 · 选择性必修1 第 3 课",ready:false},
+{n:"法国大革命：从三级会议到共和国",book:"第 9 课",ready:false},
+{n:"拿破仑与《民法典》",book:"第 9 课",ready:false},
+{n:"德意志统一与 1871 年宪法",book:"第 9 课",ready:false},
+{n:"改革之路：俄国 1861 与日本明治维新",book:"第 12 课",ready:false},
+{n:"代议制大比拼",book:"选择性必修1 第 3 课",ready:false},
+{n:"拉美独立与亚洲觉醒",book:"第 13 课",ready:false},
+{n:"随堂检测",book:"浙江选考 资本主义制度的确立",ready:false}];
+/* ---------- history drawing tools ---------- */
+const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif";
+const INK={blue:"#0071e3",gold:"#9a6a00",red:"#c0362c"};// text colors: theme().fg or these three only
+function itext(ctx,text,x,y,o){o=o||{};const T=theme(),col=o.color||T.fg;ctx.save();
+ ctx.font=(o.weight||400)+" "+(o.size||13)+"px "+SANS;ctx.textAlign=o.align||"center";ctx.textBaseline="middle";ctx.lineJoin="round";
+ ctx.lineWidth=3;ctx.strokeStyle=isDark()&&col===T.fg?T.bg:"rgba(255,255,255,.9)";ctx.strokeText(text,x,y);ctx.fillStyle=col;ctx.fillText(text,x,y);ctx.restore()}
+function person(ctx,x,y,h,o){o=o||{};const col=o.color||theme().fg,role=o.role||"citizen",r=h*.11,hy=y-h+r,sh=hy+r*1.3;
+ ctx.save();ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineCap="round";ctx.lineJoin="round";
+ ctx.beginPath();ctx.arc(x,hy,r,0,7);ctx.fill();
+ const robe=role==="judge"||role==="king",bw=robe?h*.2:h*.15;
+ ctx.beginPath();ctx.moveTo(x-bw*.8,sh);ctx.lineTo(x+bw*.8,sh);ctx.lineTo(x+bw,robe?y:y-h*.4);ctx.lineTo(x-bw,robe?y:y-h*.4);ctx.closePath();ctx.fill();
+ if(!robe){ctx.lineWidth=h*.07;ctx.beginPath();ctx.moveTo(x-bw*.5,y-h*.42);ctx.lineTo(x-bw*.6,y);ctx.moveTo(x+bw*.5,y-h*.42);ctx.lineTo(x+bw*.6,y);ctx.stroke()}
+ ctx.lineWidth=h*.03;
+ if(role==="king"){const cy=hy-r*.8;ctx.beginPath();ctx.moveTo(x-r,cy);ctx.lineTo(x-r,cy-r*.9);ctx.lineTo(x-r*.5,cy-r*.4);ctx.lineTo(x,cy-r*1.1);ctx.lineTo(x+r*.5,cy-r*.4);ctx.lineTo(x+r,cy-r*.9);ctx.lineTo(x+r,cy);ctx.closePath();ctx.fillStyle="#c98a12";ctx.fill()}
+ if(role==="mp"||role==="judge"){ctx.beginPath();ctx.arc(x-r*.95,hy+r*.3,r*.45,0,7);ctx.arc(x+r*.95,hy+r*.3,r*.45,0,7);ctx.fill();ctx.beginPath();ctx.arc(x,hy-r*.35,r*1.05,Math.PI,0);ctx.fill()}
+ if(role==="judge"){ctx.strokeStyle=theme().bg;ctx.beginPath();ctx.moveTo(x,sh+r*.3);ctx.lineTo(x,y-h*.05);ctx.stroke()}
+ if(role==="soldier"){ctx.beginPath();ctx.moveTo(x-r*1.5,hy-r*.4);ctx.lineTo(x,hy-r*1.9);ctx.lineTo(x+r*1.5,hy-r*.4);ctx.closePath();ctx.fill();
+  ctx.lineWidth=h*.035;ctx.beginPath();ctx.moveTo(x+bw*1.1,y-h*.3);ctx.lineTo(x+bw*1.5,y-h*1.05);ctx.stroke()}
+ if(role==="president"){ctx.fillRect(x-r*1.4,hy-r*.85,r*2.8,r*.3);ctx.fillRect(x-r*.85,hy-r*2.3,r*1.7,r*1.5)}
+ if(role==="peasant"){ctx.beginPath();ctx.moveTo(x-r*1.8,hy-r*.3);ctx.quadraticCurveTo(x,hy-r*2.2,x+r*1.8,hy-r*.3);ctx.closePath();ctx.fill();
+  ctx.lineWidth=h*.035;ctx.beginPath();ctx.moveTo(x-bw*1.1,y);ctx.lineTo(x-bw*1.4,y-h*.85);ctx.lineTo(x-bw*.6,y-h*.95);ctx.stroke()}
+ ctx.restore()}
+function balance(ctx,x,y,w,tilt,ll,rl,lc,rc){const T=theme(),t=Math.max(-1,Math.min(1,tilt||0)),a=t*.35,hw=w/2,top=y-w*.55,dx=Math.cos(a)*hw,dy=Math.sin(a)*hw;
+ lc=lc||INK.blue;rc=rc||INK.red;ctx.save();ctx.strokeStyle=T.fg;ctx.fillStyle=T.fg;ctx.lineCap="round";
+ ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,top);ctx.stroke();ctx.fillRect(x-w*.14,y-4,w*.28,6);
+ ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x-dx,top-dy);ctx.lineTo(x+dx,top+dy);ctx.stroke();ctx.beginPath();ctx.arc(x,top,5,0,7);ctx.fill();
+ const ph=w*.25,pw=w*.17;[[-1,lc,ll],[1,rc,rl]].forEach(([s,c,l])=>{const px=x+s*dx,py=top+s*dy,by=py+ph;
+  ctx.strokeStyle=T.sub;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px-pw,by);ctx.moveTo(px,py);ctx.lineTo(px+pw,by);ctx.stroke();
+  ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(px-pw*1.1,by);ctx.quadraticCurveTo(px,by+pw*.7,px+pw*1.1,by);ctx.closePath();ctx.fill();
+  if(l)itext(ctx,l,px,by+pw*.55+12,{color:c===lc||c===rc?c:T.fg,size:13,weight:600})});ctx.restore()}
+function node(ctx,x,y,w,h,label,o){o=o||{};const T=theme(),col=o.color||T.fg;ctx.save();rrect(ctx,x,y,w,h,Math.min(12,h/3));
+ ctx.fillStyle=isDark()?"#2c2c2e":"#fff";if(o.active){ctx.shadowColor=col;ctx.shadowBlur=16}ctx.fill();ctx.shadowBlur=0;
+ ctx.strokeStyle=o.active?col:isDark()?"rgba(255,255,255,.18)":"rgba(0,0,0,.14)";ctx.lineWidth=o.active?2.5:1;ctx.stroke();ctx.restore();
+ if(label)itext(ctx,label,x+w/2,y+h/2,{color:col,size:14,weight:600})}
+function arrowTo(ctx,x1,y1,x2,y2,o){o=o||{};const T=theme(),col=o.color||T.fg,p=o.progress==null?1:Math.max(0,Math.min(1,o.progress));if(p<=0)return;
+ const ex=x1+(x2-x1)*p,ey=y1+(y2-y1)*p,a=Math.atan2(y2-y1,x2-x1),k=9;ctx.save();ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=2;ctx.lineCap="round";
+ ctx.setLineDash(o.dash?[6,5]:[]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(ex-Math.cos(a)*k*.6,ey-Math.sin(a)*k*.6);ctx.stroke();ctx.setLineDash([]);
+ ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ex-k*Math.cos(a-.45),ey-k*Math.sin(a-.45));ctx.lineTo(ex-k*Math.cos(a+.45),ey-k*Math.sin(a+.45));ctx.closePath();ctx.fill();ctx.restore();
+ if(o.label&&p>=.5)itext(ctx,o.label,(x1+x2)/2,(y1+y2)/2-12,{color:col,size:12})}
+const MODS=[];// MODS[i]={text,points,gk,mount(ctrlEl,readEl),draw(ctx,w,h,t),pointer(e,type,x,y),unmount()}
+/* ---------- 第 1 章 英国：权力天平向议会倾斜 ---------- */
+CH[0].ready=true;
+MODS[0]=(()=>{
+ const S=[
+  {y:"1215 年前",ev:"中世纪王权",tl:-.6,gov:"封建君主制",nar:"中世纪英国：王权强大，国王掌握征税、立法与军队。点击「下一步」或下方时间轴节点。"},
+  {y:"1215",nm:"大宪章",ev:"《大宪章》",tl:-.45,gov:"封建君主制",nar:"贵族迫使国王签署《大宪章》，承认“王在法下”，开创限制王权的传统。天平微微一动。"},
+  {y:"1640",nm:"革命",ev:"资产阶级革命爆发",tl:-.2,gov:"君主专制受挑战",nar:"查理一世与议会围绕征税权激烈冲突，英国资产阶级革命爆发，随后爆发内战。"},
+  {y:"1649",nm:"共和",ev:"处死查理一世",tl:.15,gov:"共和国",nar:"议会处死查理一世，宣布成立共和国。政局剧烈动荡，天平大幅摇摆后回摆。",shake:1},
+  {y:"1660",nm:"复辟",ev:"斯图亚特王朝复辟",tl:-.35,gov:"君主制复辟",nar:"斯图亚特王朝复辟，王权反扑，天平向国王回摆——革命出现反复。",red:1},
+  {y:"1688",nm:"光荣革命",ev:"光荣革命 · 《权利法案》",tl:.4,gov:"君主立宪制",rd:"君主立宪制确立",nar:"1688 年光荣革命，迎立威廉三世与玛丽；1689 年《权利法案》：法律效力高于王权，未经议会同意，国王不得征税、不得废除法律、不得维持常备军。"},
+  {y:"18世纪",nm:"内阁制",ev:"责任内阁制形成",tl:.7,gov:"君主立宪制 · 责任内阁制",rd:"国王“统而不治”",nar:"1721 年沃波尔成为首任首相；1742 年沃波尔因失去下院多数支持而辞职。内阁向议会负责，国王“统而不治”。"}];
+ let s=0,reform=false,tn=-.6,shT=null,grT=null,timer=null,hits=[],ro=null,autoB=null;
+ const C=()=>{const T=theme();return isDark()?{blue:T.blue,gold:T.goldText,red:T.redText,fg:T.fg}:{blue:INK.blue,gold:INK.gold,red:INK.red,fg:T.fg}};
+ const tgt=()=>Math.max(-1,Math.min(1,S[s].tl+(reform?.08:0)));
+ function upd(){const st=S[s],c=C(),k=Math.round((1-tgt())/2*100);
+  const bar=`<span style="display:inline-flex;width:96px;height:8px;border-radius:4px;overflow:hidden;vertical-align:middle;margin-right:6px"><i style="width:${k}%;background:${c.gold}"></i><i style="flex:1;background:${c.blue}"></i></span>${k}% : ${100-k}%`;
+  const rows=[["年份",st.y],["事件",st.ev,st.red?c.red:""],["王权 : 议会",bar],["政体",st.gov,c.blue]];
+  if(st.rd)rows.push(["读数",st.rd,c.gold]);if(reform)rows.push(["1832 改革","选举权扩大，工业资产阶级进入议会",c.blue]);ro&&ro.update(rows)}
+ function go1(k){s=Math.max(0,Math.min(6,k));shT=S[s].shake?-1:null;grT=s===6?-1:grT;if(s<6)grT=null;upd()}
+ function stopAuto(){if(timer){clearInterval(timer);timer=null}if(autoB)autoB.textContent="自动播放"}
+ function wrap(ctx,t,mw){const out=[];let l="";for(const ch of t){const n=l+ch;if(ctx.measureText(n).width>mw&&l){out.push(l);l=ch}else l=n}if(l)out.push(l);return out}
+ function lock(ctx,x,y,col){ctx.save();ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y-5,4.5,Math.PI,0);ctx.stroke();rrect(ctx,x-7,y-5,14,11,2.5);ctx.fill();ctx.restore()}
+ function struct(ctx,a,c){const T=theme(),nw=Math.min(124,a.w*.42),nh=34,cx=a.x+a.w*.42,gap=Math.max(26,(a.h-30-nh*3)/2);
+  itext(ctx,"英国责任内阁制",a.x+a.w/2,a.y+10,{color:c.gold,size:13,weight:600});
+  const y1=a.y+26,y2=y1+nh+gap,y3=y2+nh+gap,lx=cx-nw*.22,rx=cx+nw*.22;
+  node(ctx,cx-nw/2,y1,nw,nh,"首相 / 内阁",{color:c.blue,active:true});node(ctx,cx-nw/2,y2,nw,nh,"下院");node(ctx,cx-nw/2,y3,nw,nh,"选民");
+  arrowTo(ctx,cx,y3,cx,y2+nh);itext(ctx,"选举",cx+8,(y3+y2+nh)/2,{size:12,align:"left"});
+  arrowTo(ctx,lx,y2,lx,y1+nh);itext(ctx,"多数党领袖",lx-6,(y2+y1+nh)/2,{size:12,align:"right"});
+  arrowTo(ctx,rx,y1+nh,rx,y2,{color:c.blue});itext(ctx,"负责",rx+6,(y2+y1+nh)/2,{size:12,align:"left",color:c.blue});
+  const kw=Math.min(84,a.x+a.w-(cx+nw/2)-14),kx=a.x+a.w-kw-2;
+  if(kw>50){ctx.save();rrect(ctx,kx,y1,kw,nh,10);ctx.fillStyle=isDark()?"#2c2c2e":"#fff";ctx.fill();ctx.setLineDash([5,4]);ctx.strokeStyle=c.gold;ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+   itext(ctx,"国王",kx+kw/2,y1+nh/2,{color:c.gold,size:14,weight:600});itext(ctx,"象征性元首",kx+kw/2,y1+nh+14,{color:c.gold,size:12})}}
+ return{
+  text:"1640 年英国资产阶级革命爆发，经过反复斗争，1688 年光荣革命后议会通过《权利法案》，以法律形式限制王权，确立君主立宪制。18 世纪形成责任内阁制，国王“统而不治”，权力中心由国王转移到议会。",
+  points:["1689 年《权利法案》确立议会主权原则，君主立宪制确立","责任内阁制：内阁由下院多数党组成，向议会负责","英国政治制度在渐进改革中发展","1832 年议会改革扩大选举权","英国资产阶级革命为工业革命提供了政治前提"],
+  gk:'<p style="margin:0 0 6px;font-size:14px">统编版《中外历史纲要（下）》第 9 课「资产阶级革命与资本主义制度的确立」；选择性必修1 第 3 课</p><p style="margin:0;font-size:14px">浙江选考高频：君主立宪制、责任内阁制的特点</p>',
+  mount(c,r){s=0;reform=false;tn=-.6;shT=grT=null;const row=el("div");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+   autoB=button("自动播放",()=>{if(timer){stopAuto();return}if(s>=6)go1(0);autoB.textContent="暂停";timer=setInterval(()=>{if(s>=6){stopAuto();return}go1(s+1);if(s>=6)stopAuto()},2600)});
+   row.append(button("上一步",()=>{stopAuto();go1(s-1)}),button("下一步",()=>{stopAuto();go1(s+1)},true),autoB);
+   [...row.children].forEach(b=>{b.style.minHeight="44px";b.style.minWidth="44px"});
+   c.append(row,toggle("1832 议会改革",false,v=>{reform=v;upd()}));ro=readout();r.append(ro);upd()},
+  unmount(){stopAuto();ro=null;autoB=null},
+  pointer(e,type,x,y){if(type!=="down")return false;const h=hits.find(p=>Math.hypot(p.x-x,p.y-y)<26);if(h){stopAuto();go1(h.i);return true}return false},
+  draw(ctx,w,h,t){const T=theme(),c=C(),st=S[s];
+   tn+=(tgt()-tn)*.06;let tl=tn;if(shT===-1)shT=t;if(shT!=null){const d=t-shT;tl+=.5*Math.sin(d*8)*Math.exp(-d*1.2)}
+   if(grT===-1)grT=t;
+   /* 旁白卡 */
+   ctx.font="14px "+SANS;const cw=w-24,ls=wrap(ctx,st.nar,cw-28),chh=46+ls.length*21;
+   ctx.save();rrect(ctx,12,12,cw,chh,16);ctx.fillStyle=isDark()?"#2c2c2e":"#fff";ctx.fill();ctx.strokeStyle=isDark()?"rgba(255,255,255,.12)":"rgba(0,0,0,.08)";ctx.lineWidth=1;ctx.stroke();ctx.restore();
+   itext(ctx,st.y+"  "+st.ev+(st.red?"  · 反复":""),26,34,{align:"left",size:15,weight:600,color:st.red?c.red:c.blue});
+   ctx.save();ctx.font="14px "+SANS;ctx.fillStyle=T.fg;ctx.textAlign="left";ctx.textBaseline="middle";ls.forEach((l,i)=>ctx.fillText(l,26,58+i*21));ctx.restore();
+   /* 时间轴 */
+   const ty=h-40,x0=34,x1=w-34;hits=[];ctx.save();ctx.strokeStyle=T.sub;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x0,ty);ctx.lineTo(x1,ty);ctx.stroke();ctx.restore();
+   for(let i=1;i<=6;i++){const x=x0+(x1-x0)*(i-1)/5,on=i<=s,col=S[i].red?c.red:c.blue;hits.push({x,y:ty,i});
+    ctx.save();ctx.beginPath();ctx.arc(x,ty,i===s?10:8,0,7);ctx.fillStyle=on?col:T.bg;ctx.fill();ctx.strokeStyle=on?col:T.sub;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+    itext(ctx,S[i].y,x,ty-22,{size:12,weight:600,color:i===s?col:c.fg});itext(ctx,S[i].nm,x,ty+22,{size:12,color:i===s?col:c.fg})}
+   /* 区域划分 */
+   const top=12+chh+10,bot=h-84,show=s>=6,side=w>h;let A={x:0,y:top,w:w,h:bot-top},B=null;
+   if(show){if(side){A.w=w*.56;B={x:w*.56,y:top+10,w:w*.44-12,h:bot-top-10}}else{A.h=(bot-top)*.55;B={x:12,y:top+A.h+8,w:w-24,h:bot-top-A.h-8}}}
+   /* 天平 */
+   const bw=Math.max(120,Math.min(A.w*.78,A.h/.95)),bx=A.x+A.w/2,by=A.y+A.h-4;
+   balance(ctx,bx,by,bw,tl,"国王","议会",c.gold,c.blue);
+   const ag=Math.max(-1,Math.min(1,tl))*.35,dx=Math.cos(ag)*bw/2,dy=Math.sin(ag)*bw/2,bt=by-bw*.55,ph=bw*.25,pw=bw*.17;
+   const lx=bx-dx,lb=bt-dy+ph,rx=bx+dx,rb=bt+dy+ph;
+   person(ctx,lx,lb-1,bw*.2,{role:"king"});
+   for(let i=-1;i<=1;i++)person(ctx,rx+i*pw*.6,rb-1,bw*.15,{role:"mp"});
+   if(reform)for(let i=-1;i<=1;i++)person(ctx,rx+i*pw*.6+pw*.3,rb+pw*.2,bw*.1,{color:T.blue});
+   if(s>=5){for(let i=-1;i<=1;i++)lock(ctx,lx+i*pw*.6,lb+pw*.2,c.red);
+    ctx.font="12px "+SANS;const tx="征税 · 废法 · 常备军",half=ctx.measureText(tx).width/2+6;
+    itext(ctx,tx,Math.max(half,Math.min(w-half,lx)),lb-bw*.2-14,{size:12,weight:600,color:c.red})}
+   if(s===4)itext(ctx,"反复",bx,bt-bw*.14-16,{size:16,weight:600,color:c.red});
+   if(show){const g=Math.min(1,(t-grT)/.8),nw=64,nh=30,ny=rb-bw*.15-26-nh*g-22*g;
+    ctx.save();ctx.globalAlpha=g;node(ctx,rx-nw/2,ny,nw,nh,"内阁",{color:c.blue,active:true});ctx.restore();
+    arrowTo(ctx,rx,ny+nh,rx,rb-bw*.15-4,{color:c.blue,progress:g});
+    if(g>.5)itext(ctx,"向议会负责",rx-nw/2-6,ny+nh/2,{size:12,align:"right",color:c.blue})}
+   if(B)struct(ctx,B,c)}};
+})();
+/* ---------- 第 2 章 美国 1787 年宪法：三权制衡 ---------- */
+CH[1].ready=true;
+MODS[1]=(()=>{
+ const NM=["国会","总统","最高法院"],FULL=["国会（立法权）","总统（行政权）","最高法院（司法权）"],ROLE=["mp","president","judge"];
+ const AR=[
+  {a:0,b:1,tag:"弹劾·拨款",how:"可弹劾总统；参议院批准总统任命与条约；控制财政拨款"},
+  {a:1,b:0,tag:"否决",how:"对国会法案行使否决权"},
+  {a:1,b:2,tag:"提名法官",how:"提名联邦法官"},
+  {a:2,b:1,tag:"司法审查",how:"司法审查：宣布行政命令违宪",jr:1},
+  {a:0,b:2,tag:"批准·弹劾",how:"参议院批准法官任命；可弹劾法官"},
+  {a:2,b:0,tag:"司法审查",how:"司法审查：宣布法律违宪",jr:1}];
+ let sel=-1,fed=false,conf=false,fk=0,ck=0,hits=[],ro=null,box=null,tm=[],bill=null;
+ const C=()=>{const T=theme();return isDark()?{blue:T.blue,gold:T.goldText,red:T.redText,fg:T.fg}:{blue:INK.blue,gold:INK.gold,red:INK.red,fg:T.fg}};
+ const later=(f,ms)=>tm.push(setTimeout(f,ms));
+ function clr(){tm.forEach(clearTimeout);tm=[]}
+ function mv(k,stage,col){bill={from:bill?bill.to:k,to:k,t0:null,stage,col:col||""};upd()}
+ function btns(list){if(!box)return;box.innerHTML="";list.forEach(([l,f])=>{const b=button(l,f);b.style.minHeight="44px";box.append(b)})}
+ function toCourt(){btns([["诉至最高法院",()=>{btns([]);mv("court","最高法院审理中…");
+  later(()=>Math.random()<.5?mv("court","判定合宪：法律有效",C().blue):mv("court","判定违宪：法律无效（司法审查）",C().red),1400)}]])}
+ function start(){clr();bill=null;btns([]);mv("house","众议院审议通过");later(()=>mv("senate","参议院审议通过"),1300);later(()=>mv("pres","提交总统签署"),2600);
+  later(()=>{if(Math.random()<.5){mv("law","总统签署 → 成为法律",C().blue);toCourt()}
+   else{mv("pres","总统否决",C().red);btns([["国会两院各 2/3 推翻否决",()=>{btns([]);mv("congress","国会两院各 2/3 再表决");
+    later(()=>{mv("law","以 2/3 多数通过，成为法律",C().blue);toCourt()},1300)}]])}},3800)}
+ function upd(){const c=C(),A=sel>=0?AR[sel]:null;
+  ro&&ro.update([["选中权力",A?NM[A.a]+" → "+NM[A.b]:"点击画布上的箭头",A?c.blue:""],
+   ["制衡方式",A?A.how+(A.jr?"（1803 马伯里诉麦迪逊案确立）":""):"—",A&&A.jr?c.gold:""],
+   ["当前法案环节",bill?bill.stage:"未提出",bill&&bill.col||""],
+   ["原则",conf?"邦联：各州各自为政，中央软弱":["分权制衡",fed?"联邦制":"","人民主权"].filter(Boolean).join(" · "),conf?c.red:c.blue]])}
+ function wr(ctx,t,mw){const out=[];let l="";for(const ch of t){const n=l+ch;if(ctx.measureText(n).width>mw&&l){out.push(l);l=ch}else l=n}if(l)out.push(l);return out}
+ function seg(px,py,[x1,y1,x2,y2]){const dx=x2-x1,dy=y2-y1,u=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(px-x1-u*dx,py-y1-u*dy)}
+ function doc(ctx,x,y){const T=theme();ctx.save();ctx.shadowColor="rgba(0,0,0,.25)";ctx.shadowBlur=6;ctx.fillStyle=T.gold;ctx.beginPath();
+  ctx.moveTo(x-8,y-10);ctx.lineTo(x+3,y-10);ctx.lineTo(x+8,y-5);ctx.lineTo(x+8,y+10);ctx.lineTo(x-8,y+10);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle=T.bg;ctx.lineWidth=1.5;ctx.beginPath();for(let i=0;i<3;i++){ctx.moveTo(x-4,y-3+i*5);ctx.lineTo(x+4,y-3+i*5)}ctx.stroke();ctx.restore()}
+ return{
+  text:"独立战争胜利后，美国于 1787 年制定宪法，确立了联邦制、三权分立与制衡、民主共和制等原则。立法、行政、司法三权分属国会、总统和最高法院，相互制约、保持平衡。1787 年宪法是世界上第一部比较完整的成文宪法。",
+  points:["1787 年宪法是世界上第一部比较完整的成文宪法","三权分立与制衡：国会立法、总统行政、最高法院司法","联邦制：联邦与州分权","总统制：总统由选举产生、对选民负责而非对国会负责","局限：保留奴隶制，妇女、黑人、印第安人没有选举权"],
+  gk:'<p style="margin:0 0 6px;font-size:14px">统编版《中外历史纲要（下）》第 9 课；选择性必修1 第 3 课</p><p style="margin:0;font-size:14px">浙江选考高频：美国 1787 年宪法的原则、总统制与英国内阁制的区别</p>',
+  mount(c,r){clr();sel=-1;fed=conf=false;fk=ck=0;bill=null;
+   const lab=el("p",null,"小实验 · 一项法案的旅程");lab.style.cssText="margin:0;font-size:13px;font-weight:600";
+   const row=el("div");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap;align-items:center";
+   const sb=button("提出法案",start,true);sb.style.minHeight="44px";box=el("div");box.style.cssText="display:flex;gap:8px;flex-wrap:wrap";row.append(sb,box);
+   c.append(lab,row,toggle("联邦与州（分权）",false,v=>{fed=v;upd()}),toggle("对比 1781 年《邦联条例》",false,v=>{conf=v;upd()}));
+   ro=readout();r.append(ro);upd()},
+  unmount(){clr();ro=box=null;bill=null},
+  pointer(e,type,x,y){if(type!=="down"||ck>.5)return false;const R=e&&e.pointerType==="touch"?20:14;let best=-1,bd=R;
+   hits.forEach((s,i)=>{const d=seg(x,y,s);if(d<bd){bd=d;best=i}});if(best<0)return false;sel=best;upd();return true},
+  draw(ctx,w,h,t){const T=theme(),c=C();fk+=((fed||conf?1:0)-fk)*.08;ck+=((conf?1:0)-ck)*.08;
+   /* 说明卡（画布下方） */
+   const L=[];
+   if(conf)L.push(["1781 年《邦联条例》",c.red,600],["中央软弱，无权征税、无常备军 → 1787 年制宪会议",c.red,400]);
+   else{if(sel>=0){const A=AR[sel];L.push([NM[A.a]+" → "+NM[A.b],A.jr?c.gold:c.blue,600],[A.how,T.fg,400]);if(A.jr)L.push(["1803 年马伯里诉麦迪逊案确立司法审查",c.gold,400])}
+    else L.push(["点击三角形边上的箭头，查看三权如何相互制衡",T.fg,400]);
+    if(fed)L.push(["联邦制：中央与地方分权，外交、国防、货币归联邦",c.blue,600])}
+   ctx.font="600 14px "+SANS;const cw=w-24,lines=[];L.forEach(([s,col,wt])=>wr(ctx,s,cw-28).forEach(x=>lines.push([x,col,wt])));
+   const chh=lines.length*21+22,cy0=h-chh-12;
+   ctx.save();rrect(ctx,12,cy0,cw,chh,16);ctx.fillStyle=isDark()?"#2c2c2e":"#fff";ctx.fill();ctx.strokeStyle=isDark()?"rgba(255,255,255,.12)":"rgba(0,0,0,.08)";ctx.lineWidth=1;ctx.stroke();ctx.restore();
+   lines.forEach(([s,col,wt],i)=>itext(ctx,s,26,cy0+21+i*21,{align:"left",size:14,weight:wt,color:col}));
+   /* 几何：手机竖屏自动缩放居中 */
+   const top=10,bot=cy0-10,nw0=Math.min(150,w*.38),nh0=40,ph0=Math.max(18,Math.min(40,(bot-top)*.12));
+   const R0=Math.max(40,Math.min((w/2-nw0/2-8)/.87,(bot-top-nh0-ph0-8)/1.5)),cx=w/2,cy2=(top+bot)/2;
+   const cc0=top+ph0+8+nh0/2+R0,cm=cc0+(cy2-cc0)*fk,R=R0*(1-.45*fk-.35*ck),small=fk>.5,nw=small?Math.min(76,nw0):nw0,nh=small?28:nh0,ph=ph0*(1-.4*fk);
+   const V=[[cx,cm-R],[cx-R*.87,cm+R*.5],[cx+R*.87,cm+R*.5]];
+   /* 州：联邦制圆环 / 邦联松散分布 */
+   if(fk>.01){const Rm=Math.max(60,Math.min(w/2-30,(bot-top)/2-14)),N=10;ctx.save();ctx.globalAlpha=fk;
+    ctx.setLineDash([5,6]);ctx.strokeStyle=conf?T.sub:c.blue;ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(cx,cy2,Rm*(1+.08*ck),0,7);ctx.stroke();ctx.setLineDash([]);
+    for(let i=0;i<N;i++){const a=-Math.PI/2+i*2*Math.PI/N+.18*ck*Math.sin(i*3),r=Rm*(1+ck*.1*Math.sin(i*2.1+1)),x=cx+Math.cos(a)*r,y=cy2+Math.sin(a)*r;
+     node(ctx,x-20,y-12,40,24,"州",{color:conf?T.fg:c.blue})}ctx.restore()}
+   /* 三权三角形 */
+   ctx.save();ctx.globalAlpha=1-ck*.85;hits=[];
+   AR.forEach((A,i)=>{const P=V[A.a],Q=V[A.b],dx=Q[0]-P[0],dy=Q[1]-P[1],len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len,o=7;
+    const s=[P[0]+dx*.3+nx*o,P[1]+dy*.3+ny*o,P[0]+dx*.7+nx*o,P[1]+dy*.7+ny*o],on=i===sel,col=on?(A.jr?c.gold:c.blue):T.sub;
+    arrowTo(ctx,s[0],s[1],s[2],s[3],{color:col});hits.push(s);
+    if(!small)itext(ctx,A.tag,(s[0]+s[2])/2+nx*16,(s[1]+s[3])/2+ny*16,{size:12,color:on?col:T.fg,weight:on?600:400})});
+   V.forEach(([x,y],k)=>{const on=sel>=0&&AR[sel].a===k,col=on?c.blue:T.fg;
+    if(ph>14)person(ctx,x+[0,-nw*.28,nw*.28][k],y-nh/2-2,ph,{role:ROLE[k],color:on?c.blue:undefined});
+    node(ctx,x-nw/2,y-nh/2,nw,nh,null,{active:on,color:col});
+    if(small)itext(ctx,NM[k],x,y,{size:13,weight:600,color:col});
+    else if(k===0){itext(ctx,FULL[0],x,y-8,{size:13,weight:600,color:col});itext(ctx,"参议院+众议院",x,y+10,{size:12,color:col})}
+    else itext(ctx,FULL[k],x,y,{size:13,weight:600,color:col})});
+   ctx.restore();
+   if(ck>.01){ctx.save();ctx.globalAlpha=ck;node(ctx,cx-40,cm-14,80,28,null);itext(ctx,"邦联国会",cx,cm,{size:12,weight:600,color:c.red});ctx.restore()}
+   /* 法案旅程 */
+   if(bill&&ck<.5){const P={house:[V[0][0]-nw/4,V[0][1]],senate:[V[0][0]+nw/4,V[0][1]],pres:V[1],congress:V[0],law:[cx,cm],court:V[2]};
+    if(bill.t0==null)bill.t0=t;let p=Math.min(1,(t-bill.t0)/.8);p=p*p*(3-2*p);const a=P[bill.from],b=P[bill.to],ox=bill.to==="law"||bill.to==="house"||bill.to==="senate"?0:nw/2-8,oy=bill.to==="law"?0:-nh/2-2;
+    doc(ctx,a[0]+(b[0]-a[0])*p+ox,a[1]+(b[1]-a[1])*p+oy);
+    if(bill.to==="law"&&p>=1)itext(ctx,"法律",cx,cm+20,{size:12,weight:600,color:c.blue})}}};
+})();
+/* ---------- 第 3 章 法国大革命：从三级会议到共和国 ---------- */
+CH[2].ready=true;
+MODS[2]=(()=>{
+ const E=[
+  {y:"1789.5",tk:"89.5",yr:1789.35,ev:"三级会议",g:0,gov:"君主专制",nar:"路易十六为解决财政危机召开三级会议。第三等级要求按人头投票，特权等级坚持按等级投票——试试投票方式开关。"},
+  {y:"1789.6",tk:"89.6",yr:1789.45,ev:"国民议会",g:0,gov:"君主专制",nar:"投票方式之争使矛盾激化，第三等级代表自行组成国民议会（后改称制宪议会），誓言制定宪法。"},
+  {y:"1789.7.14",tk:"7.14",yr:1789.55,ev:"攻占巴士底狱",g:0,gov:"君主专制",r:1,nar:"巴黎民众攻占象征专制统治的巴士底狱，法国大革命开始。"},
+  {y:"1789.8",tk:"89.8",yr:1789.65,ev:"《人权宣言》",g:0,gov:"君主专制（革命中）",nar:"制宪议会通过《人权宣言》，宣扬人权、法治、自由、分权，宣布私有财产神圣不可侵犯。"},
+  {y:"1791",tk:"1791",yr:1791,ev:"1791 年宪法",g:1,gov:"君主立宪",nar:"1791 年宪法确立君主立宪制，国王权力受到宪法限制。"},
+  {y:"1792",tk:"1792",yr:1792,ev:"法兰西第一共和国",g:2,gov:"共和",nar:"君主立宪派统治被推翻，法兰西第一共和国成立。"},
+  {y:"1793",tk:"1793",yr:1793,ev:"处死路易十六 · 雅各宾派专政",g:2,gov:"共和（雅各宾派专政）",r:1,nar:"路易十六被送上断头台；雅各宾派实行专政，以激进手段打击内外反革命势力。"},
+  {y:"1794",tk:"1794",yr:1794,ev:"热月政变",g:2,gov:"共和",nar:"热月政变推翻雅各宾派专政，大资产阶级掌权，政局依然动荡。"},
+  {y:"1799",tk:"1799",yr:1799,ev:"雾月政变 · 拿破仑掌权",g:3,gov:"执政府 → 帝制（1804）",r:1,nar:"拿破仑发动雾月政变，建立执政府，掌握国家大权，1804 年称帝。→ 第 4 章"}];
+ const GOV=["君主专制","君主立宪","共和","帝制"],P=[[1789,0],[1791,1],[1792,2],[1804,3],[1814,1],[1830,1],[1848,2],[1852,3],[1875,2]];
+ const FIG={0:[["judge","gold"],["mp","blue"],["citizen","fg"]],1:[["citizen","fg"],["peasant","fg"],["citizen","fg"]],4:[["king","fg"]],5:[["citizen","blue"]],6:[["king","fg"]],7:[["mp","fg"]],8:[["soldier","blue"]]};
+ let s=0,vm="e",rep=false,vk=0,gv=0,rk=0,bt=null,timer=null,hits=[],ro=null,autoB=null;
+ const C=()=>{const T=theme();return isDark()?{blue:T.blue,gold:T.goldText,red:T.redText,fg:T.fg}:{blue:INK.blue,gold:INK.gold,red:INK.red,fg:T.fg}};
+ function wr(ctx,t,mw){const out=[];let l="";for(const ch of t){const n=l+ch;if(ctx.measureText(n).width>mw&&l){out.push(l);l=ch}else l=n}if(l)out.push(l);return out}
+ function upd(){const st=E[s],c=C();ro&&ro.update([["选中事件",st.ev,st.r?c.red:c.blue],["年份",st.y],["政体",st.gov,c.blue],
+  ["投票方式",vm==="e"?"按等级投票":"按人头投票"],["按等级计票","特权等级 2 : 1 第三等级（第一、二等级胜）",vm==="e"?c.gold:""],
+  ["按人头计票","第三等级 578 + 部分开明代表 > 教士 291 + 贵族 270（第三等级胜）",vm==="h"?c.blue:""],["结论","矛盾激化 → 第三等级自行组成国民议会",c.red]]
+  .concat(rep?[["革命的反复","第一共和 1792 → 第一帝国 1804 → 波旁复辟 1814 → 七月王朝 1830 → 第二共和 1848 → 第二帝国 1852 → 1875 宪法确立第三共和国",c.gold]]:[]))}
+ function go1(k){s=Math.max(0,Math.min(8,k));bt=-1;upd()}
+ function stopAuto(){if(timer){clearInterval(timer);timer=null}if(autoB)autoB.textContent="自动播放"}
+ function card(ctx,x,y,w,h,r){ctx.save();rrect(ctx,x,y,w,h,r);ctx.fillStyle=isDark()?"#2c2c2e":"#fff";ctx.fill();ctx.strokeStyle=isDark()?"rgba(255,255,255,.12)":"rgba(0,0,0,.08)";ctx.lineWidth=1;ctx.stroke();ctx.restore()}
+ function crowd(ctx,L,c,T){const cw=[.23,.23,.54].map(k=>k*L.w),xs=[L.x,L.x+cw[0],L.x+cw[0]+cw[1]],fy0=L.y+44,fy1=L.y+L.h*.5,res=L.y+L.h-34,fh=fy1-fy0;
+  const K=[{n:"第一等级",p:"教士 约12万",col:c.gold,role:"judge",N:1,v:291},{n:"第二等级",p:"贵族 约35万",col:c.blue,role:"mp",N:3,v:270},{n:"第三等级 约 2400 万",p:"资产阶级 · 农民 · 城市平民",col:c.red,v:578}];
+  const ba1=res-12,av=Math.max(30,ba1-(fy1+22)),bw=Math.min(cw[0]*.72,70);
+  K.forEach((k,i)=>{const x=xs[i],ww=cw[i],mx=x+ww/2;
+   itext(ctx,k.n,mx,L.y+10,{size:13,weight:600,color:k.col});itext(ctx,k.p,mx,L.y+28,{size:12,color:i<2?k.col:c.fg});
+   if(i<2){const ph=Math.min(44,fh*.75);for(let j=0;j<k.N;j++)person(ctx,mx+(k.N===1?0:(j-1)*Math.min(ww/3.2,ph*.6)),fy0+fh*.85,ph,{role:k.role,color:k.col})}
+   else{ctx.save();rrect(ctx,x+2,fy0-4,ww-4,fh+4,12);ctx.strokeStyle=c.red;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+    const ph=Math.max(10,(fh-28)/3.2),gx=ph*.55,nc=Math.max(4,Math.floor((ww-16)/gx)),x0=mx-(nc-1)*gx/2;
+    for(let r=0;r<3;r++)for(let j=0;j<nc;j++)person(ctx,x0+j*gx,fy0+2+ph*1.05*(r+1),ph,{role:(r+j)%3===0?"peasant":"citizen"});
+    itext(ctx,"约占人口 98%",mx,fy1-11,{size:12,weight:600,color:c.red})}
+   /* 投票框 */
+   const hE=av*.55,hH=Math.max(26,av*k.v/578),hb=hE+(hH-hE)*vk,bx=mx-bw/2,by=ba1-hb;
+   ctx.save();rrect(ctx,bx,by,bw,hb,6);ctx.fillStyle=isDark()?"#2c2c2e":"#fff";ctx.fill();ctx.strokeStyle=k.col;ctx.lineWidth=2;ctx.stroke();
+   ctx.strokeStyle=T.fg;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(mx-bw*.22,by+6);ctx.lineTo(mx+bw*.22,by+6);ctx.stroke();ctx.restore();
+   itext(ctx,vk<.5?"1 票":k.v+" 人",mx,by+hb/2+3,{size:13,weight:600,color:k.col});
+   if(vm==="e"?i<2:i===2)itext(ctx,"胜",mx,by-10,{size:13,weight:600,color:k.col})});
+  if(vk>.05){const x2=xs[2]+cw[2]/2-bw/2;arrowTo(ctx,xs[1]+cw[1]/2+bw/2+2,ba1-av*.3,x2-4,ba1-av*.3,{color:c.blue,dash:true,progress:vk});
+   if(vk>.6)itext(ctx,"+ 部分开明代表",x2+bw+4,ba1-av*.3,{size:12,align:"left",color:c.blue})}
+  itext(ctx,vm==="e"?"按等级：2 : 1，第一、二等级胜":"按人头：578 + 开明代表 > 561，第三等级胜",L.x+L.w/2,res+4,{size:13,weight:600,color:vm==="e"?c.gold:c.blue});
+  itext(ctx,"矛盾激化 → 第三等级自行组成国民议会",L.x+L.w/2,res+24,{size:13,weight:600,color:c.red})}
+ function emblem(ctx,B,c,T,t){const st=E[s],ex=B.x+B.w/2,ey=B.y+B.h/2,sz=Math.min(B.w*.7,B.h*.75);
+  if(s===2){const p=Math.min(1,(t-bt)/1.2),bh=sz*.55,bx=ex-sz/2,by=ey+sz*.2,tw=sz*.22;ctx.save();ctx.fillStyle=T.fg;ctx.fillRect(bx,by-bh*.7,sz,bh*.7);
+    [0,.78].forEach(f=>{const tx=bx+sz*f;ctx.fillRect(tx,by-bh,tw,bh);for(let k=0;k<3;k++)ctx.fillRect(tx+k*tw*.4,by-bh-tw*.18,tw*.2,tw*.18)});
+    const mx=bx+sz*.39;ctx.fillRect(mx,by-bh*.6,tw,bh*.6);ctx.save();ctx.translate(mx+tw/2+p*tw*.9,by-bh*.8+p*p*bh*.45);ctx.rotate(p*.7);ctx.fillRect(-tw/2,-bh*.2,tw,bh*.4);ctx.restore();
+    ctx.fillStyle=T.bg;ctx.beginPath();ctx.arc(ex,by-bh*.18,sz*.07,Math.PI,0);ctx.lineTo(ex+sz*.07,by);ctx.lineTo(ex-sz*.07,by);ctx.fill();
+    ctx.strokeStyle=c.red;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(mx+tw*.2,by-bh*.6);ctx.lineTo(mx+tw*.6,by-bh*.4);ctx.lineTo(mx+tw*.3,by-bh*.25);ctx.lineTo(mx+tw*.7,by-bh*.08);ctx.stroke();ctx.restore();
+    itext(ctx,"巴士底狱 被攻破",ex,by+14,{size:13,weight:600,color:c.red});return}
+  if(s===3){ctx.font="13px "+SANS;const L=[["《人权宣言》",c.gold,600]];wr(ctx,"“人们生来并且始终是自由的，在权利上是平等的”",B.w-12).forEach(x=>L.push([x,c.fg,400]));
+   wr(ctx,"“私有财产神圣不可侵犯”",B.w-12).forEach(x=>L.push([x,c.gold,600]));const y0=ey-(L.length-1)*10;L.forEach(([x,col,wt],i)=>itext(ctx,x,ex,y0+i*20,{size:13,weight:wt,color:col}));return}
+  const F=FIG[s]||[["citizen","fg"]],ph=Math.min(56,B.h*.5),fy=ey+ph*.35;
+  F.forEach(([role,k],i)=>person(ctx,ex+(i-(F.length-1)/2)*ph*.7,fy,ph,{role,color:c[k]}));
+  if(s===6){ctx.save();ctx.strokeStyle=c.red;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(ex-ph*.3,fy-ph*.9);ctx.lineTo(ex+ph*.3,fy-ph*.3);ctx.moveTo(ex+ph*.3,fy-ph*.9);ctx.lineTo(ex-ph*.3,fy-ph*.3);ctx.stroke();ctx.restore()}
+  itext(ctx,s===8?"→ 第 4 章 拿破仑":st.ev,ex,fy+16,{size:13,weight:600,color:s===8?c.blue:st.r?c.red:c.fg})}
+ function indicator(ctx,I,c,T){const st=E[s];card(ctx,I.x,I.y,I.w,I.h,14);itext(ctx,"政体指示",I.x+12,I.y+14,{align:"left",size:12,weight:600});
+  if(rk>.3&&I.w>220)itext(ctx,"1875 共和制最终确立",I.x+I.w-10,I.y+14,{align:"right",size:12,weight:600,color:c.red});
+  const py0=I.y+36,py1=I.y+I.h-(rk>.01?22:14),Y=g=>py1-(py1-py0)*g/3,px0=I.x+72,px1=I.x+I.w-14;
+  GOV.forEach((g,i)=>{const on=Math.round(gv)===i&&rk<.5;itext(ctx,g,I.x+10,Y(i),{align:"left",size:12,weight:on?600:400,color:on?c.blue:c.fg});
+   ctx.save();ctx.strokeStyle=T.grid;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(px0,Y(i));ctx.lineTo(px1,Y(i));ctx.stroke();ctx.restore()});
+  if(rk<1){const dx=(px0+px1)/2;ctx.save();ctx.globalAlpha=1-rk;ctx.strokeStyle=T.sub;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(dx,Y(0));ctx.lineTo(dx,Y(3));ctx.stroke();
+   ctx.fillStyle=c.blue;ctx.beginPath();ctx.arc(dx,Y(gv),7,0,7);ctx.fill();ctx.restore()}
+  if(rk>0){const X=y=>px0+(px1-px0)*(y-1789)/91;ctx.save();ctx.beginPath();ctx.rect(px0-4,I.y,(px1-px0+8)*rk,I.h);ctx.clip();
+   ctx.strokeStyle=c.blue;ctx.lineWidth=2;ctx.lineJoin="round";ctx.beginPath();ctx.moveTo(X(1789),Y(0));
+   for(let i=1;i<P.length;i++){ctx.lineTo(X(P[i][0]),Y(P[i-1][1]));ctx.lineTo(X(P[i][0]),Y(P[i][1]))}ctx.lineTo(px1,Y(2));ctx.stroke();
+   P.forEach(([y,g],i)=>{ctx.fillStyle=i===8?c.red:c.blue;ctx.beginPath();ctx.arc(X(y),Y(g),i===8?5:3.5,0,7);ctx.fill();if(i>1)itext(ctx,""+y,X(y),Y(g)-11,{size:12,color:i===8?c.red:c.fg})});
+   ctx.setLineDash([3,4]);ctx.strokeStyle=c.gold;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(st.yr),py0-6);ctx.lineTo(X(st.yr),py1);ctx.stroke();ctx.restore();
+   itext(ctx,"1789",px0,py1+12,{size:12})}}
+ return{
+  text:"18 世纪末法国等级森严，第三等级承担赋税却无政治权利。1789 年三级会议的投票方式之争引发革命：攻占巴士底狱、发表《人权宣言》，此后经历君主立宪、共和、帝制的反复，直到 1875 年宪法确立共和制。法国大革命沉重打击了欧洲封建制度，传播了自由、平等、民主思想。",
+  points:["法国大革命根源：等级制度与第三等级的不满，启蒙思想的传播","1789 年《人权宣言》宣扬人权、法治、自由、分权、私有财产神圣不可侵犯","政体反复：君主立宪 → 共和 → 帝制 → 复辟……","1875 年宪法确立共和制","法国大革命是最彻底的资产阶级革命，影响深远"],
+  gk:'<p style="margin:0 0 6px;font-size:14px">统编版《中外历史纲要（下）》第 9 课</p><p style="margin:0;font-size:14px">浙江选考高频：《人权宣言》的内容与意义、法国共和制确立的曲折性</p>',
+  mount(c,r){stopAuto();s=0;vm="e";rep=false;vk=gv=rk=0;bt=null;
+   const lab=el("p",null,"投票方式");lab.style.cssText="margin:0;font-size:13px;font-weight:600";
+   const ch=chips([{label:"按等级投票",value:"e"},{label:"按人头投票",value:"h"}],"e",v=>{vm=v;upd()});
+   const row=el("div");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+   autoB=button("自动播放",()=>{if(timer){stopAuto();return}if(s>=8)go1(0);autoB.textContent="暂停";timer=setInterval(()=>{go1(s+1);if(s>=8)stopAuto()},2600)});
+   row.append(button("上一步",()=>{stopAuto();go1(s-1)}),button("下一步",()=>{stopAuto();go1(s+1)},true),autoB);
+   [...row.children,...ch.children].forEach(b=>{b.style.minHeight="44px";b.style.minWidth="44px"});
+   c.append(lab,ch,row,toggle("革命的反复",false,v=>{rep=v;upd()}));ro=readout();r.append(ro);upd()},
+  unmount(){stopAuto();ro=null;autoB=null;bt=null},
+  pointer(e,type,x,y){if(type!=="down")return false;const R=e&&e.pointerType==="touch"?24:18,h=hits.find(p=>Math.hypot(p.x-x,p.y-y)<R);if(h){stopAuto();go1(h.i);return true}return false},
+  draw(ctx,w,h,t){const T=theme(),c=C(),st=E[s],side=w>h&&w>=600;
+   vk+=((vm==="h"?1:0)-vk)*.08;gv+=(st.g-gv)*.08;rk+=((rep?1:0)-rk)*.06;if(bt===-1)bt=t;
+   const L=side?{x:12,y:12,w:w*.4-18,h:h-24}:{x:12,y:12,w:w-24,h:Math.max(220,(h-24)*.46)};
+   const R=side?{x:w*.4+6,y:12,w:w*.6-18,h:h-24}:{x:12,y:L.y+L.h+14,w:w-24,h:h-L.h-38};
+   crowd(ctx,L,c,T);
+   /* 旁白卡 */
+   ctx.font="14px "+SANS;const ls=wr(ctx,st.nar,R.w-28),chh=44+ls.length*20;card(ctx,R.x,R.y,R.w,chh,16);
+   itext(ctx,st.y+"  "+st.ev,R.x+14,R.y+22,{align:"left",size:15,weight:600,color:st.r?c.red:c.blue});
+   ctx.save();ctx.font="14px "+SANS;ctx.fillStyle=T.fg;ctx.textAlign="left";ctx.textBaseline="middle";ls.forEach((l,i)=>ctx.fillText(l,R.x+14,R.y+46+i*20));ctx.restore();
+   /* 时间轴 */
+   const ty=R.y+R.h-30,x0=R.x+22,x1=R.x+R.w-22;hits=[];ctx.save();ctx.strokeStyle=T.sub;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x0,ty);ctx.lineTo(x1,ty);ctx.stroke();ctx.restore();
+   E.forEach((ev,i)=>{const x=x0+(x1-x0)*i/8,on=i<=s,col=ev.r?c.red:c.blue;hits.push({x,y:ty,i});
+    ctx.save();ctx.beginPath();ctx.arc(x,ty,i===s?9:7,0,7);ctx.fillStyle=on?col:T.bg;ctx.fill();ctx.strokeStyle=on?col:T.sub;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+    itext(ctx,ev.tk,x,ty+(i%2?20:-20),{size:12,weight:i===s?600:400,color:i===s?col:c.fg})});
+   /* 中部：事件图示 + 政体指示 */
+   const M={x:R.x,y:R.y+chh+10,w:R.w,h:ty-32-(R.y+chh+10)};
+   if(M.h>70){const nw=Math.min(150,M.w*.45),iw=nw+(M.w-nw)*rk;indicator(ctx,{x:M.x+M.w-iw,y:M.y,w:iw,h:M.h},c,T);
+    if(rk<.6&&M.w-iw>90){ctx.save();ctx.globalAlpha=1-rk/.6;emblem(ctx,{x:M.x,y:M.y,w:M.w-iw-10,h:M.h},c,T,t);ctx.restore()}}}};
+})();
+CH[3].ready=true;
+MODS[3]=(()=>{
+ const PR=[
+  {n:"法律面前人人平等",d:"《人权宣言》：人们在权利上是平等的",rm:"罗马法传统：公民在法律上地位平等",ef:"否定封建等级特权"},
+  {n:"私有财产神圣不可侵犯",d:"《人权宣言》：私有财产神圣不可侵犯",rm:"罗马法传统：完备的所有权制度",ef:"保护资产阶级和农民的财产"},
+  {n:"契约自由",d:"《人权宣言》：自由即可以做一切不损害他人的事",rm:"罗马法传统：发达的契约（债法）制度",ef:"为商品经济和资本主义发展扫清障碍"},
+  {n:"（男子）信仰与职业自由",d:"《人权宣言》：意见（包括宗教）自由",rm:"罗马法传统：自由民的人格与身份观念",ef:"冲破教会与行会的束缚"}];
+ const NUM="①②③④",SP=[["荷兰",.42,.1],["比利时",.3,.3],["德意志西部",.66,.3],["意大利",.56,.56],["西班牙",.18,.56],["拉美",.12,.86],["日本",.88,.86]];
+ const RG=[["法国",.3,.58],["比利时",.36,.4],["荷兰",.4,.26],["德意志西部",.49,.42],["意大利",.48,.76],["奥地利",.62,.6],["普鲁士",.62,.3],["华沙",.74,.42],["西班牙",.13,.8],["英国",.2,.2],["莫斯科",.9,.24]];
+ const EV=[
+  {y:"1799",n:"雾月政变",ef:"拿破仑掌权，建立执政府",ctl:[0,1],m:[0,"巴黎"]},
+  {y:"1804",n:"称帝",ef:"建立法兰西第一帝国；同年颁布《民法典》",ctl:[0,1,2,4],m:[0,"称帝"]},
+  {y:"1805",n:"奥斯特里茨战役",ef:"大败俄奥联军（三皇会战）",ctl:[0,1,2,3,4],m:[5,"奥斯特里茨"]},
+  {y:"1806",n:"废除神圣罗马帝国",ef:"沉重打击德意志地区封建势力",ctl:[0,1,2,3,4,6],m:[3,"神圣罗马帝国 ✕"]},
+  {y:"1812",n:"远征俄国失败",ef:"约 60 万大军折损至不到 10 万（示意）",ctl:[0,1,2,3,4,6,7,8],r:1},
+  {y:"1814",n:"退位",ef:"反法同盟攻入巴黎，帝国崩溃",ctl:[0],r:1,m:[0,"退位"]},
+  {y:"1815",n:"滑铁卢战败",ef:"“百日王朝”结束，拿破仑被流放",ctl:[0],r:1,m:[1,"滑铁卢"]}];
+ let md="A",ord=[],dn=[],fl={},sp=false,spT=null,s=0,at=null,cv=RG.map(()=>0),hits=[],ro=null,box=null;
+ const C=()=>{const T=theme();return isDark()?{blue:T.blue,gold:T.goldText,red:T.redText,fg:T.fg}:{blue:INK.blue,gold:INK.gold,red:INK.red,fg:T.fg}};
+ const cl=v=>Math.max(0,Math.min(1,v)),ez=p=>p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+ function wr(ctx,t,mw){const out=[];let l="";for(const ch of t){const n=l+ch;if(ctx.measureText(n).width>mw&&l){out.push(l);l=ch}else l=n}if(l)out.push(l);return out}
+ function card(ctx,x,y,w,h,r){ctx.save();rrect(ctx,x,y,w,h,r);ctx.fillStyle=isDark()?"#2c2c2e":"#fff";ctx.fill();ctx.strokeStyle=isDark()?"rgba(255,255,255,.12)":"rgba(0,0,0,.08)";ctx.lineWidth=1;ctx.stroke();ctx.restore()}
+ function upd(){if(!ro)return;const c=C();
+  if(md==="A"){const k=ord.filter(i=>dn[i]),l=k.length?PR[k[k.length-1]]:null;
+   ro.update([["模式","法典工坊"],["年份","1804"],["事件/原则",l?l.n:"点击原则方块，写入法典",c.blue],["影响",k.length===4?"第一部资本主义民法典，以法律形式巩固大革命成果":l?l.ef:"—",k.length===4?c.blue:""]]
+    .concat(sp?[["法典的传播","影响大陆法系：意大利、比利时、荷兰、德意志西部、西班牙及拉美、日本",c.blue],["局限","维护夫权（妻子须服从丈夫）",c.red]]:[]))}
+  else{const e=EV[s];ro.update([["模式","拿破仑的欧洲"],["年份",e.y],["事件/原则",e.n,e.r?c.red:c.blue],["影响",e.ef],
+   ["战争双重性","传播革命成果、打击封建势力",c.blue],["","同时具有侵略扩张性质",c.red]])}}
+ function fly(i){if(dn[i]||fl[i]!=null)return;ord.push(i);fl[i]=-1}
+ function go1(k){s=Math.max(0,Math.min(6,k));at=s===4?-1:null;build();upd()}
+ function build(){if(!box)return;box.innerHTML="";const row=el("div");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+  if(md==="A"){row.append(button("下一块飞入",()=>{const i=[0,1,2,3].find(j=>!dn[j]&&fl[j]==null);if(i!=null)fly(i)},true),button("重新开始",()=>{ord=[];dn=[];fl={};upd()}));
+   box.append(row,toggle("法典的传播",sp,v=>{sp=v;spT=v?-1:null;upd()}))}
+  else{EV.forEach((e,i)=>row.append(button(e.y+" "+e.n,()=>go1(i),i===s)));box.append(row)}
+  row.querySelectorAll("button").forEach(b=>{b.style.minHeight="44px"})}
+ function lay(w,h){if(w>h&&w>=600)return{P:{x:12,y:12,w:w*.22,h:h-24},B:{x:w*.22+24,y:12,w:w*.44-24,h:h-24},S:{x:w*.66+12,y:12,w:w*.34-24,h:h-24},side:1};
+  const B={x:12,y:12,w:w-24,h:(h-24)*.34},P={x:12,y:B.y+B.h+8,w:w-24,h:Math.max(110,(h-24)*.22)};return{B,P,S:{x:12,y:P.y+P.h+8,w:w-24,h:h-P.y-P.h-20}}}
+ function blocks(L){const P=L.P,o=[];for(let i=0;i<4;i++){if(L.side){const bh=Math.min(70,(P.h-30)/4-10);o.push({x:P.x,y:P.y+26+i*(bh+10),w:P.w,h:bh})}
+  else{const bw=(P.w-8)/2,bh=(P.h-26)/2-4;o.push({x:P.x+(i%2)*(bw+8),y:P.y+22+Math.floor(i/2)*(bh+8),w:bw,h:bh})}}return o}
+ function minibook(ctx,x,y,col){ctx.save();ctx.fillStyle=col;rrect(ctx,x-7,y-5,14,10,2);ctx.fill();ctx.strokeStyle=isDark()?"#1c1c1e":"#fff";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y-4);ctx.lineTo(x,y+4);ctx.stroke();ctx.restore()}
+ function drawA(ctx,w,h,t,c,T){const L=lay(w,h),{P,B,S}=L,bl=blocks(L);hits=[];
+  itext(ctx,"原则方块 · 点击飞入",P.x+2,P.y+8,{align:"left",size:12,weight:600});
+  bl.forEach((b,i)=>{const used=dn[i]||fl[i]!=null;ctx.save();rrect(ctx,b.x,b.y,b.w,b.h,10);ctx.fillStyle=isDark()?"#2c2c2e":"#fff";ctx.fill();ctx.strokeStyle=used?T.grid:c.blue;ctx.lineWidth=used?1:2;if(used)ctx.setLineDash([4,4]);ctx.stroke();ctx.restore();
+   if(!used)hits.push({x:b.x,y:b.y,w:b.w,h:b.h,i});ctx.save();ctx.globalAlpha=used?.35:1;ctx.font="600 13px "+SANS;const ls=wr(ctx,NUM[i]+" "+PR[i].n,b.w-16);
+   ls.forEach((l,j)=>itext(ctx,l,b.x+b.w/2,b.y+b.h/2+(j-(ls.length-1)/2)*17,{size:13,weight:600}));ctx.restore()});
+  const bw=Math.min(B.w-12,(B.h-16)*1.55),bh=bw/1.55,bx=B.x+(B.w-bw)/2,by=B.y+(B.h-bh)/2,cx=bx+bw/2,pw=bw/2;
+  ctx.save();ctx.fillStyle=T.gold;rrect(ctx,bx-6,by-6,bw+12,bh+12,8);ctx.fill();[bx,cx].forEach(x=>{rrect(ctx,x,by,pw,bh,4);ctx.fillStyle=isDark()?"#2c2c2e":"#fffdf6";ctx.fill()});
+  ctx.strokeStyle=T.grid;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,by);ctx.lineTo(cx,by+bh);ctx.stroke();ctx.restore();
+  itext(ctx,"1804",bx+pw/2,by+bh*.26,{size:Math.max(16,Math.min(28,bw*.07)),weight:600,color:c.gold});
+  itext(ctx,"《法国民法典》",bx+pw/2,by+bh*.48,{size:Math.max(12,Math.min(17,bw*.042)),weight:600});itext(ctx,"（拿破仑法典）",bx+pw/2,by+bh*.64,{size:12});
+  const slot=k=>({x:cx+10,y:by+bh*(.16+k*.22)});
+  ord.forEach((i,k)=>{const sl=slot(k);if(fl[i]!=null){if(fl[i]===-1)fl[i]=t;const p=cl((t-fl[i])/.8),b=bl[i],e=ez(p),x=b.x+b.w/2+(sl.x+pw/2-10-b.x-b.w/2)*e,y=b.y+b.h/2+(sl.y-b.y-b.h/2)*e-Math.sin(p*Math.PI)*40;
+    ctx.save();rrect(ctx,x-30,y-12,60,24,8);ctx.fillStyle=c.blue;ctx.globalAlpha=.9;ctx.fill();ctx.restore();itext(ctx,NUM[i],x,y,{size:13,weight:600,color:isDark()?"#1c1c1e":"#fff"});
+    if(p>=1){delete fl[i];dn[i]=true;upd()}return}
+   ctx.font="600 12px "+SANS;wr(ctx,NUM[i]+" "+PR[i].n,pw-20).forEach((l,j)=>itext(ctx,l,sl.x,sl.y+j*15,{align:"left",size:12,weight:600,color:c.blue}))});
+  const k=ord.filter(i=>dn[i]),last=k[k.length-1],lines=[["它来自哪里",c.fg,600]];ctx.font="13px "+SANS;
+  if(last==null)lines.push(["点击原则方块，看它的来源",c.fg,400]);
+  else{const p=PR[last];lines.push([NUM[last]+" "+p.n,c.fg,600]);wr(ctx,p.d,S.w-28).forEach(x=>lines.push([x,c.blue,400]));wr(ctx,p.rm,S.w-28).forEach(x=>lines.push([x,c.gold,600]));lines.push(["↺ 联系古代文明实验：罗马法",c.gold,400])}
+  if(k.length===4){ctx.font="600 13px "+SANS;wr(ctx,"第一部资本主义民法典，以法律形式巩固大革命成果",S.w-28).forEach(x=>lines.push([x,c.blue,600]))}
+  const chh=16+lines.length*20;card(ctx,S.x,S.y,S.w,chh,14);lines.forEach(([x,col,wt],j)=>itext(ctx,x,S.x+14,S.y+18+j*20,{align:"left",size:13,weight:wt,color:col}));
+  if(spT!=null){if(spT===-1)spT=t;const Q={x:S.x,y:S.y+chh+10,w:S.w},nl=(ctx.font="12px "+SANS,wr(ctx,"法典也有局限：如维护夫权（妻子须服从丈夫）",S.w-28));Q.h=S.y+S.h-Q.y;if(Q.h<100)return;
+   card(ctx,Q.x,Q.y,Q.w,Q.h,14);itext(ctx,"法典的传播",Q.x+14,Q.y+16,{align:"left",size:13,weight:600});itext(ctx,"影响大陆法系",Q.x+Q.w-14,Q.y+16,{align:"right",size:12,weight:600,color:c.blue});
+   nl.forEach((l,j)=>itext(ctx,l,Q.x+14,Q.y+Q.h-12-(nl.length-1-j)*16,{align:"left",size:12,color:c.red}));
+   const I={x:Q.x+40,y:Q.y+40,w:Q.w-80,h:Q.h-62-nl.length*16};
+   SP.forEach((d,j)=>{const tx=I.x+d[1]*I.w,ty=I.y+d[2]*I.h,p=cl((t-spT-j*.25)/1.1),e=ez(p);
+    ctx.save();ctx.strokeStyle=T.grid;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(tx,ty,9,0,7);ctx.stroke();ctx.restore();
+    if(p>0)minibook(ctx,cx+(tx-cx)*e,by+bh/2+(ty-by-bh/2)*e-Math.sin(p*Math.PI)*60,T.gold);if(p>=1)itext(ctx,d[0],tx,ty+16,{size:12,weight:600,color:j>4?c.blue:c.fg})})}}
+ function drawB(ctx,w,h,t,c,T){const e=EV[s];hits=[];card(ctx,12,12,w-24,54,14);
+  itext(ctx,e.y+"  "+e.n,26,30,{align:"left",size:15,weight:600,color:e.r?c.red:c.blue});itext(ctx,e.ef,26,51,{align:"left",size:13});
+  const ty=h-34,M={x:12,y:76,w:w-24,h:ty-34-76},r=Math.max(12,Math.min(M.w,M.h)*.065),X=g=>M.x+g[1]*M.w,Y=g=>M.y+g[2]*M.h;
+  card(ctx,M.x,M.y,M.w,M.h,14);itext(ctx,"欧洲（示意）",M.x+12,M.y+14,{align:"left",size:12});
+  RG.forEach((g,i)=>{cv[i]+=((e.ctl.includes(i)?1:0)-cv[i])*.06;const x=X(g),y=Y(g);ctx.save();ctx.beginPath();ctx.arc(x,y,r*(1+.25*cv[i]),0,7);
+   ctx.globalAlpha=.12+.45*cv[i];ctx.fillStyle=cv[i]>.05?T.blue:T.grid;ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle=cv[i]>.5?T.blue:T.grid;ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+   itext(ctx,g[0],x,y+r*1.25+10,{size:12,weight:cv[i]>.5?600:400,color:cv[i]>.5?c.blue:c.fg})});
+  person(ctx,X(RG[0]),Y(RG[0])+r*.55,r*1.5,{role:s>=1&&s<5?"king":"soldier",color:s>=5?c.red:c.blue});
+  if(e.m){const g=RG[e.m[0]];itext(ctx,e.m[1],X(g),Y(g)-r*1.25-10,{size:13,weight:600,color:e.r?c.red:s===3?c.red:c.blue})}
+  if(s===4){if(at===-1)at=t;const p=at==null?0:cl((t-at)/2.4)*2,a=RG[0],b=RG[10],x1=X(a),y1=Y(a)-8,x2=X(b),y2=Y(b)-8;
+   arrowTo(ctx,x1,y1,x2,y2,{color:c.red,progress:Math.min(1,p)});if(p>1)arrowTo(ctx,x2,y2+16,x1,y1+16,{color:c.red,dash:true,progress:p-1});
+   const q=p<=1?p:p-1,hx=p<=1?x1+(x2-x1)*q:x2+(x1-x2)*q,hy=p<=1?y1+(y2-y1)*q:y1+16;
+   itext(ctx,p>=2?"不到 10 万":"约 "+Math.round(60-50*p/2)+" 万",hx,hy+(p<=1?-14:18),{size:13,weight:600,color:c.red})}
+  const x0=M.x+24,x1=M.x+M.w-24;ctx.save();ctx.strokeStyle=T.grid;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x0,ty);ctx.lineTo(x1,ty);ctx.stroke();ctx.restore();
+  EV.forEach((v,i)=>{const x=x0+(x1-x0)*i/6,col=v.r?c.red:c.blue;hits.push({x:x-20,y:ty-22,w:40,h:44,i});ctx.save();ctx.beginPath();ctx.arc(x,ty,i===s?8:6,0,7);
+   ctx.fillStyle=i<=s?col:T.bg;ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();ctx.restore();itext(ctx,v.y,x,ty+(i%2?18:-18),{size:12,weight:i===s?600:400,color:i===s?col:c.fg})})}
+ return{
+  text:"1799 年拿破仑发动雾月政变掌权，1804 年颁布《法国民法典》并称帝。法典把大革命的成果以法律形式固定下来，影响了欧洲和世界许多国家的法律。拿破仑的对外战争沉重打击了欧洲封建势力，但后期也带有侵略扩张性质，最终失败。",
+  points:["1804 年《法国民法典》是第一部资本主义民法典","法典确立法律面前人人平等、私有财产神圣不可侵犯、契约自由等原则","法典影响大陆法系的形成","拿破仑战争具有双重性","拿破仑帝国的失败（1812 远征俄国、1815 滑铁卢）"],
+  gk:'<p style="margin:0 0 6px;font-size:14px">统编版《中外历史纲要（下）》第 9 课 · 选择性必修1 第 9 课</p><p style="margin:0;font-size:14px">浙江选考高频：《拿破仑法典》的原则与影响、对拿破仑的评价</p>',
+  mount(c,r){md="A";ord=[];dn=[];fl={};sp=false;spT=null;s=0;at=null;cv=RG.map(()=>0);
+   const ch=chips([{label:"法典工坊",value:"A"},{label:"拿破仑的欧洲",value:"B"}],"A",v=>{md=v;if(v==="B")go1(s);else{build();upd()}});
+   [...ch.children].forEach(b=>{b.style.minHeight="44px"});box=el("div");box.style.cssText="display:flex;flex-direction:column;gap:10px";
+   c.append(ch,box);ro=readout();r.append(ro);build();upd()},
+  unmount(){fl={};spT=null;at=null;ro=null;box=null;hits=[]},
+  pointer(e,type,x,y){if(type!=="down")return false;const p=e&&e.pointerType==="touch"?8:2,h=hits.find(b=>x>=b.x-p&&x<=b.x+b.w+p&&y>=b.y-p&&y<=b.y+b.h+p);
+   if(!h)return false;if(md==="A")fly(h.i);else go1(h.i);return true},
+  draw(ctx,w,h,t){const T=theme(),c=C();if(md==="A")drawA(ctx,w,h,t,c,T);else drawB(ctx,w,h,t,c,T)}};
+})();
+/* ---------- 第 5 章 德意志统一与 1871 年宪法 ---------- */
+CH[4].ready=true;
+MODS[4]=(()=>{
+ const G=["......SS....","......SS....","...nnnnnPPPP","..nnnnnPPPPP","..nnPPnnPPPP",".PPnnxxxPPPP",".PPeennxx...","A..eeBBBB...","A.DWWBBBBOOO","AADWWBBBOOOO",".DDWBBBOOOOO"];
+ const JS={P:0,S:2,n:3,x:3,B:4,W:4,D:4,e:4,A:4},NM={P:"普鲁士",S:"石—荷",x:"萨克森",B:"巴伐利亚",W:"符腾堡",D:"巴登",e:"黑森",O:"奥地利",A:"阿尔萨斯—洛林"};
+ const FILL={S:"#a8c8c4",x:"#d8c69a",B:"#b7c4d6",W:"#cfa9a9",D:"#b9b0cf",e:"#a9bfa8",O:"#d9c48e",A:"#c4c7cc"},PAL=["#c9b6a3","#a9bfa8","#d8c69a","#b7c4d6","#cfa9a9","#b9b0cf","#a8c8c4","#d6b98f"],PRU="#4f6378";
+ const TL=[];G.forEach((row,r)=>[...row].forEach((k,q)=>{if(k!==".")TL.push({r,q,k,f:k==="P"?PRU:k==="n"?PAL[(q*3+r*5)%8]:FILL[k],v:k==="P"?1:0})}));
+ const CEN={};TL.forEach(o=>{const z=CEN[o.k]||(CEN[o.k]={r:0,q:0,n:0});z.r+=o.r;z.q+=o.q;z.n++});
+ const E=[
+  {y:"1815",n:"德意志邦联",d:"维也纳会议后成立德意志邦联：30 多个邦国，四分五裂。",p:"30 多个邦国"},
+  {y:"1862",n:"俾斯麦任普鲁士首相",d:"“当代重大问题不是通过演说和多数派决议所能解决的……而是要用铁和血来解决。”",p:"30 多个邦国",g:1},
+  {y:"1864",n:"普丹战争",d:"北部石勒苏益格—荷尔斯泰因并入普鲁士势力范围。",p:"北部石勒苏益格—荷尔斯泰因并入"},
+  {y:"1866",n:"普奥战争",d:"奥地利被排除在德意志之外，北德意志邦联成立。",p:"北德意志邦联成立，南德 4 邦仍在外"},
+  {y:"1870—1871",n:"普法战争",d:"南德各邦并入；阿尔萨斯—洛林划入德国。",p:"南德各邦并入，阿尔萨斯—洛林划入"},
+  {y:"1871.1",n:"德意志帝国成立",d:"德意志帝国在凡尔赛宫镜厅宣告成立，德意志完成统一。",p:"统一的德意志帝国",g:1}];
+ const LI=["帝国议会：由普选产生","联邦议会：由各邦代表组成"],RI=["皇帝由普鲁士国王兼任：任免宰相、统帅军队、召集和解散议会","宰相只对皇帝负责，不对议会负责","联邦议会 58 票中普鲁士占 17 票，14 票即可否决修宪：普鲁士握有否决权"];
+ let md="A",s=0,gv=3,ov=0,mg=0,tg=0,te=0,eng=false,ro=null,box=null;
+ const C=()=>{const T=theme();return isDark()?{blue:T.blue,gold:T.goldText,red:T.redText,fg:T.fg}:{blue:INK.blue,gold:INK.gold,red:INK.red,fg:T.fg}};
+ const hx=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),mix=(a,b,p)=>{const A=hx(a),B=hx(b);return"rgb("+A.map((v,i)=>Math.round(v+(B[i]-v)*p)).join(",")+")"};
+ function wr(ctx,t,mw){const out=[];let l="";for(const ch of t){const n=l+ch;if(ctx.measureText(n).width>mw&&l){out.push(l);l=ch}else l=n}if(l)out.push(l);return out}
+ function card(ctx,x,y,w,h,r){ctx.save();rrect(ctx,x,y,w,h,r);ctx.fillStyle=isDark()?"#2c2c2e":"#fff";ctx.fill();ctx.strokeStyle=isDark()?"rgba(255,255,255,.12)":"rgba(0,0,0,.08)";ctx.lineWidth=1;ctx.stroke();ctx.restore()}
+ function upd(){if(!ro)return;const c=C();
+  if(md==="A"){const e=E[s];ro.update([["模式","铁血统一"],["年份",e.y,e.g?c.gold:c.blue],["统一进度",s?e.p:"1815 年德意志邦联：30 多个邦国"],["性质",s>=2?"王朝战争，“自上而下”完成统一":"—",s>=2?c.blue:""]])}
+  else ro.update([["模式","1871 年宪法：外表与实质"],["年份","1871"],["权力归属","皇帝和宰相掌握实权，议会权力有限",c.red],["性质","君主立宪制，保留浓厚的专制色彩、军国主义传统",c.red]]
+   .concat(eng?[["英国","议会主权、内阁对议会负责",c.blue],["德国","君主权力强大、宰相对皇帝负责",c.red]]:[]))}
+ function go1(k){s=Math.max(0,Math.min(5,k));build();upd()}
+ function build(){if(!box)return;box.innerHTML="";const row=el("div");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+  if(md==="A"){E.forEach((e,i)=>row.append(button(e.y+" "+e.n,()=>go1(i),i===s)));row.append(button(s<5?"下一步":"重新开始",()=>go1(s<5?s+1:0)));box.append(row)}
+  else box.append(toggle("与英国对比",eng,v=>{eng=v;if(!v)te=0;upd()}));
+  box.querySelectorAll("button").forEach(b=>{b.style.minHeight="44px"})}
+ function drawA(ctx,w,h,t,c,T){const e=E[s];ctx.font="13px "+SANS;const ls=wr(ctx,e.d,w-52),chh=40+ls.length*18;card(ctx,12,12,w-24,chh,14);
+  itext(ctx,e.y+"  "+e.n,26,30,{align:"left",size:15,weight:600,color:e.g?c.gold:c.blue});
+  ls.forEach((l,j)=>itext(ctx,l,26,50+j*18,{align:"left",size:13,weight:e.g?600:400,color:e.g?c.gold:c.fg}));
+  const M={x:12,y:chh+22,w:w-24,h:h-chh-34};card(ctx,M.x,M.y,M.w,M.h,14);
+  itext(ctx,s?e.p:"1815 年德意志邦联：30 多个邦国",M.x+12,M.y+16,{align:"left",size:12,weight:600,color:s===5?c.gold:c.fg});
+  const cs=Math.max(8,Math.min((M.w-24)/12,(M.h-44)/12)),ox=M.x+(M.w-cs*12)/2,oy=M.y+32,sx=k=>k==="O"?ov*cs*.35:0,sy=k=>k==="O"?ov*cs*.8:0;
+  gv+=((s>=5?0:3)-gv)*.08;ov+=((s>=3?1:0)-ov)*.06;mg+=((s>=5?1:0)-mg)*.06;
+  TL.forEach(o=>{const on=o.k!=="O"&&s>=JS[o.k];o.v+=((on?1:0)-o.v)*.06;const x=ox+o.q*cs+sx(o.k),y=oy+o.r*cs+sy(o.k),d=gv<.5?.6:0;
+   ctx.save();ctx.globalAlpha=o.k==="O"?1-.45*ov:1;ctx.fillStyle=o.k==="P"?PRU:mix(o.f,PRU,o.v);ctx.fillRect(x+gv/2,y+gv/2,cs-gv+d,cs-gv+d);ctx.restore()});
+  if(mg>.02){const U=(r,q)=>{const k=(G[r]||"")[q];return k&&k!=="."&&k!=="O"};ctx.save();ctx.globalAlpha=mg;ctx.strokeStyle=c.gold;ctx.lineWidth=3;ctx.lineCap="round";ctx.beginPath();
+   TL.forEach(o=>{if(o.k==="O")return;const x=ox+o.q*cs,y=oy+o.r*cs;
+    if(!U(o.r-1,o.q)){ctx.moveTo(x,y);ctx.lineTo(x+cs,y)}if(!U(o.r+1,o.q)){ctx.moveTo(x,y+cs);ctx.lineTo(x+cs,y+cs)}
+    if(!U(o.r,o.q-1)){ctx.moveTo(x,y);ctx.lineTo(x,y+cs)}if(!U(o.r,o.q+1)){ctx.moveTo(x+cs,y);ctx.lineTo(x+cs,y+cs)}});ctx.stroke();ctx.restore()}
+  const sz=Math.max(12,Math.min(14,cs*.36));
+  Object.keys(NM).forEach(k=>{if(s>=5&&k!=="O")return;const z=CEN[k],lb=k==="O"&&ov>.5?"奥地利 · 被排除在外":NM[k];
+   let x=ox+(z.q/z.n+.5)*cs+sx(k),y=oy+(z.r/z.n+.5)*cs+sy(k);x=Math.max(M.x+8+lb.length*sz*.5,Math.min(M.x+M.w-8-lb.length*sz*.5,x));
+   itext(ctx,lb,x,y,{size:sz,weight:600,color:k==="O"&&ov>.5?c.red:c.fg})});
+  if(s>=3&&s<5){const z=CEN.n;itext(ctx,"北德意志邦联",ox+(z.q/z.n+.5)*cs,oy+(z.r/z.n+.5)*cs,{size:sz,weight:600,color:c.blue})}
+  if(s>=5){itext(ctx,"德意志帝国",ox+6*cs,oy+5*cs,{size:Math.max(16,Math.min(24,cs*.6)),weight:600,color:c.gold});itext(ctx,"1871.1 凡尔赛宫镜厅宣告成立",ox+6*cs,oy+6.1*cs,{size:12,weight:600,color:c.gold})}}
+ function plines(ctx,items,mw){ctx.font="13px "+SANS;const o=[];items.forEach(it=>wr(ctx,"· "+it,mw).forEach(l=>o.push(l)));return o}
+ function panel(ctx,P,title,col,ls){card(ctx,P.x,P.y,P.w,P.h,14);itext(ctx,title,P.x+14,P.y+22,{align:"left",size:15,weight:600,color:col});ls.forEach((l,j)=>itext(ctx,l,P.x+14,P.y+48+j*19,{align:"left",size:13}))}
+ function scale(ctx,x,y,bw,tilt,cap,ll,rl,note,ncol,nw,c){itext(ctx,cap,x,y-bw*.72-8,{size:13,weight:600});balance(ctx,x,y,bw,tilt,ll,rl,c.gold,c.blue);
+  ctx.font="600 12px "+SANS;wr(ctx,note,nw).forEach((l,j)=>itext(ctx,l,x,y+18+j*16,{size:12,weight:600,color:ncol}))}
+ function drawB(ctx,w,h,t,c,T){tg+=(-.7-tg)*.05;te+=((eng?.7:0)-te)*.05;const land=w>h&&w>=600;let L,R,M;
+  if(land){const cw=Math.min(300,w*.3);L={x:12,y:12,w:cw};R={x:w-12-cw,y:12,w:cw};M={x:cw+24,y:12,w:w-2*cw-48,h:h-24}}else{L={x:12,y:12,w:w-24};R={x:12,w:w-24}}
+  const ll=plines(ctx,LI,L.w-28),rl=plines(ctx,RI,R.w-28);L.h=60+ll.length*19;R.h=60+rl.length*19;
+  if(!land){R.y=h-12-R.h;M={x:12,y:L.y+L.h+8,w:w-24,h:R.y-L.y-L.h-16}}
+  panel(ctx,L,"看起来像议会制",c.blue,ll);panel(ctx,R,"实际上皇帝和宰相大权在握",c.red,rl);
+  const n=eng?2:1,bw=Math.max(60,Math.min(M.w/n*.6,(M.h-80)/.75,200)),Ht=bw*.72+72,y=M.y+(M.h-Ht)/2+bw*.72+20,cw=M.w/n;
+  scale(ctx,M.x+cw/2,y,bw,tg,"德国 · 1871 年宪法","皇帝/宰相","议会","保留浓厚的专制色彩、军国主义传统",c.red,cw-12,c);
+  if(eng)scale(ctx,M.x+cw*1.5,y,bw,te,"英国 · 君主立宪制","国王","议会","议会主权、内阁对议会负责",c.blue,cw-12,c)}
+ return{
+  text:"19 世纪中期，普鲁士首相俾斯麦推行“铁血政策”，通过三次王朝战争于 1871 年完成德意志统一。1871 年宪法确立了君主立宪制，但皇帝和宰相掌握实权，议会权力有限，带有浓厚的专制主义和军国主义色彩。统一为德国经济迅速发展扫清了障碍。",
+  points:["德意志统一是通过王朝战争“自上而下”完成的","三次王朝战争：普丹、普奥、普法","1871 年宪法：君主立宪制，但皇帝权力很大、宰相对皇帝负责","保留了专制主义和军国主义传统","统一促进了德国资本主义的迅速发展"],
+  gk:'<p style="margin:0 0 6px;font-size:14px">统编版《中外历史纲要（下）》第 9 课</p><p style="margin:0;font-size:14px">浙江选考高频：德意志统一的方式、德国与英国君主立宪制的区别</p>',
+  mount(c,r){md="A";s=0;gv=3;ov=0;mg=0;tg=0;te=0;eng=false;TL.forEach(o=>{o.v=o.k==="P"?1:0});
+   const ch=chips([{label:"铁血统一",value:"A"},{label:"1871 年宪法：外表与实质",value:"B"}],"A",v=>{md=v;if(v==="B")tg=0;build();upd()});
+   [...ch.children].forEach(b=>{b.style.minHeight="44px"});box=el("div");box.style.cssText="display:flex;flex-direction:column;gap:10px";
+   c.append(ch,box);ro=readout();r.append(ro);build();upd()},
+  unmount(){ro=null;box=null;eng=false;gv=3;ov=0;mg=0;tg=0;te=0},
+  draw(ctx,w,h,t){const T=theme(),c=C();if(md==="A")drawA(ctx,w,h,t,c,T);else drawB(ctx,w,h,t,c,T)}};
+})();
+CH[5].ready=true;
+MODS[5]=(()=>{
+ const P=[["政治","废藩置县，建立中央集权"],["经济","殖产兴业，地税改革，允许土地买卖"],["社会","废除等级身份（“四民平等”）"],["教育","文明开化，普及教育"],["军事","征兵制，建立新式军队"],["1889 宪法","《大日本帝国宪法》：天皇大权，确立君主立宪制"]],NUM="①②③④⑤⑥";
+ let md="A",fr=false,fa=0,lit=[0,0,0,0,0,0],lv=[0,0,0,0,0,0],jp=0,cmp=false,ro=null,box=null,tm=null,hits=[];
+ const C=()=>{const T=theme();return isDark()?{blue:T.blue,gold:T.goldText,red:T.redText,fg:T.fg}:{blue:INK.blue,gold:INK.gold,red:INK.red,fg:T.fg}};
+ const hx=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),mix=(a,b,p)=>{const A=hx(a),B=hx(b);return"rgb("+A.map((v,i)=>Math.round(v+(B[i]-v)*p)).join(",")+")"};
+ function wr(ctx,t,mw){const out=[];let l="";for(const ch of t){const n=l+ch;if(ctx.measureText(n).width>mw&&l){out.push(l);l=ch}else l=n}if(l)out.push(l);return out}
+ function card(ctx,x,y,w,h,r){ctx.save();rrect(ctx,x,y,w,h,r);ctx.fillStyle=isDark()?"#2c2c2e":"#fff";ctx.fill();ctx.strokeStyle=isDark()?"rgba(255,255,255,.12)":"rgba(0,0,0,.08)";ctx.lineWidth=1;ctx.stroke();ctx.restore()}
+ function para(ctx,t,x,y,mw,o){ctx.font=(o.weight||400)+" "+(o.size||13)+"px "+SANS;const ls=wr(ctx,t,mw);ls.forEach((l,j)=>itext(ctx,l,x,y+j*(o.lh||18),Object.assign({align:"left"},o)));return ls.length*(o.lh||18)}
+ const cnt=()=>lit.filter(Boolean).length;
+ function stop(){if(tm){clearInterval(tm);tm=null}}
+ function upd(){if(!ro)return;const c=C();
+  if(md==="A")ro.update([["模式","俄国 1861 年改革"],["年份",fr?"1861 年 2 月":"1861 年前",c.blue],["已推进的改革",fr?"废除农奴制法令（亚历山大二世）":"—"],["结果",fr?"意义：为资本主义发展提供了劳动力、资金和市场，俄国走上资本主义道路":"农奴被束缚在地主庄园",fr?c.gold:""]].concat(fr?[["局限","保留大量农奴制残余，是自上而下的改革",c.red]]:[]));
+  else{const k=cnt(),done=k===6;ro.update([["模式","日本明治维新"],["年份",done?"1868—1889":"1868 起",c.blue],["已推进的改革",k?k+"/6："+P.filter((_,i)=>lit[i]).map(p=>p[0]).join("、"):"—"],["结果",done?"资本主义强国":"半殖民地危机（1853 佩里叩关“黑船来航”）",done?c.gold:c.red]]
+   .concat(done?[["警示","保留大量封建残余，军国主义色彩浓厚 → 对外侵略（1894 甲午战争）",c.red],["提示","联系：近代中国实验",c.blue]]:[]).concat(cmp?[["中日对比","改革全面性与政治基础不同",c.blue]]:[]))}}
+ function build(){if(!box)return;box.innerHTML="";const row=el("div");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+  if(md==="A"){row.append(button("1861 年 2 月 废除农奴制法令（亚历山大二世）",()=>{fr=true;build();upd()},!fr));if(fr)row.append(button("重来",()=>{fr=false;fa=0;build();upd()}));box.append(row)}
+  else{row.append(button("一键推演",()=>{stop();tm=setInterval(()=>{const i=lit.indexOf(0);if(i<0){stop();return}lit[i]=1;upd()},650)},true),button("重置",()=>{stop();lit=[0,0,0,0,0,0];upd()}));
+   box.append(row,toggle("中日对比",cmp,v=>{cmp=v;upd()}))}
+  box.querySelectorAll("button").forEach(b=>{b.style.minHeight="44px"})}
+ function chain(ctx,x1,y1,x2,y2,col){const L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.floor(L/12)),a=Math.atan2(y2-y1,x2-x1);ctx.save();ctx.strokeStyle=col;ctx.lineWidth=2.5;
+  for(let i=0;i<n;i++){const f=(i+.5)/n;ctx.beginPath();ctx.ellipse(x1+(x2-x1)*f,y1+(y2-y1)*f,7,i%2?2.5:4,a,0,7);ctx.stroke()}ctx.restore()}
+ function drawA(ctx,w,h,c,T){fa+=((fr?1:0)-fa)*.03;const e=fa*fa*(3-2*fa),land=w>=600&&w>h*.9;let S,B;
+  if(land){S={x:12,y:12,w:w*.62-18,h:h-24};B={x:w*.62,y:12,w:w*.38-12,h:h-24}}else{const bh=Math.min(220,h*.42);S={x:12,y:12,w:w-24,h:h-bh-32};B={x:12,y:h-12-bh,w:w-24,h:bh}}
+  card(ctx,S.x,S.y,S.w,S.h,14);const gy=S.y+S.h-34,mw=Math.min(110,S.w*.24),mh=mw*.7,mx=S.x+16,fw=Math.min(100,S.w*.22),fx=S.x+S.w-16-fw;
+  ctx.save();ctx.fillStyle=isDark()?"#3a3a3c":"#e8e2d6";ctx.fillRect(mx,gy-mh,mw,mh);ctx.fillStyle="#b9a58a";ctx.beginPath();ctx.moveTo(mx-6,gy-mh);ctx.lineTo(mx+mw/2,gy-mh-mw*.35);ctx.lineTo(mx+mw+6,gy-mh);ctx.fill();
+  ctx.fillStyle="#b7c4d6";ctx.fillRect(fx,gy-fw*.55,fw*.6,fw*.55);ctx.fillRect(fx+fw*.62,gy-fw*.8,fw*.38,fw*.8);ctx.fillStyle="#8a9bb0";ctx.fillRect(fx+fw*.1,gy-fw*1.05,fw*.12,fw*.5);
+  ctx.fillStyle=isDark()?"rgba(255,255,255,.18)":"rgba(0,0,0,.12)";[0,1,2].forEach(i=>{ctx.beginPath();ctx.arc(fx+fw*(.16+i*.08),gy-fw*(1.15+i*.12),5+i*2,0,7);ctx.fill()});ctx.restore();
+  itext(ctx,"地主庄园",mx+mw/2,gy+16,{size:12,weight:600});itext(ctx,"城市 / 工厂",fx+fw/2,gy+16,{size:12,weight:600});
+  const ph=Math.max(36,Math.min(70,S.h*.3)),p0=mx+mw+Math.min(60,S.w*.1),p1=fx-ph*.6,px=p0+(p1-p0)*e,ax=mx+mw,ay=gy-mh*.45,cy=gy-ph*.45;
+  if(!fr&&fa<.01)chain(ctx,ax,ay,px-ph*.12,cy,T.sub);else{chain(ctx,ax,ay,ax+(p0-ax)*.42,ay+(cy-ay)*.42+fa*10,T.sub);chain(ctx,px-ph*.12-26,cy+6,px-ph*.12,cy,T.sub)}
+  person(ctx,px,gy,ph,{role:"peasant"});person(ctx,px+ph*.32,gy,ph*.6,{});
+  itext(ctx,fa>.3?"自由人":"农奴",px+ph*.1,gy-ph-14,{size:13,weight:600,color:fa>.3?c.blue:c.fg});
+  if(fa>.15)arrowTo(ctx,p0,gy-ph-40,p1+ph*.3,gy-ph-40,{color:c.blue,progress:fa,label:"劳动力来源"});
+  ctx.save();ctx.globalAlpha=Math.min(1,fa*1.5);if(fa>.02){itext(ctx,"须缴纳高额赎金才能得到份地",S.x+S.w/2,S.y+22,{size:13,weight:600,color:c.red});itext(ctx,"份地被割去一部分",S.x+S.w/2,S.y+44,{size:13,weight:600,color:c.red})}ctx.restore();
+  if(!fr)itext(ctx,"农奴被锁链拴在地主庄园上",S.x+S.w/2,S.y+22,{size:13,weight:600});
+  card(ctx,B.x,B.y,B.w,B.h,14);itext(ctx,"改革的代价（示意）",B.x+14,B.y+20,{align:"left",size:13,weight:600});
+  const base=B.y+B.h-44,mH=B.h-100,bw=Math.min(56,B.w*.18);
+  [[.3,fa,.62,"土地市价","赎金","远高于土地市价"],[.72,1-.2*fa,1,"改革前份地","份地面积","减少约 1/5"]].forEach(([fx2,v,rf,rl,nm,sub])=>{const x=B.x+B.w*fx2;
+   ctx.save();ctx.fillStyle=T.red;ctx.globalAlpha=.85;rrect(ctx,x-bw/2,base-mH*v,bw,Math.max(1,mH*v),4);ctx.fill();ctx.restore();
+   ctx.save();ctx.strokeStyle=T.sub;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(x-bw*.9,base-mH*rf);ctx.lineTo(x+bw*.9,base-mH*rf);ctx.stroke();ctx.restore();
+   itext(ctx,rl,x,base-mH*rf-10,{size:12});itext(ctx,nm,x,base+14,{size:13,weight:600});itext(ctx,sub,x,base+31,{size:12,weight:600,color:c.red})});
+  ctx.save();ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(B.x+12,base);ctx.lineTo(B.x+B.w-12,base);ctx.stroke();ctx.restore()}
+ function drawB(ctx,w,h,c,T){const k=cnt(),done=k===6;lv=lv.map((v,i)=>v+(lit[i]-v)*.08);jp+=((done?1:0)-jp)*.05;hits=[];const land=w>=600;let Pz,Cp=null;
+  if(cmp&&land){Pz={x:12,y:12,w:(w-36)*.6,h:h-24};Cp={x:Pz.x+Pz.w+12,y:12,w:w-Pz.w-36,h:h-24}}else if(cmp){const ch=Math.min(250,h*.42);Pz={x:12,y:12,w:w-24,h:h-ch-32};Cp={x:12,y:h-12-ch,w:w-24,h:ch}}else Pz={x:12,y:12,w:w-24,h:h-24};
+  const r=Math.min(26,Pz.h*.08),ix=Pz.x+8+r,iy=Pz.y+8+r;ctx.save();ctx.fillStyle=mix(T.red,T.gold,jp);ctx.beginPath();ctx.arc(ix,iy,r,0,7);ctx.fill();ctx.restore();
+  itext(ctx,"日",ix,iy,{size:Math.max(12,r*.8),weight:600,color:isDark()?T.bg:"#fff"});
+  itext(ctx,"日本："+(jp>.5?"资本主义强国":"半殖民地危机"),ix+r+12,iy-9,{align:"left",size:15,weight:600,color:jp>.5?c.gold:c.red});
+  itext(ctx,jp>.5?"1868 起全面改革 · 1889 确立君主立宪制":"1853 佩里叩关“黑船来航”",ix+r+12,iy+12,{align:"left",size:12,color:jp>.5?c.gold:c.red});
+  const top=Pz.y+2*r+22,wh=done?Math.min(70,Pz.h*.22):0,cols=Pz.w>=420?3:2,rows=6/cols,gw=(Pz.w-(cols-1)*8)/cols,gh=(Pz.h-(top-Pz.y)-wh-(rows-1)*8)/rows;
+  P.forEach((p,i)=>{const x=Pz.x+(i%cols)*(gw+8),y=top+Math.floor(i/cols)*(gh+8),v=lv[i];card(ctx,x,y,gw,gh,12);
+   ctx.save();rrect(ctx,x,y,gw,gh,12);ctx.globalAlpha=.16*v;ctx.fillStyle=T.gold;ctx.fill();ctx.globalAlpha=v;ctx.strokeStyle=T.gold;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+   itext(ctx,NUM[i]+" "+p[0],x+12,y+18,{align:"left",size:14,weight:600,color:v>.5?c.gold:c.fg});
+   ctx.save();ctx.globalAlpha=.45+.55*v;para(ctx,p[1],x+12,y+40,gw-24,{size:12,lh:16});ctx.restore();hits.push({x,y,w:gw,h:gh,i})});
+  if(done){ctx.save();ctx.globalAlpha=jp;const wy=Pz.y+Pz.h-wh+12;para(ctx,"⚠ 保留大量封建残余，军国主义色彩浓厚 → 对外侵略（1894 甲午战争）",Pz.x+4,wy,Pz.w-8,{size:13,weight:600,color:c.red});
+   itext(ctx,"联系：近代中国实验",Pz.x+4,Pz.y+Pz.h-10,{align:"left",size:13,weight:600,color:c.blue});ctx.restore()}
+  if(Cp){const hh=(Cp.h-38)/2;[[c.red,"中国：洋务运动（器物）/ 戊戌变法（失败）","洋务运动只学习西方器物；戊戌变法未能改变政治制度，以失败告终"],[c.blue,"日本：明治维新（全面改革、成功）","政治、经济、社会、教育、军事全面改革，确立君主立宪制"]].forEach(([col,t,d],j)=>{const y=Cp.y+j*(hh+8);card(ctx,Cp.x,y,Cp.w,hh,12);
+    const th=para(ctx,t,Cp.x+12,y+18,Cp.w-24,{size:13,weight:600,color:col});para(ctx,d,Cp.x+12,y+22+th,Cp.w-24,{size:12,lh:16})});
+   itext(ctx,"改革全面性与政治基础不同",Cp.x+Cp.w/2,Cp.y+Cp.h-12,{size:13,weight:600,color:c.gold})}}
+ return{
+  text:"19 世纪中后期，俄国和日本面对危机，分别通过 1861 年改革和明治维新走上资本主义道路。两场改革都是自上而下进行的，推动了国家近代化，但都保留了大量封建残余；日本还逐步走上军国主义对外扩张道路。",
+  points:["俄国 1861 年改革废除农奴制，是俄国历史的转折点","改革具有不彻底性：赎金与割地","明治维新：废藩置县、殖产兴业、文明开化、征兵制、1889 年宪法","明治维新使日本摆脱民族危机，走上资本主义道路","两者都是自上而下的改革，保留封建残余，日本走向军国主义"],
+  gk:'<p style="margin:0 0 6px;font-size:14px">统编版《中外历史纲要（下）》第 12 课</p><p style="margin:0;font-size:14px">浙江选考高频：俄国 1861 年改革与明治维新的异同、中日近代化道路比较</p>',
+  mount(c,r){stop();md="A";fr=false;fa=0;lit=[0,0,0,0,0,0];lv=[0,0,0,0,0,0];jp=0;cmp=false;
+   const ch=chips([{label:"俄国 1861 年改革",value:"A"},{label:"日本明治维新（1868 起）",value:"B"}],"A",v=>{md=v;stop();build();upd()});
+   [...ch.children].forEach(b=>{b.style.minHeight="44px"});box=el("div");box.style.cssText="display:flex;flex-direction:column;gap:10px";
+   c.append(ch,box);ro=readout();r.append(ro);build();upd()},
+  unmount(){stop();ro=null;box=null;cmp=false},
+  pointer(e,type,x,y){if(type!=="down"||md!=="B")return false;const p=e&&e.pointerType==="touch"?8:2,h=hits.find(b=>x>=b.x-p&&x<=b.x+b.w+p&&y>=b.y-p&&y<=b.y+b.h+p);
+   if(h){stop();lit[h.i]=lit[h.i]?0:1;upd();return true}return false},
+  draw(ctx,w,h,t){const T=theme(),c=C();if(md==="A")drawA(ctx,w,h,c,T);else drawB(ctx,w,h,c,T)}};
+})();
+/* ---------- 第 7 章 代议制大比拼 ---------- */
+CH[6].ready=true;
+MODS[6]=(()=>{
+ const D={
+  UK:{nm:"英国",gov:"议会君主制",resp:"内阁对下院（议会）负责",fall:"能：下院可通过不信任案倒阁",fc:"blue",
+   N:{v:["选民",.5,.92],h:["下院",.5,.6],m:["首相·内阁",.5,.3,"多数党领袖任首相组阁"],k:["国王",.08,.04]},
+   E:[["v","h","选举","blue"],["h","m","多数党领袖组阁","blue",-16],["m","h","对下院负责","gold",-16],["k","m","统而不治","gold",0,1]]},
+  US:{nm:"美国",gov:"总统共和制",resp:"总统对选民负责，不对国会负责",fall:"不能：总统任期固定（4 年），只能弹劾",fc:"red",
+   N:{v:["选民",.5,.92],p:["总统",.12,.5,"元首兼政府首脑·组织政府"],g:["国会",.88,.5],s:["最高法院",.5,.1]},
+   E:[["v","p","间接选举","blue"],["v","g","选举","blue"],["p","g","否决","fg",-10],["g","p","弹劾","red",-10],["p","s","提名法官","fg"],["s","g","司法审查","fg"]]},
+  FR:{nm:"法国（第三共和国）",gov:"议会共和制",resp:"内阁对议会负责",fall:"能：议会可倒阁",fc:"blue",note:"多党林立，内阁更迭频繁（第三共和国 65 年间更换内阁 100 多届，示意）",
+   N:{v:["选民",.8,.92],d:["众议院",.8,.6],s:["参议院",.36,.6],p:["总统（虚位）",.12,.26],m:["总理·内阁",.72,.14]},
+   E:[["v","d","选举","blue"],["d","p","两院联合选举","blue"],["s","p","","blue"],["p","m","任命总理","gold"],["m","d","对议会负责","gold"]]},
+  DE:{nm:"德国（1871）",gov:"二元君主制",resp:"宰相只对皇帝负责",fall:"不能：议会无权组阁",fc:"red",note:"议会无权组阁，君主权力强大",
+   N:{k:["皇帝",.2,.1,"普鲁士国王兼任"],c:["宰相",.2,.58],v:["选民",.8,.92],r:["帝国议会",.8,.58,"权力有限"]},
+   E:[["k","c","任免宰相","red",-16],["c","k","对皇帝负责","gold",-16],["v","r","普选","blue"],["r","c","无权组阁","fg",0,1]]}};
+ const QS=[["首相由下院多数党领袖担任","UK"],["总统既是元首又是政府首脑","US"],["宰相只对皇帝负责","DE"],["总统由议会选出、权力有限","FR"]];
+ const TB=[["国家元首地位","国王“统而不治”","总统掌实权","总统虚位","皇帝掌实权"],["政府首脑","首相","总统","总理","宰相"],["政府对谁负责","下院（议会）","选民（不对国会）","议会","皇帝"],["议会能否倒阁","能（不信任案）","不能（只能弹劾）","能","不能"]];
+ let k="UK",t0=null,nt=null,pend=false,msg="",ro=null,act=null,tw=null,qb=null,showT=false,Q=null,qi=0,sc=0;
+ const C=()=>{const T=theme();return isDark()?{blue:T.blue,gold:T.goldText,red:T.redText,fg:T.fg}:{blue:INK.blue,gold:INK.gold,red:INK.red,fg:T.fg}};
+ function upd(){if(!ro)return;const c=C(),d=D[k];ro.update([["国家",d.nm,c.blue],["政体",d.gov],["政府对谁负责",d.resp,c.gold],["能否倒阁",d.fall,c[d.fc]]].concat(d.note?[["特点",d.note,c.red]]:[]).concat(msg?[["演示结果",msg,c.red]]:[]));tbl()}
+ function tbl(){if(!tw)return;tw.style.display=showT?"block":"none";if(!showT)return;const c=C(),ks=["UK","US","FR","DE"],hl=i=>ks[i]===k?"color:"+c.blue+";font-weight:600;":"",cs="padding:8px 10px;border-bottom:1px solid var(--stroke-secondary,rgba(0,0,0,.1));text-align:left;white-space:nowrap;font-size:13px;";
+  tw.innerHTML='<table style="border-collapse:collapse;min-width:520px;width:100%"><thead><tr><th style="'+cs+'"></th>'+["英国","美国","法国","德国"].map((n,i)=>'<th style="'+cs+hl(i)+'">'+n+"</th>").join("")+"</tr></thead><tbody>"+
+   TB.map(r=>'<tr><th style="'+cs+'font-weight:600">'+r[0]+"</th>"+r.slice(1).map((v,i)=>'<td style="'+cs+hl(i)+'">'+v+"</td>").join("")+"</tr>").join("")+"</tbody></table>"}
+ function acts(){if(!act)return;act.innerHTML="";const row=el("div");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+  if(k==="UK")row.append(button("下院不信任投票",()=>{pend=true;msg="内阁辞职或解散议会重新大选";upd()},true));
+  if(k==="US")row.append(button("国会不信任？",()=>{msg="美国没有不信任案机制，总统任期固定（4 年），只能弹劾";upd()},true));
+  row.append(button("重播流向",()=>{t0=null;nt=null;msg="";upd()}),button(showT?"隐藏对比表":"显示对比表",()=>{showT=!showT;acts();upd()}));
+  act.append(row);act.querySelectorAll("button").forEach(b=>{b.style.minHeight="44px"})}
+ function quiz(){if(!qb)return;if(!Q||qi>=4){Q=QS.slice().sort(()=>Math.random()-.5);qi=0;sc=0}qb.innerHTML="";const c=C();
+  const p=el("p",null,"特征："+Q[qi][0]);p.style.cssText="margin:0;font-size:14px;font-weight:600;color:"+c.blue;const row=el("div");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+  [["英国","UK"],["美国","US"],["法国","FR"],["德国","DE"]].forEach(([n,v])=>{const b=button(n,()=>ans(v));b.style.minHeight="44px";row.append(b)});qb.append(p,row)}
+ function ans(v){const c=C(),ok=v===Q[qi][1];if(ok)sc++;const right=D[Q[qi][1]].nm;qi++;qb.innerHTML="";
+  const p=el("p",null,(ok?"✓ 答对了":"✗ 答错了，是"+right)+" · 得分 "+sc+"/4"+(qi>=4?" · 已完成，再点「猜猜这是哪国」重来":" · 点「猜猜这是哪国」继续"));p.style.cssText="margin:0;font-size:14px;font-weight:600;color:"+(ok?c.blue:c.red);qb.append(p)}
+ return{
+  text:"近代西方国家普遍建立代议制，但形式各异：英国是议会君主制，内阁对议会负责；美国是总统共和制，三权分立；法国第三共和国是议会共和制，内阁对议会负责；德意志帝国是二元君主制，宰相对皇帝负责。它们都是资产阶级代议制，适应了各国国情。",
+  points:["代议制是近代资产阶级民主制度的核心","英国：议会主权、责任内阁","美国：三权分立、总统制、联邦制","法国：议会共和制，多党制下内阁不稳定","德国：君主权力强大，民主不彻底"],
+  gk:'<p style="margin:0 0 6px;font-size:14px">选择性必修1 第 3 课「西方国家现代政治制度的演变」</p><p style="margin:0;font-size:14px">浙江选考高频：英美法德政体比较（谁对谁负责）</p>',
+  mount(c,r){k="UK";t0=null;nt=null;pend=false;msg="";showT=false;Q=null;qi=0;sc=0;
+   const ch=chips([{label:"英国（议会君主制）",value:"UK"},{label:"美国（总统共和制）",value:"US"},{label:"法国（第三共和国 议会共和制）",value:"FR"},{label:"德国（1871 二元君主制）",value:"DE"}],"UK",v=>{k=v;t0=null;nt=null;pend=false;msg="";acts();upd()});
+   [...ch.children].forEach(b=>{b.style.minHeight="44px"});act=el("div");qb=el("div");qb.style.cssText="display:flex;flex-direction:column;gap:8px";
+   const qbtn=button("猜猜这是哪国",quiz);qbtn.style.minHeight="44px";const qw=el("div");qw.style.cssText="display:flex;flex-direction:column;gap:8px";qw.append(qbtn,qb);
+   c.append(ch,act,qw);ro=readout();tw=el("div");tw.style.cssText="overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;margin-top:12px";r.append(ro,tw);acts();upd()},
+  unmount(){ro=null;act=null;tw=null;qb=null},
+  pointer(){return false},
+  draw(ctx,w,h,t){const c=C(),d=D[k];if(t0==null)t0=t;if(pend){nt=t;pend=false}
+   const nw=Math.min(150,Math.max(84,w*.26)),nh=36,pt=22,pb=42,P={};
+   for(const id in d.N){const[l,fx,fy,sub]=d.N[id];P[id]={x:12+nw/2+(w-24-nw)*fx,y:pt+nh/2+(h-pt-pb-nh)*fy,hw:nw/2,hh:nh/2,l,sub}}
+   d.E.forEach((e,i)=>{const[a,b,lab,col,off,dash]=e,A=P[a],B=P[b],dx=B.x-A.x,dy=B.y-A.y,L=Math.hypot(dx,dy)||1,o=off||0,nx=-dy/L*o,ny=dx/L*o,
+     sa=Math.min((A.hw+5)/Math.abs(dx||1e-6),(A.hh+5)/Math.abs(dy||1e-6)),sb=Math.min((B.hw+5)/Math.abs(dx||1e-6),(B.hh+5)/Math.abs(dy||1e-6)),p=(t-t0-.3-i*.45)/.5;
+    arrowTo(ctx,A.x+nx+dx*sa,A.y+ny+dy*sa,B.x+nx-dx*sb,B.y+ny-dy*sb,{color:c[col],progress:p,dash:!!dash});
+    if(lab&&p>=.6){const mx=(A.x+B.x)/2+nx,my=(A.y+B.y)/2+ny;if(Math.abs(dx)<Math.abs(dy)){const s=o?Math.sign(nx):1;itext(ctx,lab,mx+s*8,my,{align:s>0?"left":"right",size:12,weight:600,color:c[col]})}
+     else itext(ctx,lab,mx,my+(o&&ny>0?14:-12),{size:12,weight:600,color:c[col]})}});
+   for(const id in P){const n=P[id];let o={},fall=0;
+    if(k==="UK"&&id==="m"&&nt!=null){const dt=t-nt;if(dt<1.2)o={active:Math.floor(dt*6)%2===0,color:c.red};else{fall=Math.min(1,(dt-1.2)/.6);o={color:c.red}}}
+    ctx.save();if(fall){ctx.translate(n.x+n.hw,n.y+n.hh);ctx.rotate(fall*1.2);ctx.translate(-n.x-n.hw,-n.y-n.hh);ctx.globalAlpha=1-.55*fall}
+    node(ctx,n.x-n.hw,n.y-n.hh,nw,nh,n.l,o);if(n.sub)itext(ctx,n.sub,n.x,n.y+n.hh+11,{size:12,color:c.gold});ctx.restore()}
+   if(k==="UK"&&nt!=null&&t-nt>1.4)itext(ctx,"内阁辞职或解散议会重新大选",P.m.x,P.m.y-P.m.hh-12,{size:13,weight:600,color:c.red});
+   if(k==="US"&&msg)itext(ctx,"✕ 无不信任案，只能弹劾",(P.p.x+P.g.x)/2,P.p.y+38,{size:13,weight:600,color:c.red});
+   itext(ctx,d.nm+" · "+d.gov+" · "+d.resp,w/2,h-14,{size:13,weight:600,color:c.blue})}};
+})();
+/* ---------- 第 8 章 拉美独立与亚洲觉醒 ---------- */
+CH[7].ready=true;
+MODS[7]=(()=>{
+ const R={HT:["海地","fr",1804,0,[[.47,.13],[.56,.13],[.56,.19],[.47,.19]]],
+  MX:["墨西哥","es",1821,1810,[[.04,.02],[.38,.03],[.41,.13],[.31,.22],[.21,.24],[.09,.14]]],
+  GC:["大哥伦比亚","es",1819,0,[[.3,.27],[.56,.24],[.61,.34],[.5,.41],[.33,.4]]],
+  PE:["秘鲁","es",1824,1821,[[.29,.43],[.46,.44],[.49,.58],[.38,.62],[.29,.52]]],
+  BR:["巴西","pt",1822,0,[[.53,.42],[.63,.35],[.92,.43],[.87,.62],[.68,.77],[.58,.68],[.51,.52]]],
+  AR:["拉普拉塔","es",1816,0,[[.47,.63],[.56,.69],[.6,.8],[.53,.97],[.46,.95],[.46,.71]]],
+  CL:["智利","es",1818,0,[[.38,.65],[.44,.67],[.42,.98],[.36,.98],[.35,.8]]]};
+ const EV=[[1804,"HT","海地独立","黑人奴隶起义，杜桑·卢维杜尔领导；第一个独立的拉美国家","杜桑·卢维杜尔","第一个独立的拉美国家"],
+  [1810,"MX","墨西哥起义","伊达尔哥发出“多洛雷斯呼声”，独立战争开始（1821 年独立）","伊达尔哥","1821 年墨西哥独立"],
+  [1816,"AR","阿根廷独立","圣马丁率军解放南部，拉普拉塔宣布独立","圣马丁","阿根廷（拉普拉塔）独立"],
+  [1818,"CL","智利独立","圣马丁翻越安第斯山，解放智利","圣马丁","智利独立"],
+  [1819,"GC","大哥伦比亚成立","玻利瓦尔解放北部，建立大哥伦比亚","玻利瓦尔","大哥伦比亚独立"],
+  [1821,"PE","两路会师秘鲁","墨西哥独立；圣马丁攻入利马，秘鲁宣布独立","圣马丁、玻利瓦尔","秘鲁宣布独立（会师 1821—1824）"],
+  [1822,"BR","巴西独立","葡属殖民地，以和平方式独立","佩德罗一世","巴西独立"],
+  [1824,"PE","秘鲁解放","玻利瓦尔部队赢得阿亚库乔战役，南美解放基本完成","玻利瓦尔","西班牙在南美的殖民统治瓦解"]];
+ const AS=[{k:"CN",nm:"中国",yr:"1911",ld:"孙中山",res:"推翻帝制，建立中华民国（亚洲第一个共和国）",L:["辛亥革命","推翻帝制","建立中华民国","“亚洲第一个共和国”"]},
+  {k:"IR",nm:"伊朗",yr:"1905—1911",ld:"立宪派",res:"立宪革命：颁布宪法、召开议会",L:["立宪革命","颁布宪法","召开议会"]},
+  {k:"TR",nm:"土耳其",yr:"1908 → 1923",ld:"青年土耳其党；凯末尔",res:"1923 年凯末尔建立土耳其共和国，世俗化改革",L:["1908 青年土耳其党革命","1923 凯末尔建立","土耳其共和国","世俗化改革"]},
+  {k:"IN",nm:"印度",yr:"1905",ld:"甘地（延伸）",res:"抵制英货运动；非暴力不合作（第 16 课延伸）",L:["1905 抵制英货运动","甘地：非暴力不合作","（第 16 课 延伸）"]}];
+ const FC={es:"rgba(154,106,0,.5)",pt:"rgba(40,140,80,.5)",fr:"rgba(40,90,190,.45)"},CON="到 1826 年拉美大部分地区获得独立；独立后多数国家出现考迪罗（军事强人）统治，经济仍依附外国",LEN="列宁：“亚洲的觉醒”——亚洲民族民主运动兴起";
+ let m="A",y=1790,play=false,lt=0,lit={},sel=null,ro=null,box=null,sl=null,hits=[];
+ const C=()=>{const T=theme();return isDark()?{blue:T.blue,gold:T.goldText,red:T.redText,fg:T.fg}:{blue:INK.blue,gold:INK.gold,red:INK.red,fg:T.fg}};
+ const last=()=>{let e=null;EV.forEach(v=>{if(y>=v[0])e=v});return e};
+ function upd(){if(!ro)return;const c=C();
+  if(m==="A"){const e=last();ro.update([["模式","拉丁美洲独立运动"],["年份",y+" 年",c.blue],["国家",e?R[e[1]][0]+"（"+e[2]+"）":"—"],["领导人",e?e[4]:"—"],["结果",y>=1826?CON:e?e[5]:"仍处殖民统治之下",y>=1826?c.red:c.gold]])}
+  else{const a=AS.find(v=>v.k===sel),all=AS.every(v=>lit[v.k]);ro.update([["模式","20 世纪初亚洲的觉醒"],["年份",a?a.yr:"—",c.blue],["国家",a?a.nm:"点击卡片逐个点亮"],["领导人",a?a.ld:"—"],["结果",a?a.res:"—",c.gold]].concat(all?[["结论",LEN,c.gold]]:[]))}}
+ function tap(k){lit[k]=true;sel=k;upd()}
+ function ctl(){if(!box)return;box.innerHTML="";
+  if(m==="A"){sl=slider("时间",1790,1830,1,y,v=>v+" 年",v=>{y=v;play=false;upd()});const pb=button("▶ 自动播放",()=>{if(y>=1830)y=1790;play=true;lt=0},true);pb.style.minHeight="44px";box.append(sl,pb)}
+  else{sl=null;const row=el("div");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap";AS.forEach((a,i)=>row.append(button("①②③④"[i]+" "+a.nm,()=>tap(a.k))));row.append(button("重置",()=>{lit={};sel=null;upd()}));row.querySelectorAll("button").forEach(b=>{b.style.minHeight="44px"});box.append(row)}}
+ function poly(ctx,P,r){const n=P.length,md=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2],s=md(P[n-1],P[0]);ctx.beginPath();ctx.moveTo(s[0],s[1]);for(let i=0;i<n;i++){const q=md(P[i],P[(i+1)%n]);ctx.arcTo(P[i][0],P[i][1],q[0],q[1],r)}ctx.closePath()}
+ function wrap(ctx,s,mw,sz,wt){ctx.save();ctx.font=(wt||400)+" "+sz+"px "+SANS;const L=[];let cur="";for(const ch of s){if(cur&&ctx.measureText(cur+ch).width>mw){L.push(cur);cur=ch}else cur+=ch}if(cur)L.push(cur);ctx.restore();return L}
+ function card(ctx,x,y0,cw,chh,on,c){const dk=isDark();ctx.save();rrect(ctx,x,y0,cw,chh,12);ctx.fillStyle=dk?"#2c2c2e":"#fff";if(on){ctx.shadowColor=c.blue;ctx.shadowBlur=14}ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle=on?c.blue:dk?"rgba(255,255,255,.18)":"rgba(0,0,0,.14)";ctx.lineWidth=on?2:1;ctx.stroke();ctx.restore()}
+ function drawA(ctx,w,h,t,c){const dk=isDark(),wide=w>=520;
+  if(play){if(!lt)lt=t;if(t-lt>.35){lt=t;y=Math.min(1830,y+1);sl&&sl.set(y);upd();if(y>=1830)play=false}}
+  const mw=wide?w*.56:w-24,mh=wide?h-24:h-136,bh=mh,bw=Math.min(mw,mh*.9),ox=12+(mw-bw)/2,my=12,S=p=>[ox+p[0]*bw,my+p[1]*bh];
+  const cen=k=>{const Q=R[k][4].map(S);return{x:Q.reduce((s,p)=>s+p[0],0)/Q.length,y:Q.reduce((s,p)=>s+p[1],0)/Q.length}};
+  for(const k in R){const[nm,ow,yr,st,P]=R[k],Q=P.map(S),ind=y>=yr,fight=!ind&&st&&y>=st;ctx.save();poly(ctx,Q,Math.min(14,bw*.04));
+   if(ind&&y-yr<=1){ctx.shadowColor=c.blue;ctx.shadowBlur=16}ctx.fillStyle=ind?(dk?"#2c2c2e":"#fff"):FC[ow];ctx.fill();ctx.shadowBlur=0;
+   ctx.strokeStyle=ind||fight?c.blue:dk?"rgba(255,255,255,.25)":"rgba(0,0,0,.2)";ctx.lineWidth=ind||fight?2:1;ctx.setLineDash(fight?[5,4]:[]);ctx.stroke();ctx.restore();
+   const p=cen(k),lab=nm+(ind?" "+yr:"");if(k==="HT")itext(ctx,lab,Q[1][0]+6,p.y,{align:"left",size:12,weight:600,color:ind?c.blue:c.fg});else itext(ctx,lab,p.x,p.y,{size:12,weight:600,color:ind?c.blue:c.fg})}
+  const g=cen("GC"),pe=cen("PE"),ar=cen("AR"),cl=cen("CL"),pb=(y-1813)/9,ps=(y-1816)/5;
+  arrowTo(ctx,g.x-8,g.y+10,pe.x-4,pe.y-12,{color:c.blue,progress:pb});if(pb>0)itext(ctx,"玻利瓦尔",g.x-14,g.y+22,{align:"right",size:12,weight:600,color:c.blue});
+  arrowTo(ctx,ar.x,ar.y-8,cl.x+4,cl.y,{color:c.gold,progress:ps*2});arrowTo(ctx,cl.x+2,cl.y-10,pe.x+6,pe.y+12,{color:c.gold,progress:ps*2-1});
+  if(ps>0)itext(ctx,"圣马丁",ar.x+10,ar.y+14,{align:"left",size:12,weight:600,color:c.gold});
+  if(y>=1821&&y<1826){const f=(t*1.2)%1;ctx.save();ctx.strokeStyle=c.blue;ctx.globalAlpha=1-f;ctx.lineWidth=2;ctx.beginPath();ctx.arc(pe.x,pe.y,8+f*18,0,7);ctx.stroke();ctx.restore()}
+  itext(ctx,y+" 年",ox+bw-4,my+12,{align:"right",size:20,weight:600,color:c.blue});
+  const lg=[["西属",FC.es],["葡属",FC.pt],["法属",FC.fr],["已独立",dk?"#2c2c2e":"#fff"]];lg.forEach((v,i)=>{const lx=ox+4,ly=my+bh*.7+i*20;ctx.save();rrect(ctx,lx,ly,14,12,3);ctx.fillStyle=v[1];ctx.fill();if(i===3){ctx.strokeStyle=c.blue;ctx.lineWidth=1.5;ctx.stroke()}ctx.restore();itext(ctx,v[0],lx+20,ly+6,{align:"left",size:12,color:c.fg})});
+  const x=wide?12+mw+12:12,y0=wide?12:h-118,cw=wide?w-x-12:w-24,e=last(),pad=12;
+  if(!e){itext(ctx,"拖动时间滑块，或点「自动播放」",x+cw/2,y0+40,{size:13,color:c.fg});return}
+  const done=y>=1826,tt=done?"1826 · 拉美大部分独立":e[0]+" · "+e[2],B=wrap(ctx,done?CON:e[3],cw-pad*2,13),chh=wide?36+B.length*18+(done?8:28):106;
+  card(ctx,x,y0,cw,chh,true,c);itext(ctx,tt,x+pad,y0+20,{align:"left",size:15,weight:600,color:c.blue});
+  B.forEach((s,i)=>itext(ctx,s,x+pad,y0+42+i*18,{align:"left",size:13,color:done?c.red:c.fg}));if(!done)itext(ctx,"领导人："+e[4],x+pad,y0+42+B.length*18,{align:"left",size:13,weight:600,color:c.gold})}
+ function drawB(ctx,w,h,t,c){hits=[];const all=AS.every(v=>lit[v.k]),L=all?wrap(ctx,LEN,w-24,14,600):[],bot=all?L.length*20+16:12,cw=(w-36)/2,chh=(h-12-bot-12)/2;
+  AS.forEach((a,i)=>{const x=12+(i%2)*(cw+12),y0=12+Math.floor(i/2)*(chh+12),on=!!lit[a.k];hits.push([x,y0,cw,chh,a.k]);card(ctx,x,y0,cw,chh,on,c);
+   itext(ctx,"①②③④"[i]+" "+a.nm+" · "+a.yr,x+12,y0+20,{align:"left",size:14,weight:600,color:on?c.blue:c.fg});
+   if(on)a.L.forEach((s,j)=>itext(ctx,s,x+12,y0+44+j*18,{align:"left",size:12,color:j===a.L.length-1&&a.k!=="IN"?c.gold:c.fg}));
+   else itext(ctx,"点击点亮",x+cw/2,y0+chh/2+10,{size:13,color:c.fg})});
+  L.forEach((s,i)=>itext(ctx,s,w/2,h-bot+10+i*20,{size:14,weight:600,color:c.gold}))}
+ return{
+  text:"19 世纪初，受美国独立和法国大革命影响，拉丁美洲爆发独立运动，玻利瓦尔、圣马丁领导南美解放，大多数拉美国家获得独立。20 世纪初，伊朗、土耳其、中国等亚洲国家相继爆发资产阶级革命，史称“亚洲的觉醒”。",
+  points:["拉美独立运动受美国独立战争、法国大革命和启蒙思想影响","海地是第一个独立的拉美国家","玻利瓦尔、圣马丁领导南美独立战争","拉美独立后仍面临政治动荡和经济依附问题","20 世纪初“亚洲的觉醒”：伊朗、土耳其、中国辛亥革命"],
+  gk:'<p style="margin:0 0 6px;font-size:14px">统编版纲要（下）第 13 课「亚非拉民族独立运动」</p><p style="margin:0;font-size:14px">浙江选考常考：拉美独立运动的背景与局限、辛亥革命的世界意义</p>',
+  mount(c,r){m="A";y=1790;play=false;lit={};sel=null;
+   const ch=chips([{label:"拉丁美洲独立运动",value:"A"},{label:"20 世纪初亚洲的觉醒",value:"B"}],"A",v=>{m=v;play=false;ctl();upd()});
+   [...ch.children].forEach(b=>{b.style.minHeight="44px"});box=el("div");box.style.cssText="display:flex;flex-direction:column;gap:8px";c.append(ch,box);ro=readout();r.append(ro);ctl();upd()},
+  unmount(){ro=null;box=null;sl=null;play=false},
+  pointer(e,type,x,y){if(m!=="B"||type!=="down")return false;const h=hits.find(q=>x>=q[0]&&x<=q[0]+q[2]&&y>=q[1]&&y<=q[1]+q[3]);if(h){tap(h[4]);return true}return false},
+  draw(ctx,w,h,t){const c=C();if(m==="A")drawA(ctx,w,h,t,c);else drawB(ctx,w,h,t,c)}};
+})();
+CH[8].ready=true;
+MODS[8]=(()=>{
+ const Q=[
+  [null,"1689 年英国《权利法案》的颁布，标志着（ ）",["英国资产阶级革命开始","君主立宪制确立","责任内阁制形成","英国成为共和国"],1,"《权利法案》限制王权，确立君主立宪制。",1],
+  ["美国 1787 年宪法规定，总统对国会通过的法案有否决权，国会可以弹劾总统。","这体现了（ ）",["联邦制原则","三权分立与制衡原则","人民主权原则","议会至上原则"],1,"立法与行政相互制约。",2],
+  [null,"1789 年法国《人权宣言》的核心原则是（ ）",["君权神授","人权、法治、自由、分权、保护私有财产","三级会议按等级投票","天主教为国教"],1,"《人权宣言》宣扬人权和法治等原则。",3],
+  [null,"《拿破仑法典》（1804）的历史意义是（ ）",["第一部资本主义民法典，影响大陆法系","宣告法兰西第一共和国成立","确立君主专制","废除私有财产"],0,"法典巩固大革命成果并影响世界多国法律。",4],
+  ["1871 年德意志帝国宪法规定宰相由皇帝任免、只对皇帝负责。","这说明德国（ ）",["实行责任内阁制","君主权力强大，专制色彩浓厚","实行总统共和制","议会掌握最高权力"],1,"德国是带有专制色彩的君主立宪制。",5],
+  [null,"俄国 1861 年改革与日本明治维新的共同点是（ ）",["都是自下而上的革命","都是自上而下的改革，推动国家走上资本主义道路","都彻底清除了封建残余","都建立了共和制"],1,"两者都是自上而下的改革，保留封建残余。",6],
+  ["英国内阁对议会负责，美国总统对选民负责而不对国会负责。","下列表述正确的是（ ）",["英国下院可通过不信任案迫使内阁辞职","美国国会可通过不信任案使总统辞职","英国国王掌握实权","美国总统由国会选举产生"],0,"美国没有不信任案机制，只能弹劾。",7],
+  [null,"19 世纪初领导南美北部独立斗争、被誉为“解放者”的是（ ）",["圣马丁","玻利瓦尔","伊达尔哥","杜桑·卢维杜尔"],1,"玻利瓦尔领导南美北部独立。",8]];
+ const CSS=`.x-qz{position:absolute;inset:0;overflow:auto;padding:16px 14px 24px;color:inherit;z-index:2}
+.x-qw{max-width:640px;margin:0 auto}
+.x-dots{display:flex;gap:10px;justify-content:center;margin:0 0 16px}
+.x-dots i{width:10px;height:10px;border-radius:50%;border:1.5px solid currentColor;opacity:.3}
+.x-dots i.cur{opacity:1}.x-dots i.ok{background:#0071e3;border-color:#0071e3;opacity:1}.x-dots i.bad{background:#c0362c;border-color:#c0362c;opacity:1}
+.x-no{font:13px ui-monospace,Menlo,monospace;color:#0071e3;margin:0 0 8px}
+.x-mat{margin:0 0 12px;padding:10px 14px;border-left:3px solid #9a6a00;background:rgba(154,106,0,.08);border-radius:0 10px 10px 0;font-size:15px;line-height:1.7}
+.x-stem{font-size:17px;font-weight:600;line-height:1.6;margin:0 0 14px}
+.x-op{display:flex;gap:10px;align-items:flex-start;width:100%;box-sizing:border-box;min-height:48px;padding:12px 14px;margin:0 0 10px;text-align:left;font:inherit;font-size:15px;line-height:1.5;color:inherit;background:transparent;border:1.5px solid rgba(128,128,128,.35);border-radius:12px;cursor:pointer;white-space:normal;overflow-wrap:anywhere}
+.x-op:disabled{cursor:default;opacity:1}.x-op b,.x-op em{flex:none;font-style:normal;font-weight:700}.x-op span{flex:1}
+.x-op.ok{background:rgba(0,113,227,.1);border-color:#0071e3;color:#0071e3}.x-op.bad{background:rgba(192,54,44,.1);border-color:#c0362c;color:#c0362c}
+.x-ex{margin:6px 0 0;padding:12px 14px;border-radius:12px;background:rgba(128,128,128,.08);font-size:15px;line-height:1.6}
+.x-g{color:#9a6a00;font-weight:600}.x-b{color:#0071e3}.x-r{color:#c0362c}
+.x-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.x-row button{flex:1 1 140px;min-height:44px}
+.x-score{font-size:48px;font-weight:600;color:#0071e3;margin:8px 0 4px;text-align:center}.x-sub{text-align:center;margin:0 0 16px;font-size:15px}
+.x-wr{display:flex;flex-direction:column;gap:8px}.x-wr button{min-height:44px;text-align:left;white-space:normal}
+html.dark .x-no,html.dark .x-b,html.dark .x-score{color:#2997ff}html.dark .x-g{color:#f0b847}html.dark .x-r{color:#ff7b72}html.dark .x-mat{border-color:#f0b847}
+html.dark .x-op.ok{background:rgba(41,151,255,.15);border-color:#2997ff;color:#2997ff}html.dark .x-op.bad{background:rgba(255,123,114,.15);border-color:#ff7b72;color:#ff7b72}
+html.dark .x-dots i.ok{background:#2997ff;border-color:#2997ff}html.dark .x-dots i.bad{background:#ff7b72;border-color:#ff7b72}`;
+ let i=0,ans=[],t0=0,t1=0,box=null,ro=null;
+ const right=()=>ans.filter((a,k)=>a===Q[k][3]).length,done=()=>ans.filter(a=>a>=0).length;
+ const C=()=>isDark()?{b:"#2997ff",g:"#f0b847",r:"#ff7b72"}:{b:"#0071e3",g:"#9a6a00",r:"#c0362c"};
+ function upd(){if(!ro)return;const c=C(),d=done(),r=right();ro.update([["已答",d+" / 8"],["正确",r+" 题",c.b],["正确率",d?Math.round(r/d*100)+"%":"—",d&&r<d?c.g:c.b]])}
+ function dots(){return '<div class="x-dots" aria-label="进度">'+Q.map((q,k)=>{const a=ans[k];return `<i class="${a>=0?(a===q[3]?"ok":"bad"):""}${k===i?" cur":""}"></i>`}).join("")+"</div>"}
+ function fmtT(s){s=Math.round(s);return Math.floor(s/60)+" 分 "+String(s%60).padStart(2,"0")+" 秒"}
+ function reset(){i=0;ans=Q.map(()=>-1);t0=performance.now();t1=0;render();upd()}
+ function render(){if(!box)return;box.scrollTop=0;
+  if(i>=Q.length){const wr=Q.map((q,k)=>ans[k]!==q[3]?q[5]:0).filter(Boolean),u=[...new Set(wr)];
+   box.innerHTML=`<div class="x-qw">${dots()}<p class="x-score">${right()}/8</p><p class="x-sub">用时 <span class="x-b">${fmtT((t1-t0)/1000)}</span></p>`+
+    (u.length?'<p class="x-g" style="margin:0 0 8px">错题章节（点击复习）</p><div class="x-wr"></div>':'<p class="x-sub x-b">全部正确！</p>')+'<div class="x-row"></div></div>';
+   const w=box.querySelector(".x-wr");u.forEach(n=>{const b=button("回到第 "+n+" 章 · "+CH[n-1].n,()=>{location.hash="#"+n});w&&w.append(b)});
+   box.querySelector(".x-row").append(button("重做",reset,true));return}
+  const q=Q[i],a=ans[i],L="ABCD";
+  box.innerHTML=`<div class="x-qw">${dots()}<p class="x-no">第 ${i+1} / 8 题</p>`+(q[0]?`<blockquote class="x-mat">${q[0]}</blockquote>`:"")+`<p class="x-stem">${q[1]}</p><div role="group">`+
+   q[2].map((o,k)=>{const cl=a<0?"":k===q[3]?"ok":k===a?"bad":"";return `<button class="x-op ${cl}" data-k="${k}"${a>=0?" disabled":""}><b>${L[k]}</b><span>${o}</span>${cl==="ok"?"<em>✓</em>":cl==="bad"?"<em>✗</em>":""}</button>`}).join("")+"</div>"+
+   (a>=0?`<div class="x-ex"><span class="x-g">解析</span> <span class="${a===q[3]?"x-b":"x-r"}">${a===q[3]?"回答正确。":"正确答案 "+L[q[3]]+"。"}</span>${q[4]}</div><div class="x-row"></div>`:"")+"</div>";
+  box.querySelectorAll(".x-op").forEach(b=>{b.onclick=()=>{if(ans[i]>=0)return;ans[i]=+b.dataset.k;render();upd()}});
+  if(a>=0){const r=box.querySelector(".x-row");r.append(button("回到第 "+q[5]+" 章",()=>{location.hash="#"+q[5]}),button(i<Q.length-1?"下一题":"查看结果",()=>{i++;if(i>=Q.length)t1=performance.now();render()},true))}}
+ return{
+  text:"8 道选考风格单选，覆盖本实验 1–8 章，答完可跳回对应章节复习。",
+  points:["一题一屏，点选即判，附解析","错题可一键跳回对应章节复习","结束页显示得分、用时与错题章节"],
+  gk:'<p style="margin:0;font-size:14px">浙江选考 资本主义制度的确立</p>',
+  mount(c,r){if(!document.getElementById("x-qz-css")){const s=el("style");s.id="x-qz-css";s.textContent=CSS;document.head.append(s)}
+   const host=$("cwrap");if(getComputedStyle(host).position==="static")host.style.position="relative";
+   box=el("div","x-qz");host.append(box);ro=readout();r.append(ro);reset()},
+  unmount(){box&&box.remove();box=null;ro=null},
+  draw(){}};
+})();
+const $=id=>document.getElementById(id),pad=i=>String(i+1).padStart(2,"0");
+let cur=0,mod=null,W=0,H=0,DPR=1;
+const cv=$("cv"),ctx=cv.getContext("2d");
+/* ---------- theme ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function isDark(){return document.documentElement.classList.contains("dark")}
+function theme(){return isDark()
+ ?{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e2a336",teal:"#2ec4b6",purple:"#b197fc",goldText:"#f0b847",redText:"#ff7b72"}
+ :{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.05)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"}}
+function setDark(d){document.documentElement.classList.toggle("dark",d);store.set("geming-dark",d?"1":"0");$("dark").textContent=$("mdark").textContent=d?"浅色":"深色"}
+setDark(store.get("geming-dark")==="1");
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||fmtNum;const w=el("div","sl"),l=el("label"),o=el("output"),i=el("input");
+ l.append(document.createTextNode(label),o);i.type="range";Object.assign(i,{min,max,step,value:val});i.setAttribute("aria-label",label);o.textContent=fmt(+val);
+ i.oninput=()=>{o.textContent=fmt(+i.value);onchange&&onchange(+i.value)};w.append(l,i);
+ w.set=v=>{i.value=v;o.textContent=fmt(+v)};return w}
+function chips(options,val,onchange){const w=el("div","chips");const bs=options.map(op=>{const o=typeof op==="object"?op:{label:op,value:op};const b=el("button",o.value===val?"on":"",o.label);
+ b.onclick=()=>{bs.forEach(x=>x.classList.remove("on"));b.classList.add("on");onchange&&onchange(o.value)};w.append(b);return b});return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" primary":""),label);b.onclick=onclick;return b}
+function toggle(label,val,onchange){const b=el("button","tg"+(val?" on":""),"<span>"+label+"</span><i></i>");b.setAttribute("role","switch");b.setAttribute("aria-checked",!!val);
+ b.onclick=()=>{val=!val;b.classList.toggle("on",val);b.setAttribute("aria-checked",val);onchange&&onchange(val)};return b}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML=rs.map(r=>`<dt>${r[0]}</dt><dd style="${r[2]?"color:"+r[2]:""}">${r[1]}</dd>`).join("")};d.update(rows||[]);return d}
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){if(!isFinite(v))return v>0?"∞":v<0?"−∞":"—";const e=1e-6,s=v<0?"−":"",a=Math.abs(v);
+ if(Math.abs(a-Math.round(a))<e)return(Math.round(a)===0?"":s)+Math.round(a);
+ for(let d=2;d<=12;d++){const n=a*d;if(Math.abs(n-Math.round(n))<e)return s+Math.round(n)+"/"+d}
+ for(const r of[2,3,5,6,7,10,11,13,14,15]){const q=Math.sqrt(r);for(let d=1;d<=6;d++){const k=a*d/q;if(Math.abs(k-Math.round(k))<e&&Math.round(k)>0){const K=Math.round(k);return s+(K===1?"":K)+"√"+r+(d>1?"/"+d:"")}}}
+ return s+a.toFixed(2)}
+function drawAxes(ctx,box,xr,yr,opts){opts=Object.assign({equal:true,grid:true,ticks:true,step:1,labels:true},opts);const T=theme();
+ let[x0,x1]=xr,[y0,y1]=yr,sx=box.w/(x1-x0),sy=box.h/(y1-y0);
+ if(opts.equal){const s=Math.min(sx,sy),cx=(x0+x1)/2,cy=(y0+y1)/2;sx=sy=s;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)*sx,Y=y=>box.y+box.h-(y-y0)*sy,invX=p=>x0+(p-box.x)/sx,invY=p=>y0+(box.y+box.h-p)/sy;
+ let st=opts.step;while(st*sx<22)st*=2;
+ ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();ctx.lineWidth=1;
+ if(opts.grid){ctx.strokeStyle=T.grid;ctx.beginPath();for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st){ctx.moveTo(X(x),box.y);ctx.lineTo(X(x),box.y+box.h)}for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st){ctx.moveTo(box.x,Y(y));ctx.lineTo(box.x+box.w,Y(y))}ctx.stroke()}
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,Y(0));ctx.lineTo(box.x+box.w,Y(0));ctx.moveTo(X(0),box.y);ctx.lineTo(X(0),box.y+box.h);ctx.stroke();
+ if(opts.labels){ctx.fillStyle=T.sub;ctx.font="12px ui-monospace,Menlo,monospace";ctx.textAlign="center";ctx.textBaseline="top";
+  for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st)if(Math.abs(x)>1e-9)ctx.fillText(fmtNum(x),X(x),Y(0)+4);
+  ctx.textAlign="right";ctx.textBaseline="middle";for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st)if(Math.abs(y)>1e-9)ctx.fillText(fmtNum(y),X(0)-5,Y(y));
+  ctx.textBaseline="top";ctx.fillText("O",X(0)-4,Y(0)+4);ctx.font="italic 13px "+getComputedStyle(document.body).fontFamily;ctx.fillStyle=T.fg;
+  ctx.fillText("x",box.x+box.w-4,Y(0)+4);ctx.textAlign="left";ctx.fillText("y",X(0)+6,box.y+4)}
+ ctx.restore();return{X,Y,invX,invY,s:sx,box,xr:[x0,x1],yr:[y0,y1]}}
+function drawLine(ctx,map,A,B,C,color,width,dashed){if(Math.abs(A)<1e-12&&Math.abs(B)<1e-12)return;const[x0,x1]=map.xr,[y0,y1]=map.yr,b=map.box;let p,q;
+ if(Math.abs(B)>=Math.abs(A)){p=[x0,-(A*x0+C)/B];q=[x1,-(A*x1+C)/B]}else{p=[-(B*y0+C)/A,y0];q=[-(B*y1+C)/A,y1]}
+ ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.setLineDash(dashed?[6,5]:[]);
+ ctx.beginPath();ctx.moveTo(map.X(p[0]),map.Y(p[1]));ctx.lineTo(map.X(q[0]),map.Y(q[1]));ctx.stroke();ctx.restore()}
+function drawCircle(ctx,map,cx,cy,r,color,width,fill){const b=map.box;ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w,b.h);ctx.clip();ctx.beginPath();ctx.arc(map.X(cx),map.Y(cy),Math.max(0,r*map.s),0,Math.PI*2);
+ if(fill){ctx.fillStyle=fill;ctx.fill()}if(width!==0){ctx.strokeStyle=color||theme().blue;ctx.lineWidth=width||2;ctx.stroke()}ctx.restore()}
+function dragPoints(points,map,snap){const M=()=>typeof map==="function"?map():map;const h=function(e,type,x,y){const m=M();if(!m)return false;
+ if(type==="down"){const R=e&&e.pointerType==="touch"?22:12;let best=-1,bd=R;points.forEach((p,i)=>{if(p.fixed)return;const d=Math.hypot(m.X(p.x)-x,m.Y(p.y)-y);if(d<=bd){bd=d;best=i}});h.active=best;return best>=0}
+ if(type==="move"&&h.active>=0){const p=points[h.active];let nx=m.invX(x),ny=m.invY(y);if(snap){nx=Math.round(nx/snap)*snap;ny=Math.round(ny/snap)*snap}
+  nx=Math.min(m.xr[1],Math.max(m.xr[0],nx));ny=Math.min(m.yr[1],Math.max(m.yr[0],ny));p.x=+nx.toFixed(6);p.y=+ny.toFixed(6);p.onmove&&p.onmove(p);h.onmove&&h.onmove(p,h.active);return true}
+ if(type==="up"){const was=h.active>=0;h.active=-1;return was}return false};h.active=-1;return h}
+function wrapText(ctx,text,x,y,maxW,lh){let line="";for(const ch of String(text)){if(ch==="\n"){ctx.fillText(line,x,y);line="";y+=lh;continue}
+ const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);line=ch;y+=lh}else line=t}if(line)ctx.fillText(line,x,y);return y+lh}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+/* ---------- placeholder ---------- */
+function drawSoon(ctx,w,h){const T=theme(),cw=Math.min(320,w-40),ch=150,x=(w-cw)/2,y=(h-ch)/2;
+ ctx.save();ctx.shadowColor="rgba(0,0,0,.08)";ctx.shadowBlur=24;ctx.shadowOffsetY=4;ctx.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(ctx,x,y,cw,ch,22);ctx.fill();ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.blue;ctx.font="13px ui-monospace,Menlo,monospace";ctx.fillText("CHAPTER "+pad(cur),w/2,y+38);
+ ctx.fillStyle=T.fg;ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText("即将上线",w/2,y+72);
+ ctx.fillStyle=T.sub;ctx.font="14px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText(CH[cur].n,w/2,y+108)}
+/* ---------- canvas loop ---------- */
+function resize(){const r=$("cwrap").getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);frame(performance.now())}
+function frame(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H);
+ try{mod&&mod.draw?mod.draw(ctx,W,H,t/1000):drawSoon(ctx,W,H)}catch(err){console.error(err)}}
+function loop(t){frame(t);requestAnimationFrame(loop)}
+new ResizeObserver(resize).observe($("cwrap"));window.addEventListener("resize",resize);
+function ptr(type){return e=>{if(!mod||!mod.pointer)return;const r=cv.getBoundingClientRect();
+ if(type==="down")try{cv.setPointerCapture(e.pointerId)}catch(_){}mod.pointer(e,type,e.clientX-r.left,e.clientY-r.top)}}
+cv.addEventListener("pointerdown",ptr("down"));cv.addEventListener("pointermove",ptr("move"));cv.addEventListener("pointerup",ptr("up"));cv.addEventListener("pointercancel",ptr("up"));
+/* ---------- chapters ---------- */
+function list(host,cls){host.innerHTML="";CH.forEach((c,i)=>{const b=el("button",cls,`<span class="mono">${pad(i)}</span><span>${c.n}</span>`);b.onclick=()=>{go(i);closeSheet()};host.append(b)})}
+list($("toc"),"");list($("slist"),"it");
+$("segs").innerHTML=CH.map(()=>"<i></i>").join("");
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod.unmount()}catch(e){console.error(e)}
+ cur=i;const c=CH[i],m=c.ready&&MODS[i]?MODS[i]:null;mod=m;
+ $("ctitle").textContent=pad(i)+"  "+c.n;$("cbook").textContent=c.book;$("ctext").innerHTML=m?m.text||"":"本章交互实验即将上线，敬请期待。";
+ const ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";$("pts").innerHTML="";$("gk").innerHTML="";
+ if(m){m.mount&&m.mount(ctrl,read);$("pts").innerHTML=m.points?"<ul>"+[].concat(m.points).map(p=>"<li>"+p+"</li>").join("")+"</ul>":"";$("gk").innerHTML=m.gk||""}
+ $("ctrlSec").hidden=!ctrl.children.length;$("readSec").hidden=!read.children.length;$("ptSec").hidden=!$("pts").innerHTML;$("gkSec").hidden=!$("gk").innerHTML;
+ if(!m){$("ctrlSec").hidden=false;ctrl.innerHTML='<p class="soon">本章控件即将上线。</p>'}
+ document.querySelectorAll("#toc button,#slist button").forEach(b=>{const on=+b.querySelector(".mono").textContent-1===i;b.classList.toggle("on",on);on?b.setAttribute("aria-current","true"):b.removeAttribute("aria-current")});
+ document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
+ $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+/* ---------- controls ---------- */
+$("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
+$("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("explain").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+function openSheet(){$("mask").hidden=$("sheet").hidden=false;const on=$("slist").querySelector(".on");on&&on.scrollIntoView({block:"nearest"})}
+function closeSheet(){$("mask").hidden=$("sheet").hidden=true}
+$("chbtn").onclick=openSheet;$("mask").onclick=closeSheet;
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"&&t.type!=="range"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable))return;
+ if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+go(fromHash());requestAnimationFrame(loop);
+</script>
+</body>
+</html>
