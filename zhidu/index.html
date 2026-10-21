@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><script src="../lib/labfix-2d.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>制度变迁 · 格物实验室</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--sel:#e8f1fc;--selfg:#0058b0;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+--sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
+html.dark{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--sel:rgba(41,151,255,.18);--selfg:#6cb6ff;--btn2:#2c2c2e;--bar:rgba(0,0,0,.72);--shadow:0 0 0 1px rgba(255,255,255,.08)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
+.back b{font-size:22px;font-weight:400;margin-right:4px}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prog{display:flex;align-items:center;gap:10px;margin-left:auto}
+.segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
+.count{font:13px var(--mono);color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.pill{border:0;border-radius:980px;padding:0 16px;min-height:36px;background:var(--btn2);font-size:14px;white-space:nowrap}
+.pill.primary{background:var(--blue);color:#fff}
+html.dark .pill.primary,html.dark .chips button.on{color:#000}
+.pill:disabled{opacity:.4;cursor:default}
+.chbtn{margin-left:auto;min-height:44px}
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr 340px;height:calc(100vh - 56px)}
+.toc{border-right:1px solid var(--line);overflow:auto;padding:12px 10px}
+.toc button,.sheet button.it{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px;align-items:center}
+.toc button:hover{background:var(--btn2)}
+.toc button.on,.sheet button.it.on{background:var(--sel);color:var(--selfg);font-weight:600}
+.toc .mono,.sheet .mono{font-size:13px;color:var(--sub)}.on .mono{color:var(--selfg)!important}
+.stage{display:flex;flex-direction:column;gap:12px;padding:16px;min-width:0;min-height:0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 20px}
+.explain{flex:none}
+.ehead{display:flex;align-items:center;gap:10px}
+.ehead h2{font-size:20px;flex:1;min-width:0}
+.book{font-size:13px;color:var(--sub);margin:2px 0 0}
+.etext{margin:8px 0 0;max-height:4.9em;overflow:auto;line-height:1.6}
+.explain.collapsed .etext,.explain.collapsed .book{display:none}
+.fold{border:0;background:var(--btn2);border-radius:980px;padding:4px 12px;font-size:13px;color:var(--sub);min-height:32px}
+.cwrap{flex:1;min-height:0;position:relative;border-radius:22px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.panel{border-left:1px solid var(--line);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:none}
+.sec h3{font-size:13px;color:var(--sub);font-weight:600;letter-spacing:0;margin:0 0 8px}
+.ctrls{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;font-size:14px}.sl output{font-family:var(--mono);color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:0;border-radius:980px;padding:0 14px;min-height:34px;background:var(--btn2);font-size:14px}.chips button.on{background:var(--blue);color:#fff}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;min-height:36px;border:0;background:none;padding:0;width:100%}
+.tg i{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.tg.on i{background:#34c759}.tg.on i::after{left:20px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.ro dt{color:var(--sub)}.ro dd{margin:0;text-align:right;font-family:var(--mono)}
+.points ul{margin:0;padding-left:18px}.points li{margin:4px 0}
+.gk a{color:var(--blue);text-decoration:none;font-size:14px}
+.mdark{display:none}
+.soon{color:var(--sub);font-size:14px;margin:0}
+/* sheet */
+.mask{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:20px 20px 0 0;max-height:70vh;overflow:auto;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.bbar{display:none}
+/* tablet */
+@media (max-width:1023px){
+ .prog{display:none}.app{display:block;height:auto}.toc{display:none}
+ .stage{padding:12px}.cwrap{order:-1;flex:none;height:56vh}
+ .explain .fold{display:none}.explain.collapsed .etext,.explain.collapsed .book{display:block}.etext{max-height:none;overflow:visible}
+ .panel{border:0;padding:0 12px 24px}
+}
+@media (min-width:1024px){.chbtn{display:none}}
+/* phone */
+@media (max-width:767px){
+ .top{height:calc(52px + env(safe-area-inset-top));gap:6px;padding-left:4px;padding-right:8px}
+ .back{width:44px;justify-content:center}.back span{display:none}.back b{margin:0}
+ .tname{flex:1;font-size:16px}.tbtns{display:none}.chbtn{margin-left:0;padding:0 12px}
+ .stage{padding:0;gap:0}.cwrap{height:52vh;border-radius:0;box-shadow:none;border-bottom:1px solid var(--line)}
+ .explain{background:none;box-shadow:none;padding:16px 16px 4px}.ehead h2{font-size:20px}.etext{font-size:16px;line-height:1.7}
+ .panel{padding:0 16px calc(84px + env(safe-area-inset-bottom))}
+ input[type=range]{height:44px}.chips button,.tg{min-height:44px}
+ .mdark{display:block;align-self:flex-start;min-height:44px}
+ .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+ .bbar .pill{flex:1;min-height:44px}
+}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
+  <div class="tname">制度变迁 · ZhiduLab</div>
+  <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 09</span></div>
+  <div class="tbtns">
+    <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
+    <button class="pill" id="dark">深色</button><button class="pill" id="fs">全屏</button>
+  </div>
+  <button class="pill chbtn" id="chbtn">章节 <span class="mono" id="chnum">01/09</span></button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="ehead"><h2 id="ctitle"></h2><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="cbook"></p>
+      <p class="etext" id="ctext"></p>
+    </section>
+    <div class="cwrap" id="cwrap"><canvas id="cv"></canvas></div>
+  </main>
+  <aside class="panel">
+    <section class="card sec" id="ctrlSec"><h3>控件</h3><div class="ctrls" id="ctrl"></div></section>
+    <section class="card sec" id="readSec"><h3>读数</h3><div id="read"></div></section>
+    <section class="card sec points" id="ptSec"><h3>要点</h3><div id="pts"></div></section>
+    <section class="card sec gk" id="gkSec"><h3>高考链接</h3><div id="gk"></div></section>
+    <button class="pill mdark" id="mdark">深色</button>
+  </aside>
+</div>
+<div class="mask" id="mask" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="章节列表"><div class="grab"></div><div id="slist"></div></div>
+<div class="bbar"><button class="pill" id="bprev">上一章</button><button class="pill primary" id="bnext">下一章</button></div>
+<script>
+const CH=[
+{n:"秦：皇帝制度与郡县制",book:"统编版《中外历史纲要（上）》第 3 课 · 选择性必修1 第 1 课",ready:false},
+{n:"汉：中外朝与郡国并行",book:"纲要（上）第 4 课 · 选择性必修1 第 1 课",ready:false},
+{n:"隋唐：三省六部与科举",book:"纲要（上）第 6–7 课 · 选择性必修1 第 1、7 课",ready:false},
+{n:"宋：分割相权与强干弱枝",book:"纲要（上）第 9 课",ready:false},
+{n:"元：中书省与行省制度",book:"纲要（上）第 10 课",ready:false},
+{n:"明：废丞相与内阁",book:"纲要（上）第 13 课",ready:false},
+{n:"清：军机处与边疆治理",book:"纲要（上）第 13 课",ready:false},
+{n:"演变总览：君权与相权、中央与地方",book:"选择性必修1 第 1 单元",ready:false},
+{n:"随堂检测",book:"浙江选考 · 古代政治制度",ready:false}];
+const MODS=[];// MODS[i]={text,points,gk,mount(ctrlEl,readEl),draw(ctx,w,h,t),pointer(e,type,x,y),unmount()}
+CH[0].ready=true;
+MODS[0]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",N={};
+ function d(id,name,tag,duty,app,col,part){N[id]={id,name,tag,duty,app,col,part}}
+ d("hd","皇帝","皇权至上","至高无上，独揽全国军政大权","皇位世袭","goldText","中央");
+ d("cx","丞相","掌行政","辅佐皇帝处理全国政务","皇帝任免","blue","中央");
+ d("tw","太尉","掌军事","掌管全国军事","皇帝任免","red","中央");
+ d("ys","御史大夫","掌监察","掌监察百官，兼副丞相","皇帝任免","purple","中央");
+ [["fc","奉常","掌宗庙礼仪"],["lz","郎中令","掌宫殿警卫"],["ww","卫尉","掌宫门屯卫"],["tp","太仆","掌皇帝车马"],["tw2","廷尉","掌司法"],["dk","典客","掌民族事务与外交"],["zz","宗正","掌皇族事务"],["zs","治粟内史","掌财政（租税钱谷）"],["sf","少府","掌皇室财政（山海池泽之税）"]].forEach(q=>d(q[0],q[1],"",q[2],"皇帝任免","blue","中央 · 九卿"));
+ d("js","郡守","最高长官","一郡最高行政长官，由皇帝任免","皇帝任免","teal","地方 · 郡");
+ d("jw","郡尉","掌军事","掌一郡军事","皇帝任免","teal","地方 · 郡");
+ d("jj","郡监","掌监察","掌一郡监察（监御史）","皇帝任免","teal","地方 · 郡");
+ d("xl","县令/县长","万户以上称令","治理一县，万户以上称令，以下称长","皇帝任免","teal","地方 · 县");
+ d("xli","乡里","三老·啬夫·游徼","基层组织：三老掌教化，啬夫掌赋税诉讼，游徼掌治安","郡县任用乡官","teal","地方 · 乡里");
+ d("zw","周王","天下共主","天下共主，分封诸侯，诸侯须服从、纳贡、出兵","世袭","goldText","西周 · 分封制");
+ d("zh","诸侯","世袭","在封国内世袭统治，再分封卿大夫","世袭","red","西周 · 分封制");
+ d("qd","卿大夫","世袭","受诸侯分封，世袭采邑","世袭","red","西周 · 分封制");
+ d("shi","士","世袭","贵族最低一级，受卿大夫赏赐食田","世袭","red","西周 · 分封制");
+ const QING=["fc","lz","ww","tp","tw2","dk","zz","zs","sf"];
+ let part="all",cmp=false,sel="cx",rects=[],R={},ro=null,last="";
+ const tc=(T,k)=>k==="goldText"?T.goldText:k==="blue"?T.blue:k==="red"?T.redText:T.fg;
+ function card(c,T,r){const n=N[r.id],col=T[n.col],on=sel===r.id;c.save();rrect(c,r.x,r.y,r.w,r.h,Math.min(10,r.h/3));c.fillStyle=T.bg;c.fill();
+  if(on){c.globalAlpha=.14;c.fillStyle=col;c.fill();c.globalAlpha=1}c.strokeStyle=col;c.lineWidth=on?3:n.col==="goldText"?2.2:1.3;c.stroke();
+  const two=n.tag&&r.h>=40;c.fillStyle=T.fg;c.font=(r.small?"":"600 ")+(r.small?12:14)+"px "+SANS;c.textAlign="center";c.textBaseline="middle";
+  c.fillText(n.name,r.x+r.w/2,r.y+r.h/2-(two?8:0));if(two){c.font="12px "+SANS;c.fillStyle=tc(T,n.col);c.fillText(n.tag,r.x+r.w/2,r.y+r.h/2+10)}
+  c.restore();rects.push(r);R[r.id]=r}
+ function line(c,T,pts,dash){c.save();c.strokeStyle=T.axis;c.lineWidth=1;c.setLineDash(dash?[4,4]:[]);c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.stroke();c.restore()}
+ function link(c,T,p,ks){const cs=ks.map(k=>R[k]).filter(Boolean);if(!p||!cs.length)return;const top=Math.min(...cs.map(r=>r.y)),my=(p.y+p.h+top)/2,px=p.x+p.w/2;
+  line(c,T,[[px,p.y+p.h],[px,my]]);const xs=cs.map(r=>r.x+r.w/2);line(c,T,[[Math.min(px,...xs),my],[Math.max(px,...xs),my]]);cs.forEach(r=>line(c,T,[[r.x+r.w/2,my],[r.x+r.w/2,r.y]]))}
+ function rowsFor(narrow){const r0=[["hd"]],c=[["cx","tw","ys"]].concat(narrow?[QING.slice(0,5).map(x=>x),QING.slice(5)]:[QING]),l=[["jw","js","jj"],["xl"],["xli"]];
+  return part==="c"?r0.concat(c):part==="l"?r0.concat(l):r0.concat(c,l)}
+ function tree(c,T,b){const narrow=b.w<560,rows=rowsFor(narrow),rh=b.h/rows.length,g=narrow?6:10;
+  const pos=[];rows.forEach((ids,i)=>{const small=ids.length>3,h=Math.min(small?34:48,rh*.62),max=small?96:150,w=Math.min(max,(b.w-24-g*(ids.length-1))/ids.length),tot=w*ids.length+g*(ids.length-1);
+   ids.forEach((id,k)=>pos.push({id,small,x:b.x+(b.w-tot)/2+k*(w+g),y:b.y+i*rh+(rh-h)/2,w,h}))});
+  R={};pos.forEach(p=>R[p.id]=p);
+  link(c,T,R.hd,["cx","tw","ys"]);link(c,T,R.cx,QING.filter(k=>R[k]&&R.fc&&Math.abs(R[k].y-R.fc.y)<1));if(R.zz&&R.fc&&R.zz.y!==R.fc.y)link(c,T,R.cx,QING.slice(5));
+  if(R.js){if(part==="l")link(c,T,R.hd,["jw","js","jj"]);else{const xr=b.x+b.w-6,hy=R.hd.y+R.hd.h/2,top=R.js.y,my=top-Math.min(14,(rh-R.js.h)/2);
+    line(c,T,[[R.hd.x+R.hd.w,hy],[xr,hy],[xr,my],[R.jw.x+R.jw.w/2,my]],true);["jw","js","jj"].forEach(k=>line(c,T,[[R[k].x+R[k].w/2,my],[R[k].x+R[k].w/2,top]],true));
+    c.font="12px "+SANS;c.fillStyle=T.goldText;c.textAlign="right";c.textBaseline="bottom";c.fillText("皇帝任免",xr-4,hy-3);
+    const dy=R.jw.y-(rh-R.jw.h)/2;line(c,T,[[b.x+8,dy],[b.x+b.w-14,dy]],true);c.textAlign="left";c.textBaseline="top";c.fillStyle=T.fg;c.font="600 12px "+SANS;c.fillText("地方",b.x+10,dy+4)}
+   link(c,T,R.js,["xl"]);link(c,T,R.xl,["xli"])}
+  c.font="600 12px "+SANS;c.fillStyle=T.fg;c.textAlign="left";c.textBaseline="top";c.fillText(part==="l"?"中央 → 地方":"中央",b.x+10,b.y+8);
+  pos.forEach(p=>card(c,T,p))}
+ function arrow(c,T,x1,y1,x2,y2){line(c,T,[[x1,y1],[x2,y2]]);const a=Math.atan2(y2-y1,x2-x1);c.save();c.fillStyle=T.axis;c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-7*Math.cos(a-.4),y2-7*Math.sin(a-.4));c.lineTo(x2-7*Math.cos(a+.4),y2-7*Math.sin(a+.4));c.fill();c.restore()}
+ function compare(c,T,b,vert){const ids=["zw","zh","qd","shi"];c.save();c.strokeStyle=T.grid;c.lineWidth=1;c.beginPath();vert?(c.moveTo(b.x+.5,b.y+12),c.lineTo(b.x+.5,b.y+b.h-12)):(c.moveTo(b.x+12,b.y+.5),c.lineTo(b.x+b.w-12,b.y+.5));c.stroke();c.restore();
+  c.font="600 14px "+SANS;c.fillStyle=T.fg;c.textAlign="left";c.textBaseline="top";c.fillText("对比 · 西周分封制",b.x+16,b.y+12);
+  const foot=vert?96:52;let rs;
+  if(vert){const top=b.y+44,ah=b.h-44-foot,ch=Math.min(46,ah/4*.6),cw=Math.min(150,b.w-40),st=ah/4;rs=ids.map((id,i)=>({id,x:b.x+(b.w-cw)/2,y:top+i*st+(st-ch)/2,w:cw,h:ch}))}
+  else{const ah=b.h-40-foot,ch=Math.min(46,ah*.8),g=12,cw=Math.min(130,(b.w-32-g*3)/4),tot=cw*4+g*3;rs=ids.map((id,i)=>({id,x:b.x+(b.w-tot)/2+i*(cw+g),y:b.y+38+(ah-ch)/2,w:cw,h:ch}))}
+  rs.forEach((r,i)=>{if(i){const p=rs[i-1];vert?arrow(c,T,r.x+r.w/2,p.y+p.h+2,r.x+r.w/2,r.y-3):arrow(c,T,p.x+p.w+2,r.y+r.h/2,r.x-3,r.y+r.h/2)}});
+  rs.forEach(r=>card(c,T,r));
+  const fy=b.y+b.h-foot+(vert?8:4),mw=b.w-32;c.textBaseline="top";c.textAlign="left";c.font="600 13px "+SANS;c.fillStyle=T.redText;
+  let y=wrapText(c,"西周：血缘 · 世袭",b.x+16,fy,mw,18);c.fillStyle=T.blue;wrapText(c,"秦：官僚 · 皇帝任免 · 不得世袭",b.x+16,y+(vert?4:0),mw,18)}
+ function rows(T){const n=N[sel];return[["职官",n.name,tc(T,n.col)],["所属",n.part],["职责",n.duty],["任免方式",n.app,/世袭/.test(n.app)?T.redText:/皇帝/.test(n.app)?T.blue:T.fg]]}
+ return{
+  text:"秦统一后，创立<b>皇帝制度</b>，皇权至高无上；中央设<b>三公九卿</b>，丞相、太尉、御史大夫分掌行政、军事、监察，相互牵制，都对皇帝负责；地方全面推行<b>郡县制</b>，郡守、县令由皇帝任免，不得世袭。从此专制主义中央集权制度确立，奠定了此后两千多年政治制度的基本格局。点击结构图中的任一职官看职责。",
+  points:["皇帝制度：「皇帝」称号、皇位世袭、皇权至上","三公分权、相互牵制，九卿分管具体事务","郡县制：官员由中央任免、不得世袭，与分封制根本不同","开创中央集权的基本格局，「百代都行秦政法」"],
+  gk:"浙江选考常以材料考查秦朝中央集权的特点和郡县制与分封制的区别。<br>易错：三公九卿中丞相并非独揽大权，御史大夫兼有副丞相与监察职能；郡县制在战国已出现，秦是「全面推行」。",
+  mount(ctrl,read){ctrl.append(chips([{label:"中央",value:"c"},{label:"地方",value:"l"},{label:"全部",value:"all"}],part,v=>{part=v;last=""}));
+   ctrl.append(toggle("对比分封制",cmp,v=>{cmp=v;last=""}));ro=readout([]);read.append(ro);last=""},
+  draw(c,w,h){const T=theme(),wide=w>=640;rects=[];
+   if(cmp&&wide){const mw=Math.round(w*.66);tree(c,T,{x:0,y:8,w:mw,h:h-16});const keep=R;compare(c,T,{x:mw,y:0,w:w-mw,h},true);R=keep}
+   else if(cmp){const mh=Math.round(h*.6);tree(c,T,{x:0,y:4,w,h:mh-8});const keep=R;compare(c,T,{x:0,y:mh,w,h:h-mh},false);R=keep}
+   else tree(c,T,{x:0,y:8,w,h:h-16});
+   if(ro){const rs=rows(T),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(type!=="down")return false;const r=rects.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h);if(r){sel=r.id;last="";return true}return false},
+  unmount(){ro=null;rects=[]}}})();
+CH[1].ready=true;
+MODS[1]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",N={};
+ function d(id,name,tag,duty,col,part){N[id]={id,name,tag,duty,col,part}}
+ d("hd","皇帝","决策核心","总揽全国军政大权，借中朝亲自决策","goldText","中央");
+ d("dsm","大司马大将军","中朝领袖","统领中朝，参与机要决策，权势常在丞相之上","goldText","中朝（内朝）");
+ d("sz","侍中","皇帝近臣","出入宫禁，侍从左右，备顾问应对","goldText","中朝（内朝）");
+ d("ss","尚书","掌文书章奏","掌管文书奏章，参与机要，权力日重","goldText","中朝（内朝）");
+ d("cx","丞相","外朝之首","统领百官，执行政务；决策权被中朝分割","blue","外朝 · 三公");
+ d("tw","太尉","掌军事","掌管全国军事（武帝时改称大司马）","blue","外朝 · 三公");
+ d("ys","御史大夫","掌监察","掌监察百官，兼副丞相","blue","外朝 · 三公");
+ d("jq","九卿","分管事务","分掌礼仪、司法、财政等具体政务","blue","外朝 · 九卿");
+ d("hd2","皇帝","派遣刺史","前 106 年分全国为十三州部，各派刺史一人","goldText","监察");
+ d("cs","刺史","秩六百石","按「六条问事」巡察郡国，监察郡守、豪强","purple","监察 · 十三州部");
+ d("js","郡守","秩二千石","一郡长官，受刺史监察——以小监大","blue","监察对象");
+ d("tj","地方长官考察推荐","孝廉 · 茂才等","郡国长官考察品行才能，按科目向中央推荐","blue","察举 · 推荐");
+ d("kh","中央考核","策问 · 考察","中央对被举荐者进行考核","blue","察举 · 考核");
+ d("rg","任官","授予官职","考核合格者授官；以德行为主，后期被世家大族把持","blue","察举 · 任官");
+ const G=["J J J 赵2 赵1 燕1 燕2 燕3","J J J 赵3 赵2 齐2 齐1 齐1","J J J 梁2 梁3 齐3 齐2 齐1","J J J 梁1 楚2 楚3 楚2 齐2","J J J 淮南1 淮南2 吴3 吴2 吴1","J J J 淮南3 楚1 吴2 吴1 吴1"].map(r=>r.split(" "));
+ const S=[{y:"汉初 · 前 202",p:"约 40%",d:"郡国并行：郡县与封国并存，王国自置官吏、势力膨胀"},
+  {y:"七国之乱后 · 前 154 平定",p:"约 60%",d:"诸侯王不得治民，王国官吏由中央任命，王国面积变小"},
+  {y:"推恩令 · 前 127",p:"约 85%",d:"汉武帝采纳主父偃建议，诸侯王把封地分给子弟为侯国，侯国归属所在的郡"}];
+ let view="a",stage=0,sel="dsm",rects=[],ro=null,last="",sub=null;
+ const tc=(T,k)=>k==="goldText"?T.goldText:k==="blue"?T.blue:k==="red"?T.redText:T.fg;
+ function card(c,T,r){const n=N[r.id],col=T[n.col],on=sel===r.id;c.save();rrect(c,r.x,r.y,r.w,r.h,Math.min(10,r.h/3));c.fillStyle=T.bg;c.fill();
+  if(on){c.globalAlpha=.14;c.fillStyle=col;c.fill();c.globalAlpha=1}c.strokeStyle=col;c.lineWidth=on?3:n.col==="goldText"?2.2:1.5;c.stroke();
+  const two=n.tag&&r.h>=40,fs=c.measureText&&r.w<n.name.length*14+10?12:14;c.fillStyle=T.fg;c.font="600 "+fs+"px "+SANS;c.textAlign="center";c.textBaseline="middle";
+  c.fillText(n.name,r.x+r.w/2,r.y+r.h/2-(two?8:0));if(two){c.font="12px "+SANS;c.fillStyle=tc(T,n.col);c.fillText(n.tag,r.x+r.w/2,r.y+r.h/2+10)}
+  c.restore();rects.push(r)}
+ function arrow(c,x1,y1,x2,y2,col,lw){c.save();c.strokeStyle=c.fillStyle=col;c.lineWidth=lw||1.2;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+  const a=Math.atan2(y2-y1,x2-x1),k=6+(lw||1.2)*1.5;c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-k*Math.cos(a-.4),y2-k*Math.sin(a-.4));c.lineTo(x2-k*Math.cos(a+.4),y2-k*Math.sin(a+.4));c.fill();c.restore()}
+ function txt(c,s,x,y,col,f,al,bl){c.font=f||"12px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline=bl||"top";c.fillText(s,x,y)}
+ function mapView(c,T,w,h){const s=Math.min((w-32)/8,(h-72)/6),ox=(w-8*s)/2,oy=40,K={};
+  txt(c,"■",16,12,T.blue,"14px "+SANS);txt(c,"郡（中央直辖）",32,13,T.fg);txt(c,"■",130,12,T.goldText,"14px "+SANS);txt(c,"诸侯王国",146,13,T.fg);
+  txt(c,"示意 · 非真实地图",w-16,13,T.redText,"12px "+SANS,"right");
+  G.forEach((row,j)=>row.forEach((tok,i)=>{const x=ox+i*s,y=oy+j*s,k=tok==="J"?0:+tok.slice(-1),nm=tok.slice(0,-1),jun=k===0||(k<3&&stage>=k);
+   c.save();c.fillStyle=jun?T.blue:T.gold;c.globalAlpha=jun?.16:stage===2?.22:stage===1?.5:.62;c.fillRect(x+1.5,y+1.5,s-3,s-3);c.globalAlpha=1;
+   c.strokeStyle=jun?T.blue:T.gold;c.lineWidth=1;c.strokeRect(x+1.5,y+1.5,s-3,s-3);
+   if(stage===2&&k>=2){c.strokeStyle=jun?T.blue:T.gold;c.globalAlpha=.6;c.setLineDash([2,2]);c.beginPath();c.moveTo(x+s/2,y+3);c.lineTo(x+s/2,y+s-3);c.moveTo(x+3,y+s/2);c.lineTo(x+s-3,y+s/2);c.stroke()}
+   c.restore();if(!jun){(K[nm]=K[nm]||[]).push([x+s/2,y+s/2])}}));
+  txt(c,"中央直辖郡",ox+1.5*s,oy+3*s,T.blue,"600 14px "+SANS,"center","middle");
+  Object.keys(K).forEach(nm=>{const p=K[nm],x=p.reduce((a,q)=>a+q[0],0)/p.length,y=p.reduce((a,q)=>a+q[1],0)/p.length;
+   c.save();c.font="600 "+(stage===2?12:14)+"px "+SANS;const tw=c.measureText(nm).width+10;c.fillStyle=T.bg;c.globalAlpha=.85;rrect(c,x-tw/2,y-10,tw,20,6);c.fill();c.restore();
+   txt(c,nm,x,y,stage===2?T.goldText:T.fg,"600 "+(stage===2?12:14)+"px "+SANS,"center","middle")});
+  if(stage===2)txt(c,"虚线小格 = 分出的侯国，归属所在的郡",w/2,oy+6*s+8,T.goldText,"12px "+SANS,"center")}
+ function col(c,T,ids,x,y,w,h){const n=ids.length,ch=Math.min(46,h/n*.72),st=h/n;return ids.map((id,i)=>({id,x,y:y+i*st+(st-ch)/2,w,h:ch}))}
+ function courtView(c,T,w,h){const hd={id:"hd",x:w/2-60,y:12,w:120,h:46},g=Math.max(40,w*.08),cw=(w-32-g)/2,top=hd.y+hd.h+40,bot=h-44,lx=16,rx=16+cw+g;
+  [[lx,T.goldText,"中朝（内朝）· 参与决策"],[rx,T.blue,"外朝 · 执行政务"]].forEach(([x,cl,lab])=>{c.save();c.strokeStyle=cl;c.setLineDash([4,4]);c.lineWidth=1;rrect(c,x,top,cw,bot-top,14);c.stroke();c.restore();
+   txt(c,lab,x+cw/2,top+8,cl,"600 13px "+SANS,"center");arrow(c,hd.x+hd.w/2,hd.y+hd.h,x+cw/2,top-2,T.axis,1)});
+  const inner=Math.min(cw-24,170);col(c,T,["dsm","sz","ss"],lx+(cw-inner)/2,top+30,inner,bot-top-36).concat(col(c,T,["cx","tw","ys","jq"],rx+(cw-inner)/2,top+30,inner,bot-top-36)).concat([hd]).forEach(r=>card(c,T,r));
+  const my=(top+bot)/2;arrow(c,rx-2,my,lx+cw+2,my,T.redText,2.5);
+  txt(c,"决策权：外朝 → 中朝（加强皇权、削弱相权）",w/2,bot+12,T.redText,"600 13px "+SANS,"center")}
+ function flow(c,T,ids,b,vert,cl,lw){const n=ids.length,g=vert?0:14,cw=vert?Math.min(200,b.w-32):Math.min(150,(b.w-32-g*(n-1))/n),ch=Math.min(48,vert?b.h/n*.6:b.h*.7);
+  const rs=ids.map((id,i)=>vert?{id,x:b.x+(b.w-cw)/2,y:b.y+i*b.h/n+(b.h/n-ch)/2,w:cw,h:ch}:{id,x:b.x+(b.w-(cw*n+g*(n-1)))/2+i*(cw+g),y:b.y+(b.h-ch)/2,w:cw,h:ch});
+  rs.forEach((r,i)=>{if(i){const p=rs[i-1];vert?arrow(c,r.x+r.w/2,p.y+p.h+2,r.x+r.w/2,r.y-3,cl,lw):arrow(c,p.x+p.w+2,r.y+r.h/2,r.x-3,r.y+r.h/2,cl,lw)}});rs.forEach(r=>card(c,T,r));return rs}
+ function examView(c,T,w,h){const wide=w>=600,bs=wide?[{x:0,y:0,w:w/2,h},{x:w/2,y:0,w:w/2,h}]:[{x:0,y:0,w,h:h/2},{x:0,y:h/2,w,h:h/2}];
+  c.save();c.strokeStyle=T.grid;c.beginPath();wide?(c.moveTo(w/2+.5,12),c.lineTo(w/2+.5,h-12)):(c.moveTo(12,h/2+.5),c.lineTo(w-12,h/2+.5));c.stroke();c.restore();
+  const[a,b]=bs;txt(c,"监察：十三州部刺史 · 前 106 年",a.x+16,a.y+12,T.fg,"600 14px "+SANS);txt(c,"选官：察举制",b.x+16,b.y+12,T.fg,"600 14px "+SANS);
+  const fa={x:a.x,y:a.y+38,w:a.w,h:a.h-80},fb={x:b.x,y:b.y+38,w:b.w,h:b.h-80};
+  const ra=flow(c,T,["hd2","cs","js"],fa,wide,T.purple,2);
+  if(wide)txt(c,"监察",ra[1].x+ra[1].w+8,(ra[0].y+ra[0].h+ra[1].y)/2,T.fg,"12px "+SANS,"left","middle"),txt(c,"监察",ra[2].x+ra[2].w+8,(ra[1].y+ra[1].h+ra[2].y)/2,T.fg,"12px "+SANS,"left","middle");
+  txt(c,"「以小监大」：六百石刺史监察二千石郡守 · 六条问事",a.x+a.w/2,a.y+a.h-30,T.goldText,"600 12px "+SANS,"center");
+  flow(c,T,["tj","kh","rg"],fb,wide,T.axis,1.2);
+  txt(c,"以德行为主，后期被世家大族把持",b.x+b.w/2,b.y+b.h-30,T.redText,"600 12px "+SANS,"center")}
+ function rows(T){if(view==="a"){const s=S[stage];return[["阶段",s.y,T.goldText],["中央直辖比例",s.p+"（示意）",T.blue],["说明",s.d]]}
+  const n=N[sel];return[["职官 / 环节",n.name,tc(T,n.col)],["所属",n.part],["职责",n.duty]]}
+ function setView(v){view=v;last="";sel=v==="b"?"dsm":"cs";if(!sub)return;sub.innerHTML="";
+  if(v==="a")sub.append(slider("时间",0,2,1,stage,x=>["① 汉初","② 七国之乱后","③ 推恩令"][x],x=>{stage=x;last=""}))}
+ return{
+  text:"汉承秦制，又有调整。汉初实行<b>郡国并行</b>，王国势力膨胀导致<b>七国之乱</b>；汉武帝用<b>推恩令</b>削弱王国，中央集权加强。在中央，汉武帝设<b>中朝</b>分割丞相权力；在地方，设<b>刺史</b>监察郡国；选官上推行<b>察举制</b>。",
+  points:["郡国并行 → 七国之乱 → 推恩令，王国问题基本解决","中外朝：加强皇权、削弱相权","刺史制度：「以小监大」，六条问事","察举制：以德行、才能选官，打破贵族世袭，后被豪族把持"],
+  gk:"浙江选考常考推恩令、刺史制度对加强中央集权的作用，中朝的设置意在削弱相权。<br>易错：推恩令针对诸侯王国，不是针对郡县；察举制 ≠ 科举制（科举始于隋）。",
+  mount(ctrl,read){ctrl.append(chips([{label:"郡国并行",value:"a"},{label:"中外朝",value:"b"},{label:"监察与选官",value:"c"}],view,setView));
+   sub=el("div");ctrl.append(sub);setView(view);ro=readout([]);read.append(ro)},
+  draw(c,w,h){const T=theme();rects=[];view==="a"?mapView(c,T,w,h):view==="b"?courtView(c,T,w,h):examView(c,T,w,h);
+   if(ro){const rs=rows(T),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(type!=="down"||view==="a")return false;const r=rects.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h);if(r){sel=r.id;last="";return true}return false},
+  unmount(){ro=null;sub=null;rects=[]}}})();
+CH[2].ready=true;
+MODS[2]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",N={},ST=0.9;
+ function d(id,name,tag,duty,col){N[id]={id,name,tag,duty,col}}
+ d("hd","皇帝","最高决策","最高决策者，诏令以皇帝名义发出","goldText");
+ d("zs","中书省","草拟诏令","秉承皇帝旨意，草拟诏令（出令）","blue");
+ d("mx","门下省","审核 · 封驳","审核中书省草拟的诏令，不合适可「封驳」退回重拟","purple");
+ d("ss","尚书省","执行","执行诏令，下辖六部分掌具体政务","teal");
+ [["lb","吏部","官吏任免考核"],["hb","户部","户籍财政"],["lib","礼部","礼仪、科举"],["bb","兵部","军事"],["xb","刑部","司法"],["gb","工部","工程"]].forEach(q=>d(q[0],q[1],q[2],"尚书省下属，掌"+q[2],"teal"));
+ d("zst","政事堂","三省长官议事","三省长官集体议事之处：宰相集体议政，相权一分为三","goldText");
+ d("cj","察举制","汉 · 地方推荐","地方推荐，重德行","blue");
+ d("jp","九品中正制","魏晋 · 门第品级","中正官评定门第品级，「上品无寒门，下品无势族」","redText");
+ d("kj","科举制","隋唐 · 考试取士","分科考试、自由报考、以考试成绩取士","blue");
+ const TL=[["t1","隋文帝","分科考试","隋文帝开创分科考试选官"],["t2","隋炀帝","设进士科","隋炀帝设进士科，标志科举制正式诞生"],["t3","唐太宗","扩国子监","唐太宗扩充国子监，进士、明经为主要科目"],["t4","武则天","殿试 · 武举","武则天首创殿试和武举"],["t5","唐玄宗","诗赋取士","唐玄宗时以诗赋取士"]];
+ TL.forEach(q=>d(q[0],q[1],q[2],q[3],"blue"));
+ const DEP=["lb","hb","lib","bb","xb","gb"];
+ let view="a",sel="zs",rects=[],R={},G={},ro=null,last="",sub=null,veto=false,anim=null,lit=0,act=null;
+ const tc=(T,k)=>k==="goldText"||k==="blue"||k==="redText"?T[k]:T.fg,now=()=>performance.now()/1000;
+ function card(c,T,r){const n=N[r.id],col=T[n.col],on=sel===r.id;c.save();rrect(c,r.x,r.y,r.w,r.h,Math.min(10,r.h/3));c.fillStyle=T.bg;c.fill();
+  if(on){c.globalAlpha=.14;c.fillStyle=col;c.fill();c.globalAlpha=1}if(act===r.id){c.shadowColor=T.gold;c.shadowBlur=14}c.strokeStyle=col;c.lineWidth=on||act===r.id?3:n.col==="goldText"?2.2:1.5;c.stroke();c.shadowBlur=0;
+  const two=n.tag&&r.h>=40&&r.w>=n.tag.length*12+6,fs=r.w<n.name.length*14+10?12:14;c.fillStyle=T.fg;c.font="600 "+fs+"px "+SANS;c.textAlign="center";c.textBaseline="middle";
+  c.fillText(n.name,r.x+r.w/2,r.y+r.h/2-(two?8:0));if(two){c.font="12px "+SANS;c.fillStyle=tc(T,n.col);c.fillText(n.tag,r.x+r.w/2,r.y+r.h/2+10)}
+  c.restore();rects.push(r)}
+ function txt(c,s,x,y,col,f,al,bl){c.font=f||"12px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline=bl||"top";c.fillText(s,x,y)}
+ function poly(c,pts,col,lw,dash,head){c.save();c.strokeStyle=c.fillStyle=col;c.lineWidth=lw;c.setLineDash(dash?[5,4]:[]);c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.stroke();
+  if(head){const[a,b]=pts.slice(-2),g=Math.atan2(b[1]-a[1],b[0]-a[0]),k=6+lw*1.5;c.setLineDash([]);c.beginPath();c.moveTo(b[0],b[1]);c.lineTo(b[0]-k*Math.cos(g-.4),b[1]-k*Math.sin(g-.4));c.lineTo(b[0]-k*Math.cos(g+.4),b[1]-k*Math.sin(g+.4));c.fill()}c.restore()}
+ function along(pts,f){const L=[];let tot=0;for(let i=1;i<pts.length;i++){const l=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);L.push(l);tot+=l}
+  let s=f*tot;for(let i=0;i<L.length;i++){if(s<=L[i]||i===L.length-1){const k=L[i]?Math.min(1,s/L[i]):1;return[pts[i][0]+(pts[i+1][0]-pts[i][0])*k,pts[i][1]+(pts[i+1][1]-pts[i][1])*k]}s-=L[i]}return pts[0]}
+ function P(a,b,k){const A=R[a],B=R[b],cx=r=>r.x+r.w/2,cy=r=>r.y+r.h/2;
+  if(a==="hd")return[[A.x,cy(A)],[cx(B),cy(A)],[cx(B),B.y]];
+  if(k)return[[cx(A),A.y+A.h],[cx(A),G.by],[cx(B),G.by],[cx(B),B.y+B.h]];
+  if(a==="ss")return[[cx(A),A.y+A.h],[cx(A),G.my],[cx(B),G.my],[cx(B),B.y]];
+  return[[A.x+A.w,cy(A)],[B.x,cy(B)]]}
+ function issue(){const tg=DEP.includes(sel)?sel:DEP[Math.floor(Math.random()*6)],s=[["hd","zs"],["zs","mx"]];if(veto)s.push(["mx","zs",1],["zs","mx"]);s.push(["mx","ss"],["ss",tg]);anim={s,t0:now(),veto};last=""}
+ function stat(T,t){if(!anim)return["—","未下发",T.fg];const s=anim.s,i=Math.floor((t-anim.t0)/ST),dn=N[s[s.length-1][1]].name;
+  if(i>=s.length)return[dn,"已下达"+dn+"，执行中",T.blue];const[a,b,k]=s[i],second=anim.veto&&i>=3;
+  const st=a==="hd"?"中书省草拟诏令":a==="zs"?(second?"重拟完毕，第二遍送审":"草拟完毕，送门下省审核"):k?"封驳：退回重拟":a==="mx"?(anim.veto?"第二遍审核通过，交尚书省执行":"审核通过，交尚书省执行"):"尚书省下发"+dn;
+  return[N[a].name+" → "+N[b].name,st,k?T.redText:T.fg]}
+ function viewA(c,T,w,h,t){const top=30,rh=(h-top-10)/3,g=Math.max(24,w*.06),cw=Math.min(170,(w-32-2*g)/3),ch=Math.min(54,rh*.55),x0=(w-cw*3-g*2)/2,ry=i=>top+i*rh+(rh-ch)/2;
+  R={hd:{id:"hd",x:x0+cw+g,y:ry(0),w:cw,h:ch},zst:{id:"zst",x:x0+2*(cw+g),y:ry(0),w:cw,h:ch}};
+  ["zs","mx","ss"].forEach((id,i)=>R[id]={id,x:x0+i*(cw+g),y:ry(1),w:cw,h:ch});
+  const dg=w<560?6:10,dw=Math.min(120,(w-24-dg*5)/6),dh=Math.min(50,rh*.55),dx=(w-dw*6-dg*5)/2,dy=top+2*rh+(rh-dh)/2;
+  DEP.forEach((id,i)=>R[id]={id,x:dx+i*(dw+dg),y:dy,w:dw,h:dh});
+  const gap=dy-(R.zs.y+ch);G={by:R.zs.y+ch+gap*.32,my:R.zs.y+ch+gap*.68};
+  txt(c,"中央：三省六部",12,8,T.fg,"600 12px "+SANS);
+  [P("hd","zs"),P("zs","mx"),P("mx","ss")].forEach(p=>poly(c,p,T.axis,1.2,false,true));
+  const sx=R.ss.x+R.ss.w/2,xs=DEP.map(k=>R[k].x+R[k].w/2);poly(c,[[sx,R.ss.y+ch],[sx,G.my]],T.axis,1.2);poly(c,[[xs[0],G.my],[xs[5],G.my]],T.axis,1.2);xs.forEach(x=>poly(c,[[x,G.my],[x,dy]],T.axis,1.2,false,true));
+  if(veto){poly(c,P("mx","zs",1),T.redText,1.8,true,true);txt(c,"封驳：退回重拟",(R.zs.x+R.zs.w+R.mx.x)/2,G.by-3,T.redText,"600 12px "+SANS,"center","bottom")}
+  let pos=null;act=null;
+  if(anim){const s=anim.s,el=(t-anim.t0)/ST,i=Math.floor(el);if(i<s.length){const f=(1-Math.cos(Math.PI*(el-i)))/2;pos=along(P(...s[i]),f);act=f<.5?s[i][0]:s[i][1]}else{const r=R[s[s.length-1][1]];act=r.id;pos=[r.x+r.w/2,r.y+r.h/2]}}
+  Object.values(R).forEach(r=>card(c,T,r));
+  if(pos){c.save();c.shadowColor=T.gold;c.shadowBlur=18;c.fillStyle=T.gold;rrect(c,pos[0]-7,pos[1]-7,14,14,3);c.fill();c.shadowBlur=6;c.fillStyle=T.bg;c.globalAlpha=.7;c.fillRect(pos[0]-2.5,pos[1]-2.5,5,5);c.restore()}}
+ function viewB(c,T,w,h){const ha=h*.55,g=Math.max(28,w*.05),cw=Math.min(230,(w-32-2*g)/3),x0=(w-cw*3-g*2)/2,cy=36,chh=ha-cy-12;
+  txt(c,"选官制度演变",12,8,T.fg,"600 12px "+SANS);
+  ["cj","jp","kj"].forEach((id,i)=>{const n=N[id],x=x0+i*(cw+g),col=T[n.col],on=sel===id;
+   if(i)poly(c,[[x-g+4,cy+chh/2],[x-4,cy+chh/2]],T.axis,1.2,false,true);
+   c.save();rrect(c,x,cy,cw,chh,12);c.fillStyle=T.bg;c.fill();if(on){c.globalAlpha=.12;c.fillStyle=col;c.fill();c.globalAlpha=1}c.strokeStyle=col;c.lineWidth=on||id==="kj"?2.6:1.5;c.stroke();c.restore();
+   txt(c,n.tag.split(" · ")[0],x+10,cy+10,T.goldText,"600 12px "+SANS);txt(c,n.name,x+10,cy+28,T.fg,"600 "+(cw<110?13:15)+"px "+SANS);
+   c.fillStyle=tc(T,n.col);c.font="12px "+SANS;wrapText(c,n.duty,x+10,cy+52,cw-20,17);rects.push({id,x,y:cy,w:cw,h:chh})});
+  const ay=ha+(h-ha)*.55,X=i=>24+(i+.5)*(w-48)/5;txt(c,"科举制的发展",12,ha+4,T.fg,"600 12px "+SANS);
+  txt(c,"隋",(X(0)+X(1))/2,ay-46,T.goldText,"600 12px "+SANS,"center");txt(c,"唐",X(3),ay-46,T.goldText,"600 12px "+SANS,"center");
+  poly(c,[[24,ay],[w-24,ay]],T.axis,1.2);if(lit>1)poly(c,[[X(0),ay],[X(lit-1),ay]],T.blue,3);
+  TL.forEach((q,i)=>{const on=i<lit,x=X(i),key=i===1;c.save();c.beginPath();c.arc(x,ay,9,0,7);c.fillStyle=on?(key?T.gold:T.blue):T.bg;c.fill();c.strokeStyle=on?(key?T.gold:T.blue):T.axis;c.lineWidth=1.5;c.stroke();
+   if(sel===q[0]){c.beginPath();c.arc(x,ay,14,0,7);c.strokeStyle=key?T.gold:T.blue;c.lineWidth=2;c.stroke()}if(on){c.shadowColor=T.blue;c.shadowBlur=10}c.restore();
+   c.save();c.globalAlpha=on?1:.45;txt(c,q[1],x,ay-20,T.fg,"600 13px "+SANS,"center","bottom");txt(c,q[2],x,ay+20,on?(key?T.goldText:T.blue):T.fg,"12px "+SANS,"center");c.restore();
+   if(on)rects.push({id:q[0],x:x-26,y:ay-34,w:52,h:68})})}
+ function rows(T,t){if(view==="a"){const n=N[sel],s=stat(T,t);return[["职官",n.name,tc(T,n.col)],["职责",n.duty],["当前流程环节",s[0]],["本诏令状态",s[1],s[2]]]}
+  const n=N[sel];return[["选中",n.name,tc(T,n.col)],["说明",n.duty],["已点亮节点",lit+" / 5",T.blue]]}
+ function setView(v){view=v;last="";sel=v==="a"?"zs":"kj";if(!sub)return;sub.innerHTML="";
+  if(v==="a")sub.append(button("下发一道诏令",issue,true),toggle("门下封驳",veto,x=>{veto=x}));
+  else sub.append(button("点亮下一个节点",()=>{if(lit<5){sel=TL[lit][0];lit++;last=""}},true),button("重置",()=>{lit=0;sel="kj";last=""}))}
+ return{
+  text:"隋唐确立<b>三省六部制</b>：中书省出令、门下省审核、尚书省执行，分工明确又相互牵制，提高了行政效率，也分割了相权、加强了皇权。选官方面，<b>科举制</b>取代九品中正制，以考试选官，打破门阀垄断，扩大了统治基础。",
+  points:["中书草拟、门下审核、尚书执行","相权一分为三，集体宰相制","六部分掌具体政务，沿用至清","科举制：分科考试、择优录取，扩大官吏来源，提高官员文化素质"],
+  gk:"浙江选考常考三省六部制的特点（分工、制衡、效率）和科举制的影响。<br>易错：科举制开创于隋（进士科是隋炀帝设），不是唐；门下省有「封驳」权，尚书省只负责执行。",
+  mount(ctrl,read){ctrl.append(chips([{label:"三省六部",value:"a"},{label:"选官制度演变",value:"b"}],view,setView));
+   sub=el("div","ctrls");ctrl.append(sub);setView(view);ro=readout([]);read.append(ro)},
+  draw(c,w,h,t){const T=theme();rects=[];view==="a"?viewA(c,T,w,h,t):viewB(c,T,w,h);
+   if(ro){const rs=rows(T,t),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(type!=="down")return false;const r=rects.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h);if(r){sel=r.id;last="";return true}return false},
+  unmount(){ro=null;sub=null;rects=[]}}})();
+CH[3].ready=true;
+MODS[3]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",N={},ST=1.0;
+ function d(id,name,tag,duty,col,tcol){N[id]={id,name,tag,duty,col,tcol:tcol||"fg"}}
+ d("hd","皇帝","总揽大权","行政、军政、财政分归三机构，均直接对皇帝负责","gold","goldText");
+ d("zs","中书门下","政事堂 · 掌民政","宰相「同中书门下平章事」议政之处，只掌行政（民政）","blue","blue");
+ d("cz","参知政事","副相 · 分相权","副宰相，分割宰相的行政权，使宰相不得专权","blue","blue");
+ d("sm","枢密院","掌军政","与中书门下合称「二府」，掌全国军政","red","redText");
+ d("ss","三司","盐铁 · 度支 · 户部","掌财政，长官三司使号「计相」","teal","fg");
+ d("hd2","皇帝","发令出征","调兵、统兵、领兵三权分离，最终集中于皇帝","gold","goldText");
+ d("sm2","枢密院","有调兵权 · 无统兵权","奉皇帝之命调发军队、颁发兵符，但不直接统领军队","red","redText");
+ d("sy","三衙","有统兵权 · 无调兵权","殿前司、侍卫马军司、侍卫步军司，平时管理训练军队","blue","blue");
+ d("lc","率臣","有领兵权","战时由皇帝临时委派的将领领兵出征，战后兵归三衙、将归本职","gold","goldText");
+ d("jj","禁军","精锐 · 集中京城一带","全国精兵编为禁军，大部分驻守京城及其附近——「强干」","blue","blue");
+ d("xj","厢军","地方 · 老弱","地方军，多老弱，主要承担杂役，战斗力弱——「弱枝」","fg","fg");
+ d("zz","知州","文臣担任 · 三年一换","各州长官由文臣担任，三年一换，防止武将专权、地方坐大","blue","blue");
+ d("tp","通判","监督知州","与知州共治一州，监督知州，州府公文须通判副署方能生效","purple","fg");
+ d("zy","转运使","收地方财赋","把地方财赋大部分运往中央（开封），地方无财力割据","teal","fg");
+ d("r1","冗官","官多","一职多官、恩荫入仕，官僚机构臃肿","red","redText");
+ d("r2","冗兵","兵多","募兵养兵，军队数量激增而战斗力低下","red","redText");
+ d("r3","冗费","费多","养官养兵开支浩大，财政长期困难","red","redText");
+ d("r4","积贫积弱","三冗之果","财政困难谓之积贫，对外战争屡败谓之积弱","red","redText");
+ const PIE={tang:[{v:60,lab:"行政（宰相）",col:"blue",al:.85},{v:20,lab:"参与军政",col:"blue",al:.5},{v:20,lab:"参与财政",col:"blue",al:.3}],
+  song:[{v:30,lab:"宰相 · 民政",col:"blue",al:.85},{v:30,lab:"参知政事",col:"blue",al:.4},{v:20,lab:"枢密院 · 军政",col:"red",al:.75},{v:20,lab:"三司 · 财政",col:"teal",al:.75}]};
+ let view="a",era="song",sel="zs",rects=[],R={},ro=null,last="",sub=null,gx=false,seq=null,act=null;
+ const now=()=>performance.now()/1000,tc=(T,k)=>T[k]||T.fg;
+ function txt(c,s,x,y,col,f,al,bl){c.font=f||"12px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline=bl||"top";c.fillText(s,x,y)}
+ function card(c,T,r){const n=N[r.id],col=T[n.col],on=sel===r.id;c.save();rrect(c,r.x,r.y,r.w,r.h,Math.min(10,r.h/3));c.fillStyle=T.bg;c.fill();
+  if(on){c.globalAlpha=.14;c.fillStyle=col;c.fill();c.globalAlpha=1}if(act===r.id){c.shadowColor=T.gold;c.shadowBlur=14}
+  c.strokeStyle=col;c.lineWidth=on||act===r.id?3:n.col==="gold"||n.col==="red"?2.2:1.5;c.stroke();c.shadowBlur=0;
+  const two=n.tag&&r.h>=40&&r.w>=56,fs=r.w<n.name.length*15+10?12:14;c.fillStyle=T.fg;c.font="600 "+fs+"px "+SANS;c.textAlign="center";c.textBaseline="middle";
+  c.fillText(n.name,r.x+r.w/2,r.y+r.h/2-(two?9:0));
+  if(two){c.font=(r.w<n.tag.length*12?11:12)+"px "+SANS;c.fillStyle=tc(T,n.tcol);c.fillText(n.tag,r.x+r.w/2,r.y+r.h/2+11)}
+  c.restore();rects.push(r)}
+ function poly(c,pts,col,lw,dash,head){c.save();c.strokeStyle=c.fillStyle=col;c.lineWidth=lw;c.setLineDash(dash?[5,4]:[]);c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.stroke();
+  if(head){const[a,b]=pts.slice(-2),g=Math.atan2(b[1]-a[1],b[0]-a[0]),k=6+lw*1.5;c.setLineDash([]);c.beginPath();c.moveTo(b[0],b[1]);c.lineTo(b[0]-k*Math.cos(g-.4),b[1]-k*Math.sin(g-.4));c.lineTo(b[0]-k*Math.cos(g+.4),b[1]-k*Math.sin(g+.4));c.fill()}c.restore()}
+ function pie(c,T,cx,cy,r){const segs=PIE[era];let a=-Math.PI/2;
+  segs.forEach(s=>{const e=a+s.v/100*Math.PI*2,m=(a+e)/2;c.save();c.beginPath();c.moveTo(cx,cy);c.arc(cx,cy,r,a,e);c.closePath();
+   c.fillStyle=T[s.col];c.globalAlpha=s.al;c.fill();c.globalAlpha=1;c.strokeStyle=T.bg;c.lineWidth=2;c.stroke();c.restore();
+   const lx=cx+Math.cos(m)*(r+10),ly=cy+Math.sin(m)*(r+10),col=s.col==="blue"?T.blue:s.col==="red"?T.redText:T.fg;
+   txt(c,s.lab,lx,ly,col,"12px "+SANS,Math.cos(m)<-0.1?"right":Math.cos(m)>0.1?"left":"center","middle");a=e});
+  txt(c,"宰相权力 · "+(era==="tang"?"唐":"宋"),cx,cy-r-34,T.fg,"600 13px "+SANS,"center");
+  txt(c,era==="tang"?"三省长官集体为相，掌行政并参与军财":"宰相只剩民政一块，另有参知政事分权",cx,cy+r+22,era==="tang"?T.fg:T.redText,"12px "+SANS,"center")}
+ function viewA(c,T,w,h){const wide=w>=720,mw=wide?Math.round(w*.58):w,mh=wide?h:Math.round(h*.56);
+  txt(c,"中央：二府三司",12,8,T.fg,"600 12px "+SANS);
+  const cw=Math.min(170,(mw-40)/3-10),g=Math.min(28,(mw-40-cw*3)/2),x0=(mw-cw*3-g*2)/2,ch=Math.min(56,mh*.17),ty=34,by=ty+ch+Math.min(70,mh*.2);
+  R={hd:{id:"hd",x:mw/2-cw/2,y:ty,w:cw,h:ch}};["zs","sm","ss"].forEach((id,i)=>R[id]={id,x:x0+i*(cw+g),y:by,w:cw,h:ch});
+  R.cz={id:"cz",x:R.zs.x,y:by+ch+26,w:cw,h:Math.min(44,ch)};
+  const my=(R.hd.y+ch+by)/2;poly(c,[[mw/2,R.hd.y+ch],[mw/2,my]],T.axis,1.2);
+  poly(c,[[R.zs.x+cw/2,my],[R.ss.x+cw/2,my]],T.axis,1.2);["zs","sm","ss"].forEach(k=>poly(c,[[R[k].x+cw/2,my],[R[k].x+cw/2,by]],T.axis,1.2,false,true));
+  poly(c,[[R.zs.x+cw/2,by+ch],[R.cz.x+cw/2,R.cz.y]],T.blue,1.6,true,true);
+  txt(c,"分相权",R.cz.x+cw/2+8,(by+ch+R.cz.y)/2,T.blue,"12px "+SANS,"left","middle");
+  txt(c,"「二府」",(R.zs.x+R.sm.x+cw)/2,by-6,T.goldText,"600 12px "+SANS,"center","bottom");
+  Object.values(R).forEach(r=>card(c,T,r));
+  txt(c,"分割相权，加强皇权",mw/2,Math.min(mh-12,R.cz.y+R.cz.h+18),T.redText,"600 13px "+SANS,"center");
+  const px=wide?mw+(w-mw)/2:w/2,ph=wide?h:h-mh,pr=Math.max(40,Math.min(wide?(w-mw)/2-46:ph/2-56,96));
+  if(wide){c.save();c.strokeStyle=T.grid;c.beginPath();c.moveTo(mw+.5,16);c.lineTo(mw+.5,h-16);c.stroke();c.restore()}
+  pie(c,T,px,(wide?h/2:mh+ph/2)+6,pr)}
+ function viewB(c,T,w,h,t){const ch=Math.min(58,h*.15),cw=Math.min(190,(w-40)/3-8),g=Math.min(26,(w-32-cw*3)/2),x0=(w-cw*3-g*2)/2,ty=42,by=ty+ch+Math.min(72,h*.17);
+  txt(c,"「杯酒释兵权」：宋太祖解除禁军将领兵权，兵权三分",12,8,T.goldText,"600 12px "+SANS);
+  R={hd2:{id:"hd2",x:w/2-cw/2,y:ty,w:cw,h:ch}};["sm2","sy","lc"].forEach((id,i)=>R[id]={id,x:x0+i*(cw+g),y:by,w:cw,h:ch});
+  const my=(ty+ch+by)/2;poly(c,[[w/2,ty+ch],[w/2,my]],T.axis,1.2);poly(c,[[R.sm2.x+cw/2,my],[R.lc.x+cw/2,my]],T.axis,1.2);
+  ["sm2","sy","lc"].forEach(k=>poly(c,[[R[k].x+cw/2,my],[R[k].x+cw/2,by]],T.axis,1.2,false,true));
+  poly(c,[[R.sm2.x+cw+3,by+ch/2],[R.sy.x-4,by+ch/2]],T.axis,1.2,true,true);
+  poly(c,[[R.sy.x+cw+3,by+ch/2],[R.lc.x-4,by+ch/2]],T.axis,1.2,true,true);
+  act=null;let pos=null,step="";
+  if(seq){const i=Math.floor((t-seq.t0)/ST),s=seq.s;if(i<s.length){const f=(1-Math.cos(Math.PI*((t-seq.t0)/ST-i)))/2,[a,b,lab]=s[i];step=lab;
+    const A=R[a],B=R[b]||R[a];pos=[A.x+A.w/2+(B.x+B.w/2-(A.x+A.w/2))*f,A.y+A.h/2+(B.y+B.h/2-(A.y+A.h/2))*f];act=f<.5?a:b||a}
+   else{step=s[s.length-1][2];act=s[s.length-1][1]||s[s.length-1][0];const r=R[act];pos=[r.x+r.w/2,r.y+r.h/2]}}
+  Object.values(R).forEach(r=>card(c,T,r));
+  if(pos){c.save();c.shadowColor=T.gold;c.shadowBlur=18;c.fillStyle=T.gold;rrect(c,pos[0]-7,pos[1]-7,14,14,3);c.fill();c.restore()}
+  if(step)txt(c,step,w/2,by+ch+14,T.fg,"600 13px "+SANS,"center");
+  const gy=by+ch+(step?42:24),bw=Math.min(110,(w-60)/3),bx=(w-bw*3-24)/2;
+  if(gx){txt(c,"更戍法：禁军定期更换驻地，将领不随军调动",w/2,gy,T.goldText,"600 12px "+SANS,"center");
+   ["驻地一","驻地二","驻地三"].forEach((s,i)=>{const x=bx+i*(bw+12),y=gy+22,hh=Math.min(34,Math.max(26,h-gy-54));
+    c.save();rrect(c,x,y,bw,hh,8);c.fillStyle=T.bg;c.fill();c.strokeStyle=T.blue;c.lineWidth=1.3;c.setLineDash([4,3]);c.stroke();c.restore();
+    txt(c,s,x+bw/2,y+hh/2,T.fg,"12px "+SANS,"center","middle");
+    if(i)poly(c,[[x-11,y+hh/2],[x-3,y+hh/2]],T.blue,1.4,false,true)});
+   txt(c,"「兵不识将，将不识兵」",w/2,gy+22+Math.min(34,Math.max(26,h-gy-54))+8,T.redText,"600 14px "+SANS,"center")}
+  else txt(c,"调兵权与统兵权分离，皇帝总揽兵权",w/2,gy,T.fg,"12px "+SANS,"center")}
+ function viewC(c,T,w,h){const wide=w>=700,bh=Math.min(h*.62,h-110),lw=wide?w*.42:w,ox=16;
+  txt(c,"强干弱枝：禁军与厢军",ox,8,T.fg,"600 12px "+SANS);
+  const bars=[["jj",82,22,T.blue],["xj",34,10,T.axis]],bx=ox+58,maxw=lw-bx-ox-36;
+  bars.forEach((b,i)=>{const[id,pct,th,col]=b,y=48+i*52,ww=maxw*pct/100,on=sel===id;
+   txt(c,N[id].name,ox,y,N[id].col==="blue"?T.blue:T.fg,"600 13px "+SANS,"left","middle");
+   c.save();rrect(c,bx,y-th/2,ww,th,th/2);c.fillStyle=col;c.globalAlpha=on?1:.75;c.fill();c.restore();
+   txt(c,id==="jj"?"精锐 · 集中京城一带":"老弱 · 散在地方任杂役",bx+ww+8,y,id==="jj"?T.blue:T.fg,"12px "+SANS,"left","middle");
+   rects.push({id,x:ox,y:y-16,w:lw-ox*2,h:32})});
+  const sx=wide?lw+16:ox,sw=(wide?w-lw:w)-32,sy=wide?34:150,cw=Math.min(190,sw),ch=46;
+  if(wide){c.save();c.strokeStyle=T.grid;c.beginPath();c.moveTo(lw+.5,16);c.lineTo(lw+.5,bh);c.stroke();c.restore()}
+  txt(c,"地方：文臣知州 · 通判监督 · 转运使收财",sx,sy-22,T.fg,"600 12px "+SANS);
+  const zz={id:"zz",x:sx,y:sy,w:cw,h:ch},tp={id:"tp",x:sx,y:sy+ch+34,w:cw,h:ch},zy={id:"zy",x:sx,y:sy+(ch+34)*2,w:cw,h:ch};
+  poly(c,[[tp.x+cw/2,tp.y-3],[zz.x+cw/2,zz.y+ch+3]],T.purple,2,false,true);
+  txt(c,"监督 · 公文须副署",tp.x+cw+10,(zz.y+ch+tp.y)/2,T.fg,"12px "+SANS,"left","middle");
+  [zz,tp,zy].forEach(r=>card(c,T,r));
+  const ax=zy.x+cw+12,ay=zy.y+ch/2;if(ax+70<w-8){poly(c,[[ax,ay],[Math.min(w-56,ax+56),ay]],T.teal,2,false,true);txt(c,"财赋 → 开封",Math.min(w-52,ax+60),ay,T.fg,"12px "+SANS,"left","middle")}
+  const fy=Math.max(bh+8,zy.y+ch+14),fw=Math.min(118,(w-72)/4),fx=(w-fw*4-36)/2;
+  ["r1","r2","r3","r4"].forEach((id,i)=>{const r={id,x:fx+i*(fw+12),y:fy,w:fw,h:44};if(i===3)poly(c,[[r.x-10,fy+22],[r.x-3,fy+22]],T.red,1.6,false,true);card(c,T,r)});
+  txt(c,"代价：三冗 → 积贫积弱（点击查看）",fx,fy-16,T.redText,"600 12px "+SANS)}
+ function rows(T){const n=N[sel];
+  if(view==="a")return[["机构",n.name,tc(T,n.tcol)],["职掌",n.tag,tc(T,n.tcol)],["说明",n.duty],["作用","分割相权，加强皇权",T.redText]];
+  if(view==="b")return[["机构 / 将领",n.name,tc(T,n.tcol)],["权限",n.tag,tc(T,n.tcol)],["说明",n.duty],["更戍法",gx?"禁军定期换防，将不专兵":"未开启",gx?T.redText:T.fg]];
+  return[["选中",n.name,tc(T,n.tcol)],["要点",n.tag,tc(T,n.tcol)],["说明",n.duty]]}
+ function march(mode){seq={t0:now(),s:mode==="out"
+   ?[["hd2","sm2","① 皇帝发令：命枢密院调兵"],["sm2","sy","② 枢密院出兵符，调发军队"],["sy","lc","③ 三衙交出军队，率臣领兵"],["lc","lc","④ 率臣领兵出征"]]
+   :[["lc","sy","① 战后：兵归三衙"],["lc","hd2","② 将归本职，听候皇帝另派"]]};last=""}
+ function setView(v){view=v;sel=v==="a"?"zs":v==="b"?"sm2":"jj";seq=null;last="";if(!sub)return;sub.innerHTML="";
+  if(v==="a")sub.append(chips([{label:"唐",value:"tang"},{label:"宋",value:"song"}],era,x=>{era=x;last=""}));
+  else if(v==="b")sub.append(button("出征",()=>march("out"),true),button("战后",()=>march("back")),toggle("更戍法",gx,x=>{gx=x;last=""}))}
+ return{
+  text:"宋太祖鉴于唐末五代<b>藩镇割据</b>，采取「收其精兵、制其钱谷、削夺其权」的方针。中央分割宰相的行政、军事、财政大权；军事上<b>兵权三分</b>、更戍；地方上以<b>文臣知州</b>，设<b>通判</b>监督，由<b>转运使</b>掌财赋。中央集权空前加强，但也造成冗官冗兵冗费，国家积贫积弱。",
+  points:["二府三司：宰相只管民政，军政归枢密院，财政归三司","参知政事为副相，分宰相之权","兵权三分：调兵权与统兵权分离，更戍法使将不专兵","知州文臣、通判监督、转运使收财，强干弱枝；代价：「三冗」与积贫积弱"],
+  gk:"浙江选考常以材料考查宋代分权措施的目的（防止割据、加强集权）与影响（利：结束割据、政局稳定；弊：三冗、积贫积弱）。<br>易错：枢密院只有调兵权没有统兵权；通判不是知州的副手，而是监督者。",
+  mount(ctrl,read){ctrl.append(chips([{label:"二府三司",value:"a"},{label:"兵权三分",value:"b"},{label:"强干弱枝",value:"c"}],view,setView));
+   sub=el("div","ctrls");ctrl.append(sub);setView(view);ro=readout([]);read.append(ro)},
+  draw(c,w,h,t){const T=theme();rects=[];act=null;view==="a"?viewA(c,T,w,h):view==="b"?viewB(c,T,w,h,t):viewC(c,T,w,h);
+   if(ro){const rs=rows(T),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(type!=="down")return false;const r=rects.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h);if(r){sel=r.id;last="";return true}return false},
+  unmount(){ro=null;sub=null;rects=[];seq=null}}})();
+CH[4].ready=true;
+MODS[4]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",N={};
+ function d(id,name,tag,duty,col,tcol){N[id]={id,name,tag,duty,col,tcol:tcol||"fg"}}
+ d("hd","皇帝","最高统治者","中书省、枢密院、御史台、宣政院均直接对皇帝负责","gold","goldText");
+ d("zs","中书省","总理全国政务","中央最高行政机构，总理全国政务；直辖腹里，并在地方设行中书省（行省）","blue","blue");
+ d("sm","枢密院","掌军事","掌管全国军事","red","redText");
+ d("ys","御史台","掌监察","掌管监察，纠察百官","purple");
+ d("xz","宣政院","掌佛教事务 · 管辖西藏","掌管全国佛教事务，并管辖西藏地区；西藏从此正式纳入中央管辖","teal");
+ const P=[["lb","岭北","行省","辖蒙古高原及以北地区",1,0,3,1],["ly","辽阳","行省","辖今东北地区一带",4,0,1,2],
+  ["gs","甘肃","行省","辖今甘肃、宁夏一带",0,1,1,1],["sx","陕西","行省","辖今陕西一带",1,1,1,1],
+  ["fl","腹里","中书省直辖","山东、山西、河北一带，由中书省直辖",2,1,2,1,"gold","goldText"],
+  ["tb","西藏","宣政院管辖","由中央宣政院直接管辖，西藏正式纳入中央管辖始于元朝",0,2,1,2,"teal"],
+  ["sc","四川","行省","辖今四川一带",1,2,1,1],["hn","河南江北","行省","辖今河南及湖北、安徽、江苏长江以北一带",2,2,2,1],
+  ["jz","江浙","行省","辖今浙江、福建及江苏、安徽南部一带。浙江考生：今浙江属江浙行省",4,2,1,2,"blue","blue"],
+  ["yn","云南","行省","辖今云南一带",1,3,1,1],["hg","湖广","行省","辖今湖南、广西等地",2,3,1,1],["jx","江西","行省","辖今江西、广东一带",3,3,1,1],
+  ["ph","澎湖巡检司","元朝设","隶属江浙行省泉州路，管辖澎湖和琉球（今台湾）",5.25,3.2,.55,.55,"red","redText"]
+ ].map(a=>({id:a[0],name:a[1],sub:a[2],desc:a[3],g:a.slice(4,8),col:a[8],tcol:a[9]||"fg"}));
+ const PB={};P.forEach(p=>PB[p.id]=p);
+ let view="a",selA="zs",selB="jz",lv=false,dual=false,rects=[],ro=null,sub=null,last="";
+ const tc=(T,k)=>T[k]||T.fg;
+ function txt(c,s,x,y,col,f,al,bl){c.font=f||"12px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline=bl||"top";c.fillText(s,x,y)}
+ function card(c,T,r){const n=N[r.id],col=T[n.col],on=selA===r.id;c.save();rrect(c,r.x,r.y,r.w,r.h,Math.min(10,r.h/3));c.fillStyle=T.bg;c.fill();
+  if(on||n.col==="blue"||n.col==="gold"){c.globalAlpha=on?.16:.08;c.fillStyle=col;c.fill();c.globalAlpha=1}
+  c.strokeStyle=col;c.lineWidth=on?3:n.col==="gold"||n.col==="red"?2.2:1.6;c.stroke();
+  const two=n.tag&&r.h>=40&&r.w>=56,fs=r.w<n.name.length*15+10?12:14;c.fillStyle=tc(T,n.col==="gold"?"goldText":n.col==="blue"?"blue":"fg");c.font="600 "+fs+"px "+SANS;c.textAlign="center";c.textBaseline="middle";
+  c.fillText(n.name,r.x+r.w/2,r.y+r.h/2-(two?9:0));
+  if(two){c.font="12px "+SANS;c.fillStyle=tc(T,n.tcol);let s=n.tag;while(s.length>2&&c.measureText(s).width>r.w-8)s=s.slice(0,-2)+"…";c.fillText(s,r.x+r.w/2,r.y+r.h/2+11)}
+  c.restore();rects.push(r)}
+ function poly(c,pts,col,lw,dash,head){c.save();c.strokeStyle=c.fillStyle=col;c.lineWidth=lw;c.setLineDash(dash?[5,4]:[]);c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.stroke();
+  if(head){const[a,b]=pts.slice(-2),g=Math.atan2(b[1]-a[1],b[0]-a[0]),k=6+lw*1.5;c.setLineDash([]);c.beginPath();c.moveTo(b[0],b[1]);c.lineTo(b[0]-k*Math.cos(g-.4),b[1]-k*Math.sin(g-.4));c.lineTo(b[0]-k*Math.cos(g+.4),b[1]-k*Math.sin(g+.4));c.fill()}c.restore()}
+ function viewA(c,T,w,h){txt(c,"元朝中央机构",12,8,T.fg,"600 12px "+SANS);
+  const ids=["zs","sm","ys","xz"],narrow=w<560,ch=Math.min(58,narrow?(h-150)/5:h*.15),ty=36;
+  if(!narrow){const g=14,cw=Math.min(180,(w-32-g*3)/4),x0=(w-cw*4-g*3)/2,by=ty+ch+Math.min(76,h*.18),hd={id:"hd",x:w/2-cw/2,y:ty,w:cw,h:ch},my=(ty+ch+by)/2;
+   poly(c,[[w/2,ty+ch],[w/2,my]],T.axis,1.2);poly(c,[[x0+cw/2,my],[x0+3*(cw+g)+cw/2,my]],T.axis,1.2);
+   const rs=ids.map((id,i)=>({id,x:x0+i*(cw+g),y:by,w:cw,h:ch}));rs.forEach(r=>poly(c,[[r.x+cw/2,my],[r.x+cw/2,by]],T.axis,1.2,false,true));
+   [hd].concat(rs).forEach(r=>card(c,T,r));
+   txt(c,"中书省直辖腹里，在地方设行中书省（见「行省」视图）",w/2,by+ch+26,T.fg,"12px "+SANS,"center");
+   txt(c,"宣政院管辖西藏：西藏正式纳入中央管辖",w/2,by+ch+48,T.redText,"600 12px "+SANS,"center");return}
+  const cw=Math.min(240,w-90),cx=w/2-cw/2+16,bx=cx-18,hd={id:"hd",x:w/2-cw/2,y:ty,w:cw,h:ch},st=ch+14,y0=ty+ch+28;
+  const rs=ids.map((id,i)=>({id,x:cx,y:y0+i*st,w:cw,h:ch}));
+  poly(c,[[w/2,ty+ch],[w/2,ty+ch+12],[bx,ty+ch+12],[bx,rs[3].y+ch/2]],T.axis,1.2);
+  rs.forEach(r=>poly(c,[[bx,r.y+ch/2],[cx-2,r.y+ch/2]],T.axis,1.2,false,true));[hd].concat(rs).forEach(r=>card(c,T,r));
+  txt(c,"中书省直辖腹里，地方设行中书省",w/2,rs[3].y+ch+16,T.fg,"12px "+SANS,"center")}
+ function tile(c,T,p,r){const on=selB===p.id,col=p.col?T[p.col]:T.axis;c.save();rrect(c,r.x,r.y,r.w,r.h,Math.min(8,r.w/4));c.fillStyle=T.bg;c.fill();
+  if(p.col||on){c.globalAlpha=on?.2:.1;c.fillStyle=p.col?col:T.blue;c.fill();c.globalAlpha=1}
+  c.strokeStyle=on&&!p.col?T.blue:col;c.lineWidth=p.id==="jz"||on?3:p.col?2:1.2;c.stroke();c.restore();rects.push(Object.assign({id:p.id},r));
+  if(p.id==="ph")return;const fs=r.w<p.name.length*13+8?12:13,two=r.h>=46;
+  txt(c,p.name,r.x+r.w/2,r.y+r.h/2-(two?8:0),tc(T,p.tcol),"600 "+fs+"px "+SANS,"center","middle");
+  if(two){c.font="12px "+SANS;let s=p.sub;if(c.measureText(s).width>r.w-6)s=p.id==="tb"?"宣政院":s.slice(0,2);txt(c,s,r.x+r.w/2,r.y+r.h/2+10,p.id==="tb"?T.fg:tc(T,p.tcol),"12px "+SANS,"center","middle")}}
+ function viewB(c,T,w,h){const wide=w>=620,small=w<520,side=lv&&wide?150:0,low=(lv&&!wide?66:0)+(dual?(small?62:46):0)+26;
+  const aw=w-24-side,ah=h-40-low-18,s=Math.max(30,Math.min(aw/6,ah/4)),ox=12+(aw-6*s)/2,oy=36;
+  txt(c,"元朝行省图",12,8,T.fg,"600 12px "+SANS);c.font="600 12px "+SANS;const tw=c.measureText("元朝行省图").width;
+  c.save();rrect(c,18+tw,6,40,18,9);c.strokeStyle=T.redText;c.lineWidth=1;c.stroke();c.restore();txt(c,"示意",38+tw,15,T.redText,"12px "+SANS,"center","middle");
+  txt(c,"非真实地图，按大致方位摆放",64+tw,8,T.fg,"12px "+SANS);
+  const R={};P.forEach(p=>{const[gc,gr,gw,gh]=p.g;R[p.id]={x:ox+gc*s+2,y:oy+gr*s+2,w:gw*s-4,h:gh*s-4}});
+  if(dual){const f=R.fl,fx=f.x+f.w/2,fy=f.y+f.h/2;P.filter(p=>p.sub==="行省").forEach(p=>{const r=R[p.id];c.save();c.globalAlpha=.5;poly(c,[[fx,fy],[r.x+r.w/2,r.y+r.h/2]],T.blue,1.2,true);c.restore()})}
+  P.forEach(p=>tile(c,T,p,R[p.id]));
+  const ph=R.ph;txt(c,"澎湖巡检司",Math.min(w-side-12,ph.x+ph.w+4),ph.y+ph.h+4,T.redText,"600 12px "+SANS,"right");
+  let y=oy+4*s+20;txt(c,"江浙 · 浙江考生：今浙江属江浙行省",ox,y,T.blue,"600 12px "+SANS);y+=24;
+  if(dual){txt(c,"行省的双重性质",ox,y,T.goldText,"600 12px "+SANS);c.font="12px "+SANS;c.fillStyle=T.fg;
+   wrapText(c,"既是中书省的派出机构（代表中央），又是地方最高行政机构",ox,y+18,Math.max(160,aw-(ox-12)*2),16);y+=small?62:46}
+  if(!lv)return;const L=["行省","路","府","州","县"];
+  function box(x,yy,bw,bh,i){c.save();rrect(c,x,yy,bw,bh,8);c.fillStyle=T.bg;c.fill();c.strokeStyle=i?T.axis:T.blue;c.lineWidth=i?1.2:2;c.stroke();c.restore();
+   txt(c,L[i],x+bw/2,yy+bh/2,i?T.fg:T.blue,"600 13px "+SANS,"center","middle")}
+  if(wide){const x=w-side+8,bw=side-24,st=(h-64)/5,bh=Math.min(40,st*.6);c.save();c.strokeStyle=T.grid;c.beginPath();c.moveTo(x-8.5,16);c.lineTo(x-8.5,h-16);c.stroke();c.restore();
+   txt(c,"行省之下",x,8,T.fg,"600 12px "+SANS);L.forEach((_,i)=>{const yy=40+i*st+(st-bh)/2;box(x,yy,bw,bh,i);if(i)poly(c,[[x+bw/2,yy-(st-bh)+3],[x+bw/2,yy-3]],T.axis,1.2,false,true)})}
+  else{const g=16,bw=(w-24-g*4)/5,yy=h-44;txt(c,"行省之下",12,yy-20,T.fg,"600 12px "+SANS);
+   L.forEach((_,i)=>{const x=12+i*(bw+g);box(x,yy,bw,34,i);if(i)poly(c,[[x-g+2,yy+17],[x-2,yy+17]],T.axis,1.2,false,true)})}}
+ function rows(T){if(view==="a"){const n=N[selA];return[["机构",n.name,tc(T,n.col==="gold"?"goldText":n.tcol)],["职掌",n.tag,tc(T,n.tcol)],["说明",n.duty]]}
+  const p=PB[selB],rs=[["名称",p.name+"（"+p.sub+"）",tc(T,p.tcol)],["说明",p.desc]];
+  if(dual&&p.sub==="行省")rs.push(["双重性质","中书省的派出机构 + 地方最高行政机构",T.blue]);return rs}
+ function setView(v){view=v;last="";if(!sub)return;sub.innerHTML="";
+  if(v==="b")sub.append(toggle("行省之下",lv,x=>{lv=x;last=""}),toggle("行省的双重性质",dual,x=>{dual=x;last=""}))}
+ return{
+  text:"元朝在中央设<b>中书省</b>总领政务，<b>枢密院</b>掌军事，<b>御史台</b>掌监察，<b>宣政院</b>掌管佛教事务和西藏地区。地方上实行<b>行省制度</b>：中书省直辖腹里，其余地区设行中书省，行省之下有路、府、州、县。行省制度加强了中央对地方的管理，是我国<b>省制的开端</b>。",
+  points:["中书省总理政务，宣政院管辖西藏","行省制度：腹里由中书省直辖，其余设十个行省","设澎湖巡检司，管辖澎湖、琉球（台湾）","行省制是我国省制的开端，影响深远"],
+  gk:"浙江选考常考行省制度的意义（加强中央集权、巩固多民族国家统一），以及宣政院、澎湖巡检司对边疆的管辖。<br>易错：西藏正式纳入中央管辖始于元朝（宣政院）；澎湖巡检司是元朝设的，不是明清。",
+  mount(ctrl,read){ctrl.append(chips([{label:"中央",value:"a"},{label:"行省",value:"b"}],view,setView));
+   sub=el("div","ctrls");ctrl.append(sub);setView(view);ro=readout([]);read.append(ro)},
+  draw(c,w,h){const T=theme();rects=[];view==="a"?viewA(c,T,w,h):viewB(c,T,w,h);
+   if(ro){const rs=rows(T),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(type!=="down")return false;const r=rects.slice().reverse().find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h);
+   if(r){view==="a"?selA=r.id:selB=r.id;last="";return true}return false},
+  unmount(){ro=null;sub=null;rects=[]}}})();
+CH[5].ready=true;
+MODS[5]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",N={},ST=1.1;
+ function d(id,name,tag,duty,col,tcol){N[id]={id,name,tag,duty,col,tcol:tcol||"fg"}}
+ d("hd","皇帝","直接掌控六部","废丞相后，皇帝直接统领六部，集皇权与相权于一身","gold","goldText");
+ d("zs","中书省","原最高行政机构","明初沿元制设中书省总领六部；1380 年借胡惟庸案废除","blue","blue");
+ d("cx","丞相","统领百官","中书省长官；1380 年废除，延续一千多年的宰相制度结束","blue","blue");
+ ["吏部","户部","礼部","兵部","刑部","工部"].forEach((s,i)=>d("b"+i,s,"","六部保留，地位提高，直接对皇帝负责","blue","blue"));
+ d("zz","奏章","百官上奏","臣民奏章先送内阁","axis");
+ d("ng","内阁","殿阁大学士 · 票拟","明成祖时殿阁大学士入值文渊阁参与机务，仁宣以后取得「票拟」权；只是皇帝的顾问和秘书机构","blue","blue");
+ d("hd2","皇帝","批红 · 最终决策","用朱笔批示，决策权始终在皇帝","gold","goldText");
+ d("sl","司礼监","宦官 · 代为批红","皇帝怠政时，由司礼监太监代为批红，形成宦官专权","red","redText");
+ d("lb","六部","执行","按批红后的意见执行","blue","blue");
+ d("jy","锦衣卫","明太祖设","明太祖设立的特务机构，监视、侦察臣民","purple");
+ d("dc","东厂","明成祖设 · 宦官掌领","明成祖设立，由宦官掌领的特务机构","purple","redText");
+ d("xc","西厂","明宪宗设","明宪宗设立的特务机构","purple");
+ d("bg","百官","受厂卫监视","厂卫特务统治加强了君主专制，也助长了宦官专权","axis");
+ d("zy","中央","三司分别负责","三司互不统属，分别对中央负责，防止地方专权","gold","goldText");
+ d("bz","承宣布政使司","民政、财政","掌一省民政、财政","blue","blue");
+ d("ta","提刑按察使司","司法、监察","掌一省司法、监察","blue","blue");
+ d("dz","都指挥使司","军事","掌一省军事","blue","blue");
+ let view="a",sel="zs",abol=null,doc=null,lazy=false,cur=null,rects=[],R={},ro=null,sub=null,last="";
+ const now=()=>performance.now()/1000,tc=(T,k)=>T[k]||T.fg,cl=v=>Math.max(0,Math.min(1,v));
+ function txt(c,s,x,y,col,f,al,bl){c.font=f||"12px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline=bl||"top";c.fillText(s,x,y)}
+ function wrap(c,s,mw){const L=[];let l="";for(const ch of String(s)){const t=l+ch;if(c.measureText(t).width>mw&&l){L.push(l);l=ch}else l=t}if(l)L.push(l);return L}
+ function para(c,s,x,y,mw,col,f,al){c.font=f||"12px "+SANS;const L=wrap(c,s,mw);L.forEach((l,i)=>txt(c,l,x,y+i*17,col,f,al));return y+L.length*17}
+ function card(c,T,r){const n=N[r.id],col=T[n.col],on=sel===r.id,a=r.a==null?1:r.a;c.save();c.globalAlpha=a;rrect(c,r.x,r.y,r.w,r.h,Math.min(10,r.h/3));c.fillStyle=T.bg;c.fill();
+  if(on||n.col==="blue"||n.col==="gold"){c.globalAlpha=a*(on?.16:.07);c.fillStyle=col;c.fill();c.globalAlpha=a}
+  c.strokeStyle=col;c.lineWidth=on?3:n.col==="gold"||n.col==="red"?2.2:1.5;if(r.dash)c.setLineDash([5,4]);c.stroke();c.setLineDash([]);
+  const mw=r.w-10;c.font="600 13px "+SANS;const NL=wrap(c,n.name,mw);c.font="12px "+SANS;const TL=n.tag?wrap(c,n.tag,mw):[];
+  let y=r.y+(r.h-(NL.length*17+TL.length*15+(TL.length?2:0)))/2;const ncol=n.col==="gold"||n.col==="blue"?tc(T,n.tcol):T.fg;
+  NL.forEach(l=>{txt(c,l,r.x+r.w/2,y,ncol,"600 13px "+SANS,"center");y+=17});y+=2;TL.forEach(l=>{txt(c,l,r.x+r.w/2,y,tc(T,n.tcol),"12px "+SANS,"center");y+=15});
+  if(r.x2){const k=r.x2,p=6;c.globalAlpha=1;c.strokeStyle=T.redText;c.lineWidth=3;c.lineCap="round";c.beginPath();
+   c.moveTo(r.x+p,r.y+p);c.lineTo(r.x+p+(r.w-2*p)*cl(k*2),r.y+p+(r.h-2*p)*cl(k*2));if(k>.5){c.moveTo(r.x+r.w-p,r.y+p);c.lineTo(r.x+r.w-p-(r.w-2*p)*cl(k*2-1),r.y+p+(r.h-2*p)*cl(k*2-1))}c.stroke()}
+  c.restore();rects.push(r)}
+ function poly(c,pts,col,lw,dash,head,al){c.save();if(al!=null)c.globalAlpha=al;c.strokeStyle=c.fillStyle=col;c.lineWidth=lw;c.setLineDash(dash?[5,4]:[]);c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.stroke();
+  if(head){const[a,b]=pts.slice(-2),g=Math.atan2(b[1]-a[1],b[0]-a[0]),k=6+lw*1.5;c.setLineDash([]);c.beginPath();c.moveTo(b[0],b[1]);c.lineTo(b[0]-k*Math.cos(g-.4),b[1]-k*Math.sin(g-.4));c.lineTo(b[0]-k*Math.cos(g+.4),b[1]-k*Math.sin(g+.4));c.fill()}c.restore()}
+ const ctr=r=>[r.x+r.w/2,r.y+r.h/2];
+ function edge(r,dx,dy,pad){const s=Math.min(dx?(r.w/2+pad)/Math.abs(dx):1e9,dy?(r.h/2+pad)/Math.abs(dy):1e9),[x,y]=ctr(r);return[x+dx*s,y+dy*s]}
+ function link(c,A,B,col,lw,dash,al){const[ax,ay]=ctr(A),[bx,by]=ctr(B),dx=bx-ax,dy=by-ay;poly(c,[edge(A,dx,dy,2),edge(B,-dx,-dy,4)],col,lw,dash,true,al)}
+ function viewA(c,T,w,h,t){const f=abol?cl((t-abol)/1.6):0,ch=Math.max(42,Math.min(56,(h-220)/3.2)),gp=Math.max(26,Math.min(48,(h-3*ch-170)/3)),ty=34;
+  txt(c,f>0?"1380 年 胡惟庸案后":"明初：沿用中书省、丞相",12,8,f>0?T.redText:T.fg,"600 12px "+SANS);
+  const hw=Math.min(170,w*.4),cw=Math.min(150,(w-56)/2.6);R={hd:{id:"hd",x:w/2-hw/2,y:ty,w:hw,h:ch}};
+  const zy=ty+ch+gp;R.zs={id:"zs",x:w/2-cw/2,y:zy,w:cw,h:ch,a:1-f*.75,x2:cl(f*1.4-.2)};
+  const cxx=R.zs.x+cw+14;R.cx={id:"cx",x:cxx,y:zy+4,w:Math.min(cw*.8,w-12-cxx),h:ch-8,a:1-f*.75,x2:cl(f*1.4-.4)};
+  const g=Math.min(14,w*.02),bw=Math.min(110,(w-32-5*g)/6),bx0=(w-bw*6-5*g)/2,by=zy+ch+gp,bus=by-gp/2,L=Math.max(12,R.zs.x-22);
+  for(let i=0;i<6;i++)R["b"+i]={id:"b"+i,x:bx0+i*(bw+g),y:by,w:bw,h:Math.min(ch,46)};
+  const xs=[0,1,2,3,4,5].map(i=>R["b"+i].x+bw/2),old=1-f;
+  link(c,R.hd,R.zs,T.axis,1.2,false,old);poly(c,[[R.zs.x+cw+2,zy+ch/2],[cxx-2,zy+ch/2]],T.axis,1.2,true,false,old);
+  poly(c,[[w/2,zy+ch],[w/2,bus]],T.axis,1.2,false,false,old);
+  if(f>0)poly(c,[[R.hd.x,ty+ch/2],[L,ty+ch/2],[L,bus]],T.gold,2.4,false,false,f);
+  poly(c,[[Math.min(xs[0],f>0?L:xs[0]),bus],[xs[5],bus]],f>0?T.gold:T.axis,f>0?2:1.2);
+  xs.forEach(x=>poly(c,[[x,bus],[x,by-3]],f>0?T.gold:T.axis,f>0?2:1.2,false,true));
+  Object.values(R).forEach(r=>card(c,T,r));
+  let y=by+R.b0.h+16;c.save();c.globalAlpha=f>0?f:1;
+  y=para(c,f>0?"权分六部，六部直接对皇帝负责":"中书省（丞相）总领六部",w/2,y,w-32,f>0?T.goldText:T.fg,"600 13px "+SANS,"center");c.restore();
+  const bl=Math.min(260,w-150),bx=Math.max(72,(w-bl)/2-20);y+=Math.min(20,Math.max(8,h-y-64));
+  [["君权",.55+.45*f,T.gold,T.goldText,f>.99?"↑ 空前加强":""],["相权",.55*(1-f),T.blue,T.blue,f>.99?"→ 0":""]].forEach((b,i)=>{const yy=y+i*26;
+   txt(c,b[0],bx-10,yy+7,b[3],"600 12px "+SANS,"right","middle");c.save();rrect(c,bx,yy,bl,14,7);c.fillStyle=T.grid;c.fill();
+   if(b[1]>.01){rrect(c,bx,yy,Math.max(14,bl*b[1]),14,7);c.fillStyle=b[2];c.fill()}c.restore();txt(c,b[4],bx+bl+8,yy+7,b[3],"600 12px "+SANS,"left","middle")});
+  txt(c,"示意",bx,y+52,T.fg,"12px "+SANS)}
+ function viewB(c,T,w,h,t){const ty=36,wide=w>=640,ids=["zz","ng","hd2","lb"];cur=null;
+  txt(c,lazy?"皇帝怠政：司礼监代为批红":"票拟—批红：内阁拟意见，皇帝作决策",12,8,lazy?T.redText:T.fg,"600 12px "+SANS);
+  if(wide){const g=Math.max(30,w*.05),cw=Math.min(160,(w-32-3*g)/4),x0=(w-cw*4-3*g)/2,ch=Math.min(64,Math.max(50,h*.14));
+   ids.forEach((id,i)=>R[id]={id,x:x0+i*(cw+g),y:ty+10,w:cw,h:ch});R.sl={id:"sl",x:R.hd2.x,y:ty+10+ch+Math.min(70,h*.16),w:cw,h:ch}}
+  else{const cw=Math.min(200,w*.5),st=Math.max(64,Math.min(86,(h-ty-130)/4)),ch=st-26;
+   ids.forEach((id,i)=>R[id]={id,x:16,y:ty+i*st,w:cw,h:ch});const sx=16+cw+22;R.sl={id:"sl",x:sx,y:R.hd2.y-4,w:w-12-sx,h:ch+8}}
+  R.hd2.a=lazy?.45:1;R.sl.dash=true;
+  link(c,R.zz,R.ng,T.axis,1.4);link(c,R.ng,R.hd2,T.axis,1.4,false,lazy?.3:1);link(c,R.hd2,R.lb,T.axis,1.4,false,lazy?.3:1);
+  if(lazy){link(c,R.ng,R.sl,T.red,2,true);link(c,R.sl,R.lb,T.red,2,true)}
+  const segs=lazy?[["zz","ng","① 奏章送内阁"],["ng","sl","② 内阁票拟，送入宫中"],["sl","lb","③ 司礼监太监代为批红"],["lb","lb","④ 六部执行"]]
+   :[["zz","ng","① 奏章送内阁"],["ng","hd2","② 内阁票拟：拟出处理意见"],["hd2","lb","③ 皇帝批红"],["lb","lb","④ 六部执行"]];
+  let pos=null,step="";if(doc){const i=Math.floor((t-doc)/ST),s=i<segs.length?segs[i]:segs[segs.length-1],k=i<segs.length?(1-Math.cos(Math.PI*((t-doc)/ST-i)))/2:1,A=ctr(R[s[0]]),B=ctr(R[s[1]]);
+   pos=[A[0]+(B[0]-A[0])*k,A[1]+(B[1]-A[1])*k];step=s[2];cur=step}
+  Object.values(R).forEach(r=>card(c,T,r));
+  if(pos){c.save();c.shadowColor=T.gold;c.shadowBlur=16;c.fillStyle=T.gold;rrect(c,pos[0]-8,pos[1]-8,16,16,3);c.fill();c.restore()}
+  let y=Math.max(R.sl.y+R.sl.h,R.lb.y+R.lb.h)+14;if(step)y=para(c,step,w/2,y,w-32,lazy&&/司礼监/.test(step)?T.redText:T.fg,"600 13px "+SANS,"center")+4;
+  const bw=Math.min(520,w-32),bx=(w-bw)/2,s2="内阁始终不是法定的中央一级行政机构，只是皇帝的顾问和秘书机构。";c.font="12px "+SANS;const nl=wrap(c,s2,bw-24).length,bh=nl*17+40;y=Math.min(y+6,h-bh-6);
+  c.save();rrect(c,bx,y,bw,bh,12);c.strokeStyle=T.axis;c.lineWidth=1;c.setLineDash([4,4]);c.stroke();c.restore();
+  txt(c,"内阁的性质",bx+12,y+10,T.goldText,"600 12px "+SANS);para(c,s2,bx+12,y+28,bw-24,T.fg)}
+ function viewC(c,T,w,h){const wide=w>=700;
+  const fw=wide?w*.44:w,sx=wide?fw+16:16,sw=wide?w-fw-32:w-32;
+  txt(c,"厂卫特务机构",16,8,T.fg,"600 12px "+SANS);
+  if(wide){const cw=Math.min(170,fw*.42),ch=Math.min(60,(h-150)/3.6),st=ch+18;["jy","dc","xc"].forEach((id,i)=>R[id]={id,x:16,y:34+i*st,w:cw,h:ch});
+   R.bg={id:"bg",x:fw-16-Math.min(140,fw*.32),y:34+st-4,w:Math.min(140,fw*.32),h:ch+8}}
+  else{const g=10,cw=(w-32-2*g)/3,ch=64;["jy","dc","xc"].forEach((id,i)=>R[id]={id,x:16+i*(cw+g),y:32,w:cw,h:ch});R.bg={id:"bg",x:w/2-70,y:32+ch+34,w:140,h:48}}
+  ["jy","dc","xc"].forEach(k=>link(c,R[k],R.bg,T.purple,2,true));
+  if(wide){c.save();c.strokeStyle=T.grid;c.beginPath();c.moveTo(fw+.5,16);c.lineTo(fw+.5,h-70);c.stroke();c.restore()}
+  const ty=wide?8:R.bg.y+R.bg.h+20;txt(c,"地方：废行省，设「三司」",sx,ty,T.fg,"600 12px "+SANS);
+  const zw=Math.min(170,sw*.5),zh=wide?50:46;R.zy={id:"zy",x:sx+sw/2-zw/2,y:ty+26,w:zw,h:zh};
+  const g=10,cw=(sw-2*g)/3,cy=R.zy.y+zh+(wide?60:40),ch=wide?Math.min(76,Math.max(60,h*.17)):64;
+  ["bz","ta","dz"].forEach((id,i)=>{R[id]={id,x:sx+i*(cw+g),y:cy,w:cw,h:ch};poly(c,[[sx+i*(cw+g)+cw/2,cy-3],[sx+i*(cw+g)+cw/2,R.zy.y+zh+3]],T.gold,1.8,false,true)});
+  for(let i=1;i<3;i++){const x=sx+i*(cw+g)-g/2;txt(c,"≠",x,cy+ch/2,T.redText,"600 13px "+SANS,"center","middle")}
+  Object.values(R).forEach(r=>card(c,T,r));
+  let y=para(c,"互不统属 · 分别对中央负责",sx+sw/2,cy+ch+10,sw,T.goldText,"600 12px "+SANS,"center");
+  y=Math.max(y+12,wide?h-58:y+12);c.save();c.strokeStyle=T.grid;c.beginPath();c.moveTo(16,y-6.5);c.lineTo(w-16,y-6.5);c.stroke();c.restore();
+  txt(c,"八股取士",16,y,T.redText,"600 12px "+SANS);para(c,"考试内容限于四书五经，以朱熹注释为准，文体固定",16,y+18,w-32,T.fg)}
+ function rows(T){const n=N[sel]||N.hd;
+  if(view==="a"){const f=abol?cl((now()-abol)/1.6):0,bar=v=>"█".repeat(Math.round(v*10))+"░".repeat(10-Math.round(v*10));
+   return[["事件",abol?"1380 胡惟庸案：废中书省、丞相":"未触发",abol?T.redText:T.fg],["君权（示意）",bar(.55+.45*f)+(f>.99?" ↑":""),T.goldText],["相权（示意）",bar(.55*(1-f))+(f>.99?" → 0":""),T.blue],
+    ["注",f>.99?"从此宰相制度被废除，君主专制空前加强":"点击「1380 胡惟庸案」",f>.99?T.redText:T.fg],["选中",n.name+"："+n.duty]]}
+  if(view==="b")return[["当前环节",cur||"点击「呈递奏章」"],["批红者",lazy?"司礼监太监（代批）":"皇帝",lazy?T.redText:T.goldText],
+   ["提示",lazy?"宦官专权的制度根源":"内阁只有票拟权，决策权在皇帝",lazy?T.redText:T.fg],["选中",n.name+"："+n.duty]];
+  return[["选中",n.name,tc(T,n.col==="purple"||n.col==="axis"?"fg":n.tcol)],["要点",n.tag,tc(T,n.tcol)],["说明",n.duty]]}
+ function setView(v){view=v;last="";doc=null;cur=null;sel=v==="a"?"zs":v==="b"?"ng":"dc";if(!sub)return;sub.innerHTML="";
+  if(v==="a")sub.append(button("1380 胡惟庸案",()=>{if(!abol)abol=now();last=""},true),button("复原",()=>{abol=null;last=""}));
+  else if(v==="b")sub.append(button("呈递奏章",()=>{doc=now();last=""},true),toggle("皇帝怠政",lazy,x=>{lazy=x;doc=null;last=""}))}
+ return{
+  text:"明太祖借<b>胡惟庸案</b>废除中书省和丞相，<b>权分六部</b>，皇帝直接掌控六部，君主专制空前加强。明成祖设<b>内阁</b>，后来内阁获得<b>票拟</b>权，但始终从属于皇权；皇帝怠政时<b>司礼监</b>代为批红，导致宦官专权。地方设<b>三司</b>分权，<b>厂卫</b>监视臣民，科举实行<b>八股取士</b>。",
+  points:["1380 年废丞相，权分六部，延续一千多年的宰相制度结束","内阁：票拟—批红，非法定机构","厂卫特务统治与宦官专权","地方三司分权；八股取士束缚思想"],
+  gk:"浙江选考常考废丞相与内阁设立的实质（加强君主专制）、内阁与宰相的区别、八股取士的影响。<br>易错：内阁不是宰相机构，没有决策权；废除的是丞相和中书省，六部保留。",
+  mount(ctrl,read){ctrl.append(chips([{label:"废丞相",value:"a"},{label:"内阁与票拟",value:"b"},{label:"厂卫与地方",value:"c"}],view,setView));
+   sub=el("div","ctrls");ctrl.append(sub);setView(view);ro=readout([]);read.append(ro)},
+  draw(c,w,h,t){const T=theme();rects=[];R={};view==="a"?viewA(c,T,w,h,t):view==="b"?viewB(c,T,w,h,t):viewC(c,T,w,h);
+   if(ro){const rs=rows(T),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(type!=="down")return false;const r=rects.slice().reverse().find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h);if(r){sel=r.id;last="";return true}return false},
+  unmount(){ro=null;sub=null;rects=[];doc=null;cur=null}}})();
+CH[6].ready=true;
+MODS[6]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",N={},ST=1.2;
+ function d(id,name,tag,duty,col,tcol,ex){N[id]=Object.assign({id,name,tag,duty,col,tcol:tcol||"fg"},ex||{})}
+ d("hd","皇帝","乾纲独断","军国大事由皇帝最终决定","gold","goldText");
+ d("jj","军机处","雍正七年（1729）设 · 因西北用兵","皇帝的秘书机构，以廷寄直接下达机密谕旨","blue","blue");
+ d("ng","内阁","保留 · 处理一般事务","内阁保留，只处理一般事务，军国要务转归军机处","axis");
+ d("lb","六部","执行政务","承接内阁转来的一般政务","axis");
+ d("df","地方督抚","总督 · 巡抚","接受廷寄或六部文书，执行政令","axis");
+ d("mg","北 · 蒙古","理藩院 · 盟旗制度","","blue","blue",{org:"理藩院管理，实行盟旗制度",time:"清朝前期",mean:"加强对蒙古地区的管辖"});
+ d("xj","西北 · 新疆","1762 设伊犁将军","","blue","blue",{org:"伊犁将军",time:"1762 年",mean:"统辖新疆军政，加强对新疆的管辖"});
+ d("xz","西南 · 西藏","驻藏大臣 · 金瓶掣签","","blue","blue",{org:"驻藏大臣；《钦定藏内善后章程》",time:"1727 设驻藏大臣；1793 乾隆颁布章程",mean:"以「金瓶掣签」确定达赖、班禅转世，加强中央对西藏的管辖"});
+ d("xn","西南 · 云贵桂川","雍正时 改土归流","","blue","blue",{org:"流官（取代世袭土司）",time:"雍正时大规模推行",mean:"废除世袭土司，改派可以调动的流官，加强中央对西南少数民族地区的管辖"});
+ d("tw","东南 · 台湾","1684 设台湾府","","blue","blue",{org:"台湾府，隶属福建省；后建台湾省",time:"1684 设台湾府；1885 建台湾省",mean:"加强对台湾的管辖"});
+ d("lf","理藩院","中央 · 少数民族事务","","gold","goldText",{org:"理藩院（中央）",time:"清朝",mean:"掌管蒙古、西藏、新疆等少数民族事务"});
+ let view="a",sel="jj",mode=null,go0=null,cur=null,rects=[],R={},ro=null,sub=null,last="";
+ const now=()=>performance.now()/1000,tc=(T,k)=>T[k]||T.fg;
+ function txt(c,s,x,y,col,f,al,bl){c.font=f||"12px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline=bl||"top";c.fillText(s,x,y)}
+ function wrap(c,s,mw){const L=[];let l="";for(const ch of String(s)){const t=l+ch;if(c.measureText(t).width>mw&&l){L.push(l);l=ch}else l=t}if(l)L.push(l);return L}
+ function para(c,s,x,y,mw,col,f,al){c.font=f||"12px "+SANS;const L=wrap(c,s,mw);L.forEach((l,i)=>txt(c,l,x,y+i*17,col,f,al));return y+L.length*17}
+ function need(c,id,w){const n=N[id],mw=w-10;c.font="600 13px "+SANS;const a=wrap(c,n.name,mw).length;c.font="12px "+SANS;const b=n.tag?wrap(c,n.tag,mw).length:0;return a*17+b*15+(b?2:0)+16}
+ function card(c,T,r){const n=N[r.id],col=T[n.col],on=sel===r.id;c.save();rrect(c,r.x,r.y,r.w,r.h,Math.min(10,r.h/3));c.fillStyle=T.bg;c.fill();
+  if(on||n.col!=="axis"){c.globalAlpha=on?.16:.07;c.fillStyle=col;c.fill();c.globalAlpha=1}
+  c.strokeStyle=col;c.lineWidth=on?3:n.col==="gold"?2.2:1.5;c.stroke();
+  const mw=r.w-10;c.font="600 13px "+SANS;const NL=wrap(c,n.name,mw);c.font="12px "+SANS;const TL=n.tag?wrap(c,n.tag,mw):[];
+  let y=r.y+(r.h-(NL.length*17+TL.length*15+(TL.length?2:0)))/2;const ncol=n.col==="axis"?T.fg:tc(T,n.tcol);
+  NL.forEach(l=>{txt(c,l,r.x+r.w/2,y,ncol,"600 13px "+SANS,"center");y+=17});y+=2;TL.forEach(l=>{txt(c,l,r.x+r.w/2,y,tc(T,n.tcol),"12px "+SANS,"center");y+=15});
+  c.restore();rects.push(r)}
+ function poly(c,pts,col,lw,dash,head,al){c.save();if(al!=null)c.globalAlpha=al;c.strokeStyle=c.fillStyle=col;c.lineWidth=lw;c.setLineDash(dash?[5,4]:[]);c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.stroke();
+  if(head){const[a,b]=pts.slice(-2),g=Math.atan2(b[1]-a[1],b[0]-a[0]),k=6+lw*1.5;c.setLineDash([]);c.beginPath();c.moveTo(b[0],b[1]);c.lineTo(b[0]-k*Math.cos(g-.4),b[1]-k*Math.sin(g-.4));c.lineTo(b[0]-k*Math.cos(g+.4),b[1]-k*Math.sin(g+.4));c.fill()}c.restore()}
+ const ctr=r=>[r.x+r.w/2,r.y+r.h/2];
+ function edge(r,dx,dy,pad){const s=Math.min(dx?(r.w/2+pad)/Math.abs(dx):1e9,dy?(r.h/2+pad)/Math.abs(dy):1e9),[x,y]=ctr(r);return[x+dx*s,y+dy*s]}
+ function seg(A,B,p1,p2){const[ax,ay]=ctr(A),[bx,by]=ctr(B),dx=bx-ax,dy=by-ay;return[edge(A,dx,dy,p1),edge(B,-dx,-dy,p2)]}
+ function link(c,A,B,col,lw,dash,al){poly(c,seg(A,B,2,4),col,lw,dash,true,al)}
+ const PATH={s:[["hd","jj","① 皇帝口授机密谕旨"],["jj","jj","② 军机大臣「跪受笔录」"],["jj","df","③ 以「廷寄」密封，直接寄发地方督抚（绕过内阁、六部）"],["df","df","④ 督抚接旨执行"]],
+  n:[["hd","ng","① 一般政务交内阁"],["ng","lb","② 内阁 → 六部"],["lb","df","③ 六部 → 地方"],["df","df","④ 地方执行"]]};
+ function viewA(c,T,w,h,t){const ty=34,cw=Math.min(170,(w-48)/2),ch=Math.max(50,Math.min(60,(h-200)/4.5)),gp=Math.max(22,Math.min(44,(h-4*ch-150)/3));cur=null;
+  txt(c,mode==="s"?"机密谕旨：廷寄直达":mode==="n"?"一般政务：常规路径":"清朝中枢结构",12,8,mode==="s"?T.goldText:T.fg,"600 12px "+SANS);
+  const lx=Math.max(16,w*.28-cw/2),rx=Math.min(w-16-cw,w*.72-cw/2),H=(id,b)=>Math.max(b,need(c,id,cw));
+  R.hd={id:"hd",x:w/2-cw/2,y:ty,w:cw,h:H("hd",ch)};const y1=R.hd.y+R.hd.h+gp,h1=Math.max(H("jj",ch),H("ng",ch));
+  R.jj={id:"jj",x:lx,y:y1,w:cw,h:h1};R.ng={id:"ng",x:rx,y:y1,w:cw,h:h1};R.lb={id:"lb",x:rx,y:y1+h1+gp,w:cw,h:H("lb",ch)};
+  R.df={id:"df",x:w/2-cw/2,y:R.lb.y+R.lb.h+gp,w:cw,h:H("df",ch)};
+  let idx=-1,pos=null;const P=mode?PATH[mode]:null;
+  if(P){const e=(t-go0)/ST,i=Math.floor(e);idx=Math.min(i,P.length-1);const s=P[idx],k=i<P.length?(1-Math.cos(Math.PI*(e-i)))/2:1,A=ctr(R[s[0]]),B=ctr(R[s[1]]);pos=[A[0]+(B[0]-A[0])*k,A[1]+(B[1]-A[1])*k];cur=s[2]}
+  [["hd","jj"],["jj","df"],["hd","ng"],["ng","lb"],["lb","df"]].forEach(p=>link(c,R[p[0]],R[p[1]],T.axis,1,true,.3));
+  if(P)P.forEach((s,i)=>{if(i>idx||s[0]===s[1])return;mode==="s"?link(c,R[s[0]],R[s[1]],T.gold,s[0]==="jj"?4.5:2.4):link(c,R[s[0]],R[s[1]],T.axis,1.3)});
+  Object.values(R).forEach(r=>card(c,T,r));
+  if(mode==="s"&&idx===1)txt(c,"跪受笔录",R.jj.x+R.jj.w/2,R.jj.y-6,T.goldText,"600 12px "+SANS,"center","bottom");
+  if(mode==="s"&&idx>=2){const[a,b]=seg(R.jj,R.df,2,4);txt(c,"廷寄",(a[0]+b[0])/2-8,(a[1]+b[1])/2,T.goldText,"600 13px "+SANS,"right","middle")}
+  if(pos){c.save();const g=mode==="s"?T.gold:T.axis;c.shadowColor=g;c.shadowBlur=mode==="s"?16:0;c.fillStyle=g;rrect(c,pos[0]-8,pos[1]-8,16,16,3);c.fill();c.restore()}
+  let y=R.df.y+R.df.h+14;if(cur)y=para(c,cur,w/2,y,w-32,mode==="s"?T.goldText:T.fg,"600 13px "+SANS,"center")+4;
+  const bl=Math.max(80,Math.min(240,w-200)),bx=Math.max(104,(w-bl)/2);y=Math.max(y+6,Math.min(h-44,y+30));
+  txt(c,"君主专制程度",bx-10,y+7,T.fg,"600 12px "+SANS,"right","middle");c.save();rrect(c,bx,y,bl,14,7);c.fillStyle=T.grid;c.fill();rrect(c,bx,y,bl,14,7);c.fillStyle=T.redText;c.fill();c.restore();
+  txt(c,"→ 顶峰",bx+bl+8,y+7,T.redText,"600 12px "+SANS,"left","middle");txt(c,"示意",bx,y+22,T.fg,"12px "+SANS)}
+ function viewB(c,T,w,h){const ty=34,g=10,tw=Math.min(200,(w-32-2*g)/3),x0=(w-3*tw-2*g)/2,base=Math.max(60,Math.min(96,(h-120)/3));
+  txt(c,"示意 · 按大致方位排列",12,8,T.fg,"600 12px "+SANS);
+  const G=[["xj","mg",null],["xz","lf",null],["xn",null,"tw"]];let y=ty;
+  G.forEach(row=>{const rh=Math.max(base,...row.filter(Boolean).map(id=>need(c,id,tw)));row.forEach((id,j)=>{if(id)R[id]={id,x:x0+j*(tw+g),y,w:tw,h:rh}});y+=rh+g});
+  txt(c,"北 ↑",w-16,8,T.fg,"12px "+SANS,"right");
+  ["mg","xj","xz","xn","tw"].forEach(k=>poly(c,seg(R.lf,R[k],2,2),T.gold,1.5,true,false,.85));
+  Object.values(R).forEach(r=>card(c,T,r));
+  para(c,"虚线：理藩院等中央机构统辖边疆 · 点击瓦片查看机构、时间、意义",w/2,y+4,w-32,T.fg,"12px "+SANS,"center")}
+ function rows(T){const n=N[sel]||N.jj;
+  if(view==="a"){const r=[["当前环节",cur||"点击「下达机密谕旨」或「一般政务」"],["路径",mode==="s"?"皇帝 → 军机处 → 地方督抚（廷寄，绕过内阁、六部）":mode==="n"?"内阁 → 六部 → 地方（常规）":"—",mode==="s"?T.goldText:T.fg]];
+   if(sel==="jj")r.push(["选任","军机大臣由皇帝从亲信大臣中选任",T.blue],["设置","无固定衙署和属官；「只供传述缮撰，不能稍有赞画」"],["特点","办事迅速、保密"]);
+   else r.push(["选中",n.name+"："+n.duty]);
+   r.push(["君主专制程度","██████████ → 顶峰",T.redText]);return r}
+  return[["选中",n.name,tc(T,n.tcol)],["机构",n.org],["时间",n.time],["意义",n.mean]]}
+ function setView(v){view=v;last="";mode=null;cur=null;sel=v==="a"?"jj":"lf";if(!sub)return;sub.innerHTML="";
+  if(v==="a")sub.append(button("下达机密谕旨",()=>{mode="s";go0=now();last=""},true),button("一般政务",()=>{mode="n";go0=now();last=""}))}
+ return{
+  text:"清朝沿袭明制并有发展。雍正时设<b>军机处</b>，军国大事由皇帝和军机大臣决定，以<b>廷寄</b>直接下达，君主专制达到顶峰。在边疆，清朝设<b>理藩院</b>，在西藏设<b>驻藏大臣</b>并实行<b>金瓶掣签</b>，在新疆设<b>伊犁将军</b>，在西南推行<b>改土归流</b>，在台湾设府，巩固和发展了统一多民族国家。",
+  points:["军机处：皇帝的秘书机构，跪受笔录、廷寄，君主专制顶峰","理藩院管理少数民族事务","驻藏大臣、金瓶掣签；伊犁将军；台湾府","改土归流：加强中央对西南少数民族地区的管辖"],
+  gk:"浙江选考常考军机处设立的实质（强化皇权，标志君主专制达到顶峰）与清朝边疆治理措施。<br>易错：军机处没有决策权，不是宰相机构；改土归流是雍正时大规模推行，针对西南，不是西北。",
+  mount(ctrl,read){ctrl.append(chips([{label:"军机处",value:"a"},{label:"边疆治理",value:"b"}],view,setView));
+   sub=el("div","ctrls");ctrl.append(sub);setView(view);ro=readout([]);read.append(ro)},
+  draw(c,w,h,t){const T=theme();rects=[];R={};view==="a"?viewA(c,T,w,h,t):viewB(c,T,w,h);
+   if(ro){const rs=rows(T),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(type!=="down")return false;const r=rects.slice().reverse().find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h);if(r){sel=r.id;last="";return true}return false},
+  unmount(){ro=null;sub=null;rects=[];mode=null;cur=null}}})();
+CH[7].ready=true;
+MODS[7]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",D=["秦","汉","隋唐","宋","元","明","清"];
+ const MA=["三公九卿","中外朝","三省六部（相权一分为三）","二府三司、参知政事","中书省（相权有所回升）","废丞相、设内阁","设军机处"];
+ const ML=["郡县制","郡国并行 → 推恩令、刺史","州县制，后期藩镇割据","知州、通判、转运使","行省制度","废行省，设三司","督抚制、改土归流"];
+ const NB=["确立中央集权","汉初郡国并行，七国之乱后推恩令削藩","前期加强；后期藩镇割据 → 五代十国","强干弱枝，此后持续加强","行省加强对地方的管辖","三司分权，直属中央","中央集权进一步加强"];
+ const JQ=[[0,.45],[1,.52],[2,.58],[3,.68],[4,.7],[5,.9],[6,1]],XQ=[[0,.85],[1,.7],[2,.5],[3,.33],[4,.48],[5,0]];
+ const ZY=[[0,.6],[.6,.3],[1,.55],[2,.68],[2.55,.22],[3,.62],[4,.72],[5,.85],[6,.95]];
+ const N={},LX=["sg","cj","jp","kj"],LJ=["ys","cs","yt","tp","yt2","dc"];
+ function d(id,name,tag,duty,col){N[id]={id,name,tag,duty,col}}
+ d("sg","世官制","先秦","贵族世代为官，按血缘关系任官","blue");
+ d("cj","察举制","汉","地方长官考察、推荐人才，以德行（孝廉）为主要标准；后期被豪强把持","blue");
+ d("jp","九品中正制","魏晋","中正官按家世、才德将士人评为九品；后期「上品无寒门，下品无势族」","blue");
+ d("kj","科举制","隋唐至清 · 1905 年废除","分科考试、以成绩取士，打破门第垄断，扩大统治基础；明清八股取士，1905 年废除","blue");
+ d("ys","御史大夫","秦","三公之一，掌监察百官","gold");
+ d("cs","刺史","汉","汉武帝分全国为十三州部，派刺史监察地方","gold");
+ d("yt","御史台","隋唐","中央监察机构，纠察百官","gold");
+ d("tp","通判","宋","州设通判，与知州相互牵制，监督知州","gold");
+ d("yt2","御史台","元","中央设御史台，地方设行御史台","gold");
+ d("dc","都察院","明清","明改御史台为都察院，清沿置，监察更趋严密","gold");
+ let view="a",si=5,sel="kj",drag=false,G=null,rects=[],ro=null,last="";
+ const cl=v=>Math.max(0,Math.min(1,v));
+ function txt(c,s,x,y,col,f,al,bl){c.font=f||"12px "+SANS;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline=bl||"top";c.fillText(s,x,y)}
+ function wrap(c,s,mw){const L=[];let l="";for(const ch of String(s)){const t=l+ch;if(c.measureText(t).width>mw&&l){L.push(l);l=ch}else l=t}if(l)L.push(l);return L}
+ function para(c,s,x,y,mw,col,f,al){c.font=f||"12px "+SANS;const L=wrap(c,s,mw);L.forEach((l,i)=>txt(c,l,x,y+i*17,col,f,al));return y+L.length*17}
+ function need(c,id,w){const n=N[id],mw=w-10;c.font="600 13px "+SANS;const a=wrap(c,n.name,mw).length;c.font="12px "+SANS;const b=wrap(c,n.tag,mw).length;return a*17+b*15+18}
+ function card(c,T,r){const n=N[r.id],col=n.col==="gold"?T.gold:T.blue,tcol=n.col==="gold"?T.goldText:T.blue,on=sel===r.id;
+  c.save();rrect(c,r.x,r.y,r.w,r.h,Math.min(10,r.h/3));c.fillStyle=T.bg;c.fill();c.globalAlpha=on?.16:.07;c.fillStyle=col;c.fill();c.globalAlpha=1;
+  c.strokeStyle=col;c.lineWidth=on?3:1.5;c.stroke();const mw=r.w-10;c.font="600 13px "+SANS;const NL=wrap(c,n.name,mw);c.font="12px "+SANS;const TL=wrap(c,n.tag,mw);
+  let y=r.y+(r.h-(NL.length*17+TL.length*15+2))/2;NL.forEach(l=>{txt(c,l,r.x+r.w/2,y,tcol,"600 13px "+SANS,"center");y+=17});y+=2;
+  TL.forEach(l=>{txt(c,l,r.x+r.w/2,y,T.fg,"12px "+SANS,"center");y+=15});c.restore();rects.push(r)}
+ function curve(c,P,col,lw,dash){c.save();c.strokeStyle=col;c.lineWidth=lw;c.lineCap="round";c.setLineDash(dash?[6,5]:[]);c.beginPath();c.moveTo(P[0][0],P[0][1]);
+  for(let i=0;i<P.length-1;i++){const p0=P[i-1]||P[i],p1=P[i],p2=P[i+1],p3=P[i+2]||p2;
+   c.bezierCurveTo(p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6,p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6,p2[0],p2[1])}c.stroke();c.restore()}
+ function dot(c,x,y,col,r){c.save();c.fillStyle=col;c.beginPath();c.arc(x,y,r,0,7);c.fill();c.restore()}
+ function frameAB(c,T,w,h,leg){let lx=16;leg.forEach(l=>{c.save();c.strokeStyle=l[1];c.lineWidth=3;c.beginPath();c.moveTo(lx,15);c.lineTo(lx+18,15);c.stroke();c.restore();
+   txt(c,l[0],lx+24,8,l[2],"600 12px "+SANS);c.font="600 12px "+SANS;lx+=24+c.measureText(l[0]).width+16});
+  txt(c,"示意，非定量",w-16,8,T.fg,"12px "+SANS,"right");
+  c.font="600 13px "+SANS;const info=D[si]+"："+(view==="a"?MA[si]:ML[si]),il=wrap(c,info,w-32).length;
+  const top=48,base=Math.max(top+80,h-il*17-46),bx=52,bw=w-16-12-bx,X=i=>bx+i*bw/6,Y=v=>top+(1-v)*(base-top);G={bx,bw,top,base,X,Y};
+  c.save();c.strokeStyle=T.grid;c.lineWidth=1;c.beginPath();[.5,1].forEach(v=>{c.moveTo(40,Y(v)+.5);c.lineTo(w-16,Y(v)+.5)});c.stroke();
+  c.strokeStyle=T.axis;c.beginPath();c.moveTo(40,base+.5);c.lineTo(w-16,base+.5);c.stroke();c.restore();
+  txt(c,"强",16,Y(1),T.fg,"12px "+SANS,"left","middle");txt(c,"弱",16,base,T.fg,"12px "+SANS,"left","middle");
+  c.save();c.strokeStyle=T.axis;c.setLineDash([3,4]);c.beginPath();c.moveTo(X(si)+.5,top-6);c.lineTo(X(si)+.5,base);c.stroke();c.restore();
+  D.forEach((n,i)=>txt(c,n,X(i),base+8,T.fg,(i===si?"600 13px ":"12px ")+SANS,"center"));
+  para(c,"▸ "+info,16,base+32,w-32,view==="a"?T.goldText:T.redText,"600 13px "+SANS);return G}
+ const px=P=>P.map(p=>[G.X(p[0]),G.Y(p[1])]);
+ function viewA(c,T,w,h){frameAB(c,T,w,h,[["君权",T.goldText,T.goldText],["相权",T.blue,T.blue]]);
+  curve(c,px(XQ),T.blue,2.5);curve(c,px([[5,0],[6,0]]),T.blue,2.5,true);txt(c,"无宰相",G.X(5.5),G.Y(0)-6,T.blue,"600 12px "+SANS,"center","bottom");
+  curve(c,px(JQ),T.goldText,3);txt(c,"顶峰",G.X(6)-6,G.Y(1)-6,T.goldText,"600 12px "+SANS,"right","bottom");
+  for(let i=0;i<7;i++){dot(c,G.X(i),G.Y(JQ[i][1]),T.goldText,i===si?6:3);dot(c,G.X(i),G.Y(i<5?XQ[i][1]:0),T.blue,i===si?6:3)}}
+ function viewB(c,T,w,h){frameAB(c,T,w,h,[["中央集权程度",T.redText,T.redText]]);curve(c,px(ZY),T.redText,3);
+  const uw=G.bw/6;[[.6,.3,"汉初郡国并行 → 七国之乱"],[2.55,.22,"唐后期藩镇割据 → 五代十国"]].forEach(p=>{const x=G.X(p[0]),y=G.Y(p[1]),mw=Math.max(72,Math.min(150,uw*1.7));
+   dot(c,x,y,T.redText,4);const cx=Math.max(16+mw/2,Math.min(w-16-mw/2,x));c.font="12px "+SANS;const L=wrap(c,p[2],mw);
+   L.forEach((l,i)=>txt(c,l,cx,y+10+i*16,T.redText,"12px "+SANS,"center"))});
+  ZY.forEach(p=>{if(Number.isInteger(p[0]))dot(c,G.X(p[0]),G.Y(p[1]),T.redText,p[0]===si?6:3)})}
+ function lane(c,T,w,y,ids,label){const g=22,cols=Math.max(1,Math.min(ids.length,Math.floor((w-32+g)/(96+g)))),cw=Math.min(170,(w-32-(cols-1)*g)/cols),x0=(w-cols*cw-(cols-1)*g)/2;
+  const rows=[];for(let i=0;i<ids.length;i+=cols)rows.push(ids.slice(i,i+cols));
+  const rh=Math.max(52,...ids.map(id=>need(c,id,cw))),bh=24+rows.length*(rh+12);
+  c.save();rrect(c,8,y,w-16,bh,14);c.fillStyle=T.grid;c.fill();c.restore();txt(c,label,16,y+6,ids===LX?T.blue:T.goldText,"600 12px "+SANS);
+  rows.forEach((row,ri)=>{const yy=y+24+ri*(rh+12);row.forEach((id,j)=>{const r={id,x:x0+j*(cw+g),y:yy,w:cw,h:rh};card(c,T,r);
+   if(j){c.save();c.strokeStyle=c.fillStyle=T.axis;c.lineWidth=1.3;const ax=r.x-g+3,bx=r.x-4,ay=yy+rh/2;c.beginPath();c.moveTo(ax,ay);c.lineTo(bx,ay);c.stroke();
+    c.beginPath();c.moveTo(bx+2,ay);c.lineTo(bx-5,ay-4);c.lineTo(bx-5,ay+4);c.fill();c.restore()}})});return y+bh}
+ function viewC(c,T,w,h){txt(c,"两条并行时间带 · 点击卡片查看说明",16,8,T.fg,"600 12px "+SANS);
+  let y=lane(c,T,w,32,LX,"选官：重血缘、门第 → 重才学");y=lane(c,T,w,y+14,LJ,"监察：日益严密");
+  if(y+24<h)para(c,"选官 世官 → 察举 → 九品中正 → 科举；监察 御史大夫 → 刺史 → 御史台 → 通判 → 御史台 → 都察院",w/2,y+10,w-32,T.fg,"12px "+SANS,"center")}
+ function bar(v){const k=Math.round(cl(v)*10);return"█".repeat(k)+"░".repeat(10-k)}
+ function rows(T){if(view==="a")return[["朝代",D[si]],["关键措施",MA[si],T.goldText],["君权（示意）",bar(JQ[si][1])+(si===6?" 顶峰":""),T.goldText],["相权（示意）",si<5?bar(XQ[si][1]):"无宰相",T.blue]];
+  if(view==="b"){const v=ZY.find(p=>p[0]===si)[1];return[["朝代",D[si]],["地方制度",ML[si],T.redText],["中央集权（示意）",bar(v),T.redText],["趋势",NB[si]]]}
+  const n=N[sel];return[["选中",n.name,n.col==="gold"?T.goldText:T.blue],["类别",LX.includes(sel)?"选官制度":"监察制度"],["时期",n.tag],["说明",n.duty]]}
+ function pick(x){if(!G)return;si=Math.round(Math.max(0,Math.min(6,(x-G.bx)/(G.bw/6))));last=""}
+ return{
+  text:"中国古代政治制度演变有两条主线：一是<b>君权与相权</b>的矛盾，相权不断被分割和削弱，君权不断加强，明清达到顶峰；二是<b>中央与地方</b>的矛盾，总体趋势是中央集权不断加强，地方权力逐步被收回。选官从重血缘、重门第走向<b>重才学</b>，监察制度日益严密。",
+  points:["君权↑ 相权↓：三公 → 三省 → 二府 → 废丞相 → 内阁 → 军机处","中央集权总体加强，有反复（汉初、唐后期）","选官：世官 → 察举 → 九品中正 → 科举","专制主义中央集权：利于统一与发展，后期阻碍社会进步"],
+  gk:"浙江选考常以材料题考查制度演变的趋势与特点，要求按「君权与相权」「中央与地方」两条线归纳。<br>易错：君主专制是中央决策方式（君权与相权），中央集权是中央与地方的关系，两者不能混用。",
+  mount(ctrl,read){ctrl.append(chips([{label:"君权与相权",value:"a"},{label:"中央与地方",value:"b"},{label:"选官与监察",value:"c"}],view,v=>{view=v;last=""}));
+   ro=readout([]);read.append(ro)},
+  draw(c,w,h){const T=theme();rects=[];G=null;view==="a"?viewA(c,T,w,h):view==="b"?viewB(c,T,w,h):viewC(c,T,w,h);
+   if(ro){const rs=rows(T),key=JSON.stringify(rs);if(key!==last){last=key;ro.update(rs)}}},
+  pointer(e,type,x,y){if(view==="c"){if(type!=="down")return false;const r=rects.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h);if(r){sel=r.id;last="";return true}return false}
+   if(type==="down"&&G&&y>=G.top-12&&y<=G.base+30){drag=true;pick(x);return true}
+   if(type==="move"&&drag){pick(x);return true}if(type==="up")drag=false;return false},
+  unmount(){ro=null;rects=[];drag=false;G=null}}})();
+CH[8].ready=true;
+MODS[8]=(()=>{
+ const SANS="-apple-system,'PingFang SC','Noto Sans SC',sans-serif",L="ABCD";
+ const Q=[
+  {q:"秦朝郡县制与西周分封制最根本的区别是",o:["地方官由皇帝任免、不得世袭","统治地域更加广阔","以血缘关系维系统治","中央设三公九卿"],a:0,e:"郡县制以官僚制取代世袭贵族，地方官由皇帝任免，这是与分封制的根本区别。",c:1},
+  {q:"汉武帝采纳主父偃建议颁布推恩令，其主要目的是",o:["加强对官吏的监察","削弱诸侯王国势力","分割丞相的权力","扩大官吏来源"],a:1,e:"推恩令让诸侯王把封地分给子弟，王国越分越小，王国问题基本解决。",c:2},
+  {q:"唐代三省六部制中，负责审核政令、可以「封驳」的是",o:["中书省","尚书省","门下省","吏部"],a:2,e:"中书省草拟、门下省审核（可封驳）、尚书省执行。",c:3},
+  {q:"宋代「兵权三分」中，枢密院",o:["有统兵权无调兵权","有调兵权无统兵权","既有调兵权又有统兵权","只负责战时领兵"],a:1,e:"枢密院掌调兵，三衙掌统兵，率臣战时领兵，相互牵制。",c:4},
+  {q:"关于明朝内阁，表述正确的是",o:["是法定的中央最高行政机构","内阁首辅即丞相","是皇帝的顾问和秘书机构，始终从属于皇权","拥有最终决策权"],a:2,e:"内阁只有票拟权，批红权在皇帝，内阁不是宰相机构。",c:6},
+  {q:"下列机构中，标志着中国古代君主专制达到顶峰的是",o:["清朝军机处","元朝行省","宋朝二府三司","明朝三司"],a:0,e:"军机处由皇帝亲信组成，跪受笔录、廷寄，一切大权集于皇帝。",c:7}];
+ let qi=0,ans=Array(6).fill(null),box=null,rd=null,dots=[];
+ const score=()=>ans.filter((v,i)=>v===Q[i].a).length,done=()=>ans.every(v=>v!==null);
+ function comment(s){return s===6?"全对，古代政治制度掌握扎实！":s>=4?"掌握较好，再看看错题对应的章节。":"建议回看相关章节，再来一次。"}
+ function render(){if(!box)return;const T=theme(),q=Q[qi],my=ans[qi];box.innerHTML="";
+  const h=el("p","",`<span class="mono" style="color:${T.blue}">第 ${qi+1} / 6 题</span><br>${q.q}（　）`);h.style.cssText="margin:0;font-size:15px;line-height:1.6";box.append(h);
+  q.o.forEach((t,k)=>{const b=el("button","",`<b>${L[k]}.</b> ${t}`);let bg="var(--btn2)",fg="var(--fg)";
+   if(my!==null){if(k===q.a){bg=T.blue;fg="#fff"}else if(k===my){bg=T.redText;fg="#fff"}}
+   b.style.cssText=`display:block;width:100%;text-align:left;border:0;border-radius:22px;padding:10px 16px;min-height:44px;white-space:normal;line-height:1.5;font-size:15px;background:${bg};color:${fg}`;
+   b.setAttribute("role","radio");b.setAttribute("aria-checked",my===k);b.disabled=my!==null;b.style.opacity="1";b.style.cursor=my!==null?"default":"pointer";
+   b.onclick=()=>{if(ans[qi]!==null)return;ans[qi]=k;render()};box.append(b)});
+  const nav=el("div");nav.style.cssText="display:flex;flex-wrap:wrap;gap:8px";
+  const p=button("上一题",()=>{qi--;render()}),n=button(qi===5?"查看总分":"下一题",()=>{if(qi<5)qi++;render()},true),r=button("重新开始",()=>{ans=Array(6).fill(null);qi=0;render()});
+  p.disabled=qi===0;n.disabled=qi===5&&!done();[p,n,r].forEach(b=>{b.style.minHeight="44px";nav.append(b)});box.append(nav);
+  rd.innerHTML="";if(my!==null){const ok=my===q.a,d=el("div");d.style.cssText="font-size:14px;line-height:1.7";
+   d.innerHTML=`<p style="margin:0;font-weight:600;color:${ok?T.blue:T.redText}">${ok?"回答正确":"回答错误"} · 正确答案 ${L[q.a]}</p><p style="margin:4px 0 0;color:${T.fg}">${q.e}<span style="color:${T.goldText}">（对应第 ${q.c} 章）</span></p>`;
+   const g=button("去第 "+q.c+" 章",()=>{location.hash="#"+q.c});g.style.cssText="margin-top:8px;min-height:44px";d.append(g);rd.append(d)}
+  else rd.innerHTML=`<p style="margin:0;font-size:14px;color:${T.fg}">选择一个选项，立即判对错并显示解析。</p>`;
+  if(done()){const s=score(),f=el("p","",`<b>总分 ${s} / 6</b>　${comment(s)}`);f.style.cssText=`margin:10px 0 0;font-size:14px;color:${s===6?T.blue:s>=4?T.goldText:T.redText}`;rd.append(f)}}
+ return{
+  text:"六道浙江选考风格单选题，覆盖秦至清的中央与地方制度。点选项立即判对错，查看解析，并可跳回对应章节复习。",
+  points:["郡县制 vs 分封制：任免与世袭","推恩令、三省分工、兵权三分","内阁从属皇权，军机处标志专制顶峰"],
+  gk:"选考单选常设「根本区别」「主要目的」「标志」类设问，注意区分本质特征与表面现象。",
+  mount(ctrl,read){box=el("div");box.style.cssText="display:flex;flex-direction:column;gap:8px";box.setAttribute("role","radiogroup");rd=el("div");ctrl.append(box);read.append(rd);render()},
+  draw(c,w,h){const T=theme(),s=score(),R=Math.max(30,Math.min(70,h*.2,w*.2)),cx=w/2,cy=24+R;
+   c.save();c.lineWidth=Math.max(8,R*.16);c.lineCap="round";c.strokeStyle=T.grid;c.beginPath();c.arc(cx,cy,R,0,Math.PI*2);c.stroke();
+   if(s){c.strokeStyle=T.blue;c.beginPath();c.arc(cx,cy,R,-Math.PI/2,-Math.PI/2+Math.PI*2*s/6);c.stroke()}
+   c.textAlign="center";c.textBaseline="middle";c.fillStyle=T.fg;c.font="600 "+Math.round(R*.5)+"px "+SANS;c.fillText(s+"/6",cx,cy-R*.08);
+   c.font="12px "+SANS;c.fillText("答对",cx,cy+R*.38);
+   const gap=Math.min(48,(w-40)/6),y=cy+R+40,x0=cx-gap*2.5;dots=[];
+   Q.forEach((q,i)=>{const x=x0+i*gap,v=ans[i],col=v===null?T.grid:v===q.a?T.blue:T.redText;c.beginPath();c.arc(x,y,12,0,Math.PI*2);c.fillStyle=col;c.fill();
+    if(i===qi){c.lineWidth=2;c.strokeStyle=T.fg;c.beginPath();c.arc(x,y,16,0,Math.PI*2);c.stroke()}
+    c.fillStyle=v===null?T.fg:"#fff";c.font="600 12px "+SANS;c.fillText(i+1,x,y+.5);dots.push({x,y,i})});
+   c.font="13px "+SANS;c.fillStyle=T.fg;const y2=y+40;
+   if(done()){c.font="600 15px "+SANS;c.fillStyle=s===6?T.blue:s>=4?T.goldText:T.redText;wrapText(c,"总分 "+s+" / 6 · "+comment(s),cx,y2,w-32,20)}
+   else wrapText(c,"已答 "+ans.filter(v=>v!==null).length+" / 6 · 点题号小圆点可切换题目",cx,y2,w-32,18);c.restore()},
+  pointer(e,type,x,y){if(type!=="down")return false;const d=dots.find(d=>Math.hypot(x-d.x,y-d.y)<22);if(d){qi=d.i;render();return true}return false},
+  unmount(){box=rd=null;dots=[]}}})();
+const $=id=>document.getElementById(id),pad=i=>String(i+1).padStart(2,"0");
+let cur=0,mod=null,W=0,H=0,DPR=1;
+const cv=$("cv"),ctx=cv.getContext("2d");
+/* ---------- theme ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function isDark(){return document.documentElement.classList.contains("dark")}
+function theme(){return isDark()
+ ?{bg:"#1c1c1e",fg:"#f5f5f7",sub:"#a1a1a6",grid:"rgba(255,255,255,.07)",axis:"rgba(255,255,255,.45)",blue:"#2997ff",red:"#ff6369",gold:"#e2a336",teal:"#2ec4b6",purple:"#b197fc",goldText:"#f0b847",redText:"#ff7b72"}
+ :{bg:"#ffffff",fg:"#1d1d1f",sub:"#6e6e73",grid:"rgba(0,0,0,.05)",axis:"rgba(0,0,0,.45)",blue:"#0071e3",red:"#e5484d",gold:"#c98a12",teal:"#0a9396",purple:"#8e6bd8",goldText:"#9a6a00",redText:"#c0362c"}}
+function setDark(d){document.documentElement.classList.toggle("dark",d);store.set("zhidu-dark",d?"1":"0");$("dark").textContent=$("mdark").textContent=d?"浅色":"深色"}
+setDark(store.get("zhidu-dark")==="1");
+/* ---------- UI tools ---------- */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function slider(label,min,max,step,val,fmt,onchange){fmt=fmt||fmtNum;const w=el("div","sl"),l=el("label"),o=el("output"),i=el("input");
+ l.append(document.createTextNode(label),o);i.type="range";Object.assign(i,{min,max,step,value:val});i.setAttribute("aria-label",label);o.textContent=fmt(+val);
+ i.oninput=()=>{o.textContent=fmt(+i.value);onchange&&onchange(+i.value)};w.append(l,i);
+ w.set=v=>{i.value=v;o.textContent=fmt(+v)};return w}
+function chips(options,val,onchange){const w=el("div","chips");const bs=options.map(op=>{const o=typeof op==="object"?op:{label:op,value:op};const b=el("button",o.value===val?"on":"",o.label);
+ b.onclick=()=>{bs.forEach(x=>x.classList.remove("on"));b.classList.add("on");onchange&&onchange(o.value)};w.append(b);return b});return w}
+function button(label,onclick,primary){const b=el("button","pill"+(primary?" primary":""),label);b.onclick=onclick;return b}
+function toggle(label,val,onchange){const b=el("button","tg"+(val?" on":""),"<span>"+label+"</span><i></i>");b.setAttribute("role","switch");b.setAttribute("aria-checked",!!val);
+ b.onclick=()=>{val=!val;b.classList.toggle("on",val);b.setAttribute("aria-checked",val);onchange&&onchange(val)};return b}
+function readout(rows){const d=el("dl","ro");d.update=rs=>{d.innerHTML=rs.map(r=>`<dt>${r[0]}</dt><dd style="${r[2]?"color:"+r[2]:""}">${r[1]}</dd>`).join("")};d.update(rows||[]);return d}
+/* ---------- math / canvas tools ---------- */
+function fmtNum(v){if(!isFinite(v))return v>0?"∞":v<0?"−∞":"—";const e=1e-6,s=v<0?"−":"",a=Math.abs(v);
+ if(Math.abs(a-Math.round(a))<e)return(Math.round(a)===0?"":s)+Math.round(a);
+ for(let d=2;d<=12;d++){const n=a*d;if(Math.abs(n-Math.round(n))<e)return s+Math.round(n)+"/"+d}
+ return s+a.toFixed(2)}
+function drawAxes(ctx,box,xr,yr,opts){opts=Object.assign({equal:true,grid:true,ticks:true,step:1,labels:true},opts);const T=theme();
+ let[x0,x1]=xr,[y0,y1]=yr,sx=box.w/(x1-x0),sy=box.h/(y1-y0);
+ if(opts.equal){const s=Math.min(sx,sy),cx=(x0+x1)/2,cy=(y0+y1)/2;sx=sy=s;x0=cx-box.w/s/2;x1=cx+box.w/s/2;y0=cy-box.h/s/2;y1=cy+box.h/s/2}
+ const X=x=>box.x+(x-x0)*sx,Y=y=>box.y+box.h-(y-y0)*sy,invX=p=>x0+(p-box.x)/sx,invY=p=>y0+(box.y+box.h-p)/sy;
+ let st=opts.step;while(st*sx<22)st*=2;
+ ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();ctx.lineWidth=1;
+ if(opts.grid){ctx.strokeStyle=T.grid;ctx.beginPath();for(let x=Math.ceil(x0/st)*st;x<=x1;x+=st){ctx.moveTo(X(x),box.y);ctx.lineTo(X(x),box.y+box.h)}for(let y=Math.ceil(y0/st)*st;y<=y1;y+=st){ctx.moveTo(box.x,Y(y));ctx.lineTo(box.x+box.w,Y(y))}ctx.stroke()}
+ ctx.strokeStyle=T.axis;ctx.beginPath();ctx.moveTo(box.x,Y(0));ctx.lineTo(box.x+box.w,Y(0));ctx.moveTo(X(0),box.y);ctx.lineTo(X(0),box.y+box.h);ctx.stroke();
+ ctx.restore();return{X,Y,invX,invY,s:sx,box,xr:[x0,x1],yr:[y0,y1]}}
+function wrapText(ctx,text,x,y,maxW,lh){let line="";for(const ch of String(text)){if(ch==="\n"){ctx.fillText(line,x,y);line="";y+=lh;continue}
+ const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);line=ch;y+=lh}else line=t}if(line)ctx.fillText(line,x,y);return y+lh}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+/* ---------- placeholder ---------- */
+function drawSoon(ctx,w,h){const T=theme(),cw=Math.min(320,w-40),ch=150,x=(w-cw)/2,y=(h-ch)/2;
+ ctx.save();ctx.shadowColor="rgba(0,0,0,.08)";ctx.shadowBlur=24;ctx.shadowOffsetY=4;ctx.fillStyle=isDark()?"#2c2c2e":"#fff";rrect(ctx,x,y,cw,ch,22);ctx.fill();ctx.restore();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=T.blue;ctx.font="13px ui-monospace,Menlo,monospace";ctx.fillText("CHAPTER "+pad(cur),w/2,y+38);
+ ctx.fillStyle=T.fg;ctx.font="600 22px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText("即将上线",w/2,y+72);
+ ctx.fillStyle=T.sub;ctx.font="14px -apple-system,'PingFang SC','Noto Sans SC',sans-serif";ctx.fillText(CH[cur].n,w/2,y+108)}
+/* ---------- canvas loop ---------- */
+function resize(){const r=$("cwrap").getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,3);W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);frame(performance.now())}
+function frame(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);ctx.fillStyle=theme().bg;ctx.fillRect(0,0,W,H);
+ try{mod&&mod.draw?mod.draw(ctx,W,H,t/1000):drawSoon(ctx,W,H)}catch(err){console.error(err)}}
+function loop(t){frame(t);requestAnimationFrame(loop)}
+new ResizeObserver(resize).observe($("cwrap"));window.addEventListener("resize",resize);
+function ptr(type){return e=>{if(!mod||!mod.pointer)return;const r=cv.getBoundingClientRect();
+ if(type==="down")try{cv.setPointerCapture(e.pointerId)}catch(_){}mod.pointer(e,type,e.clientX-r.left,e.clientY-r.top)}}
+cv.addEventListener("pointerdown",ptr("down"));cv.addEventListener("pointermove",ptr("move"));cv.addEventListener("pointerup",ptr("up"));cv.addEventListener("pointercancel",ptr("up"));
+/* ---------- chapters ---------- */
+function list(host,cls){host.innerHTML="";CH.forEach((c,i)=>{const b=el("button",cls,`<span class="mono">${pad(i)}</span><span>${c.n}</span>`);b.onclick=()=>{go(i);closeSheet()};host.append(b)})}
+list($("toc"),"");list($("slist"),"it");
+$("segs").innerHTML=CH.map(()=>"<i></i>").join("");
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod.unmount()}catch(e){console.error(e)}
+ cur=i;const c=CH[i],m=c.ready&&MODS[i]?MODS[i]:null;mod=m;
+ $("ctitle").textContent=pad(i)+"  "+c.n;$("cbook").textContent=c.book;$("ctext").innerHTML=m?m.text||"":"本章交互实验即将上线，敬请期待。";
+ const ctrl=$("ctrl"),read=$("read");ctrl.innerHTML="";read.innerHTML="";$("pts").innerHTML="";$("gk").innerHTML="";
+ if(m){m.mount&&m.mount(ctrl,read);$("pts").innerHTML=m.points?"<ul>"+[].concat(m.points).map(p=>"<li>"+p+"</li>").join("")+"</ul>":"";$("gk").innerHTML=m.gk||""}
+ $("ctrlSec").hidden=!ctrl.children.length;$("readSec").hidden=!read.children.length;$("ptSec").hidden=!$("pts").innerHTML;$("gkSec").hidden=!$("gk").innerHTML;
+ if(!m){$("ctrlSec").hidden=false;ctrl.innerHTML='<p class="soon">本章控件即将上线。</p>'}
+ document.querySelectorAll("#toc button,#slist button").forEach(b=>{const on=+b.querySelector(".mono").textContent-1===i;b.classList.toggle("on",on);on?b.setAttribute("aria-current","true"):b.removeAttribute("aria-current")});
+ document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
+ $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
+ ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+/* ---------- controls ---------- */
+$("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
+$("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("fold").onclick=()=>{const c=$("explain").classList.toggle("collapsed");$("fold").textContent=c?"展开":"收起";$("fold").setAttribute("aria-expanded",!c);resize()};
+function openSheet(){$("mask").hidden=$("sheet").hidden=false;const on=$("slist").querySelector(".on");on&&on.scrollIntoView({block:"nearest"})}
+function closeSheet(){$("mask").hidden=$("sheet").hidden=true}
+$("chbtn").onclick=openSheet;$("mask").onclick=closeSheet;
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INPUT"&&t.type!=="range"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable))return;
+ if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
+function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+go(fromHash());requestAnimationFrame(loop);
+</script>
+</body>
+</html>
