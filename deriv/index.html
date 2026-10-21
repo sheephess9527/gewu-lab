@@ -1,0 +1,2397 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>格物实验室 导数</title>
+<style>
+:root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--blue-fill:#0071e3;--blue-soft:#e6f0fc;--blue-text:#0058b0;--sec:#f5f5f7;--red:#e5484d;--gold:#c98a12;--gold-text:#9a6a00;--red-text:#c4262c;--teal:#0a9396;--purple:#8e6bd8;--grid:rgba(0,0,0,.05);--axis:rgba(0,0,0,.45);--bar:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.04);
+--sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--sb:env(safe-area-inset-bottom,0px)}
+html[data-theme=dark]{--bg:#000;--card:#1c1c1e;--fg:#f5f5f7;--sub:#a1a1a6;--line:rgba(255,255,255,.12);--blue:#2997ff;--blue-fill:#0066cc;--blue-soft:#0f2236;--blue-text:#2997ff;--sec:#2c2c2e;--gold-text:#c98a12;--red-text:#ff6b70;--grid:rgba(255,255,255,.07);--axis:rgba(255,255,255,.5);--bar:rgba(0,0,0,.72);--shadow:0 2px 12px rgba(0,0,0,.4)}
+[hidden]{display:none!important}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em}
+.mono{font-family:var(--mono)}
+a{color:var(--blue);text-decoration:none}
+.pill{height:32px;padding:0 16px;border-radius:999px;background:var(--sec);font-size:13px;font-weight:500;white-space:nowrap}
+.pill.pri{background:var(--blue-fill);color:#fff}
+.pill:disabled{opacity:.4;cursor:default}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);border:1px solid var(--line)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;height:52px;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+.back{display:flex;align-items:center;gap:4px;font-size:14px;white-space:nowrap;min-height:44px}
+.back b{font-size:22px;font-weight:400;line-height:1}
+.ttl{font-weight:600;letter-spacing:-.02em;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog{display:flex;gap:3px;margin-left:auto}
+.prog i{width:14px;height:4px;border-radius:2px;background:var(--line)}
+.prog i.on{background:var(--blue)}
+.prog i.cur{background:var(--blue);width:22px}
+.cnt{font-size:13px;color:var(--sub)}
+.tbtns{display:flex;gap:8px}
+.chbtn{display:none}
+/* desktop layout */
+.app{display:flex;height:calc(100vh - 52px);height:calc(100dvh - 52px)}
+.toc{width:220px;flex:none;overflow-y:auto;padding:14px 10px;border-right:1px solid var(--line)}
+.toc button,.sheet button{display:flex;gap:10px;width:100%;text-align:left;padding:9px 12px;border-radius:12px;font-size:14px;align-items:baseline}
+.toc button:hover{background:var(--sec)}
+.toc .num,.sheet .num{font-family:var(--mono);font-size:13px;color:var(--sub)}
+.toc button.cur,.sheet button.cur{background:var(--blue-soft);color:var(--blue-text)}
+.toc button.cur .num,.sheet button.cur .num{color:var(--blue-text)}
+.stage{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px;padding:14px}
+.explain{flex:none;padding:16px 20px}
+.exhead{display:flex;align-items:center;gap:12px}
+.exhead h1{font-size:20px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fold{font-size:13px;color:var(--blue);padding:4px 8px}
+.book{font-size:13px;color:var(--sub);margin-top:2px}
+.extext{font-size:15px;line-height:1.6;max-height:4.8em;overflow-y:auto;margin-top:6px}
+.explain.folded .book,.explain.folded .extext{display:none}
+.cvwrap{flex:1;min-height:0;position:relative;overflow:hidden;padding:0}
+#cv{display:block;width:100%;height:100%;touch-action:none}
+.soon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.soon div{padding:28px 36px;text-align:center}
+.soon h2{font-size:24px}
+.soon p{color:var(--sub);font-size:14px;margin-top:4px}
+.panel{width:340px;flex:none;overflow-y:auto;padding:14px 14px 14px 0;display:flex;flex-direction:column;gap:14px}
+.panel .card{padding:16px 18px}
+.panel h3{font-size:13px;color:var(--sub);font-weight:500;letter-spacing:0;margin-bottom:8px}
+.points ul{padding-left:18px;font-size:14px}
+.points li+li{margin-top:4px}
+.gk a{display:block;font-size:14px;padding:6px 0}
+.mdark{display:none}
+.empty{font-size:14px;color:var(--sub)}
+/* controls */
+.ctl{display:block;padding:6px 0}
+.ctl-h{display:flex;justify-content:space-between;font-size:14px}
+.ctl-h b{font-family:var(--mono);font-weight:400;color:var(--blue)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25),0 0 0 .5px rgba(0,0,0,.1)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0}
+.chips button{height:32px;padding:0 14px;border-radius:999px;background:var(--sec);font-size:13px}
+.chips button.on{background:var(--blue-fill);color:#fff}
+.btnrow{padding:6px 0}
+.tog{display:flex;justify-content:space-between;align-items:center;width:100%;padding:6px 0;font-size:14px}
+.tog i{width:42px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:background .2s}
+.tog i::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.tog.on i{background:var(--blue-fill)}.tog.on i::after{transform:translateX(16px)}
+.ro{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}
+.ro span{color:var(--sub)}.ro b{font-family:var(--mono);font-weight:400}
+/* sheet */
+.sheet-bg{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3);display:flex;align-items:flex-end}
+.sheet{width:100%;max-height:70vh;overflow-y:auto;background:var(--card);border-radius:20px 20px 0 0;padding:12px 12px calc(12px + var(--sb))}
+.sheet h3{font-size:15px;padding:6px 12px 8px}
+.sheet button{min-height:44px;align-items:center}
+.bbar{display:none}
+/* tablet + phone */
+@media (max-width:1023px){
+  .top{gap:8px;padding:0 8px}
+  .back{width:44px;height:44px;justify-content:center}.back span{display:none}
+  .ttl{flex:1;text-align:center}
+  .prog,.cnt,.tbtns{display:none}
+  .chbtn{display:block;height:44px;padding:0 12px;border-radius:999px;background:var(--sec);font-size:13px;white-space:nowrap}
+  .app{display:flex;flex-direction:column;height:auto;padding-bottom:calc(76px + var(--sb))}
+  .toc{display:none}
+  .stage{display:contents}
+  .cvwrap{order:1;flex:none;height:52vh;border-radius:0;border:0;box-shadow:none;border-bottom:1px solid var(--line)}
+  .explain{order:2;background:none;border:0;box-shadow:none;border-radius:0;padding:18px 16px 4px}
+  .exhead h1{white-space:normal;font-size:20px}
+  .fold{display:none}
+  .explain.folded .book,.explain.folded .extext{display:block}
+  .extext{font-size:16px;line-height:1.7;max-height:none;overflow:visible;margin-top:10px}
+  .panel{order:3;width:auto;overflow:visible;padding:8px 16px 16px}
+  .ctl,.tog{min-height:44px}
+  .chips button{height:44px;min-width:44px}
+  .btnrow .pill{height:44px}
+  .mdark{display:block;align-self:flex-start;height:44px;min-width:64px}
+  .bbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + var(--sb));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line)}
+  .bbar .pill{flex:1;height:44px;font-size:15px}
+}
+@media (min-width:768px) and (max-width:1023px){.explain,.panel{max-width:760px;width:100%;margin:0 auto}}
+</style>
+<style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+<body>
+<header class="top">
+  <a class="back" href="../" aria-label="返回格物实验室"><b>‹</b><span>格物实验室</span></a>
+  <div class="ttl">导数 · DerivLab</div>
+  <div class="prog" id="prog" aria-hidden="true"></div>
+  <span class="cnt mono" id="cnt">01 / 11</span>
+  <div class="tbtns">
+    <button class="pill" id="prevT">上一章</button>
+    <button class="pill pri" id="nextT">下一章</button>
+    <button class="pill" id="darkT">深色</button>
+    <button class="pill" id="fullT">全屏</button>
+  </div>
+  <button class="chbtn" id="chBtn">章节 01/11</button>
+</header>
+<div class="app">
+  <nav class="toc" id="toc" aria-label="章节"></nav>
+  <main class="stage">
+    <section class="card explain" id="explain">
+      <div class="exhead"><h1 id="chT"></h1><button class="fold" id="fold" aria-expanded="true">收起</button></div>
+      <p class="book" id="book"></p>
+      <div class="extext" id="exText"></div>
+    </section>
+    <div class="card cvwrap" id="cvwrap">
+      <canvas id="cv"></canvas>
+      <div class="soon" id="soon" hidden><div class="card"><h2>即将上线</h2><p id="soonT"></p></div></div>
+    </div>
+  </main>
+  <aside class="panel">
+    <div class="card"><h3>控件</h3><div id="ctrl"></div></div>
+    <div class="card" id="readCard"><h3>读数</h3><div id="read"></div></div>
+    <div class="card points" id="ptsCard"><h3>要点</h3><div id="pts"></div></div>
+    <div class="card gk" id="gkCard"><h3>高考链接</h3><div id="gk"></div></div>
+    <button class="pill mdark" id="darkM">深色</button>
+  </aside>
+</div>
+<div class="bbar">
+  <button class="pill" id="prevB">上一章</button>
+  <button class="pill pri" id="nextB">下一章</button>
+</div>
+<div class="sheet-bg" id="sheetBg" hidden>
+  <div class="sheet" role="dialog" aria-label="章节列表"><h3>章节</h3><div id="sheetList"></div></div>
+</div>
+<script>
+"use strict";
+const B = "人教A版 选择性必修第二册 · ";
+const CH = [
+  { n: "变化率与导数", book: B + "5.1 导数的概念及其意义", ready: true },
+  { n: "导数的运算", book: B + "5.2 导数的运算", ready: false },
+  { n: "切线问题", book: B + "5.1–5.2 · 拓展", ready: false },
+  { n: "单调性与含参讨论", book: B + "5.3.1 函数的单调性", ready: false },
+  { n: "极值与最值", book: B + "5.3.2 函数的极值与最大(小)值", ready: false },
+  { n: "零点个数与参数", book: "高考拓展", ready: false },
+  { n: "恒成立与存在性", book: "高考拓展", ready: false },
+  { n: "切线放缩与常用不等式", book: "高考拓展", ready: false },
+  { n: "极值点偏移", book: "高考拓展", ready: false },
+  { n: "同构与指对跨阶", book: "高考拓展", ready: false },
+  { n: "随堂检测", book: "第五章 一元函数的导数及其应用", ready: false },
+];
+const MODS = new Array(CH.length).fill(null);
+
+/* ---------- 01 变化率与导数 ---------- */
+MODS[0] = (() => {
+  const FN = [
+    { label: "s=t²", f: (t) => t * t, d: (t) => 2 * t },
+    { label: "s=t³/3−t²+2t", f: (t) => (t * t * t) / 3 - t * t + 2 * t, d: (t) => t * t - 2 * t + 2 },
+    { label: "s=√t·2", f: (t) => 2 * Math.sqrt(t), d: (t) => 1 / Math.sqrt(t) },
+    { label: "s=sin t+t", f: (t) => Math.sin(t) + t, d: (t) => Math.cos(t) + 1 },
+  ];
+  const MARKS = [1, 0.5, 0.1, 0.01, 0.001], DUR = 2500, XR = [-0.3, 5.3];
+  const S = { fi: 0, t0: 1.5, dt: 1, tan: true, play: false, p0: 0, d0: 1, prevAbs: 1, last: null, rec: new Map(), drag: null, map: null };
+  const ui = {};
+  const F = () => FN[S.fi];
+  const MONO = "ui-monospace,Menlo,monospace", SANS = "-apple-system,BlinkMacSystemFont,sans-serif";
+  function clampDt(v) {
+    v = Math.min(Math.max(v, Math.max(-1.5, -S.t0)), Math.min(2, 5 - S.t0));
+    if (Math.abs(v) < 0.001) v = v < 0 ? -0.001 : 0.001;
+    return v;
+  }
+  function yRange() {
+    const f = F().f; let lo = 0, hi = -Infinity;
+    for (let i = 0; i <= 200; i++) { const y = f((5 * i) / 200); lo = Math.min(lo, y); hi = Math.max(hi, y); }
+    const p = (hi - lo) * 0.1 || 1;
+    return [lo - p * 0.6, hi + p];
+  }
+  function clearRec() { S.rec = new Map(); S.last = null; }
+  function sync() {
+    if (!ui.ro) return;
+    const f = F().f, ds = f(S.t0 + S.dt) - f(S.t0), k = ds / S.dt, d = F().d(S.t0), T = theme();
+    ui.t0.set(S.t0); ui.dt.set(S.dt);
+    ui.ro.set([
+      ["t₀", S.t0.toFixed(2)],
+      ["Δt", S.dt.toFixed(3)],
+      ["Δs", ds.toFixed(4)],
+      ["平均变化率 Δs/Δt", k.toFixed(4), "var(--gold-text)"],
+      ["瞬时变化率 f′(t₀)", d.toFixed(4), "var(--red-text)"],
+      ["两者之差", (k - d).toFixed(4)],
+    ]);
+  }
+  function stopPlay() { S.play = false; if (ui.play) ui.play.btn.textContent = "Δt→0"; }
+  function startPlay() {
+    if (Math.abs(S.dt) <= 0.0011) { S.dt = clampDt(1); clearRec(); }
+    S.d0 = S.dt; S.p0 = performance.now(); S.prevAbs = Math.abs(S.dt) * (1 + 1e-9) + 1e-12;
+    S.play = true; ui.play.btn.textContent = "暂停";
+  }
+  function tick(now) {
+    if (!S.play) return;
+    const tau = (now - S.p0) / DUR, a = Math.abs(S.d0), sg = S.d0 < 0 ? -1 : 1;
+    const cur = tau >= 1 ? 0.001 : Math.max(0.001, a * Math.pow(0.001 / a, tau));
+    const f = F().f;
+    MARKS.forEach((m) => {
+      if (m <= S.prevAbs && m >= cur - 1e-12 && !S.rec.has(m)) {
+        S.rec.set(m, (f(S.t0 + sg * m) - f(S.t0)) / (sg * m)); S.last = m;
+      }
+    });
+    S.prevAbs = cur; S.dt = sg * cur;
+    if (tau >= 1) stopPlay();
+    sync();
+  }
+  function reset() { stopPlay(); S.t0 = 1.5; S.dt = 1; S.tan = true; if (ui.tan) ui.tan.set(true); clearRec(); sync(); }
+
+  function dot(ctx, x, y, c, label, dx, T) {
+    if (S.drag && ((label === "P") === (S.drag === "P"))) {
+      ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, 14, 0, 7); ctx.fill(); ctx.restore();
+    }
+    ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fillStyle = c; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = T.bg; ctx.stroke();
+    ctx.font = "600 14px " + SANS; ctx.textAlign = dx > 0 ? "left" : "right"; ctx.textBaseline = "bottom";
+    ctx.fillText(label, x + dx, y - 6);
+  }
+  function table(ctx, box, d, T, sm) {
+    const tw = sm ? 136 : 156, rh = sm ? 18 : 20, rows = MARKS.length + 2;
+    const tx = box.x + box.w - tw - 6, ty = box.y + 6, th = rows * rh + 10, sg = S.dt < 0 ? -1 : 1;
+    ctx.save();
+    ctx.globalAlpha = 0.92; ctx.fillStyle = T.bg; ctx.fillRect(tx, ty, tw, th);
+    ctx.globalAlpha = 1; ctx.strokeStyle = T.axis; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
+    ctx.strokeRect(tx + 0.5, ty + 0.5, tw - 1, th - 1);
+    ctx.beginPath(); ctx.moveTo(tx + 6, ty + 5 + rh); ctx.lineTo(tx + tw - 6, ty + 5 + rh);
+    ctx.moveTo(tx + 6, ty + 5 + rh * (rows - 1)); ctx.lineTo(tx + tw - 6, ty + 5 + rh * (rows - 1)); ctx.stroke();
+    ctx.globalAlpha = 1; ctx.textBaseline = "middle"; ctx.font = "12px " + MONO;
+    const row = (i, a, b, c) => {
+      const y = ty + 5 + rh * i + rh / 2; ctx.fillStyle = c;
+      ctx.textAlign = "left"; ctx.fillText(a, tx + 8, y);
+      ctx.textAlign = "right"; ctx.fillText(b, tx + tw - 8, y);
+    };
+    row(0, "Δt", "割线斜率", T.sub);
+    MARKS.forEach((m, i) => {
+      const has = S.rec.has(m);
+      row(i + 1, (sg < 0 ? "−" : "") + m, has ? S.rec.get(m).toFixed(4) : "—", S.last === m ? T.gold : has ? T.fg : T.sub);
+    });
+    row(rows - 1, "f′(t₀)", d.toFixed(4), T.red);
+    ctx.restore();
+  }
+
+  return {
+    text: "汽车的位移 <i>s</i> 随时间 <i>t</i> 变化。一段时间内的<b>平均速度</b>是割线的斜率 Δ<i>s</i>/Δ<i>t</i>；让 Δ<i>t</i> 越来越小，割线绕着点 P 转动，最终贴成<b>切线</b>——它的斜率就是 <i>t</i>₀ 时刻的<b>瞬时速度</b>，也就是导数 <i>f</i>′(<i>t</i>₀) = lim<sub>Δ<i>t</i>→0</sub> [<i>f</i>(<i>t</i>₀+Δ<i>t</i>) − <i>f</i>(<i>t</i>₀)] / Δ<i>t</i>。",
+    points: [
+      "平均变化率 = 割线斜率",
+      "导数 = 切线斜率 = 瞬时变化率",
+      "<i>f</i>′(<i>x</i>₀) 是一个数，<i>f</i>′(<i>x</i>) 是一个函数",
+      "Δ<i>x</i> 可正可负，但不为 0",
+    ],
+    gk: [
+      "常考：利用导数的几何意义求切线斜率，利用物理意义求瞬时速度。",
+      "易错：lim<sub><i>h</i>→0</sub> [<i>f</i>(<i>x</i>₀+2<i>h</i>) − <i>f</i>(<i>x</i>₀)] / <i>h</i> = 2<i>f</i>′(<i>x</i>₀)，不是 <i>f</i>′(<i>x</i>₀)。",
+    ],
+    mount(ctrl, read) {
+      ui.fn = chips(FN.map((o, i) => ({ label: o.label, value: i })), S.fi, (v) => { stopPlay(); S.fi = v; clearRec(); sync(); });
+      ui.t0 = slider("t₀", 0.2, 4.2, 0.01, S.t0, (v) => v.toFixed(2), (v) => { stopPlay(); S.t0 = v; S.dt = clampDt(S.dt); clearRec(); sync(); });
+      ui.dt = slider("Δt", -1.5, 2, 0.001, S.dt, (v) => v.toFixed(3), (v) => { stopPlay(); S.dt = clampDt(v); sync(); });
+      ui.play = button("Δt→0", () => (S.play ? stopPlay() : startPlay()), true);
+      const rs = button("重置", reset); rs.btn.style.marginLeft = "8px"; ui.play.append(rs.btn);
+      ui.tan = toggle("显示切线", S.tan, (v) => { S.tan = v; });
+      ui.ro = readout();
+      ctrl.append(ui.fn, ui.t0, ui.dt, ui.play, ui.tan); read.append(ui.ro);
+      stopPlay(); sync();
+    },
+    unmount() { stopPlay(); S.drag = null; cv.style.cursor = ""; for (const k in ui) delete ui[k]; },
+    draw(ctx, W, H) {
+      tick(performance.now());
+      const T = theme(), sm = W < 520;
+      const box = { x: 40, y: 12, w: Math.max(10, W - 54), h: Math.max(10, H - 40) };
+      const m = drawAxes(ctx, box, XR, yRange(), { xlabel: "t", ylabel: "s" }); S.map = m;
+      const f = F().f, t0 = S.t0, t1 = t0 + S.dt, s0 = f(t0), s1 = f(t1), k = (s1 - s0) / S.dt, d = F().d(t0);
+      if (S.tan) plotFn(ctx, m, (x) => s0 + d * (x - t0), null, T.red, 1.5, true);
+      plotFn(ctx, m, f, [0, 5], T.blue, 2.5);
+      plotFn(ctx, m, (x) => s0 + k * (x - t0), null, T.gold, 2);
+      const px = m.X(t0), py = m.Y(s0), qx = m.X(t1), qy = m.Y(s1);
+      ctx.save(); ctx.beginPath(); ctx.rect(box.x, box.y, box.w, box.h); ctx.clip();
+      ctx.strokeStyle = T.teal; ctx.lineWidth = 2; ctx.lineJoin = "round";
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(qx, py); ctx.lineTo(qx, qy); ctx.stroke();
+      ctx.fillStyle = T.teal; ctx.font = "italic 13px " + SANS;
+      if (Math.abs(qx - px) > 22) {
+        ctx.textAlign = "center"; ctx.textBaseline = qy < py ? "top" : "bottom";
+        ctx.fillText("Δt", (px + qx) / 2, py + (qy < py ? 4 : -4));
+      }
+      if (Math.abs(qy - py) > 16) {
+        ctx.textAlign = qx > px ? "left" : "right"; ctx.textBaseline = "middle";
+        ctx.fillText("Δs", qx + (qx > px ? 6 : -6), (py + qy) / 2);
+      }
+      ctx.restore();
+      const side = S.dt > 0 ? 1 : -1;
+      dot(ctx, qx, qy, T.gold, "Q", 9 * side, T);
+      dot(ctx, px, py, T.blue, "P", -9 * side, T);
+      table(ctx, box, d, T, sm);
+    },
+    pointer(e, type, x, y) {
+      const m = S.map; if (!m) return;
+      const f = F().f, t1 = S.t0 + S.dt;
+      const dP = Math.hypot(x - m.X(S.t0), y - m.Y(f(S.t0))), dQ = Math.hypot(x - m.X(t1), y - m.Y(f(t1)));
+      const R = e.pointerType === "mouse" ? 14 : 24;
+      if (type === "down") {
+        if (Math.min(dP, dQ) <= R) { S.drag = dQ <= dP ? "Q" : "P"; stopPlay(); cv.style.cursor = "grabbing"; e.preventDefault(); }
+      } else if (type === "move") {
+        if (S.drag) {
+          const t = m.invX(x);
+          if (S.drag === "P") { S.t0 = Math.min(4.2, Math.max(0.2, t)); S.dt = clampDt(S.dt); clearRec(); }
+          else S.dt = clampDt(t - S.t0);
+          sync();
+        } else cv.style.cursor = Math.min(dP, dQ) <= R ? "grab" : "";
+      } else { S.drag = null; cv.style.cursor = ""; }
+    },
+  };
+})();
+
+/* ---------- 02 导数的运算 ---------- */
+CH[1].ready = true;
+MODS[1] = (() => {
+  const SANS = "-apple-system,BlinkMacSystemFont,sans-serif", MONO = "ui-monospace,Menlo,monospace", L2 = Math.log(2), DUR = 3000, XR = [-4.4, 4.4];
+  const BF = [
+    { label: "x²", name: "x²", f: (x) => x * x, d: (x) => 2 * x, dom: [-4, 4], fr: [-2, 17], dr: [-9, 9], rule: "(x²)′ = 2x" },
+    { label: "x³", name: "x³", f: (x) => x * x * x, d: (x) => 3 * x * x, dom: [-4, 4], fr: [-20, 20], dr: [-5, 50], rule: "(x³)′ = 3x²" },
+    { label: "√x", name: "√x", f: Math.sqrt, d: (x) => 0.5 / Math.sqrt(x), dom: [0, 4], cd: [0.05, 4], fr: [-1, 2.6], dr: [-0.6, 3.2], rule: "(√x)′ = 1/(2√x)" },
+    { label: "1/x", name: "1/x", f: (x) => 1 / x, d: (x) => -1 / (x * x), dom: [-4, 4], gap: true, fr: [-5, 5], dr: [-6, 1.5], rule: "(1/x)′ = −1/x²" },
+    { label: "eˣ", name: "eˣ", f: Math.exp, d: Math.exp, dom: [-4, 4], fr: [-2, 20], dr: [-2, 20], rule: "(eˣ)′ = eˣ" },
+    { label: "ln x", name: "ln x", f: Math.log, d: (x) => 1 / x, dom: [0, 4], cd: [0.05, 4], fr: [-4, 2], dr: [-1, 7], rule: "(ln x)′ = 1/x" },
+    { label: "sin x", name: "sin x", f: Math.sin, d: Math.cos, dom: [-4, 4], fr: [-1.6, 1.6], dr: [-1.6, 1.6], rule: "(sin x)′ = cos x" },
+    { label: "cos x", name: "cos x", f: Math.cos, d: (x) => -Math.sin(x), dom: [-4, 4], fr: [-1.6, 1.6], dr: [-1.6, 1.6], rule: "(cos x)′ = −sin x" },
+    { label: "aˣ", name: "2ˣ（a = 2）", f: (x) => Math.pow(2, x), d: (x) => Math.pow(2, x) * L2, dom: [-4, 4], fr: [-1, 17], dr: [-1, 12], rule: "(2ˣ)′ = 2ˣ ln 2" },
+  ];
+  const CF = [
+    { label: "sin(2x)", u: "2x", o: "sin u", g: (x) => 2 * x, gd: () => 2, f: Math.sin, fd: Math.cos, chain: "y′ = cos(2x)·2", yr: [-1.6, 1.6], sc: 2.5 },
+    { label: "e^(−x²)", u: "−x²", o: "eᵘ", g: (x) => -x * x, gd: (x) => -2 * x, f: Math.exp, fd: Math.exp, chain: "y′ = e^(−x²)·(−2x)", yr: [-0.4, 1.4], sc: 3 },
+    { label: "ln(x²+1)", u: "x²+1", o: "ln u", g: (x) => x * x + 1, gd: (x) => 2 * x, f: Math.log, fd: (u) => 1 / u, chain: "y′ = 1/(x²+1)·2x", yr: [-0.6, 3.4], sc: 3 },
+    { label: "(3x−1)²", u: "3x−1", o: "u²", g: (x) => 3 * x - 1, gd: () => 3, f: (u) => u * u, fd: (u) => 2 * u, chain: "y′ = 2(3x−1)·3", yr: [-6, 50], sc: 30 },
+  ];
+  const S = { mode: 0, bi: 0, ci: 0, x0: 1, sweep: 0, tr: null, done: false, drag: false, m: null, bb: null };
+  const ui = {};
+  const fn = () => (S.mode ? CF[S.ci] : BF[S.bi]);
+  const cdom = () => (S.mode ? [-4, 4] : fn().cd || fn().dom);
+  const f4 = (v) => (isFinite(v) ? (Math.abs(v) < 5e-5 ? 0 : v).toFixed(4) : "—");
+  function clampX(v) {
+    const [a, b] = cdom(); v = Math.min(b, Math.max(a, v));
+    if (!S.mode && fn().gap && Math.abs(v) < 0.1) v = v < 0 ? -0.1 : 0.1;
+    return v;
+  }
+  function vals() {
+    const x = S.x0, F = fn();
+    if (!S.mode) return { y: F.f(x), d: F.d(x) };
+    const u = F.g(x), fu = F.fd(u), gx = F.gd(x);
+    return { u, fu, gx, y: F.f(u), d: fu * gx };
+  }
+  function sync() {
+    if (!ui.ro) return;
+    const v = vals(), F = fn();
+    ui.x.set(S.x0);
+    const rows = [["x₀", f4(S.x0)]];
+    if (S.mode) rows.push(["u = g(x₀)", f4(v.u)], ["f′(u)", f4(v.fu)], ["g′(x₀)", f4(v.gx)]);
+    rows.push([S.mode ? "y(x₀)" : "f(x₀)", f4(v.y)], [S.mode ? "y′(x₀)" : "f′(x₀)", f4(v.d), "var(--red-text)"]);
+    ui.ro.set(rows);
+    ui.fm.innerHTML = S.mode
+      ? "y = " + F.label + "<br>u = " + F.u + "，y = " + F.o + "<br>y′ₓ = y′ᵤ · u′ₓ"
+      : "f(x) = " + F.name + "<br>" + F.rule;
+  }
+  function stopSweep() { S.sweep = 0; if (ui.sw) ui.sw.btn.textContent = "描出导函数"; }
+  function startSweep() { S.sweep = performance.now(); S.done = false; S.tr = cdom()[0]; ui.sw.btn.textContent = "停止"; }
+  function tick(now) {
+    if (!S.sweep) return;
+    const p = Math.min(1, (now - S.sweep) / DUR), [a, b] = cdom();
+    S.tr = a + (b - a) * p; S.x0 = clampX(S.tr);
+    if (p >= 1) { S.done = true; stopSweep(); }
+    sync();
+  }
+  function reset() {
+    stopSweep(); S.tr = null; S.done = false; S.x0 = clampX(S.mode ? 0.5 : 1);
+    if (!ui.x) return;
+    ui.bf.hidden = ui.sw.hidden = !!S.mode; ui.cf.hidden = !S.mode;
+    const r = ui.x.querySelector("input"), [a, b] = cdom(); r.min = a; r.max = b;
+    sync();
+  }
+  function dot(ctx, x, y, c, T) {
+    if (S.drag) { ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, 14, 0, 7); ctx.fill(); ctx.restore(); }
+    ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.bg; ctx.stroke();
+  }
+  function tag(ctx, x, y, s, c, T) {
+    ctx.save(); ctx.font = "13px " + SANS; const w = ctx.measureText(s).width;
+    ctx.globalAlpha = 0.88; ctx.fillStyle = T.bg; ctx.fillRect(x - 4, y - 2, w + 8, 20);
+    ctx.globalAlpha = 1; ctx.fillStyle = c; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(s, x, y + 1);
+    ctx.restore();
+  }
+  function bars(ctx, W, bb, v, F, T, sm) {
+    const lx = 16, lw = sm ? 96 : 124, z0 = lx + lw, zw = Math.max(40, W - 16 - z0), cx = z0 + zw / 2, half = zw / 2 - 6;
+    const rh = Math.max(34, Math.min(48, (bb.h - 52) / 3));
+    const rows = [["外层 f′(u)", v.fu], ["内层 g′(x)", v.gx], ["乘积 y′", v.d]];
+    ctx.save();
+    ctx.font = "12px " + SANS; ctx.fillStyle = T.sub; ctx.textAlign = "right"; ctx.textBaseline = "top";
+    ctx.fillText("满格 ±" + F.sc, W - 16, bb.y - 4);
+    rows.forEach(([k, val], i) => {
+      const y = bb.y + 10 + i * rh, yc = y + 15;
+      ctx.textAlign = "left"; ctx.textBaseline = "top";
+      ctx.font = "13px " + SANS; ctx.fillStyle = T.fg; ctx.fillText(k, lx, y);
+      ctx.font = "12px " + MONO; ctx.fillStyle = T.sub; ctx.fillText(f4(val), lx, y + 17);
+      ctx.fillStyle = T.grid; ctx.fillRect(z0, yc - 7, zw, 14);
+      if (!isFinite(val)) return;
+      const len = Math.min(1, Math.abs(val) / F.sc) * half, sg = val < 0 ? -1 : 1;
+      ctx.fillStyle = val < 0 ? T.red : T.blue;
+      ctx.fillRect(sg > 0 ? cx : cx - len, yc - 7, len, 14);
+      if (Math.abs(val) > F.sc) {
+        const ex = cx + sg * half; ctx.beginPath(); ctx.moveTo(ex, yc - 7); ctx.lineTo(ex + sg * 6, yc); ctx.lineTo(ex, yc + 7); ctx.fill();
+      }
+    });
+    ctx.strokeStyle = T.axis; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.moveTo(Math.round(cx) + 0.5, bb.y + 18); ctx.lineTo(Math.round(cx) + 0.5, bb.y + 10 + 3 * rh - 6); ctx.stroke();
+    const fy = bb.y + 10 + 3 * rh + 2;
+    ctx.font = "13px " + MONO; ctx.fillStyle = T.fg; ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.fillText(F.chain, lx, fy);
+    ctx.fillText("= " + f4(v.fu) + " × " + f4(v.gx) + " = " + f4(v.d), lx, fy + 19);
+    ctx.restore();
+  }
+
+  return {
+    text: "把 <i>f</i>(<i>x</i>) 在每一点的切线斜率记下来，连成的新函数就是<b>导函数</b> <i>f</i>′(<i>x</i>)。上面的曲线越陡，下面 <i>f</i>′ 的值越大；上面曲线在顶点或谷底变平时，下面 <i>f</i>′ 正好穿过 0。<b>复合函数</b>求导像齿轮传动：<i>y</i>=<i>f</i>(<i>u</i>)、<i>u</i>=<i>g</i>(<i>x</i>)，<i>y</i> 对 <i>x</i> 的变化率等于两级传动比相乘，<i>y</i>′ = <i>f</i>′(<i>u</i>)·<i>g</i>′(<i>x</i>)。",
+    points: [
+      "(<i>x</i>ⁿ)′ = <i>n</i><i>x</i>ⁿ⁻¹",
+      "(eˣ)′ = eˣ，(<i>a</i>ˣ)′ = <i>a</i>ˣ ln <i>a</i>",
+      "(ln <i>x</i>)′ = 1/<i>x</i>，(logₐ<i>x</i>)′ = 1/(<i>x</i> ln <i>a</i>)",
+      "(sin <i>x</i>)′ = cos <i>x</i>，(cos <i>x</i>)′ = −sin <i>x</i>",
+      "(<i>uv</i>)′ = <i>u</i>′<i>v</i> + <i>uv</i>′，(<i>u</i>/<i>v</i>)′ = (<i>u</i>′<i>v</i> − <i>uv</i>′)/<i>v</i>²",
+      "复合函数：<i>y</i>′ₓ = <i>y</i>′ᵤ · <i>u</i>′ₓ",
+    ],
+    gk: [
+      "常考：求导是一切导数题的第一步，选填常考复合函数与商的求导。",
+      "易错：(cos <i>x</i>)′ = −sin <i>x</i> 的负号；[ln(2<i>x</i>)]′ = 1/<i>x</i>，不是 1/(2<i>x</i>)；(e<sup>2<i>x</i></sup>)′ = 2e<sup>2<i>x</i></sup>。",
+    ],
+    mount(ctrl, read) {
+      ui.mode = chips([{ label: "基本函数", value: 0 }, { label: "复合函数", value: 1 }], S.mode, (v) => { S.mode = v; reset(); });
+      ui.bf = chips(BF.map((o, i) => ({ label: o.label, value: i })), S.bi, (v) => { S.bi = v; reset(); });
+      ui.cf = chips(CF.map((o, i) => ({ label: o.label, value: i })), S.ci, (v) => { S.ci = v; reset(); });
+      ui.x = slider("x₀", -4, 4, 0.01, S.x0, (v) => v.toFixed(2), (v) => { stopSweep(); S.x0 = clampX(v); sync(); });
+      ui.sw = button("描出导函数", () => (S.sweep ? stopSweep() : startSweep()), true);
+      ui.fm = el("div", "mono");
+      ui.fm.style.cssText = "background:var(--sec);border-radius:14px;padding:10px 14px;margin:8px 0 4px;font-size:14px;line-height:1.7;overflow-wrap:anywhere";
+      ui.ro = readout();
+      ctrl.append(ui.mode, ui.bf, ui.cf, ui.x, ui.sw, ui.fm); read.append(ui.ro);
+      reset();
+    },
+    unmount() { stopSweep(); S.drag = false; cv.style.cursor = ""; for (const k in ui) delete ui[k]; },
+    draw(ctx, W, H) {
+      tick(performance.now());
+      const T = theme(), F = fn(), v = vals(), sm = W < 520, gap = 18;
+      const h = Math.max(20, (H - 24 - gap) / 2), bw = Math.max(10, W - 54);
+      const tb = { x: 40, y: 12, w: bw, h }, bb = { x: 40, y: 12 + h + gap, w: bw, h };
+      const m = drawAxes(ctx, tb, XR, S.mode ? F.yr : F.fr, { ylabel: "y" }); S.m = m; S.bb = bb;
+      const yf = S.mode ? (x) => F.f(F.g(x)) : F.f;
+      plotFn(ctx, m, (x) => v.y + v.d * (x - S.x0), null, T.red, 1.8);
+      plotFn(ctx, m, yf, S.mode ? null : F.dom, T.blue, 2.5);
+      const X0 = m.X(S.x0), cl = (y, b) => Math.min(b.y + b.h, Math.max(b.y, y));
+      const py = cl(m.Y(v.y), tb);
+      tag(ctx, tb.x + 8, tb.y + 6, S.mode ? "y = " + F.label : "f(x) = " + F.name, T.blue, T);
+      let qy = null;
+      if (S.mode) bars(ctx, W, bb, v, F, T, sm);
+      else {
+        const m2 = drawAxes(ctx, bb, XR, F.dr, { ylabel: "y′" });
+        if (S.done) { ctx.save(); ctx.globalAlpha = 0.4; plotFn(ctx, m2, F.d, F.dom, T.purple, 2.5); ctx.restore(); }
+        else if (S.tr != null) plotFn(ctx, m2, F.d, [F.dom[0], S.tr], T.purple, 2.5);
+        tag(ctx, bb.x + 8, bb.y + 6, S.done ? "f′(x) = " + F.rule.split("′ = ")[1] : "f′(x)", T.purple, T);
+        qy = cl(m2.Y(v.d), bb);
+      }
+      ctx.save(); ctx.strokeStyle = T.sub; ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.moveTo(X0, tb.y); ctx.lineTo(X0, qy == null ? tb.y + tb.h : bb.y + bb.h); ctx.stroke();
+      if (qy != null) { ctx.globalAlpha = 0.8; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(X0, py); ctx.lineTo(X0, qy); ctx.stroke(); }
+      ctx.restore();
+      ctx.save(); ctx.font = "italic 13px " + SANS; ctx.fillStyle = T.sub; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+      ctx.fillText("x₀", X0, tb.y + tb.h - 2); ctx.restore();
+      if (isFinite(v.y)) dot(ctx, X0, py, T.blue, T);
+      if (qy != null && isFinite(v.d)) dot(ctx, X0, qy, T.purple, T);
+    },
+    pointer(e, type, x, y) {
+      const m = S.m; if (!m) return;
+      const b = m.box, yb = S.mode ? b.y + b.h : S.bb.y + S.bb.h;
+      const inside = x >= b.x - 10 && x <= b.x + b.w + 10 && y >= b.y && y <= yb;
+      if (type === "down") {
+        if (inside) { S.drag = true; stopSweep(); S.x0 = clampX(m.invX(x)); sync(); cv.style.cursor = "grabbing"; e.preventDefault(); }
+      } else if (type === "move") {
+        if (S.drag) { S.x0 = clampX(m.invX(x)); sync(); } else cv.style.cursor = inside ? "ew-resize" : "";
+      } else { S.drag = false; cv.style.cursor = ""; }
+    },
+  };
+})();
+
+/* ---------- 03 切线问题 ---------- */
+CH[2].ready = true;
+MODS[2] = (() => {
+  const SANS = "-apple-system,BlinkMacSystemFont,sans-serif", MONO = "ui-monospace,Menlo,monospace";
+  const XR = [-3.5, 3.5], YR = [-8, 8], TR = [-2.5, 1.8], XR2 = [-3, 5.5], YR2 = [-3, 6], CELL = 6, NUM = ["①", "②", "③"];
+  const f = (x) => x * x * x - 3 * x, fd = (x) => 3 * x * x - 3;
+  const S = { mode: 0, px: 2, py: 0, snap: false, t: 0.5, drag: false, m: null, zc: null, anim: null, found: [], roots: null };
+  const ui = {};
+  const f3 = (v) => (isFinite(v) ? (Math.abs(v) < 5e-4 ? 0 : v).toFixed(3).replace("-", "−") : "—");
+  const eq = (k, b) => "y = " + f3(k) + "x " + (b < -5e-4 ? "− " : "+ ") + f3(Math.abs(b));
+  const cl = (v, a, b) => Math.min(b, Math.max(a, v));
+  function bis(g, a, b) {
+    let ga = g(a);
+    for (let i = 0; i < 64; i++) { const c = (a + b) / 2, gc = g(c); if (gc < 0 === ga < 0) { a = c; ga = gc; } else b = c; }
+    return (a + b) / 2;
+  }
+  const XS = bis((x) => f(x) - (YR[1] - 0.5), 2, 3);
+  // 切点 t：2t³ − 3x_P t² + 3x_P + y_P = 0 的实根（临界点 0 与 x_P 分段 + 二分）
+  function tangents(x, y) {
+    const g = (t) => 2 * t * t * t - 3 * x * t * t + 3 * x + y, c1 = Math.min(0, x), c2 = Math.max(0, x);
+    const R = 2 + Math.max(1.5 * Math.abs(x), Math.abs(3 * x + y) / 2), ps = [-R, c1, c2, R], out = [];
+    const eps = 1e-9 * (1 + Math.abs(x * x * x) + Math.abs(y));
+    for (let i = 0; i < 3; i++) {
+      const a = ps[i], b = ps[i + 1]; if (b - a < 1e-12) continue;
+      const ga = g(a), gb = g(b);
+      if (Math.abs(ga) > eps && Math.abs(gb) > eps && ga * gb < 0) out.push(bis(g, a, b));
+    }
+    [c1, c2].forEach((c) => { if (Math.abs(g(c)) <= eps) out.push(c); });
+    out.sort((p, q) => p - q);
+    return out.filter((t, i) => i === 0 || t - out[i - 1] > 1e-6);
+  }
+  const onCurve = () => Math.abs(S.py - f(S.px)) < 1e-9;
+  function region(x, y) {
+    const a = 3 * x + y, b = y - f(x);
+    if (Math.abs(a) < 1e-9 && Math.abs(b) < 1e-9) return "拐点 (0, 0)";
+    if (Math.abs(b) < 1e-9) return "曲线上";
+    if (Math.abs(a) < 1e-9) return "直线 y = −3x 上";
+    return a * b < 0 ? "曲线与 y = −3x 之间" : "其余区域";
+  }
+  function syncP() {
+    if (!ui.ro) return;
+    const ts = tangents(S.px, S.py), on = onCurve();
+    const rows = [["P 坐标", "(" + f3(S.px) + ", " + f3(S.py) + ")"], ["过 P 的切线条数", ts.length + " 条", "var(--blue-text)"]];
+    if (S.mode === 1) rows.push(["P 的位置", region(S.px, S.py)]);
+    ts.forEach((t, i) => {
+      const at = on && Math.abs(t - S.px) < 1e-6;
+      rows.push([NUM[i] + " t = " + f3(t), eq(fd(t), -2 * t * t * t), at ? "var(--red-text)" : "var(--gold-text)"]);
+    });
+    ui.ro.set(rows);
+    ui.note.textContent = on
+      ? ts.length > 1 ? "P 在曲线上：「在点 P 处的切线」只有红色这 1 条，「过点 P 的切线」却有 " + ts.length + " 条。" : "P 是拐点：在点与过点的切线恰好都只有 1 条。"
+      : "P 不在曲线上：只能说「过点 P 的切线」，先设切点 (t, f(t)) 再解 t。";
+  }
+  const phi = (t) => (t - 1) * Math.exp(t) - t - 1;
+  function findRoots() {
+    const r = [];
+    for (let a = -6; a < 6; a += 0.01) { const b = a + 0.01; if (phi(a) * phi(b) < 0) r.push(bis(phi, a, b)); }
+    return r;
+  }
+  function syncC() {
+    if (!ui.ro) return;
+    const t = S.t, e = Math.exp(t), b1 = e * (1 - t), b2 = -t - 1, d = b1 - b2;
+    ui.ts.set(t);
+    const rows = [
+      ["eˣ 上切点 t", f3(t), "var(--blue-text)"], ["ln x 上切点 s = e^(−t)", f3(Math.exp(-t))], ["共同斜率 eᵗ", f3(e)],
+      ["截距 eᵗ(1−t)", f3(b1), "var(--gold-text)"], ["截距 −t−1", f3(b2), "var(--gold-text)"], ["截距差", f3(d), "var(--red-text)"],
+      ["与 ln x 的关系", Math.abs(d) < 5e-3 ? "相切（公切线）" : d > 0 ? "相离" : "相交（两个交点）"],
+    ];
+    if (S.roots) rows.push(["(t−1)eᵗ = t+1 的根", S.roots.map(f3).join("，")]);
+    S.found.forEach((r, i) => rows.push(
+      [NUM[i] + " 公切线", eq(Math.exp(r), Math.exp(r) * (1 - r)), "var(--red-text)"],
+      [NUM[i] + " eˣ 上切点", "(" + f3(r) + ", " + f3(Math.exp(r)) + ")"],
+      [NUM[i] + " ln x 上切点", "(" + f3(Math.exp(-r)) + ", " + f3(-r) + ")"]));
+    ui.ro.set(rows);
+    ui.note.textContent = "截距差 > 0：直线在 ln x 上方，相离；= 0：相切；< 0：相交。公切线：两个切点各设一个，斜率相等、截距相等。";
+  }
+  const sync = () => (S.mode === 2 ? syncC() : syncP());
+  function setP(x, y) {
+    if (S.snap) { x = cl(x, -XS, XS); y = f(x); } else { x = cl(x, XR[0], XR[1]); y = cl(y, YR[0], YR[1]); }
+    S.px = x; S.py = y; syncP();
+  }
+  function startFind() {
+    S.roots = findRoots(); S.found = [];
+    const seq = S.roots.slice().sort((p, q) => Math.abs(p - S.t) - Math.abs(q - S.t));
+    S.anim = { seq, i: 0, a: S.t, t0: performance.now() }; syncC();
+  }
+  function tick(now) {
+    const A = S.anim; if (!A || S.mode !== 2) return;
+    const p = Math.min(1, (now - A.t0) / 1100), k = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+    S.t = A.a + (A.seq[A.i] - A.a) * k;
+    if (p >= 1) { S.t = A.seq[A.i]; S.found.push(S.t); A.a = S.t; A.i++; A.t0 = now; if (A.i >= A.seq.length) S.anim = null; }
+    syncC();
+  }
+  function zone(m, T) {
+    const b = m.box, key = b.w + "x" + b.h;
+    if (S.zc && S.zc.key === key && S.zc.T === T) return S.zc.c;
+    const c = document.createElement("canvas"), cols = Math.ceil(b.w / CELL), rows = Math.ceil(b.h / CELL), g = c.getContext("2d");
+    c.width = Math.ceil(b.w); c.height = Math.ceil(b.h);
+    const n = cols + 1, A = new Float64Array(n * (rows + 1)), Bv = new Float64Array(n * (rows + 1));
+    for (let j = 0; j <= rows; j++) for (let i = 0; i <= cols; i++) {
+      const x = m.invX(b.x + i * CELL), y = m.invY(b.y + j * CELL); A[j * n + i] = 3 * x + y; Bv[j * n + i] = y - f(x);
+    }
+    const cross = (V, k) => { const v = [V[k], V[k + 1], V[k + n], V[k + n + 1]]; return Math.min(...v) <= 0 && Math.max(...v) >= 0; };
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+      const k = j * n + i;
+      if (cross(A, k) || cross(Bv, k)) { g.fillStyle = T.gold; g.globalAlpha = 0.32; }
+      else if ((A[k] + A[k + n + 1]) * (Bv[k] + Bv[k + n + 1]) < 0) { g.fillStyle = T.teal; g.globalAlpha = 0.16; }
+      else continue;
+      g.fillRect(i * CELL, j * CELL, CELL, CELL);
+    }
+    S.zc = { key, T, c }; return c;
+  }
+  function dot(ctx, x, y, c, T, r, halo) {
+    if (halo) { ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, 14, 0, 7); ctx.fill(); ctx.restore(); }
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.bg; ctx.stroke();
+  }
+  function tag(ctx, x, y, s, c, T, right) {
+    ctx.save(); ctx.font = "13px " + SANS; const w = ctx.measureText(s).width; if (right) x -= w;
+    ctx.globalAlpha = 0.88; ctx.fillStyle = T.bg; ctx.fillRect(x - 4, y - 2, w + 8, 20);
+    ctx.globalAlpha = 1; ctx.fillStyle = c; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(s, x, y + 1); ctx.restore();
+  }
+  const inBox = (b, x, y) => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
+  function drawCubic(ctx, box, T) {
+    const m = drawAxes(ctx, box, XR, YR, {}), z = S.mode === 1; S.m = m;
+    if (z) { ctx.drawImage(zone(m, T), box.x, box.y); plotFn(ctx, m, (x) => -3 * x, null, T.fg, 2.5); }
+    const ts = tangents(S.px, S.py), on = onCurve(), C = [T.gold, T.teal, T.purple];
+    const isAt = (t) => on && Math.abs(t - S.px) < 1e-6;
+    ts.forEach((t, i) => plotFn(ctx, m, (x) => f(t) + fd(t) * (x - t), null, isAt(t) ? T.red : C[i], isAt(t) ? 3.5 : z ? 1.4 : 1.8));
+    plotFn(ctx, m, f, [-3, 3], T.blue, z ? 3.5 : 2.5);
+    ts.forEach((t, i) => {
+      const X = m.X(t), Y = m.Y(f(t)); if (!inBox(box, X, Y)) return;
+      dot(ctx, X, Y, isAt(t) ? T.red : C[i], T, 5);
+      ctx.save(); ctx.font = "600 13px " + SANS; ctx.fillStyle = T.fg; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(NUM[i], X + 7, Y + 4); ctx.restore();
+    });
+    const PX = m.X(S.px), PY = m.Y(S.py);
+    dot(ctx, PX, PY, T.fg, T, 6, S.drag);
+    ctx.save(); ctx.font = "600 14px " + SANS; ctx.fillStyle = T.fg; ctx.textAlign = "right"; ctx.textBaseline = "bottom"; ctx.fillText("P", PX - 8, PY - 6); ctx.restore();
+    const right = PX > box.x + box.w - 70;
+    tag(ctx, PX + (right ? -10 : 10), PY + 8, ts.length + " 条", T.fg, T, right);
+    tag(ctx, box.x + 8, box.y + 6, "f(x) = x³ − 3x", T.blue, T);
+    if (on && ts.length > 1) tag(ctx, box.x + 8, box.y + box.h - 26, "红：在点 P 处的切线", T.red, T);
+    if (z) {
+      [[T.teal, 0.16, "3 条"], [T.gold, 0.32, "2 条（分界线上）"], [null, 0, "1 条"]].forEach(([c, a, s], i) => {
+        const y = box.y + 32 + i * 22;
+        ctx.save(); ctx.globalAlpha = 0.88; ctx.fillStyle = T.bg; ctx.fillRect(box.x + 4, y - 2, 130, 22); ctx.globalAlpha = 1;
+        if (c) { ctx.globalAlpha = a; ctx.fillStyle = c; ctx.fillRect(box.x + 8, y + 3, 12, 12); ctx.globalAlpha = 1; }
+        ctx.strokeStyle = T.axis; ctx.lineWidth = 1; ctx.strokeRect(box.x + 8.5, y + 3.5, 11, 11); ctx.restore();
+        tag(ctx, box.x + 26, y, s, T.fg, T);
+      });
+      tag(ctx, m.X(2.1) + 8, m.Y(-6.3), "y = −3x", T.fg, T);
+    }
+  }
+  function drawCommon(ctx, box, T) {
+    const m = drawAxes(ctx, box, XR2, YR2, {}); S.m = m;
+    const t = S.t, e = Math.exp(t), s = Math.exp(-t), b1 = e * (1 - t), b2 = -t - 1, d = b1 - b2;
+    S.found.forEach((r) => plotFn(ctx, m, (x) => Math.exp(r) * (x + 1 - r), null, T.red, 3));
+    plotFn(ctx, m, (x) => e * x + b2, null, T.teal, 1.5, true);
+    plotFn(ctx, m, (x) => e * x + b1, null, T.gold, 2.2);
+    plotFn(ctx, m, Math.exp, null, T.blue, 2.5);
+    plotFn(ctx, m, Math.log, [1e-4, XR2[1]], T.teal, 2.5);
+    const X0 = m.X(0), y1 = cl(m.Y(b1), box.y, box.y + box.h), y2 = cl(m.Y(b2), box.y, box.y + box.h);
+    ctx.save(); ctx.strokeStyle = T.red; ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(X0, y1); ctx.lineTo(X0, y2); ctx.stroke(); ctx.restore();
+    if (Math.abs(y1 - y2) > 4) tag(ctx, X0 - 8, (y1 + y2) / 2 - 10, "差 " + f3(d), T.red, T, true);
+    S.found.forEach((r) => {
+      [[r, Math.exp(r)], [Math.exp(-r), -r]].forEach(([x, y], k) => {
+        const X = m.X(x), Y = m.Y(y); if (!inBox(box, X, Y)) return;
+        dot(ctx, X, Y, T.red, T, 5);
+        const rt = k ? X > box.x + box.w - 130 : X > box.x + 130;
+        tag(ctx, X + (rt ? -8 : 8), Y + 6, "(" + f3(x) + ", " + f3(y) + ")", T.fg, T, rt);
+      });
+    });
+    const LX = m.X(s), LY = m.Y(-t), EX = m.X(t), EY = m.Y(e);
+    if (inBox(box, LX, LY)) { dot(ctx, LX, LY, T.bg, T, 5); ctx.save(); ctx.strokeStyle = T.teal; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(LX, LY, 5, 0, 7); ctx.stroke(); ctx.restore(); }
+    if (inBox(box, EX, EY)) dot(ctx, EX, EY, T.gold, T, 6, S.drag);
+    tag(ctx, box.x + 8, box.y + 6, "y = eˣ", T.blue, T);
+    tag(ctx, box.x + 8, box.y + 28, "y = ln x", T.teal, T);
+    tag(ctx, box.x + box.w - 8, box.y + box.h - 26, Math.abs(d) < 5e-3 ? "相切：公切线" : d > 0 ? "与 ln x 相离" : "与 ln x 相交", T.fg, T, true);
+  }
+  function apply() {
+    ui.snap.hidden = S.mode === 2; ui.ts.hidden = ui.find.hidden = S.mode !== 2; sync();
+  }
+
+  return {
+    text: "「在点 <i>P</i> 处的切线」：<i>P</i> 就是切点，斜率直接是 <i>f</i>′(<i>x</i>₀)。「过点 <i>P</i> 的切线」：<i>P</i> 不一定是切点，要先设切点 (<i>t</i>, <i>f</i>(<i>t</i>))，写出切线 <i>y</i> − <i>f</i>(<i>t</i>) = <i>f</i>′(<i>t</i>)(<i>x</i> − <i>t</i>)，再代入 <i>P</i> 解 <i>t</i>——有几个解就有几条切线。",
+    points: [
+      "在点 ≠ 过点",
+      "过点求切线：先设切点",
+      "三次函数过一点的切线条数，取决于该点相对于曲线和拐点切线的位置",
+      "公切线：两个切点各设一个，斜率相等、截距相等",
+    ],
+    gk: [
+      "常考：新高考 I 卷多次考过「过点作曲线切线有几条」与「公切线」。",
+      "易错：把「过点」当成「在点」，直接求导代入。",
+    ],
+    mount(ctrl, read) {
+      ui.mode = chips([{ label: "在点与过点", value: 0 }, { label: "切线条数分区", value: 1 }, { label: "公切线", value: 2 }], S.mode, (v) => { S.mode = v; S.zc = null; S.anim = null; apply(); });
+      ui.snap = toggle("吸附到曲线上", S.snap, (v) => { S.snap = v; setP(S.px, S.py); });
+      ui.ts = slider("eˣ 上切点 t", TR[0], TR[1], 0.001, S.t, (v) => v.toFixed(3), (v) => { S.anim = null; S.t = v; syncC(); });
+      ui.find = button("求公切线", startFind, true);
+      ui.ro = readout(); ui.note = el("p");
+      ui.note.style.cssText = "font-size:13px;line-height:1.6;margin-top:8px";
+      ctrl.append(ui.mode, ui.snap, ui.ts, ui.find); read.append(ui.ro, ui.note);
+      apply();
+    },
+    unmount() { S.anim = null; S.drag = false; S.zc = null; cv.style.cursor = ""; for (const k in ui) delete ui[k]; },
+    draw(ctx, W, H) {
+      tick(performance.now());
+      const T = theme(), box = { x: 40, y: 12, w: Math.max(10, W - 54), h: Math.max(10, H - 40) };
+      if (S.mode === 2) drawCommon(ctx, box, T); else drawCubic(ctx, box, T);
+    },
+    pointer(e, type, x, y) {
+      const m = S.m; if (!m) return;
+      const inside = inBox(m.box, x, y);
+      const act = () => { if (S.mode === 2) { S.anim = null; S.t = cl(m.invX(x), TR[0], TR[1]); syncC(); } else setP(m.invX(x), m.invY(y)); };
+      if (type === "down") { if (inside) { S.drag = true; act(); cv.style.cursor = "grabbing"; e.preventDefault(); } }
+      else if (type === "move") { if (S.drag) act(); else cv.style.cursor = inside ? (S.mode === 2 ? "ew-resize" : "crosshair") : ""; }
+      else { S.drag = false; cv.style.cursor = ""; }
+    },
+  };
+})();
+
+/* ---------- 04 单调性与含参讨论 ---------- */
+CH[3].ready = true;
+MODS[3] = (() => {
+  const SANS = "-apple-system,BlinkMacSystemFont,sans-serif", MONO = "ui-monospace,Menlo,monospace";
+  const EX = [
+    {
+      label: "① x³−3ax", fx: "f(x) = x³ − 3ax", dx: "f′(x) = 3x² − 3a = 3(x² − a)",
+      f: (x, a) => x * x * x - 3 * a * x, d: (x, a) => 3 * (x * x - a),
+      xr: [-2.8, 2.8], lo: -Infinity, hi: Infinity, ar: [-2, 2, 1],
+      zeros: (a) => (a > 0 ? [-Math.sqrt(a), Math.sqrt(a)] : []),
+      cases: [
+        { t: "a ≤ 0", in: (a) => a <= 0, inc: "(−∞, +∞)", dec: "无", why: "x² − a ≥ 0 恒成立，f′ 无变号零点" },
+        { t: "a > 0", in: (a) => a > 0, inc: "(−∞, −√a) 和 (√a, +∞)", dec: "(−√a, √a)", why: "两个零点 ±√a，中间 f′ < 0" },
+      ],
+    },
+    {
+      label: "② ln x−ax", fx: "f(x) = ln x − ax（x > 0）", dx: "f′(x) = 1/x − a = (1 − ax)/x",
+      f: (x, a) => Math.log(x) - a * x, d: (x, a) => 1 / x - a,
+      xr: [-0.5, 5], lo: 0, hi: Infinity, ar: [-1, 2, 0.5],
+      zeros: (a) => (a > 0 ? [1 / a] : []),
+      cases: [
+        { t: "a ≤ 0", in: (a) => a <= 0, inc: "(0, +∞)", dec: "无", why: "x > 0 时 1/x − a > 0 恒成立" },
+        { t: "a > 0", in: (a) => a > 0, inc: "(0, 1/a)", dec: "(1/a, +∞)", why: "唯一零点 x = 1/a 落在定义域内" },
+      ],
+    },
+    {
+      label: "③ ½x²−(a+1)x+a ln x", fx: "f(x) = ½x² − (a+1)x + a ln x（x > 0）", dx: "f′(x) = (x − 1)(x − a)/x",
+      f: (x, a) => 0.5 * x * x - (a + 1) * x + a * Math.log(x), d: (x, a) => ((x - 1) * (x - a)) / x,
+      xr: [-0.5, 4.5], lo: 0, hi: Infinity, ar: [-1, 3, 0.5],
+      zeros: (a) => (a > 0 ? (Math.abs(a - 1) < 1e-9 ? [1] : [1, a].sort((p, q) => p - q)) : [1]),
+      cases: [
+        { t: "a ≤ 0", in: (a) => a <= 0, inc: "(1, +∞)", dec: "(0, 1)", why: "零点 a 不在定义域内，只剩 x = 1" },
+        { t: "0 < a < 1", in: (a) => a > 0 && a < 1 - 1e-9, inc: "(0, a) 和 (1, +∞)", dec: "(a, 1)", why: "两个零点都在定义域内，且 a < 1" },
+        { t: "a = 1", in: (a) => Math.abs(a - 1) < 1e-9, inc: "(0, +∞)", dec: "无", why: "两零点重合，f′ = (x−1)²/x ≥ 0" },
+        { t: "a > 1", in: (a) => a > 1 + 1e-9, inc: "(0, 1) 和 (a, +∞)", dec: "(1, a)", why: "两个零点，且 1 < a" },
+      ],
+    },
+    {
+      label: "④ eˣ−ax", fx: "f(x) = eˣ − ax", dx: "f′(x) = eˣ − a",
+      f: (x, a) => Math.exp(x) - a * x, d: (x, a) => Math.exp(x) - a,
+      xr: [-3.4, 2.6], lo: -Infinity, hi: Infinity, ar: [-1, 4, 1],
+      zeros: (a) => (a > 0 ? [Math.log(a)] : []),
+      cases: [
+        { t: "a ≤ 0", in: (a) => a <= 0, inc: "(−∞, +∞)", dec: "无", why: "eˣ > 0 ≥ a，f′ 恒正" },
+        { t: "a > 0", in: (a) => a > 0, inc: "(ln a, +∞)", dec: "(−∞, ln a)", why: "唯一零点 x = ln a" },
+      ],
+    },
+  ];
+  const S = { i: 0, a: 1, x0: 0.8, tan: true, drag: false, m: null, bb: null, bar: null, flash: 0, key: "" };
+  const ui = {};
+  const ex = () => EX[S.i];
+  const f3 = (v) => (!isFinite(v) ? "—" : (Math.abs(v) < 5e-4 ? 0 : v).toFixed(3).replace("-", "−"));
+  const endS = (v) => (v === -Infinity ? "−∞" : v === Infinity ? "+∞" : f3(v));
+  const cl = (v, a, b) => Math.min(b, Math.max(a, v));
+  function clampX(v) {
+    const E = ex();
+    return cl(v, Math.max(E.xr[0], E.lo + 0.02), Math.min(E.xr[1], E.hi));
+  }
+  function parts() {
+    const E = ex(), a = S.a;
+    const z = E.zeros(a).filter((v) => v > E.lo + 1e-9 && v < E.hi - 1e-9).sort((p, q) => p - q);
+    const pts = [E.lo, ...z, E.hi], out = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const L = pts[i], R = pts[i + 1];
+      const A = isFinite(L) ? L : isFinite(R) ? R - 4 : -4, Bq = isFinite(R) ? R : A + 8;
+      let best = 0;
+      for (let k = 1; k <= 7; k++) { const v = E.d(A + ((Bq - A) * k) / 8, a); if (isFinite(v) && Math.abs(v) > Math.abs(best)) best = v; }
+      const s = Math.abs(best) < 1e-12 ? 0 : best > 0 ? 1 : -1;
+      const p = out[out.length - 1];
+      if (p && p.s === s) p.R = R; else out.push({ L, R, s });
+    }
+    return { z, out };
+  }
+  const iv = (p) => "(" + endS(p.L) + ", " + endS(p.R) + ")";
+  const curCase = () => ex().cases.find((c) => c.in(S.a)) || ex().cases[0];
+  function sync() {
+    if (!ui.ro) return;
+    const E = ex(), P = parts(), c = curCase(), dv = E.d(S.x0, S.a);
+    const key = S.i + "|" + P.z.map((v) => v.toFixed(4)).join(",");
+    if (key !== S.key) { if (S.key.split("|")[0] === String(S.i)) S.flash = performance.now(); S.key = key; }
+    const inc = P.out.filter((p) => p.s > 0).map(iv).join(" 和 ") || "无";
+    const dec = P.out.filter((p) => p.s < 0).map(iv).join(" 和 ") || "无";
+    ui.ro.set([
+      ["参数 a", f3(S.a), "var(--blue-text)"],
+      ["f′ 零点（定义域内）", P.z.length ? P.z.map(f3).join("，") : "无", "var(--gold-text)"],
+      ["单调递增区间", inc, "var(--blue-text)"],
+      ["单调递减区间", dec, "var(--red-text)"],
+      ["游标 x₀", f3(S.x0)],
+      ["f′(x₀)", f3(dv), dv > 1e-9 ? "var(--blue-text)" : dv < -1e-9 ? "var(--red-text)" : "var(--gold-text)"],
+      ["f′(x₀) 的符号", dv > 1e-9 ? "> 0，此处递增 ↗" : dv < -1e-9 ? "< 0，此处递减 ↘" : "= 0，临界点", dv > 1e-9 ? "var(--blue-text)" : dv < -1e-9 ? "var(--red-text)" : "var(--gold-text)"],
+    ]);
+    ui.note.innerHTML = E.dx + "<br>当前情形 <b>" + c.t + "</b>：增 " + c.inc + "；减 " + c.dec + "。";
+    mark();
+  }
+  function mark() {
+    if (!ui.tree) return;
+    const c = curCase();
+    [...ui.tree.children].forEach((r, k) => {
+      const on = ex().cases[k] === c;
+      r.style.background = on ? "var(--blue-soft)" : "var(--sec)";
+      r.style.color = on ? "var(--blue-text)" : "var(--fg)";
+    });
+  }
+  function tree() {
+    if (!ui.tree) return;
+    ui.tree.innerHTML = ex().cases.map((c) =>
+      '<div style="padding:9px 12px;border-radius:12px;margin-bottom:6px;font-size:13px;line-height:1.6;overflow-wrap:anywhere">' +
+      "<b>" + c.t + "</b><br>增：" + c.inc + "；减：" + c.dec + "<br><span style=\"opacity:.75\">" + c.why + "</span></div>").join("");
+    mark();
+  }
+  function setEx(i) {
+    S.i = i; const E = ex(); S.a = E.ar[2]; S.x0 = clampX(i === 0 ? 0.8 : i === 3 ? 0.5 : 1.5);
+    if (ui.a) { const r = ui.a.querySelector("input"); r.min = E.ar[0]; r.max = E.ar[1]; ui.a.set(S.a); ui.fm.innerHTML = E.fx + "<br>" + E.dx; }
+    S.key = ""; S.flash = 0; tree(); sync();
+  }
+  function rng(fn, lim) {
+    const E = ex(), A = Math.max(E.lo + 1e-3, E.xr[0]), Bq = Math.min(E.hi, E.xr[1]);
+    let lo = Infinity, hi = -Infinity;
+    for (let i = 0; i <= 160; i++) {
+      const y = fn(A + ((Bq - A) * i) / 160, S.a);
+      if (!isFinite(y) || Math.abs(y) > lim) continue;
+      lo = Math.min(lo, y); hi = Math.max(hi, y);
+    }
+    if (!isFinite(lo)) { lo = -1; hi = 1; }
+    lo = Math.min(lo, 0); hi = Math.max(hi, 0);
+    const p = (hi - lo) * 0.12 || 1;
+    return [lo - p, hi + p];
+  }
+  function dot(ctx, x, y, c, T, r, halo) {
+    if (halo) { ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, 14, 0, 7); ctx.fill(); ctx.restore(); }
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.bg; ctx.stroke();
+  }
+  function tag(ctx, x, y, s, c, T, right) {
+    ctx.save(); ctx.font = "13px " + SANS; const w = ctx.measureText(s).width; if (right) x -= w;
+    ctx.globalAlpha = 0.88; ctx.fillStyle = T.bg; ctx.fillRect(x - 4, y - 2, w + 8, 20);
+    ctx.globalAlpha = 1; ctx.fillStyle = c; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(s, x, y + 1); ctx.restore();
+  }
+  function signBar(ctx, m, y, h, T) {
+    const E = ex(), b = m.box;
+    ctx.save();
+    ctx.fillStyle = T.grid; ctx.fillRect(b.x, y, b.w, h);
+    const xa = Math.max(b.x, m.X(Math.max(E.lo, m.xr[0]))), xb = Math.min(b.x + b.w, m.X(Math.min(E.hi, m.xr[1])));
+    const runs = [];
+    for (let px = xa; px <= xb; px += 2) {
+      const v = E.d(m.invX(px), S.a), s = !isFinite(v) ? 0 : v > 1e-12 ? 1 : v < -1e-12 ? -1 : 0;
+      const last = runs[runs.length - 1];
+      if (last && last.s === s) last.b = px; else runs.push({ s, a: px, b: px });
+    }
+    runs.forEach((r) => {
+      if (!r.s) return;
+      ctx.globalAlpha = 0.22; ctx.fillStyle = r.s > 0 ? T.teal : T.red;
+      ctx.fillRect(r.a, y, Math.max(2, r.b - r.a), h);
+      const w = r.b - r.a;
+      if (w > 20) {
+        ctx.globalAlpha = 1; ctx.fillStyle = r.s > 0 ? T.teal : T.red;
+        ctx.font = "600 15px " + SANS; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        const cx = (r.a + r.b) / 2, lab = w > 110;
+        ctx.fillText(r.s > 0 ? "↗" : "↘", lab ? cx - 40 : cx, y + h / 2 + 1);
+        if (lab) { ctx.font = "12px " + SANS; ctx.fillText(r.s > 0 ? "f′ > 0 递增" : "f′ < 0 递减", cx + 10, y + h / 2); }
+      }
+    });
+    ctx.globalAlpha = 1; ctx.strokeStyle = T.axis; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
+    ctx.strokeRect(b.x + 0.5, y + 0.5, b.w - 1, h - 1);
+    ctx.restore();
+    S.bar = { y, h };
+  }
+
+  return {
+    text: "<b><i>f</i>′(<i>x</i>) &gt; 0 的区间上 <i>f</i> 单调递增，<i>f</i>′(<i>x</i>) &lt; 0 的区间上单调递减</b>。含参数时，关键是看 <i>f</i>′(<i>x</i>) 的「零点」在不在定义域内、有几个、谁大谁小——参数 <i>a</i> 一变，零点就移动，单调区间跟着变，这就是分类讨论的由来。拖动 <i>a</i>，看中间符号条上青色（↗）与红色（↘）的分界如何跟着零点跑。",
+    points: [
+      "求单调区间四步：①定义域 ②求导并因式分解 ③找 <i>f</i>′ 零点并比较 ④列表定号",
+      "含参分类三问：有没有零点、零点在不在定义域、零点谁大谁小",
+      "<i>f</i>′(<i>x</i>) &gt; 0 ⇒ 递增；<i>f</i>′(<i>x</i>) &lt; 0 ⇒ 递减",
+      "临界值（如 <i>a</i> = 0、<i>a</i> = 1）处零点出现、合并或移出定义域",
+    ],
+    gk: [
+      "常考：解答题第一问高频「讨论 <i>f</i>(<i>x</i>) 的单调性」，按参数分类写全每种情形。",
+      "易错：忘记定义域（含 ln <i>x</i> 时 <i>x</i> &gt; 0）；单调区间不能用「∪」连接，要用「和」或逗号隔开。",
+    ],
+    mount(ctrl, read) {
+      ui.ex = chips(EX.map((o, i) => ({ label: o.label, value: i })), S.i, setEx);
+      ui.a = slider("参数 a", EX[S.i].ar[0], EX[S.i].ar[1], 0.05, S.a, (v) => v.toFixed(2), (v) => { S.a = +v.toFixed(2); sync(); });
+      ui.tan = toggle("在 x₀ 处显示切线", S.tan, (v) => { S.tan = v; });
+      ui.fm = el("div", "mono");
+      ui.fm.style.cssText = "background:var(--sec);border-radius:14px;padding:10px 14px;margin:8px 0 4px;font-size:14px;line-height:1.7;overflow-wrap:anywhere";
+      ui.th = el("h3", "", "分类讨论树"); ui.th.style.cssText = "font-size:13px;color:var(--sub);font-weight:500;margin:12px 0 8px";
+      ui.tree = el("div");
+      ui.ro = readout(); ui.note = el("p");
+      ui.note.style.cssText = "font-size:13px;line-height:1.6;margin-top:8px;overflow-wrap:anywhere";
+      ctrl.append(ui.ex, ui.a, ui.tan, ui.fm, ui.th, ui.tree); read.append(ui.ro, ui.note);
+      setEx(S.i);
+    },
+    unmount() { S.drag = false; cv.style.cursor = ""; for (const k in ui) delete ui[k]; },
+    draw(ctx, W, H) {
+      const T = theme(), E = ex(), barH = 28, gap = 8;
+      const hh = Math.max(24, (H - 26 - barH - 2 * gap) / 2), bw = Math.max(10, W - 54);
+      const tb = { x: 40, y: 10, w: bw, h: hh }, by = 10 + hh + gap;
+      const bb = { x: 40, y: by + barH + gap, w: bw, h: hh };
+      const dom = [Math.max(E.lo + 1e-4, E.xr[0]), Math.min(E.hi, E.xr[1])];
+      const m = drawAxes(ctx, tb, E.xr, rng(E.f, 20), { ylabel: "f" }); S.m = m;
+      const y0 = E.f(S.x0, S.a), d0 = E.d(S.x0, S.a);
+      if (S.tan && isFinite(y0) && isFinite(d0)) plotFn(ctx, m, (x) => y0 + d0 * (x - S.x0), null, T.red, 1.8);
+      plotFn(ctx, m, (x) => E.f(x, S.a), dom, T.blue, 2.5);
+      tag(ctx, tb.x + 8, tb.y + 6, E.fx, T.blue, T);
+      signBar(ctx, m, by, barH, T);
+      const m2 = drawAxes(ctx, bb, E.xr, rng(E.d, 12), { ylabel: "f′" });
+      plotFn(ctx, m2, (x) => E.d(x, S.a), dom, T.purple, 2.5);
+      tag(ctx, bb.x + 8, bb.y + 6, E.dx, T.purple, T);
+      const P = parts(), fl = S.flash ? Math.max(0, 1 - (performance.now() - S.flash) / 900) : 0;
+      P.z.forEach((z) => {
+        const X = m.X(z); if (X < tb.x - 2 || X > tb.x + tb.w + 2) return;
+        ctx.save(); ctx.strokeStyle = T.gold; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.65; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(X, tb.y); ctx.lineTo(X, tb.y + tb.h); ctx.moveTo(X, bb.y); ctx.lineTo(X, bb.y + bb.h); ctx.stroke(); ctx.restore();
+        if (fl > 0) { ctx.save(); ctx.globalAlpha = 0.45 * fl; ctx.fillStyle = T.gold; ctx.beginPath(); ctx.arc(X, m2.Y(0), 8 + 16 * (1 - fl), 0, 7); ctx.fill(); ctx.restore(); }
+        dot(ctx, X, m2.Y(0), T.gold, T, 5);
+        tag(ctx, X + 6, bb.y + bb.h - 26, "零点 " + f3(z), T.gold, T, X > bb.x + bb.w - 90);
+      });
+      const X0 = m.X(S.x0);
+      ctx.save(); ctx.strokeStyle = T.sub; ctx.globalAlpha = 0.3; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(X0, tb.y); ctx.lineTo(X0, bb.y + bb.h); ctx.stroke(); ctx.restore();
+      const cly = (y, b) => cl(y, b.y, b.y + b.h);
+      if (isFinite(y0)) dot(ctx, X0, cly(m.Y(y0), tb), T.blue, T, 6, S.drag);
+      if (isFinite(d0)) dot(ctx, X0, cly(m2.Y(d0), bb), d0 > 0 ? T.teal : d0 < 0 ? T.red : T.gold, T, 6, S.drag);
+      ctx.save(); ctx.font = "italic 13px " + SANS; ctx.fillStyle = T.sub; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+      ctx.fillText("x₀", X0, tb.y + tb.h - 2); ctx.restore();
+    },
+    pointer(e, type, x, y) {
+      const m = S.m; if (!m) return;
+      const b = m.box, bot = S.bar ? S.bar.y + S.bar.h + b.h + 8 : b.y + b.h;
+      const inside = x >= b.x - 12 && x <= b.x + b.w + 12 && y >= b.y - 6 && y <= bot + 6;
+      if (type === "down") { if (inside) { S.drag = true; S.x0 = clampX(m.invX(x)); sync(); cv.style.cursor = "grabbing"; e.preventDefault(); } }
+      else if (type === "move") { if (S.drag) { S.x0 = clampX(m.invX(x)); sync(); } else cv.style.cursor = inside ? "ew-resize" : ""; }
+      else { S.drag = false; cv.style.cursor = ""; }
+    },
+  };
+})();
+CH[4].ready = true;
+MODS[4] = (() => {
+  const SANS = "-apple-system,BlinkMacSystemFont,sans-serif", PI = Math.PI;
+  const C3 = { label: "x³−3x", fx: "f(x) = x³ − 3x", dx: "f′(x) = 3x² − 3 = 3(x + 1)(x − 1)", f: (x) => x ** 3 - 3 * x, d: (x) => 3 * x * x - 3, xr: [-2.6, 2.6], z: [-1, 1] };
+  const FA = [
+    { ...C3, x0: 0.4 },
+    { label: "x³（非极值反例）", fx: "f(x) = x³", dx: "f′(x) = 3x²", f: (x) => x ** 3, d: (x) => 3 * x * x, xr: [-2, 2], z: [0], x0: -0.8,
+      note: "f′(0) = 0，但 0 左右两侧 f′ 都 &gt; 0，不变号，所以 0 不是极值点——f′(x₀) = 0 只是必要条件。" },
+    { label: "x⁴−2x²", fx: "f(x) = x⁴ − 2x²", dx: "f′(x) = 4x³ − 4x = 4x(x + 1)(x − 1)", f: (x) => x ** 4 - 2 * x * x, d: (x) => 4 * x ** 3 - 4 * x, xr: [-1.9, 1.9], z: [-1, 0, 1], x0: 0.5 },
+    { label: "x+2sin x", fx: "f(x) = x + 2sin x，x∈[−6, 6]", dx: "f′(x) = 1 + 2cos x", f: (x) => x + 2 * Math.sin(x), d: (x) => 1 + 2 * Math.cos(x), xr: [-6, 6], z: [-4 * PI / 3, -2 * PI / 3, 2 * PI / 3, 4 * PI / 3], x0: 1 },
+    { label: "x·eˣ", fx: "f(x) = x·eˣ", dx: "f′(x) = (x + 1)eˣ", f: (x) => x * Math.exp(x), d: (x) => (x + 1) * Math.exp(x), xr: [-5, 0.8], z: [-1], x0: -2 },
+    { label: "ln x / x", fx: "f(x) = ln x / x（x &gt; 0）", dx: "f′(x) = (1 − ln x) / x²", f: (x) => Math.log(x) / x, d: (x) => (1 - Math.log(x)) / (x * x), xr: [-0.5, 9], lo: 0, z: [Math.E], x0: 1.5, yr: [-2, 0.8], yd: [-0.3, 1.2] },
+  ];
+  const FB = [
+    { ...C3, ab: [-1.8, 1.6] },
+    { label: "x³−3x²+2", fx: "f(x) = x³ − 3x² + 2", dx: "f′(x) = 3x² − 6x = 3x(x − 2)", f: (x) => x ** 3 - 3 * x * x + 2, d: (x) => 3 * x * x - 6 * x, xr: [-1.5, 3.5], z: [0, 2], ab: [-0.8, 2.6] },
+    { label: "sin x + cos x", fx: "f(x) = sin x + cos x，x∈[−π, 2π]", dx: "f′(x) = cos x − sin x", f: (x) => Math.sin(x) + Math.cos(x), d: (x) => Math.cos(x) - Math.sin(x), xr: [-PI, 2 * PI], z: [-3 * PI / 4, PI / 4, 5 * PI / 4], ab: [-1, 4.5] },
+    { label: "x − 2ln x", fx: "f(x) = x − 2ln x（x &gt; 0）", dx: "f′(x) = 1 − 2/x", f: (x) => x - 2 * Math.log(x), d: (x) => 1 - 2 / x, xr: [-0.4, 7], lo: 0, z: [2], ab: [0.5, 5], yr: [-0.6, 5.5] },
+  ];
+  const S = { mode: 0, i: 0, j: 0, x0: FA[0].x0, a: FB[0].ab[0], b: FB[0].ab[1], drag: null, last: "b", m: null, bot: 0 };
+  const ui = {};
+  const f3 = (v) => (!isFinite(v) ? "—" : (Math.abs(v) < 5e-4 ? 0 : v).toFixed(3).replace("-", "−"));
+  const cl = (v, a, b) => Math.min(b, Math.max(a, v));
+  const dom = (F) => [Math.max(F.xr[0], F.lo != null ? F.lo + 1e-3 : -Infinity), F.xr[1]];
+  const ends = () => { const F = FB[S.j]; return [Math.max(F.xr[0], F.lo != null ? F.lo + 0.1 : -Infinity), F.xr[1]]; };
+  const kind = (F, x) => { const l = F.d(x - 1e-3), r = F.d(x + 1e-3); return l > 0 && r < 0 ? 1 : l < 0 && r > 0 ? -1 : 0; };
+  const crits = (F) => F.z.map((x) => ({ x, k: kind(F, x) }));
+  const clampX = (v) => { const D = dom(FA[S.i]); return cl(v, D[0] + 0.02, D[1]); };
+  const KN = (k) => (k > 0 ? "极大值点" : k < 0 ? "极小值点" : "驻点，非极值");
+  function rng(fn, F, lim) {
+    const [A, Bq] = dom(F); let lo = Infinity, hi = -Infinity;
+    for (let i = 0; i <= 200; i++) { const y = fn(A + ((Bq - A) * i) / 200); if (!isFinite(y) || Math.abs(y) > lim) continue; lo = Math.min(lo, y); hi = Math.max(hi, y); }
+    if (!isFinite(lo)) { lo = -1; hi = 1; }
+    lo = Math.min(lo, 0); hi = Math.max(hi, 0); const p = (hi - lo) * 0.12 || 1; return [lo - p, hi + p];
+  }
+  function res() {
+    const F = FB[S.j], c = [{ x: S.a, t: "端点" }];
+    F.z.forEach((z) => { if (z > S.a + 1e-9 && z < S.b - 1e-9) { const k = kind(F, z); if (k) c.push({ x: z, t: k > 0 ? "极大" : "极小" }); } });
+    c.push({ x: S.b, t: "端点" }); c.forEach((p) => (p.y = F.f(p.x)));
+    const M = Math.max(...c.map((p) => p.y)), mn = Math.min(...c.map((p) => p.y));
+    const isM = (p) => p.y >= M - 5e-4, ism = (p) => p.y <= mn + 5e-4;
+    return { c, M, mn, isM, ism, max: c.find(isM), min: c.find(ism) };
+  }
+  function setAB(a, b, who) {
+    const [L, R] = ends();
+    if (who === "a") S.a = cl(a, L, S.b - 0.1); else if (who === "b") S.b = cl(b, S.a + 0.1, R);
+    else { S.a = cl(a, L, R - 0.1); S.b = cl(b, S.a + 0.1, R); }
+    if (ui.sa) { ui.sa.set(S.a); ui.sb.set(S.b); }
+    sync();
+  }
+  function setJ(j) {
+    S.j = j; S.last = "b"; const [L, R] = ends();
+    if (ui.sa) [ui.sa, ui.sb].forEach((s) => { const r = s.querySelector("input"); r.min = L; r.max = R; });
+    setAB(FB[j].ab[0], FB[j].ab[1]);
+  }
+  function sync() {
+    if (!ui.ro) return;
+    const m0 = S.mode === 0, F = m0 ? FA[S.i] : FB[S.j];
+    ui.fa.hidden = !m0; ui.fb.hidden = ui.sa.hidden = ui.sb.hidden = ui.tbl.hidden = m0;
+    ui.fm.innerHTML = F.fx + "<br>" + F.dx;
+    if (m0) {
+      const y0 = F.f(S.x0), d0 = F.d(S.x0), cs = crits(F), sc = d0 > 1e-9 ? "var(--blue-text)" : d0 < -1e-9 ? "var(--red-text)" : "var(--gold-text)";
+      ui.ro.set([
+        ["游标 x₀", f3(S.x0)], ["f(x₀)", f3(y0)], ["f′(x₀)", f3(d0), sc],
+        ...cs.map((c) => [KN(c.k), "x = " + f3(c.x) + "，f = " + f3(F.f(c.x)), c.k > 0 ? "var(--gold-text)" : c.k < 0 ? "var(--blue-text)" : ""]),
+      ]);
+      const p = cs.filter((c) => c.k > 0).length, q = cs.filter((c) => c.k < 0).length;
+      ui.note.innerHTML = "f′ 的变号零点才是极值点：极大值点 " + p + " 个，极小值点 " + q + " 个。" + (F.note ? "<br>" + F.note : "");
+      return;
+    }
+    const R = res(), e = S.last === "a" ? S.a : S.b, at = (fn) => R.c.filter(fn).map((p) => "x = " + f3(p.x) + "（" + p.t + "）").join("，");
+    ui.ro.set([
+      ["区间 [a, b]", "[" + f3(S.a) + ", " + f3(S.b) + "]"],
+      ["当前候选点（端点 " + S.last + "）", "x = " + f3(e) + "，f = " + f3(F.f(e))],
+      ["最大值", f3(R.M), "var(--blue-text)"], ["最大值取于", at(R.isM), "var(--blue-text)"],
+      ["最小值", f3(R.mn), "var(--red-text)"], ["最小值取于", at(R.ism), "var(--red-text)"],
+    ]);
+    const td = "padding:5px 4px 5px 0;text-align:left";
+    ui.tbl.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:10px"><tr>' +
+      ["候选点 x", "f(x)", "类型"].map((h) => '<th style="' + td + ';font-weight:500">' + h + "</th>").join("") + "</tr>" +
+      R.c.map((p) => {
+        const mx = R.isM(p), mi = R.ism(p), st = mx ? "font-weight:600;color:var(--blue-text)" : mi ? "font-weight:600;color:var(--red-text)" : "";
+        return '<tr style="border-top:1px solid var(--line);' + st + '"><td class="mono" style="' + td + '">' + f3(p.x) + '</td><td class="mono" style="' + td + '">' + f3(p.y) +
+          '</td><td style="' + td + '">' + p.t + (mx ? " · 最大值" : mi ? " · 最小值" : "") + "</td></tr>";
+      }).join("") + "</table>";
+    ui.note.innerHTML = R.max.t === "端点" || R.min.t === "端点" ? "有最值落在端点上——求闭区间最值一定要比较端点值。" : "此时最大、最小值都由区间内的极值取到；拖动端点试试让端点值反超。";
+  }
+  function setMode(k) { S.mode = k; S.drag = null; sync(); }
+  function dot(ctx, x, y, c, T, r, halo) {
+    if (halo) { ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, 14, 0, 7); ctx.fill(); ctx.restore(); }
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.bg; ctx.stroke();
+  }
+  function ring(ctx, x, y, T) { ctx.save(); ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fillStyle = T.bg; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.fg; ctx.stroke(); ctx.restore(); }
+  function tri(ctx, x, y, up, c) {
+    const s = up ? -1 : 1; ctx.save(); ctx.fillStyle = c; ctx.beginPath();
+    ctx.moveTo(x, y + s * 7); ctx.lineTo(x - 7, y - s * 5); ctx.lineTo(x + 7, y - s * 5); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  function tag(ctx, x, y, s, c, T, right) {
+    ctx.save(); ctx.font = "13px " + SANS; const w = ctx.measureText(s).width; if (right) x -= w;
+    ctx.globalAlpha = 0.88; ctx.fillStyle = T.bg; ctx.fillRect(x - 4, y - 2, w + 8, 20);
+    ctx.globalAlpha = 1; ctx.fillStyle = c; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(s, x, y + 1); ctx.restore();
+  }
+  function vline(ctx, X, y1, y2, c, a) {
+    ctx.save(); ctx.strokeStyle = c; ctx.globalAlpha = a; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(X, y1); ctx.lineTo(X, y2); ctx.stroke(); ctx.restore();
+  }
+  function draw0(ctx, W, H, T) {
+    const F = FA[S.i], gap = 14, hh = Math.max(24, (H - 22 - gap) / 2), bw = Math.max(10, W - 54), D = dom(F);
+    const tb = { x: 40, y: 10, w: bw, h: hh }, bb = { x: 40, y: 10 + hh + gap, w: bw, h: hh };
+    const m = drawAxes(ctx, tb, F.xr, F.yr || rng(F.f, F, 30), { ylabel: "f" }); S.m = m; S.bot = bb.y + bb.h;
+    const y0 = F.f(S.x0), d0 = F.d(S.x0), cly = (y, b) => cl(y, b.y, b.y + b.h);
+    if (isFinite(y0) && isFinite(d0)) plotFn(ctx, m, (x) => y0 + d0 * (x - S.x0), null, T.red, 1.6);
+    plotFn(ctx, m, F.f, D, T.blue, 2.5);
+    tag(ctx, tb.x + 8, tb.y + 6, F.fx.replace("&gt;", ">"), T.blue, T);
+    const m2 = drawAxes(ctx, bb, F.xr, F.yd || rng(F.d, F, 30), { ylabel: "f′" });
+    plotFn(ctx, m2, F.d, D, T.purple, 2.5);
+    tag(ctx, bb.x + 8, bb.y + 6, F.dx, T.purple, T);
+    crits(F).forEach((c) => {
+      const X = m.X(c.x), Y = m.Y(F.f(c.x)), Y2 = m2.Y(0), col = c.k > 0 ? T.gold : c.k < 0 ? T.teal : T.fg, rt = X > tb.x + tb.w - 110;
+      vline(ctx, X, tb.y, tb.y + tb.h, col, 0.5); vline(ctx, X, bb.y, bb.y + bb.h, col, 0.5);
+      if (c.k) {
+        dot(ctx, X, Y, col, T, 4.5); dot(ctx, X, Y2, col, T, 4.5); tri(ctx, X, c.k > 0 ? Y - 15 : Y + 15, c.k > 0, col);
+        tag(ctx, rt ? X - 10 : X + 10, cly(c.k > 0 ? Y - 30 : Y + 12, { y: tb.y + 26, h: tb.h - 48 }), KN(c.k), col, T, rt);
+      } else { ring(ctx, X, Y, T); ring(ctx, X, Y2, T); tag(ctx, rt ? X - 10 : X + 10, cly(Y + 10, { y: tb.y + 26, h: tb.h - 48 }), "驻点，非极值", T.fg, T, rt); }
+    });
+    const X0 = m.X(S.x0);
+    ctx.save(); ctx.strokeStyle = T.sub; ctx.globalAlpha = 0.3; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, tb.y); ctx.lineTo(X0, bb.y + bb.h); ctx.stroke(); ctx.restore();
+    const P0 = cly(m.Y(y0), tb);
+    [-1, 1].forEach((s) => {
+      const Xs = X0 + s * 28, v = F.d(m.invX(Xs)); if (!isFinite(v) || Xs < tb.x || Xs > tb.x + tb.w) return;
+      const col = v > 1e-9 ? T.teal : v < -1e-9 ? T.red : T.sub, ay = cl(P0 - 20, tb.y + 30, tb.y + tb.h - 8);
+      ctx.save(); ctx.fillStyle = col; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.font = "600 17px " + SANS; ctx.fillText(v > 1e-9 ? "↗" : v < -1e-9 ? "↘" : "→", Xs, ay);
+      ctx.font = "12px " + SANS; ctx.fillText(v > 1e-9 ? "f′>0" : v < -1e-9 ? "f′<0" : "f′=0", Xs, ay - 16); ctx.restore();
+    });
+    if (isFinite(y0)) dot(ctx, X0, P0, T.blue, T, 6, S.drag);
+    if (isFinite(d0)) dot(ctx, X0, cly(m2.Y(d0), bb), d0 > 0 ? T.teal : d0 < 0 ? T.red : T.gold, T, 6, S.drag);
+    ctx.save(); ctx.font = "italic 13px " + SANS; ctx.fillStyle = T.sub; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+    ctx.fillText("x₀", X0, tb.y + tb.h - 2); ctx.restore();
+  }
+  function draw1(ctx, W, H, T) {
+    const F = FB[S.j], box = { x: 40, y: 12, w: Math.max(10, W - 54), h: Math.max(10, H - 40) };
+    const m = drawAxes(ctx, box, F.xr, F.yr || rng(F.f, F, 30)); S.m = m;
+    const XA = m.X(S.a), XB = m.X(S.b), ay = cl(m.Y(0), box.y, box.y + box.h), ax = cl(m.X(0), box.x, box.x + box.w), R = res();
+    ctx.save(); ctx.globalAlpha = 0.07; ctx.fillStyle = T.blue; ctx.fillRect(XA, box.y, XB - XA, box.h); ctx.restore();
+    plotFn(ctx, m, F.f, dom(F), T.sub, 1.4);
+    plotFn(ctx, m, F.f, [S.a, S.b], T.blue, 3.2);
+    tag(ctx, box.x + 8, box.y + 6, F.fx.replace("&gt;", ">"), T.blue, T);
+    [[R.max, T.blue, "最大值 "], [R.min, T.red, "最小值 "]].forEach(([p, col, s], k) => {
+      const X = m.X(p.x), Y = m.Y(p.y);
+      ctx.save(); ctx.strokeStyle = col; ctx.setLineDash([5, 4]); ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(X, Y); ctx.lineTo(ax, Y); ctx.stroke(); ctx.restore();
+      tag(ctx, X >= ax ? ax + 6 : ax - 6, k ? Y + 4 : Y - 22, s + f3(p.y), col, T, X < ax);
+    });
+    R.c.forEach((p) => {
+      const X = m.X(p.x), Y = m.Y(p.y), big = p === R.max || p === R.min;
+      if (p.t === "端点") vline(ctx, X, ay, Y, T.sub, 0.6);
+      else tri(ctx, X, p.t === "极大" ? Y - 15 : Y + 15, p.t === "极大", p.t === "极大" ? T.gold : T.teal);
+      dot(ctx, X, Y, p === R.max ? T.blue : p === R.min ? T.red : p.t === "极大" ? T.gold : p.t === "极小" ? T.teal : T.fg, T, big ? 6 : 4.5, big);
+    });
+    [["a", XA], ["b", XB]].forEach(([n, X]) => {
+      dot(ctx, X, ay, T.fg, T, S.drag === n ? 10 : 8, S.drag === n);
+      ctx.save(); ctx.fillStyle = T.bg; ctx.font = "italic 600 12px " + SANS; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(n, X, ay + 0.5); ctx.restore();
+    });
+  }
+  return {
+    text: "<b><i>f</i>′ 在 <i>x</i>₀ 左正右负，<i>x</i>₀ 是极大值点；左负右正，是极小值点。</b><i>f</i>′(<i>x</i>₀) = 0 只是必要条件——<i>y</i> = <i>x</i>³ 在 0 处导数为 0，却不是极值点。闭区间上的最值，从「极值」和「端点值」里挑最大最小；极值是局部概念，极大值可能比极小值还小。",
+    points: [
+      "极值点处 <i>f</i>′ = 0（可导时），反之不成立",
+      "求闭区间最值：求极值 + 端点值 → 比较",
+      "极值可以有多个，最值至多一个最大、一个最小",
+      "开区间上最值可能不存在",
+    ],
+    gk: [
+      "常考：解答题常考「求极值 / 最值」和「已知极值求参数」——求出参数后必须检验是否真为极值点。",
+      "易错：<i>f</i>′(<i>x</i>₀) = 0 就说是极值点；忘记比较端点。",
+    ],
+    mount(ctrl, read) {
+      ui.mode = chips([{ label: "极值判定", value: 0 }, { label: "闭区间最值", value: 1 }], S.mode, setMode);
+      ui.fa = chips(FA.map((o, i) => ({ label: o.label, value: i })), S.i, (i) => { S.i = i; S.x0 = FA[i].x0; sync(); });
+      ui.fb = chips(FB.map((o, i) => ({ label: o.label, value: i })), S.j, setJ);
+      ui.sa = slider("端点 a", 0, 1, 0.01, 0, (v) => f3(v), (v) => { S.last = "a"; setAB(v, 0, "a"); });
+      ui.sb = slider("端点 b", 0, 1, 0.01, 0, (v) => f3(v), (v) => { S.last = "b"; setAB(0, v, "b"); });
+      ui.fm = el("div", "mono");
+      ui.fm.style.cssText = "background:var(--sec);border-radius:14px;padding:10px 14px;margin:8px 0 4px;font-size:14px;line-height:1.7;overflow-wrap:anywhere";
+      ui.ro = readout(); ui.tbl = el("div"); ui.note = el("p");
+      ui.note.style.cssText = "font-size:13px;line-height:1.6;margin-top:8px;overflow-wrap:anywhere";
+      ctrl.append(ui.mode, ui.fa, ui.fb, ui.sa, ui.sb, ui.fm); read.append(ui.ro, ui.tbl, ui.note);
+      const a = S.a, b = S.b, last = S.last; setJ(S.j); S.last = last; setAB(a, b);
+    },
+    unmount() { S.drag = null; cv.style.cursor = ""; for (const k in ui) delete ui[k]; },
+    draw(ctx, W, H) { const T = theme(); if (S.mode === 0) draw0(ctx, W, H, T); else draw1(ctx, W, H, T); },
+    pointer(e, type, x, y) {
+      const m = S.m; if (!m) return; const b = m.box;
+      if (S.mode === 0) {
+        const inside = x >= b.x - 12 && x <= b.x + b.w + 12 && y >= b.y - 6 && y <= S.bot + 6;
+        if (type === "down") { if (inside) { S.drag = "x"; S.x0 = clampX(m.invX(x)); sync(); cv.style.cursor = "grabbing"; e.preventDefault(); } }
+        else if (type === "move") { if (S.drag) { S.x0 = clampX(m.invX(x)); sync(); } else cv.style.cursor = inside ? "ew-resize" : ""; }
+        else { S.drag = null; cv.style.cursor = ""; }
+        return;
+      }
+      const R = e.pointerType === "mouse" ? 16 : 28, XA = m.X(S.a), XB = m.X(S.b), da = Math.abs(x - XA), db = Math.abs(x - XB);
+      const near = y >= b.y - 6 && y <= b.y + b.h + 20 && Math.min(da, db) <= R ? (da < db || (da === db && x < XA) ? "a" : "b") : null;
+      if (type === "down") { if (near) { S.drag = S.last = near; cv.style.cursor = "grabbing"; e.preventDefault(); sync(); } }
+      else if (type === "move") { if (S.drag) { const v = m.invX(x); if (S.drag === "a") setAB(v, 0, "a"); else setAB(0, v, "b"); } else cv.style.cursor = near ? "ew-resize" : ""; }
+      else { S.drag = null; cv.style.cursor = ""; }
+    },
+  };
+})();
+CH[5].ready = true;
+MODS[5] = (() => {
+  const SANS = "-apple-system,BlinkMacSystemFont,sans-serif", E1 = Math.E, IE = 1 / Math.E;
+  const EX = [
+    {
+      label: "① ln x − ax", eq: "ln x − ax = 0（x &gt; 0）", sep: "a = g(x) = ln x / x",
+      g: (x) => Math.log(x) / x, xr: [-0.8, 14], yr: [-1.2, 0.85], br: [[1e-6, E1], [E1, 1e5]], tan: [E1],
+      ah: [0], av: [0], ar: [-0.6, 0.8, 0.2], ticks: [[IE, "1/e"], [0, "0"]],
+      jump: [["a = 1/e", IE], ["a = 0", 0]],
+      cases: [["a > 1/e", (a) => a > IE + 1e-9, "0 个"], ["a = 1/e（相切）", (a) => Math.abs(a - IE) < 1e-9, "1 个"],
+        ["0 < a < 1/e", (a) => a > 1e-12 && a < IE - 1e-9, "2 个"], ["a ≤ 0", (a) => a <= 1e-12, "1 个"]],
+      note: "g 在 x = e 处取最大值 1/e；x → 0⁺ 时 g → −∞，x → +∞ 时 g → 0⁺。所以 a ≤ 0 时只有一个交点，0 < a < 1/e 时两个（右交点可能远在视窗外）。",
+    },
+    {
+      label: "② x·eˣ = a", eq: "x·eˣ = a", sep: "a = g(x) = x·eˣ",
+      g: (x) => x * Math.exp(x), xr: [-5.2, 2.2], yr: [-1.3, 4], br: [[-40, -1], [-1, 4]], tan: [-1],
+      ah: [0], av: [], ar: [-0.8, 3, -0.2], ticks: [[-IE, "−1/e"], [0, "0"]],
+      jump: [["a = −1/e", -IE], ["a = 0", 0]],
+      cases: [["a < −1/e", (a) => a < -IE - 1e-9, "0 个"], ["a = −1/e（相切）", (a) => Math.abs(a + IE) < 1e-9, "1 个"],
+        ["−1/e < a < 0", (a) => a > -IE + 1e-9 && a < -1e-12, "2 个"], ["a ≥ 0", (a) => a >= -1e-12, "1 个"]],
+      note: "g 在 x = −1 处取最小值 −1/e；x → −∞ 时 g → 0⁻（从下方趋近，取不到 0），x → +∞ 时 g → +∞。所以 a ≥ 0 时恰好一个交点。",
+    },
+    {
+      label: "③ eˣ − ax", eq: "eˣ − ax = 0（x ≠ 0）", sep: "a = g(x) = eˣ / x",
+      g: (x) => Math.exp(x) / x, xr: [-4.5, 5], yr: [-11, 17], br: [[-40, -1e-9], [1e-9, 1], [1, 12]], tan: [1],
+      ah: [0], av: [0], ar: [-9, 15, 5], ticks: [[E1, "e"], [0, "0"]],
+      jump: [["a = 0", 0], ["a = e", E1]],
+      cases: [["a < 0", (a) => a < -1e-12, "1 个"], ["0 ≤ a < e", (a) => a >= -1e-12 && a < E1 - 1e-9, "0 个"],
+        ["a = e（相切）", (a) => Math.abs(a - E1) < 1e-9, "1 个"], ["a > e", (a) => a > E1 + 1e-9, "2 个"]],
+      note: "分母 x 有正负两支：x &gt; 0 时 g ≥ e（x = 1 取最小值 e），x &lt; 0 时 g 取遍 (−∞, 0)。所以 a &lt; 0 的交点全在负半轴，a = 0 时 eˣ/x = 0 无解。",
+    },
+    {
+      label: "④ x³−3x = a", eq: "x³ − 3x − a = 0", sep: "a = g(x) = x³ − 3x",
+      g: (x) => x ** 3 - 3 * x, xr: [-2.9, 2.9], yr: [-4.6, 4.6], br: [[-10, -1], [-1, 1], [1, 10]], tan: [-1, 1],
+      ah: [], av: [], ar: [-4.5, 4.5, 1], ticks: [[2, "2"], [-2, "−2"]],
+      jump: [["a = −2", -2], ["a = 2", 2]],
+      cases: [["a < −2 或 a > 2", (a) => Math.abs(a) > 2 + 1e-9, "1 个"], ["a = 2 或 a = −2", (a) => Math.abs(Math.abs(a) - 2) < 1e-9, "2 个"],
+        ["−2 < a < 2", (a) => Math.abs(a) < 2 - 1e-9, "3 个"]],
+      note: "g 的极大值 2（x = −1）、极小值 −2（x = 1）；两端都趋于无穷。水平线卡在极值高度上时，与曲线相切，交点并为 2 个。",
+    },
+  ];
+  const S = { i: 0, a: 0.2, drag: false, m: null, sw: 0, top: -Infinity, done: false, bands: {} };
+  const ui = {};
+  const ex = () => EX[S.i];
+  const f3 = (v) => (!isFinite(v) ? "—" : (Math.abs(v) < 5e-4 ? 0 : v).toFixed(3).replace("-", "−"));
+  const cl = (v, a, b) => Math.min(b, Math.max(a, v));
+  const CC = (n, T) => (n === 0 ? T.sub : n === 1 ? T.teal : n === 2 ? T.gold : T.purple);
+  function roots(a) {
+    const E = ex(), out = [];
+    E.br.forEach(([lo, hi]) => {
+      const n = 400; let px = lo, pv = E.g(lo) - a;
+      for (let i = 1; i <= n; i++) {
+        const x = lo + ((hi - lo) * i) / n, v = E.g(x) - a;
+        if (isFinite(pv) && isFinite(v)) {
+          if (pv === 0) out.push(px);
+          else if (pv * v < 0) {
+            let A = px, Bq = x;
+            for (let k = 0; k < 60; k++) { const M = (A + Bq) / 2; if ((E.g(A) - a) * (E.g(M) - a) <= 0) Bq = M; else A = M; }
+            out.push((A + Bq) / 2);
+          }
+        }
+        px = x; pv = v;
+      }
+    });
+    (E.tan || []).forEach((t) => { if (Math.abs(E.g(t) - a) < 1e-9) out.push(t); });
+    out.sort((p, q) => p - q);
+    return out.filter((v, i) => i === 0 || v - out[i - 1] > 1e-5);
+  }
+  function band() {
+    if (S.bands[S.i]) return S.bands[S.i];
+    const E = ex(), n = 130, arr = [];
+    for (let i = 0; i <= n; i++) { const a = E.ar[0] + ((E.ar[1] - E.ar[0]) * i) / n; arr.push({ a, c: roots(a).length }); }
+    S.bands[S.i] = arr; return arr;
+  }
+  const curCase = () => ex().cases.find((c) => c[1](S.a)) || null;
+  function setA(a) {
+    const E = ex(); S.a = cl(a, E.ar[0], E.ar[1]);
+    if (ui.a) ui.a.set(S.a);
+    sync();
+  }
+  function sync() {
+    if (!ui.ro) return;
+    const E = ex(), R = roots(S.a), c = curCase();
+    const rows = [["水平线 a", f3(S.a), "var(--blue-text)"], ["交点个数", R.length + " 个", "var(--gold-text)"]];
+    R.forEach((r, k) => rows.push(["交点 " + (k + 1) + " 的 x", f3(r) + (r < E.xr[0] || r > E.xr[1] ? "（视窗外）" : ""), "var(--gold-text)"]));
+    if (!R.length) rows.push(["交点 x", "无实根", "var(--red-text)"]);
+    rows.push(["所在情形", c ? c[0] : "—"]);
+    ui.ro.set(rows);
+    ui.note.innerHTML = E.note;
+    if (ui.tbl) [...ui.tbl.children].forEach((r, k) => {
+      const on = E.cases[k] === c;
+      r.style.background = on ? "var(--blue-soft)" : "var(--sec)";
+      r.style.color = on ? "var(--blue-text)" : "var(--fg)";
+    });
+  }
+  function table() {
+    if (!ui.tbl) return;
+    ui.tbl.innerHTML = ex().cases.map((c) =>
+      '<div style="padding:9px 12px;border-radius:12px;margin-bottom:6px;font-size:13px;line-height:1.6;overflow-wrap:anywhere"><b>' +
+      c[0] + "</b> → 零点 " + c[2] + "</div>").join("");
+  }
+  function stopSweep() { S.sw = 0; if (ui.sw) ui.sw.btn.textContent = "扫描 a"; }
+  function startSweep() { const E = ex(); S.sw = performance.now(); S.done = false; S.top = E.ar[0]; ui.sw.btn.textContent = "停止"; }
+  function tick(now) {
+    if (!S.sw) return;
+    const E = ex(), p = Math.min(1, (now - S.sw) / 5000);
+    S.top = E.ar[0] + (E.ar[1] - E.ar[0]) * p; setA(S.top);
+    if (p >= 1) { S.done = true; stopSweep(); }
+  }
+  function setEx(i) {
+    S.i = i; stopSweep(); S.top = -Infinity; S.done = false;
+    const E = ex();
+    if (ui.a) { const r = ui.a.querySelector("input"); r.min = E.ar[0]; r.max = E.ar[1]; }
+    if (ui.jump) { const j = chips(E.jump.map(([l, v]) => ({ label: l, value: v })), null, (v) => { stopSweep(); setA(v); }); ui.jump.replaceWith(j); ui.jump = j; }
+    if (ui.fm) ui.fm.innerHTML = E.eq + "<br>⇒ " + E.sep;
+    table(); setA(E.ar[2]);
+  }
+  function tag(ctx, x, y, s, c, T, right) {
+    ctx.save(); ctx.font = "13px " + SANS; const w = ctx.measureText(s).width; if (right) x -= w;
+    ctx.globalAlpha = 0.88; ctx.fillStyle = T.bg; ctx.fillRect(x - 4, y - 2, w + 8, 20);
+    ctx.globalAlpha = 1; ctx.fillStyle = c; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(s, x, y + 1); ctx.restore();
+  }
+  return {
+    text: "问「<i>f</i>(<i>x</i>) = 0 有几个根」，先把参数 <i>a</i> 单独移到一边写成 <b><i>a</i> = <i>g</i>(<i>x</i>)</b>，问题就变成「水平线 <i>y</i> = <i>a</i> 与曲线 <i>y</i> = <i>g</i>(<i>x</i>) 有几个交点」。先用导数画出 <i>g</i> 的大致图像——定义域、单调性与极值、端点与无穷远处的趋势——再让水平线上下扫，交点个数发生变化的位置就是<b>临界值</b>。",
+    points: [
+      "分离参数：<i>a</i> = <i>g</i>(<i>x</i>) ⇒ 水平线与曲线的交点个数",
+      "画 <i>g</i> 看四样：定义域、单调性与极值、端点/渐近趋势、特殊点",
+      "临界位置单独判断：相切算一个交点，趋近不可达则取不到",
+      "分离参数时注意所除式子的正负（如除以 <i>x</i> 要分 <i>x</i> &gt; 0、<i>x</i> &lt; 0）",
+    ],
+    gk: [
+      "常考：新高考解答题第二问高频「已知零点个数求参数范围」，答案多为区间端点开闭的判断题。",
+      "易错：忽略 <i>x</i> → 0⁺ 或 <i>x</i> → ∞ 的极限趋势，导致端点开闭写错；相切时的临界值漏判。",
+    ],
+    mount(ctrl, read) {
+      ui.ex = chips(EX.map((o, i) => ({ label: o.label, value: i })), S.i, setEx);
+      ui.a = slider("水平线 a", -1, 1, 0.01, S.a, (v) => f3(v), (v) => { stopSweep(); setA(v); });
+      ui.jump = chips(ex().jump.map(([l, v]) => ({ label: l, value: v })), null, (v) => { stopSweep(); setA(v); });
+      ui.sw = button("扫描 a", () => (S.sw ? stopSweep() : startSweep()), true);
+      ui.fm = el("div", "mono");
+      ui.fm.style.cssText = "background:var(--sec);border-radius:14px;padding:10px 14px;margin:8px 0 4px;font-size:14px;line-height:1.7;overflow-wrap:anywhere";
+      ui.ro = readout(); ui.tbl = el("div"); ui.tbl.style.marginTop = "10px"; ui.note = el("p");
+      ui.note.style.cssText = "font-size:13px;line-height:1.6;margin-top:4px;overflow-wrap:anywhere";
+      ctrl.append(ui.ex, ui.a, ui.jump, ui.sw, ui.fm); read.append(ui.ro, ui.tbl, ui.note);
+      setEx(S.i);
+    },
+    unmount() { stopSweep(); S.drag = false; cv.style.cursor = ""; for (const k in ui) delete ui[k]; },
+    draw(ctx, W, H) {
+      tick(performance.now());
+      const T = theme(), E = ex(), bandW = 22, gapR = 44;
+      const box = { x: 40, y: 12, w: Math.max(10, W - 54 - gapR), h: Math.max(10, H - 40) };
+      const m = drawAxes(ctx, box, E.xr, E.yr); S.m = m;
+      const Yc = (y) => cl(m.Y(y), box.y, box.y + box.h);
+      ctx.save(); ctx.setLineDash([4, 5]); ctx.lineWidth = 1.1; ctx.strokeStyle = T.sub; ctx.globalAlpha = 0.5;
+      E.ah.forEach((y) => { const Y = Yc(y); ctx.beginPath(); ctx.moveTo(box.x, Y); ctx.lineTo(box.x + box.w, Y); ctx.stroke(); });
+      E.av.forEach((x) => { const X = m.X(x); ctx.beginPath(); ctx.moveTo(X, box.y); ctx.lineTo(X, box.y + box.h); ctx.stroke(); });
+      ctx.restore();
+      ctx.save(); ctx.setLineDash([3, 5]); ctx.lineWidth = 1.2; ctx.strokeStyle = T.gold; ctx.globalAlpha = 0.55;
+      E.ticks.forEach(([v]) => { const Y = Yc(v); ctx.beginPath(); ctx.moveTo(box.x, Y); ctx.lineTo(box.x + box.w, Y); ctx.stroke(); });
+      ctx.restore();
+      ctx.save(); ctx.font = "12px ui-monospace,Menlo,monospace"; ctx.fillStyle = T.fg; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      E.ticks.forEach(([v, s]) => ctx.fillText(s, box.x - 4, Yc(v))); ctx.restore();
+      E.br.forEach(([a, b]) => plotFn(ctx, m, E.g, [Math.max(a, E.xr[0]), Math.min(b, E.xr[1])], T.blue, 2.6));
+      tag(ctx, box.x + 8, box.y + 6, E.sep, T.blue, T);
+      const Ya = Yc(S.a);
+      ctx.save(); ctx.strokeStyle = T.fg; ctx.lineWidth = S.drag ? 3 : 2.2; ctx.globalAlpha = 0.85;
+      ctx.beginPath(); ctx.moveTo(box.x, Ya); ctx.lineTo(box.x + box.w, Ya); ctx.stroke(); ctx.restore();
+      tag(ctx, box.x + box.w - 6, Ya - 22, "y = a = " + f3(S.a), T.fg, T, true);
+      const R = roots(S.a);
+      R.forEach((r, k) => {
+        if (r < E.xr[0] || r > E.xr[1]) return;
+        const X = m.X(r);
+        ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = T.gold; ctx.beginPath(); ctx.arc(X, Ya, 13, 0, 7); ctx.fill(); ctx.restore();
+        ctx.beginPath(); ctx.arc(X, Ya, 5.5, 0, 7); ctx.fillStyle = T.gold; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.bg; ctx.stroke();
+        ctx.save(); ctx.fillStyle = T.fg; ctx.font = "600 12px " + SANS; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+        ctx.fillText(String(k + 1), X, Ya - 12); ctx.restore();
+      });
+      ctx.save(); ctx.fillStyle = T.fg; ctx.textAlign = "right"; ctx.textBaseline = "top";
+      ctx.font = "600 30px " + SANS; ctx.fillText(String(R.length), box.x + box.w - 8, box.y + 30);
+      ctx.font = "12px " + SANS; ctx.fillStyle = T.sub; ctx.fillText("个交点", box.x + box.w - 8, box.y + 64); ctx.restore();
+      const bx = box.x + box.w + 14, rows = band(), n = rows.length;
+      ctx.save();
+      ctx.globalAlpha = 0.15; ctx.fillStyle = T.sub; ctx.fillRect(bx, box.y, bandW, box.h); ctx.globalAlpha = 1;
+      rows.forEach((r, k) => {
+        if (!S.done && r.a > S.top) return;
+        const y1 = box.y + box.h * (1 - (k + 0.5) / n), hgt = box.h / n + 1;
+        ctx.fillStyle = CC(r.c, T); ctx.fillRect(bx, y1 - hgt / 2, bandW, hgt);
+      });
+      const pb = box.y + box.h * (1 - (S.a - E.ar[0]) / (E.ar[1] - E.ar[0]));
+      ctx.strokeStyle = T.fg; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(bx - 4, pb); ctx.lineTo(bx + bandW + 2, pb); ctx.stroke();
+      ctx.font = "11px " + SANS; ctx.fillStyle = T.sub; ctx.textAlign = "center"; ctx.textBaseline = "top";
+      ctx.fillText("a", bx + bandW / 2, box.y + box.h + 4); ctx.restore();
+    },
+    pointer(e, type, x, y) {
+      const m = S.m; if (!m) return; const b = m.box, E = ex();
+      const inside = x >= b.x - 12 && x <= b.x + b.w + 12 && y >= b.y - 6 && y <= b.y + b.h + 6;
+      if (type === "down") { if (inside) { S.drag = true; stopSweep(); setA(m.invY(y)); cv.style.cursor = "grabbing"; e.preventDefault(); } }
+      else if (type === "move") {
+        if (S.drag) setA(m.invY(y));
+        else cv.style.cursor = inside && Math.abs(y - cl(m.Y(S.a), b.y, b.y + b.h)) < 18 ? "ns-resize" : "";
+      } else { S.drag = false; cv.style.cursor = ""; }
+    },
+  };
+})();
+CH[6].ready = true;
+MODS[6] = (() => {
+  const SANS = "-apple-system,BlinkMacSystemFont,sans-serif", MONO = "ui-monospace,Menlo,monospace", IE = 1 / Math.E;
+  const FS = [
+    { label: "x ln x", fx: "f(x) = x ln x（x > 0）", f: (x) => x * Math.log(x), d: [1e-6, 3.2], xr: [-0.3, 3.2], yr: [-0.9, 3], ar: [-0.85, 2.8], a0: 0,
+      mn: [-IE, "−1/e", [IE]], mx: null, no: "x → +∞ 时 f → +∞，无最大值" },
+    { label: "eˣ − x", fx: "f(x) = eˣ − x", f: (x) => Math.exp(x) - x, d: [-2.6, 2.6], xr: [-2.6, 2.6], yr: [-0.6, 5], ar: [-0.5, 4.8], a0: 2,
+      mn: [1, "1", [0]], mx: null, no: "x → ±∞ 时 f → +∞，无最大值" },
+    { label: "x³ − 3x", fx: "f(x) = x³ − 3x，x ∈ [−2, 3]", f: (x) => x ** 3 - 3 * x, d: [-2, 3], xr: [-2.6, 3.4], yr: [-5, 20], ar: [-4.5, 19.5], a0: 5,
+      mn: [-2, "−2", [-2, 1]], mx: [18, "18", [3]], ends: true },
+    { label: "(ln x + 1)/x", fx: "f(x) = (ln x + 1)/x（x > 0）", f: (x) => (Math.log(x) + 1) / x, d: [1e-4, 8], xr: [-0.3, 8], yr: [-3, 1.8], ar: [-2.8, 1.7], a0: 0.5,
+      mn: null, mx: [1, "1", [1]], no: "x → 0⁺ 时 f → −∞，无最小值" },
+  ];
+  const QT = [
+    { label: "∀x, f(x) ≥ a", all: true, ge: true, use: "mn" }, { label: "∀x, f(x) ≤ a", all: true, ge: false, use: "mx" },
+    { label: "∃x, f(x) ≥ a", all: false, ge: true, use: "mx" }, { label: "∃x, f(x) ≤ a", all: false, ge: false, use: "mn" },
+  ];
+  const QT2 = [
+    { label: "∀x₁ ∃x₂ f(x₁) = g(x₂)", rule: "f 值域 ⊆ g 值域", ok: (g) => g[0] <= -1 + 1e-9 && g[1] >= 3 - 1e-9, rng: "a ≤ −2 或 a ≥ 2", why: "需 1 − |a| ≤ −1 且 1 + |a| ≥ 3 ⇒ |a| ≥ 2" },
+    { label: "∀x₁ ∀x₂ f(x₁) ≥ g(x₂)", rule: "f_min ≥ g_max", ok: (g) => -1 >= g[1] - 1e-9, rng: "无解（a 不存在）", why: "需 −1 ≥ 1 + |a|，不可能" },
+    { label: "∃x₁ ∃x₂ f(x₁) ≥ g(x₂)", rule: "f_max ≥ g_min", ok: (g) => 3 >= g[0] - 1e-9, rng: "a ∈ R（恒成立）", why: "需 3 ≥ 1 − |a|，对一切 a 成立" },
+  ];
+  const S = { mode: 0, i: 0, q: 0, a: 0, b: 1, j: 0, drag: false, m: null };
+  const ui = {};
+  const f3 = (v) => (!isFinite(v) ? "—" : (Math.abs(v) < 5e-4 ? 0 : v).toFixed(3).replace("-", "−"));
+  const cl = (v, a, b) => Math.min(b, Math.max(a, v));
+  let CK = null, CC = {};
+  const cc = (T) => { if (CK !== T) { const s = getComputedStyle(document.documentElement); CC = { gt: s.getPropertyValue("--gold-text").trim(), rt: s.getPropertyValue("--red-text").trim() }; CK = T; } return CC; };
+  const gR = () => [1 - Math.abs(S.b), 1 + Math.abs(S.b)];
+  function judge() {
+    const F = FS[S.i], q = QT[S.q], E = F[q.use], nm = q.use === "mn" ? "f_min" : "f_max";
+    if (E) return { E, nm, ok: q.ge ? E[0] >= S.a - 1e-9 : E[0] <= S.a + 1e-9, rng: "a " + (q.ge ? "≤ " : "≥ ") + E[1], rule: nm + (q.ge ? " ≥ a" : " ≤ a") };
+    return { E, nm, ok: !q.all, rng: q.all ? "无解（a 不存在）" : "a ∈ R（任意 a 都成立）", rule: F.no };
+  }
+  function setA(v) { const F = FS[S.i]; S.a = cl(v, F.ar[0], F.ar[1]); if (ui.a1) ui.a1.set(S.a); sync(); }
+  function setB(v) { S.b = cl(Math.round(v * 100) / 100, -3, 3); if (ui.a2) ui.a2.set(S.b); sync(); }
+  function setFn(i) { S.i = i; const F = FS[i]; if (ui.a1) { const r = ui.a1.querySelector("input"); r.min = F.ar[0]; r.max = F.ar[1]; } setA(F.a0); }
+  function setMode(k) { S.mode = k; S.drag = false; if (ui.g1) { ui.g1.hidden = k !== 0; ui.g2.hidden = k !== 1; } sync(); }
+  function crit() {
+    if (S.mode === 0) { const J = judge(); if (J.E) setA(J.E[0]); }
+    else if (S.j === 0) setB(S.b < 0 ? -2 : 2);
+  }
+  function sync() {
+    if (!ui.ro) return;
+    const B = (ok) => [ok ? "成立 ✓" : "不成立 ✗", ok ? "var(--blue-text)" : "var(--red-text)"];
+    if (S.mode === 0) {
+      const J = judge(), at = J.E && Math.abs(S.a - J.E[0]) < 1e-9;
+      ui.ro.set([["a", at ? J.E[1] + "（临界）" : f3(S.a), "var(--blue-text)"],
+        [J.nm, J.E ? J.E[1] + (!Number.isInteger(J.E[0]) ? " ≈ " + f3(J.E[0]) : "") : "不存在", "var(--gold-text)"],
+        ["是否成立"].concat(B(J.ok)), ["a 的取值范围", J.rng, "var(--gold-text)"]]);
+      ui.note.innerHTML = QT[S.q].label + " ⇔ " + J.rule + (J.E ? "（最值可取到，等号成立）" : "，故" + (QT[S.q].all ? "不可能恒成立" : "一定存在"));
+      ui.crit.btn.disabled = !J.E;
+    } else {
+      const g = gR(), q = QT2[S.j], ok = q.ok(g), gs = "[" + f3(g[0]) + ", " + f3(g[1]) + "]";
+      const rel = S.j === 0 ? ["g 值域", gs] : S.j === 1 ? ["f_min / g_max", "−1 / " + f3(g[1])] : ["f_max / g_min", "3 / " + f3(g[0])];
+      ui.ro.set([["a", f3(S.b), "var(--blue-text)"], ["f 值域", "[−1, 3]", "var(--gold-text)"], rel.concat("var(--gold-text)"),
+        ["是否成立"].concat(B(ok)), ["a 的取值范围", q.rng, "var(--gold-text)"]]);
+      ui.note.innerHTML = q.label + " ⇔ " + q.rule + "。g 值域为 [1 − |a|, 1 + |a|]，" + q.why + "。";
+      ui.crit.btn.disabled = S.j !== 0;
+    }
+  }
+  function tag(ctx, x, y, s, c, T, right) {
+    ctx.save(); ctx.font = "13px " + SANS; const w = ctx.measureText(s).width; if (right) x -= w;
+    ctx.globalAlpha = 0.88; ctx.fillStyle = T.bg; ctx.fillRect(x - 4, y - 2, w + 8, 20);
+    ctx.globalAlpha = 1; ctx.fillStyle = c; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(s, x, y + 1); ctx.restore();
+  }
+  function dot(ctx, x, y, c, T) { ctx.beginPath(); ctx.arc(x, y, 5.5, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.bg; ctx.stroke(); }
+  function hdash(ctx, x1, x2, Y, c) { ctx.save(); ctx.setLineDash([4, 4]); ctx.lineWidth = 1.4; ctx.strokeStyle = c; ctx.beginPath(); ctx.moveTo(x1, Y); ctx.lineTo(x2, Y); ctx.stroke(); ctx.restore(); }
+  function status(ctx, x, y, ok, size, C, T) {
+    ctx.save(); ctx.font = "600 " + size + "px " + SANS; ctx.textAlign = "right"; ctx.textBaseline = "top";
+    ctx.fillStyle = ok ? T.blue : C.rt; ctx.fillText(ok ? "成立 ✓" : "不成立 ✗", x, y); ctx.restore();
+  }
+  function draw0(ctx, W, H, T, C) {
+    const F = FS[S.i], q = QT[S.q], J = judge(), a = S.a;
+    const box = { x: 40, y: 12, w: Math.max(10, W - 54), h: Math.max(10, H - 40) };
+    const m = drawAxes(ctx, box, F.xr, F.yr); S.m = m;
+    const good = (x) => { const y = F.f(x); return q.ge ? y >= a - 1e-9 : y <= a + 1e-9; };
+    plotFn(ctx, m, (x) => (good(x) ? F.f(x) : NaN), F.d, T.blue, 2.8);
+    plotFn(ctx, m, (x) => (good(x) ? NaN : F.f(x)), F.d, C.rt, 2.8);
+    if (F.ends) F.d.forEach((x) => dot(ctx, m.X(x), m.Y(F.f(x)), good(x) ? T.blue : C.rt, T));
+    tag(ctx, box.x + 8, box.y + 6, F.fx, T.blue, T);
+    if (J.E) {
+      const Y = m.Y(J.E[0]); hdash(ctx, box.x, box.x + box.w, Y, T.gold);
+      J.E[2].forEach((x) => dot(ctx, m.X(x), Y, T.gold, T));
+      tag(ctx, m.X(J.E[2][J.E[2].length - 1]) + 10, Y + (J.nm === "f_min" ? 6 : -24), J.nm + " = " + J.E[1], C.gt, T);
+    } else tag(ctx, box.x + 8, box.y + 30, F.no, C.gt, T);
+    const Ya = cl(m.Y(a), box.y, box.y + box.h);
+    ctx.save(); ctx.strokeStyle = T.fg; ctx.lineWidth = S.drag ? 3 : 2.2; ctx.globalAlpha = 0.85;
+    ctx.beginPath(); ctx.moveTo(box.x, Ya); ctx.lineTo(box.x + box.w, Ya); ctx.stroke(); ctx.restore();
+    tag(ctx, box.x + box.w - 6, Ya - 22, "y = a = " + f3(a), T.fg, T, true);
+    status(ctx, box.x + box.w - 8, box.y + 34, J.ok, 28, C, T);
+    tag(ctx, box.x + box.w - 6, box.y + 70, q.label, T.fg, T, true);
+  }
+  function draw1(ctx, W, H, T, C) {
+    S.m = null;
+    const g = gR(), q = QT2[S.j], ok = q.ok(g), yr = [-2.6, 4.6], bw = 100, top = 34, h = Math.max(10, H - top - 30);
+    const pw = Math.max(10, (W - bw - 36 - 34) / 2);
+    const fb = { x: 36, y: top, w: pw, h }, gb = { x: 36 + pw + 34, y: top, w: pw, h };
+    const mf = drawAxes(ctx, fb, [-0.5, 3.4], yr), mg = drawAxes(ctx, gb, [-1.4, 1.4], yr);
+    const f = (x) => x * x - 2 * x, gf = (x) => S.b * x + 1;
+    plotFn(ctx, mf, f, [0, 3], T.blue, 2.6); plotFn(ctx, mg, gf, [-1, 1], T.blue, 2.6);
+    [0, 3].forEach((x) => dot(ctx, mf.X(x), mf.Y(f(x)), T.blue, T)); [-1, 1].forEach((x) => dot(ctx, mg.X(x), mg.Y(gf(x)), T.blue, T));
+    dot(ctx, mf.X(1), mf.Y(-1), T.gold, T);
+    ctx.save(); ctx.font = "13px " + SANS; ctx.fillStyle = T.fg; ctx.textBaseline = "top";
+    ctx.fillText("f(x) = x² − 2x, [0, 3]", fb.x, 8); ctx.fillText("g(x) = ax + 1, [−1, 1]", gb.x, 8); ctx.restore();
+    const bx = W - bw + 6, col = ok ? T.blue : C.rt, Y = mf.Y;
+    const bars = [["f", -1, 3, bx + 14], ["g", g[0], g[1], bx + 58]];
+    bars.forEach(([n, lo, hi, x]) => {
+      ctx.fillStyle = col; ctx.fillRect(x, Y(hi), 16, Math.max(2, Y(lo) - Y(hi)));
+      ctx.save(); ctx.font = "12px " + MONO; ctx.fillStyle = C.gt; ctx.textAlign = "center";
+      ctx.textBaseline = "bottom"; ctx.fillText(f3(hi).replace(".000", ""), x + 8, Y(hi) - 3);
+      ctx.textBaseline = "top"; ctx.fillText(f3(lo).replace(".000", ""), x + 8, Y(lo) + 3);
+      ctx.font = "13px " + SANS; ctx.fillStyle = T.fg; ctx.fillText(n + " 值域", x + 8, top + h + 8); ctx.restore();
+    });
+    const pr = S.j === 0 ? [[-1, g[0]], [3, g[1]]] : S.j === 1 ? [[-1, g[1]]] : [[3, g[0]]];
+    pr.forEach(([u, v]) => { ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = T.gold; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(bx + 30, Y(u)); ctx.lineTo(bx + 58, Y(v)); ctx.stroke(); ctx.restore(); });
+    status(ctx, W - 8, 8, ok, 18, C, T);
+  }
+  return {
+    text: "「对任意 <i>x</i>，<i>f</i>(<i>x</i>) ≥ <i>a</i> 恒成立」等价于 <b><i>f</i> 的最小值 ≥ <i>a</i></b>——整条曲线都在水平线上方；「存在 <i>x</i>，使 <i>f</i>(<i>x</i>) ≥ <i>a</i>」只要<b>最大值 ≥ <i>a</i></b>——曲线有一点够得着就行。双变量问题「对任意 <i>x</i>₁ 存在 <i>x</i>₂ 使 <i>f</i>(<i>x</i>₁) ≥ <i>g</i>(<i>x</i>₂)」则比较 <i>f</i> 的最小值和 <i>g</i> 的最小值。",
+    points: [
+      "∀<i>x</i> <i>f</i>(<i>x</i>) ≥ <i>a</i> ⇔ <i>f</i>_min ≥ <i>a</i>；∃<i>x</i> <i>f</i>(<i>x</i>) ≥ <i>a</i> ⇔ <i>f</i>_max ≥ <i>a</i>",
+      "∀<i>x</i>₁∀<i>x</i>₂ <i>f</i>(<i>x</i>₁) ≥ <i>g</i>(<i>x</i>₂) ⇔ <i>f</i>_min ≥ <i>g</i>_max",
+      "∀<i>x</i>₁∃<i>x</i>₂ <i>f</i>(<i>x</i>₁) = <i>g</i>(<i>x</i>₂) ⇔ <i>f</i> 值域 ⊆ <i>g</i> 值域",
+      "最值取不到时注意等号",
+    ],
+    gk: [
+      "常考：恒成立求参是导数解答题第二问的主力题型，常配合分离参数。",
+      "易错：最值取不到（只是下确界）时，「≥」能不能取等要单独判断；「任意」和「存在」对应的最值别弄反。",
+    ],
+    mount(ctrl, read) {
+      ui.mode = chips([{ label: "单变量", value: 0 }, { label: "双变量", value: 1 }], S.mode, setMode);
+      ui.g1 = el("div"); ui.g2 = el("div");
+      ui.g1.append(chips(FS.map((F, i) => ({ label: F.label, value: i })), S.i, setFn),
+        chips(QT.map((q, i) => ({ label: q.label, value: i })), S.q, (j) => { S.q = j; sync(); }),
+        (ui.a1 = slider("水平线 a", -1, 1, 0.01, S.a, f3, setA)));
+      ui.g2.append(chips(QT2.map((q, i) => ({ label: q.label, value: i })), S.j, (j) => { S.j = j; sync(); }),
+        (ui.a2 = slider("参数 a", -3, 3, 0.1, S.b, f3, setB)));
+      ui.crit = button("a 取到临界", crit, true);
+      ui.ro = readout(); ui.note = el("p");
+      ui.note.style.cssText = "font-size:13px;line-height:1.6;margin-top:6px;overflow-wrap:anywhere";
+      ctrl.append(ui.mode, ui.g1, ui.g2, ui.crit); read.append(ui.ro, ui.note);
+      setFn(S.i); setMode(S.mode);
+    },
+    unmount() { S.drag = false; cv.style.cursor = ""; for (const k in ui) delete ui[k]; },
+    draw(ctx, W, H) { const T = theme(), C = cc(T); if (S.mode === 0) draw0(ctx, W, H, T, C); else draw1(ctx, W, H, T, C); },
+    pointer(e, type, x, y) {
+      const m = S.m; if (!m || S.mode !== 0) return; const b = m.box;
+      const inside = x >= b.x - 12 && x <= b.x + b.w + 12 && y >= b.y - 6 && y <= b.y + b.h + 6;
+      if (type === "down") { if (inside) { S.drag = true; setA(m.invY(y)); cv.style.cursor = "grabbing"; e.preventDefault(); } }
+      else if (type === "move") {
+        if (S.drag) setA(m.invY(y));
+        else cv.style.cursor = inside && Math.abs(y - cl(m.Y(S.a), b.y, b.y + b.h)) < 18 ? "ns-resize" : "";
+      } else { S.drag = false; cv.style.cursor = ""; }
+    },
+  };
+})();
+/* ---------- 08 切线放缩与常用不等式 ---------- */
+CH[7].ready = true;
+MODS[7] = (() => {
+  const SANS = "-apple-system,BlinkMacSystemFont,sans-serif", E = Math.E, ex = Math.exp, ln = Math.log;
+  const IQ = [
+    { label: "① eˣ ≥ x+1", c: 0, s: "eˣ ≥ x + 1", g: (x) => x + 1, gS: "y = x + 1", ge: 1, eq: 0, eqS: "0", dS: "eˣ − x − 1", dpS: "eˣ − 1", xr: [-2.5, 2.5], yr: [-1.2, 6], x0: 1.2 },
+    { label: "② eˣ ≥ ex", c: 0, s: "eˣ ≥ ex", g: (x) => E * x, gS: "y = ex", ge: 1, eq: 1, eqS: "1", dS: "eˣ − ex", dpS: "eˣ − e", xr: [-2, 2.6], yr: [-2.5, 8], x0: 2 },
+    { label: "③ ln x ≤ x−1", c: 1, s: "ln x ≤ x − 1", g: (x) => x - 1, gS: "y = x − 1", ge: 0, eq: 1, eqS: "1", dS: "x − 1 − ln x", dpS: "1 − 1/x", xr: [-0.4, 4.5], yr: [-3, 3.5], x0: 3 },
+    { label: "④ ln x ≥ 1−1/x", c: 1, s: "ln x ≥ 1 − 1/x（x > 0）", g: (x) => 1 - 1 / x, gS: "y = 1 − 1/x", gd: [0.02, 9], ge: 1, eq: 1, eqS: "1", dS: "ln x − 1 + 1/x", dpS: "(x − 1)/x²", xr: [-0.4, 4.5], yr: [-3.5, 2.5], x0: 0.4 },
+    { label: "⑤ ln x ≤ x/e", c: 1, s: "ln x ≤ x/e", g: (x) => x / E, gS: "y = x/e", ge: 0, eq: E, eqS: "e", dS: "x/e − ln x", dpS: "1/e − 1/x", xr: [-0.4, 7], yr: [-2.5, 3], x0: 5.5 },
+    { label: "⑥ eˣ ≥ 1+x+x²/2", c: 0, s: "eˣ ≥ 1 + x + x²/2（x ≥ 0）", g: (x) => 1 + x + (x * x) / 2, gS: "y = 1 + x + x²/2", ge: 1, eq: 0, eqS: "0", dS: "eˣ − 1 − x − x²/2", dpS: "eˣ − 1 − x ≥ 0（由 ①）", lo: 0, endMin: true, xr: [-0.6, 2.5], yr: [-0.6, 9], x0: 1.8 },
+  ];
+  const S = { i: 0, x: 1.2, t: 0, free: false, chain: false, drag: 0, m: null };
+  const ui = {};
+  const f3 = (v) => (!isFinite(v) ? "—" : (Math.abs(v) < 5e-4 ? 0 : v).toFixed(3).replace("-", "−"));
+  const cl = (v, a, b) => Math.min(b, Math.max(a, v));
+  const BT = "var(--blue-text)", GT = "var(--gold-text)", RT = "var(--red-text)";
+  let CK = null, CC = {};
+  const cc = (T) => { if (CK !== T) { const s = getComputedStyle(document.documentElement); CC = { gt: s.getPropertyValue("--gold-text").trim(), rt: s.getPropertyValue("--red-text").trim() }; CK = T; } return CC; };
+  const fv = (C, x) => (C.c ? (x > 0 ? ln(x) : NaN) : ex(x));
+  const lineS = (k, b) => "y = " + f3(k) + "x " + (b < -5e-4 ? "− " : "+ ") + f3(Math.abs(b));
+  function cfg() {
+    const Q = IQ[S.i]; if (!S.free) return Q;
+    const t = S.t, e = Q.c === 0, k = e ? ex(t) : 1 / t, b = e ? ex(t) * (1 - t) : ln(t) - 1;
+    return { ...Q, g: (x) => k * x + b, gS: lineS(k, b), gd: null, lo: null, endMin: false, ge: e ? 1 : 0, eq: t, eqS: "t = " + f3(t),
+      s: e ? "eˣ ≥ eᵗ(x − t + 1)" : "ln x ≤ x/t + ln t − 1", dS: e ? "eˣ − eᵗ(x − t + 1)" : "x/t + ln t − 1 − ln x", dpS: e ? "eˣ − eᵗ" : "1/t − 1/x" };
+  }
+  const dfn = (C) => (x) => (C.ge ? fv(C, x) - C.g(x) : C.g(x) - fv(C, x));
+  const dom = () => { if (S.chain) return [-2.2, 4.2]; const C = cfg(); return [Math.max(C.xr[0], C.c ? 0.05 : -1e9, C.lo != null ? C.lo : -1e9), C.xr[1]]; };
+  const tr = () => { const Q = IQ[S.i]; return Q.c === 0 ? [Math.max(-1.5, Q.xr[0] + 0.1), Math.min(1.8, Q.xr[1] - 0.3)] : [0.3, Q.xr[1] - 0.5]; };
+  function ranges() {
+    if (!ui.xs) return; const D = dom(), R = tr(), a = ui.xs.querySelector("input"), b = ui.ts.querySelector("input");
+    a.min = D[0]; a.max = D[1]; b.min = R[0]; b.max = R[1]; ui.ts.hidden = !S.free || S.chain; ui.g.hidden = S.chain;
+  }
+  function setX(v) { const D = dom(); S.x = cl(v, D[0], D[1]); if (ui.xs) ui.xs.set(S.x); sync(); }
+  function setT(v) { const R = tr(); S.t = cl(v, R[0], R[1]); if (ui.ts) ui.ts.set(S.t); sync(); }
+  function setI(i) { S.i = i; const R = tr(); S.t = cl(IQ[i].eq, R[0], R[1]); if (ui.ts) ui.ts.set(S.t); ranges(); setX(IQ[i].x0); }
+  function sync() {
+    if (!ui.ro) return; const x = S.x;
+    if (S.chain) {
+      ui.ro.set([["x₀", f3(x), BT], ["eˣ₀", f3(ex(x)), BT], ["x₀ + 1", f3(x + 1), GT], ["x₀", f3(x)], ["x₀ − 1", f3(x - 1), GT], ["ln x₀", x > 0 ? f3(ln(x)) : "无定义", BT], ["等号条件", "x = 0 / x = 1", RT]]);
+      ui.note.textContent = "eˣ = x + 1 当且仅当 x = 0，x − 1 = ln x 当且仅当 x = 1；中间 x + 1 > x > x − 1 各差 1，两个等号不能同时取到，所以 eˣ > ln x 严格成立。";
+      return;
+    }
+    const C = cfg(), d = dfn(C)(x);
+    ui.ro.set([["x₀", f3(x), BT], ["曲线值", f3(fv(C, x)), BT], ["放缩值", f3(C.g(x)), GT], ["差值 d(x₀)", f3(d)], ["等号条件", "当且仅当 x = " + (S.free ? f3(C.eq) : C.eqS), RT]]
+      .concat(S.free ? [["切线方程", C.gS, GT]] : []));
+    ui.note.textContent = "证明：构造 d(x) = " + C.dS + "，d′(x) = " + C.dpS + "，" + (C.endMin ? "x ≥ 0 时 d′ ≥ 0，d 递增，d_min = d(0) = 0" : "d 在 x = " + (S.free ? "t" : C.eqS) + " 左减右增，d_min = 0")
+      + " ⇒ " + C.s + "。" + (S.free ? "任意切点 t 都给出一个放缩不等式。" : "");
+  }
+  function tag(ctx, x, y, s, c, T, right, size) {
+    ctx.save(); ctx.font = (size || 13) + "px " + SANS; const w = ctx.measureText(s).width; if (right) x -= w;
+    ctx.globalAlpha = 0.88; ctx.fillStyle = T.bg; ctx.fillRect(x - 4, y - 2, w + 8, (size || 13) + 7);
+    ctx.globalAlpha = 1; ctx.fillStyle = c; ctx.textBaseline = "top"; ctx.fillText(s, x, y + 1); ctx.restore();
+  }
+  function dot(ctx, x, y, c, T, r) { ctx.beginPath(); ctx.arc(x, y, r || 5, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.bg; ctx.stroke(); }
+  function band(ctx, m, f, g, a, b, T) {
+    const B = m.box, a2 = Math.max(a, m.xr[0]), b2 = Math.min(b, m.xr[1]); if (!(b2 > a2)) return;
+    const n = 200, lim = (v) => cl(v, B.y - B.h, B.y + 2 * B.h), P = (x, fn) => ctx.lineTo(m.X(x), lim(m.Y(fn(x))));
+    ctx.save(); ctx.beginPath(); ctx.rect(B.x, B.y, B.w, B.h); ctx.clip(); ctx.beginPath();
+    for (let i = 0; i <= n; i++) P(a2 + ((b2 - a2) * i) / n, f);
+    for (let i = n; i >= 0; i--) P(a2 + ((b2 - a2) * i) / n, g);
+    ctx.closePath(); ctx.globalAlpha = 0.22; ctx.fillStyle = T.teal; ctx.fill(); ctx.restore();
+  }
+  function vcur(ctx, m, T) {
+    const X = m.X(S.x); ctx.save(); ctx.strokeStyle = T.fg; ctx.globalAlpha = 0.6; ctx.lineWidth = S.drag === 1 ? 2.4 : 1.4;
+    ctx.beginPath(); ctx.moveTo(X, m.box.y); ctx.lineTo(X, m.box.y + m.box.h); ctx.stroke(); ctx.restore();
+  }
+  function inset(ctx, C, D, W, H, T, K) {
+    const iw = Math.min(230, W * 0.38), ih = Math.min(150, H * 0.34), d = dfn(C);
+    const ib = { x: W - iw - 18, y: H - ih - 36, w: iw, h: ih }, a = C.c ? Math.max(D[0], 0.15) : D[0];
+    let M = 0; for (let i = 0; i <= 60; i++) { const v = d(a + ((D[1] - a) * i) / 60); if (isFinite(v)) M = Math.max(M, v); }
+    M = Math.max(M, 0.5) * 1.1;
+    ctx.save(); ctx.fillStyle = T.bg; ctx.strokeStyle = T.axis; ctx.globalAlpha = 0.95; ctx.fillRect(ib.x - 10, ib.y - 26, ib.w + 20, ib.h + 36);
+    ctx.globalAlpha = 0.5; ctx.strokeRect(ib.x - 10, ib.y - 26, ib.w + 20, ib.h + 36); ctx.restore();
+    const m = drawAxes(ctx, ib, [a, D[1]], [-0.15 * M, M], { labels: false, grid: false, xlabel: " ", ylabel: " " });
+    plotFn(ctx, m, d, [a, D[1]], T.teal, 2.2);
+    tag(ctx, ib.x - 4, ib.y - 22, "d(x) = " + C.dS, T.fg, T, false, 12);
+    if (C.eq >= a && C.eq <= D[1]) { dot(ctx, m.X(C.eq), m.Y(0), T.red, T, 4.5); tag(ctx, m.X(C.eq) + 8, m.Y(0) + 4, "d_min = 0", K.rt, T, m.X(C.eq) > ib.x + ib.w / 2, 12); }
+    const v = d(S.x); if (S.x >= a && isFinite(v) && v <= M) dot(ctx, m.X(S.x), m.Y(v), T.fg, T, 3.5);
+  }
+  function single(ctx, m, C, T, K, W, H) {
+    const D = dom(), b = m.box, f = (x) => fv(C, x);
+    band(ctx, m, f, C.g, D[0] - (C.c ? 0.03 : 0), D[1], T);
+    plotFn(ctx, m, C.g, C.gd || m.xr, T.gold, 2.4); plotFn(ctx, m, f, C.c ? [1e-4, m.xr[1]] : null, T.blue, 2.8);
+    tag(ctx, b.x + 8, b.y + 6, C.c ? "y = ln x" : "y = eˣ", T.blue, T);
+    tag(ctx, b.x + 8, b.y + 30, (S.free ? "切线 " : "") + C.gS, K.gt, T);
+    tag(ctx, b.x + b.w - 8, b.y + 6, C.s, T.fg, T, true, 18);
+    vcur(ctx, m, T);
+    const X = m.X(S.x), yf = f(S.x), yg = C.g(S.x);
+    if (isFinite(yf) && isFinite(yg)) {
+      const Yf = cl(m.Y(yf), b.y, b.y + b.h), Yg = cl(m.Y(yg), b.y, b.y + b.h);
+      ctx.save(); ctx.strokeStyle = T.fg; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(X, Yf); ctx.lineTo(X, Yg); ctx.stroke(); ctx.restore();
+      dot(ctx, X, Yg, T.gold, T, 4.5); dot(ctx, X, Yf, T.blue, T, 4.5);
+      tag(ctx, X + 8, (Yf + Yg) / 2 - 9, "d(x₀) = " + f3(dfn(C)(S.x)), T.fg, T, X > b.x + b.w * 0.6);
+    }
+    const ex0 = m.X(C.eq), ey = m.Y(f(C.eq));
+    if (S.free) { ctx.save(); ctx.beginPath(); ctx.arc(ex0, ey, S.drag === 2 ? 13 : 10, 0, 7); ctx.strokeStyle = T.red; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.6; ctx.stroke(); ctx.restore(); }
+    dot(ctx, ex0, ey, T.red, T, 5.5);
+    tag(ctx, ex0 + 10, ey + 8, (S.free ? "切点 t = " + f3(C.eq) + "，" : "") + "当且仅当 x = " + (S.free ? "t" : C.eqS), K.rt, T, ex0 > b.x + b.w * 0.55);
+    inset(ctx, C, D, W, H, T, K);
+  }
+  function chain(ctx, m, T, K) {
+    const b = m.box, L = (x) => (x > 0 ? ln(x) : NaN), xr = m.xr;
+    band(ctx, m, ex, (x) => x + 1, xr[0], xr[1], T); band(ctx, m, (x) => x - 1, L, 0.02, xr[1], T);
+    plotFn(ctx, m, (x) => x + 1, null, T.gold, 2.2); plotFn(ctx, m, (x) => x, null, T.fg, 1.6, true); plotFn(ctx, m, (x) => x - 1, null, T.gold, 2.2);
+    plotFn(ctx, m, ex, null, T.blue, 2.8); plotFn(ctx, m, L, [1e-4, xr[1]], T.blue, 2.8);
+    const xe = 3.45; [["x + 1", xe + 1, K.gt], ["x", xe, T.fg], ["x − 1", xe - 1, K.gt], ["ln x", ln(xe), T.blue]].forEach(([s, y, c]) => tag(ctx, m.X(xe) + 6, m.Y(y) + 4, s, c, T));
+    tag(ctx, m.X(1.25) - 8, m.Y(ex(1.25)), "eˣ", T.blue, T, true);
+    tag(ctx, b.x + 8, b.y + 6, "eˣ ≥ x + 1 ≥ x ≥ x − 1 ≥ ln x", T.fg, T, false, 18);
+    vcur(ctx, m, T);
+    [[ex, T.blue], [(x) => x + 1, T.gold], [(x) => x, T.fg], [(x) => x - 1, T.gold], [L, T.blue]].forEach(([fn, c]) => { const y = fn(S.x); if (isFinite(y) && y >= m.yr[0] && y <= m.yr[1]) dot(ctx, m.X(S.x), m.Y(y), c, T, 4); });
+    dot(ctx, m.X(0), m.Y(1), T.red, T, 5.5); tag(ctx, m.X(0) - 10, m.Y(1) - 24, "当且仅当 x = 0", K.rt, T, true);
+    dot(ctx, m.X(1), m.Y(0), T.red, T, 5.5); tag(ctx, m.X(1) + 10, m.Y(0) + 8, "当且仅当 x = 1", K.rt, T);
+  }
+  return {
+    text: "凸函数总在切线上方，凹函数总在切线下方。e<sup>x</sup> 在 <i>x</i> = 0 处的切线是 <i>y</i> = <i>x</i> + 1，所以 <b>e<sup>x</sup> ≥ <i>x</i> + 1</b>；ln <i>x</i> 在 <i>x</i> = 1 处的切线是 <i>y</i> = <i>x</i> − 1，所以 <b>ln <i>x</i> ≤ <i>x</i> − 1</b>。这几条「切线不等式」是压轴题放缩的常用工具：把难处理的指数、对数换成一次函数，误差就是曲线与切线之间那一条缝。",
+    points: [
+      "e<sup>x</sup> ≥ <i>x</i> + 1，ln <i>x</i> ≤ <i>x</i> − 1（<i>x</i> > 0），等号都在切点",
+      "变形：e<sup>x−1</sup> ≥ <i>x</i>，ln(<i>x</i> + 1) ≤ <i>x</i>，<i>x</i> ln <i>x</i> ≥ <i>x</i> − 1",
+      "证明：构造差函数 <i>d</i>(<i>x</i>)，求导求最值，证 <i>d</i>_min = 0",
+    ],
+    gk: [
+      "高考链接：压轴题常用放缩把 e<sup>x</sup>、ln <i>x</i> 线性化，或用 e<sup>x</sup> ≥ <i>x</i> + 1 与 ln <i>x</i> ≤ <i>x</i> − 1 夹出 e<sup>x</sup> > ln <i>x</i>。",
+      "易错：放缩方向不能反；放缩后还要检查各步等号能否同时取到。",
+    ],
+    mount(ctrl, read) {
+      ui.g = el("div");
+      ui.g.append(chips(IQ.map((q, i) => ({ label: q.label, value: i })), S.i, setI),
+        toggle("切点自由", S.free, (v) => { S.free = v; setI(S.i); }));
+      ui.xs = slider("游标 x₀", -2, 2, 0.01, S.x, f3, setX);
+      ui.ts = slider("切点 t", -1, 1, 0.01, S.t, f3, setT);
+      ui.ch = toggle("叠加 eˣ 与 ln x", S.chain, (v) => { S.chain = v; ranges(); setX(v ? 2 : IQ[S.i].x0); });
+      ui.ro = readout(); ui.note = el("p");
+      ui.note.style.cssText = "font-size:13px;line-height:1.6;margin-top:6px;overflow-wrap:anywhere";
+      ctrl.append(ui.g, ui.ts, ui.xs, ui.ch); read.append(ui.ro, ui.note);
+      const x = S.x, t = S.t; ranges(); setT(t); setX(x);
+    },
+    unmount() { S.drag = 0; cv.style.cursor = ""; for (const k in ui) delete ui[k]; },
+    draw(ctx, W, H) {
+      const T = theme(), K = cc(T), C = cfg(), xr = S.chain ? [-2.2, 4.2] : C.xr, yr = S.chain ? [-3.2, 5.2] : C.yr;
+      const m = drawAxes(ctx, { x: 40, y: 12, w: Math.max(10, W - 54), h: Math.max(10, H - 40) }, xr, yr); S.m = m;
+      if (S.chain) chain(ctx, m, T, K); else single(ctx, m, C, T, K, W, H);
+    },
+    pointer(e, type, x, y) {
+      const m = S.m; if (!m) return; const b = m.box, inside = x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
+      const mv = (px) => (S.drag === 2 ? setT(m.invX(px)) : setX(m.invX(px)));
+      const nearT = () => S.free && !S.chain && Math.hypot(x - m.X(S.t), y - m.Y(fv(cfg(), S.t))) < 22;
+      if (type === "down") { if (!inside) return; S.drag = nearT() ? 2 : 1; mv(x); cv.style.cursor = "grabbing"; e.preventDefault(); }
+      else if (type === "move") { if (S.drag) mv(x); else cv.style.cursor = inside ? (nearT() ? "grab" : "ew-resize") : ""; }
+      else { S.drag = 0; cv.style.cursor = ""; }
+    },
+  };
+})();
+/* ---------- 09 极值点偏移 ---------- */
+CH[8].ready = true;
+MODS[8] = (() => {
+  const SANS = "-apple-system,BlinkMacSystemFont,sans-serif", E = Math.E, ex = Math.exp, ln = Math.log;
+  const FS = [
+    { label: "① x·e⁻ˣ", fx: "f(x) = x·e⁻ˣ", f: (x) => x * ex(-x), x0: 1, x0S: "1", tS: "2", mx: 1, L: 0, R: 14, mr: [0.03, 0.36], m0: 0.2, xr: [-0.4, 6.4], yr: [-0.12, 0.46], ir: [1, 3], con: "x₁ + x₂ > 2" },
+    { label: "② ln x / x", fx: "f(x) = ln x / x", f: (x) => (x > 0 ? ln(x) / x : NaN), d: [1e-3, 14], x0: E, x0S: "e", tS: "2e ≈ 5.437", mx: 1, L: 1, R: 80, mr: [0.2, 0.36], m0: 0.3, xr: [-0.3, 14], yr: [-0.3, 0.46], ir: [E, 2 * E], con: "x₁ + x₂ > 2e", ext: "（x₂ ≥ 2e 时结论显然）" },
+    { label: "③ x²（对照）", fx: "f(x) = x²", f: (x) => x * x, x0: 0, x0S: "0", tS: "0", mx: 0, L: -3, R: 3, mr: [0.1, 4], m0: 2, xr: [-2.6, 2.6], yr: [-0.5, 4.6], ir: [0, 2.5], con: "x₁ + x₂ = 0" },
+    { label: "④ eˣ − x", fx: "f(x) = eˣ − x", f: (x) => ex(x) - x, x0: 0, x0S: "0", tS: "0", mx: 0, L: -6, R: 3, mr: [1.05, 4], m0: 2, xr: [-4.6, 2.4], yr: [-0.5, 4.6], ir: [0, 2], con: "x₁ + x₂ < 0" },
+  ];
+  const S = { i: 0, m: 0.2, mir: false, sw: 0, drag: false, mp: null };
+  const ui = {};
+  const f3 = (v) => (!isFinite(v) ? "—" : (Math.abs(v) < 5e-4 ? 0 : v).toFixed(3).replace("-", "−"));
+  const cl = (v, a, b) => Math.min(b, Math.max(a, v));
+  const BT = "var(--blue-text)", GT = "var(--gold-text)", RT = "var(--red-text)";
+  let CK = null, CC = {};
+  const cc = (T) => { if (CK !== T) { const s = getComputedStyle(document.documentElement); CC = { gt: s.getPropertyValue("--gold-text").trim(), rt: s.getPropertyValue("--red-text").trim() }; CK = T; } return CC; };
+  function bis(f, a, b, m) { let fa = f(a) - m; for (let i = 0; i < 70; i++) { const c = (a + b) / 2, fc = f(c) - m; if (fc < 0 === fa < 0) { a = c; fa = fc; } else b = c; } return (a + b) / 2; }
+  const roots = () => { const F = FS[S.i]; return [bis(F.f, F.L, F.x0, S.m), bis(F.f, F.x0, F.R, S.m)]; };
+  const Gf = (F) => (x) => F.f(x) - F.f(2 * F.x0 - x);
+  const sgn = (F) => { const v = Gf(F)(F.x0 + 0.5); return Math.abs(v) < 1e-9 ? 0 : Math.sign(v); };
+  function setM(v) { const F = FS[S.i]; S.m = cl(v, F.mr[0], F.mr[1]); if (ui.ms) ui.ms.set(S.m); sync(); }
+  function setI(i) { stopSw(); S.i = i; const F = FS[i], r = ui.ms && ui.ms.querySelector("input"); if (r) { r.min = F.mr[0]; r.max = F.mr[1]; } setM(F.m0); }
+  function stopSw() { S.sw = 0; if (ui.sw) ui.sw.btn.textContent = "扫一遍 m"; }
+  function startSw() { S.sw = performance.now(); ui.sw.btn.textContent = "停止"; }
+  function tick(now) {
+    const F = FS[S.i], u = Math.min(1, (now - S.sw) / 4000), A = F.mx ? F.mr[1] : F.mr[0], Z = F.mx ? F.mr[0] : F.mr[1];
+    setM(A + (Z - A) * u); if (u >= 1) stopSw();
+  }
+  function sync() {
+    if (!ui.ro) return; const F = FS[S.i], [a, b] = roots(), d = a + b - 2 * F.x0, Fv = Gf(F)(b), sg = sgn(F);
+    ui.ro.set([["m", f3(S.m), BT], ["x₁", f3(a), GT], ["x₂", f3(b), GT], ["x₁ + x₂", f3(a + b), RT], ["2x₀", F.tS, BT],
+      ["x₁ + x₂ − 2x₀", (d > 5e-4 ? "+" : "") + f3(d), RT], ["F(x₂)", isFinite(Fv) ? f3(Fv) : "2e − x₂ ≤ 0，不必比较"]]);
+    ui.note.textContent = sg === 0 ? "F(x) = f(x) − f(−x) ≡ 0：曲线关于 x = 0 对称，中点恰在 x₀，x₁ + x₂ = 0。"
+      : "x > " + F.x0S + " 时 F(x) = f(x) − f(2x₀ − x) > 0 ⇒ f(x₁) = f(x₂) > f(2x₀ − x₂)；x₁ 与 2x₀ − x₂ 同在 x₀ 左侧，f 在那里" + (F.mx ? "递增 ⇒ x₁ > 2x₀ − x₂" : "递减 ⇒ x₁ < 2x₀ − x₂") + " ⇒ " + F.con + "。" + (F.ext || "");
+  }
+  function tag(ctx, x, y, s, c, T, right, size) {
+    ctx.save(); ctx.font = (size || 13) + "px " + SANS; const w = ctx.measureText(s).width; if (right) x -= w;
+    ctx.globalAlpha = 0.88; ctx.fillStyle = T.bg; ctx.fillRect(x - 4, y - 2, w + 8, (size || 13) + 7);
+    ctx.globalAlpha = 1; ctx.fillStyle = c; ctx.textBaseline = "top"; ctx.fillText(s, x, y + 1); ctx.restore();
+  }
+  function dot(ctx, x, y, c, T, r) { ctx.beginPath(); ctx.arc(x, y, r || 5, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.bg; ctx.stroke(); }
+  function vdash(ctx, X, y1, y2, c, a) { ctx.save(); ctx.setLineDash([4, 4]); ctx.globalAlpha = a || 1; ctx.strokeStyle = c; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(X, y1); ctx.lineTo(X, y2); ctx.stroke(); ctx.restore(); }
+  function band(ctx, m, f, g, a, b, c) {
+    const B = m.box, a2 = Math.max(a, m.xr[0]), b2 = Math.min(b, m.xr[1]); if (!(b2 > a2)) return;
+    const n = 200, P = (x, fn) => ctx.lineTo(m.X(x), cl(m.Y(fn(x)), B.y - B.h, B.y + 2 * B.h));
+    ctx.save(); ctx.beginPath(); ctx.rect(B.x, B.y, B.w, B.h); ctx.clip(); ctx.beginPath();
+    for (let i = 0; i <= n; i++) P(a2 + ((b2 - a2) * i) / n, f);
+    for (let i = n; i >= 0; i--) P(a2 + ((b2 - a2) * i) / n, g);
+    ctx.closePath(); ctx.globalAlpha = 0.16; ctx.fillStyle = c; ctx.fill(); ctx.restore();
+  }
+  /* 小图放在主曲线最少经过的角落（右上、左上、右下、左下依次优先） */
+  function spot(ctx, F, W, H, m, box, labs) {
+    const iw = Math.min(210, W * 0.36), ih = Math.min(110, H * 0.24);
+    const R = W - iw - 24, Lx = box.x + 18, Bt = box.y + box.h - ih - 14;
+    const cand = (S.i < 2 ? [[R, 44]] : [[R, 44], [Lx, 44], [R, Bt], [Lx, Bt]]).map(([x, y]) => ({ x, y, w: iw, h: ih }));
+    const fns = [F.f]; if (S.mir) fns.push((x) => F.f(2 * F.x0 - x));
+    const pts = []; for (const fn of fns) for (let i = 0; i <= 600; i++) { const x = F.xr[0] + ((F.xr[1] - F.xr[0]) * i) / 600, y = fn(x); if (isFinite(y)) pts.push([m.X(x), m.Y(y)]); }
+    let best = cand[0], bs = Infinity;
+    for (const ib of cand) {
+      const fx = ib.x - 18, fy = ib.y - 34, fw = ib.w + 36, fh = ib.h + 52;
+      let s = 0; for (const [px, py] of pts) if (px >= fx && px <= fx + fw && py >= fy && py <= fy + fh) s++;
+      for (const l of labs) if (l.x < fx + fw && l.x + l.w > fx && l.y < fy + fh && l.y + l.h > fy) s += 80;
+      if (s < bs) { bs = s; best = ib; }
+    }
+    return best;
+  }
+  function inset(ctx, F, W, H, T, K, x2, sg, ib) {
+    const iw = ib.w, ih = ib.h, G = Gf(F), D = F.ir;
+    let M = 0; for (let i = 0; i <= 60; i++) { const v = G(D[0] + ((D[1] - D[0]) * i) / 60); if (isFinite(v)) M = Math.max(M, Math.abs(v)); }
+    M = sg ? M * 1.1 : 1;
+    ctx.save(); ctx.fillStyle = T.bg; ctx.strokeStyle = T.axis; ctx.globalAlpha = 0.95; ctx.fillRect(ib.x - 10, ib.y - 26, ib.w + 20, ib.h + 36);
+    ctx.globalAlpha = 0.5; ctx.strokeRect(ib.x - 10, ib.y - 26, ib.w + 20, ib.h + 36); ctx.restore();
+    const m = drawAxes(ctx, ib, [D[0] - (D[1] - D[0]) * 0.06, D[1]], sg ? [-0.15 * M, M] : [-1, 1], { labels: false, grid: false, xlabel: " ", ylabel: " " });
+    plotFn(ctx, m, G, D, T.teal, 2.2);
+    tag(ctx, ib.x - 4, ib.y - 22, "F(x)，x > x₀：" + (sg ? "F(x) > 0" : "F(x) ≡ 0"), T.fg, T, false, 12);
+    dot(ctx, m.X(D[0]), m.Y(0), T.red, T, 4.5); tag(ctx, m.X(D[0]) + 8, m.Y(0) + 4, "F(x₀) = 0", K.rt, T, false, 12);
+    const v = G(x2); if (x2 <= D[1] && isFinite(v)) dot(ctx, m.X(x2), m.Y(v), T.gold, T, 4);
+  }
+  function numline(ctx, m, F, a, b, NY, T, K) {
+    const B = m.box, mid = (a + b) / 2, d = a + b - 2 * F.x0;
+    ctx.save(); ctx.strokeStyle = T.axis; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(B.x, NY); ctx.lineTo(B.x + B.w, NY); ctx.stroke(); ctx.restore();
+    if (Math.abs(d) > 5e-4) { ctx.save(); ctx.strokeStyle = T.red; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(m.X(F.x0), NY); ctx.lineTo(m.X(mid), NY); ctx.stroke(); ctx.restore(); }
+    [[a, "x₁"], [b, "x₂"]].forEach(([x, s]) => { dot(ctx, m.X(x), NY, T.gold, T, 4.5); tag(ctx, m.X(x) - 6, NY - 22, s, K.gt, T); });
+    dot(ctx, m.X(F.x0), NY, T.blue, T, 5); tag(ctx, m.X(F.x0) - 8, NY + 8, "x₀ = " + F.x0S, T.blue, T);
+    dot(ctx, m.X(mid), NY, T.red, T, 5);
+    const sd = Math.abs(d) < 5e-4 ? "中点 = x₀（对称）" : d > 0 ? "中点偏右 →" : "← 中点偏左";
+    tag(ctx, m.X(mid) + (d < 0 ? -10 : 10), NY - 22, (Math.abs(d) < 5e-4 ? "" : "(x₁+x₂)/2  ") + sd, K.rt, T, d < 0);
+  }
+  return {
+    text: "<i>f</i>(<i>x</i>) 在 <i>x</i>₀ 取极值，若 <i>f</i>(<i>x</i>₁) = <i>f</i>(<i>x</i>₂)（<i>x</i>₁ < <i>x</i>₀ < <i>x</i>₂）：对称的抛物线有 <i>x</i>₁ + <i>x</i>₂ = 2<i>x</i>₀；但一般函数左右<b>不对称</b>，极值点会偏向一侧，<i>x</i>₁ + <i>x</i>₂ 与 2<i>x</i>₀ 的大小要证明。标准方法是<b>对称化</b>：构造 <i>F</i>(<i>x</i>) = <i>f</i>(<i>x</i>) − <i>f</i>(2<i>x</i>₀ − <i>x</i>)，证明它在 <i>x</i>₀ 一侧恒正或恒负，再借单调性比较。",
+    points: [
+      "极值点偏移 = 曲线关于极值点不对称",
+      "对称化三步：① 求 <i>x</i>₀；② 构造 <i>F</i>(<i>x</i>) = <i>f</i>(<i>x</i>) − <i>f</i>(2<i>x</i>₀ − <i>x</i>)，判定符号；③ 代入 <i>x</i>₂，借 <i>f</i>(<i>x</i>₁) = <i>f</i>(<i>x</i>₂) 与单调性得结论",
+      "也可用比值代换 <i>t</i> = <i>x</i>₂/<i>x</i>₁，或对数均值不等式",
+    ],
+    gk: [
+      "高考链接：新高考压轴题常考「证明 <i>x</i>₁ + <i>x</i>₂ > 2」或「<i>x</i>₁<i>x</i>₂ > e²」。",
+      "易错：最后一步要把 <i>x</i>₁、2<i>x</i>₀ − <i>x</i>₂ 放进同一个单调区间才能比较。",
+    ],
+    mount(ctrl, read) {
+      ui.fc = chips(FS.map((F, i) => ({ label: F.label, value: i })), S.i, setI);
+      ui.ms = slider("水平线 m", 0, 1, 0.001, S.m, f3, (v) => { stopSw(); setM(v); });
+      ui.mi = toggle("镜像曲线", S.mir, (v) => { S.mir = v; });
+      ui.sw = button("扫一遍 m", () => (S.sw ? stopSw() : startSw()), true);
+      ui.ro = readout(); ui.note = el("p");
+      ui.note.style.cssText = "font-size:13px;line-height:1.6;margin-top:6px;overflow-wrap:anywhere";
+      ctrl.append(ui.fc, ui.ms, ui.mi, ui.sw); read.append(ui.ro, ui.note);
+      const m = S.m; setI(S.i); setM(m);
+    },
+    unmount() { stopSw(); S.drag = false; cv.style.cursor = ""; for (const k in ui) delete ui[k]; },
+    draw(ctx, W, H) {
+      const T = theme(), K = cc(T), F = FS[S.i];
+      if (S.sw) tick(performance.now());
+      const box = { x: 40, y: 12, w: Math.max(10, W - 54), h: Math.max(10, H - 104) };
+      const m = drawAxes(ctx, box, F.xr, F.yr); S.mp = m;
+      const [a, b] = roots(), x0 = F.x0, sg = sgn(F), mir = (x) => F.f(2 * x0 - x), NY = box.y + box.h + 58;
+      if (S.mir) {
+        band(ctx, m, F.f, mir, x0, F.ir[0] === E ? 2 * E : F.xr[1], T.blue);
+        plotFn(ctx, m, mir, null, T.gold, 2.2, true);
+      }
+      vdash(ctx, m.X(x0), box.y, box.y + box.h, T.sub, 0.9);
+      plotFn(ctx, m, F.f, F.d || null, T.blue, 2.8);
+      const Ym = m.Y(S.m);
+      ctx.save(); ctx.strokeStyle = T.fg; ctx.lineWidth = S.drag ? 3 : 2; ctx.globalAlpha = 0.8;
+      ctx.beginPath(); ctx.moveTo(box.x, Ym); ctx.lineTo(box.x + box.w, Ym); ctx.stroke(); ctx.restore();
+      [a, b].forEach((x) => { vdash(ctx, m.X(x), Ym, NY, T.gold, 0.6); dot(ctx, m.X(x), Ym, T.gold, T, 5.5); });
+      tag(ctx, m.X(b) + 10, Ym - 22, "y = m = " + f3(S.m), T.fg, T);
+      tag(ctx, m.X(x0) + 6, box.y + box.h - 22, "x = x₀", T.fg, T);
+      tag(ctx, box.x + 8, box.y + 6, F.fx, T.blue, T);
+      tag(ctx, box.x + 8, box.y + 30, F.con, T.fg, T, false, 18);
+      if (S.mir) {
+        tag(ctx, box.x + 8, box.y + 60, "y = f(2x₀ − x)（镜像）", K.gt, T);
+        tag(ctx, box.x + 8, box.y + 84, sg ? "x > x₀ 时 f 在镜像上方：F(x) > 0" : "两曲线重合：F(x) ≡ 0", T.fg, T);
+      }
+      numline(ctx, m, F, a, b, NY, T, K);
+      ctx.save(); ctx.font = "18px " + SANS;
+      const labs = [{ x: box.x + 4, y: box.y + 4, w: Math.max(ctx.measureText(F.con).width, 120, S.mir ? 236 : 0) + 8, h: S.mir ? 104 : 54 }];
+      ctx.restore();
+      inset(ctx, F, W, H, T, K, b, sg, spot(ctx, F, W, H, m, box, labs));
+    },
+    pointer(e, type, x, y) {
+      const m = S.mp; if (!m) return; const b = m.box;
+      const inside = x >= b.x - 12 && x <= b.x + b.w + 12 && y >= b.y - 6 && y <= b.y + b.h + 6;
+      if (type === "down") { if (inside) { stopSw(); S.drag = true; setM(m.invY(y)); cv.style.cursor = "grabbing"; e.preventDefault(); } }
+      else if (type === "move") {
+        if (S.drag) setM(m.invY(y));
+        else cv.style.cursor = inside && Math.abs(y - m.Y(S.m)) < 18 ? "ns-resize" : "";
+      } else { S.drag = false; cv.style.cursor = ""; }
+    },
+  };
+})();
+CH[9].ready = true;
+MODS[9] = (() => {
+  const SANS = "-apple-system,BlinkMacSystemFont,sans-serif", ex = Math.exp, ln = Math.log, E2 = Math.exp(2);
+  const S = { mode: 0, x: 0.6, q: 0, a: 3, m: 0.5, st: [1, 1], drag: null, mp: [] };
+  const ui = {};
+  const f3 = (v) => (!isFinite(v) ? "—" : (Math.abs(v) < 5e-4 ? 0 : v).toFixed(3).replace("-", "−"));
+  const cl = (v, a, b) => Math.min(b, Math.max(a, v));
+  const BT = "var(--blue-text)", GT = "var(--gold-text)", RT = "var(--red-text)";
+  let CK = null, CC = {};
+  const cc = (T) => { if (CK !== T) { const s = getComputedStyle(document.documentElement), g = (n) => s.getPropertyValue(n).trim(); CC = { bt: g("--blue-text"), gt: g("--gold-text"), rt: g("--red-text") }; CK = T; } return CC; };
+  const XS = (() => { let a = 0.1, b = 1; for (let i = 0; i < 60; i++) { const c = (a + b) / 2; if (c + ln(c) < 0) a = c; else b = c; } return (a + b) / 2; })();
+  const PAIRS = [["x eˣ", "= e^(x + ln x)"], ["eˣ / x", "= e^(x − ln x)"], ["x / eˣ", "= e^(ln x − x)"], ["x² eˣ", "= e^(x + 2ln x)"]];
+  const Q = [
+    { label: "① 求 a 的范围", steps: [
+      "两边除以 a（a > 0）：e^(x − ln a) − ln a − ln(x − 1) + 1 > 0",
+      "两边同加 x − 1：e^(x − ln a) + (x − ln a) > e^(ln(x − 1)) + ln(x − 1)",
+      "令 g(t) = eᵗ + t，g′(t) = eᵗ + 1 > 0，g 递增 ⇒ x − ln a > ln(x − 1)",
+      "分离参数：ln a < h(x) = x − ln(x − 1) 对 x > 1 恒成立",
+      "h′(x) = 1 − 1/(x − 1)，x = 2 时取最小值 h(2) = 2 ⇒ ln a < 2 ⇒ <b>0 < a < e²</b>"] },
+    { label: "② 求 m 的最大值", steps: [
+      "x eˣ = e^(x + ln x)，令 t = x + ln x",
+      "t 在 (0, +∞) 上递增，x → 0⁺ 时 t → −∞，x → +∞ 时 t → +∞：t 取遍 ℝ",
+      "原式 x eˣ − (x + ln x) = eᵗ − t = φ(t)",
+      "φ′(t) = eᵗ − 1，t = 0 时最小 φ(0) = 1（此时 x + ln x = 0，x ≈ 0.567）",
+      "x eˣ − x − ln x ≥ 1 ⇒ m ≤ 1，<b>m 的最大值为 1</b>"] },
+  ];
+  const h = (x) => (x > 1 ? x - ln(x - 1) : NaN), F2 = (x) => (x > 0 ? x * ex(x) - x - ln(x) : NaN);
+  function minOrig(a) { let m = Infinity; for (let i = 1; i <= 3000; i++) { const x = 1 + (i / 3000) ** 2 * 9; m = Math.min(m, ex(x) - a * ln(a * (x - 1)) + a); } return m; }
+  function minF2() { let m = Infinity; for (let i = 1; i <= 4000; i++) m = Math.min(m, F2(i / 2000)); return m; }
+  function setX(v) { S.x = cl(v, 0.05, 1.6); if (ui.xs) ui.xs.set(S.x); sync(); }
+  function setA(v) { S.a = cl(v, 0.5, 10); if (ui.as) ui.as.set(S.a); sync(); }
+  function setM(v) { S.m = cl(v, -1, 3); if (ui.ms) ui.ms.set(S.m); sync(); }
+  function setQ(i) { S.q = i; if (ui.as) { ui.as.hidden = i !== 0; ui.ms.hidden = i !== 1; } sync(); }
+  function setMode(k) { S.mode = k; S.drag = null; if (ui.g0) { ui.g0.hidden = k !== 0; ui.g1.hidden = k !== 1; } sync(); }
+  function next() { const n = Q[S.q].steps.length; S.st[S.q] = S.st[S.q] >= n ? 1 : S.st[S.q] + 1; sync(); }
+  function sync() {
+    if (!ui.ro) return; const m0 = S.mode === 0;
+    ui.hd.hidden = ui.tb.hidden = !m0; ui.box.hidden = m0;
+    if (m0) {
+      const x = S.x, t = x + ln(x), v = x * ex(x);
+      ui.ro.set([["x₀", f3(x), BT], ["t₀ = x₀ + ln x₀", f3(t), GT], ["x₀ · e^x₀", f3(v), BT], ["e^(x₀ + ln x₀)", f3(ex(t)), RT], ["两者之差", Math.abs(v - ex(t)) < 1e-12 ? "0（相等）" : (v - ex(t)).toExponential(1)]]);
+      return;
+    }
+    if (S.q === 0) { const ok = S.a < E2;
+      ui.ro.set([["a", f3(S.a), BT], ["ln a", f3(ln(S.a)), BT], ["h(x) 最小值 h(2)", "2", GT], ["e²", f3(E2)], ["原式在 x > 1 上的数值最小值", f3(minOrig(S.a)), ok ? BT : RT], ["是否恒成立", ok ? "成立（a < e²）" : "不成立（a ≥ e²）", ok ? BT : RT]]);
+    } else { const ok = S.m <= 1;
+      ui.ro.set([["m", f3(S.m), BT], ["φ(t) 最小值 φ(0)", "1", GT], ["x eˣ − x − ln x 在 x ≈ " + f3(XS) + " 处", f3(F2(XS)), BT], ["数值最小值", f3(minF2())], ["是否恒成立", ok ? "成立（m ≤ 1）" : "不成立（m > 1）", ok ? BT : RT]]);
+    }
+    const q = Q[S.q], k = S.st[S.q];
+    ui.box.innerHTML = '<ol style="margin:8px 0 0 18px;font-size:13px;line-height:1.7">' + q.steps.slice(0, k).map((s) => "<li>" + s + "</li>").join("") + "</ol>";
+    ui.nx.btn.textContent = k >= q.steps.length ? "重来" : "下一步（" + k + "/" + q.steps.length + "）";
+  }
+  function tag(ctx, x, y, s, c, T, right, size) {
+    ctx.save(); ctx.font = (size || 13) + "px " + SANS; const w = ctx.measureText(s).width; if (right) x -= w;
+    ctx.globalAlpha = 0.88; ctx.fillStyle = T.bg; ctx.fillRect(x - 4, y - 2, w + 8, (size || 13) + 7);
+    ctx.globalAlpha = 1; ctx.fillStyle = c; ctx.textBaseline = "top"; ctx.fillText(s, x, y + 1); ctx.restore();
+  }
+  function dot(ctx, x, y, c, T, r) { ctx.beginPath(); ctx.arc(x, y, r || 5, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.bg; ctx.stroke(); }
+  function dash(ctx, P, Q2, c) { ctx.save(); ctx.setLineDash([4, 4]); ctx.globalAlpha = 0.6; ctx.strokeStyle = c; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(P[0], P[1]); ctx.lineTo(Q2[0], Q2[1]); ctx.stroke(); ctx.restore(); }
+  function hline(ctx, m, y, c, w) { ctx.save(); ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(m.box.x, m.Y(y)); ctx.lineTo(m.box.x + m.box.w, m.Y(y)); ctx.stroke(); ctx.restore(); }
+  const bx = (x, y, w, h) => ({ x, y, w: Math.max(10, w), h: Math.max(10, h) });
+  function draw0(ctx, W, H, T, K) {
+    const x = S.x, t = x + ln(x), v = x * ex(x), wide = W >= 600; let A, B, C;
+    if (wide) { const lw = W * 0.6, hh = (H - 56) / 2; A = bx(40, 14, lw - 56, hh); B = bx(40, hh + 42, lw - 56, hh); C = bx(lw + 26, 14, W - lw - 40, hh); }
+    else { const hh = (H - 84) / 3; A = bx(40, 14, W - 54, hh); B = bx(40, hh + 42, W - 54, hh); C = bx(40, 2 * hh + 70, W - 54, hh); }
+    const ma = drawAxes(ctx, A, [0, 1.7], [-0.6, 8.6]), mb = drawAxes(ctx, B, [0, 1.7], [-3.4, 2.6], { ylabel: "t" }), mc = drawAxes(ctx, C, [-3.2, 2.3], [-0.6, 8.6], { xlabel: "t" });
+    S.mp = [ma, mb];
+    plotFn(ctx, ma, (u) => u * ex(u), [1e-3, 1.7], T.blue, 2.6); plotFn(ctx, mb, (u) => u + ln(u), [1e-3, 1.7], T.gold, 2.6); plotFn(ctx, mc, ex, null, T.red, 2.4);
+    const P1 = [ma.X(x), ma.Y(v)], P2 = [mb.X(x), mb.Y(t)], P3 = [mc.X(t), mc.Y(ex(t))];
+    dash(ctx, P1, P2, T.fg); dash(ctx, P2, P3, T.fg); dash(ctx, P1, P3, T.fg);
+    dot(ctx, ...P1, T.blue, T); dot(ctx, ...P2, T.gold, T); dot(ctx, ...P3, T.red, T);
+    const r = x > 1;
+    tag(ctx, P1[0] + (r ? -10 : 10), P1[1] - 22, "x₀eˣ⁰ = " + f3(v), K.bt, T, r);
+    tag(ctx, P2[0] + (r ? -10 : 10), P2[1] + 6, "t₀ = " + f3(t), K.gt, T, r);
+    tag(ctx, P3[0] - 10, P3[1] - 22, "eᵗ⁰ = " + f3(ex(t)), K.rt, T, true);
+    tag(ctx, A.x + 8, A.y + 6, "y = x eˣ（x > 0）", K.bt, T);
+    tag(ctx, B.x + 8, B.y + 6, "t = x + ln x（x > 0）", K.gt, T);
+    tag(ctx, C.x + 8, C.y + 6, "y = eᵗ", K.rt, T);
+    const cy = wide ? C.y + C.h + 18 : C.y + 30;
+    tag(ctx, C.x + 8, cy, "x  →  t = x + ln x  →  eᵗ", T.fg, T);
+    tag(ctx, C.x + 8, cy + 24, "x eˣ = e^(x + ln x)", T.fg, T, false, 16);
+  }
+  function draw1(ctx, W, H, T, K) {
+    if (S.q === 0) {
+      const box = bx(40, 14, W - 54, H - 40), m = drawAxes(ctx, box, [0.8, 6.2], [-1, 6.2]), la = ln(S.a), ok = S.a < E2; S.mp = [m];
+      plotFn(ctx, m, h, [1.0005, 6.2], T.gold, 2.6);
+      if (!ok) { let lo = null, hi = null; for (let i = 0; i <= 600; i++) { const u = 1.001 + (5.2 * i) / 600; if (h(u) <= la) { if (lo === null) lo = u; hi = u; } } if (lo !== null) plotFn(ctx, m, h, [lo, Math.max(hi, lo + 0.01)], T.red, 4.5); }
+      dash(ctx, [m.X(2), box.y + box.h], [m.X(2), m.Y(2)], T.fg);
+      hline(ctx, m, la, ok ? T.blue : T.red, S.drag ? 3.2 : 2.4);
+      dot(ctx, m.X(2), m.Y(2), T.gold, T, 5.5); tag(ctx, m.X(2) + 10, m.Y(2) + 6, "最小值 h(2) = 2", K.gt, T);
+      tag(ctx, box.x + box.w - 8, m.Y(la) - 22, "y = ln a = " + f3(la), ok ? K.bt : K.rt, T, true);
+      tag(ctx, box.x + box.w - 8, box.y + 6, "h(x) = x − ln(x − 1)，x > 1", K.gt, T, true);
+      tag(ctx, box.x + box.w - 8, box.y + 30, "ln a < 2 ⇔ 0 < a < e² ≈ 7.389", T.fg, T, true);
+      tag(ctx, box.x + box.w - 8, box.y + 54, ok ? "a = " + f3(S.a) + "：ln a 在 h(x) 下方，恒成立" : "a = " + f3(S.a) + "：ln a ≥ 2，不恒成立", ok ? K.bt : K.rt, T, true);
+      return;
+    }
+    const wide = W >= 600, ok = S.m <= 1; let A, B;
+    if (wide) { const hw = (W - 40) / 2; A = bx(40, 14, hw - 40, H - 40); B = bx(hw + 40, 14, hw - 14, H - 40); }
+    else { const hh = (H - 56) / 2; A = bx(40, 14, W - 54, hh); B = bx(40, hh + 42, W - 54, hh); }
+    const ma = drawAxes(ctx, A, [-2.6, 2.2], [-0.6, 5.2], { xlabel: "t" }), mb = drawAxes(ctx, B, [0, 2], [-0.6, 5.2]); S.mp = [ma, mb];
+    plotFn(ctx, ma, (t) => ex(t) - t, null, T.gold, 2.6); plotFn(ctx, mb, F2, [1e-3, 2], T.blue, 2.6);
+    dash(ctx, [mb.X(XS), B.y + B.h], [mb.X(XS), mb.Y(1)], T.fg);
+    [ma, mb].forEach((m) => hline(ctx, m, S.m, ok ? T.fg : T.red, S.drag ? 3 : 2));
+    dot(ctx, ma.X(0), ma.Y(1), T.red, T, 5.5); dot(ctx, mb.X(XS), mb.Y(1), T.red, T, 5.5);
+    tag(ctx, ma.X(0) + 10, ma.Y(1) + 6, "φ(0) = 1", K.rt, T); tag(ctx, mb.X(XS) + 10, mb.Y(1) + 6, "x ≈ " + f3(XS) + "，最小值 1", K.rt, T);
+    tag(ctx, A.x + 8, A.y + 6, "φ(t) = eᵗ − t", K.gt, T); tag(ctx, B.x + 8, B.y + 6, "y = x eˣ − x − ln x", K.bt, T);
+    tag(ctx, B.x + 8, B.y + 30, "t = x + ln x 取遍 ℝ ⇒ 两图最小值相同", T.fg, T);
+    tag(ctx, B.x + 8, B.y + 54, "m = " + f3(S.m) + (ok ? "：m ≤ 1，恒成立" : "：m > 1，不恒成立"), ok ? K.bt : K.rt, T);
+  }
+  return {
+    text: "<i>x</i>eˣ 和 <i>x</i> + ln <i>x</i> 看似一个指数、一个对数，其实是一家人：<i>x</i>eˣ = e^(<i>x</i> + ln <i>x</i>)。令 <i>t</i> = <i>x</i> + ln <i>x</i>，指数和对数就<b>同构</b>到了同一个函数 eᵗ 上。不等式两边如果能写成同一个函数 <i>g</i> 在不同位置的值 <i>g</i>(<i>u</i>) ≥ <i>g</i>(<i>v</i>)，再借 <i>g</i> 的单调性就能比较 <i>u</i> 与 <i>v</i>：这就是同构法。",
+    points: [
+      "<i>x</i>eˣ = e^(<i>x</i> + ln <i>x</i>)，eˣ/<i>x</i> = e^(<i>x</i> − ln <i>x</i>)",
+      "同构三步：① 变形成 <i>g</i>(<i>u</i>) 与 <i>g</i>(<i>v</i>)；② 确定 <i>g</i> 的单调性；③ 比较 <i>u</i>、<i>v</i>",
+      "常用 <i>g</i>(<i>t</i>) = <i>t</i>eᵗ、eᵗ + <i>t</i>、<i>t</i> ln <i>t</i>、eᵗ − <i>t</i>",
+    ],
+    gk: [
+      "高考链接：近年压轴题常见指对混合的恒成立问题，同构能一步化简。",
+      "易错：换元 <i>t</i> = <i>x</i> + ln <i>x</i> 后要确认 <i>t</i> 的取值范围（这里是全体实数）。",
+    ],
+    mount(ctrl, read) {
+      ui.mc = chips([{ label: "x eˣ 与 x+ln x", value: 0 }, { label: "同构解不等式", value: 1 }], S.mode, setMode);
+      ui.g0 = el("div"); ui.xs = slider("游标 x₀", 0.05, 1.6, 0.001, S.x, f3, setX); ui.g0.append(ui.xs);
+      ui.g1 = el("div"); ui.qc = chips(Q.map((q, i) => ({ label: q.label, value: i })), S.q, setQ);
+      ui.as = slider("a", 0.5, 10, 0.01, S.a, f3, setA); ui.ms = slider("m", -1, 3, 0.01, S.m, f3, setM);
+      ui.nx = button("下一步", next, true); ui.g1.append(ui.qc, ui.as, ui.ms, ui.nx);
+      ui.ro = readout(); ui.hd = el("p", "", "常见同构对照"); ui.hd.style.cssText = "font-size:13px;font-weight:600;margin-top:10px";
+      ui.tb = readout(PAIRS); ui.box = el("div");
+      ctrl.append(ui.mc, ui.g0, ui.g1); read.append(ui.ro, ui.hd, ui.tb, ui.box);
+      setQ(S.q); setMode(S.mode);
+    },
+    unmount() { S.drag = null; cv.style.cursor = ""; for (const k in ui) delete ui[k]; },
+    draw(ctx, W, H) { const T = theme(), K = cc(T); if (S.mode === 0) draw0(ctx, W, H, T, K); else draw1(ctx, W, H, T, K); },
+    pointer(e, type, x, y) {
+      if (type === "up") { S.drag = null; cv.style.cursor = ""; return; }
+      const hit = S.mp.find((m) => x >= m.box.x - 10 && x <= m.box.x + m.box.w + 10 && y >= m.box.y - 6 && y <= m.box.y + m.box.h + 6);
+      if (type === "down" && hit) { S.drag = hit; e.preventDefault(); }
+      cv.style.cursor = S.drag ? "grabbing" : hit ? (S.mode === 0 ? "ew-resize" : "ns-resize") : "";
+      const m = S.drag; if (!m) return;
+      if (S.mode === 0) setX(m.invX(x)); else if (S.q === 0) setA(ex(m.invY(y))); else setM(m.invY(y));
+    },
+  };
+})();
+CH[10].ready = true;
+MODS[10] = (() => {
+  const SANS = "-apple-system,BlinkMacSystemFont,sans-serif", ex = Math.exp, ln = Math.log, BT = "var(--blue-text)", RT = "var(--red-text)";
+  const X0 = 0.5671432904, L = ["A", "B", "C", "D"], TOTAL = 31;
+  const Q = [
+    { t: "单选", pts: 5, ans: "A", stem: "曲线 <i>y</i> = <i>x</i> ln <i>x</i> 在点 (1, 0) 处的切线方程为",
+      opts: ["y = x − 1", "y = 2x − 2", "y = x + 1", "y = −x + 1"],
+      ex: "y′ = ln x + 1，x = 1 时斜率 k = 1，切线 y − 0 = 1·(x − 1)，即 y = x − 1。对应 5.1 导数的几何意义与 5.2 导数的运算（本实验第 01–03 章）。" },
+    { t: "单选", pts: 5, ans: "B", stem: "函数 <i>f</i>(<i>x</i>) = <i>x</i>³ − 3<i>x</i>² + 1 的单调递减区间为",
+      opts: ["(−∞, 0)", "(0, 2)", "(2, +∞)", "(−∞, 0) 和 (2, +∞)"],
+      ex: "f′(x) = 3x² − 6x = 3x(x − 2)，0 < x < 2 时 f′(x) < 0，故递减区间为 (0, 2)；两侧 f′ > 0 为递增区间。对应 5.3.1 函数的单调性（第 04 章）。" },
+    { t: "单选", pts: 5, ans: "A", stem: "若函数 <i>f</i>(<i>x</i>) = <i>x</i>³ + <i>a</i><i>x</i>² − 9<i>x</i> 在 <i>x</i> = −1 处取得极值，则 <i>a</i> =",
+      opts: ["−3", "3", "−6", "6"],
+      ex: "f′(x) = 3x² + 2ax − 9，由 f′(−1) = 3 − 2a − 9 = 0 得 a = −3。求出参数后要检验：f′(x) = 3(x − 3)(x + 1) 在 x = −1 两侧由正变负，确为极大值点。对应 5.3.2 函数的极值（第 05 章）。" },
+    { t: "单选", pts: 5, ans: "A", stem: "已知函数 <i>f</i>(<i>x</i>) = ln <i>x</i> − <i>a</i><i>x</i> 有两个零点，则 <i>a</i> 的取值范围是",
+      opts: ["(0, 1/e)", "(0, 1)", "(−∞, 1/e)", "(1/e, +∞)"],
+      ex: "分离参数：a = ln x / x = g(x)。g′(x) = (1 − ln x)/x²，g 在 (0, e) 递增、(e, +∞) 递减，最大值 g(e) = 1/e，且 x → +∞ 时 g → 0⁺，故 y = a 与 g 有两个交点 ⇔ 0 < a < 1/e。对应第 06 章 零点个数与参数。" },
+    { t: "多选", pts: 5, ans: "ABD", multi: true, stem: "下列不等式对所有 <i>x</i> > 0 都成立的有",
+      opts: ["eˣ ≥ x + 1", "ln x ≤ x − 1", "eˣ > ln x + 3", "ln x ≥ 1 − 1/x"],
+      ex: "A、B 是切线放缩的两个基本不等式；D 由 B 把 x 换成 1/x 得到。C：令 h(x) = eˣ − ln x，h′(x) = eˣ − 1/x 在 x₀ ≈ 0.567 处为 0，最小值 h(x₀) = x₀ + 1/x₀ ≈ 2.330 < 3，故 C 不成立。对应第 08 章 切线放缩与常用不等式。" },
+    { t: "填空", pts: 6, ans: 1, fill: true, stem: "若 <i>x</i>eˣ − <i>x</i> − ln <i>x</i> ≥ <i>m</i> 对 <i>x</i> > 0 恒成立，则 <i>m</i> 的最大值为 ____",
+      ex: "同构：x eˣ = e^(x + ln x)，令 t = x + ln x（取遍 ℝ），原式 = eᵗ − t ≥ 1，t = 0（x ≈ 0.567）时取等，故 m 的最大值为 1。对应第 10 章 同构与指对跨阶、第 07 章 恒成立问题。" },
+  ];
+  const S = { q: 0, sel: Q.map(() => ""), done: Q.map(() => false), got: Q.map(() => 0), review: false };
+  const ui = {};
+  const allDone = () => S.done.every(Boolean), ring = () => allDone() && !S.review;
+  const sum = () => S.got.reduce((a, b) => a + b, 0);
+  function score(i) {
+    const q = Q[i], s = S.sel[i];
+    if (q.fill) { const v = Number(String(s).trim()); return s.trim() !== "" && Math.abs(v - q.ans) < 1e-9 ? q.pts : 0; }
+    if (!q.multi) return s === q.ans ? q.pts : 0;
+    if ([...s].some((c) => !q.ans.includes(c))) return 0;
+    return s.length === q.ans.length ? q.pts : s.length ? 2 : 0;
+  }
+  function pick(c) {
+    const i = S.q, q = Q[i]; if (S.done[i]) return;
+    if (q.multi) { const s = new Set(S.sel[i]); s.has(c) ? s.delete(c) : s.add(c); S.sel[i] = L.filter((x) => s.has(x)).join(""); } else S.sel[i] = c;
+    render();
+  }
+  function submit() {
+    const i = S.q; if (S.done[i] || !String(S.sel[i]).trim()) return;
+    S.got[i] = score(i); S.done[i] = true; if (allDone()) S.review = false; render();
+  }
+  function goQ(i) { S.q = i; S.review = true; render(); }
+  function again() { S.sel = Q.map(() => ""); S.done = Q.map(() => false); S.got = Q.map(() => 0); S.q = 0; S.review = false; render(); }
+  function render() {
+    if (!ui.card) return;
+    const i = S.q, q = Q[i], d = S.done[i];
+    ui.nav.set(i); [...ui.nav.children].forEach((b, k) => { b.textContent = k + 1 + (S.done[k] ? " ✓" : ""); b.setAttribute("aria-label", "第 " + (k + 1) + " 题"); });
+    const c = ui.card; c.innerHTML = "";
+    c.append(el("p", "", "第 " + (i + 1) + " 题 · " + q.t + " " + q.pts + " 分"));
+    c.firstChild.style.cssText = "font-size:13px;color:var(--sub);margin-top:6px";
+    const st = el("p", "", q.stem); st.style.cssText = "font-size:15px;margin:4px 0 6px"; c.append(st);
+    if (q.multi) { const n = el("p", "", "部分选对得 2 分，有错选得 0 分"); n.style.cssText = "font-size:13px;color:var(--sub)"; c.append(n); }
+    if (q.opts) q.opts.forEach((o, k) => {
+      const ch = L[k], on = S.sel[i].includes(ch), right = q.ans.includes(ch);
+      const b = el("button", "", "<b style='font-weight:600'>" + ch + ".</b> " + o); b.type = "button"; b.onclick = () => pick(ch);
+      b.setAttribute("aria-pressed", on);
+      let css = "display:block;width:100%;text-align:left;min-height:44px;padding:8px 14px;margin-top:6px;border-radius:12px;font-size:14px;border:1.5px solid transparent;background:" + (on ? "var(--blue-soft)" : "var(--sec)") + ";color:" + (on ? BT : "var(--fg)");
+      if (d && right) { css += ";border-color:var(--blue);color:" + BT; b.innerHTML += " ✓"; }
+      else if (d && on) { css += ";border-color:var(--red-text);color:" + RT; b.innerHTML += " ✗"; }
+      if (d) css += ";cursor:default";
+      b.style.cssText = css; c.append(b);
+    });
+    if (q.fill) {
+      const inp = el("input"); Object.assign(inp, { type: "text", inputMode: "decimal", value: S.sel[i], placeholder: "输入答案", disabled: d });
+      inp.setAttribute("aria-label", "第 6 题答案");
+      inp.style.cssText = "width:100%;height:44px;margin-top:6px;padding:0 14px;border-radius:12px;border:1.5px solid " + (d ? (S.got[i] ? "var(--blue)" : "var(--red-text)") : "var(--line)") + ";background:var(--sec);color:var(--fg);font:15px var(--mono)";
+      inp.oninput = () => { S.sel[i] = inp.value; ui.sb.btn.disabled = !inp.value.trim(); };
+      inp.onkeydown = (e) => { if (e.key === "Enter") submit(); };
+      c.append(inp);
+    }
+    ui.sb = button(d ? "已提交" : "提交", submit, true); ui.sb.btn.disabled = d || !String(S.sel[i]).trim(); c.append(ui.sb);
+    if (d) {
+      const g = S.got[i], r = el("p", "", "得 " + g + " / " + q.pts + " 分 · " + (g === q.pts ? "回答正确" : g ? "部分正确" : "回答错误") + (q.fill ? "（正确答案 1）" : "（正确答案 " + q.ans + "）"));
+      r.style.cssText = "font-size:14px;font-weight:600;color:" + (g ? BT : RT); c.append(r);
+      const a = el("p", "", q.ex); a.style.cssText = "font-size:14px;line-height:1.7;margin-top:4px"; c.append(a);
+      const nx = allDone() ? button("查看成绩", () => { S.review = false; render(); }) : button("下一题", () => { const k = S.done.findIndex((x, j) => !x && j > i); goQ(k >= 0 ? k : S.done.indexOf(false)); });
+      c.append(nx);
+    }
+    const n = S.done.filter(Boolean).length;
+    ui.ro.set([["总分", sum() + " / " + TOTAL, BT], ["已完成", n + " / 6"], ["本题", d ? S.got[i] + " / " + q.pts + " 分" : "未作答", d ? BT : null]]);
+    ui.ag.hidden = !ring();
+  }
+  let CK = null, K = {};
+  const cc = (T) => { if (CK !== T) { const s = getComputedStyle(document.documentElement); K = { bt: s.getPropertyValue("--blue-text").trim(), rt: s.getPropertyValue("--red-text").trim() }; CK = T; } return K; };
+  function tag(ctx, x, y, s, c, T, right) {
+    ctx.save(); ctx.font = "13px " + SANS; const w = ctx.measureText(s).width; if (right) x -= w;
+    ctx.globalAlpha = 0.88; ctx.fillStyle = T.bg; ctx.fillRect(x - 4, y - 2, w + 8, 20);
+    ctx.globalAlpha = 1; ctx.fillStyle = c; ctx.textBaseline = "top"; ctx.fillText(s, x, y + 1); ctx.restore();
+  }
+  function dot(ctx, x, y, c, T) { ctx.beginPath(); ctx.arc(x, y, 5.5, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.bg; ctx.stroke(); }
+  function hline(ctx, m, y, c, dash) { ctx.save(); ctx.strokeStyle = c; ctx.lineWidth = 1.6; if (dash) ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(m.box.x, m.Y(y)); ctx.lineTo(m.box.x + m.box.w, m.Y(y)); ctx.stroke(); ctx.restore(); }
+  function bis(g, a, b) { let ga = g(a); for (let i = 0; i < 60; i++) { const c = (a + b) / 2, gc = g(c); if (gc < 0 === ga < 0) { a = c; ga = gc; } else b = c; } return (a + b) / 2; }
+  const wrongPick = (i) => (S.done[i] && S.got[i] === 0 && !Q[i].multi && !Q[i].fill ? L.indexOf(S.sel[i]) : -1);
+  function drawQ(ctx, W, H, T, K) {
+    const i = S.q, d = S.done[i], sm = W < 520, bh = i === 1 && d ? 56 : 0;
+    const box = { x: 40, y: 14, w: Math.max(10, W - 54), h: Math.max(10, H - 40 - bh) }, tx = box.x + box.w - 8, ty = box.y + 6;
+    const lbl = (k, s, c) => tag(ctx, tx, ty + 24 * k, s, c || T.fg, T, true);
+    if (i === 0) {
+      const m = drawAxes(ctx, box, [-0.3, 3], [-1.4, 3.2]), LN = [(x) => x - 1, (x) => 2 * x - 2, (x) => x + 1, (x) => 1 - x], w = wrongPick(0);
+      plotFn(ctx, m, (x) => (x > 0 ? x * ln(x) : NaN), [1e-4, 3], T.fg, 2.4);
+      if (w > 0) plotFn(ctx, m, LN[w], null, K.rt, 1.8, true);
+      if (d) plotFn(ctx, m, LN[0], null, T.blue, 2.4);
+      dot(ctx, m.X(1), m.Y(0), d ? T.blue : T.fg, T); tag(ctx, m.X(1) + 10, m.Y(0) + 8, "(1, 0)", T.fg, T);
+      lbl(0, "y = x ln x"); if (d) { lbl(1, "切线 y = x − 1，斜率 y′(1) = 1", K.bt); if (w > 0) lbl(2, "所选 " + L[w] + "：" + Q[0].opts[w] + "（虚线）", K.rt); }
+    } else if (i === 1) {
+      const m = drawAxes(ctx, box, [-1.5, 3.5], [-4, 3.5]), f = (x) => x * x * x - 3 * x * x + 1;
+      plotFn(ctx, m, f, null, T.fg, 2.4); lbl(0, "f(x) = x³ − 3x² + 1");
+      if (d) {
+        plotFn(ctx, m, f, [0, 2], T.blue, 4.5); dot(ctx, m.X(0), m.Y(1), T.blue, T); dot(ctx, m.X(2), m.Y(-3), T.blue, T);
+        lbl(1, "(0, 2) 上递减", K.bt);
+        const y = box.y + box.h + 22, seg = [[-1.5, 0, "+"], [0, 2, "−"], [2, 3.5, "+"]];
+        seg.forEach(([a, b, s]) => {
+          ctx.save(); ctx.fillStyle = s === "−" ? T.blue : T.grid; ctx.globalAlpha = s === "−" ? 0.22 : 1; ctx.fillRect(m.X(a) + 1, y, m.X(b) - m.X(a) - 2, 24); ctx.restore();
+          ctx.save(); ctx.fillStyle = s === "−" ? K.bt : T.fg; ctx.font = "600 15px " + SANS; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(s, (m.X(a) + m.X(b)) / 2, y + 12); ctx.restore();
+        });
+        tag(ctx, box.x + 4, y - 20, "f′(x) = 3x(x − 2) 的符号", T.fg, T);
+      }
+    } else if (i === 2) {
+      const m = drawAxes(ctx, box, [-3.2, 5.5], [-32, 12]), A = [-3, 3, -6, 6], w = wrongPick(2), f = (a) => (x) => x * x * x + a * x * x - 9 * x;
+      ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = T.axis; ctx.beginPath(); ctx.moveTo(m.X(-1), box.y); ctx.lineTo(m.X(-1), box.y + box.h); ctx.stroke(); ctx.restore();
+      lbl(0, "f(x) = x³ + ax² − 9x，x = −1 处取极值");
+      if (w > 0) { plotFn(ctx, m, f(A[w]), null, K.rt, 1.8, true); lbl(2, "所选 a = " + A[w] + "：f′(−1) ≠ 0（虚线）", K.rt); }
+      if (d) {
+        plotFn(ctx, m, f(-3), null, T.blue, 2.6); dot(ctx, m.X(-1), m.Y(5), T.blue, T); dot(ctx, m.X(3), m.Y(-27), T.blue, T);
+        tag(ctx, m.X(-1) + 10, m.Y(5) - 24, "极大值 f(−1) = 5", K.bt, T); tag(ctx, m.X(3) + 10, m.Y(-27) - 8, "极小值 f(3) = −27", T.fg, T);
+        lbl(1, "a = −3：f′ = 3(x − 3)(x + 1)，−1 两侧变号", K.bt);
+      } else tag(ctx, m.X(-1) + 8, box.y + box.h - 26, "x = −1", T.fg, T);
+    } else if (i === 3) {
+      const m = drawAxes(ctx, box, [0, 9], [-1.2, 0.7]), g = (x) => (x > 0 ? ln(x) / x : NaN);
+      plotFn(ctx, m, g, [0.05, 9], T.fg, 2.4); lbl(0, "g(x) = ln x / x");
+      if (d) {
+        const e = Math.E, a = 0.3, h = (x) => ln(x) / x - a, r1 = bis(h, 1, e), r2 = bis(h, e, 9);
+        hline(ctx, m, 1 / e, T.axis, true); hline(ctx, m, a, T.blue);
+        dot(ctx, m.X(e), m.Y(1 / e), T.fg, T); tag(ctx, m.X(e) - 10, m.Y(1 / e) - 26, "最大值 g(e) = 1/e ≈ 0.368", T.fg, T, true);
+        dot(ctx, m.X(r1), m.Y(a), T.blue, T); dot(ctx, m.X(r2), m.Y(a), T.blue, T);
+        tag(ctx, m.X(r2) + 10, m.Y(a) + 8, "y = a = 0.3：两个交点", K.bt, T);
+        lbl(1, "0 < a < 1/e ⇔ 两个零点", K.bt);
+      }
+    } else if (i === 4) {
+      const m = drawAxes(ctx, box, [0, 3], d ? [-1.5, 3] : [-2.5, 6]);
+      if (!d) { plotFn(ctx, m, ex, null, T.fg, 2.4); plotFn(ctx, m, (x) => (x > 0 ? ln(x) : NaN), [1e-3, 3], T.fg, 2.4); tag(ctx, m.X(1.5) + 10, m.Y(ex(1.5)), "y = eˣ", T.fg, T); tag(ctx, m.X(2.4), m.Y(ln(2.4)) + 8, "y = ln x", T.fg, T); return; }
+      const P = (x) => (x > 0 ? 1 : NaN);
+      plotFn(ctx, m, (x) => ex(x) - x - 1, null, T.blue, 2.4);
+      plotFn(ctx, m, (x) => P(x) * (x - 1 - ln(x)), [1e-3, 3], T.blue, 2.4, true);
+      plotFn(ctx, m, (x) => P(x) * (ln(x) - 1 + 1 / x), [1e-3, 3], T.blue, 1.4);
+      plotFn(ctx, m, (x) => P(x) * (ex(x) - ln(x) - 3), [1e-3, 3], K.rt, 2.4);
+      const cm = X0 + 1 / X0 - 3; dot(ctx, m.X(X0), m.Y(cm), K.rt, T); tag(ctx, m.X(X0) + 10, m.Y(cm) + 8, "C 最小值 ≈ " + cm.toFixed(3).replace("-", "−") + " < 0", K.rt, T);
+      lbl(0, "各项化为「左 − 右」，看是否 ≥ 0"); lbl(1, "A：eˣ − x − 1（实线）", K.bt); lbl(2, "B：x − 1 − ln x（虚线）", K.bt);
+      lbl(3, "D：ln x − 1 + 1/x（细线）", K.bt); lbl(4, "C：eˣ − ln x − 3 有负值，不成立", K.rt);
+    } else {
+      const m = drawAxes(ctx, box, [0, 2], [-0.5, 5]), F = (x) => (x > 0 ? x * ex(x) - x - ln(x) : NaN);
+      plotFn(ctx, m, F, [1e-3, 2], T.fg, 2.4); lbl(0, "y = x eˣ − x − ln x（x > 0）");
+      if (d) {
+        hline(ctx, m, 1, T.blue); dot(ctx, m.X(X0), m.Y(1), T.blue, T);
+        tag(ctx, m.X(X0) + 10, m.Y(1) + 8, "x₀ ≈ 0.567，最小值 1", K.bt, T);
+        lbl(1, "= eᵗ − t ≥ 1，t = x + ln x", K.bt); if (!sm) lbl(2, "x₀ + ln x₀ = 0 时取等", T.fg);
+      }
+    }
+  }
+  function drawRing(ctx, W, H, T, K) {
+    const r = Math.max(50, Math.min(110, Math.min(W, H) * 0.22)), cx = W / 2, cy = H / 2 - 30, s = sum();
+    ctx.save(); ctx.lineWidth = 12; ctx.lineCap = "round";
+    ctx.strokeStyle = T.grid; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.stroke();
+    ctx.strokeStyle = T.blue; ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + (2 * Math.PI * s) / TOTAL); if (s) ctx.stroke();
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = T.fg; ctx.font = "600 " + Math.round(r * 0.55) + "px " + SANS; ctx.fillText(String(s), cx, cy - r * 0.08);
+    ctx.fillStyle = T.sub; ctx.font = "14px " + SANS; ctx.fillText("/ " + TOTAL + " 分", cx, cy + r * 0.36);
+    ctx.fillStyle = T.fg; ctx.fillText("全对 " + S.got.filter((g, i) => g === Q[i].pts).length + " 题 · 点题号回看解析", cx, cy + r + 26);
+    ctx.restore();
+    if (ui.ag) ui.ag.style.top = Math.round(cy + r + 50) + "px";
+  }
+  return {
+    text: "第五章综合检测：6 题共 31 分，新高考 I 卷题型风格。点上方题号切换，作答后点「提交」即时判分并给出解析；画布同步演示答案，全部完成后显示成绩。",
+    points: ["单选每题 5 分；多选 5 分，部分选对得 2 分，有错选得 0 分；填空 6 分", "解析注明对应章节，做错的题可回到该章再看一遍", "含参极值题：求出参数后一定要检验导数是否变号"],
+    gk: ["高考链接：切线、单调区间、极值求参、零点个数、常用不等式、同构恒成立，覆盖导数小题的主要考点。"],
+    mount(ctrl, read) {
+      ui.nav = chips(Q.map((q, i) => ({ label: String(i + 1), value: i })), S.q, goQ);
+      ui.card = el("div"); ui.ro = readout(); ctrl.append(ui.nav, ui.card); read.append(ui.ro);
+      ui.ag = el("button", "pill pri", "再做一遍"); ui.ag.type = "button"; ui.ag.onclick = again;
+      ui.ag.style.cssText = "position:absolute;left:50%;transform:translateX(-50%);height:44px;padding:0 22px;font-size:15px";
+      $("cvwrap").append(ui.ag); render();
+    },
+    unmount() { if (ui.ag) ui.ag.remove(); for (const k in ui) delete ui[k]; },
+    draw(ctx, W, H) { const T = theme(), K = cc(T); if (ring()) drawRing(ctx, W, H, T, K); else drawQ(ctx, W, H, T, K); },
+  };
+})();
+const $ = (id) => document.getElementById(id);
+const pad = (i) => String(i + 1).padStart(2, "0");
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+
+/* ---------- theme ---------- */
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+let THEME = null;
+function theme() {
+  if (THEME) return THEME;
+  const s = getComputedStyle(document.documentElement), v = (n) => s.getPropertyValue("--" + n).trim();
+  THEME = { bg: v("card"), fg: v("fg"), sub: v("sub"), grid: v("grid"), axis: v("axis"), blue: v("blue"), red: v("red"), gold: v("gold"), teal: v("teal"), purple: v("purple") };
+  return THEME;
+}
+function setDark(on) {
+  document.documentElement.dataset.theme = on ? "dark" : "light";
+  THEME = null; store.set("derivlab-theme", on ? "dark" : "light");
+  $("darkT").textContent = $("darkM").textContent = on ? "浅色" : "深色";
+}
+setDark(store.get("derivlab-theme") === "dark");
+const toggleDark = () => setDark(document.documentElement.dataset.theme !== "dark");
+
+/* ---------- UI tools ---------- */
+function slider(label, min, max, step, val, fmt, onchange) {
+  fmt = fmt || ((v) => String(v));
+  const w = el("label", "ctl"), h = el("span", "ctl-h"), b = el("b");
+  h.append(el("span", "", label), b);
+  const r = el("input"); Object.assign(r, { type: "range", min, max, step, value: val });
+  const up = () => { b.textContent = fmt(+r.value); };
+  r.addEventListener("input", () => { up(); onchange && onchange(+r.value); });
+  up(); w.append(h, r);
+  w.set = (v) => { r.value = v; up(); }; w.get = () => +r.value;
+  return w;
+}
+function chips(options, val, onchange) {
+  const w = el("div", "chips");
+  const opts = options.map((o) => (typeof o === "object" ? o : { label: String(o), value: o }));
+  const render = () => [...w.children].forEach((c, i) => c.classList.toggle("on", opts[i].value === val));
+  opts.forEach((o) => { const c = el("button", "", o.label); c.type = "button"; c.onclick = () => { val = o.value; render(); onchange && onchange(val); }; w.append(c); });
+  render(); w.set = (v) => { val = v; render(); }; w.get = () => val;
+  return w;
+}
+function button(label, onclick, primary) {
+  const w = el("div", "btnrow"), b = el("button", "pill" + (primary ? " pri" : ""), label);
+  b.type = "button"; b.onclick = onclick; w.append(b); w.btn = b; return w;
+}
+function toggle(label, val, onchange) {
+  const b = el("button", "tog", "<span>" + label + "</span><i></i>"); b.type = "button";
+  const r = () => { b.classList.toggle("on", !!val); b.setAttribute("aria-pressed", !!val); };
+  b.onclick = () => { val = !val; r(); onchange && onchange(val); };
+  r(); b.set = (v) => { val = v; r(); }; b.get = () => val; return b;
+}
+function readout(rows) {
+  const w = el("div", "readout");
+  w.set = (rs) => { w.innerHTML = ""; rs.forEach(([k, v, c]) => { const r = el("div", "ro"); r.append(el("span", "", k)); const b = el("b", "", v); if (c) b.style.color = c; r.append(b); w.append(r); }); };
+  w.set(rows || []); return w;
+}
+
+/* ---------- drawing tools ---------- */
+function niceStep(range, n) {
+  const raw = range / n, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+  return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p;
+}
+function fmtNum(v, s) { const d = Math.max(0, -Math.floor(Math.log10(s) + 1e-9)); const t = v.toFixed(d); return t === "-0" ? "0" : t; }
+function drawAxes(ctx, box, xr, yr, opts) {
+  opts = opts || {}; const T = theme();
+  const X = (x) => box.x + ((x - xr[0]) / (xr[1] - xr[0])) * box.w;
+  const Y = (y) => box.y + box.h - ((y - yr[0]) / (yr[1] - yr[0])) * box.h;
+  const invX = (px) => xr[0] + ((px - box.x) / box.w) * (xr[1] - xr[0]);
+  const invY = (py) => yr[0] + ((box.y + box.h - py) / box.h) * (yr[1] - yr[0]);
+  const sx = opts.xStep || niceStep(xr[1] - xr[0], Math.max(2, box.w / 70));
+  const sy = opts.yStep || niceStep(yr[1] - yr[0], Math.max(2, box.h / 50));
+  const ax = Math.min(Math.max(X(0), box.x), box.x + box.w), ay = Math.min(Math.max(Y(0), box.y), box.y + box.h);
+  ctx.save(); ctx.lineWidth = 1;
+  if (opts.grid !== false) {
+    ctx.strokeStyle = T.grid; ctx.beginPath();
+    for (let x = Math.ceil(xr[0] / sx) * sx; x <= xr[1] + 1e-9; x += sx) { const p = Math.round(X(x)) + 0.5; ctx.moveTo(p, box.y); ctx.lineTo(p, box.y + box.h); }
+    for (let y = Math.ceil(yr[0] / sy) * sy; y <= yr[1] + 1e-9; y += sy) { const p = Math.round(Y(y)) + 0.5; ctx.moveTo(box.x, p); ctx.lineTo(box.x + box.w, p); }
+    ctx.stroke();
+  }
+  ctx.strokeStyle = T.axis; ctx.fillStyle = T.sub; ctx.beginPath();
+  ctx.moveTo(box.x, Math.round(ay) + 0.5); ctx.lineTo(box.x + box.w, Math.round(ay) + 0.5);
+  ctx.moveTo(Math.round(ax) + 0.5, box.y); ctx.lineTo(Math.round(ax) + 0.5, box.y + box.h); ctx.stroke();
+  ctx.font = "12px ui-monospace,Menlo,monospace";
+  if (opts.labels !== false) {
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    for (let x = Math.ceil(xr[0] / sx) * sx; x <= xr[1] + 1e-9; x += sx) { if (Math.abs(x) < sx / 2) continue; const p = X(x); ctx.beginPath(); ctx.moveTo(p, ay - 3); ctx.lineTo(p, ay + 3); ctx.stroke(); ctx.fillText(fmtNum(x, sx), p, Math.min(ay + 5, box.y + box.h - 14)); }
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    for (let y = Math.ceil(yr[0] / sy) * sy; y <= yr[1] + 1e-9; y += sy) { if (Math.abs(y) < sy / 2) continue; const p = Y(y); ctx.beginPath(); ctx.moveTo(ax - 3, p); ctx.lineTo(ax + 3, p); ctx.stroke(); ctx.fillText(fmtNum(y, sy), Math.max(ax - 6, box.x + 24), p); }
+    if (xr[0] < 0 && xr[1] > 0 && yr[0] < 0 && yr[1] > 0) { ctx.textAlign = "right"; ctx.textBaseline = "top"; ctx.fillText("O", ax - 4, ay + 4); }
+  }
+  ctx.font = "italic 13px -apple-system,sans-serif"; ctx.fillStyle = T.sub;
+  ctx.textAlign = "right"; ctx.textBaseline = "bottom"; ctx.fillText(opts.xlabel || "x", box.x + box.w - 4, ay - 4);
+  ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(opts.ylabel || "y", ax + 6, box.y + 4);
+  ctx.restore();
+  return { X, Y, invX, invY, box, xr, yr };
+}
+function plotFn(ctx, map, f, xr, color, width, dashed) {
+  const b = map.box, a = Math.max(xr ? xr[0] : map.xr[0], map.xr[0]), z = Math.min(xr ? xr[1] : map.xr[1], map.xr[1]);
+  if (!(z > a)) return;
+  const n = Math.max(2, Math.ceil(((map.X(z) - map.X(a)) * 2))), jump = b.h * 1.2;
+  ctx.save(); ctx.beginPath(); ctx.rect(b.x, b.y, b.w, b.h); ctx.clip();
+  ctx.strokeStyle = color || theme().blue; ctx.lineWidth = width || 2; ctx.lineJoin = ctx.lineCap = "round";
+  if (dashed) ctx.setLineDash([6, 5]);
+  ctx.beginPath(); let pen = false, py = 0;
+  const lim = (v) => Math.max(b.y - b.h, Math.min(b.y + 2 * b.h, v));
+  for (let i = 0; i <= n; i++) {
+    const x = a + ((z - a) * i) / n; let y; try { y = f(x); } catch (e) { y = NaN; }
+    if (!isFinite(y)) { pen = false; continue; }
+    const sx = map.X(x), sy = map.Y(y);
+    if (pen && Math.abs(sy - py) > jump) {
+      const xm = x - (z - a) / n / 2, ym = f(xm);           // refine: real steep or a break?
+      const mid = isFinite(ym) ? map.Y(ym) : NaN;
+      if (!(isFinite(mid) && Math.min(py, sy) - 1 <= mid && mid <= Math.max(py, sy) + 1)) pen = false;
+    }
+    if (pen) ctx.lineTo(sx, lim(sy)); else ctx.moveTo(sx, lim(sy));
+    pen = true; py = sy;
+  }
+  ctx.stroke(); ctx.restore();
+}
+
+/* ---------- canvas ---------- */
+const cv = $("cv"), ctx = cv.getContext("2d");
+let W = 0, H = 0, DPR = 1;
+function resize() {
+  const r = $("cvwrap").getBoundingClientRect();
+  DPR = Math.min(window.devicePixelRatio || 1, 3); W = Math.max(1, r.width); H = Math.max(1, r.height);
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  frame(performance.now());
+}
+function frame(t) {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = theme().bg; ctx.fillRect(0, 0, W, H);
+  const m = MODS[cur];
+  if (m && m.draw) { try { m.draw(ctx, W, H, t / 1000); } catch (e) { console.error(e); } }
+}
+function loop(t) { frame(t); requestAnimationFrame(loop); }
+if (window.ResizeObserver) new ResizeObserver(resize).observe($("cvwrap"));
+window.addEventListener("resize", resize);
+function pt(e, type) {
+  const m = MODS[cur]; if (!m || !m.pointer) return;
+  const r = cv.getBoundingClientRect();
+  m.pointer(e, type, e.clientX - r.left, e.clientY - r.top);
+}
+cv.addEventListener("pointerdown", (e) => { try { cv.setPointerCapture(e.pointerId); } catch (_) {} pt(e, "down"); });
+cv.addEventListener("pointermove", (e) => pt(e, "move"));
+cv.addEventListener("pointerup", (e) => pt(e, "up"));
+cv.addEventListener("pointercancel", (e) => pt(e, "up"));
+
+/* ---------- chapters ---------- */
+let cur = -1;
+const N = CH.length;
+function buildNav() {
+  const prog = $("prog"), toc = $("toc"), sl = $("sheetList");
+  CH.forEach((c, i) => {
+    prog.append(el("i"));
+    [toc, sl].forEach((p) => { const b = el("button", "", '<span class="num">' + pad(i) + "</span><span>" + c.n + "</span>"); b.type = "button"; b.onclick = () => { closeSheet(); go(i); }; p.append(b); });
+  });
+}
+function go(i) {
+  i = Math.max(0, Math.min(N - 1, i));
+  if (i === cur) return;
+  const old = MODS[cur];
+  if (old && old.unmount) { try { old.unmount(); } catch (e) { console.error(e); } }
+  cur = i; const c = CH[i], m = MODS[i];
+  if (location.hash !== "#" + (i + 1)) history.replaceState(null, "", "#" + (i + 1));
+  document.title = "格物实验室 导数 · " + c.n;
+  $("chT").textContent = pad(i) + " " + c.n; $("book").textContent = c.book;
+  $("cnt").textContent = pad(i) + " / " + N; $("chBtn").textContent = "章节 " + pad(i) + "/" + N;
+  [...$("prog").children].forEach((e, k) => { e.className = k < i ? "on" : k === i ? "cur" : ""; });
+  [$("toc"), $("sheetList")].forEach((p) => [...p.children].forEach((b, k) => { b.classList.toggle("cur", k === i); if (k === i) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); }));
+  ["prevT", "prevB"].forEach((id) => ($(id).disabled = i === 0));
+  ["nextT", "nextB"].forEach((id) => ($(id).disabled = i === N - 1));
+  const ctrl = $("ctrl"), read = $("read"); ctrl.innerHTML = ""; read.innerHTML = "";
+  $("soon").hidden = !!m; $("soonT").textContent = pad(i) + " " + c.n;
+  if (m) {
+    $("exText").innerHTML = m.text || "";
+    $("pts").innerHTML = m.points ? "<ul>" + m.points.map((p) => "<li>" + p + "</li>").join("") + "</ul>" : "";
+    const gk = Array.isArray(m.gk) ? m.gk : m.gk ? [m.gk] : [];
+    $("gk").innerHTML = gk.map((g) => (typeof g === "string" ? "<p>" + g + "</p>" : '<a href="' + g.href + '" target="_blank" rel="noopener">' + g.t + " ›</a>")).join("");
+    $("ptsCard").hidden = !m.points; $("gkCard").hidden = !gk.length; $("readCard").hidden = false;
+    try { m.mount && m.mount(ctrl, read); } catch (e) { console.error(e); }
+  } else {
+    $("exText").textContent = "本章的交互实验正在制作中，敬请期待。";
+    ctrl.append(el("p", "empty", "本章控件即将上线。"));
+    $("readCard").hidden = $("ptsCard").hidden = $("gkCard").hidden = true;
+  }
+  $("cvwrap").scrollTop = 0; resize();
+}
+function openSheet() { $("sheetBg").hidden = false; const c = $("sheetList").children[cur]; c && c.scrollIntoView({ block: "nearest" }); }
+function closeSheet() { $("sheetBg").hidden = true; }
+$("sheetBg").addEventListener("click", (e) => { if (e.target === $("sheetBg")) closeSheet(); });
+$("chBtn").onclick = openSheet;
+$("prevT").onclick = $("prevB").onclick = () => go(cur - 1);
+$("nextT").onclick = $("nextB").onclick = () => go(cur + 1);
+$("darkT").onclick = $("darkM").onclick = toggleDark;
+$("fullT").onclick = () => {
+  try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); } catch (e) {}
+};
+$("fold").onclick = () => {
+  const f = $("explain").classList.toggle("folded");
+  $("fold").textContent = f ? "展开" : "收起"; $("fold").setAttribute("aria-expanded", !f);
+  resize();
+};
+document.addEventListener("keydown", (e) => {
+  const t = e.target, tag = t && t.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (t && t.isContentEditable)) return;
+  if (e.key === "Escape") closeSheet();
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === "ArrowLeft") go(cur - 1);
+  else if (e.key === "ArrowRight") go(cur + 1);
+});
+const fromHash = () => { const k = parseInt(location.hash.slice(1), 10); return k >= 1 && k <= N ? k - 1 : 0; };
+window.addEventListener("hashchange", () => go(fromHash()));
+
+buildNav();
+go(fromHash());
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
