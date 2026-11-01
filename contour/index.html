@@ -531,7 +531,9 @@
         history.replaceState(null, "", "#" + (cur + 1));
         el("readout").style.display = cur === 0 ? "" : "none";
         setLabels(cur === 0 && showLabels);
+        window.CINE && CINE.refresh();
       }
+      window.LAB = { get cur() { return cur; }, go: go };
       el("prev").onclick = () => go(cur - 1);
       el("next").onclick = () => go(cur + 1);
       el("theme").onclick = () => {
@@ -1038,6 +1040,7 @@
         }
         window.C3 = {
           panel: panel,
+          demo: (p) => { pts = p.map((q) => ({ x: q[0], y: q[1], h: Math.round(H(q[0], q[1])) })); draw(); }, // 纪录片用：直接选点
           enter: (active) => {
             g3.visible = active;
             if (!active) { on = false; pool.forEach((d) => (d.style.display = "none")); return; }
@@ -2285,5 +2288,6 @@
         themeLabel(); tag(); sync(); layout();
       })();
     </script>
+  <script src="../lib/cine-core.js"></script><script src="cine-data.js"></script>
   <script src="../lib/labfix-dom.js"></script></body>
 </html>

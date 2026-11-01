@@ -913,7 +913,7 @@ function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod
  document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
  $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
  ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
- if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize();window.CINE&&CINE.refresh()}
 /* ---------- controls ---------- */
 $("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
 $("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
@@ -926,7 +926,9 @@ document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INP
  if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
 function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
 window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+window.LAB={get cur(){return cur},go:i=>go(i)};
 go(fromHash());requestAnimationFrame(loop);
 </script>
+<script src="../lib/cine-core.js"></script><script src="cine-data.js"></script>
 </body>
 </html>

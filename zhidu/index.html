@@ -192,7 +192,7 @@ MODS[0]=(()=>{
   const fy=b.y+b.h-foot+(vert?8:4),mw=b.w-32;c.textBaseline="top";c.textAlign="left";c.font="600 13px "+SANS;c.fillStyle=T.redText;
   let y=wrapText(c,"西周：血缘 · 世袭",b.x+16,fy,mw,18);c.fillStyle=T.blue;wrapText(c,"秦：官僚 · 皇帝任免 · 不得世袭",b.x+16,y+(vert?4:0),mw,18)}
  function rows(T){const n=N[sel];return[["职官",n.name,tc(T,n.col)],["所属",n.part],["职责",n.duty],["任免方式",n.app,/世袭/.test(n.app)?T.redText:/皇帝/.test(n.app)?T.blue:T.fg]]}
- return{
+ return{pick(v){sel=v;last=""},
   text:"秦统一后，创立<b>皇帝制度</b>，皇权至高无上；中央设<b>三公九卿</b>，丞相、太尉、御史大夫分掌行政、军事、监察，相互牵制，都对皇帝负责；地方全面推行<b>郡县制</b>，郡守、县令由皇帝任免，不得世袭。从此专制主义中央集权制度确立，奠定了此后两千多年政治制度的基本格局。点击结构图中的任一职官看职责。",
   points:["皇帝制度：「皇帝」称号、皇位世袭、皇权至上","三公分权、相互牵制，九卿分管具体事务","郡县制：官员由中央任免、不得世袭，与分封制根本不同","开创中央集权的基本格局，「百代都行秦政法」"],
   gk:"浙江选考常以材料考查秦朝中央集权的特点和郡县制与分封制的区别。<br>易错：三公九卿中丞相并非独揽大权，御史大夫兼有副丞相与监察职能；郡县制在战国已出现，秦是「全面推行」。",
@@ -273,7 +273,7 @@ MODS[1]=(()=>{
   const n=N[sel];return[["职官 / 环节",n.name,tc(T,n.col)],["所属",n.part],["职责",n.duty]]}
  function setView(v){view=v;last="";sel=v==="b"?"dsm":"cs";if(!sub)return;sub.innerHTML="";
   if(v==="a")sub.append(slider("时间",0,2,1,stage,x=>["① 汉初","② 七国之乱后","③ 推恩令"][x],x=>{stage=x;last=""}))}
- return{
+ return{pick(v){sel=v;last=""},
   text:"汉承秦制，又有调整。汉初实行<b>郡国并行</b>，王国势力膨胀导致<b>七国之乱</b>；汉武帝用<b>推恩令</b>削弱王国，中央集权加强。在中央，汉武帝设<b>中朝</b>分割丞相权力；在地方，设<b>刺史</b>监察郡国；选官上推行<b>察举制</b>。",
   points:["郡国并行 → 七国之乱 → 推恩令，王国问题基本解决","中外朝：加强皇权、削弱相权","刺史制度：「以小监大」，六条问事","察举制：以德行、才能选官，打破贵族世袭，后被豪族把持"],
   gk:"浙江选考常考推恩令、刺史制度对加强中央集权的作用，中朝的设置意在削弱相权。<br>易错：推恩令针对诸侯王国，不是针对郡县；察举制 ≠ 科举制（科举始于隋）。",
@@ -354,7 +354,7 @@ MODS[2]=(()=>{
  function setView(v){view=v;last="";sel=v==="a"?"zs":"kj";if(!sub)return;sub.innerHTML="";
   if(v==="a")sub.append(button("下发一道诏令",issue,true),toggle("门下封驳",veto,x=>{veto=x}));
   else sub.append(button("点亮下一个节点",()=>{if(lit<5){sel=TL[lit][0];lit++;last=""}},true),button("重置",()=>{lit=0;sel="kj";last=""}))}
- return{
+ return{pick(v){sel=v;last=""},
   text:"隋唐确立<b>三省六部制</b>：中书省出令、门下省审核、尚书省执行，分工明确又相互牵制，提高了行政效率，也分割了相权、加强了皇权。选官方面，<b>科举制</b>取代九品中正制，以考试选官，打破门阀垄断，扩大了统治基础。",
   points:["中书草拟、门下审核、尚书执行","相权一分为三，集体宰相制","六部分掌具体政务，沿用至清","科举制：分科考试、择优录取，扩大官吏来源，提高官员文化素质"],
   gk:"浙江选考常考三省六部制的特点（分工、制衡、效率）和科举制的影响。<br>易错：科举制开创于隋（进士科是隋炀帝设），不是唐；门下省有「封驳」权，尚书省只负责执行。",
@@ -473,7 +473,7 @@ MODS[3]=(()=>{
  function setView(v){view=v;sel=v==="a"?"zs":v==="b"?"sm2":"jj";seq=null;last="";if(!sub)return;sub.innerHTML="";
   if(v==="a")sub.append(chips([{label:"唐",value:"tang"},{label:"宋",value:"song"}],era,x=>{era=x;last=""}));
   else if(v==="b")sub.append(button("出征",()=>march("out"),true),button("战后",()=>march("back")),toggle("更戍法",gx,x=>{gx=x;last=""}))}
- return{
+ return{pick(v){sel=v;last=""},
   text:"宋太祖鉴于唐末五代<b>藩镇割据</b>，采取「收其精兵、制其钱谷、削夺其权」的方针。中央分割宰相的行政、军事、财政大权；军事上<b>兵权三分</b>、更戍；地方上以<b>文臣知州</b>，设<b>通判</b>监督，由<b>转运使</b>掌财赋。中央集权空前加强，但也造成冗官冗兵冗费，国家积贫积弱。",
   points:["二府三司：宰相只管民政，军政归枢密院，财政归三司","参知政事为副相，分宰相之权","兵权三分：调兵权与统兵权分离，更戍法使将不专兵","知州文臣、通判监督、转运使收财，强干弱枝；代价：「三冗」与积贫积弱"],
   gk:"浙江选考常以材料考查宋代分权措施的目的（防止割据、加强集权）与影响（利：结束割据、政局稳定；弊：三冗、积贫积弱）。<br>易错：枢密院只有调兵权没有统兵权；通判不是知州的副手，而是监督者。",
@@ -557,7 +557,7 @@ MODS[4]=(()=>{
   if(dual&&p.sub==="行省")rs.push(["双重性质","中书省的派出机构 + 地方最高行政机构",T.blue]);return rs}
  function setView(v){view=v;last="";if(!sub)return;sub.innerHTML="";
   if(v==="b")sub.append(toggle("行省之下",lv,x=>{lv=x;last=""}),toggle("行省的双重性质",dual,x=>{dual=x;last=""}))}
- return{
+ return{pick(v){if(view==="a")selA=v;else selB=v;last=""},
   text:"元朝在中央设<b>中书省</b>总领政务，<b>枢密院</b>掌军事，<b>御史台</b>掌监察，<b>宣政院</b>掌管佛教事务和西藏地区。地方上实行<b>行省制度</b>：中书省直辖腹里，其余地区设行中书省，行省之下有路、府、州、县。行省制度加强了中央对地方的管理，是我国<b>省制的开端</b>。",
   points:["中书省总理政务，宣政院管辖西藏","行省制度：腹里由中书省直辖，其余设十个行省","设澎湖巡检司，管辖澎湖、琉球（台湾）","行省制是我国省制的开端，影响深远"],
   gk:"浙江选考常考行省制度的意义（加强中央集权、巩固多民族国家统一），以及宣政院、澎湖巡检司对边疆的管辖。<br>易错：西藏正式纳入中央管辖始于元朝（宣政院）；澎湖巡检司是元朝设的，不是明清。",
@@ -675,7 +675,7 @@ MODS[5]=(()=>{
  function setView(v){view=v;last="";doc=null;cur=null;sel=v==="a"?"zs":v==="b"?"ng":"dc";if(!sub)return;sub.innerHTML="";
   if(v==="a")sub.append(button("1380 胡惟庸案",()=>{if(!abol)abol=now();last=""},true),button("复原",()=>{abol=null;last=""}));
   else if(v==="b")sub.append(button("呈递奏章",()=>{doc=now();last=""},true),toggle("皇帝怠政",lazy,x=>{lazy=x;doc=null;last=""}))}
- return{
+ return{pick(v){sel=v;last=""},
   text:"明太祖借<b>胡惟庸案</b>废除中书省和丞相，<b>权分六部</b>，皇帝直接掌控六部，君主专制空前加强。明成祖设<b>内阁</b>，后来内阁获得<b>票拟</b>权，但始终从属于皇权；皇帝怠政时<b>司礼监</b>代为批红，导致宦官专权。地方设<b>三司</b>分权，<b>厂卫</b>监视臣民，科举实行<b>八股取士</b>。",
   points:["1380 年废丞相，权分六部，延续一千多年的宰相制度结束","内阁：票拟—批红，非法定机构","厂卫特务统治与宦官专权","地方三司分权；八股取士束缚思想"],
   gk:"浙江选考常考废丞相与内阁设立的实质（加强君主专制）、内阁与宰相的区别、八股取士的影响。<br>易错：内阁不是宰相机构，没有决策权；废除的是丞相和中书省，六部保留。",
@@ -755,7 +755,7 @@ MODS[6]=(()=>{
   return[["选中",n.name,tc(T,n.tcol)],["机构",n.org],["时间",n.time],["意义",n.mean]]}
  function setView(v){view=v;last="";mode=null;cur=null;sel=v==="a"?"jj":"lf";if(!sub)return;sub.innerHTML="";
   if(v==="a")sub.append(button("下达机密谕旨",()=>{mode="s";go0=now();last=""},true),button("一般政务",()=>{mode="n";go0=now();last=""}))}
- return{
+ return{pick(v){sel=v;last=""},
   text:"清朝沿袭明制并有发展。雍正时设<b>军机处</b>，军国大事由皇帝和军机大臣决定，以<b>廷寄</b>直接下达，君主专制达到顶峰。在边疆，清朝设<b>理藩院</b>，在西藏设<b>驻藏大臣</b>并实行<b>金瓶掣签</b>，在新疆设<b>伊犁将军</b>，在西南推行<b>改土归流</b>，在台湾设府，巩固和发展了统一多民族国家。",
   points:["军机处：皇帝的秘书机构，跪受笔录、廷寄，君主专制顶峰","理藩院管理少数民族事务","驻藏大臣、金瓶掣签；伊犁将军；台湾府","改土归流：加强中央对西南少数民族地区的管辖"],
   gk:"浙江选考常考军机处设立的实质（强化皇权，标志君主专制达到顶峰）与清朝边疆治理措施。<br>易错：军机处没有决策权，不是宰相机构；改土归流是雍正时大规模推行，针对西南，不是西北。",
@@ -836,7 +836,7 @@ MODS[7]=(()=>{
   if(view==="b"){const v=ZY.find(p=>p[0]===si)[1];return[["朝代",D[si]],["地方制度",ML[si],T.redText],["中央集权（示意）",bar(v),T.redText],["趋势",NB[si]]]}
   const n=N[sel];return[["选中",n.name,n.col==="gold"?T.goldText:T.blue],["类别",LX.includes(sel)?"选官制度":"监察制度"],["时期",n.tag],["说明",n.duty]]}
  function pick(x){if(!G)return;si=Math.round(Math.max(0,Math.min(6,(x-G.bx)/(G.bw/6))));last=""}
- return{
+ return{pick(v){sel=v;last=""},setSi(v){si=v;last=""},
   text:"中国古代政治制度演变有两条主线：一是<b>君权与相权</b>的矛盾，相权不断被分割和削弱，君权不断加强，明清达到顶峰；二是<b>中央与地方</b>的矛盾，总体趋势是中央集权不断加强，地方权力逐步被收回。选官从重血缘、重门第走向<b>重才学</b>，监察制度日益严密。",
   points:["君权↑ 相权↓：三公 → 三省 → 二府 → 废丞相 → 内阁 → 军机处","中央集权总体加强，有反复（汉初、唐后期）","选官：世官 → 察举 → 九品中正 → 科举","专制主义中央集权：利于统一与发展，后期阻碍社会进步"],
   gk:"浙江选考常以材料题考查制度演变的趋势与特点，要求按「君权与相权」「中央与地方」两条线归纳。<br>易错：君主专制是中央决策方式（君权与相权），中央集权是中央与地方的关系，两者不能混用。",
@@ -966,7 +966,7 @@ function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod
  document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
  $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
  ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
- if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize();window.CINE&&CINE.refresh()}
 /* ---------- controls ---------- */
 $("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
 $("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
@@ -980,6 +980,8 @@ document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INP
 function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
 window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
 go(fromHash());requestAnimationFrame(loop);
+window.LAB={get cur(){return cur},get mod(){return mod},setChapter:go};
 </script>
+<script src="../lib/cine-core.js"></script><script src="cine-data.js"></script>
 </body>
 </html>
