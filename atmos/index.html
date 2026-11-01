@@ -752,6 +752,7 @@
           $("soon").innerHTML = `<div><p class="x-book">${BOOK}</p><p class="x-count">${pad(n)} / ${pad(CH.length)}</p><h2>${c.t}</h2>${c.p.map((x) => `<p>${x}</p>`).join("")}<span class="x-tag">⏳ 交互即将上线</span></div>`;
           $("soon").scrollTop = 0;
         }
+        window.CINE && CINE.refresh();
       }
 
       /* ---------- 3D：地球 + 经向剖面光环 + 三圈环流粒子 ---------- */
@@ -2471,5 +2472,6 @@
         xMob(cur);
       })();
     </script>
+  <script src="../lib/cine-core.js"></script><script src="cine-data.js"></script>
   </body>
 </html>
