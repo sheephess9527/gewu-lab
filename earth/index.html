@@ -821,6 +821,7 @@
           setPlay(false);
         } else updateHud();
         loop();
+        window.CINE && CINE.refresh();
       }
       $("x-prev").onclick = function () { go(cur === 0 ? CH.length - 1 : cur - 1); };
       $("x-next").onclick = function () { go(cur === CH.length - 1 ? 0 : cur + 1); };
@@ -1923,5 +1924,6 @@
         if (MQ.matches) layout();
       })();
     </script>
+  <script src="../lib/cine-core.js"></script><script src="cine-data.js"></script>
   </body>
 </html>
