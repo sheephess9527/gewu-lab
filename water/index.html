@@ -624,6 +624,7 @@
         if (ch9) ch9.show(cur === 8);
         if (ch10) ch10.show(cur === 9);
         if (ch11) ch11.show(cur === 10);
+        window.CINE && CINE.refresh();
       }
 
       document.getElementById("prev").onclick = function () { go(cur - 1); };
@@ -2327,5 +2328,6 @@
         place(); sync();
       })();
     </script>
+  <script src="../lib/cine-core.js"></script><script src="cine-data.js"></script>
   </body>
 </html>
