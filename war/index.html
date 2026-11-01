@@ -1134,6 +1134,7 @@
       lastS = s; [...btns].forEach((b, i) => { b.setAttribute("aria-current", i === s); b.classList.toggle("is-past", i < s); b.firstChild.style.width = ""; });
       if (chart) { chart.data.datasets.forEach((d) => { d.pointRadius = d.data.map((_, i) => (i === s ? 4 : 0)); }); chart.update("none"); }
       sup.forEach((L) => { L.material.color.set(col(s >= S.cut ? "--x-red" : S.supC)); L.material.opacity = s >= S.cut ? 0.5 : 0.9; });
+      window.dispatchEvent(new CustomEvent("war:stage", { detail: { s, prev } }));
     }
     if (S.frame) S.frame(s, l, ch, prev);
     if (btns[s]) btns[s].firstChild.style.width = l * 100 + "%";
@@ -1150,6 +1151,7 @@
       if (nt >= NS() * DUR) { nt = NS() * DUR - 0.001; if (auto) setAuto(false); }
       T = nt; if (R) updArmies(dt, stageOf(), Math.min(1, (T - stageOf() * DUR) / DUR)); updStage();
     }
+    if (R && window.WAR_FRAME) { try { window.WAR_FRAME(dt); } catch (e) { console.warn(e); } }
     if (R) { ctl.update(); R.render(scene, cam); }
   }
   /* ---------- 面板 ---------- */
@@ -1461,6 +1463,7 @@
     makeChart();
     if (R) { cfg = c.live ? c.sc.terrain : TERRAIN.generic; buildTerrain(); buildFeatures(); buildArmies(); resetView(); }
     if (c.quiz) { $("#qBody").addEventListener("click", qClick); qStage(QZ[Math.min(qi, QZ.length - 1)]); if (qAns[qi] !== undefined || qi >= QZ.length) qHold = false; qShow(); }
+    window.dispatchEvent(new CustomEvent("war:chapter", { detail: { i: cur } }));
   }
   function toggleTheme() {
     const t = isDark() ? "light" : "dark"; root.setAttribute("data-theme", t);
@@ -1494,6 +1497,10 @@
   });
   const fromHash = () => { const n = parseInt(location.hash.slice(1), 10); return n >= 1 && n <= CH.length ? n - 1 : 0; };
   window.addEventListener("hashchange", () => { if (fromHash() !== cur) setChapter(fromHash(), true); });
+  window.WAR = { CH, DUR, H, col, isDark, SC, NS, stageOf, goStage, setAuto, setChapter,
+    get cur() { return cur; }, get T() { return T; }, set T(v) { T = v; }, get auto() { return auto; }, get clock() { return clock; },
+    get cam() { return cam; }, get ctl() { return ctl; }, get scene() { return scene; }, get R() { return R; }, get armies() { return armies; },
+    get dotTex() { return dotTex; }, get speed() { return speed; }, set speed(v) { speed = v; } };
   initGL();
   setChapter(fromHash(), true);
   requestAnimationFrame(tick);
@@ -1559,5 +1566,6 @@
         }).observe(tl, { attributes: true, subtree: true, attributeFilter: ["aria-current"] });
       })();
     </script>
+    <script src="cine.js"></script>
   </body>
 </html>
