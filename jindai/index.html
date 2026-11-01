@@ -232,7 +232,7 @@ MODS[0]=(()=>{
    ctx.font="600 13px "+MF;ctx.fillStyle=it.hl==="hk"&&!it.x?T.redText:T.fg;
    if(big)wrapText(ctx,it.n,x+12,y+28,cw-24,17);else{ctx.textBaseline="middle";wrapText(ctx,it.n,x+12,y+ch/2,cw-24,17)}
    ctx.restore();return[x,y,cw,ch]})}
- return{
+ return{S,
   text:"鸦片战争是中国近代史的开端。英国为打开中国市场、扭转贸易逆差，以林则徐虎门销烟为借口发动战争。清政府战败，被迫签订中国近代史上第一个不平等条约《南京条约》。中国开始沦为半殖民地半封建社会，主权和领土完整遭到破坏。",
   points:["根本原因：英国工业革命后急需开拓市场、掠夺原料","《南京条约》：割香港岛、赔款 2100 万银元、五口通商、协定关税","《虎门条约》等使英国获得领事裁判权、片面最惠国待遇","影响：中国开始沦为半殖民地半封建社会"],
   gk:"<p>浙江选考常考《南京条约》各条款对应的主权损害（领土、关税、司法）。</p><p><b style=\"color:#c0362c\">易错：</b>领事裁判权、片面最惠国待遇出自《虎门条约》，不在《南京条约》本身。</p>",
@@ -316,7 +316,7 @@ MODS[1]=(()=>{
   if(k>=1){[["永安",P.ya,"r"],["桂林",P.gl,"l"],["长沙",P.cs,"l"],["武昌",P.wc,"l"]].forEach(([n,p,sd])=>city(ctx,m,n,p[0],p[1],B,4,sd));
    const fall=k===5,cc=fall?T.redText:B;city(ctx,m,"天京（南京）",...P.nj,cc,6,"r");if(k===1||k>=3)ring(ctx,m,P.nj,cc,t)}
   label(ctx,EB[k].d+" "+EB[k].n,m.X(100.6),m.Y(43.2),k===5?T.redText:B)}
- return{
+ return{S,
   text:"第二次鸦片战争是第一次鸦片战争的继续和扩大，列强侵略势力由沿海深入内地，中国半殖民地化程度加深；沙俄趁机割占大片领土。同时期的太平天国运动是中国旧式农民战争的最高峰，提出了比较系统的纲领，但受阶级局限最终失败。",
   points:["借口：亚罗号事件、马神甫事件","《天津条约》《北京条约》：公使驻京、长江通航、内地传教、割九龙司","沙俄割占中国领土 150 多万平方公里","太平天国：旧式农民战争的最高峰；《天朝田亩制度》与《资政新篇》均未实行"],
   gk:"<p>浙江选考常考两次鸦片战争的不同影响（由沿海到内地），以及太平天国两个纲领的比较。</p><p><b style=\"color:#c0362c\">易错：</b>《资政新篇》是第一个在中国发展资本主义的方案，但未实施；割九龙司出自《北京条约》，不是《南京条约》。</p>",
@@ -365,7 +365,7 @@ MODS[2]=(()=>{
   yy=head("指导思想",yy+6);ctx.font="600 14px "+MF;ctx.fillStyle=T.redText;ctx.fillText("「中体西用」",L,yy);
   ctx.font="13px "+MF;ctx.fillStyle=T.fg;yy=wrapText(ctx,"中学为体，西学为用",L,yy+20,mw,18);
   if(S.lost){ctx.font="600 13px "+MF;ctx.fillStyle=T.redText;wrapText(ctx,"1894—1895 甲午战败，北洋舰队全军覆没",L,yy+6,mw,18)}ctx.restore()}
- return{
+ return{S,
   text:"两次鸦片战争后，清政府中的洋务派以「自强」「求富」为口号，引进西方先进技术，创办近代军事工业和民用企业，建立新式海军，兴办新式学堂、派遣留学生。洋务运动没有使中国走上富强道路，但引进了西方先进生产技术，揭开了中国近代化的序幕。",
   points:["目的：维护清朝统治","指导思想：中体西用","内容：先「自强」办军工，后「求富」办民用，建海军，办学堂","评价：中国近代化开端，但只学技术不变制度，甲午战败标志破产"],
   gk:"<p>浙江选考常考洋务企业的性质（军工多为官办，民用多为官督商办）、洋务运动的积极作用与局限。</p><p><b style=\"color:#c0362c\">易错：</b>洋务运动没有触动封建制度；「中体西用」是其指导思想而非目标；江南制造总局在上海，福州船政局在福州。</p>",
@@ -471,7 +471,7 @@ MODS[3]=(()=>{
   label(ctx,"列强势力范围（示意） 1897—1899",m.X(100.6),m.Y(43.2),T.fg);
   if(S.open){label(ctx,"1899 美国「门户开放」：",m.X(124.5),m.Y(33.2),T.blue);label(ctx,"承认既得利益，要求利益均沾",m.X(124.5),m.Y(32.2),T.blue)}}
  function inPoly(x,y,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const[xi,yi]=P[i],[xj,yj]=P[j];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c}return c}
- return{
+ return{S,
   text:"甲午中日战争中国战败，签订《马关条约》，大大加深了中国社会的半殖民地化。列强随即掀起瓜分中国的狂潮，强占租借地、划分势力范围，中华民族面临空前严重的危机。",
   points:["《马关条约》：割辽东半岛、台湾、澎湖，赔款 2 亿两，开四埠，允许设厂","设厂条款适应列强资本输出需要","三国干涉还辽","瓜分狂潮与美国「门户开放」，民族危机空前严重"],
   gk:"<p>浙江选考常考《马关条约》对中国经济的影响（设厂权、赔款→借外债）及与《南京条约》的比较。</p><p><b style=\"color:#c0362c\">易错：</b>开放的是沙市、重庆、苏州、<b style=\"color:#9a6a00\">杭州</b>（杭州是浙江考生常考点）；辽东半岛后被赎回。</p>",
@@ -560,7 +560,7 @@ MODS[4]=(()=>{
   city(ctx,m,c.hl==="bj"?"北京 · 东交民巷使馆界":"北京",...P.bj,k>=1?R:T.fg,k>=1?6:4,"l");if(c.hl==="bj"||k===1)ring(ctx,m,P.bj,R,t);
   label(ctx,EC[k].d+" "+EC[k].n,m.X(100.6),m.Y(43.2),k>=1?R:G);if(k>=2)label(ctx,"中国完全沦为半殖民地半封建社会",m.X(100.6),m.Y(42.2),R);
   timeline(ctx,w,h,EC,k)}
- return{
+ return{S,
   text:"甲午战败后民族危机加深，康有为、梁启超等发起维新变法，因顽固派反对仅百日而失败。随后义和团运动兴起，八国联军侵华，清政府签订《辛丑条约》。中国完全沦为半殖民地半封建社会，清政府成为「洋人的朝廷」。",
   points:["公车上书 → 明定国是 → 戊戌政变，历时 103 天","变法内容涉及政治、经济、军事、文化","义和团「扶清灭洋」，沉重打击列强瓜分中国的野心","《辛丑条约》：赔款 4.5 亿两、使馆界、驻兵、拆炮台、禁止反帝"],
   gk:"<p>浙江选考常考戊戌变法的性质（资产阶级改良）与思想启蒙作用、《辛丑条约》标志中国完全沦为半殖民地半封建社会。</p><p><b style=\"color:#c0362c\">易错：</b>戊戌变法并未改变君主专制本身，变法诏令中<b style=\"color:#9a6a00\">没有设议院</b>；「洋人的朝廷」出自《辛丑条约》之后。</p>",
@@ -646,7 +646,7 @@ MODS[5]=(()=>{
   label(ctx,EC[k].d+" "+EC[k].n,m.X(100.6),m.Y(43.2),col(EC[k]));
   const sub=[["孙中山任临时大总统",B],["两千多年的君主专制制度结束",G],["主权在民 · 三权分立 · 责任内阁制",B],["革命果实被窃取",R]][k];label(ctx,sub[0],m.X(100.6),m.Y(42.2),sub[1]);
   timeline(ctx,w,h,EC,k)}
- return{
+ return{S,
   text:"辛亥革命推翻了统治中国两千多年的君主专制制度，建立了中华民国，使民主共和观念深入人心。但它没有改变中国半殖民地半封建社会的性质，没有完成反帝反封建的任务。",
   points:["同盟会：第一个全国性的资产阶级革命政党；三民主义","武昌起义 → 各省响应","中华民国成立、清帝退位、《临时约法》","意义：结束君主专制，民主共和观念深入人心；局限：未改变社会性质"],
   gk:"<p>浙江选考常考辛亥革命的历史意义与局限、《临时约法》的特点（责任内阁制）、浙江光复与秋瑾等本省人物。</p><p><b style=\"color:#c0362c\">易错：</b>辛亥革命结束的是两千多年的<b style=\"color:#9a6a00\">君主专制制度</b>，而非封建制度；《临时约法》改总统制为<b style=\"color:#9a6a00\">责任内阁制</b>是为了限制袁世凯。</p>",
@@ -723,7 +723,7 @@ MODS[6]=(()=>{
    ctx.font=(s[2]?"600 ":"")+"12px "+MF;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=s[2]?s[1]:T.fg;ctx.fillText(s[0],x+bw/2,y0+15,bw-10);ctx.restore()});
   ctx.save();ctx.fillStyle=T.fg;ctx.font="600 14px "+MF;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("→",w/2,y0+15);ctx.restore();
   timeline(ctx,w,h,EB,k)}
- return{
+ return{S,
   text:"新文化运动高举民主与科学两面旗帜，猛烈抨击封建礼教，是一场空前的思想解放运动，后期开始传播马克思主义。1919 年巴黎和会外交失败引发五四运动，中国工人阶级登上政治舞台，运动取得初步胜利。五四运动是中国新民主主义革命的开端。",
   points:["阵地《新青年》，中心北京大学","口号：民主与科学；内容：新道德、新文学","五四导火线：巴黎和会山东问题","五四：工人阶级登上政治舞台，新民主主义革命开端"],
   gk:"<p>浙江选考常考新文化运动前后期的变化、五四运动的性质与意义。</p><p><b style=\"color:#c0362c\">易错：</b>新文化运动的局限是对东西方文化存在<b style=\"color:#9a6a00\">绝对肯定或绝对否定</b>的偏向；五四运动后期的主力是<b style=\"color:#9a6a00\">工人阶级</b>，中心是<b style=\"color:#9a6a00\">上海</b>。</p>",
@@ -799,7 +799,7 @@ MODS[7]=(()=>{
   if(p>=.4&&p<.5)ring(ctx,m,P.wh,R,t);if(p>=1){ring(ctx,m,P.sh,R,t);ring(ctx,m,P.nj,R,t)}}
  function drawC(ctx,w,h,t,m,e,mw){const T=theme();nodes(ctx,m,t,["sh","wh"],e);
   if(S.k.c===2)city(ctx,m,"南昌 · 1927.8.1 起义（下一阶段）",...P.nc,T.goldText,4,"b")}
- return{
+ return{S,
   text:"在马克思列宁主义与中国工人运动结合的过程中，中国共产党于 1921 年诞生，中国革命面貌焕然一新。国共两党合作开展国民革命，北伐战争迅速推进，基本推翻北洋军阀统治。1927 年国民党右派叛变革命，大革命失败。",
   points:["1921 中共一大：上海召开、嘉兴南湖闭幕","二大提出民主革命纲领","国民党一大标志国共合作形成；北伐先打吴佩孚、后孙传芳","四一二、七一五，大革命失败"],
   gk:"<p>浙江选考常考中共一大与嘉兴南湖、二大民主革命纲领、国共合作的政治基础（新三民主义）。</p><p><b style=\"color:#c0362c\">易错：</b>一大<b style=\"color:#9a6a00\">没有</b>提出民主革命纲领（<b style=\"color:#9a6a00\">二大</b>才提出）；国共合作是<b style=\"color:#9a6a00\">党内合作</b>（个人身份加入）。</p>",
@@ -884,7 +884,7 @@ MODS[8]=(()=>{
   label(ctx,"● 正面战场（国民党军）",m.X(100.6),m.Y(43.2),T.blue,"left");label(ctx,"● 敌后战场（八路军、新四军）",m.X(100.6),m.Y(42.2),T.redText,"left")}
  function drawC(ctx,w,h,t,m,e){const T=theme(),on=S.k.c===3;city(ctx,m,on?"台湾 1945.10.25 回归":"台湾",...P.tw,on?T.redText:T.fg,on?6:4,"r");if(on)ring(ctx,m,P.tw,T.redText,t);
   label(ctx,e.s,m.X(100.6),m.Y(42.2),T.fg,"left",w-36)}
- return{
+ return{S,
   text:"九一八事变后中国局部抗战开始，七七事变后全民族抗战爆发。国民党领导的正面战场和共产党领导的敌后战场相互配合，中国共产党成为全民族抗战的中流砥柱。1945 年中国人民取得了抗日战争的伟大胜利。",
   points:["1931 九一八，局部抗战；1937 七七，全民族抗战","西安事变和平解决 → 第二次国共合作","正面战场：淞沪、台儿庄、武汉；敌后战场：平型关、百团大战","近代以来第一次完全胜利的反侵略战争"],
   gk:"<p>浙江选考常考两个战场的关系、抗战胜利的意义、时间节点（<b style=\"color:#9a6a00\">14 年抗战从 1931 年算起</b>）。</p><p><b style=\"color:#c0362c\">易错：</b>平型关大捷是<b style=\"color:#c0362c\">八路军（敌后战场）</b>，台儿庄战役是<b style=\"color:#0071e3\">国民党军（正面战场）</b>；全民族抗战始于 <b style=\"color:#9a6a00\">1937 年七七事变</b>。</p>",
@@ -935,7 +935,7 @@ MODS[9]=(()=>{
    S.read.append(el("p","",`<span style="display:block;font-weight:600;color:${ok?T.blue:T.redText}">${ok?"回答正确":"回答错误"} · 答案 ${L[q.a]}</span><span style="display:block;margin-top:6px;line-height:1.6;font-size:14px;color:${T.fg}">${q.e}</span>`));
    const g=button(`去第 ${q.c} 章`,()=>{location.hash="#"+q.c});g.style.marginTop="10px";g.style.minHeight="44px";S.read.append(g)}
   if(done()){const n=right();S.read.append(el("p","",`<span style="display:block;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-weight:600;color:${n===6?T.blue:n>=4?T.goldText:T.redText}">总分 ${n} / 6 · ${comment(n)}</span>`))}}
- return{
+ return{S,
   text:"六道浙江选考风格单选题，覆盖鸦片战争到中共成立。点选项立即判分并显示解析，解析末尾可跳回相关章节复习。",
   points:["点选项即判：正确选项变蓝，选错变深红","画布成绩环显示答对数，题号圆点可点击跳题","全部答完显示总分与评语"],
   gk:"<p>选考单选常考<b style=\"color:#9a6a00\">条约内容与影响的对应</b>、<b style=\"color:#9a6a00\">标志性事件</b>。</p><p><b style=\"color:#c0362c\">易错：</b>领事裁判权出自《虎门条约》而非《南京条约》；完全沦为半殖民地半封建社会以《辛丑条约》为标志。</p>",
@@ -1046,7 +1046,7 @@ function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod
  document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
  $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
  ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
- if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize();window.CINE&&CINE.refresh()}
 /* ---------- controls ---------- */
 $("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
 $("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
@@ -1060,6 +1060,8 @@ document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INP
 function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
 window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
 go(fromHash());requestAnimationFrame(loop);
+window.LAB={get cur(){return cur},get mod(){return mod},setChapter:go};
 </script>
+<script src="../lib/cine-core.js"></script><script src="cine-data.js"></script>
 </body>
 </html>
