@@ -242,6 +242,7 @@ MODS[0]=(()=>{let yr=-3500,play=false,lt=0,grk=false,sel=null,cond=[0,0,0,0],all
    card(ctx,L.card,sel,T,dk);panel(ctx,L.pan,T,dk,t,L.n)},
   pointer(e,type,x,y){if(type!=="down")return false;const R=e&&e.pointerType==="touch"?22:14;
    for(const h of hits){if(h.c?Math.hypot(h.cx-x,h.cy-y)<=R:x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h){if(h.c){sel=h.c;key=""}else tgs[h.i].click();return true}}return false},
+  cine(o){if("sel"in o){sel=o.sel<0?GR:CV[o.sel];key=""}},
   unmount(){play=false;lt=0;CV.forEach(c=>c.lt=0);GR.lt=0}}})();
 /* ---------- 第 2 章 雅典民主 ---------- */
 CH[1].ready=true;
@@ -556,6 +557,7 @@ MODS[4]=(()=>{let mode="A",sel=-1,vv=false,yr=0,city=false,key="",ro,hits=[],vb,
    function vis(){vb.hidden=mode!=="A";yb.hidden=cb.hidden=mode==="A";key=""}vis()},
   draw(ctx,w,h,t){const kk=mode+"|"+sel+"|"+vv+"|"+yr+"|"+city;if(kk!==key){key=kk;upd()}mode==="A"?drawA(ctx,w,h):drawB(ctx,w,h)},
   pointer(e,type,x,y){if(mode!=="A"||type!=="down")return false;const hh=hits.find(r=>y>=r[0]&&y<r[1]);if(!hh)return false;sel=hh[2];vv=false;key="";return true},
+  cine(o){if("sel"in o){sel=o.sel;vv=false;key=""}},
   unmount(){key=""}}})();
 /* ---------- 第 6 章 中古的亚洲、非洲与美洲 ---------- */
 CH[5].ready=true;
@@ -686,6 +688,7 @@ MODS[6]=(()=>{let mode="A",pl=[],ang=.26,lu=false,luT=0,sp=false,spT=0,key="",ro
    function vis(){rb.hidden=mode!=="A";lb.hidden=sb.hidden=mode!=="B";key=""}vis()},
   draw(ctx,w,h,t){const kk=mode+"|"+pl.length+"|"+lu+"|"+sp;if(kk!==key){key=kk;upd()}mode==="A"?drawA(ctx,w,h):drawB(ctx,w,h,performance.now())},
   pointer(e,type,x,y){if(mode!=="A"||type!=="down")return false;const r=hits.find(r=>x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3]);if(!r)return false;if(!pl.includes(r[4]))pl.push(r[4]);key="";return true},
+  cine(o){if(o.pl){pl=o.pl.slice();key=""}},
   unmount(){key=""}}})();
 CH[7].ready=true;
 MODS[7]=(()=>{let sel=0,lk=false,key="",ro,hits=[],beams=[],qs=[],qi=0,sc=0,qEl,fEl,nb,gb=[];
@@ -742,6 +745,7 @@ MODS[7]=(()=>{let sel=0,lk=false,key="",ro,hits=[],beams=[],qs=[],qi=0,sc=0,qEl,
    nb=button("再来一局",start,true);nb.style.minHeight="44px";g.append(hd,qEl,br,fEl,nb);ctrl.append(row,g);ro=readout();read.append(ro);start()},
   draw(ctx,w,h){const kk=sel+"|"+lk;if(kk!==key){key=kk;upd()}draw(ctx,w,h)},
   pointer(e,type,x,y){if(type!=="down")return false;let r=hits.find(r=>x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3]);if(!r)r=beams.find(b=>seg(x,y,b[0],b[1],b[2],b[3])<10);if(!r)return false;sel=r[4];key="";return true},
+  cine(o){if("sel"in o){sel=o.sel;key=""}},
   unmount(){key=""}}})();
 /* ---------- 第 9 章 随堂检测 ---------- */
 CH[8].ready=true;
@@ -898,7 +902,7 @@ function go(i){i=Math.max(0,Math.min(CH.length-1,i));if(mod&&mod.unmount)try{mod
  document.querySelectorAll("#segs i").forEach((s,k)=>s.classList.toggle("on",k<=i));
  $("count").textContent=pad(i)+" / "+pad(CH.length-1);$("chnum").textContent=pad(i)+"/"+pad(CH.length-1);
  ["prev","bprev"].forEach(k=>$(k).disabled=i===0);["next","bnext"].forEach(k=>$(k).disabled=i===CH.length-1);
- if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize()}
+ if(location.hash!=="#"+(i+1))history.replaceState(null,"","#"+(i+1));resize();window.CINE&&CINE.refresh()}
 /* ---------- controls ---------- */
 $("prev").onclick=$("bprev").onclick=()=>go(cur-1);$("next").onclick=$("bnext").onclick=()=>go(cur+1);
 $("dark").onclick=$("mdark").onclick=()=>setDark(!isDark());
@@ -911,7 +915,9 @@ document.addEventListener("keydown",e=>{const t=e.target;if(t&&(t.tagName==="INP
  if(t&&t.type==="range")return;if(e.key==="ArrowLeft")go(cur-1);else if(e.key==="ArrowRight")go(cur+1);else if(e.key==="Escape")closeSheet()});
 function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=CH.length?n-1:0}
 window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)go(i)});
+window.LAB={get cur(){return cur},get mod(){return mod},go};
 go(fromHash());requestAnimationFrame(loop);
 </script>
+<script src="../lib/cine-core.js"></script><script src="cine-data.js"></script>
 </body>
 </html>
