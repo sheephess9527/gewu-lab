@@ -1,6 +1,6 @@
 # 格物实验室站点优化 — 2026-11-15
 
-状态：应用稿已先写入。本提交按应用稿改 `gewu-lab`，推送 `main` 后由 Cloudflare Pages 部署到 https://isolated.uk 。线上核对结果在部署完成后补记，并再次推送。
+状态：已上线。`f1b273d` 合入 `main` 为 `1d638ad`，2026-11-15 推送后 https://isolated.uk 已换成这批文件。控制台没有需要删除的通配重写：未知地址已经返回 404。
 
 逐条替换、新文件正文和删除清单在 [应用稿](2026-11-15-apply.md)。
 
@@ -47,7 +47,17 @@
 
 ## 验证
 
-应用稿落地并部署之后才算完成。未部署前，下面每一条都还没在线上成立。
+2026-11-15 推送后立刻核对 https://isolated.uk 。`gewu-lab.pages.dev` 不是这次部署：它的标题是「格物实验室 · 初中理科 3D 实验」，缺页仍返回 200。线上站以 `isolated.uk` 为准。
+
+已通过：
+
+- `/robots.txt`、`/sitemap.xml`、`/favicon.svg`、`/lib/hark.css`、`/lib/last.js`、`/404.html` 均为 200，正文不再是首页。
+- `/this-does-not-exist` 和 `/favicon.ico` 返回 404，正文是「这个页面不存在」，不是门户。
+- `/earth/` 引用 `../lib/hark.css` 和 `three-0.147.0`。`/contour/` 仍是 `three-0.128.0`，`/water/` 仍是 `three-0.149.0`。
+- `/yiguan/` 标题为「衣冠中国 · 格物实验室」。首页有「继续」导航，英雄图不再使用 `fetchpriority`。
+- `/lib/hark.css` 的缓存是 `max-age=86400`。首页和 `/yiguan/` 是 `max-age=0, must-revalidate`。
+
+未在浏览器里点选：手机是否不下载英雄图、无痕窗口是否不出现「继续」、顶栏字号、地球运动页的过渡手感。这些按应用稿实现，这次只核对了返回的 HTML。
 
 - `https://isolated.uk/this-does-not-exist` 返回 404，正文是错误页，不是首页。
 - `/robots.txt` 是文本，含 sitemap 地址。`/sitemap.xml` 是 XML，含首页和 30 个实验。`/favicon.svg` 是 SVG。三者都不再等于首页的 31878 字节。
