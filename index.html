@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>格物实验室 · 面向浙江高考的交互学习</title>
     <meta name="description" content="把高考里最难想象的那部分，变成你能转动、拖拽、亲手推演的实验。历史、地理、数学，按浙江教材编排。" />
+    <link rel="canonical" href="https://isolated.uk/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:site_name" content="格物实验室" />
+    <meta property="og:title" content="格物实验室 · 面向浙江高考的交互学习" />
+    <meta property="og:description" content="把高考里最难想象的那部分，变成你能转动、拖拽、亲手推演的实验。历史、地理、数学，按浙江教材编排。" />
+    <meta property="og:url" content="https://isolated.uk/" />
+    <meta property="og:image" content="https://isolated.uk/img/gw-hero.jpg" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light dark" />
@@ -92,7 +101,10 @@
       .x-sub { font-size: clamp(17px, 1.9vw, 21px); color: var(--muted); line-height: 1.45; margin-top: 16px; max-width: 520px; }
       .x-meta { margin-top: 20px; font-size: 15px; color: var(--muted); }
       .x-meta b { color: var(--text); font-weight: 600; }
-      .x-hero__img { width: 100%; aspect-ratio: 4 / 3; max-height: 40vh; object-fit: cover; border-radius: 28px; }
+      .x-hero__img { width: 100%; aspect-ratio: 4 / 3; max-height: 40vh; border-radius: 28px; background: var(--alt) center/cover no-repeat; }
+      @media (min-width: 735px) {
+        .x-hero__img { background-image: url("img/gw-hero.jpg"); }
+      }
 
       /* Filter bar */
       .x-filter {
@@ -226,7 +238,7 @@
             <p class="x-sub">把高考里最难想象的那部分，变成你能转动、拖拽、亲手推演的实验。</p>
             <p class="x-meta"><b id="stat-labs">–</b> 个实验 · <b id="stat-ch">–</b> 个交互章节 · 按浙江教材编排</p>
           </div>
-          <img class="x-hero__img" src="img/gw-hero.jpg" alt="悬浮的玻璃球，内含地球经纬线与金色曲线" fetchpriority="high" />
+          <div class="x-hero__img" role="img" aria-label="悬浮的玻璃球，内含地球经纬线与金色曲线"></div>
         </div>
       </section>
 
@@ -247,6 +259,7 @@
 
       <section class="x-list" id="labs" aria-label="全部实验">
         <div class="x-wrap">
+          <nav class="x-new" id="resume" aria-label="继续学习" hidden></nav>
           <nav class="x-new" id="new" aria-label="新上线"></nav>
           <div id="list"></div>
           <p class="x-empty" id="empty" hidden>没找到，换个词试试</p>
@@ -320,6 +333,7 @@
         var listEl = document.getElementById("list");
         var emptyEl = document.getElementById("empty");
         var newEl = document.getElementById("new");
+        var resumeEl = document.getElementById("resume");
         var qEl = document.getElementById("q");
         var segBtns = document.querySelectorAll(".x-seg button");
 
@@ -327,6 +341,19 @@
           return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
             return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
           });
+        }
+
+        function showResume() {
+          var raw;
+          try { raw = localStorage.getItem("gewu-last"); } catch (e) { return; }
+          if (!raw) return;
+          var saved;
+          try { saved = JSON.parse(raw); } catch (e) { return; }
+          var lab = null;
+          for (var i = 0; i < LABS.length; i++) if (LABS[i].slug === saved.slug) lab = LABS[i];
+          if (!lab) return;
+          resumeEl.hidden = false;
+          resumeEl.innerHTML = '<span class="x-new__label">继续</span><a class="x-pill" href="./' + esc(lab.slug) + '/">' + esc(lab.name) + "</a>";
         }
         function chText(l) { return l.ch ? l.ch + " 章" : "章数待补"; }
         function sumCh(arr) {
@@ -391,7 +418,9 @@
           });
           listEl.innerHTML = html;
           emptyEl.hidden = shown > 0;
-          newEl.hidden = !(state.f === "all" && !q);
+          var browse = state.f === "all" && !q;
+          newEl.hidden = !browse;
+          resumeEl.hidden = !browse || !resumeEl.innerHTML;
           segBtns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-f") === state.f)); });
         }
 
@@ -429,6 +458,7 @@
         }
         window.addEventListener("hashchange", function () { fromHash(true); });
 
+        showResume();
         if (!fromHash(false)) render();
       })();
     </script>

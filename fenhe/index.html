@@ -4,6 +4,17 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>统一与分裂 · 格物实验室</title>
+<meta name="description" content="在三维沙盘上推演孝文帝改革、隋灭陈、陈桥兵变与宋辽和战。" />
+<link rel="canonical" href="https://isolated.uk/fenhe/" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:site_name" content="格物实验室" />
+<meta property="og:title" content="统一与分裂 · 格物实验室" />
+<meta property="og:description" content="在三维沙盘上推演孝文帝改革、隋灭陈、陈桥兵变与宋辽和战。" />
+<meta property="og:url" content="https://isolated.uk/fenhe/" />
+<meta property="og:image" content="https://isolated.uk/img/gw-fenhe.jpg" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
 <script src="../lib/three-0.147.0/three.min.js"></script>
 <script src="../lib/three-0.147.0/OrbitControls.js"></script>
 <style>
@@ -21,7 +32,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;padding-top:env(safe-area-inset-top);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
 .back{color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;min-height:44px}
 .back b{font-size:22px;font-weight:400;margin-right:4px}
-.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tname{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-size:15px}
+h1.tname,h1.ttl{margin:0;font-weight:600;font-size:15px;letter-spacing:-.02em}
 .prog{display:flex;align-items:center;gap:10px;margin-left:auto}
 .segs{display:flex;gap:3px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
 .count{font:13px var(--mono);color:var(--sub)}
@@ -100,7 +112,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radiu
 <body>
 <header class="top">
   <a class="back" href="../"><b>‹</b><span>格物实验室</span></a>
-  <div class="tname">统一与分裂 · UnityLab</div>
+  <h1 class="tname">统一与分裂</h1>
   <div class="prog"><div class="segs" id="segs"></div><span class="count" id="count">01 / 09</span></div>
   <div class="tbtns">
     <button class="pill" id="prev">上一章</button><button class="pill primary" id="next">下一章</button>
@@ -1065,5 +1077,6 @@ window.LAB={get cur(){return cur},get mod(){return mod},go:i=>go(i),MODS};
 go(fromHash());requestAnimationFrame(loop);
 </script>
 <script src="../lib/cine-core.js"></script><script src="cine-data.js"></script>
+<script src="../lib/last.js"></script>
 </body>
 </html>

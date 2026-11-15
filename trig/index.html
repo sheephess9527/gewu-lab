@@ -3,7 +3,18 @@
 <head><script src="../lib/labfix-2d.js"></script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>格物实验室 三角与解三角形</title>
+<title>三角与解三角形 · 格物实验室</title>
+<meta name="description" content="一个圆、一个三角形，公式自己长出来。" />
+<link rel="canonical" href="https://isolated.uk/trig/" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:site_name" content="格物实验室" />
+<meta property="og:title" content="三角与解三角形 · 格物实验室" />
+<meta property="og:description" content="一个圆、一个三角形，公式自己长出来。" />
+<meta property="og:url" content="https://isolated.uk/trig/" />
+<meta property="og:image" content="https://isolated.uk/img/gw-trig.jpg" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
 <style>
 :root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--acc:#0071e3;--accDeep:#0058b0;--accSoft:#e8f1fc;--btn2:#f5f5f7;--bar:rgba(251,251,253,.72);--track:#e5e5ea;--shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);
 --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace}
@@ -19,7 +30,8 @@ a{color:var(--acc)}
 .top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
 .back{display:inline-flex;align-items:center;min-height:44px;text-decoration:none;color:var(--acc);font-weight:500;white-space:nowrap}
 .back .full{margin-left:4px}
-.ttl{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ttl{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-size:15px}
+h1.ttl{margin:0;font-weight:600;font-size:15px;letter-spacing:-.02em}
 .prog{display:flex;align-items:center;gap:10px;margin-left:auto}
 .segs{display:flex;gap:4px}.segs i{width:18px;height:4px;border-radius:2px;background:var(--track)}
 .segs i.on{background:var(--acc);opacity:.4}.segs i.cur{background:var(--acc);opacity:1}
@@ -116,7 +128,7 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;border-radiu
 <body>
 <header class="top">
   <a class="back" href="../" aria-label="返回格物实验室">‹<span class="full">格物实验室</span></a>
-  <div class="ttl">三角与解三角形 · TrigLab</div>
+  <h1 class="ttl">三角与解三角形</h1>
   <div class="prog"><div class="segs" id="segs"></div><span class="cnt" id="cnt">01 / 09</span></div>
   <div class="acts">
     <button class="pill" id="prev">上一章</button>
@@ -1097,5 +1109,6 @@ function fromHash(){const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=
 addEventListener("hashchange",()=>go(fromHash()));
 setDark(dark);go(fromHash());resize();
 </script>
+<script src="../lib/last.js"></script>
 </body>
 </html>

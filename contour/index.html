@@ -3,8 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>格物实验室 · 等高线</title>
-    <link rel="stylesheet" href="hark.css" />
+    <title>等高线 · 格物实验室</title>
+<meta name="description" content="把平面上的线，堆成一座山。" />
+<link rel="canonical" href="https://isolated.uk/contour/" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:site_name" content="格物实验室" />
+<meta property="og:title" content="等高线 · 格物实验室" />
+<meta property="og:description" content="把平面上的线，堆成一座山。" />
+<meta property="og:url" content="https://isolated.uk/contour/" />
+<meta property="og:image" content="https://isolated.uk/img/gw-contour.jpg" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <link rel="stylesheet" href="../lib/hark.css" />
     <style>
       :root {
         --bg1: #0e1420; --bg2: #121a2a; --panel: rgba(21, 30, 48, 0.82); --line: rgba(255, 255, 255, 0.08);
@@ -334,8 +345,12 @@
         @keyframes x-fade { from { opacity: 0; } to { opacity: 1; } }
       }
     </style>
-  <style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+  <style id="gw-hidden-fix">[hidden]{display:none!important}</style><style>
+.x-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
+</head>
   <body>
+<h1 class="x-sr">等高线</h1>
     <div class="app">
       <header class="top">
         <div class="brand"><a class="x-back" href="../" aria-label="返回格物实验室"><span aria-hidden="true">‹</span><span class="x-back__t">格物实验室</span></a><i class="x-sep" aria-hidden="true"></i><span class="x-name">等高线</span></div>
@@ -389,7 +404,7 @@
         <div class="x-sheet__list" id="x-sheet-list"></div>
       </div>
     </div>
-    <script src="hark.js"></script>
+    <script src="../lib/hark.js"></script>
     <script>
       /* 目录收起 / 展开（仅布局） */
       (function () {
@@ -2289,5 +2304,6 @@
       })();
     </script>
   <script src="../lib/cine-core.js"></script><script src="cine-data.js"></script>
-  <script src="../lib/labfix-dom.js"></script></body>
+  <script src="../lib/labfix-dom.js"></script><script src="../lib/last.js"></script>
+</body>
 </html>
