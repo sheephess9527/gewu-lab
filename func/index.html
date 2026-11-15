@@ -3,9 +3,20 @@
   <head><script src="../lib/labfix-2d.js"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>函数图像 · FuncLab — 格物实验室</title>
-    <link rel="stylesheet" href="hark.css" />
-    <link rel="stylesheet" href="hark-hero.css" />
+    <title>函数图像 · 格物实验室</title>
+<meta name="description" content="平移、伸缩、翻折，一拖就懂。" />
+<link rel="canonical" href="https://isolated.uk/func/" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:site_name" content="格物实验室" />
+<meta property="og:title" content="函数图像 · 格物实验室" />
+<meta property="og:description" content="平移、伸缩、翻折，一拖就懂。" />
+<meta property="og:url" content="https://isolated.uk/func/" />
+<meta property="og:image" content="https://isolated.uk/img/gw-func.jpg" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <link rel="stylesheet" href="../lib/hark.css" />
+    <link rel="stylesheet" href="../lib/hark-hero.css" />
     <style>
       :root[data-theme="dark"] {
         --x-bg: #000000;
@@ -556,8 +567,12 @@
         :root[data-theme="dark"] .x-app #step7, :root[data-theme="dark"] .x-app #play8 { color: #000; }
       }
     </style>
-  <style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+  <style id="gw-hidden-fix">[hidden]{display:none!important}</style><style>
+.x-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
+</head>
   <body>
+<h1 class="x-sr">函数图像</h1>
     <div class="page" id="top">
       <div class="x-app" id="app">
         <header class="x-top">
@@ -933,7 +948,7 @@
         </div>
       </div>
     </div>
-    <script src="hark.js"></script>
+    <script src="../lib/hark.js"></script>
     <script>
       (function () {
         var CH = ["图像变换", "指数与对数", "单位圆与三角函数", "正弦型函数", "导数的几何意义", "单调性与极值", "零点与二分法", "定积分（拓展）"];
@@ -2049,5 +2064,6 @@
         requestAnimationFrame(loop);
       })();
     </script>
-  </body>
+  <script src="../lib/last.js"></script>
+</body>
 </html>

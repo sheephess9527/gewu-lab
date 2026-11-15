@@ -3,7 +3,18 @@
 <head><script src="../lib/labfix-2d.js"></script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>格物实验室 复数</title>
+<title>复数 · 格物实验室</title>
+<meta name="description" content="乘一个 i，就是转九十度。" />
+<link rel="canonical" href="https://isolated.uk/cplx/" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:site_name" content="格物实验室" />
+<meta property="og:title" content="复数 · 格物实验室" />
+<meta property="og:description" content="乘一个 i，就是转九十度。" />
+<meta property="og:url" content="https://isolated.uk/cplx/" />
+<meta property="og:image" content="https://isolated.uk/img/gw-cplx.jpg" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
 <style>
 :root{--bg:#fbfbfd;--card:#fff;--fg:#1d1d1f;--sub:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--blue-ink:#fff;--sel-bg:#e8f1fc;--sel-fg:#0058b0;--btn2:#f5f5f7;--glass:rgba(251,251,253,.72);--shadow:0 2px 12px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.04);
 --sans:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--r:22px;color-scheme:light}
@@ -19,7 +30,8 @@ a{color:var(--blue);text-decoration:none}
 .top{position:sticky;top:0;z-index:20;height:56px;display:flex;align-items:center;gap:16px;padding:0 16px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
 .back{display:flex;align-items:center;justify-content:center;gap:4px;min-height:44px;min-width:44px;font-size:15px;white-space:nowrap}
 .back b{font-size:22px;font-weight:400;line-height:1}
-.ttl{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ttl{font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-size:15px}
+h1.ttl{margin:0;font-weight:600;font-size:15px;letter-spacing:-.02em}
 .prog{display:flex;align-items:center;gap:10px;margin-left:auto}
 .segs{display:flex;gap:4px}.segs i{width:22px;height:4px;border-radius:2px;background:var(--line)}.segs i.on{background:var(--blue)}
 .pnum{font:13px var(--mono);color:var(--sub)}
@@ -117,7 +129,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radiu
 <body>
 <header class="top">
   <a class="back" href="../" aria-label="返回格物实验室"><b>‹</b><span>格物实验室</span></a>
-  <div class="ttl">复数 · ComplexLab</div>
+  <h1 class="ttl">复数</h1>
   <div class="prog"><div class="segs" id="segs"></div><span class="pnum" id="pnum">01 / 07</span></div>
   <button class="pill chbtn" id="chBtn" aria-haspopup="dialog">章节 01/07</button>
   <div class="tbtns">
@@ -854,5 +866,6 @@ const fromHash=()=>{const n=parseInt(location.hash.slice(1),10);return n>=1&&n<=
 window.addEventListener("hashchange",()=>go(fromHash()));
 applyTheme();go(fromHash());
 </script>
+<script src="../lib/last.js"></script>
 </body>
 </html>

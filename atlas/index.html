@@ -4,9 +4,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#fbfbfd" />
-    <title>格物实验室 · 疆域变迁</title>
-    <link rel="stylesheet" href="hark.css" />
-    <link rel="stylesheet" href="hark-charts.css" />
+    <title>疆域变迁 · 格物实验室</title>
+<meta name="description" content="从秦到清，十六个时期的疆域，一条时间轴滑过去。" />
+<link rel="canonical" href="https://isolated.uk/atlas/" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:site_name" content="格物实验室" />
+<meta property="og:title" content="疆域变迁 · 格物实验室" />
+<meta property="og:description" content="从秦到清，十六个时期的疆域，一条时间轴滑过去。" />
+<meta property="og:url" content="https://isolated.uk/atlas/" />
+<meta property="og:image" content="https://isolated.uk/img/gw-atlas.jpg" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <link rel="stylesheet" href="../lib/hark.css" />
+    <link rel="stylesheet" href="../lib/hark-charts.css" />
     <style>
       /* 格物实验室外壳：青黛夜 / 宣纸 */
       :root {
@@ -530,8 +541,12 @@
         .x-tick { flex: 1 0 58px; }
       }
     </style>
-  <style id="gw-hidden-fix">[hidden]{display:none!important}</style></head>
+  <style id="gw-hidden-fix">[hidden]{display:none!important}</style><style>
+.x-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
+</head>
   <body>
+<h1 class="x-sr">疆域变迁</h1>
     <div class="x-app" id="top">
       <header class="x-top">
         <a class="x-back" href="../" aria-label="返回格物实验室"><b aria-hidden="true">‹</b><span>格物实验室</span></a>
@@ -599,10 +614,10 @@
       </div>
     </div>
 
-    <script src="hark.js"></script>
-    <script src="chart.js"></script>
-    <script src="datalabels.js"></script>
-    <script src="hark-charts.js"></script>
+    <script src="../lib/hark.js"></script>
+    <script src="../lib/chart.js"></script>
+    <script src="../lib/datalabels.js"></script>
+    <script src="../lib/hark-charts.js"></script>
     <script>
       /* ---------- 章节数据：全部 16 个时期 + 随堂检测，讲解取自 atlas.txt ---------- */
       var CH = [
@@ -2564,5 +2579,6 @@
       })();
     </script>
   <script src="../lib/cine-core.js"></script><script src="cine-data.js"></script>
-  </body>
+  <script src="../lib/last.js"></script>
+</body>
 </html>
