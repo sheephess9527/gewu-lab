@@ -145,7 +145,7 @@ CINE.init({
   host: document.querySelector(".tools"), before: document.getElementById("prev"),
   stage: document.getElementById("stage"), kind: "geo", hide: ["#float", "#readout", "#dock"],
   stopOn: ["#panel-body button", "#panel-body input", "#chaps button", "#prev", "#next", "#x-prev", "#x-next", "#x-sheet-list button", "#dock button", "#reset", "#x-reset"],
-  chapter() { const i = window.LAB.cur, c = CHS[i]; return c ? Object.assign({ art: "art/" + (i + 1) + ".jpg" }, c) : null; },
+  chapter() { const i = window.LAB.cur, c = CHS[i]; return c ? Object.assign({ art: "art/" + (i + 1) + ".webp" }, c) : null; },
   next() { window.LAB.go(window.LAB.cur + 1); },
   onStop() { halt(); },
 });

@@ -294,7 +294,7 @@
     stopOn: ["#ctrl button", "#ctrl input", "#toc button", "#slist button", "#prev", "#next", "#bprev", "#bnext", "#chbtn"],
     chapter() {
       const c = CH[LAB.cur]; if (!c) return null;
-      return Object.assign({ art: "art/" + (LAB.cur + 1) + ".jpg" }, c);
+      return Object.assign({ art: "art/" + (LAB.cur + 1) + ".webp" }, c);
     },
     next() { LAB.go(LAB.cur + 1); },
     // 播放时收起讲解正文，给画面让出高度；退出时恢复

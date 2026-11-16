@@ -154,8 +154,8 @@
   /* ---------- 工具 ---------- */
   const battle = () => { const S = W.SC(); for (let k = 0; k < 9; k++) if (W.CH[k].sc === S) return k; return -1; };
   const live = () => W.CH[W.cur].live && !W.CH[W.cur].quiz;
-  const art = (k) => `art/${ART[k]}.jpg`;
-  ART.forEach((a) => { const im = new Image(); im.src = `art/${a}.jpg`; }); // 预载
+  const art = (k) => `art/${ART[k]}.webp`;
+  ART.forEach((a) => { const im = new Image(); im.src = `art/${a}.webp`; }); // 预载
   function centroidOf(A) {
     const cnt = Math.ceil(A.N * A.ratio); if (cnt < 1) return null;
     const P = A.pos, step = Math.max(1, Math.floor(cnt / 48)); let x = 0, y = 0, z = 0, m = 0;

@@ -6,7 +6,7 @@
   function setR(id, v) { var e = E(id); if (!e) return; e.value = v; e.dispatchEvent(new Event("input", { bubbles: true })); e.dispatchEvent(new Event("change", { bubbles: true })); }
   function chk(id, on) { var e = E(id); if (e && e.checked !== !!on) e.click(); }
   function nth(id, i) { var e = E(id); if (e && e.children[i]) e.children[i].click(); }
-  var ART = function (n) { return "art/" + n + ".jpg"; };
+  var ART = function (n) { return "art/" + n + ".webp"; };
   /* 第 1 章三维地球：相机绕球缓移 */
   var gf = 0;
   function gfly(dir, k, ms) {

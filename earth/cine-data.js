@@ -20,7 +20,7 @@
     })();
   }
   function stopFly() { flyId++; }
-  var ART = function (n) { return "art/" + n + ".jpg"; };
+  var ART = function (n) { return "art/" + n + ".webp"; };
 
   var C = [];
   /* 第 1 章 总览 */

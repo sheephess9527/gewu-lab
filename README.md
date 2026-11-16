@@ -17,3 +17,5 @@
 三维演示使用仓库里的 three.js，不依赖外网 CDN。`contour/` 使用 0.128，`water/` 使用 0.149，其余三维实验使用 0.147。未逐页验证前不要合并这三份。公共壳子在 `lib/hark.css`、`lib/hark.js` 和 `lib/chart.js`，不要再往实验目录复制。
 
 缺页由仓库根目录的 `404.html` 处理。不要在 Pages 或 `_redirects` 里把所有未知地址重写成 `index.html` 并返回 200。
+
+门户封面和实验配图使用 WebP。新图不要再提交 JPG。

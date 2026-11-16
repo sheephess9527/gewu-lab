@@ -6,7 +6,7 @@
   function setR(id, v) { var e = E(id); if (!e) return; e.value = v; e.dispatchEvent(new Event("input", { bubbles: true })); e.dispatchEvent(new Event("change", { bubbles: true })); }
   function chk(el, on) { if (typeof el === "string") el = E(el); if (el && el.checked !== !!on) el.click(); }
   function clk(sel) { var e = document.querySelector(sel); if (e) e.click(); }
-  var ART = function (n) { return "art/" + n + ".jpg"; };
+  var ART = function (n) { return "art/" + n + ".webp"; };
   /* 相机缓推：rot.x / rot.y / dist */
   var fid = 0;
   function fly(rx, ry, d, ms) {

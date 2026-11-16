@@ -137,7 +137,7 @@ CINE.init({
   host: document.getElementById("explain"), before: document.getElementById("cbook"),
   stage: document.getElementById("cwrap"), kind: "geo", hide: [],
   stopOn: ["#ctrl button", "#ctrl input", "#toc button", "#slist button", "#prev", "#next", "#bprev", "#bnext", "#chbtn"],
-  chapter() { const i = window.LAB.cur, c = CHS[i]; return c ? Object.assign({ art: "art/" + (i + 1) + ".jpg" }, c) : null; },
+  chapter() { const i = window.LAB.cur, c = CHS[i]; return c ? Object.assign({ art: "art/" + (i + 1) + ".webp" }, c) : null; },
   next() { window.LAB.go(window.LAB.cur + 1); },
   onStart() { orbit(true, 0.3); }, onStop() { halt(); orbit(false); },
 });

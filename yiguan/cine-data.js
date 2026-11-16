@@ -26,7 +26,7 @@
   }
   function seq(list, gap) { list.forEach((f, i) => (i ? later(i * gap, f) : f())); }
 
-  const A = (n) => `art/${n}.jpg`;
+  const A = (n) => `art/${n}.webp`;
   const CH = [];
 
   /* ---------- 第 1 章 上衣下裳与深衣 ---------- */

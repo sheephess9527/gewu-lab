@@ -21,7 +21,7 @@
   /* 每幕开头：清计时器、关弹窗与闪烁标注 */
   const G = (f) => () => { clear(); state.fl = null; showPop(null); if (f) f(); dirt(); };
   const st = (title, lines, go, ms) => ({ title, lines, go: G(go), ms: ms || 5200 });
-  const A = (n) => "art/" + n + ".jpg";
+  const A = (n) => "art/" + n + ".webp";
 
   const CH = [
     /* 1 秦 */

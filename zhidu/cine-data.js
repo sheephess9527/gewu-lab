@@ -16,7 +16,7 @@
   const pick = (id) => { const m = M(); if (m.pick) m.pick(id); };
   const V = (view, f) => () => { clear(); chip(view); if (f) f(); };
   const st = (title, lines, go, ms) => ({ title, lines, go, ms: ms || 5200 });
-  const A = (n) => "art/" + n + ".jpg";
+  const A = (n) => "art/" + n + ".webp";
 
   const CH = [
     /* 1 秦 */

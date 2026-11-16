@@ -31,7 +31,7 @@
       if (!c || c === k) return; btnT(c < k ? "下一幕" : "上一幕");
     }
   }
-  const A = (n) => `art/${n}.jpg`;
+  const A = (n) => `art/${n}.webp`;
   const CH = [];
 
   /* ---------- 第 1 章 分合长河 ---------- */

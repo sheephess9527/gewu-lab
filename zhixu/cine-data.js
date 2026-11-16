@@ -181,7 +181,7 @@
     host: document.querySelector(".ehead"), before: document.getElementById("fold"),
     stage: document.getElementById("cwrap"), kind: "history", hide: [],
     stopOn: ["#ctrl button", "#ctrl input", "#toc button", "#slist button", "#prev", "#next", "#bprev", "#bnext", "#cv"],
-    chapter() { const d = D[LAB.cur]; return d ? Object.assign({ art: "art/" + (LAB.cur + 1) + ".jpg" }, d) : null; },
+    chapter() { const d = D[LAB.cur]; return d ? Object.assign({ art: "art/" + (LAB.cur + 1) + ".webp" }, d) : null; },
     next() { LAB.go(LAB.cur + 1); },
   });
 })();
